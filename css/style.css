@@ -1,0 +1,137 @@
+/* Ajuste para o modal maior */
+.modal-lg .modal-body {
+    height: 600px; /* Ajuste a altura conforme necessário */
+    display: block;
+    padding: 0; /* Retire qualquer padding extra */
+}
+
+/* Ajuste do mapa */
+#map {
+    display: block;   /* Garante que o mapa ocupe o bloco de conteúdo */
+    height: 100%;     /* Faz o mapa ocupar toda a altura do seu contêiner */
+    width: 100%;      /* Faz o mapa ocupar toda a largura disponível */
+}
+
+/* Evitar que o mapa saia do modal, limitando a altura */
+.modal-body {
+    overflow: hidden; /* Evita que o mapa transborde */
+}
+
+/* Ajustes adicionais para o conteúdo do modal */
+.card-body {
+    overflow-y: auto;
+    max-height: 500px; /* Ajuste da altura máxima, se necessário */
+}
+
+/* Tabela dentro do modal */
+.table {
+    width: 100%;
+    overflow-y: auto;
+    table-layout: fixed; /* Fixar o layout da tabela */
+    border-collapse: collapse; /* Remover espaçamento entre bordas */
+}
+
+/* Cabeçalho da tabela */
+.table th {
+    font-size: 0.8rem; /* Tamanho da fonte menor */
+    font-weight: bold; /* Tornar o texto mais evidente */
+    text-align: left; /* Alinhamento padrão do texto */
+    padding: 0.4rem; /* Espaçamento interno */
+    white-space: nowrap; /* Evitar quebras no cabeçalho */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adicionar reticências caso necessário */
+}
+
+/* Dados da tabela */
+.table td {
+    font-size: 0.8rem; /* Tamanho da fonte menor */
+    font-weight: bold; /* Dar mais ênfase ao conteúdo */
+    padding: 0.2rem; /* Espaçamento interno */
+    white-space: nowrap; /* Evitar quebras no texto */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adicionar reticências caso necessário */
+}
+
+/* Para todas as tabelas */
+table {
+    width: 100%; /* Usar toda a largura disponível */
+    table-layout: fixed; /* Fixar o layout */
+}
+
+/* Estilo compartilhado entre cabeçalho e células */
+th, td {
+    word-wrap: break-word; /* Quebra automática de palavras longas */
+    overflow-wrap: anywhere; /* Quebra em qualquer lugar permitido */
+    white-space: nowrap; /* Impedir quebras automáticas */
+    overflow: hidden; /* Esconder conteúdo que ultrapasse o limite */
+    text-overflow: ellipsis; /* Exibir reticências (...) */
+}
+
+/* Linhas do corpo da tabela */
+tbody tr {
+    display: table-row; /* Garantir exibição de linha */
+}
+
+/* Estilo do modal */
+#alertModal .modal-content {
+    border-radius: 8px;
+}
+
+#alertModal .modal-header {
+    background-color: #007bff;
+    color: white;
+}
+
+#alertModal .modal-footer .btn {
+    margin-right: 0.5rem;
+}
+
+/* Botões no card */
+.card-header .btn-group .btn {
+    margin-left: 0.2rem;
+    border-radius: 4px;
+}
+
+.card-header .btn-light {
+    color: #333;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+}
+
+.card-header .btn-light:hover {
+    background-color: #e2e6ea;
+}
+
+#loadingIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
+    text-align: center;
+    z-index: 1000;
+}
+
+/* Estilo para rotas com atraso */
+.delay-row {
+    background-color: #f8d7da; /* Cor de fundo vermelha clara */
+    color: #721c24; /* Texto vermelho */
+}
+
+/* Estilo para rotas no horário (sem atraso) */
+.on-time-row {
+    background-color: #d4edda; /* Cor de fundo verde clara */
+    color: #155724; /* Texto verde */
+}
+
+/* Estilos extras para as colunas, se necessário */
+.route-name, .route-details, .route-speed, .route-time, .route-delay {
+    word-wrap: break-word; /* Garante que o texto longo será quebrado e não irá cortar */
+    max-width: 200px; /* Limita o tamanho das células para evitar que elas fiquem muito grandes */
+}
+
+

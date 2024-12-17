@@ -1,0 +1,165 @@
+<?php
+require_once __DIR__ . '/config/configbd.php';
+
+$pdo = Database::getConnection();
+
+// URLs para o JSON
+$jsonUrls = [
+    "https://www.waze.com/row-partnerhub-api/feeds-tvt/?id=1725279881116",
+    "https://www.waze.com/row-partnerhub-api/feeds-tvt/?id=12699055487",
+];
+
+foreach ($jsonUrls as $jsonUrl) {
+    echo "Carregando dados da URL: $jsonUrl\n";
+    $jsonData = file_get_contents($jsonUrl);
+
+    if (!$jsonData) {
+        die("Erro ao carregar os dados JSON de $jsonUrl.");
+    }
+
+    $data = json_decode($jsonData, true);
+    if ($data === null) {
+        die("Erro ao decodificar os dados JSON de $jsonUrl.");
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        // Verificar se a URL já existe
+        $stmtCheckUrl = $pdo->prepare("SELECT id FROM urls WHERE url = :url");
+        $stmtCheckUrl->execute([':url' => $jsonUrl]);
+        $urlData = $stmtCheckUrl->fetch();
+
+        if ($urlData) {
+            $urlId = $urlData['id'];
+        } else {
+            $stmtUrl = $pdo->prepare("INSERT INTO urls (url) VALUES (:url)");
+            $stmtUrl->execute([':url' => $jsonUrl]);
+            $urlId = $pdo->lastInsertId();
+        }
+
+        // Inserção/Atualização de `users_on_jams` com historic_time e historic_speed
+        $stmtUsers = $pdo->prepare("
+            INSERT INTO users_on_jams (jam_level, wazers_count, url_id) 
+            VALUES (:jam_level, :wazers_count, :url_id)
+            ON DUPLICATE KEY UPDATE 
+                wazers_count = :wazers_count, 
+        ");
+
+        foreach ($data['usersOnJams'] as $userJam) {
+            
+            $stmtUsers->execute([
+                ':jam_level' => $userJam['jamLevel'],
+                ':wazers_count' => $userJam['wazersCount'],
+                ':url_id' => $urlId,
+            ]);
+        }
+
+        // Inserção/Atualização de `routes`
+        $stmtRoutes = $pdo->prepare("
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        ");
+
+        foreach ($data['routes'] as $route) {
+            $avgSpeed = ($route['length'] / 1000) / ($route['time'] / 3600); // km/h
+            $avgTime = $route['time'];
+            $historicSpeed = ($route['length'] / 1000) / ($route['historicTime'] / 3600); // km/h
+            $historicTime = $route['historicTime']; // valor vindo do JSON
+
+            $stmtRoutes->execute([
+                ':id' => $route['id'],
+                ':name' => $route['name'],
+                ':from_name' => $route['fromName'],
+                ':to_name' => $route['toName'],
+                ':length' => $route['length'],
+                ':jam_level' => $route['jamLevel'],
+                ':time' => $route['time'],
+                ':type' => $route['type'],
+                ':bbox_min_x' => $route['bbox']['minX'],
+                ':bbox_min_y' => $route['bbox']['minY'],
+                ':bbox_max_x' => $route['bbox']['maxX'],
+                ':bbox_max_y' => $route['bbox']['maxY'],
+                ':url_id' => $urlId,
+                ':avg_speed' => $avgSpeed,
+                ':avg_time' => $avgTime,
+                ':historic_speed' => $historicSpeed,
+                ':historic_time' => $historicTime, // Adicionando historic_time
+            ]);
+        }
+
+        // Inserção/Atualização de `irregularities`
+        foreach ($data['irregularities'] as $irregularity) {
+            $stmtIrregularities = $pdo->prepare("
+                INSERT INTO irregularities (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, is_active, url_id, avg_speed, avg_time, historic_speed, historic_time)
+                VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :is_active, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+                ON DUPLICATE KEY UPDATE 
+                    name = :name, 
+                    from_name = :from_name, 
+                    to_name = :to_name, 
+                    length = :length, 
+                    jam_level = :jam_level, 
+                    time = :time, 
+                    type = :type,
+                    bbox_min_x = :bbox_min_x, 
+                    bbox_min_y = :bbox_min_y, 
+                    bbox_max_x = :bbox_max_x, 
+                    bbox_max_y = :bbox_max_y, 
+                    is_active = :is_active,
+                    avg_speed = :avg_speed, 
+                    avg_time = :avg_time, 
+                    historic_speed = :historic_speed,
+                    historic_time = :historic_time
+            ");
+
+            $avgSpeed = ($irregularity['length'] / 1000) / ($irregularity['time'] / 3600); // km/h
+            $avgTime = $irregularity['time'];
+            $historicSpeed = ($irregularity['length'] / 1000) / ($irregularity['historicTime'] / 3600); // km/h
+            $historicTime = $irregularity['historicTime']; // valor vindo do JSON
+
+            $stmtIrregularities->execute([
+                ':id' => $irregularity['id'],
+                ':name' => $irregularity['name'],
+                ':from_name' => $irregularity['fromName'],
+                ':to_name' => $irregularity['toName'],
+                ':length' => $irregularity['length'],
+                ':jam_level' => $irregularity['jamLevel'],
+                ':time' => $irregularity['time'],
+                ':type' => $irregularity['type'],
+                ':bbox_min_x' => $irregularity['bbox']['minX'],
+                ':bbox_min_y' => $irregularity['bbox']['minY'],
+                ':bbox_max_x' => $irregularity['bbox']['maxX'],
+                ':bbox_max_y' => $irregularity['bbox']['maxY'],
+                ':is_active' => 1, // Assuming it's always active
+                ':url_id' => $urlId,
+                ':avg_speed' => $avgSpeed,
+                ':avg_time' => $avgTime,
+                ':historic_speed' => $historicSpeed,
+                ':historic_time' => $historicTime, // Adding historic_time to the query
+            ]);
+        }
+
+        $pdo->commit();
+        echo "Processamento concluído com sucesso para URL: $jsonUrl\n";
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        echo "Erro: " . $e->getMessage();
+    }
+}
+?>

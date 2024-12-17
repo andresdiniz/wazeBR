@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro 500 - Erro Interno do Servidor</title>
+    <style>
+        /* Reseta estilos padrão */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+        }
+
+        /* Estilo geral */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 72px;
+            color: #dc3545;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 36px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>500</h1>
+        <h2>Erro Interno do Servidor</h2>
+        <p>Ocorreu um problema inesperado. Estamos trabalhando para resolver isso.</p>
+        <p>Por favor, tente novamente mais tarde.</p>
+        <p>{{error}}</p>
+        <a href="/home">Voltar para a página inicial</a>
+        <footer>&copy; <?php echo date("Y"); ?> Seu Projeto. Todos os direitos reservados.</footer>
+    </div>
+</body>
+</html>

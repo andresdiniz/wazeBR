@@ -1,0 +1,94 @@
+<?php
+date_default_timezone_set('America/Sao_Paulo');
+
+// Carrega o autoloader do Composer
+require_once './vendor/autoload.php';
+
+// Inclui os arquivos de configuração e funções
+require_once './config/configbd.php';
+require_once './functions/scripts.php';
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
+// Configurações básicas
+session_start();
+
+// Verifica se o usuário está logado
+if (empty($_SESSION['usuario_id'])) {
+    header("Location: login.html");
+    exit();
+}
+
+// Configura o Twig
+$loader = new FilesystemLoader('./frontend');
+$twig = new Environment($loader, [
+    'debug' => true, // Ativar depuração do Twig (apenas para desenvolvimento)
+    'cache' => false, // Evita problemas de cache em desenvolvimento
+
+]);
+$twig->addExtension(new \Twig\Extension\DebugExtension()); // Extensão para debug
+
+// Conexão com o banco de dados
+$pdo = Database::getConnection();
+
+// Recupera dados gerais para o template
+$settings = getSiteSettings($pdo);
+$data = [
+    'user' => getSiteUsers($pdo),       // Usuário logado
+    'settings' => $settings,           // Configurações do site
+];
+
+// Verifica se o site está em manutenção
+if ($settings['manutencao'] ?? false) {
+    header('Location: manutencao.html');
+    exit();
+}
+
+// Renderiza os componentes fixos
+echo $twig->render('header.twig', $data);
+echo $twig->render('sidebar.twig', $data);
+
+// Determina a página solicitada
+$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$basePath = 'wazeportal'; // Subpasta onde o site está hospedado
+
+// Remove o basePath da URI, se necessário
+if (!empty($basePath) && strpos($uri, $basePath) === 0) {
+    $uri = substr($uri, strlen($basePath));
+}
+
+$uri = trim($uri, '/'); // Remove barras extras
+$page = $uri ?: 'home'; // Define 'home' como padrão se vazio
+
+// Caminhos do controlador e template
+$controllerPath = "./backend/{$page}.php";
+$templatePath = "{$page}.twig";
+
+// Define título da página usando um arquivo JSON de títulos
+$pageTitlesFile = './pages_titles.json';
+$pageTitles = file_exists($pageTitlesFile) ? json_decode(file_get_contents($pageTitlesFile), true) : [];
+$data['pageTitle'] = $pageTitles[$page] ?? 'Página Não Encontrada';
+
+try {
+    // Carrega o controlador, se existir
+    if (file_exists($controllerPath)) {
+        require_once $controllerPath; // O controlador pode manipular $data
+    }
+
+    // Renderiza o template da página solicitada
+    echo $twig->render($templatePath, $data);
+} catch (\Twig\Error\LoaderError $e) {
+    // Renderiza página 404 caso o template não seja encontrado
+    http_response_code(404);
+    echo $twig->render('404.twig', $data);
+} catch (Exception $e) {
+    // Lida com outros erros gerais e exibe página de erro
+    http_response_code(500);
+    $data['errorMessage'] = $e->getMessage();
+    echo $twig->render('error.twig', $data);
+}
+
+// Renderiza o footer
+echo $twig->render('footer.twig', $data);
+?>

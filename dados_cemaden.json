@@ -1,0 +1,28 @@
+[
+    {
+        "codigo": "311830410H",
+        "estacao": "Rio Bananeiras",
+        "cidade": "CONSELHEIRO LAFAIETE",
+        "uf": "MG",
+        "datahora": "2024-12-04 23:00:00",
+        "valor": "7",
+        "qualificacao": "0000",
+        "offset": "7.714",
+        "cota_atencao": "2.55",
+        "cota_alerta": "3.40",
+        "cota_transbordamento": "4.25"
+    },
+    {
+        "codigo": "311830410H",
+        "estacao": "Rio Bananeiras",
+        "cidade": "CONSELHEIRO LAFAIETE",
+        "uf": "MG",
+        "datahora": "2024-12-05 00:00:00",
+        "valor": "6.96",
+        "qualificacao": "0000",
+        "offset": "7.714",
+        "cota_atencao": "2.55",
+        "cota_alerta": "3.40",
+        "cota_transbordamento": "4.25"
+    }
+]

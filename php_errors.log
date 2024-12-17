@@ -1,0 +1,1319 @@
+[27-Nov-2024 16:23:00 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:23:09 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:24:40 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:24:48 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:28:23 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 16:28:32 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 16:28:32 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 16:28:32 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 16:28:32 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 16:51:59 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:52:37 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 16:53:03 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:53:08 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:53:16 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:53:21 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:54:22 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:55:24 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:56:24 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:56:54 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:57:00 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:57:04 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:57:07 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:57:11 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:58:12 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:58:43 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:59:20 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:59:20 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 16:59:25 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:00:26 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:01:27 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:02:29 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:03:30 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:04:31 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:05:32 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:06:18 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:06:18 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:06:18 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:06:18 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:07:17 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:07:18 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:07:18 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:07:18 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:07:47 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:07:47 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:07:47 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:07:47 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:08:18 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:08:18 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:08:18 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:08:18 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:08:37 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:08:37 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:08:37 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:08:37 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:09:38 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:09:38 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:09:38 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:09:38 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:10:08 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:10:08 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:10:08 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:10:08 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:10:28 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:10:28 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:10:28 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:10:28 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:10:50 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:10:50 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:10:50 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:10:50 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:10:52 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:10:52 America/Sao_Paulo] Página solicitada: api.php
+[27-Nov-2024 17:10:52 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:10:52 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:11:03 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:11:03 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:11:03 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:11:03 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:12:04 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:12:04 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:12:04 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:12:04 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:13:07 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:13:07 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:13:07 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:13:07 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:14:08 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:14:08 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:14:08 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:14:08 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:15:10 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:15:10 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:15:10 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:15:10 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:15:23 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:15:23 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:15:23 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:15:23 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:15:58 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:15:58 America/Sao_Paulo] Página solicitada: dashboard
+[27-Nov-2024 17:15:58 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[27-Nov-2024 17:15:58 America/Sao_Paulo] Template: dashboard.twig
+[27-Nov-2024 17:15:59 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:15:59 America/Sao_Paulo] Página solicitada: dashboard
+[27-Nov-2024 17:15:59 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[27-Nov-2024 17:15:59 America/Sao_Paulo] Template: dashboard.twig
+[27-Nov-2024 17:16:42 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:16:42 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:16:42 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:16:42 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:16:58 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:16:58 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:16:58 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:16:58 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:16:59 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:16:59 America/Sao_Paulo] Página solicitada: historic_acidents
+[27-Nov-2024 17:16:59 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/historic_acidents.php
+[27-Nov-2024 17:16:59 America/Sao_Paulo] Template: historic_acidents.twig
+[27-Nov-2024 17:17:01 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:17:01 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:17:01 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:17:01 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:17:02 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:17:02 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:17:02 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:17:02 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:17:12 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 17:17:20 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 17:17:20 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:17:20 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:17:21 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 17:17:21 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 17:17:21 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 17:17:21 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 17:17:21 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 17:18:22 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:18:22 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:18:22 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:18:22 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:19:23 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:19:23 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:19:23 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:19:23 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:20:26 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:20:26 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:20:26 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:20:26 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:21:28 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:21:28 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:21:28 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:21:28 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:22:30 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:22:30 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:22:30 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:22:30 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:23:32 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:23:32 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:23:32 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:23:32 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:27:30 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:27:30 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:27:30 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:27:30 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:28:48 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:28:48 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:28:48 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:28:48 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:30:54 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:30:54 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:30:54 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:30:54 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:34:50 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:34:50 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:34:50 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:34:50 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:35:04 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:35:04 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:35:04 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:35:04 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:36:06 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:36:06 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:36:06 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:36:06 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:37:11 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:37:11 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:37:11 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:37:11 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:37:33 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:37:33 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:37:33 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:37:33 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:38:43 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:38:43 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:38:43 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:38:43 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:39:25 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:39:25 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:39:25 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:39:25 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:39:42 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 17:40:41 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:40:41 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 17:40:41 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 17:40:41 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 17:41:38 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:41:38 America/Sao_Paulo] Página solicitada: historic_acidents
+[27-Nov-2024 17:41:38 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/historic_acidents.php
+[27-Nov-2024 17:41:38 America/Sao_Paulo] Template: historic_acidents.twig
+[27-Nov-2024 17:41:41 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[27-Nov-2024 17:41:41 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 17:41:41 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:41:41 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:48:19 America/Sao_Paulo] ID da Sessão: 4b3f5158db51e4df1ce7168ec8e23f47
+[27-Nov-2024 17:48:29 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 17:48:29 America/Sao_Paulo] Página solicitada: index.php
+[27-Nov-2024 17:48:29 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 17:48:29 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 17:48:43 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 17:48:43 America/Sao_Paulo] Página solicitada: dashboard
+[27-Nov-2024 17:48:43 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[27-Nov-2024 17:48:43 America/Sao_Paulo] Template: dashboard.twig
+[27-Nov-2024 20:49:38 UTC] PHP Warning:  file_get_contents(https://www.waze.com/row-partnerhub-api/feeds-tvt/?id=1725279881116): failed to open stream: HTTP request failed! HTTP/1.0 502 Bad Gateway
+ in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 17:50:36 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 17:50:43 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 17:50:43 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 17:50:43 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 17:50:43 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 17:50:44 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 18:18:49 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 18:18:50 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:18:50 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:18:50 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:18:50 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:19:03 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:19:03 America/Sao_Paulo] Página solicitada: dashboard
+[27-Nov-2024 18:19:03 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[27-Nov-2024 18:19:03 America/Sao_Paulo] Template: dashboard.twig
+[27-Nov-2024 18:19:31 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:19:31 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 18:19:31 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 18:19:31 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 18:19:44 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:19:44 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:19:44 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:19:44 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:20:45 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:20:45 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:20:45 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:20:45 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:21:46 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:21:46 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:21:46 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:21:46 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:22:47 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:22:47 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:22:47 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:22:47 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:23:48 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:23:48 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:23:48 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:23:48 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:24:49 America/Sao_Paulo] ID da Sessão: 8d35e3197d728ee7436b7c6b77aa2aca
+[27-Nov-2024 18:24:49 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:24:49 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:24:49 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:33:17 America/Sao_Paulo] ID da Sessão: 7b1868c94e1529daf1fa28122a7e9871
+[27-Nov-2024 18:33:29 America/Sao_Paulo] ID da Sessão: e2b223159ea69ff93206b3f93bd610de
+[27-Nov-2024 18:33:29 America/Sao_Paulo] Página solicitada: index.php
+[27-Nov-2024 18:33:29 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:33:29 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:33:35 America/Sao_Paulo] ID da Sessão: e2b223159ea69ff93206b3f93bd610de
+[27-Nov-2024 18:33:35 America/Sao_Paulo] Página solicitada: home
+[27-Nov-2024 18:33:35 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:33:35 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:33:48 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 18:33:55 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 18:33:55 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 18:33:55 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 18:33:55 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 18:33:55 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 18:33:56 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 18:33:56 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 18:33:56 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 18:33:56 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 18:34:30 America/Sao_Paulo] ID da Sessão: e2b223159ea69ff93206b3f93bd610de
+[27-Nov-2024 18:34:30 America/Sao_Paulo] Página solicitada: index.php
+[27-Nov-2024 18:34:30 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 18:34:30 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 18:34:49 America/Sao_Paulo] ID da Sessão: e2b223159ea69ff93206b3f93bd610de
+[27-Nov-2024 18:34:49 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 18:34:49 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 18:34:49 America/Sao_Paulo] Template: routes.twig
+[27-Nov-2024 23:34:20 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 23:34:25 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 23:34:27 America/Sao_Paulo] ID da Sessão: 660f278445cc9d3e4c580201c2b5a633
+[27-Nov-2024 23:34:27 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[27-Nov-2024 23:34:27 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[27-Nov-2024 23:34:27 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[27-Nov-2024 23:34:27 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[27-Nov-2024 23:34:28 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[27-Nov-2024 23:34:40 America/Sao_Paulo] ID da Sessão: c83fdfe6b974fb9c492c6b40029a3ba5
+[27-Nov-2024 23:34:40 America/Sao_Paulo] Página solicitada: index.php
+[27-Nov-2024 23:34:40 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[27-Nov-2024 23:34:40 America/Sao_Paulo] Template: home.twig
+[27-Nov-2024 23:34:54 America/Sao_Paulo] ID da Sessão: c83fdfe6b974fb9c492c6b40029a3ba5
+[27-Nov-2024 23:34:54 America/Sao_Paulo] Página solicitada: routes
+[27-Nov-2024 23:34:54 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[27-Nov-2024 23:34:54 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 01:06:31 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 01:06:38 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 01:06:38 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 01:06:38 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 01:06:38 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 01:06:39 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 01:07:22 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 01:07:23 America/Sao_Paulo] ID da Sessão: c83fdfe6b974fb9c492c6b40029a3ba5
+[28-Nov-2024 01:07:23 America/Sao_Paulo] Página solicitada: home
+[28-Nov-2024 01:07:23 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 01:07:23 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 01:07:27 America/Sao_Paulo] ID da Sessão: c83fdfe6b974fb9c492c6b40029a3ba5
+[28-Nov-2024 01:07:27 America/Sao_Paulo] Página solicitada: home
+[28-Nov-2024 01:07:27 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 01:07:27 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 01:07:31 America/Sao_Paulo] ID da Sessão: c83fdfe6b974fb9c492c6b40029a3ba5
+[28-Nov-2024 01:07:31 America/Sao_Paulo] Página solicitada: dashboard
+[28-Nov-2024 01:07:31 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[28-Nov-2024 01:07:31 America/Sao_Paulo] Template: dashboard.twig
+[28-Nov-2024 15:52:58 America/Sao_Paulo] ID da Sessão: b7798161e68e761143909115430fb0ab
+[28-Nov-2024 15:53:02 America/Sao_Paulo] ID da Sessão: 8937e117767c589a7e863925a2e70bb9
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 15:53:02 America/Sao_Paulo] ID da Sessão: c87693e7881664333a3c00be5734bccb
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 15:53:02 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 15:53:20 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 15:53:29 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 15:53:29 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 15:53:29 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 15:53:29 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 15:53:30 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 15:53:30 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 15:53:30 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 15:53:30 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 15:53:30 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 15:54:06 America/Sao_Paulo] ID da Sessão: c87693e7881664333a3c00be5734bccb
+[28-Nov-2024 15:54:06 America/Sao_Paulo] Página solicitada: home
+[28-Nov-2024 15:54:06 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 15:54:06 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 15:54:13 America/Sao_Paulo] ID da Sessão: c87693e7881664333a3c00be5734bccb
+[28-Nov-2024 15:54:13 America/Sao_Paulo] Página solicitada: dashboard
+[28-Nov-2024 15:54:13 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[28-Nov-2024 15:54:13 America/Sao_Paulo] Template: dashboard.twig
+[28-Nov-2024 15:54:36 America/Sao_Paulo] ID da Sessão: c87693e7881664333a3c00be5734bccb
+[28-Nov-2024 15:54:36 America/Sao_Paulo] Página solicitada: routes
+[28-Nov-2024 15:54:36 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[28-Nov-2024 15:54:36 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 16:16:35 America/Sao_Paulo] ID da Sessão: 74bd5c9eb62a7ceaa575422bfd779879
+[28-Nov-2024 16:16:35 America/Sao_Paulo] Página solicitada: home
+[28-Nov-2024 16:16:35 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 16:16:35 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:22:38 America/Sao_Paulo] ID da Sessão: 527f0bbbf61ff969387a96ee241e138b
+[28-Nov-2024 18:22:42 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:22:42 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 18:22:42 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:22:42 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:23:02 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:23:10 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:23:10 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:23:10 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:23:10 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:23:11 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:23:43 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:23:43 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 18:23:43 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:23:43 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:24:44 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:24:44 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 18:24:44 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:24:44 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:25:45 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:25:45 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 18:25:45 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:25:45 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:26:07 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:26:07 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 18:26:07 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:26:07 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:26:12 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:26:12 America/Sao_Paulo] Página solicitada: dashboard
+[28-Nov-2024 18:26:12 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[28-Nov-2024 18:26:12 America/Sao_Paulo] Template: dashboard.twig
+[28-Nov-2024 18:38:13 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:38:13 America/Sao_Paulo] Página solicitada: dashboard
+[28-Nov-2024 18:38:13 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[28-Nov-2024 18:38:13 America/Sao_Paulo] Template: dashboard.twig
+[28-Nov-2024 18:38:21 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:38:22 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:38:22 America/Sao_Paulo] Página solicitada: dashboard
+[28-Nov-2024 18:38:22 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[28-Nov-2024 18:38:22 America/Sao_Paulo] Template: dashboard.twig
+[28-Nov-2024 18:38:28 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:38:28 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:38:28 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:38:28 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:38:29 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:38:29 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:38:29 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:38:29 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:38:29 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:38:44 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:38:44 America/Sao_Paulo] Página solicitada: routes
+[28-Nov-2024 18:38:44 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[28-Nov-2024 18:38:44 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 18:39:56 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:39:56 America/Sao_Paulo] Página solicitada: routes
+[28-Nov-2024 18:39:56 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[28-Nov-2024 18:39:56 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 18:42:44 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:42:44 America/Sao_Paulo] Página solicitada: routes
+[28-Nov-2024 18:42:44 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[28-Nov-2024 18:42:44 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 18:56:56 America/Sao_Paulo] ID da Sessão: 0ea3a49f8a9c0b5fe5ec7d096208d36b
+[28-Nov-2024 18:56:56 America/Sao_Paulo] ID da Sessão: 7ff96801825c47c88efd836009554cb2
+[28-Nov-2024 18:56:56 America/Sao_Paulo] ID da Sessão: 462f62867a311f8d8913bdd58579eeb7
+[28-Nov-2024 18:57:03 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:57:06 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:57:11 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:57:11 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:57:11 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:57:11 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:57:12 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:57:19 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:57:19 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Página solicitada: routes
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/routes.php
+[28-Nov-2024 18:57:19 America/Sao_Paulo] Template: routes.twig
+[28-Nov-2024 18:57:19 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:57:31 America/Sao_Paulo] ID da Sessão: f9ec5934244f5a7da8751b28c2c75630
+[28-Nov-2024 18:57:31 America/Sao_Paulo] Página solicitada: home
+[28-Nov-2024 18:57:31 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 18:57:31 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 18:58:23 America/Sao_Paulo] ID da Sessão: f1fda317485d80c864abe21cb65b62fc
+[28-Nov-2024 18:58:33 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 18:58:41 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[28-Nov-2024 18:58:41 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[28-Nov-2024 18:58:41 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[28-Nov-2024 18:58:41 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[28-Nov-2024 18:58:41 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[28-Nov-2024 19:07:28 America/Sao_Paulo] ID da Sessão: d660bc148bd4e50730a62bf897bf7b97
+[28-Nov-2024 19:07:28 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 19:07:28 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 19:07:28 America/Sao_Paulo] Template: home.twig
+[28-Nov-2024 19:08:01 America/Sao_Paulo] ID da Sessão: d660bc148bd4e50730a62bf897bf7b97
+[28-Nov-2024 19:08:01 America/Sao_Paulo] Página solicitada: index.php
+[28-Nov-2024 19:08:01 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[28-Nov-2024 19:08:01 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:11:36 America/Sao_Paulo] ID da Sessão: d2f92481cc053f2c8cbfdcab45571332
+[30-Nov-2024 08:11:40 America/Sao_Paulo] ID da Sessão: 969ec45c82908b7a8ae43115258e0830
+[30-Nov-2024 08:11:40 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:11:40 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:11:40 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:11:41 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:11:41 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:11:41 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:11:41 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:11:54 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:12:27 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:12:27 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:12:27 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:12:27 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:12:30 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:14:54 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:14:54 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:14:54 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:14:54 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:15:00 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:15:37 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:15:55 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:15:55 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:15:55 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:15:55 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:16:08 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:16:43 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:21:55 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:21:55 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:21:55 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:21:55 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:22:01 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:22:37 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:58:24 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:58:25 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:58:25 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:58:25 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:58:33 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:58:42 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:58:42 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:58:42 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:58:42 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:59:11 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 08:59:51 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 08:59:51 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 08:59:51 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 08:59:51 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 08:59:56 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 09:00:34 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 09:01:00 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:01:00 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:01:00 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:01:00 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:02:11 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:02:11 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:02:11 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:02:11 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:03:12 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:03:12 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:03:12 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:03:12 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:04:16 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:04:16 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:04:16 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:04:16 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:05:31 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:05:31 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:05:31 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:05:31 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:13:45 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:13:45 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:13:45 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:13:45 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:14:54 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:14:54 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:14:54 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:14:54 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:16:28 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:16:28 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:16:28 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:16:28 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:17:29 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:17:29 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:17:29 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:17:29 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:18:46 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:18:46 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:18:46 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:18:46 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:33:18 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:33:18 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 09:33:18 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:33:18 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:35:09 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 09:35:18 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 09:35:18 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 09:35:18 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 09:35:18 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 09:35:47 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 09:35:47 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[30-Nov-2024 09:35:47 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[30-Nov-2024 09:35:47 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[30-Nov-2024 09:35:47 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[30-Nov-2024 10:06:17 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:06:17 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:06:17 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:06:17 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:20:27 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 10:20:32 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:20:32 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:20:32 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:20:32 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:20:36 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:20:36 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:20:36 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:20:36 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:21:03 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 10:21:04 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[30-Nov-2024 10:21:04 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[30-Nov-2024 10:21:04 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[30-Nov-2024 10:21:04 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[30-Nov-2024 10:21:47 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:21:47 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:21:47 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:21:47 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:23:48 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:23:48 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:23:48 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:23:48 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:25:29 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:25:29 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:25:29 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:25:29 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:26:32 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:26:32 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:26:32 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:26:32 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:27:13 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:27:13 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:27:13 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:27:13 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:28:15 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:28:15 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:28:15 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:28:15 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:30:43 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:30:43 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:30:43 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:30:43 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 10:34:24 America/Sao_Paulo] ID da Sessão: 0353f8d784aff0bd8a973a93bf4b4890
+[30-Nov-2024 10:34:24 America/Sao_Paulo] Página solicitada: home
+[30-Nov-2024 10:34:24 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 10:34:24 America/Sao_Paulo] Template: home.twig
+[30-Nov-2024 14:01:58 America/Sao_Paulo] ID da Sessão: c9fe9cec555ca4157df55fe6bb270aff
+[30-Nov-2024 15:51:55 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 15:51:59 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 15:52:37 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:31:23 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:31:24 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:31:30 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:31:35 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:31:57 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:32:03 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[30-Nov-2024 22:32:03 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[30-Nov-2024 22:32:03 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[30-Nov-2024 22:32:03 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[30-Nov-2024 22:32:04 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[30-Nov-2024 22:32:17 America/Sao_Paulo] ID da Sessão: ccb34eeb98ce39eaa3b03b4a068cba07
+[30-Nov-2024 22:32:20 America/Sao_Paulo] ID da Sessão: c5db72f122cfbf05e96728100379f9fa
+[30-Nov-2024 22:32:20 America/Sao_Paulo] Página solicitada: index.php
+[30-Nov-2024 22:32:20 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[30-Nov-2024 22:32:20 America/Sao_Paulo] Template: home.twig
+[01-Dec-2024 06:48:24 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[01-Dec-2024 06:48:45 America/Sao_Paulo] ID da Sessão: 68ccaef8e03ff56f54fb21f7cd729ecf
+[01-Dec-2024 06:48:48 America/Sao_Paulo] ID da Sessão: b8ca367700ef7c9adab6873837e8f42a
+[01-Dec-2024 06:48:48 America/Sao_Paulo] Página solicitada: index.php
+[01-Dec-2024 06:48:48 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[01-Dec-2024 06:48:48 America/Sao_Paulo] Template: home.twig
+[01-Dec-2024 06:48:49 America/Sao_Paulo] ID da Sessão: 762f55c8178db6cc90d7afc2f73a64dc
+[01-Dec-2024 06:48:49 America/Sao_Paulo] Página solicitada: index.php
+[01-Dec-2024 06:48:49 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[01-Dec-2024 06:48:49 America/Sao_Paulo] Template: home.twig
+[01-Dec-2024 06:48:53 America/Sao_Paulo] ID da Sessão: 762f55c8178db6cc90d7afc2f73a64dc
+[01-Dec-2024 06:48:53 America/Sao_Paulo] Página solicitada: dashboard
+[01-Dec-2024 06:48:53 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[01-Dec-2024 06:48:53 America/Sao_Paulo] Template: dashboard.twig
+[01-Dec-2024 06:49:02 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[01-Dec-2024 06:51:16 America/Sao_Paulo] ID da Sessão: 762f55c8178db6cc90d7afc2f73a64dc
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Página solicitada: dashboard
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/dashboard.php
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Template: dashboard.twig
+[01-Dec-2024 06:51:16 America/Sao_Paulo] ID da Sessão: 762f55c8178db6cc90d7afc2f73a64dc
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Página solicitada: index.php
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[01-Dec-2024 06:51:16 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:21 America/Sao_Paulo] ID da Sessão: cfa0b77df4f48179e42bc1ad938ce039
+[02-Dec-2024 14:03:28 America/Sao_Paulo] ID da Sessão: b8f8d4bd4d542c23533b435ef89b4293
+[02-Dec-2024 14:03:28 America/Sao_Paulo] Página solicitada: index.php
+[02-Dec-2024 14:03:28 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:28 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:29 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:29 America/Sao_Paulo] Página solicitada: index.php
+[02-Dec-2024 14:03:29 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:29 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:38 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:38 America/Sao_Paulo] Página solicitada: w
+[02-Dec-2024 14:03:38 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/w.php
+[02-Dec-2024 14:03:38 America/Sao_Paulo] Template: w.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: undraw_profile_1.svg
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: style.css
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: sb-admin-2.min.css
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: all.min.css
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: undraw_rocket.svg
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: undraw_profile_2.svg
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: undraw_profile_3.svg
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: jquery.min.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: sb-admin-2.min.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: bootstrap.bundle.min.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: jquery.easing.min.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: Chart.min.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: scripts.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: chart-area-demo.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Página solicitada: chart-pie-demo.js
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:03:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:03:47 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[02-Dec-2024 14:04:00 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:04:00 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:04:00 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:04:00 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:04:26 America/Sao_Paulo] PHP Warning:  file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:0A000126:SSL routines::unexpected eof while reading in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 21
+[02-Dec-2024 14:04:26 America/Sao_Paulo] Erro ao processar os dados: SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens
+[02-Dec-2024 14:04:26 America/Sao_Paulo] Stack Trace: #0 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php(199): PDOStatement->execute(Array)
+#1 /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejob.php(150): include('/home/u50971685...')
+#2 {main}
+[02-Dec-2024 14:04:26 America/Sao_Paulo] Consulta SQL gerada: 
+            INSERT INTO routes (id, name, from_name, to_name, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, url_id, avg_speed, avg_time, historic_speed, historic_time)
+            VALUES (:id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time)
+            ON DUPLICATE KEY UPDATE 
+                name = :name, 
+                from_name = :from_name, 
+                to_name = :to_name, 
+                length = :length, 
+                jam_level = :jam_level, 
+                time = :time, 
+                type = :type,
+                bbox_min_x = :bbox_min_x, 
+                bbox_min_y = :bbox_min_y, 
+                bbox_max_x = :bbox_max_x, 
+                bbox_max_y = :bbox_max_y, 
+                avg_speed = :avg_speed,
+                avg_time = :avg_time, 
+                historic_speed = :historic_speed,
+                historic_time = :historic_time
+        
+[02-Dec-2024 14:04:26 America/Sao_Paulo] PHP Warning:  Invalid argument supplied for foreach() in /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/wazejobtraficc.php on line 268
+[02-Dec-2024 14:05:01 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:05:01 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:05:01 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:05:01 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:06:03 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:06:03 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:06:03 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:06:03 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:07:05 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:07:05 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:07:05 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:07:05 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:08:06 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:08:06 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:08:06 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:08:06 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:09:09 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:09:09 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:09:09 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:09:09 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:10:59 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:10:59 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:10:59 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:10:59 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:12:02 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:12:02 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:12:02 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:12:02 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:13:05 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:13:05 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:13:05 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:13:05 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:14:09 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:14:09 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:14:09 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:14:09 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:15:12 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:15:12 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:15:12 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:15:12 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:16:15 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:16:15 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:16:15 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:16:15 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:21:22 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:21:22 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:21:22 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:21:22 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:22:32 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:22:32 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:22:32 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:22:32 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:23:36 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:23:36 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:23:36 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:23:36 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 14:24:39 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 14:24:39 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 14:24:39 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 14:24:39 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 15:18:22 America/Sao_Paulo] ID da Sessão: f923d71366f6e9b4f3f9904807f0225f
+[02-Dec-2024 15:18:22 America/Sao_Paulo] Página solicitada: home
+[02-Dec-2024 15:18:22 America/Sao_Paulo] Controlador: /home/u509716858/domains/fenixsmm.store/public_html/wazeportal/backend/home.php
+[02-Dec-2024 15:18:22 America/Sao_Paulo] Template: home.twig
+[02-Dec-2024 21:27:27 America/Sao_Paulo] ID da Sessão: ee0162115cc2ca6e8f9440a298cb7198

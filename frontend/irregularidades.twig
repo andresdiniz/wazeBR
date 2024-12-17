@@ -1,0 +1,150 @@
+<div class="container">
+    <h2>Irregularidades</h2>
+    {% if irregularities is not empty %}
+        <!-- Para telas grandes, exibe tabela -->
+        <div class="d-none d-lg-block">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Origem</th>
+                            <th>Destino</th>
+                            <th>Velocidade Média</th>
+                            <th>Tempo Médio</th>
+                            <th>Velocidade Histórica</th>
+                            <th>Tempo Histórico</th>
+                            <th>Tempo de Atraso</th>
+                            <th>Nível de Congestionamento</th>
+                            <th>Coordenadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for irregularity in irregularities %}
+                            <tr>
+                                <td>{{ irregularity.id }}</td>
+                                <td>{{ irregularity.name }}</td>
+                                <td>{{ irregularity.from_name }}</td>
+                                <td>{{ irregularity.to_name }}</td>
+                                <td>{{ irregularity.avg_speed|number_format(2) }} Km/h</td>
+                                <td>{{ (irregularity.avg_time / 60)|number_format(2) }} Km/h</td>
+                                <td>{{ irregularity.historic_speed|number_format(2) }} Km/h</td>
+                                <td>{{ (irregularity.historic_time / 60)|number_format(2) }} min</td>
+                                <td>{{ ((irregularity.avg_time - irregularity.historic_time) / 60)|number_format(2) }} min</td>
+                                <td>{{ irregularity.jam_level }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm view-map" 
+                                                data-route-id="{{ irregularity.id }}" 
+                                                data-bs-toggle="modal" data-bs-target="#mapModal">
+                                            Ver no Mapa
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Para telas pequenas, exibe cartões -->
+        <div class="d-lg-none">
+            {% for irregularity in irregularities %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ irregularity.name }}</h5>
+                        <p class="card-text">
+                            <strong>Origem:</strong> {{ irregularity.from_name }}<br>
+                            <strong>Destino:</strong> {{ irregularity.to_name }}<br>
+                            <strong>Velocidade Média:</strong> {{ irregularity.avg_speed|number_format(2) }} km/h<br>
+                            <strong>Tempo Médio:</strong> {{ (irregularity.avg_time / 60)|number_format(2) }} min<br>
+                            <strong>Velocidade Histórica:</strong> {{ irregularity.historic_speed|number_format(2) }} km/h<br>
+                            <strong>Tempo Histórico:</strong> {{ (irregularity.historic_time / 60)|number_format(2) }} min<br>
+                            <strong>Tempo de Atraso:</strong> {{ ((irregularity.avg_time - irregularity.historic_time) / 60)|number_format(2) }} min<br>
+                            <strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level }}<br>
+                        </p>
+                            <button class="btn btn-primary btn-sm view-map" 
+                                    data-route-id="{{ irregularity.id }}" 
+                                    data-bs-toggle="modal" data-bs-target="#mapModal">
+                                Ver no Mapa
+                            </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Não há irregularidades registradas no momento.</p>
+    {% endif %}
+</div>
+
+<!-- Modal para o Mapa -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">Mapa da Irregularidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="mapContainer" style="width: 100%; height: 500px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicializa os tooltips no documento
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Clique no botão "Ver no Mapa"
+        document.querySelectorAll('.view-map').forEach(button => {
+            button.addEventListener('click', async function () {
+                const routeId = this.dataset.routeId; // ID do route passado no botão
+                const baseUrl = '../wazeportal/api.php'; // Base da URL
+                const action = 'get_route_lines_irre'; // Ação que queremos executar
+        
+                // Montar a URL com os parâmetros
+                const apiUrl = `${baseUrl}?action=${action}&route_id_irre=${routeId}`;
+        
+                // Limpa o container do mapa
+                const mapContainer = document.getElementById('mapContainer');
+                mapContainer.innerHTML = ''; // Limpa o conteúdo do container
+        
+                try {
+                    // Faz a requisição para a API
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error('Erro ao obter coordenadas.');
+                    }
+        
+                    const data = await response.json();
+        
+                    // Verifica se há coordenadas na resposta
+                    if (data.length > 0) { // O JSON é uma lista
+                        // Extrai as coordenadas
+                        const coordinates = data.map(coord => [parseFloat(coord.y), parseFloat(coord.x)]);
+        
+                        // Renderiza o mapa com as coordenadas
+                        const map = L.map('mapContainer').setView(coordinates[0], 13);
+        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                        }).addTo(map);
+        
+                        // Adiciona as linhas das coordenadas
+                        L.polyline(coordinates, { color: 'red' }).addTo(map);
+                    } else {
+                        mapContainer.innerHTML = '<p>Não foi possível carregar as coordenadas.</p>';
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar coordenadas:', error);
+                    mapContainer.innerHTML = '<p>Erro ao buscar as coordenadas. Tente novamente mais tarde.</p>';
+                }
+            });
+        });
+    });
+</script>

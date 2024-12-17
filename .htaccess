@@ -1,0 +1,10 @@
+# Habilita RewriteEngine
+RewriteEngine On
+
+# Define o diretório base (ajuste caso o site não esteja na raiz)
+RewriteBase /wazeportal
+
+# Redireciona tudo para o index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

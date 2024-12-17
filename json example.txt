@@ -1,0 +1,271 @@
+{
+  "usersOnJams": [
+    {
+      "wazersCount": 1360,
+      "jamLevel": 0
+    },
+    {
+      "wazersCount": 16,
+      "jamLevel": 1
+    },
+    {
+      "wazersCount": 20,
+      "jamLevel": 2
+    },
+    {
+      "wazersCount": 63,
+      "jamLevel": 3
+    },
+    {
+      "wazersCount": 504,
+      "jamLevel": 4
+    }
+  ],
+  "routes": [
+    {
+      "subRoutes": [],
+      "toName": "MGC-356 S",
+      "historicTime": 881,
+      "line": [
+        {
+          "x": -43.9599395609266,
+          "y": -19.9941690929153
+        },
+        {
+          "x": -43.9584801322603,
+          "y": -19.9918571138309
+        },
+        {
+          "x": -43.9584801322603,
+          "y": -19.9918571138309
+        },
+        {
+          "x": -43.9591359495552,
+          "y": -19.9928460317802
+        },
+        {
+          "x": -43.9605907032844,
+          "y": -19.9952420678867
+        },
+        {
+          "x": -43.9610818182603,
+          "y": -19.9960208221302
+        }
+      ],
+      "bbox": {
+        "minY": -20.0443730233468,
+        "minX": -43.9717262656314,
+        "maxY": -19.9903108224415,
+        "maxX": -43.9575670940801
+      },
+      "name": "MGC-356 S Belo Horizonte",
+      "fromName": "MGC-356 S",
+      "length": 14116,
+      "jamLevel": 2,
+      "id": "1729691094526",
+      "time": 1392,
+      "type": "STATIC"
+    },
+    {
+      "subRoutes": [
+        {
+          "toName": "",
+          "historicTime": 51,
+          "line": [
+            {
+              "x": -43.962017,
+              "y": -19.997425
+            },
+            {
+              "x": -43.965057,
+              "y": -20.001948
+            }
+          ],
+          "bbox": {
+            "minY": -20.001948,
+            "minX": -43.965057,
+            "maxY": -19.997425,
+            "maxX": -43.962017
+          },
+          "fromName": "Anel Rodoviário Celso Mello Azevedo",
+          "length": 586,
+          "jamLevel": 3,
+          "time": 99
+        },
+        {
+          "toName": "Saída 629",
+          "historicTime": 3790,
+          "line": [
+            {
+              "x": -43.965057,
+              "y": -20.001948
+            },
+            {
+              "x": -43.8092,
+              "y": -20.650933
+            },
+            {
+              "x": -43.809109,
+              "y": -20.651581
+            },
+            {
+              "x": -43.808888,
+              "y": -20.6529
+            }
+          ],
+          "bbox": {
+            "minY": -20.6529,
+            "minX": -43.983609,
+            "maxY": -20.001948,
+            "maxX": -43.804161
+          },
+          "fromName": "Anel Rodoviário Celso Mello Azevedo",
+          "length": 84159,
+          "jamLevel": 0,
+          "time": 3863
+        }
+      ],
+      "toName": "BR-040 Rod. Pres. Juscelino Kubitschek",
+      "historicTime": 3841,
+      "line": [
+        {
+          "x": -43.9620646151203,
+          "y": -19.9974926065026
+        },
+        {
+          "x": -43.8088938914708,
+          "y": -20.6528694627682
+        }
+      ],
+      "bbox": {
+        "minY": -20.6528694627682,
+        "minX": -43.9836095522077,
+        "maxY": -19.9974926065026,
+        "maxX": -43.8041609070959
+      },
+      "name": "BR-040 S Rod. Pres. Juscelino Kubitschek; BR-040 Rod. Pres. Juscelino Kubitschek",
+      "fromName": "BR-040 S Rod. Pres. Juscelino Kubitschek",
+      "length": 84745,
+      "jamLevel": 0,
+      "id": "1730014499877",
+      "time": 3962,
+      "type": "STATIC"
+    },
+    {
+      "subRoutes": [
+        {
+          "toName": "Nova Lima",
+          "historicTime": 3520,
+          "line": [
+            {
+              "x": -43.808888,
+              "y": -20.6529
+            },
+            {
+              "x": -43.962519,
+              "y": -19.998401
+            }
+          ],
+          "bbox": {
+            "minY": -20.036346,
+            "minX": -43.971554,
+            "maxY": -19.998401,
+            "maxX": -43.962519
+          },
+          "fromName": "Nova Lima",
+          "length": 4575,
+          "jamLevel": 4,
+          "time": 450
+        }
+      ],
+      "toName": "BR-040 N Rod. Pres. Juscelino Kubitschek",
+      "historicTime": 3703,
+      "line": [
+        {
+          "x": -43.808906149467,
+          "y": -20.6527941299543
+        },
+        {
+          "x": -43.9625336040931,
+          "y": -19.9984199516518
+        }
+      ],
+      "bbox": {
+        "minY": -20.6527941299543,
+        "minX": -43.9834118025031,
+        "maxY": -19.9984199516518,
+        "maxX": -43.8041609070959
+      },
+      "name": "BR-040 Rod. Pres. Juscelino Kubitschek; BR-040 N Rod. Pres. Juscelino Kubitschek",
+      "fromName": "BR-040 Rod. Pres. Juscelino Kubitschek",
+      "length": 84631,
+      "jamLevel": 0,
+      "id": "1730014561552",
+      "time": 3987,
+      "type": "STATIC"
+    }
+  ],
+  "irregularities": [
+    {
+      "subRoutes": [],
+      "toName": "Belo Horizonte",
+      "historicTime": 205,
+      "line": [
+        {
+          "x": -43.971068,
+          "y": -20.017576
+        },
+        {
+          "x": -43.962519,
+          "y": -19.998401
+        }
+      ],
+      "bbox": {
+        "minY": -20.017576,
+        "minX": -43.971068,
+        "maxY": -19.998401,
+        "maxX": -43.962519
+      },
+      "name": "BR-040 N Rod. Pres. Juscelino Kubitschek,Belo Horizonte",
+      "fromName": "Belo Horizonte",
+      "length": 2405,
+      "jamLevel": 4,
+      "id": "0",
+      "time": 745,
+      "type": "DYNAMIC"
+    }
+  ],
+  "broadcasterId": "",
+  "areaName": "[BR] EPR BR040",
+  "bbox": {
+    "minY": -21.64731,
+    "minX": -43.9851295471192,
+    "maxY": -19.99409,
+    "maxX": -43.4097
+  },
+  "name": "[BR] EPR BR040",
+  "isMetric": true,
+  "lengthOfJams": [
+    {
+      "jamLevel": 1,
+      "jamLength": 17160
+    },
+    {
+      "jamLevel": 2,
+      "jamLength": 25961
+    },
+    {
+      "jamLevel": 3,
+      "jamLength": 4537
+    },
+    {
+      "jamLevel": 4,
+      "jamLength": 9112
+    },
+    {
+      "jamLevel": 5,
+      "jamLength": 7684
+    }
+  ],
+  "updateTime": 1732016904515
+}

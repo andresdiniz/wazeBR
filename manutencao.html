@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em Manutenção</title>
+    <link rel="icon" href="🔧" type="image/png"> <!-- Favicon com o ícone de chave -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 100px;
+            color: #f39c12;
+        }
+
+        p {
+            font-size: 20px;
+            color: #333;
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .icon {
+            font-size: 80px;
+            color: #f39c12;
+        }
+    </style>
+    <script>
+        // Adiciona funcionalidade ao contador e redireciona após 30 segundos
+        document.addEventListener('DOMContentLoaded', function () {
+            let countdown = 30; // Define o tempo inicial em segundos
+            const countdownElement = document.getElementById('countdown');
+
+            const interval = setInterval(function () {
+                countdown--;
+                countdownElement.textContent = countdown; // Atualiza o texto da contagem
+                if (countdown <= 0) {
+                    clearInterval(interval); // Para o intervalo
+                    window.location.href = "/"; // Redireciona para a página inicial
+                }
+            }, 1000); // Atualiza a cada segundo
+        });
+    </script>
+</head>
+
+<body>
+    <div>
+        <!-- Adiciona um ícone de ferramenta -->
+        <div class="icon">🔧</div>
+        <h1>Em Manutenção</h1>
+        <p>Estamos realizando algumas melhorias no sistema. Tentaremos redirecionar você para a página inicial em <span id="countdown">30</span> segundos.</p>
+        <p><a href="/">Voltar para a página inicial</a></p>
+    </div>
+</body>
+
+</html>
