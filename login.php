@@ -1,6 +1,7 @@
 <?php
 try {
     require_once './config/configbd.php';
+    require_once './functions/scripts.php';
     session_start(); // Iniciar a sessão
 
     // Obter conexão com o banco
@@ -33,6 +34,31 @@ try {
             $_SESSION['usuario_username'] = $user['username'];
             $_SESSION['usuario_photo'] = $user['photo'];
 
+            $ip = getIp();
+
+            try {
+                // Prepara a consulta SQL para inserção
+                $sql = "
+                    INSERT INTO historic_login (user, data_hora, ip)
+                    VALUES (:user, :data_hora, :ip)
+                ";
+                $stmt = $pdo->prepare($sql);
+        
+                // Define os valores a serem inseridos
+                dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+                $dataHora = $dateTime->format('Y-m-d H:i:s'); // Formata a data no padrão Y-m-d H:i:s
+                $stmt->bindParam(':user', $_SESSION['usuario_id']);
+                $stmt->bindParam(':data_hora', $dataHora);
+                $stmt->bindParam(':ip', $ip);
+        
+                // Executa o comando SQL
+                $stmt->execute();
+        
+            } catch (PDOException $e) {
+                // Lida com erros de execução
+                return "Erro ao inserir o registro: " . $e->getMessage();
+            }
+        
             // Redireciona para a página inicial
             header("Location: /wazeportal");
             exit();

@@ -184,3 +184,27 @@ function sendEmailAlert($stationName, $valor, $cotaMaxima) {
         error_log("Falha ao enviar o e-mail de alerta");
     }
 }
+
+function getIp() {
+    // Verifica se o IP está no cabeçalho HTTP_CLIENT_IP
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } 
+    // Verifica se o IP está no cabeçalho HTTP_X_FORWARDED_FOR (usado em proxies)
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // Pode conter uma lista de IPs, pega o primeiro da lista
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($ipList[0]);
+    } 
+    // Obtém o IP diretamente do REMOTE_ADDR
+    else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    // Valida o formato do IP (IPv4 e IPv6)
+    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+        return $ip;
+    } else {
+        return 'IP não válido';
+    }
+}
