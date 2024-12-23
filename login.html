@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Painel com dados de parceiros do Waze">
     <meta name="author" content="">
-    <title>SB Admin 2 - Login</title>
+    <title>Waze BR - Login</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -21,6 +21,11 @@
         .form-control:focus {
             border-color: #4e73df;
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .is-invalid {
+            border-color: #e74a3b;
+            box-shadow: 0 0 0 0.2rem rgba(231, 74, 59, 0.25);
         }
 
         /* Botão Login - Efeito de Hover */
@@ -49,6 +54,13 @@
                 margin-top: 30px;
             }
         }
+
+        /* Estilo para a mensagem de erro */
+        .alert {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #e74a3b;
+        }
     </style>
 </head>
 
@@ -73,22 +85,14 @@
                                     </div>
 
                                     <!-- Mostrar mensagens de erro -->
-                                    <?php if (isset($_COOKIE['login_error'])): ?>
-                                        <div class="alert alert-danger">
-                                            <?php 
-                                            echo htmlspecialchars($_COOKIE['login_error']);
-                                            setcookie('login_error', '', time() - 3600, '/'); // Apaga o cookie após exibir
-                                            ?>
-                                        </div>
-                                    <?php endif; ?>
+                                    <div id="errorMessage" class="alert" style="display: none;"></div>
 
-
-                                    <form class="user" action="login.php" method="post">
+                                    <form class="user" id="loginForm" novalidate>
                                         <div class="form-group">
-                                            <input type="email" class="form-control form-control-user" name="email" placeholder="Digite seu email" required>
+                                            <input type="email" id="email" class="form-control form-control-user" name="email" placeholder="Digite seu email" required>
                                         </div>
                                         <div class="form-group">
-                                            <input type="password" class="form-control form-control-user" name="password" placeholder="Digite sua senha" required>
+                                            <input type="password" id="password" class="form-control form-control-user" name="password" placeholder="Digite sua senha" required minlength="6">
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
@@ -125,6 +129,20 @@
 
     <!-- Custom scripts for all pages-->
     <script src="./js/sb-admin-2.min.js"></script>
+
+    <!-- Mostrar erro com JavaScript -->
+    <script>
+        // Captura o parâmetro de erro da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('erro');
+
+        if (error) {
+            // Exibe a mensagem de erro
+            const errorMessageDiv = document.getElementById('errorMessage');
+            errorMessageDiv.innerHTML = error.replace('%20', ' ');  // Substitui %20 por espaço
+            errorMessageDiv.style.display = 'block';
+        }
+    </script>
 
 </body>
 
