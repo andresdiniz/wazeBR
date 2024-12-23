@@ -49,33 +49,34 @@ try {
                     VALUES (:user, :data_hora, :ip)
                 ";
                 $stmt = $pdo->prepare($sql);
-        
+
                 // Define os valores a serem inseridos
-                dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+                $dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
                 $dataHora = $dateTime->format('Y-m-d H:i:s'); // Formata a data no padrão Y-m-d H:i:s
                 $stmt->bindParam(':user', $_SESSION['usuario_id']);
                 $stmt->bindParam(':data_hora', $dataHora);
                 $stmt->bindParam(':ip', $ip);
-        
+
                 // Executa o comando SQL
                 $stmt->execute();
-        
             } catch (PDOException $e) {
-                // Lida com erros de execução
-                return "Erro ao inserir o registro: " . $e->getMessage();
+                // Lida com erros de execução e loga
+                error_log("Erro ao inserir histórico de login: " . $e->getMessage());
+                header("Location: login.php?erro=Erro ao registrar o login.");
+                exit();
             }
-        
+
             // Redireciona para a página inicial
             header("Location: /wazeportal");
             exit();
         } else {
             // Caso a senha esteja incorreta
-            header("Location: login.php?erro=Senha incorretos.");
+            header("Location: login.php?erro=Senha incorreta.");
             exit();
         }
     } else {
         // Caso o email não exista no banco
-        header("Location: login.php?erro=Email incorretos.");
+        header("Location: login.php?erro=Email incorreto.");
         exit();
     }
 } catch (PDOException $e) {
