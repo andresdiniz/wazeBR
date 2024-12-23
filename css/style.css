@@ -134,4 +134,29 @@ tbody tr {
     max-width: 200px; /* Limita o tamanho das células para evitar que elas fiquem muito grandes */
 }
 
+.col-id {
+    width: 10%;
+}
+
+.col-name {
+    width: 20%;
+}
+
+.col-origin, .col-destination {
+    width: 15%;
+}
+
+.col-avg-speed, .col-avg-time, 
+.col-historic-speed, .col-historic-time {
+    width: 10%;
+}
+
+.col-jam-level {
+    width: 5%;
+}
+
+.col-actions {
+    width: 15%;
+}
+
 

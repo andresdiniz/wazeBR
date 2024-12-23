@@ -92,45 +92,58 @@ function getTrafficData(PDO $pdo) {
         WHERE jam_level > 1 AND is_active = 1
     ");
     $stmt1->execute();
-    $kmsLento = $stmt1->fetch(PDO::FETCH_ASSOC)['total_kms_lento'];
+    $kmsLentoIrregularities = $stmt1->fetch(PDO::FETCH_ASSOC)['total_kms_lento'];
+
+    // Trânsito lento em subroutes
+    $stmt2 = $pdo->prepare("
+        SELECT SUM(length) AS total_kms_lento_subroutes
+        FROM subroutes
+        WHERE jam_level > 1 AND is_active = 1
+    ");
+    $stmt2->execute();
+    $kmsLentoSubroutes = $stmt2->fetch(PDO::FETCH_ASSOC)['total_kms_lento_subroutes'];
 
     // Atraso em irregularities
-    $stmt2 = $pdo->prepare("
+    $stmt3 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_irregularities
         FROM irregularities
         WHERE time > historic_time AND is_active = 1
     ");
-    $stmt2->execute();
-    $atrasoIrregularities = $stmt2->fetch(PDO::FETCH_ASSOC)['total_atraso_irregularities'];
+    $stmt3->execute();
+    $atrasoIrregularities = $stmt3->fetch(PDO::FETCH_ASSOC)['total_atraso_irregularities'];
 
     // Atraso em routes
-    $stmt3 = $pdo->prepare("
+    $stmt4 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_routes
         FROM routes
         WHERE time > historic_time AND is_active = 1
     ");
-    $stmt3->execute();
-    $atrasoRoutes = $stmt3->fetch(PDO::FETCH_ASSOC)['total_atraso_routes'];
+    $stmt4->execute();
+    $atrasoRoutes = $stmt4->fetch(PDO::FETCH_ASSOC)['total_atraso_routes'];
 
     // Atraso em subroutes
-    $stmt4 = $pdo->prepare("
+    $stmt5 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_subroutes
         FROM subroutes
         WHERE time > historic_time AND is_active = 1
     ");
-    $stmt4->execute();
-    $atrasoSubroutes = $stmt4->fetch(PDO::FETCH_ASSOC)['total_atraso_subroutes'];
+    $stmt5->execute();
+    $atrasoSubroutes = $stmt5->fetch(PDO::FETCH_ASSOC)['total_atraso_subroutes'];
 
     // Soma total de atrasos (em segundos)
     $totalAtrasoSegundos = $atrasoIrregularities + $atrasoRoutes + $atrasoSubroutes;
 
+    // Soma total de quilômetros lentos
+    $totalKmsLento = ($kmsLentoIrregularities ?? 0) + ($kmsLentoSubroutes ?? 0);
+
     // Retorno dos dados calculados
-   return [
-        'total_kms_lento' => number_format($kmsLento/1000, 2),
-        'total_atraso_minutos' => number_format($totalAtrasoSegundos / 60, 2),
-        'total_atraso_horas' => number_format($totalAtrasoSegundos / 3600, 2)
+    return [
+        'total_kms_lento' => number_format($totalKmsLento / 1000, 2), // Converte para quilômetros
+        'total_atraso_minutos' => number_format($totalAtrasoSegundos / 60, 2), // Converte para minutos
+        'total_atraso_horas' => number_format($totalAtrasoSegundos / 3600, 2) // Converte para horas
     ];
 }
+
 
 // Uso da função
 $trafficData = getTrafficData($pdo);

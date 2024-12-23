@@ -416,34 +416,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         
         case 'criar_evento':
             // Verifica se todos os parâmetros obrigatórios estão presentes
-            if (empty($_GET['nome']) || empty($_GET['descricao']) || empty($_GET['tipo']) || empty($_GET['coordenadas']) || empty($_GET['rua']) || empty($_GET['subtipo'])) {
+            if (
+                empty($_GET['descricao']) || empty($_GET['tipo']) || 
+                empty($_GET['subtipo']) || empty($_GET['coordenadas']) || 
+                empty($_GET['rua']) || empty($_GET['starttime']) || 
+                empty($_GET['endtime'])
+            ) {
                 http_response_code(400); // Código HTTP 400: Bad Request
-                echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
+                echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                 exit;
             }
         
-            $nome = $_GET['nome'];
             $descricao = $_GET['descricao'];
             $tipo = $_GET['tipo'];
             $subtipo = $_GET['subtipo'];
-            $coordenadas = $_GET['coordenadas'];
+            $coordenadas = $_GET['coordenadas']; // Coordenadas no formato "-20.676696, -44.058083"
             $rua = $_GET['rua'];
+            $direcao = 'ONE_DIRECTION'; // Defina um padrão ou ajuste para aceitar da URL
+            $starttime = $_GET['starttime']; // Data e hora de início
+            $endtime = $_GET['endtime']; // Data e hora de fim
+        
+            // Converter coordenadas para JSON
+            try {
+                $coordParts = explode(',', $coordenadas);
+                if (count($coordParts) != 2) {
+                    throw new Exception('Formato de coordenadas inválido.');
+                }
+                $latitude = trim($coordParts[0]);
+                $longitude = trim($coordParts[1]);
+                $coordenadasJson = json_encode([['lat' => $latitude, 'lng' => $longitude]]);
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Coordenadas inválidas.', 'details' => $e->getMessage()]);
+                exit;
+            }
         
             try {
                 // Conecte-se ao banco de dados
                 $pdo = Database::getConnection();
         
                 // SQL para inserir o evento
-                $stmt = $pdo->prepare("INSERT INTO eventos (nome, descricao, tipo, subtipo, coordenadas, rua) 
-                                       VALUES (:nome, :descricao, :tipo, :subtipo, :coordenadas, :rua)");
+                $stmt = $pdo->prepare("
+                    INSERT INTO events (
+                        parent_event_id, creationtime, updatetime, type, subtype, description, 
+                        street, polyline, direction, starttime, endtime
+                    ) VALUES (
+                        NULL, NOW(), NOW(), :tipo, :subtipo, :descricao, 
+                        :rua, :coordenadas, :direcao, :starttime, :endtime
+                    )
+                ");
         
                 // Bind dos parâmetros
-                $stmt->bindParam(':nome', $nome);
-                $stmt->bindParam(':descricao', $descricao);
                 $stmt->bindParam(':tipo', $tipo);
                 $stmt->bindParam(':subtipo', $subtipo);
-                $stmt->bindParam(':coordenadas', $coordenadas);
+                $stmt->bindParam(':descricao', $descricao);
                 $stmt->bindParam(':rua', $rua);
+                $stmt->bindParam(':coordenadas', $coordenadasJson);
+                $stmt->bindParam(':direcao', $direcao);
+                $stmt->bindParam(':starttime', $starttime);
+                $stmt->bindParam(':endtime', $endtime);
         
                 // Executar a query
                 $stmt->execute();
@@ -461,7 +492,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
-            
 
         default:
             http_response_code(400);

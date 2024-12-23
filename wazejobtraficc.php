@@ -200,11 +200,20 @@ foreach ($jsonUrls as $jsonUrl) {
                         WHERE route_id = :route_id
                     ");
                     $stmtDeactivateAll->execute([':route_id' => $route['id']]);
-            
-                    // Prepara a consulta para inserção
+                
+                    // Prepara a consulta para inserção de sub-rotas
                     $stmtSubRoutes = $pdo->prepare("
-                        INSERT INTO subroutes (id, route_id, to_name, historic_time, length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, avg_speed, historic_speed, is_active)
-                        VALUES (:id, :route_id, :to_name, :historic_time, :length, :jam_level, :time, :type, :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :avg_speed, :historic_speed, 1)
+                        INSERT INTO subroutes (
+                            id, route_id, to_name, historic_time, length, jam_level, time, type, 
+                            bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, avg_speed, historic_speed, is_active,
+                            lead_alert_id, lead_alert_type, lead_alert_sub_type, lead_alert_position, 
+                            lead_alert_num_comments, lead_alert_num_thumbs_up, lead_alert_num_not_there_reports, lead_alert_street
+                        ) VALUES (
+                            :id, :route_id, :to_name, :historic_time, :length, :jam_level, :time, :type, 
+                            :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :avg_speed, :historic_speed, 1,
+                            :lead_alert_id, :lead_alert_type, :lead_alert_sub_type, :lead_alert_position, 
+                            :lead_alert_num_comments, :lead_alert_num_thumbs_up, :lead_alert_num_not_there_reports, :lead_alert_street
+                        )
                         ON DUPLICATE KEY UPDATE 
                             to_name = VALUES(to_name), 
                             historic_time = VALUES(historic_time), 
@@ -214,20 +223,31 @@ foreach ($jsonUrls as $jsonUrl) {
                             type = VALUES(type), 
                             avg_speed = VALUES(avg_speed), 
                             historic_speed = VALUES(historic_speed), 
-                            is_active = 1
+                            is_active = 1,
+                            lead_alert_id = VALUES(lead_alert_id),
+                            lead_alert_type = VALUES(lead_alert_type),
+                            lead_alert_sub_type = VALUES(lead_alert_sub_type),
+                            lead_alert_position = VALUES(lead_alert_position),
+                            lead_alert_num_comments = VALUES(lead_alert_num_comments),
+                            lead_alert_num_thumbs_up = VALUES(lead_alert_num_thumbs_up),
+                            lead_alert_num_not_there_reports = VALUES(lead_alert_num_not_there_reports),
+                            lead_alert_street = VALUES(lead_alert_street)
                     ");
-            
+                
                     foreach ($route['subRoutes'] as $subRoute) {
                         // Prepara os dados da sub-rota
                         $length = isset($subRoute['length']) ? $subRoute['length'] : 0;
                         $time = isset($subRoute['time']) ? $subRoute['time'] : 1; // Evitar divisão por zero
                         $historicTime = isset($subRoute['historicTime']) ? $subRoute['historicTime'] : 1; // Evitar divisão por zero
-            
+                
                         $avgSpeedSubRoute = ($length / 1000) / ($time / 3600); // km/h
                         $historicSpeedSubRoute = ($length / 1000) / ($historicTime / 3600); // km/h
-                        
+                
                         $subRoute['id'] = uniqid();
-            
+                
+                        // Verifica se leadAlert existe
+                        $leadAlert = $subRoute['leadAlert'] ?? null;
+                
                         $paramsInsert = [
                             ':id' => $subRoute['id'],
                             ':route_id' => $route['id'],
@@ -243,31 +263,42 @@ foreach ($jsonUrls as $jsonUrl) {
                             ':bbox_min_y' => $subRoute['bbox']['minY'] ?? 0,
                             ':bbox_max_x' => $subRoute['bbox']['maxX'] ?? 0,
                             ':bbox_max_y' => $subRoute['bbox']['maxY'] ?? 0,
+                            // Dados do leadAlert
+                            ':lead_alert_id' => $leadAlert['id'] ?? null,
+                            ':lead_alert_type' => $leadAlert['type'] ?? null,
+                            ':lead_alert_sub_type' => $leadAlert['subType'] ?? null,
+                            ':lead_alert_position' => $leadAlert['position'] ?? null,
+                            ':lead_alert_num_comments' => $leadAlert['numComments'] ?? null,
+                            ':lead_alert_num_thumbs_up' => $leadAlert['numThumbsUp'] ?? null,
+                            ':lead_alert_num_not_there_reports' => $leadAlert['numNotThereReports'] ?? null,
+                            ':lead_alert_street' => $leadAlert['street'] ?? null,
                         ];
-            
+                
                         // Insere ou atualiza a sub-rota
                         $stmtSubRoutes->execute($paramsInsert);
                     }
-                }
+                }                
             } catch (Exception $e) {
                 echo "Erro ao processar sub-rotas: " . $e->getMessage();
             }            
         }    
 
-        //Insere irregularidades de trafego encontradas
+        // Insere irregularidades de tráfego encontradas
         if (isset($data['irregularities']) && !empty($data['irregularities'])) {
             $irregularitiesFound = true; // Marca que pelo menos uma irregularidade foi encontrada
             echo "Irregularidade encontrada\n";
-        
+
             $stmtIrregularities = $pdo->prepare("
                 INSERT INTO irregularities (
-                    id, name, from_name, to_name, length, jam_level, time, type, 
+                    id, name, from_name, to_name, length, jam_level, time, leadtype, 
                     bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y, is_active, 
-                    url_id, avg_speed, avg_time, historic_speed, historic_time, update_time
+                    url_id, avg_speed, avg_time, historic_speed, historic_time, update_time, 
+                    num_comments, city, external_image_id, num_thumbs_up, street, sub_type, position, num_not_there_reports
                 ) VALUES (
-                    :id, :name, :from_name, :to_name, :length, :jam_level, :time, :type, 
+                    :id, :name, :from_name, :to_name, :length, :jam_level, :time, :leadtype, 
                     :bbox_min_x, :bbox_min_y, :bbox_max_x, :bbox_max_y, :is_active, 
-                    :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time, :update_time
+                    :url_id, :avg_speed, :avg_time, :historic_speed, :historic_time, :update_time, 
+                    :num_comments, :city, :external_image_id, :num_thumbs_up, :street, :sub_type, :position, :num_not_there_reports
                 )
                 ON DUPLICATE KEY UPDATE 
                     name = VALUES(name),
@@ -276,7 +307,7 @@ foreach ($jsonUrls as $jsonUrl) {
                     length = VALUES(length),
                     jam_level = VALUES(jam_level),
                     time = VALUES(time),
-                    type = VALUES(type),
+                    leadtype = VALUES(leadtype),
                     bbox_min_x = VALUES(bbox_min_x),
                     bbox_min_y = VALUES(bbox_min_y),
                     bbox_max_x = VALUES(bbox_max_x),
@@ -286,23 +317,46 @@ foreach ($jsonUrls as $jsonUrl) {
                     avg_time = VALUES(avg_time),
                     historic_speed = VALUES(historic_speed),
                     historic_time = VALUES(historic_time),
-                    update_time = VALUES(update_time)
+                    update_time = VALUES(update_time),
+                    num_comments = VALUES(num_comments),
+                    city = VALUES(city),
+                    external_image_id = VALUES(external_image_id),
+                    num_thumbs_up = VALUES(num_thumbs_up),
+                    street = VALUES(street),
+                    sub_type = VALUES(sub_type),
+                    position = VALUES(position),
+                    num_not_there_reports = VALUES(num_not_there_reports)
             ");
-        
+
             // Atualizar is_active para 0 antes do processamento
             $stmtDeactivateAll = $pdo->prepare("UPDATE irregularities SET is_active = 0 WHERE url_id = :url_id");
             $stmtDeactivateAll->execute([':url_id' => $urlId]);
-        
+
             foreach ($data['irregularities'] as $irregularity) {
+                // Gerando um ID único para a irregularidade
                 $irregularityId = uniqid('irreg_', true);
+                
+                // Cálculo das velocidades média e histórica
                 $avgSpeed = ($irregularity['time'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['time'] / 3600) : 0;
                 $historicSpeed = ($irregularity['historicTime'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['historicTime'] / 3600) : 0;
-        
+
                 // Verifica se a irregularidade já existe
                 $stmtCheckExistence = $pdo->prepare("SELECT id FROM irregularities WHERE id = :id");
                 $stmtCheckExistence->execute([':id' => $irregularityId]);
                 $isIrregularityNew = ($stmtCheckExistence->rowCount() === 0);
-        
+
+                // Dados de LeadAlert (caso existam)
+                $leadAlert = isset($irregularity['leadAlert']) ? $irregularity['leadAlert'] : null;
+                $leadtype = $leadAlert ? $leadAlert['type'] : '';
+                $numComments = $leadAlert ? $leadAlert['numComments'] : 0;
+                $city = $leadAlert ? $leadAlert['city'] : '';
+                $externalImageId = $leadAlert ? $leadAlert['externalImageId'] : '';
+                $numThumbsUp = $leadAlert ? $leadAlert['numThumbsUp'] : 0;
+                $street = $leadAlert ? $leadAlert['street'] : '';
+                $subType = $leadAlert ? $leadAlert['subType'] : 'NO_SUBTYPE';
+                $position = $leadAlert ? $leadAlert['position'] : '';
+                $numNotThereReports = $leadAlert ? $leadAlert['numNotThereReports'] : 0;
+
                 // Inserir ou atualizar irregularidade
                 $stmtIrregularities->execute([
                     ':id' => $irregularityId,
@@ -312,7 +366,7 @@ foreach ($jsonUrls as $jsonUrl) {
                     ':length' => $irregularity['length'],
                     ':jam_level' => $irregularity['jamLevel'],
                     ':time' => $irregularity['time'],
-                    ':type' => $irregularity['type'],
+                    ':leadtype' => $leadtype,
                     ':bbox_min_x' => $irregularity['bbox']['minX'],
                     ':bbox_min_y' => $irregularity['bbox']['minY'],
                     ':bbox_max_x' => $irregularity['bbox']['maxX'],
@@ -323,9 +377,17 @@ foreach ($jsonUrls as $jsonUrl) {
                     ':avg_time' => $irregularity['time'],
                     ':historic_speed' => $historicSpeed,
                     ':historic_time' => $irregularity['historicTime'],
-                    ':update_time' => date('Y-m-d H:i:s')
+                    ':update_time' => date('Y-m-d H:i:s'),
+                    ':num_comments' => $numComments,
+                    ':city' => $city,
+                    ':external_image_id' => $externalImageId,
+                    ':num_thumbs_up' => $numThumbsUp,
+                    ':street' => $street,
+                    ':sub_type' => $subType,
+                    ':position' => $position,
+                    ':num_not_there_reports' => $numNotThereReports
                 ]);
-        
+
                 // Gravar coordenadas da linha (route_lines)
                 foreach ($irregularity['line'] as $point) {
                     $stmtRouteLine = $pdo->prepare("
@@ -338,7 +400,7 @@ foreach ($jsonUrls as $jsonUrl) {
                         ':y' => $point['y']
                     ]);
                 }
-        
+
                 // Enviar e-mail somente se a irregularidade for nova e nível >= 3
                 if ($isIrregularityNew && $irregularity['jamLevel'] >= 3) {
                     $to = "andresoaresdiniz201218@gmail.com";
@@ -350,9 +412,9 @@ foreach ($jsonUrls as $jsonUrl) {
                         "Local: {$irregularity['fromName']} para {$irregularity['toName']}\n" .
                         "Coordenadas: ({$irregularity['bbox']['minX']}, {$irregularity['bbox']['minY']}) a ({$irregularity['bbox']['maxX']}, {$irregularity['bbox']['maxY']})\n\n" .
                         "Por favor, tome as devidas precauções.";
-        
-                    $headers = "From: sac@clouatacado.com";
-        
+
+                    $headers = "From: atendimento@clouatacado.com";
+
                     if (mail($to, $subject, $message, $headers)) {
                         echo "Alerta de e-mail enviado para $to.\n";
                     } else {
@@ -361,6 +423,7 @@ foreach ($jsonUrls as $jsonUrl) {
                 }
             }
         }
+
         
         // Desativar todas as irregularidades se nenhuma foi encontrada
         if (!$irregularitiesFound) {

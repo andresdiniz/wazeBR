@@ -449,7 +449,7 @@
     
     // Função para salvar o evento
     function salvarEvento(queryParams) {
-        fetch('sua_api_endpoint.php?' + queryParams.toString(), {
+        fetch('api.php?' + queryParams.toString(), {
             method: 'GET', // Usando GET
         })
             .then(response => response.json())
