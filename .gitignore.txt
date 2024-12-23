@@ -1,0 +1,24 @@
+# Ignorar todos os arquivos com extensão .zip
+*.zip
+
+# Ignorar todos os arquivos com extensão .sql
+*.sql
+
+# Ignorar outros formatos de arquivos compactados
+*.tar
+*.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.tgz
+*.tbz2
+
+# Ignorar arquivos temporários ou de backup comuns
+*.tmp
+*.bak
+*.old
+
+# Ignorar arquivos de cache
+.cache/
+*.log
