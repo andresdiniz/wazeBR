@@ -64,7 +64,7 @@ try {
                 // Lida com erros de execução e loga
                 error_log("Erro ao inserir histórico de login: " . $e->getMessage());
                 $_SESSION['login_error'] = "Erro ao registrar o login.";
-                header("Location: login.php");
+                header("Location: login.html");
                 exit();
             }
 
@@ -73,18 +73,18 @@ try {
             exit();
         } else {
             // Caso a senha esteja incorreta
-            header("Location: login.php?erro=Senha%20incorreta");
+            header("Location: login.html?erro=Senha%20incorreta");
             exit();
         }
     } else {
         // Caso o email não exista no banco
-        header("Location: login.php?erro=Email%20incorreto");
+        header("Location: login.html?erro=Email%20incorreto");
         exit();
     }
 } catch (PDOException $e) {
     // Logar o erro no banco
     error_log("Erro ao acessar o banco: " . $e->getMessage());
     $_SESSION['login_error'] = "Erro ao acessar o banco.";
-    header("Location: login.php");
+    header("Location: login.html");
     exit();
 }
