@@ -1,7 +1,7 @@
 <?php
 
 // Configurações do Banco de Dados
-define('DB_HOST', 'localhost');
+define('DB_HOST', '82.197.82.45');
 define('DB_NAME', 'u509716858_wazeportal');
 define('DB_USER', 'u509716858_wazeportal');
 define('DB_PASS', '@Ndre2024.');

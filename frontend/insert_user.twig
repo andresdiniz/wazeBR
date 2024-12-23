@@ -1,0 +1,86 @@
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h2 class="h3 mb-0 text-gray-800">ROTAS</h2>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        {% if routes is not empty %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nome da Rota</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th class="d-none d-md-table-cell">Vel. Normal (km/h)</th>
+                        <th class="d-none d-md-table-cell">Tempo Normal (min)</th>
+                        <th>Vel. Atual (km/h)</th>
+                        <th>Tempo Atual (min)</th>
+                        <th>Atraso (min)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in routes %}
+                    <tr data-uuid="{{ route.id }}" class="{% if route.avg_time - route.historic_time > 0 %}delay-row{% else %}on-time-row{% endif %}">
+                        <td data-toggle="tooltip" title="{{ route.name }}" class="route-name">{{ route.name }}</td>
+                        <td data-toggle="tooltip" title="{{ route.from_name }}" class="route-details">{{ route.from_name }}</td>
+                        <td data-toggle="tooltip" title="{{ route.to_name }}" class="route-details">{{ route.to_name }}</td>
+                        <td class="d-none d-md-table-cell" data-toggle="tooltip" title="{{ route.historic_speed|number_format(2) }} Km/h">{{ route.historic_speed|number_format(2) }} Km/h</td>
+                        <td class="d-none d-md-table-cell" data-toggle="tooltip" title="{{ (route.historic_time / 60)|number_format(2) }} min">{{ (route.historic_time / 60)|number_format(2) }} min</td>
+                        <td data-toggle="tooltip" title="{{ route.avg_speed|number_format(2) }} Km/h">{{ route.avg_speed|number_format(2) }} Km/h</td>
+                        <td data-toggle="tooltip" title="{{ (route.avg_time / 60)|number_format(2) }} min">{{ (route.avg_time / 60)|number_format(2) }} min</td>
+                        <td data-toggle="tooltip" title="{{ ((route.avg_time - route.historic_time) / 60)|number_format(2) }} min">{{ ((route.avg_time - route.historic_time) / 60)|number_format(2) }} min</td>
+                        <td>
+                            <button class="btn btn-info btn-sm view-route"
+                                data-toggle="mapModal"
+                                data-target="#mapModal"
+                                data-route-id="{{ route.id }}"
+                                data-toggle="tooltip" title="Ver mais detalhes da rota">
+                                VER +
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Não há eventos de acidentes registrados no momento.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div id="loadingIndicator" style="display: none; text-align: center; font-size: 1.2em; color: gray;">
+    <p>Carregando rota...</p>
+</div>
+
+<!-- Modal para o Mapa -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">Mapa da Rota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Container para o mapa -->
+                <div id="mapContainer" style="width: 100%; height: 500px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Inicializa os tooltips no documento
+    $(document).ready(function() {
+        // Ativar tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
