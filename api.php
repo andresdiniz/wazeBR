@@ -604,7 +604,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Cadastrar no banco de dados
             try {
                 $pdo = Database::getConnection();
-                require_once './functions/scripts.php';
                 // Verifica se o e-mail já está registrado
                 $sqlCheckEmail = "SELECT COUNT(*) FROM users WHERE email = :email";
                 $stmtCheck = $pdo->prepare($sqlCheckEmail);
@@ -677,4 +676,26 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     http_response_code(400);
     echo json_encode(['error' => 'Requisição inválida.']);
+}
+
+
+function sendEmail($userEmail, $emailBody) {
+    $to = $userEmail; // Defina o e-mail do destinatário
+    $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
+    
+    // Corpo do e-mail
+    $message = "
+    $emailBody
+    ";
+    
+    // Cabeçalhos do e-mail
+    $headers = "From: sac@clouatacado.com\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    
+    // Envia o e-mail
+    if (mail($to, $subject, $message, $headers)) {
+        error_log("E-mail enviado para $to com sucesso");
+    } else {
+        error_log("Falha ao enviar o e-mail para $to");
+    }
 }
