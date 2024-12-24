@@ -559,9 +559,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lógica para cadastrar usuário
             $email = $_POST['email'] ?? null;
             $nome = $_POST['nome'] ?? null;
-            $username = $_POST['username'] ?? null;
+            $username = $_POST['usuario'] ?? null;
             $id_parceiro = $_POST['id_parceiro'] ?? null;
-            $password = $_POST['password'] ?? null;
+            $password = $_POST['senha'] ?? null;
             $type = $_POST['type'] ?? null;
 
             // Define uma imagem padrão para o campo 'photo'
