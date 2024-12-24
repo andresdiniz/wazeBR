@@ -213,6 +213,9 @@
         });
     }
 
+    const sessionType = {{ session.type | json_encode | raw }};
+    console.log(sessionType);
+
     // Função para carregar os parceiros no select
     function carregarParceiros() {
         const parceirosSelect = document.getElementById("parceirosSelect");
@@ -232,9 +235,11 @@
             .then((data) => {
                 if (data.success) {
                     // Limpa as opções existentes no select
-                    parceirosSelect.innerHTML = "<option value=''>Selecione um parceiro</option>";
-                    parceirosSelect.innerHTML = "<option value='0'>Todos Parceiros</option>";
-
+                    if (sessionType == 1) {
+                        parceirosSelect.innerHTML = "<option value='99'>Todos Parceiros</option>";
+                    } else {
+                        parceirosSelect.innerHTML = "<option value=''>Selecione um parceiro</option>";
+                    }
                     // Adiciona as novas opções
                     data.nomes.forEach((item) => {
                         const option = document.createElement("option");

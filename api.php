@@ -568,6 +568,38 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
+            if (!$email) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Email obrigatórios.']);
+            }
+
+            if (!$nome) {
+                http_response_code(400);
+                echo json_encode(['error' => 'nome obrigatórios.']);
+            }
+
+            if (!$username) {
+                http_response_code(400);
+                echo json_encode(['error' => 'username obrigatórios.']);
+            }
+
+            if (!$id_parceiro) {
+                http_response_code(400);
+                echo json_encode(['error' => 'id obrigatórios.']);
+            }
+
+            if (!$password) {
+                http_response_code(400);
+                echo json_encode(['error' => 'senha obrigatórios.']);
+            }
+
+            if (!$type) {
+                http_response_code(400);
+                echo json_encode(['error' => 'tipo obrigatórios.']);
+            }
+
+
+
             // Validação básica
             if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
                 http_response_code(400);
