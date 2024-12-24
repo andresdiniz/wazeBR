@@ -219,7 +219,7 @@
                     // Adiciona as novas opções
                     data.nomes.forEach((item) => {
                         const option = document.createElement("option");
-                        option.value = item.Nome; // Use um valor único, se disponível, como um ID
+                        option.value = item.id; // Use um valor único, se disponível, como um ID
                         option.textContent = item.Nome;
                         parceirosSelect.appendChild(option);
                     });
