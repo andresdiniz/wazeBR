@@ -40,6 +40,7 @@ try {
             $_SESSION['usuario_username'] = $user['username'];
             $_SESSION['usuario_photo'] = $user['photo'];
             $_SESSION['usuario_id_parceiro'] = $user['id_parceiro'];
+            $_SESSION['type'] = $user['type'];
 
             $ip = getIp();
 

@@ -8,29 +8,30 @@
     <div class="row">
         <div class="container">
             <div class="row">
-                <!-- Card 1 -->
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                        <div class="card-body">
-                            <h5 class="card-title">Cadastrar</h5>
-                            <p class="card-text">Cadastrar Usuarios</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">Cadastrar</button>
+                {% if session.type == 1 or session.type == 2 %}<!-- Card 1 -->
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">Cadastrar</h5>
+                                <p class="card-text">Cadastrar Usuarios</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">Cadastrar</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Card 2 -->
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                        <div class="card-body">
-                            <h5 class="card-title">Alterar Usuarios</h5>
-                            <p class="card-text">Alterar propriedades</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlterar">Alterar</button>
+                    <!-- Card 2 -->
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">Alterar Usuarios</h5>
+                                <p class="card-text">Alterar propriedades</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlterar">Alterar</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
 
                 <!-- Card 3 -->
                 <div class="col-md-3 col-sm-6 mb-4">
@@ -43,18 +44,19 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Card 4 -->
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                        <div class="card-body">
-                            <h5 class="card-title">Apagar Usuario</h5>
-                            <p class="card-text">Apagar Usuario</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalApagar">Apagar</button>
+                {% if session.type == 1 or session.type == 2 %}
+                    <!-- Card 4 -->
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="card shadow-sm">
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">Apagar Usuario</h5>
+                                <p class="card-text">Apagar Usuario</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalApagar">Apagar</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -81,8 +83,24 @@
                         <input type="text" class="form-control" id="nomeDeUsuario" name="usuario" required>
                     </div>
                     <div class="mb-3">
+                        <label for="emailUsuario" class="form-label">Email do Usuário</label>
+                        <input type="email" class="form-control" id="emailUsuario" name="email" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="senhaUsuario" class="form-label">Senha</label>
                         <input type="password" class="form-control" id="senhaUsuario" name="senha" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="typeSelect" class="form-label">Nivel de Usuario</label>
+                        <select id="typeSelect" name="parceiro" class="form-control" required>
+                            {% if session.type == 1 %}
+                                <option value="1" selected>Super User / Dev</option>
+                            {% endif %}
+                            <option value="2" selected>Administrador Conta</option>
+                            <option value="3" selected>Usuário de Teste / Treinamento</option>
+                            <option value="4" selected>Usuário Geral</option>
+                            <option value="" selected>Selecione o tipo</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="parceirosSelect" class="form-label">Parceiro</label>

@@ -37,6 +37,7 @@ $settings = getSiteSettings($pdo);
 $data = [
     'user' => getSiteUsers($pdo),       // Usuário logado
     'settings' => $settings,           // Configurações do site
+    'session' => $_SESSION
 ];
 
 // Verifica se o site está em manutenção
