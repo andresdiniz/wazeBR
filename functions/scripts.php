@@ -209,23 +209,35 @@ function getIp() {
     }
 }
 
-function sendUserEmail($userEmail, $emailBody) {
-    $to = $userEmail; // Defina o e-mail do destinatário
-    $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
-    
-    // Corpo do e-mail
-    $message = "
-    $emailBody
-    ";
-    
-    // Cabeçalhos do e-mail
-    $headers = "From: sac@clouatacado.com\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    
-    // Envia o e-mail
-    if (mail($to, $subject, $message, $headers)) {
-        error_log("E-mail enviado para $to com sucesso");
-    } else {
-        error_log("Falha ao enviar o e-mail para $to");
-    }
-}
+document.addEventListener('DOMContentLoaded', () => {
+    performSearch('searchAlterar', 'resultAlterar', 'alterar');
+    performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
+    performSearch('searchApagar', 'resultApagar', 'apagar');
+
+    // Carregar parceiros ao abrir o modal
+    const modalCadastrar = document.getElementById('modalCadastrar');
+    modalCadastrar.addEventListener('show.bs.modal', carregarParceiros);
+
+    // Submeter o formulário de cadastro
+    document.getElementById('salvarUsuario').addEventListener('click', () => {
+        const form = document.getElementById('formCadastrar');
+        const formData = new FormData(form);
+
+        fetch('api.php?action=cadastrar_usuario', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Usuário cadastrado com sucesso!');
+                    form.reset(); // Limpa o formulário
+                    const modalInstance = bootstrap.Modal.getInstance(modalCadastrar);
+                    modalInstance.hide(); // Fecha o modal
+                } else {
+                    alert('Erro ao cadastrar usuário: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Erro ao cadastrar usuário:', error));
+    });
+});

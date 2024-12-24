@@ -1,6 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+//error_reporting(E_ALL);
 
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
 
@@ -544,6 +544,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } 
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once './config/configbd.php'; // Configuração do banco de dados
+    require_once './functions/scripts.php';
+
 
     // Obtém o tipo de ação dos parâmetros GET
     $action = $_GET['action'] ?? null;
@@ -567,39 +569,12 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
-            if (!$email){
-                http_response_code(400);
-                echo json_encode(['error' => 'Email obrigatórios.']);
-            }
-            if (!$nome){
-                http_response_code(400);
-                echo json_encode(['error' => 'Nome obrigatórios.']);
-            }
-            if (!$username){
-                http_response_code(400);
-                echo json_encode(['error' => 'Username obrigatórios.']);
-            }
-            if (!$id_parceiro){
-                http_response_code(400);
-                echo json_encode(['error' => 'Id parceiro é obrigatórios.']);
-            }
-            if (!$password){
-                http_response_code(400);
-                echo json_encode(['error' => 'Senha obrigatórios.']);
-            }
-
-            if (!$type){
-                http_response_code(400);
-                echo json_encode(['error' => 'Tipo é obrigatórios.']);
-            }
-
             // Validação básica
             if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
                 exit;
             }
-
 
             // Cadastrar no banco de dados
             try {
@@ -676,26 +651,4 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     http_response_code(400);
     echo json_encode(['error' => 'Requisição inválida.']);
-}
-
-
-function sendEmail($userEmail, $emailBody) {
-    $to = $userEmail; // Defina o e-mail do destinatário
-    $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
-    
-    // Corpo do e-mail
-    $message = "
-    $emailBody
-    ";
-    
-    // Cabeçalhos do e-mail
-    $headers = "From: sac@clouatacado.com\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    
-    // Envia o e-mail
-    if (mail($to, $subject, $message, $headers)) {
-        error_log("E-mail enviado para $to com sucesso");
-    } else {
-        error_log("Falha ao enviar o e-mail para $to");
-    }
 }
