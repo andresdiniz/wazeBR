@@ -542,7 +542,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             break;
     }
 } 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once './config/configbd.php'; // Configuração do banco de dados
 
     // Obtém o tipo de ação dos parâmetros GET
