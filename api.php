@@ -570,27 +570,22 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$email){
                 http_response_code(400);
                 echo json_encode(['error' => 'Email obrigatórios.']);
-                exit;
             }
             if (!$nome){
                 http_response_code(400);
                 echo json_encode(['error' => 'Nome obrigatórios.']);
-                exit;
             }
             if (!$username){
                 http_response_code(400);
                 echo json_encode(['error' => 'Username obrigatórios.']);
-                exit;
             }
             if (!$id_parceiro){
                 http_response_code(400);
                 echo json_encode(['error' => 'Id parceiro é obrigatórios.']);
-                exit;
             }
             if (!$password){
                 http_response_code(400);
                 echo json_encode(['error' => 'Senha obrigatórios.']);
-                exit;
             }
 
             if (!$type){
