@@ -4,8 +4,6 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
 
-require_once './functions/scripts.php';
-
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     require_once './config/configbd.php'; // Configuração do banco de dados
     
@@ -606,6 +604,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Cadastrar no banco de dados
             try {
                 $pdo = Database::getConnection();
+                require_once './functions/scripts.php';
                 // Verifica se o e-mail já está registrado
                 $sqlCheckEmail = "SELECT COUNT(*) FROM users WHERE email = :email";
                 $stmtCheck = $pdo->prepare($sqlCheckEmail);
