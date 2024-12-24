@@ -576,6 +576,20 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Cadastrar no banco de dados
             try {
+                // Verifica se o e-mail já está registrado
+                $sqlCheckEmail = "SELECT COUNT(*) FROM users WHERE email = :email";
+                $stmtCheck = $pdo->prepare($sqlCheckEmail);
+                $stmtCheck->bindParam(':email', $email, PDO::PARAM_STR);
+                $stmtCheck->execute();
+                $emailExists = $stmtCheck->fetchColumn();
+
+                if ($emailExists > 0) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'O e-mail informado já está cadastrado.']);
+                    exit;
+                }
+
+                // Prosseguir com a inserção do usuário
                 $sql = "
                     INSERT INTO users (email, nome, username, id_parceiro, password, photo, type)
                     VALUES (:email, :nome, :username, :id_parceiro, :password, :photo, :type)
