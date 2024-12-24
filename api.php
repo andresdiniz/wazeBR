@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
