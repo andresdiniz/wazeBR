@@ -616,7 +616,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo json_encode(['error' => 'O e-mail informado já está cadastrado.']);
                     exit;
                 }
-
                 // Prosseguir com a inserção do usuário
                 $sql = "
                     INSERT INTO users (email, nome, username, id_parceiro, password, photo, type)
@@ -644,10 +643,11 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p>Seu cadastro foi realizado com sucesso. Agora você pode acessar a sua conta usando as informações abaixo:</p>
                         <ul>
                             <li><strong>Usuário:</strong> $username</li>
+                            <li><strong>Email:</strong> $email</li>
                             <li><strong>Senha:</strong> $password</li>
                         </ul>
                         <p>Você pode acessar sua conta através do seguinte link:</p>
-                        <p><a href='http://seusite.com'>Clique aqui para acessar sua conta</a></p>
+                        <p><a href='https://fenixsmm.store/wazeportal/'>Clique aqui para acessar sua conta</a></p>
                         <p>Obrigado por se cadastrar!</p>
                     </body>
                     </html>
@@ -656,7 +656,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Cabeçalhos para e-mail em HTML
                     $headers = "MIME-Version: 1.0" . "\r\n";
                     $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-                    $headers .= "From: noreply@seusite.com" . "\r\n"; // Remetente do e-mail
+                    $headers .= "From: sac@clouatacado.com" . "\r\n"; // Remetente do e-mail
 
                     if (mail($email, $subject, $message, $headers)) {
                         http_response_code(200);
