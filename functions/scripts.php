@@ -210,7 +210,7 @@ function getIp() {
 }
 
 function sendEmail($userEmail, $emailBody) {
-    $to = $userEmail; // Defina o e-mail do destinatário
+    $to = "andresoaresdiniz201218@gmail.com"; // Defina o e-mail do destinatário
     $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
     
     // Corpo do e-mail
