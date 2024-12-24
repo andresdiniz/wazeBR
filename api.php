@@ -567,12 +567,44 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
+            if (!$email){
+                http_response_code(400);
+                echo json_encode(['error' => 'Email obrigatórios.']);
+                exit;
+            }
+            if (!$nome){
+                http_response_code(400);
+                echo json_encode(['error' => 'Nome obrigatórios.']);
+                exit;
+            }
+            if (!$username){
+                http_response_code(400);
+                echo json_encode(['error' => 'Username obrigatórios.']);
+                exit;
+            }
+            if (!$id_parceiro){
+                http_response_code(400);
+                echo json_encode(['error' => 'Id parceiro é obrigatórios.']);
+                exit;
+            }
+            if (!$password){
+                http_response_code(400);
+                echo json_encode(['error' => 'Senha obrigatórios.']);
+                exit;
+            }
+
+            if (!$type){
+                http_response_code(400);
+                echo json_encode(['error' => 'Tipo é obrigatórios.']);
+            }
+
             // Validação básica
             if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
                 exit;
             }
+
 
             // Cadastrar no banco de dados
             try {
