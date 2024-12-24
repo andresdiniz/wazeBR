@@ -665,21 +665,36 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Chama a função para enviar o e-mail
                     sendEmail($userEmail, $message);
+
+                    http_response_code(200);
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Usuário cadastrado com sucesso.',
+                    ]);
                 } else {
                     throw new Exception('Erro ao executar a inserção.');
                 }
             } catch (Exception $e) {
                 http_response_code(500);
-                echo json_encode(['error' => 'Erro interno do servidor: ' . $e->getMessage()]);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erro interno do servidor: ' . $e->getMessage(),
+                ]);
             }
             break;
 
         default:
             http_response_code(401);
-            echo json_encode(['error' => 'Ação desconhecida.']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Ação desconhecida',
+            ]);
             break;
     }
 } else {
     http_response_code(402);
-    echo json_encode(['error' => 'Requisição inválida.']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Requisição invalida',
+    ]);
 }

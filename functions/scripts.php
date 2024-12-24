@@ -219,7 +219,7 @@ function sendEmail($userEmail, $emailBody) {
     ";
     
     // Cabeçalhos do e-mail
-    $headers = "From: sac@clouatacado.com\r\n";
+    $headers = "From: sac@fenixsmm.com\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     
     // Envia o e-mail
