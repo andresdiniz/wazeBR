@@ -46,10 +46,19 @@
 
 
     <script>
-        // Atualiza a página a cada 120.000 milissegundos (2 minuto)
+    // Obtém a URL atual da página
+    const currentUrl = window.location.pathname;
+
+    // Verifica se a URL contém as páginas específicas
+    const validPages = ['/home', '/dashboard', '/routes', '/irregularidades'];
+
+    if (validPages.includes(currentUrl)) {
+        // Atualiza a página a cada 120.000 milissegundos (2 minutos)
         setInterval(function() {
             window.location.reload();
         }, 120000);
-    </script>
+    }
+</script>
+
 
 </head>
