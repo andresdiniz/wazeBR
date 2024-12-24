@@ -546,7 +546,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once './config/configbd.php'; // Configuração do banco de dados
 
     // Obtém o tipo de ação dos parâmetros GET
-    $action = $_GET['action'] ?? null;
+    $action = $_POST['action'] ?? null;
 
     if (!$action) {
         http_response_code(400);
@@ -590,8 +590,39 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bindParam(':type', $type, PDO::PARAM_STR);
 
                 if ($stmt->execute()) {
-                    http_response_code(200);
-                    echo json_encode(['success' => true, 'message' => 'Usuário cadastrado com sucesso.']);
+                    // E-mail enviado após a criação do usuário
+                    $subject = "Sua conta foi criada!";
+                    $message = "
+                    <html>
+                    <head>
+                        <title>Conta criada com sucesso</title>
+                    </head>
+                    <body>
+                        <h2>Olá, $nome!</h2>
+                        <p>Seu cadastro foi realizado com sucesso. Agora você pode acessar a sua conta usando as informações abaixo:</p>
+                        <ul>
+                            <li><strong>Usuário:</strong> $username</li>
+                            <li><strong>Senha:</strong> $password</li>
+                        </ul>
+                        <p>Você pode acessar sua conta através do seguinte link:</p>
+                        <p><a href='http://seusite.com'>Clique aqui para acessar sua conta</a></p>
+                        <p>Obrigado por se cadastrar!</p>
+                    </body>
+                    </html>
+                    ";
+
+                    // Cabeçalhos para e-mail em HTML
+                    $headers = "MIME-Version: 1.0" . "\r\n";
+                    $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
+                    $headers .= "From: noreply@seusite.com" . "\r\n"; // Remetente do e-mail
+
+                    if (mail($email, $subject, $message, $headers)) {
+                        http_response_code(200);
+                        echo json_encode(['success' => true, 'message' => 'Usuário cadastrado com sucesso. E-mail enviado!']);
+                    } else {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erro ao enviar o e-mail.']);
+                    }
                 } else {
                     throw new Exception('Erro ao executar a inserção.');
                 }
