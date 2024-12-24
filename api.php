@@ -418,6 +418,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $id_parceiro = $_SESSION['usuario_id_parceiro'];
         
             try {
+                $pdo = Database::getConnection();
                 if ($id_parceiro == 0) { // Verifica se o ID do parceiro é 0
                     // Consulta para retornar todos os nomes
                     $sql = "SELECT Nome FROM users";
