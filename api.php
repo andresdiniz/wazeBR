@@ -603,6 +603,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Cadastrar no banco de dados
             try {
+                $pdo = Database::getConnection();
                 // Verifica se o e-mail já está registrado
                 $sqlCheckEmail = "SELECT COUNT(*) FROM users WHERE email = :email";
                 $stmtCheck = $pdo->prepare($sqlCheckEmail);
