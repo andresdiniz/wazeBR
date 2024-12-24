@@ -413,6 +413,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode(["result" => $streetsInicio]);
         
             break;
+
+        case 'get_parceiros':
+
+            session_start();
+            $id_parceiro = $_SESSION['usuario_id_parceiro'];
+        
+            try {
+                if ($id_parceiro == 0) { // Verifica se o ID do parceiro é 0
+                    // Consulta para retornar todos os nomes
+                    $sql = "SELECT Nome FROM users";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute();
+        
+                    // Obter os resultados
+                    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+                    if ($results) {
+                        echo json_encode(['success' => true, 'nomes' => $results]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Nenhum usuário encontrado']);
+                    }
+                } else {
+                    // Consulta para retornar o nome de um único parceiro
+                    $sql = "SELECT Nome FROM users WHERE id = :id";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindParam(':id', $id_parceiro, PDO::PARAM_INT);
+                    $stmt->execute();
+        
+                    // Obter o resultado
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+                    if ($result) {
+                        echo json_encode(['success' => true, 'nome' => $result['Nome']]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+                    }
+                }
+            } catch (PDOException $e) {
+                echo json_encode(['success' => false, 'message' => 'Erro ao executar a consulta: ' . $e->getMessage()]);
+            }
+            break;          
         
         case 'criar_evento':
             // Verifica se todos os parâmetros obrigatórios estão presentes
