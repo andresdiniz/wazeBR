@@ -546,7 +546,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once './config/configbd.php'; // Configuração do banco de dados
 
     // Obtém o tipo de ação dos parâmetros GET
-    $action = $_POST['action'] ?? null;
+    $action = $_GET['action'] ?? null;
 
     if (!$action) {
         http_response_code(400);
