@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
 
-require_once __DIR__ . '/functions/scripts.php';
+require_once './functions/scripts.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     require_once './config/configbd.php'; // Configuração do banco de dados
