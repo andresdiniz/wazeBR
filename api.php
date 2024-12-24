@@ -538,7 +538,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode(['error' => 'Ação não reconhecida.']);
             break;
     }
-} else {
+} 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once './config/configbd.php'; // Configuração do banco de dados
+    
+    // Obtém o tipo de ação dos parâmetros GET
+    $action = $_GET['action'] ?? null;
+
+    switch ($action) {
+        case 'cadastrar_usuario':
+            
+
+
+
+    }
+}else {
     http_response_code(400);
     echo json_encode(['error' => 'Requisição inválida.']);
 }

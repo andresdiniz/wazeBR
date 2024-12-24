@@ -247,7 +247,7 @@
             const form = document.getElementById('formCadastrar');
             const formData = new FormData(form);
 
-            fetch('api.php?function=cadastrar_usuario', {
+            fetch('api.php?action=cadastrar_usuario', {
                 method: 'POST',
                 body: formData,
             })
