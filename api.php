@@ -541,18 +541,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 } 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once './config/configbd.php'; // Configuração do banco de dados
-    
+
     // Obtém o tipo de ação dos parâmetros GET
-    $action = $_GET['action'] ?? null;
+    $action = $_POST['action'] ?? null;
+
+    if (!$action) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Parâmetro "action" não especificado.']);
+        exit;
+    }
 
     switch ($action) {
         case 'cadastrar_usuario':
-            
+            // Lógica para cadastrar usuário
+            $email = $_POST['email'] ?? null;
+            $nome = $_POST['nome'] ?? null;
+            $username = $_POST['username'] ?? null;
+            $id_parceiro = $_POST['id_parceiro'] ?? null;
+            $password = $_POST['password'] ?? null;
+            $type = $_POST['type'] ?? null;
 
+            // Define uma imagem padrão para o campo 'photo'
+            $photo = 'https://via.placeholder.com/150'; // URL de imagem padrão
 
+            // Validação básica
+            if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
+                exit;
+            }
 
+            // Cadastrar no banco de dados
+            try {
+                $sql = "
+                    INSERT INTO users (email, nome, username, id_parceiro, password, photo, type)
+                    VALUES (:email, :nome, :username, :id_parceiro, :password, :photo, :type)
+                ";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+                $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+                $stmt->bindParam(':password', password_hash($password, PASSWORD_DEFAULT), PDO::PARAM_STR);
+                $stmt->bindParam(':photo', $photo, PDO::PARAM_STR);
+                $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+
+                if ($stmt->execute()) {
+                    http_response_code(200);
+                    echo json_encode(['success' => true, 'message' => 'Usuário cadastrado com sucesso.']);
+                } else {
+                    throw new Exception('Erro ao executar a inserção.');
+                }
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Erro interno do servidor: ' . $e->getMessage()]);
+            }
+            break;
+
+        default:
+            http_response_code(400);
+            echo json_encode(['error' => 'Ação desconhecida.']);
+            break;
     }
-}else {
+} else {
     http_response_code(400);
     echo json_encode(['error' => 'Requisição inválida.']);
 }
