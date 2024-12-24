@@ -233,6 +233,7 @@
                 if (data.success) {
                     // Limpa as opções existentes no select
                     parceirosSelect.innerHTML = "<option value=''>Selecione um parceiro</option>";
+                    parceirosSelect.innerHTML = "<option value='0'>Todos Parceiros</option>";
 
                     // Adiciona as novas opções
                     data.nomes.forEach((item) => {

@@ -643,11 +643,11 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
 
         default:
-            http_response_code(400);
+            http_response_code(401);
             echo json_encode(['error' => 'Ação desconhecida.']);
             break;
     }
 } else {
-    http_response_code(400);
+    http_response_code(402);
     echo json_encode(['error' => 'Requisição inválida.']);
 }
