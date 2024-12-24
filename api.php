@@ -85,8 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
                 break;
 
-
-
             case 'get_alerts':
                 try {
                     $pdo = Database::getConnection();

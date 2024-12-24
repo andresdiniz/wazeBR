@@ -207,7 +207,7 @@
     document.addEventListener('DOMContentLoaded', () => {
     // Função para carregar os parceiros no select
     function loadParceiros() {
-        fetch('api.php?function=get_parceiros') // API PHP para buscar os parceiros
+        fetch('api.php?action=get_parceiros') // API PHP para buscar os parceiros
             .then(response => response.json())
             .then(data => {
                 const parceiroSelect = document.getElementById('parceiro');
