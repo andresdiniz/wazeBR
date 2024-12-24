@@ -206,25 +206,48 @@
 
     document.addEventListener('DOMContentLoaded', () => {
     // Função para carregar os parceiros no select
-    function loadParceiros() {
-        fetch('api.php?action=get_parceiros') // API PHP para buscar os parceiros
-            .then(response => response.json())
-            .then(data => {
-                const parceiroSelect = document.getElementById('parceiro');
-                parceiroSelect.innerHTML = ''; // Limpa opções anteriores
+    document.addEventListener("DOMContentLoaded", function () {
+    const parceirosSelect = document.getElementById("parceirosSelect");
 
-                // Adiciona uma opção padrão
-                parceiroSelect.appendChild(new Option('Selecione um parceiro', '', true, true));
+    // Função para carregar os parceiros
+    function carregarParceiros() {
+        fetch("api.php?action=get_parceiros", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Erro na requisição: " + response.status);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            if (data.success) {
+                // Limpa as opções existentes no select
+                parceirosSelect.innerHTML = "<option value=''>Selecione um parceiro</option>";
 
-                // Preenche o select com as opções
-                data.forEach(parceiro => {
-                    const option = new Option(parceiro.nome, parceiro.id);
-                    parceiroSelect.appendChild(option);
+                // Adiciona as novas opções
+                data.nomes.forEach((item) => {
+                    const option = document.createElement("option");
+                    option.value = item.Nome; // Use um valor único, se disponível, como um ID
+                    option.textContent = item.Nome;
+                    parceirosSelect.appendChild(option);
                 });
-            })
-            .catch(error => console.error('Erro ao carregar parceiros:', error));
+            } else {
+                console.error("Erro: " + data.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar os parceiros:", error);
+        });
     }
 
+    // Chama a função ao carregar a página
+    carregarParceiros();
+});
+/
     // Carregar parceiros ao abrir o modal
     const modalCadastrar = document.getElementById('modalCadastrar');
     modalCadastrar.addEventListener('show.bs.modal', loadParceiros);
