@@ -632,39 +632,33 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($stmt->execute()) {
                     // E-mail enviado após a criação do usuário
-                    $subject = "Sua conta foi criada!";
+                    $userEmail = $email; // E-mail do usuário
+                    $userName = $nome;
+                    $userPassword = $password;
+                    $loginLink = "https://fenixsmm.store/wazeportal/";
+
                     $message = "
                     <html>
                     <head>
-                        <title>Conta criada com sucesso</title>
+                        <title>Conta Criada com Sucesso</title>
                     </head>
                     <body>
-                        <h2>Olá, $nome!</h2>
-                        <p>Seu cadastro foi realizado com sucesso. Agora você pode acessar a sua conta usando as informações abaixo:</p>
+                        <h2>Olá, $userName!</h2>
+                        <p>Sua conta foi criada com sucesso! Agora você pode acessar a sua conta através do seguinte link:</p>
+                        <p><a href='$loginLink'>Clique aqui para acessar sua conta</a></p>
+                        <p><strong>Seus dados de login são:</strong></p>
                         <ul>
-                            <li><strong>Usuário:</strong> $username</li>
-                            <li><strong>Email:</strong> $email</li>
-                            <li><strong>Senha:</strong> $password</li>
+                            <li><strong>Email:</strong> $userEmail</li>
+                            <li><strong>Senha:</strong> $userPassword</li>
                         </ul>
-                        <p>Você pode acessar sua conta através do seguinte link:</p>
-                        <p><a href='https://fenixsmm.store/wazeportal/'>Clique aqui para acessar sua conta</a></p>
-                        <p>Obrigado por se cadastrar!</p>
+                        <p>Por favor, mantenha suas credenciais seguras.</p>
+                        <p>Obrigado por se cadastrar conosco!</p>
                     </body>
                     </html>
                     ";
 
-                    // Cabeçalhos para e-mail em HTML
-                    $headers = "MIME-Version: 1.0" . "\r\n";
-                    $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-                    $headers .= "From: sac@clouatacado.com" . "\r\n"; // Remetente do e-mail
-
-                    if (mail($email, $subject, $message, $headers)) {
-                        http_response_code(200);
-                        echo json_encode(['success' => true, 'message' => 'Usuário cadastrado com sucesso. E-mail enviado!']);
-                    } else {
-                        http_response_code(500);
-                        echo json_encode(['error' => 'Erro ao enviar o e-mail.']);
-                    }
+                    // Chama a função para enviar o e-mail
+                    sendEmail($userEmail, $message);
                 } else {
                     throw new Exception('Erro ao executar a inserção.');
                 }

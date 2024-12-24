@@ -208,3 +208,24 @@ function getIp() {
         return 'IP não válido';
     }
 }
+
+function sendUserEmail($userEmail, $emailBody) {
+    $to = $userEmail; // Defina o e-mail do destinatário
+    $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
+    
+    // Corpo do e-mail
+    $message = "
+    $emailBody
+    ";
+    
+    // Cabeçalhos do e-mail
+    $headers = "From: sac@clouatacado.com\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    
+    // Envia o e-mail
+    if (mail($to, $subject, $message, $headers)) {
+        error_log("E-mail enviado para $to com sucesso");
+    } else {
+        error_log("Falha ao enviar o e-mail para $to");
+    }
+}
