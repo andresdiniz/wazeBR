@@ -210,7 +210,7 @@ function getIp() {
 }
 
 function sendEmail($userEmail, $emailBody) {
-    $to = "andresoaresdiniz201218@gmail.com"; // Defina o e-mail do destinatário
+    $to = $userEmail; // Defina o e-mail do destinatário
     $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
     
     // Corpo do e-mail
@@ -219,7 +219,7 @@ function sendEmail($userEmail, $emailBody) {
     ";
     
     // Cabeçalhos do e-mail
-    $headers = "From: sac@fenixsmm.com\r\n";
+    $headers = "From: wazebrasil@fenixsmm.store\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     
     // Envia o e-mail
