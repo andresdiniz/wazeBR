@@ -565,7 +565,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $type = $_POST['type'] ?? null;
 
             // Define uma imagem padrão para o campo 'photo'
-            $photo = 'https://via.placeholder.com/150'; // URL de imagem padrão
+            $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
             // Validação básica
             if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {

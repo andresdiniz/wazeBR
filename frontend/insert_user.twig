@@ -92,19 +92,19 @@
                     </div>
                     <div class="mb-3">
                         <label for="typeSelect" class="form-label">Nivel de Usuario</label>
-                        <select id="typeSelect" name="parceiro" class="form-control" required>
+                        <select id="typeSelect" name="type" class="form-control" required>
+                            <option value="" selected>Selecione o tipo</option>
                             {% if session.type == 1 %}
                                 <option value="1" selected>Super User / Dev</option>
                             {% endif %}
                             <option value="2" selected>Administrador Conta</option>
                             <option value="3" selected>Usuário de Teste / Treinamento</option>
                             <option value="4" selected>Usuário Geral</option>
-                            <option value="" selected>Selecione o tipo</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="parceirosSelect" class="form-label">Parceiro</label>
-                        <select id="parceirosSelect" name="parceiro" class="form-control" required>
+                        <select id="parceirosSelect" name="id_parceiro" class="form-control" required>
                             <option value="">Carregando...</option>
                         </select>
                     </div>
