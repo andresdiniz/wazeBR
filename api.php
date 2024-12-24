@@ -421,7 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $pdo = Database::getConnection();
                 if ($id_parceiro == 0) { // Verifica se o ID do parceiro é 0
                     // Consulta para retornar todos os nomes
-                    $sql = "SELECT Nome FROM users";
+                    $sql = "SELECT Nome FROM parceiros";
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute();
         
@@ -435,7 +435,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     }
                 } else {
                     // Consulta para retornar o nome de um único parceiro
-                    $sql = "SELECT Nome FROM users WHERE id = :id";
+                    $sql = "SELECT Nome FROM parceiros WHERE id = :id";
                     $stmt = $pdo->prepare($sql);
                     $stmt->bindParam(':id', $id_parceiro, PDO::PARAM_INT);
                     $stmt->execute();
