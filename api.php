@@ -419,6 +419,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             session_start();
             $id_parceiro = $_SESSION['usuario_id_parceiro'];
+
+                    if (!$id_parceiro) {
+                        echo json_encode(['success' => false, 'message' => Id do parceiro não localizado]);
         
             try {
                 $pdo = Database::getConnection();
