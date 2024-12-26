@@ -415,51 +415,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         
             break;
 
-        case 'get_parceiros':
+ case 'get_parceiros':
+    session_start();
 
-            session_start();
-            $id_parceiro = $_SESSION['usuario_id_parceiro'];
+    // Validar sessão e id_parceiro
+    $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? null;
 
-                    if (!$id_parceiro) {
-                        echo json_encode(['success' => false, 'message' => 'Id do parceiro não localizado']);
-        
-            try {
-                $pdo = Database::getConnection();
-                if ($id_parceiro == 0) { // Verifica se o ID do parceiro é 0
-                    // Consulta para retornar todos os nomes
-                    $sql = "SELECT id, Nome FROM parceiros";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute();
-        
-                    // Obter os resultados
-                    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-                    if ($results) {
-                        echo json_encode(['success' => true, 'nomes' => $results]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => 'Nenhum usuário encontrado']);
-                    }
-                } else {
-                    // Consulta para retornar o nome de um único parceiro
-                    $sql = "SELECT id, Nome FROM parceiros WHERE id = :id";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->bindParam(':id', $id_parceiro, PDO::PARAM_INT);
-                    $stmt->execute();
-        
-                    // Obter o resultado
-                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-                    if ($result) {
-                        echo json_encode(['success' => true, 'nome' => $result['Nome']]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
-                    }
-                }
-            } catch (PDOException $e) {
-                echo json_encode(['success' => false, 'message' => 'Erro ao executar a consulta: ' . $e->getMessage()]);
-            }
-            break;          
-        
+    if (!isset($id_parceiro) || !is_numeric($id_parceiro)) {
+        echo json_encode(['success' => false, 'message' => 'Id do parceiro inválido ou não localizado']);
+        exit;
+    }
+
+    try {
+        $pdo = Database::getConnection();
+        $response = [];
+
+        if ((int)$id_parceiro === 0) {
+            // Consulta para todos os parceiros com limite
+            $sql = "SELECT id, Nome FROM parceiros LIMIT 100";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $response = $results ? 
+                ['success' => true, 'nomes' => $results] : 
+                ['success' => false, 'message' => 'Nenhum parceiro encontrado'];
+        } else {
+            // Consulta para um parceiro específico
+            $sql = "SELECT id, Nome FROM parceiros WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':id', $id_parceiro, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $response = $result ? 
+                ['success' => true, 'nome' => $result['Nome']] : 
+                ['success' => false, 'message' => 'Parceiro não encontrado'];
+        }
+
+        echo json_encode($response);
+    } catch (PDOException $e) {
+        // Logar o erro em vez de mostrá-lo
+        error_log("Erro no banco de dados: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Erro interno. Por favor, tente novamente.']);
+    }
+
+    break;
+          
+      
         case 'criar_evento':
             // Verifica se todos os parâmetros obrigatórios estão presentes
             if (
