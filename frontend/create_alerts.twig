@@ -204,7 +204,13 @@
     fetch(urlOverpass)
         .then(response => response.json())
         .then(data => {
+            // Dados brutos retornados pela API
+            console.log("Dados brutos retornados pela API:", data);
+
             const esquinas = data.elements;
+
+            // Log do número de esquinas encontradas
+            console.log("Número de esquinas encontradas:", esquinas.length);
 
             if (esquinas.length > 0) {
                 console.log("Todas as esquinas identificadas:");
@@ -239,7 +245,7 @@
                     console.log("Coordenadas entre as duas esquinas mais próximas:", coordenadasEntreEsquinas);
                 }
             } else {
-                console.log("Nenhuma esquina encontrada.");
+                console.warn("Nenhuma esquina encontrada.");
                 esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
             }
         })
@@ -248,6 +254,7 @@
             esquinaSelect.innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
         });
 }
+
 
 // Função para calcular a distância em metros entre dois pontos (Haversine formula)
 function calcularDistancia(lat1, lon1, lat2, lon2) {
