@@ -74,7 +74,7 @@ $xml = new DOMDocument('1.0', 'UTF-8');
 $xml->formatOutput = true;
 
 // Elemento raiz
-$root = $xml->createElement('incidents xmlms:xsi=http://www.w3');
+$root = $xml->createElement('incidents xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.gstatic.com/road-incidents/cifsv2.xsd"');
 $xml->appendChild($root);
 
 // Adicionar eventos ao XML
