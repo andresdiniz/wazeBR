@@ -461,7 +461,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     break;
-          
+
+        case 'update_user':
+    session_start();
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $id = $data['id'] ?? null;
+    $username = $data['username'] ?? null;
+    $email = $data['email'] ?? null;
+
+    if (!$id || !$username || !$email) {
+        echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
+        exit;
+    }
+
+    try {
+        $pdo = Database::getConnection();
+        $sql = "UPDATE users SET username = :username, email = :email WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
+
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        // Logar o erro em vez de mostrá-lo
+        error_log("Erro no banco de dados: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Erro interno. Por favor, tente novamente.']);
+    }
+
+    break;
       
         case 'criar_evento':
             // Verifica se todos os parâmetros obrigatórios estão presentes
