@@ -421,7 +421,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Pega o valor de sessionType da URL
     $id_parceiro = $_GET['sessionType'] ?? null;
 
-
     if (!isset($id_parceiro) || !is_numeric($id_parceiro)) {
         echo json_encode(['success' => false, 'message' => 'Id do parceiro inválido ou não localizado']);
         exit;
@@ -450,7 +449,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $response = $result ? 
-                ['success' => true, 'nome' => $result['Nome']] : 
+                ['success' => true, 'nomes' => [$result]] : 
                 ['success' => false, 'message' => 'Parceiro não encontrado'];
         }
 
