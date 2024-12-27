@@ -193,6 +193,7 @@ function consultarEsquinas(lat, lon) {
         .then(response => response.json())
         .then(data => {
             const esquinas = data.elements;
+            console.log(esquinas);
 
             if (esquinas.length > 0) {
                 console.log('Todas as esquinas encontradas:', esquinas);
