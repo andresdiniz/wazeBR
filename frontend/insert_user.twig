@@ -291,6 +291,7 @@ function saveChanges() {
     })
     .catch(error => console.error('Erro ao atualizar usuário:', error));
 }
+
 const sessionType = {{ session.type | json_encode | raw }};
 console.log(sessionType);
 
