@@ -188,74 +188,61 @@
     }
 
     // Função para consultar as esquinas próximas
-    function consultarEsquinas(lat, lon) {
-    const esquinaSelect = document.getElementById('esquinas');
-
-    // Verifica se o elemento existe
-    if (!esquinaSelect) {
-        console.error("Elemento #esquinas não encontrado no DOM.");
-        return;
-    }
-
-    // Limpa o campo de seleção
-    esquinaSelect.innerHTML = '<option value="">Carregando esquinas...</option>';
-
-    // Configura a URL da API Overpass para buscar as esquinas
+    // Função para consultar as esquinas próximas
+function consultarEsquinas(lat, lon) {
     const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:50,${lat},${lon})[highway];out body;`;
 
+    // Limpa a lista de esquinas no campo de seleção
+    const esquinaSelect = document.getElementById('esquinas');
+    esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>';
+
+    // Consulta a API Overpass para encontrar os nodes (esquinas)
     fetch(urlOverpass)
         .then(response => response.json())
         .then(data => {
             const esquinas = data.elements;
 
-            // Se não houver esquinas, atualiza o select e retorna
-            if (!esquinas || esquinas.length === 0) {
-                console.warn("Nenhuma esquina encontrada.");
+            if (esquinas.length > 0) {
+                console.log('Todas as esquinas encontradas:', esquinas);
+
+                // Calcular a distância de cada esquina para o ponto clicado
+                const esquinasDistancias = esquinas.map(esquina => {
+                    const distancia = calcularDistancia(lat, lon, esquina.lat, esquina.lon);
+                    return { ...esquina, distancia };
+                });
+
+                // Ordenar por distância (menor para maior)
+                esquinasDistancias.sort((a, b) => a.distancia - b.distancia);
+
+                // Selecionar as duas esquinas mais próximas
+                const esquinasMaisProximas = esquinasDistancias.slice(0, 2);
+                console.log('Esquinas mais próximas:', esquinasMaisProximas);
+
+                // Adicionar as esquinas encontradas no select
+                esquinasMaisProximas.forEach(esquina => {
+                    const nomeEsquina = esquina.tags.name || `Esquina ${esquina.id}`;
+                    const option = document.createElement('option');
+                    option.value = esquina.id;
+                    option.textContent = `${nomeEsquina} (${esquina.distancia.toFixed(2)} m)`;
+                    esquinaSelect.appendChild(option);
+                });
+
+                // Adicionar marcadores das esquinas mais próximas no mapa
+                esquinasMaisProximas.forEach(esquina => {
+                    L.marker([esquina.lat, esquina.lon])
+                        .addTo(map)
+                        .bindPopup(`Esquina: ${esquina.tags.name || esquina.id}<br>Distância: ${esquina.distancia.toFixed(2)} m`)
+                        .openPopup();
+                });
+
+                // Agora vamos buscar o segmento de rua entre essas duas esquinas
+                buscarSegmentoRua(esquinasMaisProximas);
+            } else {
+                // Se não encontrar esquinas, coloca a opção de erro
                 esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
-                return;
-            }
-
-            // Caso haja esquinas, processa e exibe no mapa e no select
-            console.log("Esquinas encontradas:", esquinas);
-
-            // Ordena as esquinas por distância e preenche o select
-            const esquinasDistancias = esquinas.map(esquina => {
-                const distancia = calcularDistancia(lat, lon, esquina.lat, esquina.lon);
-                return { ...esquina, distancia };
-            });
-
-            // Ordena as esquinas pela distância (menor para maior)
-            esquinasDistancias.sort((a, b) => a.distancia - b.distancia);
-
-            // Preencher o select com as esquinas encontradas
-            esquinaSelect.innerHTML = ''; // Limpa o conteúdo anterior
-
-            esquinasDistancias.forEach(esquina => {
-                const nomeEsquina = esquina.tags.name || `Esquina ${esquina.id}`;
-                const option = document.createElement('option');
-                option.value = esquina.id;
-                option.textContent = `${nomeEsquina} (${esquina.distancia.toFixed(2)} m)`;
-                esquinaSelect.appendChild(option);
-            });
-
-            // Agora, desenha os marcadores das esquinas no mapa
-            esquinasDistancias.forEach(esquina => {
-                L.marker([esquina.lat, esquina.lon]).addTo(map)
-                    .bindPopup(`Esquina ID: ${esquina.id}<br>Distância: ${esquina.distancia.toFixed(2)} m`)
-                    .openPopup();
-            });
-
-            // Adiciona as coordenadas entre as duas esquinas mais próximas no console
-            if (esquinasDistancias.length >= 2) {
-                const coordenadasEntreEsquinas = [
-                    [esquinasDistancias[0].lat, esquinasDistancias[0].lon],
-                    [esquinasDistancias[1].lat, esquinasDistancias[1].lon]
-                ];
-                console.log("Coordenadas entre as duas esquinas mais próximas:", coordenadasEntreEsquinas);
             }
         })
-        .catch(error => {
-            console.error("Erro ao consultar as esquinas:", error);
+        .catch(() => {
             esquinaSelect.innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
         });
 }
@@ -276,121 +263,67 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * c; // Distância em metros
 }
 
+// Função para buscar o segmento de rua entre as duas esquinas mais próximas
+function buscarSegmentoRua(esquinasMaisProximas) {
+    const esquina1 = esquinasMaisProximas[0];
+    const esquina2 = esquinasMaisProximas[1];
 
+    // Agora vamos buscar a via que conecta essas duas esquinas.
+    const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:50,${esquina1.lat},${esquina1.lon})[highway];way(around:50,${esquina2.lat},${esquina2.lon})[highway];);out body;`;
 
-    // Função para consultar as vias próximas e obter coordenadas de nodes
-    function consultarViasProximas(lat, lon) {
-        const ruaSelect = document.getElementById('rua');
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:10,${lat},${lon})[highway];);out body;`;
+    fetch(urlOverpass)
+        .then(response => response.json())
+        .then(data => {
+            const vias = data.elements;
+            if (vias.length > 0) {
+                console.log('Vias que conectam as esquinas:', vias);
 
-        // Limpa o campo de seleção antes de adicionar as novas opções
-        ruaSelect.innerHTML = '<option value="">Selecione uma rua</option>';
-
-        // Consulta a API Overpass para vias próximas
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const viasProximas = data.elements;
-                if (viasProximas.length > 0) {
-                    console.log(viasProximas);
-
-                    // Adiciona todas as ruas do Overpass ao select
-                    viasProximas.forEach( via => {
-                        const nomeVia = via.tags.name || 'Nome não disponível';
-                        const option = document.createElement('option');
-                        option.value = nomeVia;
-                        option.textContent = nomeVia;
-                        ruaSelect.appendChild(option);
-                    });
-
-                    // Marca a rua mais próxima do Overpass
-                    if (ruaSelect.value === '') {
-                        const primeiraVia = viasProximas[0];
-                        const nomeVia = primeiraVia.tags.name || 'Nome não disponível';
-                        ruaSelect.value = nomeVia;
-                    }
-                } else {
-                    // Se não encontrar vias, coloca a opção de erro
-                    ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
-                }
-
-                // Consulta os nodes da via
-                if (viasProximas.length > 0 && viasProximas[0].nodes && viasProximas[0].nodes.length > 0) {
-                    consultarCoordenadasNodes(viasProximas[0].nodes, function (coordenadas) {
-                        coordenadasAtuais = coordenadas; // Salva as coordenadas da via atual
-                        desenharSetas(coordenadas, 'no'); // Desenha as setas inicialmente
-                    });
-                }
-            })
-            .catch(() => {
-                document.getElementById('vias-proximas').innerHTML = '<p>Erro ao consultar as vias.</p>';
-            });
-    }
-
-    // Função para consultar as coordenadas dos nodes
-    function consultarCoordenadasNodes(nodeIds, callback) {
-        var coordenadas = [];
-        var totalNodes = nodeIds.length;
-        var processados = 0;
-
-        nodeIds.forEach(function (nodeId) {
-            var nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
-
-            fetch(nodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.elements && data.elements.length > 0) {
-                        var node = data.elements[0];
-                        coordenadas.push([node.lat, node.lon]);
-                    }
-                })
-                .finally(function () {
-                    processados++;
-
-                    if (processados === totalNodes) {
-                        callback(coordenadas);
+                // Aqui você pode obter as coordenadas da via que conecta as duas esquinas
+                vias.forEach(via => {
+                    if (via.nodes && via.nodes.length > 0) {
+                        consultarCoordenadasNodes(via.nodes, function(coordenadas) {
+                            // Agora você pode desenhar a linha entre as duas esquinas
+                            L.polyline(coordenadas, { color: 'blue', weight: 4 }).addTo(map);
+                            console.log('Segmento de rua:', coordenadas);
+                        });
                     }
                 });
-        });
-    }
-
-    // Função para desenhar setas no mapa
-    function desenharSetas(coordenadas, sentidoVia) {
-        if (coordenadas.length < 2) {
-            console.error("Não há coordenadas suficientes para desenhar setas.");
-            return;
-        }
-
-        limparSetas(); // Remove setas anteriores
-
-        // Desenha setas entre os pontos
-        for (var i = 0; i < coordenadas.length - 1; i++) {
-            var start = coordenadas[i];
-            var end = coordenadas[i + 1];
-
-            // Linha principal
-            var linha = L.polyline([start, end], { color: 'green' }).addTo(map);
-            setasDesenhadas.push(linha);
-
-            // Calcular a direção da linha e desenhar as setas
-            var lat1 = start[0], lon1 = start[1];
-            var lat2 = end[0], lon2 = end[1];
-
-            var radianos = Math.atan2(lat2 - lat1, lon2 - lon1);  // Calcula a direção da linha
-            var angulo = radianos * (180 / Math.PI);  // Converte de radianos para graus
-
-            // Se a via for de mão dupla, desenha setas no sentido selecionado
-            if (sentidoVia === 'no') {
-                var seta1 = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
-                var seta2 = L.marker(end, { icon: criarIconeSeta(angulo + 180) }).addTo(map);
-                setasDesenhadas.push(seta1, seta2);
-            } else if (sentidoVia === 'yes') {
-                // Para vias de mão única, desenha uma seta apenas no início da linha
-                var seta = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
-                setasDesenhadas.push(seta);
+            } else {
+                console.log('Nenhuma via encontrada entre as esquinas');
             }
-        }
-    }
+        })
+        .catch(() => {
+            console.log('Erro ao consultar as vias.');
+        });
+}
+
+// Função para consultar as coordenadas dos nodes (pontos de via)
+function consultarCoordenadasNodes(nodeIds, callback) {
+    var coordenadas = [];
+    var totalNodes = nodeIds.length;
+    var processados = 0;
+
+    nodeIds.forEach(function(nodeId) {
+        var nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
+
+        fetch(nodeUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.elements && data.elements.length > 0) {
+                    var node = data.elements[0];
+                    coordenadas.push([node.lat, node.lon]);
+                }
+            })
+            .finally(function() {
+                processados++;
+
+                if (processados === totalNodes) {
+                    callback(coordenadas);
+                }
+            });
+    });
+}
+
 
     // Função auxiliar para criar o ícone da seta
     function criarIconeSeta(angulo) {
