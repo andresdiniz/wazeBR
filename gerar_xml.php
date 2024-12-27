@@ -2,7 +2,7 @@
 require_once __DIR__ . '/config/configbd.php';
 
 try {
-    // Conectar ao banco de dadosn  TESTE GIT
+    // Conectar ao banco de dados
     $pdo = Database::getConnection();
 } catch (PDOException $e) {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
@@ -42,7 +42,7 @@ foreach ($rows as $row) {
             'updatetime' => $row['updatetime'],
             'type' => $row['type'],
             'subtype' => $row['subtype'],
-            'description' => $row['description'],
+            'description' => mb_substr($row['description'], 0, 40), // Limita a descrição a 40 caracteres
             'street' => $row['street'],
             'polyline' => $row['polyline'],
             'direction' => $row['direction'],
@@ -85,8 +85,15 @@ foreach ($events as $event) {
         $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
     }
 
-    // Adicionar elementos de dados do evento
-    foreach (['creationtime', 'updatetime', 'type', 'subtype', 'description', 'street', 'polyline', 'direction', 'starttime', 'endtime'] as $key) {
+    // Adicionar elementos obrigatórios
+    foreach (['type', 'street', 'polyline', 'starttime'] as $key) {
+        if (!empty($event[$key])) {
+            $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
+        }
+    }
+
+    // Adicionar elementos solicitados
+    foreach (['direction', 'endtime', 'description', 'subtype'] as $key) {
         if (!empty($event[$key])) {
             $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
         }

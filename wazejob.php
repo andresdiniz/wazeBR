@@ -46,4 +46,13 @@ try {
     logExecution('hidrologicocemadem.php', 'error', 'Erro: ' . $e->getMessage());
 }
 
+try {
+    echo "Iniciando gerar_xml.php<br>";
+    executeScript('gerar_xml.php', '/gerar_xml.php');
+    echo "Finalizando gerar_xml.php<br>";
+} catch (Exception $e) {
+    echo 'Erro em gerar_xml.php: ' . $e->getMessage() . "<br>";
+    logExecution('gerar_xml.php', 'error', 'Erro: ' . $e->getMessage());
+}
+
 ?>
