@@ -178,33 +178,33 @@
     </div>
 </div>
 
-<!-- Modal de edição -->
+<!-- Modal de Edição -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Editar Usuário</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" id="editUserId">
-                    <div class="mb-3">
-                        <label for="editUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editUsername" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="saveChanges()">Salvar Alterações</button>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Editar Usuário</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditUser">
+          <div class="mb-3">
+            <label for="editUsername" class="form-label">Nome de Usuário</label>
+            <input type="text" class="form-control" id="editUsername" required>
+          </div>
+          <div class="mb-3">
+            <label for="editEmail" class="form-label">E-mail</label>
+            <input type="email" class="form-control" id="editEmail" required>
+          </div>
+          <input type="hidden" id="editUserId">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" id="salvarUsuario">Salvar Alterações</button>
+      </div>
     </div>
+  </div>
 </div>
 
 
@@ -270,41 +270,29 @@ const sessionType = {{ session.type | json_encode | raw }};
     }
 
     // Função para abrir o modal de edição
-// Função para abrir o modal de edição
-    function openEditModal(user) {
-        const modalElement = document.getElementById('editModal');
+function openEditModal(user) {
+    const modalElement = document.getElementById('editModal');
 
-        // Certifique-se de que o modal foi criado apenas uma vez
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement, { focus: false });
+    // Instancia o modal corretamente com o método "new bootstrap.Modal()"
+    const modalInstance = new bootstrap.Modal(modalElement, { focus: false });
 
-        // Preencha os campos
-        document.getElementById('editUsername').value = user.username;
-        document.getElementById('editEmail').value = user.email;
-        document.getElementById('editUserId').value = user.id;
+    // Preenche os campos com os dados do usuário
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editUserId').value = user.id;
 
-        // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
-        modalElement.addEventListener(
-            'show.bs.modal',
-            () => {
-                console.log('Modal de edição exibido.');
-            },
-            { once: true }
-        );
+    // Exibe o modal
+    modalInstance.show();
 
-        // Exibe o modal
-        modalInstance.show();
-    }
-
-    // Previne conflitos de foco ao usar múltiplos modais
-    document.addEventListener('DOMContentLoaded', () => {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach((modal) => {
-            modal.addEventListener('shown.bs.modal', () => {
-                document.activeElement.blur();
-            });
-        });
-    });
-
+    // Adiciona um listener para o evento 'shown.bs.modal' (quando o modal é totalmente exibido)
+    modalElement.addEventListener(
+        'shown.bs.modal',
+        () => {
+            console.log('Modal de edição exibido.');
+        },
+        { once: true }
+    );
+}
 // Função para salvar as alterações
 function saveChanges() {
     const userId = document.getElementById('editUserId').value;
