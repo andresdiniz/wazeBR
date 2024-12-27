@@ -417,9 +417,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
  case 'get_parceiros':
     session_start();
+    
+    // Pega o valor de sessionType da URL
+    $sessionType = $_GET['sessionType'] ?? null;
 
-    // Validar sessão e id_parceiro
-    $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? null;
 
     if (!isset($id_parceiro) || !is_numeric($id_parceiro)) {
         echo json_encode(['success' => false, 'message' => 'Id do parceiro inválido ou não localizado']);
