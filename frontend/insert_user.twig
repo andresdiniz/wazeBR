@@ -270,29 +270,30 @@ const sessionType = {{ session.type | json_encode | raw }};
     }
 
     // Função para abrir o modal de edição
-    function openEditModal(user) {
-        const modalElement = document.getElementById('editModal');
+    // Função para abrir o modal de edição
+function openEditModal(user) {
+    const modalElement = document.getElementById('editModal');
 
-        // Certifique-se de que o modal foi criado apenas uma vez
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement, { focus: false });
+    // Usar new bootstrap.Modal() para criar a instância do modal
+    const modalInstance = new bootstrap.Modal(modalElement, { focus: false });
 
-        // Preencha os campos
-        document.getElementById('editUsername').value = user.username;
-        document.getElementById('editEmail').value = user.email;
-        document.getElementById('editUserId').value = user.id;
+    // Preencha os campos
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editUserId').value = user.id;
 
-        // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
-        modalElement.addEventListener(
-            'show.bs.modal',
-            () => {
-                console.log('Modal de edição exibido.');
-            },
-            { once: true }
-        );
+    // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
+    modalElement.addEventListener(
+        'show.bs.modal',
+        () => {
+            console.log('Modal de edição exibido.');
+        },
+        { once: true }
+    );
 
-        // Exibe o modal
-        modalInstance.show();
-    }
+    // Exibe o modal
+    modalInstance.show();
+}
 
     // Previne conflitos de foco ao usar múltiplos modais
     document.addEventListener('DOMContentLoaded', () => {
