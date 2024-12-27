@@ -220,7 +220,7 @@
     function carregarParceiros() {
         const parceirosSelect = document.getElementById("parceirosSelect");
 
-        fetch("api.php?action=get_parceiros", {
+        fetch('api.php?action=get_parceiros&sessionType=${sessionType}', {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
