@@ -270,29 +270,16 @@ const sessionType = {{ session.type | json_encode | raw }};
     }
 
     // Função para abrir o modal de edição
+// Função para abrir o modal de edição
 function openEditModal(user) {
     const modalElement = document.getElementById('editModal');
-
-    // Instancia o modal corretamente com o método "new bootstrap.Modal()"
-    const modalInstance = new bootstrap.Modal(modalElement, { focus: false });
-
-    // Preenche os campos com os dados do usuário
+    const modal = new bootstrap.Modal(modalElement);
     document.getElementById('editUsername').value = user.username;
     document.getElementById('editEmail').value = user.email;
     document.getElementById('editUserId').value = user.id;
-
-    // Exibe o modal
-    modalInstance.show();
-
-    // Adiciona um listener para o evento 'shown.bs.modal' (quando o modal é totalmente exibido)
-    modalElement.addEventListener(
-        'shown.bs.modal',
-        () => {
-            console.log('Modal de edição exibido.');
-        },
-        { once: true }
-    );
+    modal.show();
 }
+
 // Função para salvar as alterações
 function saveChanges() {
     const userId = document.getElementById('editUserId').value;
