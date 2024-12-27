@@ -185,7 +185,7 @@
     // Função para consultar as esquinas próximas
     // Função para consultar as esquinas próximas
 function consultarEsquinas(lat, lon) {
-    console.log(lat, lon);
+    console.log(lat, lon); // é por aqui o caminho
     const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:150,${lat},${lon})[highway];out body;`;
     // Consulta a API Overpass para encontrar os nodes (esquinas)
     fetch(urlOverpass)
