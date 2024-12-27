@@ -128,7 +128,7 @@
             </div>
             <div class="modal-body">
                 <input type="text" id="searchAlterar" class="form-control" placeholder="Buscar por nome ou email">
-                <ul id="resultAlterar" class="list-group mt-2"></ul>
+                <ul id="resultAlterar" class="list-group"></ul>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -182,36 +182,40 @@
 <script>
     // Função genérica para busca
     function performSearch(inputId, resultId, functionName) {
-        const inputField = document.getElementById(inputId);
-        const resultList = document.getElementById(resultId);
+    const inputField = document.getElementById(inputId);
+    const resultList = document.getElementById(resultId);
 
-        inputField.addEventListener('input', () => {
-            const query = inputField.value;
+    inputField.addEventListener('input', () => {
+        const query = inputField.value;
 
-            if (query.length >= 3) {
-                fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpar resultados anteriores
-                        resultList.innerHTML = '';
+        if (query.length >= 3) {
+            fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpar resultados anteriores
+                    resultList.innerHTML = '';
 
+                    if (data.success) {
                         // Adicionar resultados
-                        data.forEach(item => {
+                        data.users.forEach(item => {
                             const li = document.createElement('li');
                             li.className = 'list-group-item';
-                            li.textContent = `${item.name} (${item.email})`;
+                            li.textContent = `${item.username} (${item.email})`;
                             resultList.appendChild(li);
                         });
-                    })
-                    .catch(error => {
-                        console.error('Erro ao buscar:', error);
-                        resultList.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar resultados.</li>';
-                    });
-            } else {
-                resultList.innerHTML = ''; // Limpar resultados se o texto for muito curto
-            }
-        });
-    }
+                    } else {
+                        resultList.innerHTML = '<li class="list-group-item text-danger">Nenhum usuário encontrado.</li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar:', error);
+                    resultList.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar resultados.</li>';
+                });
+        } else {
+            resultList.innerHTML = ''; // Limpar resultados se o texto for muito curto
+        }
+    });
+}
 
 const sessionType = {{ session.type | json_encode | raw }};
 console.log(sessionType);
