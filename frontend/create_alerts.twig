@@ -188,26 +188,29 @@
     }
 
     // Função para consultar as esquinas próximas
-    // Função para consultar as esquinas próximas
-function consultarEsquinas(lat, lon) {
+    function consultarEsquinas(lat, lon) {
+    const esquinaSelect = document.getElementById('esquinas');
+
+    // Verifica se o elemento existe
+    if (!esquinaSelect) {
+        console.error("Elemento #esquinas não encontrado no DOM.");
+        return;
+    }
+
     const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:50,${lat},${lon})[highway];out body;`;
 
-    // Limpa a lista de esquinas no campo de seleção
-    const esquinaSelect = document.getElementById('esquinas');
-    esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>';
+    esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>'; // Limpa a lista de esquinas
 
-    // Consulta a API Overpass para encontrar os nodes (esquinas)
     fetch(urlOverpass)
         .then(response => response.json())
         .then(data => {
             const esquinas = data.elements;
 
             if (esquinas.length > 0) {
-                console.log('Todas as esquinas encontradas:', esquinas);
-
-                // Calcular a distância de cada esquina para o ponto clicado
+                console.log("Todas as esquinas identificadas:");
                 const esquinasDistancias = esquinas.map(esquina => {
                     const distancia = calcularDistancia(lat, lon, esquina.lat, esquina.lon);
+                    console.log(`Esquina ID: ${esquina.id}, Coordenadas: [${esquina.lat}, ${esquina.lon}], Distância: ${distancia.toFixed(2)} m`);
                     return { ...esquina, distancia };
                 });
 
@@ -216,7 +219,7 @@ function consultarEsquinas(lat, lon) {
 
                 // Selecionar as duas esquinas mais próximas
                 const esquinasMaisProximas = esquinasDistancias.slice(0, 2);
-                console.log('Esquinas mais próximas:', esquinasMaisProximas);
+                console.log("Esquinas mais próximas:", esquinasMaisProximas);
 
                 // Adicionar as esquinas encontradas no select
                 esquinasMaisProximas.forEach(esquina => {
@@ -227,15 +230,7 @@ function consultarEsquinas(lat, lon) {
                     esquinaSelect.appendChild(option);
                 });
 
-                // Adicionar marcadores das esquinas mais próximas no mapa
-                esquinasMaisProximas.forEach(esquina => {
-                    L.marker([esquina.lat, esquina.lon])
-                        .addTo(map)
-                        .bindPopup(`Esquina: ${esquina.tags.name || esquina.id}<br>Distância: ${esquina.distancia.toFixed(2)} m`)
-                        .openPopup();
-                });
-
-                // Obter coordenadas das duas esquinas mais próximas e exibir no console
+                // Mostra as coordenadas entre as duas esquinas mais próximas no console
                 if (esquinasMaisProximas.length === 2) {
                     const coordenadasEntreEsquinas = [
                         [esquinasMaisProximas[0].lat, esquinasMaisProximas[0].lon],
@@ -244,11 +239,12 @@ function consultarEsquinas(lat, lon) {
                     console.log("Coordenadas entre as duas esquinas mais próximas:", coordenadasEntreEsquinas);
                 }
             } else {
-                // Se não encontrar esquinas, coloca a opção de erro
+                console.log("Nenhuma esquina encontrada.");
                 esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
             }
         })
-        .catch(() => {
+        .catch(error => {
+            console.error("Erro ao consultar as esquinas:", error);
             esquinaSelect.innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
         });
 }
@@ -268,6 +264,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
 
     return R * c; // Distância em metros
 }
+
 
 
     // Função para consultar as vias próximas e obter coordenadas de nodes
