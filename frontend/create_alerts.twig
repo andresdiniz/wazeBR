@@ -62,335 +62,37 @@
         </div>
         <div class="col-lg-6">
             <div id="map" class="mb-3" style="height: 400px;"></div>
-            <!-- Exibição das vias próximas -->
-            <div id="vias-proximas" class="alert alert-info">
-                <!-- As vias próximas serão inseridas aqui -->
-            </div>
-            
-            <!-- Controles de Sentido (Adicionado) -->
-            <div id="controles" class="mt-3"></div> 
         </div>
     </div>
 </div>
 
 <script>
-    // Inicializando o mapa
-    var map = L.map('map').setView([-23.550520, -46.633308], 13); // Posição inicial (São Paulo)
+    // Carrega os subtipos de acordo com o tipo selecionado
+    document.addEventListener('DOMContentLoaded', function () {
+        const tipoSelect = document.getElementById('tipo');
+        const subtipoSelect = document.getElementById('subtipo');
 
-    // Adicionando camada do OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-    }).addTo(map);
+        const subtiposPorTipo = {{ subtiposPorTipo|json_encode|raw }};
 
-    // Variáveis globais
-    var marcadorSelecionado = null;  // Para armazenar o marcador no mapa
-    var setasDesenhadas = [];        // Para armazenar as setas e linhas desenhadas no mapa
-    var coordenadasAtuais = [];      // Para armazenar as coordenadas da via selecionada
+        tipoSelect.addEventListener('change', function () {
+            const selectedTipoId = tipoSelect.value;
+            subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
 
-    // Função para pegar a localização atual do usuário
-    function localizarUsuario() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (posicao) {
-                var latitude = posicao.coords.latitude;
-                var longitude = posicao.coords.longitude;
-                map.setView([latitude, longitude], 13);
-                L.marker([latitude, longitude]).addTo(map).bindPopup("Você está aqui").openPopup();
-            }, function () {
-                alert("Não foi possível obter sua localização.");
-            });
-        } else {
-            alert("Geolocalização não é suportada neste navegador.");
-        }
-    }
-
-    // Chama a função para localizar o usuário
-    localizarUsuario();
-
-    // Função para desenhar o segmento da rua ao clicar no mapa
-    function desenharSegmento(e) {
-        var coords = e.latlng;
-
-        // Atualizar as coordenadas no campo
-        document.getElementById('coordenadas').value = coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6);
-
-        // Remove marcador anterior, se existir
-        if (marcadorSelecionado) {
-            map.removeLayer(marcadorSelecionado);
-        }
-
-        // Limpar setas e linhas desenhadas anteriormente
-        limparSetas();
-
-        // Adiciona um novo marcador no local clicado
-        marcadorSelecionado = L.marker([coords.lat, coords.lng]).addTo(map);
-        marcadorSelecionado.bindPopup("Você clicou aqui: " + coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6)).openPopup();
-
-        // Consultar vias próximas
-        consultarViasProximas(coords.lat, coords.lng);
-
-        // Consultar esquinas próximas
-        consultarEsquinas(coords.lat, coords.lng);
-    }
-
-    // Adiciona evento de clique no mapa para desenhar o segmento
-    map.on('click', desenharSegmento);
-
-    // Função para limpar todas as setas e linhas
-    function limparSetas() {
-        setasDesenhadas.forEach(function (seta) {
-            map.removeLayer(seta);
-        });
-        setasDesenhadas = [];
-    }
-
-    // Função para consultar as esquinas próximas
-    function consultarEsquinas(lat, lon) {
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:10,${lat},${lon})[highway];out body;`;
-
-        // Limpa a lista de esquinas no campo de seleção
-        const esquinaSelect = document.getElementById('esquinas');
-        esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>';
-
-        // Consulta a API Overpass para encontrar os nodes (esquinas)
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const esquinas = data.elements;
-                if (esquinas.length > 0) {
-                    console.log(esquinas);
-
-                    // Adiciona as esquinas encontradas no select
-                    esquinas.forEach(node => {
-                        const nomeEsquina = node.tags.name || `Esquina ${node.id}`;
-                        const option = document.createElement('option');
-                        option.value = node.id;
-                        option.textContent = nomeEsquina;
-                        esquinaSelect.appendChild(option);
-                    });
-                } else {
-                    // Se não encontrar esquinas, coloca a opção de erro
-                    esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
-                }
-            })
-            .catch(() => {
-                document.getElementById('esquinas').innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
-            });
-    }
-
-    // Função para consultar as vias próximas e obter coordenadas de nodes
-    function consultarViasProximas(lat, lon) {
-        const ruaSelect = document.getElementById('rua');
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:10,${lat},${lon})[highway];);out body;`;
-
-        // Limpa o campo de seleção antes de adicionar as novas opções
-        ruaSelect.innerHTML = '<option value="">Selecione uma rua</option>';
-
-        // Primeiro, consulta a API do Waze (via api.php)
-        consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
-            if (nomeRuaWaze) {
-                console.log("Rua encontrada (Waze):", nomeRuaWaze);
-                // Adiciona o nome da rua do Waze ao select
-                const optionWaze = document.createElement('option');
-                optionWaze.value = nomeRuaWaze;
-                optionWaze.textContent = nomeRuaWaze;
-                ruaSelect.appendChild(optionWaze);
-                ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
-            }
-        }).catch(() => {
-            console.log("Erro ao consultar a API do Waze");
-        });
-
-        // Consulta a API Overpass para vias próximas
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const viasProximas = data.elements;
-                if (viasProximas.length > 0) {
-                    console.log(viasProximas);
-
-                    // Adiciona todas as ruas do Overpass ao select
-                    viasProximas.forEach( via => {
-                        const nomeVia = via.tags.name || 'Nome não disponível';
-                        const option = document.createElement('option');
-                        option.value = nomeVia;
-                        option.textContent = nomeVia;
-                        ruaSelect.appendChild(option);
-                    });
-
-                    // Marca a rua mais próxima do Overpass (caso não tenha sido marcada pelo Waze)
-                    if (ruaSelect.value === '') {
-                        const primeiraVia = viasProximas[0];
-                        const nomeVia = primeiraVia.tags.name || 'Nome não disponível';
-                        ruaSelect.value = nomeVia;
-                    }
-                } else {
-                    // Se não encontrar vias, coloca a opção de erro
-                    ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
-                }
-
-                // Consulta os nodes da via
-                if (viasProximas.length > 0 && viasProximas[0].nodes && viasProximas[0].nodes.length > 0) {
-                    consultarCoordenadasNodes(viasProximas[0].nodes, function (coordenadas) {
-                        coordenadasAtuais = coordenadas; // Salva as coordenadas da via atual
-                        desenharSetas(coordenadas, 'no'); // Desenha as setas inicialmente
-                    });
-                }
-            })
-            .catch(() => {
-                document.getElementById('vias-proximas').innerHTML = '<p>Erro ao consultar as vias.</p>';
-            });
-    }
-
-    // Função para consultar a rua via API personalizada api.php usando fetch
-    function consultarRuaWaze(lat, lon) {
-        const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
-
-        return fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.result && data.result.length > 0) {
-                    // Ordena as ruas pela menor distância
-                    data.result.sort((a, b) => a.distance - b.distance);
-                    
-                    // Pega o nome da rua mais próxima
-                    const nomeRua = data.result[0].names[0];  // Assumindo que sempre há pelo menos um nome de rua
-                    return nomeRua;
-                } else {
-                    return null; // Caso a resposta não tenha dados válidos
-                }
-            })
-            .catch(() => {
-                console.log("Erro ao consultar a API do Waze");
-                return null; // Caso ocorra um erro na consulta
-            });
-    }
-
-    // Função para consultar as coordenadas dos nodes
-    function consultarCoordenadasNodes(nodeIds, callback) {
-        var coordenadas = [];
-        var totalNodes = nodeIds.length;
-        var processados = 0;
-
-        nodeIds.forEach(function (nodeId) {
-            var nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
-
-            fetch(nodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.elements && data.elements.length > 0) {
-                        var node = data.elements[0];
-                        coordenadas.push([node.lat, node.lon]);
-                    }
-                })
-                .finally(function () {
-                    processados++;
-
-                    if (processados === totalNodes) {
-                        callback(coordenadas);
-                    }
+            if (subtiposPorTipo[selectedTipoId]) {
+                subtiposPorTipo[selectedTipoId].forEach(function (subtipo) {
+                    const option = document.createElement('option');
+                    option.value = subtipo.id;
+                    option.textContent = subtipo.name;
+                    subtipoSelect.appendChild(option);
                 });
-        });
-    }
-
-    // Criando um ícone de seta simples
-    function criarIconeSeta(rotacao) {
-        return L.divIcon({
-            className: 'seta-icon',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
-            html: '<div style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 10px solid red; transform: rotate(' + rotacao + 'deg);"></div>'
-        });
-    }
-
-    // Função para desenhar setas no mapa
-    function desenharSetas(coordenadas, sentidoVia) {
-        if (coordenadas.length < 2) {
-            console.error("Não há coordenadas suficientes para desenhar setas.");
-            return;
-        }
-
-        limparSetas(); // Remove setas anteriores
-
-        // Desenha setas entre os pontos
-        for (var i = 0; i < coordenadas.length - 1; i++) {
-            var start = coordenadas[i];
-            var end = coordenadas[i + 1];
-
-            // Linha principal
-            var linha = L.polyline([start, end], { color: 'green' }).addTo(map);
-            setasDesenhadas.push(linha);
-
-            // Calcular a direção da linha e desenhar as setas
-            var lat1 = start[0], lon1 = start[1];
-            var lat2 = end[0], lon2 = end[1];
-
-            var radianos = Math.atan2(lat2 - lat1, lon2 - lon1);  // Calcula a direção da linha
-            var angulo = radianos * (180 / Math.PI);  // Converte de radianos para graus
-
-            // Se a via for de mão dupla, desenha setas no sentido selecionado
-            if (sentidoVia === 'no') {
-                var seta1 = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
-                var seta2 = L.marker(end, { icon: criarIconeSeta(angulo + 180) }).addTo(map);
-                setasDesenhadas.push(seta1, seta2);
-            } else if (sentidoVia === 'yes') {
-                // Para vias de mão única, desenha uma seta apenas no início da linha
-                var seta = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
-                setasDesenhadas.push(seta);
             }
-        }
-    }
+        });
+    });
 
-    // Função para adicionar seleção de sentido
-    function adicionarSelecaoDeSentido() {
-        var controles = document.getElementById('controles');
-        
-        // Limpa o conteúdo anterior, se houver
-        controles.innerHTML = '';
-        
-        // Exibe os botões de seleção de sentido
-        controles.innerHTML = `
-            <button id="sentido1" class="btn btn-info">Sentido 1</button>
-            <button id="sentido2" class="btn btn-info">Sentido 2</button>
-        `;
-
-        // Define as ações para os botões
-        document.getElementById('sentido1').onclick = function () {
-            desenharSetas(coordenadasAtuais, 'yes'); // Sentido 1
-        };
-        document.getElementById('sentido2').onclick = function () {
-            desenharSetas(coordenadasAtuais.slice().reverse(), 'no'); // Sentido 2 (invertido)
-        };
-    }
-
-    // Função para salvar o evento via GET
-    function salvarEvento(eventoData) {
-        // Construir a URL com os parâmetros GET
-        const params = new URLSearchParams(eventoData).toString();
-        const url = `api.php?${params}`; // Concatenando a URL da API com os parâmetros
-
-        // Fazendo a requisição GET
-        fetch(url)
-            .then(response => response.json())  // Espera uma resposta em formato JSON
-            .then(data => {
-                if (data.success) {
-                    alert('Evento criado com sucesso!');
-                    // Redirecionar ou realizar outra ação após sucesso
-                    // Por exemplo: window.location.href = 'pagina_de_sucesso.php';
-                } else {
-                    alert('Erro ao criar evento: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao salvar evento:', error);
-                alert('Erro ao salvar evento.');
-            });
-    }
-
-    // Manipulador do envio do formulário// Manipulador do envio do formulário
+    // Manipulador do envio do formulário
     document.getElementById('eventoForm').addEventListener('submit', function (event) {
-        event.preventDefault(); // Evita o envio do formulário padrão
-    
-        // Coletando os dados do formulário
+        event.preventDefault();
+
         var nome = document.getElementById('nome').value.trim();
         var descricao = document.getElementById('descricao').value.trim();
         var tipo = document.getElementById('tipo').value;
@@ -399,38 +101,14 @@
         var rua = document.getElementById('rua').value;
         var starttime = document.getElementById('starttime').value;
         var endtime = document.getElementById('endtime').value;
-    
+
         // Validação dos campos obrigatórios
-        if (!nome) {
-            alert('O campo "Nome do Evento" é obrigatório.');
+        if (!nome || !descricao || !tipo || !subtipo || !coordenadas || !rua || !starttime || !endtime) {
+            alert('Todos os campos são obrigatórios.');
             return;
         }
-        if (!descricao) {
-            alert('O campo "Descrição" é obrigatório.');
-            return;
-        }
-        if (!tipo) {
-            alert('Selecione um "Tipo" para o evento.');
-            return;
-        }
-        if (!subtipo) {
-            alert('Selecione um "Subtipo" para o evento.');
-            return;
-        }
-        if (!coordenadas) {
-            alert('Por favor, defina as coordenadas do evento.');
-            return;
-        }
-        if (!rua) {
-            alert('Por favor, selecione uma rua para o evento.');
-            return;
-        }
-        if (!starttime || !endtime) {
-            alert('Por favor, defina o início e o fim do evento.');
-            return;
-        }
-    
-        // Criando os parâmetros da URL
+
+        // Envia os dados via fetch para o servidor
         var queryParams = new URLSearchParams({
             action: 'criar_evento',
             nome: nome,
@@ -442,56 +120,23 @@
             starttime: starttime,
             endtime: endtime
         });
-    
-        // Envia os dados para a API ou backend via GET
-        salvarEvento(queryParams);
-    });
-    
-    // Função para salvar o evento
-    function salvarEvento(queryParams) {
+
         fetch('api.php?' + queryParams.toString(), {
-            method: 'GET', // Usando GET
+            method: 'GET',
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Evento criado com sucesso!');
-                    // Redirecionar ou limpar o formulário, se necessário
-                    document.getElementById('eventoForm').reset();
-                } else {
-                    alert('Erro ao criar evento: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao criar evento:', error);
-                alert('Ocorreu um erro ao criar o evento. Tente novamente.');
-            });
-    }
-
-    //Faz os botoes de selecionar
-    document.addEventListener('DOMContentLoaded', function () {
-    const tipoSelect = document.getElementById('tipo');
-    const subtipoSelect = document.getElementById('subtipo');
-
-    // Dados de subtipos por tipo fornecidos pelo Twig
-    const subtiposPorTipo = {{ subtiposPorTipo|json_encode|raw }};
-
-    tipoSelect.addEventListener('change', function () {
-        const selectedTipoId = tipoSelect.value;
-
-        // Limpa os subtipos
-        subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-
-        // Adiciona os subtipos correspondentes ao tipo selecionado
-        if (subtiposPorTipo[selectedTipoId]) {
-            subtiposPorTipo[selectedTipoId].forEach(function (subtipo) {
-                const option = document.createElement('option');
-                option.value = subtipo.id;
-                option.textContent = subtipo.name;
-                subtipoSelect.appendChild(option);
-            });
-        }
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Evento criado com sucesso!');
+                // Redirecionar ou limpar o formulário
+                document.getElementById('eventoForm').reset();
+            } else {
+                alert('Erro ao criar evento: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao criar evento:', error);
+            alert('Ocorreu um erro ao criar o evento. Tente novamente.');
+        });
     });
-});
-
 </script>
