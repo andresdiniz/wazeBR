@@ -169,8 +169,6 @@
         // Consultar vias próximas
         consultarViasProximas(coords.lat, coords.lng);
 
-        // Consultar esquinas próximas
-        consultarEsquinas(coords.lat, coords.lng);
     }
 
     // Adiciona evento de clique no mapa para desenhar o segmento
@@ -338,12 +336,12 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
         }
 
         limparSetas(); // Remove setas anteriores
-
+        // Consultar esquinas próximas
         // Desenha setas entre os pontos
         for (var i = 0; i < coordenadas.length - 1; i++) {
             var start = coordenadas[i];
             var end = coordenadas[i + 1];
-
+            consultarEsquinas(coordenadas[i], coordenadas[i + 1]);
             // Linha principal
             var linha = L.polyline([start, end], { color: 'green' }).addTo(map);
             setasDesenhadas.push(linha);
