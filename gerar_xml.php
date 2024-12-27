@@ -133,4 +133,5 @@ foreach ($events as $event) {
 
 // Exibir ou salvar o XML
 header('Content-Type: application/xml; charset=utf-8');
+$xml->save('events.xml');
 echo $xml->saveXML();
