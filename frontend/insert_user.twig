@@ -266,6 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCadastrar = document.getElementById('modalCadastrar');
     modalCadastrar.addEventListener('show.bs.modal', () => carregarParceiros(sessionType));
 
+    // Carregar parceiros ao carregar a página
+    carregarParceiros(sessionType);
+
     // Submeter o formulário de cadastro
     document.getElementById('salvarUsuario').addEventListener('click', () => {
         const form = document.getElementById('formCadastrar');
