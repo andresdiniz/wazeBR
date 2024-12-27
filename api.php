@@ -419,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     session_start();
     
     // Pega o valor de sessionType da URL
-    $sessionType = $_GET['sessionType'] ?? null;
+    $id_parceiro = $_GET['sessionType'] ?? null;
 
 
     if (!isset($id_parceiro) || !is_numeric($id_parceiro)) {
