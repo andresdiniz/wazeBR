@@ -171,67 +171,80 @@
 
     // Função para consultar as interseções próximas
     function consultarIntersecoes(lat, lon) {
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:150,${lat},${lon})[highway];out body;`;
+    const raioBusca = 300; // Aumentado para garantir interseções
+    const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:${raioBusca},${lat},${lon})[highway];out body;`;
 
-        // Consulta a API Overpass para encontrar as interseções próximas
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const intersecoes = data.elements;
+    console.log("Consultando API Overpass:", urlOverpass);
 
-                if (intersecoes.length > 1) {
-                    console.log("Interseções encontradas:", intersecoes);
+    fetch(urlOverpass)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro na API Overpass: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Resposta da API Overpass:", data);
 
-                    // Ordena interseções pela distância ao ponto clicado
-                    intersecoes.sort((a, b) => {
-                        const distA = calcularDistancia(lat, lon, a.lat, a.lon);
-                        const distB = calcularDistancia(lat, lon, b.lat, b.lon);
-                        return distA - distB;
-                    });
+            if (!data.elements || data.elements.length === 0) {
+                console.warn("Nenhuma interseção encontrada.");
+                marcadorSelecionado.bindPopup("Nenhuma interseção encontrada.").openPopup();
+                return;
+            }
 
-                    // Seleciona as duas interseções mais próximas
-                    const intersecoesMaisProximas = intersecoes.slice(0, 2);
-                    console.log("Interseções mais próximas:", intersecoesMaisProximas);
+            const intersecoes = data.elements.map(elemento => ({
+                id: elemento.id,
+                lat: elemento.lat,
+                lon: elemento.lon,
+            }));
 
-                    // Obtém as coordenadas das interseções mais próximas
-                    const coordenadas = intersecoesMaisProximas.map(node => [node.lat, node.lon]);
-                    console.log("Coordenadas das interseções:", coordenadas);
+            console.log("Interseções encontradas:", intersecoes);
 
-                    // Desenha a polilinha entre as interseções mais próximas
-                    desenharPolilinhaEntreIntersecoes(coordenadas);
-                } else {
-                    console.log("Menos de duas interseções encontradas.");
-                }
-            })
-            .catch(error => {
-                console.error("Erro ao consultar as interseções:", error);
-            });
+            if (intersecoes.length < 2) {
+                console.warn("Menos de duas interseções encontradas.");
+                marcadorSelecionado.bindPopup("Menos de duas interseções encontradas.").openPopup();
+                return;
+            }
+
+            // Ordenar nós por proximidade ao clique
+            intersecoes.sort((a, b) =>
+                calcularDistancia(lat, lon, a.lat, a.lon) - calcularDistancia(lat, lon, b.lat, b.lon)
+            );
+
+            const intersecoesMaisProximas = intersecoes.slice(0, 2);
+            const coordenadas = intersecoesMaisProximas.map(intersecao => [intersecao.lat, intersecao.lon]);
+
+            console.log("Coordenadas mais próximas:", coordenadas);
+
+            // Desenhar polilinha entre as interseções mais próximas
+            desenharPolilinhaEntreIntersecoes(coordenadas);
+        })
+        .catch(error => {
+            console.error("Erro ao consultar a API Overpass:", error);
+            marcadorSelecionado.bindPopup("Erro ao buscar dados.").openPopup();
+        });
+}
+
+// Função de cálculo da distância
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+    const rad = x => (x * Math.PI) / 180;
+    const R = 6371e3; // Raio da Terra em metros
+    const dLat = rad(lat2 - lat1);
+    const dLon = rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+// Função para desenhar polilinha
+function desenharPolilinhaEntreIntersecoes(coordenadas) {
+    if (coordenadas.length < 2) {
+        console.warn("Coordenadas insuficientes para desenhar polilinha.");
+        return;
     }
-
-    // Função para calcular a distância entre dois pontos (em metros)
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        var R = 6371e3; // Raio da Terra em metros
-        var φ1 = lat1 * Math.PI / 180;
-        var φ2 = lat2 * Math.PI / 180;
-        var Δφ = (lat2 - lat1) * Math.PI / 180;
-        var Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c; // Distância em metros
-    }
-
-    // Função para desenhar a polilinha entre interseções
-    function desenharPolilinhaEntreIntersecoes(coordenadas) {
-        // Remove polilinha anterior, se existir
-        if (polilinhaAtual) {
-            map.removeLayer(polilinhaAtual);
-        }
-
-        // Desenha uma nova polilinha
-        polilinhaAtual = L.polyline(coordenadas, { color: 'blue', weight: 4 }).addTo(map);
-    }
+    const polilinha = L.polyline(coordenadas, { color: 'blue' }).addTo(map);
+    map.fitBounds(polilinha.getBounds());
+}
 </script>
