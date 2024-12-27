@@ -216,6 +216,9 @@
 const sessionType = {{ session.type | json_encode | raw }};
 console.log(sessionType);
 
+const sessionType = {{ session.type | json_encode | raw }};
+console.log(sessionType);
+
 // Função para carregar os parceiros no select
 function carregarParceiros(sessionType) {
     const parceirosSelect = document.getElementById("parceirosSelect");
@@ -255,46 +258,47 @@ function carregarParceiros(sessionType) {
         alert("Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.");
     });
 }
-    // Inicializar buscas e carregar parceiros
-    document.addEventListener('DOMContentLoaded', () => {
-        performSearch('searchAlterar', 'resultAlterar', 'alterar');
-        performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
-        performSearch('searchApagar', 'resultApagar', 'apagar');
 
-        // Carregar parceiros ao abrir o modal
-        const modalCadastrar = document.getElementById('modalCadastrar');
-        modalCadastrar.addEventListener('show.bs.modal', carregarParceiros(sessionType));
+// Inicializar buscas e carregar parceiros
+document.addEventListener('DOMContentLoaded', () => {
+    performSearch('searchAlterar', 'resultAlterar', 'alterar');
+    performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
+    performSearch('searchApagar', 'resultApagar', 'apagar');
 
-        // Submeter o formulário de cadastro
-            document.getElementById('salvarUsuario').addEventListener('click', () => {
-                const form = document.getElementById('formCadastrar');
-                const formData = new FormData(form);
+    // Carregar parceiros ao abrir o modal
+    const modalCadastrar = document.getElementById('modalCadastrar');
+    modalCadastrar.addEventListener('show.bs.modal', () => carregarParceiros(sessionType));
 
-                fetch('api.php?action=cadastrar_usuario', {
-                    method: 'POST',
-                    body: formData,
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Usuário cadastrado com sucesso!');
-                            form.reset(); // Limpa o formulário
+    // Submeter o formulário de cadastro
+    document.getElementById('salvarUsuario').addEventListener('click', () => {
+        const form = document.getElementById('formCadastrar');
+        const formData = new FormData(form);
 
-                            // Certifique-se de que o modal tem o ID correto
-                            const modalElement = document.getElementById('modalCadastrar');
-                            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        fetch('api.php?action=cadastrar_usuario', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Usuário cadastrado com sucesso!');
+                form.reset(); // Limpa o formulário
 
-                            // Fecha o modal
-                            if (modalInstance) {
-                                modalInstance.hide();
-                            } else {
-                                console.error('Instância do modal não encontrada!');
-                            }
-                        } else {
-                            alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
-                        }
-                    })
-                    .catch(error => console.error('Erro ao cadastrar usuário:', error));
-            });
+                // Certifique-se de que o modal tem o ID correto
+                const modalElement = document.getElementById('modalCadastrar');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+                // Fecha o modal
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    console.error('Instância do modal não encontrada!');
+                }
+            } else {
+                alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
+            }
+        })
+        .catch(error => console.error('Erro ao cadastrar usuário:', error));
     });
+});
 </script>
