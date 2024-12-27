@@ -15,21 +15,24 @@ try {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
 
-// Consulta para eventos e dados relacionados
+// Consulta para eventos e dados relacionados, incluindo agendamentos
 $query = "
     SELECT 
         e.id AS event_id, e.parent_event_id, e.creationtime, e.updatetime,
         e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
         e.starttime, e.endtime,
         s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
-        l.id AS lane_impact_id, l.total_closed_lanes, l.roadside
+        l.id AS lane_impact_id, l.total_closed_lanes, l.roadside,
+        sc.day_of_week, sc.start_time AS schedule_start_time, sc.end_time AS schedule_end_time
     FROM 
         events e
     LEFT JOIN 
         sources s ON e.id = s.event_id
     LEFT JOIN 
         lane_impacts l ON e.id = l.event_id
-    ORDER BY e.id, s.id, l.id
+    LEFT JOIN 
+        schedules sc ON e.id = sc.event_id
+    ORDER BY e.id, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
@@ -57,6 +60,7 @@ foreach ($rows as $row) {
             'endtime' => $row['endtime'],
             'sources' => [],
             'lane_impacts' => [],
+            'schedules' => [], // Adicionando o campo para armazenar agendamentos
         ];
     }
 
@@ -72,6 +76,15 @@ foreach ($rows as $row) {
         $events[$eventId]['lane_impacts'][] = [
             'total_closed_lanes' => $row['total_closed_lanes'],
             'roadside' => $row['roadside'],
+        ];
+    }
+
+    // Adicionando agendamento se existir
+    if ($row['day_of_week']) {
+        $events[$eventId]['schedules'][] = [
+            'day_of_week' => $row['day_of_week'],
+            'start_time' => $row['schedule_start_time'],
+            'end_time' => $row['schedule_end_time'],
         ];
     }
 }
@@ -141,6 +154,19 @@ foreach ($events as $event) {
         $eventNode->appendChild($laneImpactsNode);
     }
 
+    // Adicionar agendamentos, caso existam
+    if (!empty($event['schedules'])) {
+        $schedulesNode = $xml->createElement('schedules');
+        foreach ($event['schedules'] as $schedule) {
+            $scheduleNode = $xml->createElement('schedule');
+            $scheduleNode->appendChild($xml->createElement('day_of_week', htmlspecialchars($schedule['day_of_week'])));
+            $scheduleNode->appendChild($xml->createElement('start_time', htmlspecialchars($schedule['start_time'])));
+            $scheduleNode->appendChild($xml->createElement('end_time', htmlspecialchars($schedule['end_time'])));
+            $schedulesNode->appendChild($scheduleNode);
+        }
+        $eventNode->appendChild($schedulesNode);
+    }
+
     $root->appendChild($eventNode);
 }
 
@@ -148,3 +174,4 @@ foreach ($events as $event) {
 header('Content-Type: application/xml; charset=utf-8');
 $xml->save('events.xml');
 echo $xml->saveXML();
+?>
