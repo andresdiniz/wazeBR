@@ -541,6 +541,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
+case 'alterar':
+    session_start();
+    
+    // Pega o valor da query da URL
+    $query = $_GET['query'] ?? '';
+
+    if (empty($query)) {
+        echo json_encode(['success' => false, 'message' => 'Query não fornecida']);
+        exit;
+    }
+
+    try {
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM users WHERE username LIKE :query OR email LIKE :query LIMIT 10";
+        $stmt = $pdo->prepare($sql);
+        $searchQuery = '%' . $query . '%';
+        $stmt->bindParam(':query', $searchQuery, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $response = $results ? 
+            ['success' => true, 'users' => $results] : 
+            ['success' => false, 'message' => 'Nenhum usuário encontrado'];
+
+        echo json_encode($response);
+    } catch (PDOException $e) {
+        // Logar o erro em vez de mostrá-lo
+        error_log("Erro no banco de dados: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Erro interno. Por favor, tente novamente.']);
+    }
+
+    break;
+
 
         default:
             http_response_code(400);
