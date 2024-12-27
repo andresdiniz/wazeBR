@@ -125,7 +125,8 @@
 
     // Variáveis globais
     var marcadorSelecionado = null;  // Para armazenar o marcador no mapa
-    var polilinhaAtual = null;       // Para armazenar a polilinha desenhada no mapa
+    var setasDesenhadas = [];        // Para armazenar as setas e linhas desenhadas no mapa
+    var coordenadasAtuais = [];      // Para armazenar as coordenadas da via selecionada
 
     // Função para pegar a localização atual do usuário
     function localizarUsuario() {
@@ -146,8 +147,8 @@
     // Chama a função para localizar o usuário
     localizarUsuario();
 
-    // Função para desenhar a polilinha entre interseções ao clicar no mapa
-    function desenharPolilinha(e) {
+    // Função para desenhar o segmento da rua ao clicar no mapa
+    function desenharSegmento(e) {
         var coords = e.latlng;
 
         // Atualizar as coordenadas no campo
@@ -158,93 +159,185 @@
             map.removeLayer(marcadorSelecionado);
         }
 
+        // Limpar setas e linhas desenhadas anteriormente
+        limparSetas();
+
         // Adiciona um novo marcador no local clicado
         marcadorSelecionado = L.marker([coords.lat, coords.lng]).addTo(map);
         marcadorSelecionado.bindPopup("Você clicou aqui: " + coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6)).openPopup();
 
-        // Consultar interseções e desenhar polilinha
-        consultarIntersecoes(coords.lat, coords.lng);
+        // Consultar vias próximas
+        consultarViasProximas(coords.lat, coords.lng);
+
+        // Consultar esquinas próximas
+        consultarEsquinas(coords.lat, coords.lng);
     }
 
-    // Adiciona evento de clique no mapa para desenhar a polilinha
-    map.on('click', desenharPolilinha);
+    // Adiciona evento de clique no mapa para desenhar o segmento
+    map.on('click', desenharSegmento);
 
-    // Função para consultar as interseções próximas
-    function consultarIntersecoes(lat, lon) {
-    const raioBusca = 300; // Aumentado para garantir interseções
-    const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:${raioBusca},${lat},${lon})[highway];out body;`;
-
-    console.log("Consultando API Overpass:", urlOverpass);
-
-    fetch(urlOverpass)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro na API Overpass: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Resposta da API Overpass:", data);
-
-            if (!data.elements || data.elements.length === 0) {
-                console.warn("Nenhuma interseção encontrada.");
-                marcadorSelecionado.bindPopup("Nenhuma interseção encontrada.").openPopup();
-                return;
-            }
-
-            const intersecoes = data.elements.map(elemento => ({
-                id: elemento.id,
-                lat: elemento.lat,
-                lon: elemento.lon,
-            }));
-
-            console.log("Interseções encontradas:", intersecoes);
-
-            if (intersecoes.length < 2) {
-                console.warn("Menos de duas interseções encontradas.");
-                marcadorSelecionado.bindPopup("Menos de duas interseções encontradas.").openPopup();
-                return;
-            }
-
-            // Ordenar nós por proximidade ao clique
-            intersecoes.sort((a, b) =>
-                calcularDistancia(lat, lon, a.lat, a.lon) - calcularDistancia(lat, lon, b.lat, b.lon)
-            );
-
-            const intersecoesMaisProximas = intersecoes.slice(0, 2);
-            const coordenadas = intersecoesMaisProximas.map(intersecao => [intersecao.lat, intersecao.lon]);
-
-            console.log("Coordenadas mais próximas:", coordenadas);
-
-            // Desenhar polilinha entre as interseções mais próximas
-            desenharPolilinhaEntreIntersecoes(coordenadas);
-        })
-        .catch(error => {
-            console.error("Erro ao consultar a API Overpass:", error);
-            marcadorSelecionado.bindPopup("Erro ao buscar dados.").openPopup();
+    // Função para limpar todas as setas e linhas
+    function limparSetas() {
+        setasDesenhadas.forEach(function (seta) {
+            map.removeLayer(seta);
         });
-}
-
-// Função de cálculo da distância
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const rad = x => (x * Math.PI) / 180;
-    const R = 6371e3; // Raio da Terra em metros
-    const dLat = rad(lat2 - lat1);
-    const dLon = rad(lon2 - lon1);
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-}
-
-// Função para desenhar polilinha
-function desenharPolilinhaEntreIntersecoes(coordenadas) {
-    if (coordenadas.length < 2) {
-        console.warn("Coordenadas insuficientes para desenhar polilinha.");
-        return;
+        setasDesenhadas = [];
     }
-    const polilinha = L.polyline(coordenadas, { color: 'blue' }).addTo(map);
-    map.fitBounds(polilinha.getBounds());
-}
+
+    // Função para consultar as esquinas próximas
+    function consultarEsquinas(lat, lon) {
+        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:10,${lat},${lon})[highway];out body;`;
+
+        // Limpa a lista de esquinas no campo de seleção
+        const esquinaSelect = document.getElementById('esquinas');
+        esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>';
+
+        // Consulta a API Overpass para encontrar os nodes (esquinas)
+        fetch(urlOverpass)
+            .then(response => response.json())
+            .then(data => {
+                const esquinas = data.elements;
+                if (esquinas.length > 0) {
+                    console.log(esquinas);
+
+                    // Adiciona as esquinas encontradas no select
+                    esquinas.forEach(node => {
+                        const nomeEsquina = node.tags.name || `Esquina ${node.id}`;
+                        const option = document.createElement('option');
+                        option.value = node.id;
+                        option.textContent = nomeEsquina;
+                        esquinaSelect.appendChild(option);
+                    });
+                } else {
+                    // Se não encontrar esquinas, coloca a opção de erro
+                    esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('esquinas').innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
+            });
+    }
+
+    // Função para consultar as vias próximas e obter coordenadas de nodes
+    function consultarViasProximas(lat, lon) {
+        const ruaSelect = document.getElementById('rua');
+        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:10,${lat},${lon})[highway];);out body;`;
+
+        // Limpa o campo de seleção antes de adicionar as novas opções
+        ruaSelect.innerHTML = '<option value="">Selecione uma rua</option>';
+
+        // Consulta a API Overpass para vias próximas
+        fetch(urlOverpass)
+            .then(response => response.json())
+            .then(data => {
+                const viasProximas = data.elements;
+                if (viasProximas.length > 0) {
+                    console.log(viasProximas);
+
+                    // Adiciona todas as ruas do Overpass ao select
+                    viasProximas.forEach( via => {
+                        const nomeVia = via.tags.name || 'Nome não disponível';
+                        const option = document.createElement('option');
+                        option.value = nomeVia;
+                        option.textContent = nomeVia;
+                        ruaSelect.appendChild(option);
+                    });
+
+                    // Marca a rua mais próxima do Overpass
+                    if (ruaSelect.value === '') {
+                        const primeiraVia = viasProximas[0];
+                        const nomeVia = primeiraVia.tags.name || 'Nome não disponível';
+                        ruaSelect.value = nomeVia;
+                    }
+                } else {
+                    // Se não encontrar vias, coloca a opção de erro
+                    ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
+                }
+
+                // Consulta os nodes da via
+                if (viasProximas.length > 0 && viasProximas[0].nodes && viasProximas[0].nodes.length > 0) {
+                    consultarCoordenadasNodes(viasProximas[0].nodes, function (coordenadas) {
+                        coordenadasAtuais = coordenadas; // Salva as coordenadas da via atual
+                        desenharSetas(coordenadas, 'no'); // Desenha as setas inicialmente
+                    });
+                }
+            })
+            .catch(() => {
+                document.getElementById('vias-proximas').innerHTML = '<p>Erro ao consultar as vias.</p>';
+            });
+    }
+
+    // Função para consultar as coordenadas dos nodes
+    function consultarCoordenadasNodes(nodeIds, callback) {
+        var coordenadas = [];
+        var totalNodes = nodeIds.length;
+        var processados = 0;
+
+        nodeIds.forEach(function (nodeId) {
+            var nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
+
+            fetch(nodeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.elements && data.elements.length > 0) {
+                        var node = data.elements[0];
+                        coordenadas.push([node.lat, node.lon]);
+                    }
+                })
+                .finally(function () {
+                    processados++;
+
+                    if (processados === totalNodes) {
+                        callback(coordenadas);
+                    }
+                });
+        });
+    }
+
+    // Função para desenhar setas no mapa
+    function desenharSetas(coordenadas, sentidoVia) {
+        if (coordenadas.length < 2) {
+            console.error("Não há coordenadas suficientes para desenhar setas.");
+            return;
+        }
+
+        limparSetas(); // Remove setas anteriores
+
+        // Desenha setas entre os pontos
+        for (var i = 0; i < coordenadas.length - 1; i++) {
+            var start = coordenadas[i];
+            var end = coordenadas[i + 1];
+
+            // Linha principal
+            var linha = L.polyline([start, end], { color: 'green' }).addTo(map);
+            setasDesenhadas.push(linha);
+
+            // Calcular a direção da linha e desenhar as setas
+            var lat1 = start[0], lon1 = start[1];
+            var lat2 = end[0], lon2 = end[1];
+
+            var radianos = Math.atan2(lat2 - lat1, lon2 - lon1);  // Calcula a direção da linha
+            var angulo = radianos * (180 / Math.PI);  // Converte de radianos para graus
+
+            // Se a via for de mão dupla, desenha setas no sentido selecionado
+            if (sentidoVia === 'no') {
+                var seta1 = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
+                var seta2 = L.marker(end, { icon: criarIconeSeta(angulo + 180) }).addTo(map);
+                setasDesenhadas.push(seta1, seta2);
+            } else if (sentidoVia === 'yes') {
+                // Para vias de mão única, desenha uma seta apenas no início da linha
+                var seta = L.marker(start, { icon: criarIconeSeta(angulo) }).addTo(map);
+                setasDesenhadas.push(seta);
+            }
+        }
+    }
+
+    // Função auxiliar para criar o ícone da seta
+    function criarIconeSeta(angulo) {
+        return L.divIcon({
+            className: 'leaflet-div-icon',
+            html: `<div style="transform: rotate(${angulo}deg); width: 20px; height: 20px; background-color: red; border-radius: 50%;"></div>`,
+            iconSize: [20, 20]
+        });
+    }
 </script>
