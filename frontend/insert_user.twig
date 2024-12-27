@@ -220,7 +220,7 @@ console.log(sessionType);
 function carregarParceiros(sessionType) {
     const parceirosSelect = document.getElementById("parceirosSelect");
 
-    fetch(`api.php?action=get_parceiros&sessionType=${sessionType}`, {
+    fetch(`api.php?action=get_parceiros&sessionType=${encodeURIComponent(sessionType)}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
