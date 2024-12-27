@@ -217,45 +217,44 @@
     console.log(sessionType);
 
     // Função para carregar os parceiros no select
-    function carregarParceiros() {
-        const parceirosSelect = document.getElementById("parceirosSelect");
+    function carregarParceiros(sessionType) {
+    const parceirosSelect = document.getElementById("parceirosSelect");
 
-        fetch('api.php?action=get_parceiros&sessionType=${sessionType}', {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Erro na requisição: " + response.status);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-                    // Limpa as opções existentes no select
-                    if (sessionType == 1) {
-                        parceirosSelect.innerHTML = "<option value='99'>Todos Parceiros</option>";
-                    } else {
-                        parceirosSelect.innerHTML = "<option value=''>Selecione um parceiro</option>";
-                    }
-                    // Adiciona as novas opções
-                    data.nomes.forEach((item) => {
-                        const option = document.createElement("option");
-                        option.value = item.id; // Use um valor único, se disponível, como um ID
-                        option.textContent = item.Nome;
-                        parceirosSelect.appendChild(option);
-                    });
-                } else {
-                    console.error("Erro: " + data.message);
-                }
-            })
-            .catch((error) => {
-                console.error("Erro ao carregar os parceiros:", error);
+    fetch(`api.php?action=get_parceiros&sessionType=${sessionType}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error("Erro na requisição: " + response.status);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.success) {
+            // Limpa as opções existentes no select
+            parceirosSelect.innerHTML = sessionType == 1 
+                ? "<option value='99'>Todos Parceiros</option>" 
+                : "<option value=''>Selecione um parceiro</option>";
+
+            // Adiciona as novas opções
+            data.nomes.forEach((item) => {
+                const option = document.createElement("option");
+                option.value = item.id; // Use um valor único, se disponível, como um ID
+                option.textContent = item.Nome;
+                parceirosSelect.appendChild(option);
             });
-    }
-
+        } else {
+            console.error("Erro: " + data.message);
+        }
+    })
+    .catch((error) => {
+        console.error("Erro ao carregar os parceiros:", error);
+        alert("Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.");
+    });
+}
     // Inicializar buscas e carregar parceiros
     document.addEventListener('DOMContentLoaded', () => {
         performSearch('searchAlterar', 'resultAlterar', 'alterar');
