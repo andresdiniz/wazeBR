@@ -74,12 +74,12 @@ $xml = new DOMDocument('1.0', 'UTF-8');
 $xml->formatOutput = true;
 
 // Elemento raiz
-$root = $xml->createElement('events');
+$root = $xml->createElement('incidents xmlms:xsi=http://www.w3');
 $xml->appendChild($root);
 
 // Adicionar eventos ao XML
 foreach ($events as $event) {
-    $eventNode = $xml->createElement('event');
+    $eventNode = $xml->createElement('incident');
     $eventNode->setAttribute('id', $event['id']);
     if ($event['parent_event_id']) {
         $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
