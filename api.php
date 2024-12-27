@@ -438,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $response = $results ? 
-                ['success' => true, 'nomes' => $results] : 
+                ['success' => true, 'entrei aqui nomes' => $results] : 
                 ['success' => false, 'message' => 'Nenhum parceiro encontrado'];
         } else {
             // Consulta para um parceiro específico
