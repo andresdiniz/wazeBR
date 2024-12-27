@@ -7,90 +7,92 @@
                 </div>
                 <div class="card-body">
                     <form action="criar_evento.php" method="post" id="eventoForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="nome" class="form-label">Nome do Evento</label>
-                                <input type="text" class="form-control" id="nome" name="nome" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="descricao" class="form-label">Descrição</label>
-                                <textarea class="form-control" id="descricao" name="descricao" required></textarea>
-                            </div>
-                        </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="nome" class="form-label">Nome do Evento</label>
+            <input type="text" class="form-control" id="nome" name="nome" required>
+        </div>
+        <div class="col-md-6">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea class="form-control" id="descricao" name="descricao" required></textarea>
+        </div>
+    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="tipo" class="form-label">Tipo</label>
-                                <select class="form-select" id="tipo" name="tipo" required>
-                                    <option value="">Selecione um Tipo</option>
-                                    {% for tipo in tipos %}
-                                        <option value="{{ tipo.id }}">{{ tipo.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="subtipo" class="form-label">Subtipo</label>
-                                <select class="form-select" id="subtipo" name="subtipo" required>
-                                    <option value="">Selecione um Subtipo</option>
-                                </select>
-                            </div>
-                        </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select class="form-select" id="tipo" name="tipo" required>
+                <option value="">Selecione um Tipo</option>
+                {% for tipo in tipos %}
+                    <option value="{{ tipo.id }}">{{ tipo.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="subtipo" class="form-label">Subtipo</label>
+            <select class="form-select" id="subtipo" name="subtipo" required>
+                <option value="">Selecione um Subtipo</option>
+            </select>
+        </div>
+    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="starttime" class="form-label">Início do Evento</label>
-                                <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="endtime" class="form-label">Fim do Evento</label>
-                                <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
-                            </div>
-                        </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="starttime" class="form-label">Início do Evento</label>
+            <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
+        </div>
+        <div class="col-md-6">
+            <label for="endtime" class="form-label">Fim do Evento</label>
+            <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
+        </div>
+    </div>
 
-                        <!-- Campo de descrição -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="descricao_evento" class="form-label">Descrição do Evento</label>
-                                <textarea class="form-control" id="descricao_evento" name="descricao_evento" required></textarea>
-                            </div>
-                        </div>
+    <!-- Campo de descrição -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="descricao_evento" class="form-label">Descrição do Evento</label>
+            <textarea class="form-control" id="descricao_evento" name="descricao_evento" required></textarea>
+        </div>
+    </div>
 
-                        <!-- Dias da semana -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="dias_semana" class="form-label">Dias da Semana</label>
-                                <select multiple class="form-select" id="dias_semana" name="dias_semana[]" required>
-                                    <option value="domingo">Domingo</option>
-                                    <option value="segunda">Segunda-feira</option>
-                                    <option value="terca">Terça-feira</option>
-                                    <option value="quarta">Quarta-feira</option>
-                                    <option value="quinta">Quinta-feira</option>
-                                    <option value="sexta">Sexta-feira</option>
-                                    <option value="sabado">Sábado</option>
-                                </select>
-                            </div>
-                        </div>
+    <!-- Dias da semana -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="dias_semana" class="form-label">Dias da Semana</label>
+            <select multiple class="form-select" id="dias_semana" name="dias_semana[]" required>
+                <option value="domingo">Domingo</option>
+                <option value="segunda">Segunda-feira</option>
+                <option value="terca">Terça-feira</option>
+                <option value="quarta">Quarta-feira</option>
+                <option value="quinta">Quinta-feira</option>
+                <option value="sexta">Sexta-feira</option>
+                <option value="sabado">Sábado</option>
+            </select>
+        </div>
+    </div>
 
-                        <!-- Horários do Evento por dia -->
-                        <div id="horarios_dia" class="mb-3">
-                            <!-- Espaço para adicionar campos de horário para cada dia da semana -->
-                        </div>
+    <!-- Horários do Evento por dia -->
+    <div id="horarios_dia" class="mb-3">
+        <!-- Espaço para adicionar campos de horário para cada dia da semana -->
+    </div>
 
-                        <div class="row mb-3">
-                            <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
-                            <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
-                        </div>
+    <div class="row mb-3">
+        <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
+        <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
+    </div>
 
-                        <div class="row mb-3">
-                            <label for="rua" class="form-label">Selecione a Rua</label>
-                            <select class="form-select" id="rua" name="rua" required>
-                                <option value="">Selecione uma rua</option>
-                                <!-- As opções de rua serão preenchidas dinamicamente aqui -->
-                            </select>
-                        </div>
+    <div class="row mb-3">
+        <label for="rua" class="form-label">Selecione a Rua</label>
+        <select class="form-select" id="rua" name="rua" required>
+            <option value="">Selecione uma rua</option>
+            <!-- As opções de rua serão preenchidas dinamicamente aqui -->
+        </select>
+    </div>
 
-                        <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
-                    </form>
+    <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
+</form>
+
+
                 </div>
             </div>
         </div>
@@ -541,19 +543,34 @@
             var div = document.createElement('div');
             div.classList.add('mb-3');
             div.innerHTML = `
-                <label class="form-label">Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}</label>
-                <input type="time" class="form-control" name="horarios[${dia}][]" multiple required>
-                <button type="button" class="btn btn-secondary mt-2" onclick="adicionarHorario('${dia}')">Adicionar Horário</button>
+                <h5>Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}</h5>
+                <div class="horarios">
+                    <div class="mb-3 horario">
+                        <label class="form-label">Início</label>
+                        <input type="time" class="form-control" name="horarios[${dia}][][inicio]" required>
+                    </div>
+                    <div class="mb-3 horario">
+                        <label class="form-label">Fim</label>
+                        <input type="time" class="form-control" name="horarios[${dia}][][fim]" required>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="adicionarHorario('${dia}')">Adicionar Intervalo</button>
+                </div>
             `;
             horariosContainer.appendChild(div);
         });
     });
 
-    // Função para adicionar um novo campo de horário
+    // Função para adicionar um novo intervalo de horário
     function adicionarHorario(dia) {
         var div = document.createElement('div');
         div.classList.add('mb-3');
-        div.innerHTML = `<input type="time" class="form-control" name="horarios[${dia}][]" required>`;
-        document.querySelector(`#horarios_dia div:has(input[name="horarios[${dia}][]"])`).appendChild(div);
+        div.classList.add('horario');
+        div.innerHTML = `
+            <label class="form-label">Início</label>
+            <input type="time" class="form-control" name="horarios[${dia}][][inicio]" required>
+            <label class="form-label">Fim</label>
+            <input type="time" class="form-control" name="horarios[${dia}][][fim]" required>
+        `;
+        document.querySelector(`#horarios_dia .horarios`).appendChild(div);
     }
 </script>
