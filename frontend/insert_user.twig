@@ -207,13 +207,8 @@
     </div>
 </div>
 
-
 <!-- Script para busca AJAX -->
 <script>
-const sessionType = {{ session.type | json_encode | raw }};
-    console.log(sessionType);
-    let isInputEventBound = false; // Controle de inicialização
-
     // Função genérica para busca
     function performSearch(inputId, resultId, functionName) {
     const inputField = document.getElementById(inputId);
@@ -268,19 +263,13 @@ function openEditModal(user) {
     document.getElementById('editUserId').value = user.id;
     modal.show();
 }
+
 // Função para salvar as alterações
 function saveChanges() {
     const userId = document.getElementById('editUserId').value;
     const username = document.getElementById('editUsername').value;
     const email = document.getElementById('editEmail').value;
 
-    // Verifica se os campos não estão vazios
-    if (!username || !email) {
-        alert('Por favor, preencha todos os campos!');
-        return;
-    }
-
-    // Faz a requisição para salvar os dados
     fetch('api.php?action=update_user', {
         method: 'POST',
         headers: {
@@ -288,100 +277,105 @@ function saveChanges() {
         },
         body: JSON.stringify({ id: userId, username: username, email: email }),
     })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Usuário atualizado com sucesso!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+            modal.hide();
+            // Atualizar a lista de resultados ou recarregar a página
+        } else {
+            alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
+        }
+    })
+    .catch(error => console.error('Erro ao atualizar usuário:', error));
+}
+const sessionType = {{ session.type | json_encode | raw }};
+console.log(sessionType);
+
+// Função para carregar os parceiros no select
+function carregarParceiros(sessionType) {
+    const parceirosSelect = document.getElementById("parceirosSelect");
+
+    fetch(`api.php?action=get_parceiros&sessionType=${encodeURIComponent(sessionType)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error("Erro na requisição: " + response.status);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.success) {
+            // Limpa as opções existentes no select
+            parceirosSelect.innerHTML = sessionType == 1 
+                ? "<option value='99'>Todos Parceiros</option>" 
+                : "<option value=''>Selecione um parceiro</option>";
+
+            // Adiciona as novas opções
+            data.nomes.forEach((item) => {
+                const option = document.createElement("option");
+                option.value = item.id; // Use um valor único, se disponível, como um ID
+                option.textContent = item.Nome;
+                parceirosSelect.appendChild(option);
+            });
+        } else {
+            console.error("Erro: " + data.message);
+        }
+    })
+    .catch((error) => {
+        console.error("Erro ao carregar os parceiros:", error);
+        alert("Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.");
+    });
+}
+
+// Inicializar buscas e carregar parceiros
+document.addEventListener('DOMContentLoaded', () => {
+    performSearch('searchAlterar', 'resultAlterar', 'alterar');
+    performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
+    performSearch('searchApagar', 'resultApagar', 'apagar');
+
+    // Carregar parceiros ao abrir o modal
+    const modalCadastrar = document.getElementById('modalCadastrar');
+    modalCadastrar.addEventListener('show.bs.modal', () => carregarParceiros(sessionType));
+
+    // Carregar parceiros ao carregar a página
+    carregarParceiros(sessionType);
+
+    // Submeter o formulário de cadastro
+    document.getElementById('salvarUsuario').addEventListener('click', () => {
+        const form = document.getElementById('formCadastrar');
+        const formData = new FormData(form);
+
+        fetch('api.php?action=cadastrar_usuario', {
+            method: 'POST',
+            body: formData,
+        })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Usuário atualizado com sucesso!');
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-                modal.hide();
-                // Aqui você pode atualizar a lista de resultados ou recarregar a página
+                alert('Usuário cadastrado com sucesso!');
+                form.reset(); // Limpa o formulário
+
+                // Certifique-se de que o modal tem o ID correto
+                const modalElement = document.getElementById('modalCadastrar');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+                // Fecha o modal
+                if (modalInstance) {
+                    modalInstance.hide();
+                } else {
+                    console.error('Instância do modal não encontrada!');
+                }
             } else {
-                alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
+                alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
             }
         })
-        .catch(error => {
-            console.error('Erro ao atualizar usuário:', error);
-            alert('Erro ao salvar as alterações.');
-        });
-}
-
-// Adiciona o listener de clique no botão de salvar
-document.getElementById('salvarUsuario').addEventListener('click', saveChanges);
-
-
-    // Função para carregar os parceiros no select
-    function carregarParceiros(sessionType) {
-        const parceirosSelect = document.getElementById('parceirosSelect');
-
-        fetch(`api.php?action=get_parceiros&sessionType=${encodeURIComponent(sessionType)}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Erro na requisição: ' + response.status);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-                    parceirosSelect.innerHTML =
-                        sessionType == 1
-                            ? "<option value='99'>Todos Parceiros</option>"
-                            : "<option value=''>Selecione um parceiro</option>";
-
-                    data.nomes.forEach((item) => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.Nome;
-                        parceirosSelect.appendChild(option);
-                    });
-                } else {
-                    console.error('Erro: ' + data.message);
-                }
-            })
-            .catch((error) => {
-                console.error('Erro ao carregar os parceiros:', error);
-                alert('Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.');
-            });
-    }
-
-    // Inicializar buscas e carregar parceiros
-    document.addEventListener('DOMContentLoaded', () => {
-        performSearch('searchAlterar', 'resultAlterar', 'alterar');
-        performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
-        performSearch('searchApagar', 'resultApagar', 'apagar');
-
-        const modalCadastrar = document.getElementById('modalCadastrar');
-        modalCadastrar.addEventListener('show.bs.modal', () => carregarParceiros(sessionType));
-
-        carregarParceiros(sessionType);
-
-        document.getElementById('salvarUsuario').addEventListener('click', () => {
-            const form = document.getElementById('formCadastrar');
-            const formData = new FormData(form);
-
-            fetch('api.php?action=cadastrar_usuario', {
-                method: 'POST',
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        alert('Usuário cadastrado com sucesso!');
-                        form.reset();
-                        const modalElement = document.getElementById('modalCadastrar');
-                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                        if (modalInstance) {
-                            modalInstance.hide();
-                        }
-                    } else {
-                        alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
-                    }
-                })
-                .catch((error) => console.error('Erro ao cadastrar usuário:', error));
-        });
+        .catch(error => console.error('Erro ao cadastrar usuário:', error));
     });
+});
 </script>
