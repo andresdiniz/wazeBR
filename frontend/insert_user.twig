@@ -270,66 +270,71 @@ const sessionType = {{ session.type | json_encode | raw }};
     }
 
     // Função para abrir o modal de edição
-    // Função para abrir o modal de edição
+// Função para abrir o modal de edição
 function openEditModal(user) {
     const modalElement = document.getElementById('editModal');
 
     // Usar new bootstrap.Modal() para criar a instância do modal
     const modalInstance = new bootstrap.Modal(modalElement, { focus: false });
 
-    // Preencha os campos
+    // Preenche os campos do modal com os dados do usuário
     document.getElementById('editUsername').value = user.username;
     document.getElementById('editEmail').value = user.email;
     document.getElementById('editUserId').value = user.id;
 
-    // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
+    // Exibe o modal
+    modalInstance.show();
+
+    // Adiciona um listener único para o evento 'shown.bs.modal' (modal completamente visível)
     modalElement.addEventListener(
-        'show.bs.modal',
+        'shown.bs.modal',
         () => {
             console.log('Modal de edição exibido.');
         },
         { once: true }
     );
-
-    // Exibe o modal
-    modalInstance.show();
 }
 
-    // Previne conflitos de foco ao usar múltiplos modais
-    document.addEventListener('DOMContentLoaded', () => {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach((modal) => {
-            modal.addEventListener('shown.bs.modal', () => {
-                document.activeElement.blur();
-            });
-        });
-    });
+// Função para salvar as alterações
+function saveChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const username = document.getElementById('editUsername').value;
+    const email = document.getElementById('editEmail').value;
 
-    // Função para salvar as alterações
-    function saveChanges() {
-        const userId = document.getElementById('editUserId').value;
-        const username = document.getElementById('editUsername').value;
-        const email = document.getElementById('editEmail').value;
-
-        fetch('api.php?action=update_user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: userId, username: username, email: email }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    alert('Usuário atualizado com sucesso!');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-                    modal.hide();
-                } else {
-                    alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
-                }
-            })
-            .catch((error) => console.error('Erro ao atualizar usuário:', error));
+    // Verifica se os campos não estão vazios
+    if (!username || !email) {
+        alert('Por favor, preencha todos os campos!');
+        return;
     }
+
+    // Faz a requisição para salvar os dados
+    fetch('api.php?action=update_user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: userId, username: username, email: email }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Usuário atualizado com sucesso!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                modal.hide();
+                // Aqui você pode atualizar a lista de resultados ou recarregar a página
+            } else {
+                alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao atualizar usuário:', error);
+            alert('Erro ao salvar as alterações.');
+        });
+}
+
+// Adiciona o listener de clique no botão de salvar
+document.getElementById('salvarUsuario').addEventListener('click', saveChanges);
+
 
     // Função para carregar os parceiros no select
     function carregarParceiros(sessionType) {
