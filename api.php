@@ -430,7 +430,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $pdo = Database::getConnection();
         $response = [];
 
-        if ($id_parceiro == 99) {
+        if ($id_parceiro == 1) {
             // Consulta para todos os parceiros com limite
             $sql = "SELECT id, Nome FROM parceiros LIMIT 100";
             $stmt = $pdo->prepare($sql);
