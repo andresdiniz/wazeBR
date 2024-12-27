@@ -7,7 +7,8 @@
                 </div>
                 <div class="card-body">
                     <form action="criar_evento.php" method="post" id="eventoForm">
-    <div class="row mb-3">
+    <!-- Seção de Nome e Descrição -->
+    <div class="row mb-4">
         <div class="col-md-6">
             <label for="nome" class="form-label">Nome do Evento</label>
             <input type="text" class="form-control" id="nome" name="nome" required>
@@ -18,7 +19,8 @@
         </div>
     </div>
 
-    <div class="row mb-3">
+    <!-- Seção de Tipo e Subtipo -->
+    <div class="row mb-4">
         <div class="col-md-6">
             <label for="tipo" class="form-label">Tipo</label>
             <select class="form-select" id="tipo" name="tipo" required>
@@ -36,7 +38,8 @@
         </div>
     </div>
 
-    <div class="row mb-3">
+    <!-- Seção de Início e Fim do Evento -->
+    <div class="row mb-4">
         <div class="col-md-6">
             <label for="starttime" class="form-label">Início do Evento</label>
             <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
@@ -47,9 +50,9 @@
         </div>
     </div>
 
-    <!-- Dias da semana -->
-    <div class="row mb-3">
-        <div class="col-md-6">
+    <!-- Seção de Dias da Semana -->
+    <div class="row mb-4">
+        <div class="col-md-12">
             <label for="dias_semana" class="form-label">Dias da Semana</label>
             <select multiple class="form-select" id="dias_semana" name="dias_semana[]" required>
                 <option value="domingo">Domingo</option>
@@ -63,26 +66,36 @@
         </div>
     </div>
 
-    <!-- Horários do Evento por dia -->
-    <div id="horarios_dia" class="mb-3">
+    <!-- Seção de Horários -->
+    <div id="horarios_dia" class="mb-4">
         <!-- Espaço para adicionar campos de horário para cada dia da semana -->
     </div>
 
-    <div class="row mb-3">
-        <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
-        <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
+    <!-- Seção de Coordenadas -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
+            <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
+        </div>
     </div>
 
-    <div class="row mb-3">
-        <label for="rua" class="form-label">Selecione a Rua</label>
-        <select class="form-select" id="rua" name="rua" required>
-            <option value="">Selecione uma rua</option>
-            <!-- As opções de rua serão preenchidas dinamicamente aqui -->
-        </select>
+    <!-- Seção de Rua -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <label for="rua" class="form-label">Selecione a Rua</label>
+            <select class="form-select" id="rua" name="rua" required>
+                <option value="">Selecione uma rua</option>
+                <!-- As opções de rua serão preenchidas dinamicamente aqui -->
+            </select>
+        </div>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
+    <!-- Botão de envio -->
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
+    </div>
 </form>
+
 
 
                 </div>
