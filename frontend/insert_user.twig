@@ -260,6 +260,29 @@
         inputField.addEventListener('input', searchHandler);
     }
 
+// Defina a função searchHandler antes de usá-la em performSearch
+function searchHandler(data, resultList) {
+    resultList.innerHTML = '';
+
+    if (data.success) {
+        data.users.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.textContent = `${item.username} (${item.email})`;
+
+            const editIcon = document.createElement('i');
+            editIcon.className = 'fas fa-edit text-primary';
+            editIcon.style.cursor = 'pointer';
+            editIcon.addEventListener('click', () => openEditModal(item));
+
+            li.appendChild(editIcon);
+            resultList.appendChild(li);
+        });
+    } else {
+        resultList.innerHTML = '<li class="list-group-item text-danger">Nenhum usuário encontrado.</li>';
+    }
+}
+
     // Função para abrir o modal de edição
     function openEditModal(user) {
         const modalElement = document.getElementById('editModal');
