@@ -199,8 +199,16 @@
                         // Adicionar resultados
                         data.users.forEach(item => {
                             const li = document.createElement('li');
-                            li.className = 'list-group-item';
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
                             li.textContent = `${item.username} (${item.email})`;
+
+                            // Criar ícone de editar
+                            const editIcon = document.createElement('i');
+                            editIcon.className = 'fas fa-edit text-primary';
+                            editIcon.style.cursor = 'pointer';
+                            editIcon.addEventListener('click', () => openEditModal(item));
+
+                            li.appendChild(editIcon);
                             resultList.appendChild(li);
                         });
                     } else {
@@ -215,6 +223,42 @@
             resultList.innerHTML = ''; // Limpar resultados se o texto for muito curto
         }
     });
+}
+
+// Função para abrir o modal de edição
+function openEditModal(user) {
+    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editUserId').value = user.id;
+    modal.show();
+}
+
+// Função para salvar as alterações
+function saveChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const username = document.getElementById('editUsername').value;
+    const email = document.getElementById('editEmail').value;
+
+    fetch('api.php?action=update_user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: userId, username: username, email: email }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Usuário atualizado com sucesso!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+            modal.hide();
+            // Atualizar a lista de resultados ou recarregar a página
+        } else {
+            alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
+        }
+    })
+    .catch(error => console.error('Erro ao atualizar usuário:', error));
 }
 
 const sessionType = {{ session.type | json_encode | raw }};
