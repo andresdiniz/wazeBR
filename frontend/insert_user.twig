@@ -256,7 +256,8 @@
 
 // Função para abrir o modal de edição
 function openEditModal(user) {
-    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    const modalElement = document.getElementById('editModal');
+    const modal = new bootstrap.Modal(modalElement);
     document.getElementById('editUsername').value = user.username;
     document.getElementById('editEmail').value = user.email;
     document.getElementById('editUserId').value = user.id;
@@ -289,7 +290,6 @@ function saveChanges() {
     })
     .catch(error => console.error('Erro ao atualizar usuário:', error));
 }
-
 const sessionType = {{ session.type | json_encode | raw }};
 console.log(sessionType);
 
