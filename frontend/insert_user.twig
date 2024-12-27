@@ -214,89 +214,93 @@
 
     // Função genérica para busca
     function performSearch(inputId, resultId, functionName) {
-    const inputField = document.getElementById(inputId);
-    const resultList = document.getElementById(resultId);
+        const inputField = document.getElementById(inputId);
+        const resultList = document.getElementById(resultId);
 
-    inputField.addEventListener('input', debounce(() => {
-        const query = inputField.value;
+        inputField.addEventListener(
+            'input',
+            debounce(() => {
+                const query = inputField.value;
 
-        if (query.length >= 3) {
-            fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    resultList.innerHTML = '';
-                    if (data.success) {
-                        data.users.forEach(item => {
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                            li.textContent = `${item.username} (${item.email})`;
+                if (query.length >= 3) {
+                    fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            resultList.innerHTML = '';
+                            if (data.success) {
+                                data.users.forEach((item) => {
+                                    const li = document.createElement('li');
+                                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                    li.textContent = `${item.username} (${item.email})`;
 
-                            const editIcon = document.createElement('i');
-                            editIcon.className = 'fas fa-edit text-primary';
-                            editIcon.style.cursor = 'pointer';
-                            editIcon.addEventListener('click', () => openEditModal(item));
+                                    const editIcon = document.createElement('i');
+                                    editIcon.className = 'fas fa-edit text-primary';
+                                    editIcon.style.cursor = 'pointer';
+                                    editIcon.addEventListener('click', () => openEditModal(item));
 
-                            li.appendChild(editIcon);
-                            resultList.appendChild(li);
+                                    li.appendChild(editIcon);
+                                    resultList.appendChild(li);
+                                });
+                            } else {
+                                resultList.innerHTML =
+                                    '<li class="list-group-item text-danger">Nenhum usuário encontrado.</li>';
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao buscar:', error);
+                            resultList.innerHTML =
+                                '<li class="list-group-item text-danger">Erro ao buscar resultados.</li>';
                         });
-                    } else {
-                        resultList.innerHTML = '<li class="list-group-item text-danger">Nenhum usuário encontrado.</li>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao buscar:', error);
-                    resultList.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar resultados.</li>';
-                });
-        } else {
-            resultList.innerHTML = '';
-        }
-    }, 300));
-}
-
-            inputField.addEventListener('input', searchHandler);
-            isInputEventBound = true; // Marcar como registrado
-        }
+                } else {
+                    resultList.innerHTML = '';
+                }
+            }, 300)
+        );
     }
 
-function debounce(func, delay) {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-}
+    // Função debounce
+    function debounce(func, delay) {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
 
     // Função para abrir o modal de edição
-    // Função para abrir o modal de edição
-function openEditModal(user) {
-    const modalElement = document.getElementById('editModal');
+    function openEditModal(user) {
+        const modalElement = document.getElementById('editModal');
 
-    // Certifique-se de que o modal foi criado apenas uma vez
-    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement, { focus: false });
+        // Certifique-se de que o modal foi criado apenas uma vez
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement, { focus: false });
 
-    // Preencha os campos
-    document.getElementById('editUsername').value = user.username;
-    document.getElementById('editEmail').value = user.email;
-    document.getElementById('editUserId').value = user.id;
+        // Preencha os campos
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editEmail').value = user.email;
+        document.getElementById('editUserId').value = user.id;
 
-    // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
-    modalElement.addEventListener('show.bs.modal', () => {
-        console.log('Modal de edição exibido.');
-    }, { once: true });
+        // Adiciona um listener único para o evento 'show.bs.modal' (se necessário)
+        modalElement.addEventListener(
+            'show.bs.modal',
+            () => {
+                console.log('Modal de edição exibido.');
+            },
+            { once: true }
+        );
 
-    // Exibe o modal
-    modalInstance.show();
-}
+        // Exibe o modal
+        modalInstance.show();
+    }
 
-// Previne conflitos de foco ao usar múltiplos modais
-document.addEventListener('DOMContentLoaded', () => {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.addEventListener('shown.bs.modal', () => {
-            document.activeElement.blur();
+    // Previne conflitos de foco ao usar múltiplos modais
+    document.addEventListener('DOMContentLoaded', () => {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach((modal) => {
+            modal.addEventListener('shown.bs.modal', () => {
+                document.activeElement.blur();
+            });
         });
     });
-});
 
     // Função para salvar as alterações
     function saveChanges() {
@@ -311,8 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({ id: userId, username: username, email: email }),
         })
-            .then(response => response.json())
-            .then(data => {
+            .then((response) => response.json())
+            .then((data) => {
                 if (data.success) {
                     alert('Usuário atualizado com sucesso!');
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
@@ -321,47 +325,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
                 }
             })
-            .catch(error => console.error('Erro ao atualizar usuário:', error));
+            .catch((error) => console.error('Erro ao atualizar usuário:', error));
     }
-
-    const sessionType = {{ session.type | json_encode | raw }};
-    console.log(sessionType);
 
     // Função para carregar os parceiros no select
     function carregarParceiros(sessionType) {
-        const parceirosSelect = document.getElementById("parceirosSelect");
+        const parceirosSelect = document.getElementById('parceirosSelect');
 
         fetch(`api.php?action=get_parceiros&sessionType=${encodeURIComponent(sessionType)}`, {
-            method: "GET",
+            method: 'GET',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
             },
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error("Erro na requisição: " + response.status);
+                    throw new Error('Erro na requisição: ' + response.status);
                 }
                 return response.json();
             })
             .then((data) => {
                 if (data.success) {
-                    parceirosSelect.innerHTML = sessionType == 1
-                        ? "<option value='99'>Todos Parceiros</option>"
-                        : "<option value=''>Selecione um parceiro</option>";
+                    parceirosSelect.innerHTML =
+                        sessionType == 1
+                            ? "<option value='99'>Todos Parceiros</option>"
+                            : "<option value=''>Selecione um parceiro</option>";
 
                     data.nomes.forEach((item) => {
-                        const option = document.createElement("option");
+                        const option = document.createElement('option');
                         option.value = item.id;
                         option.textContent = item.Nome;
                         parceirosSelect.appendChild(option);
                     });
                 } else {
-                    console.error("Erro: " + data.message);
+                    console.error('Erro: ' + data.message);
                 }
             })
             .catch((error) => {
-                console.error("Erro ao carregar os parceiros:", error);
-                alert("Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.");
+                console.error('Erro ao carregar os parceiros:', error);
+                alert('Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.');
             });
     }
 
@@ -384,8 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData,
             })
-                .then(response => response.json())
-                .then(data => {
+                .then((response) => response.json())
+                .then((data) => {
                     if (data.success) {
                         alert('Usuário cadastrado com sucesso!');
                         form.reset();
@@ -398,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
                     }
                 })
-                .catch(error => console.error('Erro ao cadastrar usuário:', error));
+                .catch((error) => console.error('Erro ao cadastrar usuário:', error));
         });
     });
 </script>
