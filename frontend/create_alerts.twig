@@ -231,6 +231,15 @@ function consultarEsquinas(lat, lon) {
                         .bindPopup(`Esquina: ${esquina.tags.name || esquina.id}<br>Distância: ${esquina.distancia.toFixed(2)} m`)
                         .openPopup();
                 });
+
+                // Obter coordenadas das duas esquinas mais próximas e exibir no console
+                if (esquinasMaisProximas.length === 2) {
+                    const coordenadasEntreEsquinas = [
+                        [esquinasMaisProximas[0].lat, esquinasMaisProximas[0].lon],
+                        [esquinasMaisProximas[1].lat, esquinasMaisProximas[1].lon]
+                    ];
+                    console.log("Coordenadas entre as duas esquinas mais próximas:", coordenadasEntreEsquinas);
+                }
             } else {
                 // Se não encontrar esquinas, coloca a opção de erro
                 esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
