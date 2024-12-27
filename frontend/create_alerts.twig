@@ -188,11 +188,6 @@
     // Função para consultar as esquinas próximas
 function consultarEsquinas(lat, lon) {
     const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:50,${lat},${lon})[highway];out body;`;
-
-    // Limpa a lista de esquinas no campo de seleção
-    const esquinaSelect = document.getElementById('esquinas');
-    esquinaSelect.innerHTML = '<option value="">Selecione uma esquina</option>';
-
     // Consulta a API Overpass para encontrar os nodes (esquinas)
     fetch(urlOverpass)
         .then(response => response.json())
@@ -233,11 +228,11 @@ function consultarEsquinas(lat, lon) {
                 });
             } else {
                 // Se não encontrar esquinas, coloca a opção de erro
-                esquinaSelect.innerHTML = '<option value="">Nenhuma esquina encontrada</option>';
+                console.log("Nenhuma esquina encontrada");
             }
         })
         .catch(() => {
-            esquinaSelect.innerHTML = '<option value="">Erro ao consultar as esquinas.</option>';
+            console.log("Erro ao consultar as esquinas.");
         });
 }
 
