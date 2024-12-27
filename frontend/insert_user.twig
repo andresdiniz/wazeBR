@@ -210,6 +210,8 @@
 
 <!-- Script para busca AJAX -->
 <script>
+const sessionType = {{ session.type | json_encode | raw }};
+    console.log(sessionType);
     let isInputEventBound = false; // Controle de inicialização
 
     // Função genérica para busca
