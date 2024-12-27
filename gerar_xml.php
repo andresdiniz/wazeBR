@@ -80,8 +80,14 @@ foreach ($rows as $row) {
 $xml = new DOMDocument('1.0', 'UTF-8');
 $xml->formatOutput = true;
 
-// Elemento raiz
-$root = $xml->createElement('incidents xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.gstatic.com/road-incidents/cifsv2.xsd"');
+// Criar o elemento raiz "incidents"
+$root = $xml->createElement('incidents');
+
+// Adicionar os atributos de namespace e esquema
+$root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+$root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
+
+// Adicionar o elemento raiz ao XML
 $xml->appendChild($root);
 
 // Adicionar eventos ao XML
