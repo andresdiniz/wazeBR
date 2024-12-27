@@ -189,7 +189,7 @@
             const query = inputField.value;
 
             if (query.length >= 3) {
-                fetch(`api.php?function=${functionName}&query=${encodeURIComponent(query)}`)
+                fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
                         // Limpar resultados anteriores
