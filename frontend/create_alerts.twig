@@ -115,80 +115,88 @@
 </div>
 
 <script>
-        const map = L.map('map').setView([-23.5505, -46.6333], 12); // Coordenadas de São Paulo como exemplo
+        const map = L.map('map').setView([-23.5505, -46.6333], 12);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Dados GeoJSON representando os segmentos das ruas (SUBSTITUA COM SEUS DADOS)
-        // Este é um exemplo simplificado, você precisará adaptar para seus dados reais.
         const geojsonData = {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "properties": { "id": 1, "name": "Rua Eugenio Feio Segmento 1" },
-              "geometry": {
-                "type": "LineString",
-                "coordinates": [[-46.64, -23.54], [-46.63, -23.53]]
-              }
-            },
-            {
-              "type": "Feature",
-              "properties": { "id": 2, "name": "Rua Eugenio Feio Segmento 2" },
-              "geometry": {
-                "type": "LineString",
-                "coordinates": [[-46.63, -23.53], [-46.62, -23.52]]
-              }
-            },
-            {
-                "type": "Feature",
-                "properties": { "id": 3, "name": "Rua Eugenio Feio Segmento 3" },
-                "geometry": {
-                  "type": "LineString",
-                  "coordinates": [[-46.62, -23.52], [-46.61, -23.51]]
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": { "id": 1, "name": "Rua Eugenio Feio" },
+                    "geometry": {
+                        "type": "MultiLineString",
+                        "coordinates": [
+                            [[-46.64, -23.54], [-46.63, -23.53]],
+                            [[-46.63, -23.53], [-46.62, -23.52]],
+                            [[-46.62, -23.52], [-46.61, -23.51]],
+                            [[-46.61, -23.51], [-46.60, -23.50]]
+                        ]
+                    }
                 }
-              },
-              {
-                "type": "Feature",
-                "properties": { "id": 4, "name": "Rua Eugenio Feio Segmento 4" },
-                "geometry": {
-                  "type": "LineString",
-                  "coordinates": [[-46.61, -23.51], [-46.60, -23.50]]
-                }
-              }
-
-          ]
+            ]
         };
 
         let selectedLayer = null;
 
-        L.geoJSON(geojsonData, {
-            onEachFeature: function (feature, layer) {
-                layer.on('click', function (e) {
-                    if (selectedLayer) {
-                      map.removeLayer(selectedLayer); // Remove a camada anterior
-                    }
-
-                    selectedLayer = L.geoJSON(feature, {
-                        style: {
-                            color: 'red', // Cor da linha selecionada
-                            weight: 5     // Espessura da linha selecionada
-                        }
-                    }).addTo(map);
-
-
-                    // Obter as coordenadas do segmento clicado
-                    const coordinates = feature.geometry.coordinates;
-                    console.log("Coordenadas do segmento:", coordinates);
-                    alert("Segmento Selecionado: " + feature.properties.name + "\nCoordenadas: " + JSON.stringify(coordinates));
-
-                });
-            },
+        const geojsonLayer = L.geoJSON(geojsonData, {
             style: {
-                color: 'blue', // Cor padrão das linhas
-                weight: 3      // Espessura padrão das linhas
+                color: 'blue',
+                weight: 3
             }
         }).addTo(map);
+
+        map.on('click', function(e) {
+            if (selectedLayer) {
+                map.removeLayer(selectedLayer);
+            }
+
+            let closestSegment = null;
+            let shortestDistance = Infinity;
+
+            geojsonLayer.eachLayer(function(layer) {
+                if (layer instanceof L.Polyline) { //verifica se é uma polilinha
+                    const line = turf.lineString(layer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]));
+                    const clickedPoint = turf.point([e.latlng.lng, e.latlng.lat]);
+                    const snapped = turf.nearestPointOnLine(line, clickedPoint);
+                    const distance = turf.distance(clickedPoint, snapped);
+
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        closestSegment = {
+                            coordinates: layer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]),
+                            name: layer.feature ? layer.feature.properties.name : "Segmento"
+                        };
+                    }
+                } else if (layer instanceof L.FeatureGroup) { //verifica se é um grupo de features(multilinestring)
+                    layer.eachLayer(function(segmentLayer){
+                        const line = turf.lineString(segmentLayer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]));
+                        const clickedPoint = turf.point([e.latlng.lng, e.latlng.lat]);
+                        const snapped = turf.nearestPointOnLine(line, clickedPoint);
+                        const distance = turf.distance(clickedPoint, snapped);
+
+                        if (distance < shortestDistance) {
+                            shortestDistance = distance;
+                            closestSegment = {
+                                coordinates: segmentLayer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]),
+                                name: segmentLayer.feature ? segmentLayer.feature.properties.name : "Segmento"
+                            };
+                        }
+                    })
+                }
+            });
+
+            if (closestSegment) {
+                selectedLayer = L.polyline(closestSegment.coordinates.map(coords => L.latLng(coords[1], coords[0])), {
+                    color: 'red',
+                    weight: 5
+                }).addTo(map);
+
+                console.log("Segmento mais próximo:", closestSegment.coordinates);
+                alert("Segmento mais próximo: " + closestSegment.name + "\nCoordenadas: " + JSON.stringify(closestSegment.coordinates));
+            }
+        });
     </script>
