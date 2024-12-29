@@ -83,7 +83,7 @@
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <label for="rua" class="form-label">Selecione a Rua</label>
-                                <select class="form-select" id="rua" name="rua" required>
+                                <select class="form-select" id="ruaSelect" name="rua" required>
                                     <option value="">Selecione uma rua</option>
                                     <!-- As opções de rua serão preenchidas dinamicamente aqui -->
                                 </select>
@@ -135,6 +135,21 @@ map.on('locationfound', (e) => {
     L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     L.circle(e.latlng, radius).addTo(map);
     console.log('Localização do usuário:', e.latlng);
+    
+    // Chama a função para consultar a rua após localizar o usuário
+    consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            console.log("Rua encontrada (Waze):", nomeRuaWaze);
+            // Adiciona o nome da rua do Waze ao select
+            const optionWaze = document.createElement('option');
+            optionWaze.value = nomeRuaWaze;
+            optionWaze.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(optionWaze);
+            ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
+        }
+    }).catch(() => {
+        console.log("Erro ao consultar a API do Waze");
+    });
 });
 
 // Evento para quando a localização não for encontrada
@@ -142,8 +157,29 @@ map.on('locationerror', (e) => {
     console.error('Erro ao localizar o usuário:', e.message);
 });
 
-// Chamar a função para localizar o usuário
-locateUser();
+// Função para consultar a rua via API personalizada api.php usando fetch
+function consultarRuaWaze(lat, lon) {
+    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+
+    return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.result && data.result.length > 0) {
+                // Ordena as ruas pela menor distância
+                data.result.sort((a, b) => a.distance - b.distance);
+                
+                // Pega o nome da rua mais próxima
+                const nomeRua = data.result[0].names[0];  // Assumindo que sempre há pelo menos um nome de rua
+                return nomeRua;
+            } else {
+                return null; // Caso a resposta não tenha dados válidos
+            }
+        })
+        .catch(() => {
+            console.log("Erro ao consultar a API do Waze");
+            return null; // Caso ocorra um erro na consulta
+        });
+}
 
 // Função para buscar o segmento da rua entre interseções
 async function getStreetSegment(lat, lon) {
@@ -332,5 +368,20 @@ map.on('click', (e) => {
     
     // Chama a função para buscar o segmento
     getStreetSegment(lat, lon);
+
+    // Consultar a rua do Waze ao clicar no mapa
+    consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            console.log("Rua encontrada (Waze):", nomeRuaWaze);
+            // Adiciona o nome da rua do Waze ao select
+            const optionWaze = document.createElement('option');
+            optionWaze.value = nomeRuaWaze;
+            optionWaze.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(optionWaze);
+            ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
+        }
+    }).catch(() => {
+        console.log("Erro ao consultar a API do Waze");
+    });
 });
 </script>
