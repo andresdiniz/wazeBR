@@ -236,7 +236,92 @@ function consultarEsquinas(lat, lon) {
         });
 }
 
-// Função para calcular a distância em metros entre dois pontos (Haversine formula)
+function consultarViasProximas(lat, lon) {
+    const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:150,${lat},${lon})[highway];);out body;`;
+
+    fetch(urlOverpass)
+        .then(response => response.json())
+        .then(data => {
+            const viasProximas = data.elements.filter(via => via.nodes); // Apenas vias com nodes
+            console.log('Vias próximas:', viasProximas);
+
+            // Obter todos os nodes das vias
+            const allNodes = viasProximas.flatMap(via => via.nodes);
+
+            // Contar a frequência de cada node para encontrar os comuns
+            const nodeFrequencies = allNodes.reduce((acc, nodeId) => {
+                acc[nodeId] = (acc[nodeId] || 0) + 1;
+                return acc;
+            }, {});
+
+            // Filtrar apenas nodes que aparecem em mais de uma via (interseções)
+            const nodesComuns = Object.keys(nodeFrequencies)
+                .filter(nodeId => nodeFrequencies[nodeId] > 1)
+                .map(nodeId => parseInt(nodeId));
+
+            console.log('Nodes comuns (interseções):', nodesComuns);
+
+            // Consultar coordenadas dos nodes comuns
+            consultarCoordenadasNodes(nodesComuns, (coordenadas) => {
+                console.log('Coordenadas dos nodes comuns:', coordenadas);
+
+                // Calcular distâncias dos nodes comuns ao ponto clicado
+                const nodesComDistancia = coordenadas.map(coord => ({
+                    lat: coord[0],
+                    lon: coord[1],
+                    distancia: calcularDistancia(lat, lon, coord[0], coord[1]),
+                }));
+
+                // Ordenar por distância
+                nodesComDistancia.sort((a, b) => a.distancia - b.distancia);
+
+                // Selecionar os dois mais próximos
+                const maisProximos = nodesComDistancia.slice(0, 2);
+                console.log('Nodes mais próximos:', maisProximos);
+
+                // Marcar os nodes comuns no mapa
+                nodesComDistancia.forEach(node => {
+                    L.marker([node.lat, node.lon])
+                        .addTo(map)
+                        .bindPopup(`Node comum<br>Distância: ${node.distancia.toFixed(2)} m`);
+                });
+
+                // Destacar os dois mais próximos
+                maisProximos.forEach(node => {
+                    L.circleMarker([node.lat, node.lon], { color: 'red', radius: 10 })
+                        .addTo(map)
+                        .bindPopup(`Node mais próximo<br>Distância: ${node.distancia.toFixed(2)} m`);
+                });
+            });
+        })
+        .catch(error => console.error('Erro ao consultar vias próximas:', error));
+}
+
+function consultarCoordenadasNodes(nodeIds, callback) {
+    const coordenadas = [];
+    const totalNodes = nodeIds.length;
+    let processados = 0;
+
+    nodeIds.forEach(nodeId => {
+        const nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
+
+        fetch(nodeUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.elements && data.elements.length > 0) {
+                    const node = data.elements[0];
+                    coordenadas.push([node.lat, node.lon]);
+                }
+            })
+            .finally(() => {
+                processados++;
+                if (processados === totalNodes) {
+                    callback(coordenadas);
+                }
+            });
+    });
+}
+
 function calcularDistancia(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // Raio da Terra em metros
     const φ1 = lat1 * Math.PI / 180;
@@ -252,83 +337,6 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * c; // Distância em metros
 }
 
-
-    // Função para consultar as vias próximas e obter coordenadas de nodes
-    function consultarViasProximas(lat, lon) {
-        const ruaSelect = document.getElementById('rua');
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=[out:json];(way(around:10,${lat},${lon})[highway];);out body;`;
-
-        // Limpa o campo de seleção antes de adicionar as novas opções
-        ruaSelect.innerHTML = '<option value="">Selecione uma rua</option>';
-
-        // Consulta a API Overpass para vias próximas
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const viasProximas = data.elements;
-                if (viasProximas.length > 0) {
-                    console.log(viasProximas);
-
-                    // Adiciona todas as ruas do Overpass ao select
-                    viasProximas.forEach( via => {
-                        const nomeVia = via.tags.name || 'Nome não disponível';
-                        const option = document.createElement('option');
-                        option.value = nomeVia;
-                        option.textContent = nomeVia;
-                        ruaSelect.appendChild(option);
-                    });
-
-                    // Marca a rua mais próxima do Overpass
-                    if (ruaSelect.value === '') {
-                        const primeiraVia = viasProximas[0];
-                        const nomeVia = primeiraVia.tags.name || 'Nome não disponível';
-                        ruaSelect.value = nomeVia;
-                    }
-                } else {
-                    // Se não encontrar vias, coloca a opção de erro
-                    ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
-                }
-
-                // Consulta os nodes da via
-                if (viasProximas.length > 0 && viasProximas[0].nodes && viasProximas[0].nodes.length > 0) {
-                    consultarCoordenadasNodes(viasProximas[0].nodes, function (coordenadas) {
-                        coordenadasAtuais = coordenadas; // Salva as coordenadas da via atual
-                        desenharSetas(coordenadas, 'no'); // Desenha as setas inicialmente
-                        consultarEsquinas(coordenadas[i], coordenadas[i + 1]);
-                    });
-                }
-            })
-            .catch(() => {
-                document.getElementById('vias-proximas').innerHTML = '<p>Erro ao consultar as vias.</p>';
-            });
-    }
-
-    // Função para consultar as coordenadas dos nodes
-    function consultarCoordenadasNodes(nodeIds, callback) {
-        var coordenadas = [];
-        var totalNodes = nodeIds.length;
-        var processados = 0;
-
-        nodeIds.forEach(function (nodeId) {
-            var nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
-
-            fetch(nodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.elements && data.elements.length > 0) {
-                        var node = data.elements[0];
-                        coordenadas.push([node.lat, node.lon]);
-                    }
-                })
-                .finally(function () {
-                    processados++;
-
-                    if (processados === totalNodes) {
-                        callback(coordenadas);
-                    }
-                });
-        });
-    }
 
     // Função para desenhar setas no mapa
     function desenharSetas(coordenadas, sentidoVia) {
