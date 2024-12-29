@@ -114,89 +114,73 @@
     </div>
 </div>
 
-<script>
-        const map = L.map('map').setView([-23.5505, -46.6333], 12);
+    <script>
+        const map = L.map('map').setView([-23.5505, -46.6333], 15);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        const geojsonData = {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": { "id": 1, "name": "Rua Eugenio Feio" },
-                    "geometry": {
-                        "type": "MultiLineString",
-                        "coordinates": [
-                            [[-46.64, -23.54], [-46.63, -23.53]],
-                            [[-46.63, -23.53], [-46.62, -23.52]],
-                            [[-46.62, -23.52], [-46.61, -23.51]],
-                            [[-46.61, -23.51], [-46.60, -23.50]]
-                        ]
-                    }
-                }
-            ]
-        };
-
-        let selectedLayer = null;
-
-        const geojsonLayer = L.geoJSON(geojsonData, {
-            style: {
-                color: 'blue',
-                weight: 3
-            }
-        }).addTo(map);
-
         map.on('click', function(e) {
-            if (selectedLayer) {
-                map.removeLayer(selectedLayer);
-            }
+            const clickedLatLng = e.latlng;
+            const clickedCoords = [clickedLatLng.lng, clickedLatLng.lat];
+            L.marker(clickedLatLng).addTo(map).bindPopup("Ponto Clicado").openPopup();//adiciona um marcador no ponto clicado
+            console.log("Coordenadas do clique:", clickedCoords);
 
-            let closestSegment = null;
-            let shortestDistance = Infinity;
+            // Consulta Overpass (adaptar a consulta conforme necessário)
+            const overpassQuery = `
+                [out:json][timeout:25];
+                (
+                    way(around:50,${clickedLatLng.lat},${clickedLatLng.lng})["highway"];
+                );
+                out center;
+            `;
 
-            geojsonLayer.eachLayer(function(layer) {
-                if (layer instanceof L.Polyline) { //verifica se é uma polilinha
-                    const line = turf.lineString(layer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]));
-                    const clickedPoint = turf.point([e.latlng.lng, e.latlng.lat]);
-                    const snapped = turf.nearestPointOnLine(line, clickedPoint);
-                    const distance = turf.distance(clickedPoint, snapped);
+            $.ajax({
+                url: 'https://overpass-api.de/api/interpreter',
+                data: { data: overpassQuery },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.elements.length > 0) {
+                        let closestWay = null;
+                        let shortestDistance = Infinity;
 
-                    if (distance < shortestDistance) {
-                        shortestDistance = distance;
-                        closestSegment = {
-                            coordinates: layer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]),
-                            name: layer.feature ? layer.feature.properties.name : "Segmento"
-                        };
-                    }
-                } else if (layer instanceof L.FeatureGroup) { //verifica se é um grupo de features(multilinestring)
-                    layer.eachLayer(function(segmentLayer){
-                        const line = turf.lineString(segmentLayer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]));
-                        const clickedPoint = turf.point([e.latlng.lng, e.latlng.lat]);
-                        const snapped = turf.nearestPointOnLine(line, clickedPoint);
-                        const distance = turf.distance(clickedPoint, snapped);
+                        data.elements.forEach(way => {
+                            if (way.type === 'way' && way.geometry) {
+                                const line = turf.lineString(way.geometry.map(coord => [coord.lon, coord.lat]));
+                                const clickedPoint = turf.point(clickedCoords);
+                                const snapped = turf.nearestPointOnLine(line, clickedPoint);
+                                const distance = turf.distance(clickedPoint, snapped);
 
-                        if (distance < shortestDistance) {
-                            shortestDistance = distance;
-                            closestSegment = {
-                                coordinates: segmentLayer.getLatLngs().map(latlng => [latlng.lng, latlng.lat]),
-                                name: segmentLayer.feature ? segmentLayer.feature.properties.name : "Segmento"
-                            };
+                                if (distance < shortestDistance) {
+                                    shortestDistance = distance;
+                                    closestWay = way;
+                                }
+                            }
+                        });
+
+                        if (closestWay) {
+                            console.log("Way mais próxima:", closestWay);
+                            const wayCoords = closestWay.geometry.map(coord => [coord.lon, coord.lat]);
+                            L.polyline(wayCoords.map(coords => L.latLng(coords[1], coords[0])), {color:'green'}).addTo(map).bindPopup("Via mais proxima")
+
+                            const clickedPointTurf = turf.point(clickedCoords);
+                            const lineTurf = turf.lineString(wayCoords);
+                            const snapped = turf.nearestPointOnLine(lineTurf, clickedPointTurf);
+                            const snappedCoords = snapped.geometry.coordinates;
+                            console.log("Ponto na via:",snappedCoords)
+                            L.marker([snappedCoords[1],snappedCoords[0]]).addTo(map).bindPopup("Ponto na via")
+
+                            alert("Clique: " + JSON.stringify(clickedCoords) + "\nVia mais próxima (ID: " + closestWay.id + ")\nSegmento mais proximo:" + JSON.stringify(snappedCoords));
                         }
-                    })
+                    } else {
+                        alert("Nenhuma rua encontrada próxima ao clique.");
+                    }
+                },
+                error: function(error) {
+                    console.error("Erro na consulta Overpass:", error);
+                    alert("Erro ao consultar dados da rua.");
                 }
             });
-
-            if (closestSegment) {
-                selectedLayer = L.polyline(closestSegment.coordinates.map(coords => L.latLng(coords[1], coords[0])), {
-                    color: 'red',
-                    weight: 5
-                }).addTo(map);
-
-                console.log("Segmento mais próximo:", closestSegment.coordinates);
-                alert("Segmento mais próximo: " + closestSegment.name + "\nCoordenadas: " + JSON.stringify(closestSegment.coordinates));
-            }
         });
     </script>
