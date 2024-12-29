@@ -114,73 +114,134 @@
     </div>
 </div>
 
-    <script>
-        const map = L.map('map').setView([-23.5505, -46.6333], 15);
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+<script>
+// Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
 
-        map.on('click', function(e) {
-            const clickedLatLng = e.latlng;
-            const clickedCoords = [clickedLatLng.lng, clickedLatLng.lat];
-            L.marker(clickedLatLng).addTo(map).bindPopup("Ponto Clicado").openPopup();//adiciona um marcador no ponto clicado
-            console.log("Coordenadas do clique:", clickedCoords);
+// Adicionar mapa ao elemento HTML
+const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
 
-            // Consulta Overpass (adaptar a consulta conforme necessário)
-            const overpassQuery = `
-                [out:json][timeout:25];
-                (
-                    way(around:50,${clickedLatLng.lat},${clickedLatLng.lng})["highway"];
-                );
-                out center;
-            `;
+// Adicionar camada do mapa base
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-            $.ajax({
-                url: 'https://overpass-api.de/api/interpreter',
-                data: { data: overpassQuery },
-                dataType: 'json',
-                success: function(data) {
-                    if (data.elements.length > 0) {
-                        let closestWay = null;
-                        let shortestDistance = Infinity;
+// Localizar o usuário
+function locateUser() {
+    map.locate({ setView: true, maxZoom: 16 });
+}
 
-                        data.elements.forEach(way => {
-                            if (way.type === 'way' && way.geometry) {
-                                const line = turf.lineString(way.geometry.map(coord => [coord.lon, coord.lat]));
-                                const clickedPoint = turf.point(clickedCoords);
-                                const snapped = turf.nearestPointOnLine(line, clickedPoint);
-                                const distance = turf.distance(clickedPoint, snapped);
+// Evento para quando a localização for encontrada
+map.on('locationfound', (e) => {
+    const radius = e.accuracy / 2;
+    L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+    L.circle(e.latlng, radius).addTo(map);
+    console.log('Localização do usuário:', e.latlng);
+});
 
-                                if (distance < shortestDistance) {
-                                    shortestDistance = distance;
-                                    closestWay = way;
-                                }
-                            }
-                        });
+// Evento para quando a localização não for encontrada
+map.on('locationerror', (e) => {
+    console.error('Erro ao localizar o usuário:', e.message);
+});
 
-                        if (closestWay) {
-                            console.log("Way mais próxima:", closestWay);
-                            const wayCoords = closestWay.geometry.map(coord => [coord.lon, coord.lat]);
-                            L.polyline(wayCoords.map(coords => L.latLng(coords[1], coords[0])), {color:'green'}).addTo(map).bindPopup("Via mais proxima")
+// Chamar a função para localizar o usuário
+locateUser();
 
-                            const clickedPointTurf = turf.point(clickedCoords);
-                            const lineTurf = turf.lineString(wayCoords);
-                            const snapped = turf.nearestPointOnLine(lineTurf, clickedPointTurf);
-                            const snappedCoords = snapped.geometry.coordinates;
-                            console.log("Ponto na via:",snappedCoords)
-                            L.marker([snappedCoords[1],snappedCoords[0]]).addTo(map).bindPopup("Ponto na via")
+// Função para buscar o segmento da rua entre interseções
+async function getStreetSegment(lat, lon) {
+    const query = `
+        [out:json];
+        (
+            node(around:100, ${lat}, ${lon});
+            way(bn)["highway"];
+            >;
+        );
+        out geom;
+    `;
 
-                            alert("Clique: " + JSON.stringify(clickedCoords) + "\nVia mais próxima (ID: " + closestWay.id + ")\nSegmento mais proximo:" + JSON.stringify(snappedCoords));
-                        }
-                    } else {
-                        alert("Nenhuma rua encontrada próxima ao clique.");
-                    }
-                },
-                error: function(error) {
-                    console.error("Erro na consulta Overpass:", error);
-                    alert("Erro ao consultar dados da rua.");
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.elements.length > 0) {
+            const nodes = {};
+            const ways = [];
+
+            // Separar nós e vias
+            data.elements.forEach(el => {
+                if (el.type === 'node') {
+                    nodes[el.id] = [el.lon, el.lat];
+                } else if (el.type === 'way') {
+                    ways.push(el);
                 }
             });
-        });
-    </script>
+
+            // Encontrar a via mais próxima e dividir entre interseções
+            let closestWay = null;
+            let minDistance = Infinity;
+
+            ways.forEach(way => {
+                const wayNodes = way.nodes.map(id => nodes[id]);
+                const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestWay = way;
+                }
+            });
+
+            if (closestWay) {
+                const wayNodes = closestWay.nodes.map(id => nodes[id]);
+
+                // Identificar interseções (nós compartilhados por múltiplas vias)
+                const intersections = closestWay.nodes.filter(nodeId =>
+                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                );
+
+                if (intersections.length >= 2) {
+                    // Obter trecho entre as duas primeiras interseções
+                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                    const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+
+                    // Criar segmento como GeoJSON
+                    const segment = {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: segmentNodes
+                        }
+                    };
+
+                    // Adicionar ao mapa
+                    L.geoJSON(segment).addTo(map);
+                    console.log('Trecho identificado entre interseções:', segment);
+
+                    // Logar as coordenadas do segmento
+                    console.log('Coordenadas do segmento:', segmentNodes);
+                } else {
+                    console.log('Não foi possível encontrar duas interseções na via.');
+                }
+            } else {
+                console.log('Nenhuma via encontrada próxima.');
+            }
+        } else {
+            console.log('Nenhum elemento encontrado na consulta.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar segmento:', error);
+    }
+}
+
+// Evento de clique no mapa
+map.on('click', async (e) => {
+    const { lat, lng } = e.latlng;
+    console.log(`Coordenadas clicadas: ${lat}, ${lng}`);
+    await getStreetSegment(lat, lng);
+});
+
+</script>
