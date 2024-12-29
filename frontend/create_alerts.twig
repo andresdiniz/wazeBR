@@ -7,97 +7,94 @@
                 </div>
                 <div class="card-body">
                     <form action="criar_evento.php" method="post" id="eventoForm">
-    <!-- Seção de Nome e Descrição -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label for="nome" class="form-label">Nome do Evento</label>
-            <input type="text" class="form-control" id="nome" name="nome" required>
-        </div>
-        <div class="col-md-6">
-            <label for="descricao" class="form-label">Descrição</label>
-            <textarea class="form-control" id="descricao" name="descricao" required></textarea>
-        </div>
-    </div>
+                        <!-- Seção de Nome e Descrição -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome do Evento</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="descricao" class="form-label">Descrição</label>
+                                <textarea class="form-control" id="descricao" name="descricao" required></textarea>
+                            </div>
+                        </div>
 
-    <!-- Seção de Tipo e Subtipo -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label for="tipo" class="form-label">Tipo</label>
-            <select class="form-select" id="tipo" name="tipo" required>
-                <option value="">Selecione um Tipo</option>
-                {% for tipo in tipos %}
-                    <option value="{{ tipo.id }}">{{ tipo.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-6">
-            <label for="subtipo" class="form-label">Subtipo</label>
-            <select class="form-select" id="subtipo" name="subtipo" required>
-                <option value="">Selecione um Subtipo</option>
-            </select>
-        </div>
-    </div>
+                        <!-- Seção de Tipo e Subtipo -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    <option value="">Selecione um Tipo</option>
+                                    {% for tipo in tipos %}
+                                        <option value="{{ tipo.id }}">{{ tipo.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="subtipo" class="form-label">Subtipo</label>
+                                <select class="form-select" id="subtipo" name="subtipo" required>
+                                    <option value="">Selecione um Subtipo</option>
+                                </select>
+                            </div>
+                        </div>
 
-    <!-- Seção de Início e Fim do Evento -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label for="starttime" class="form-label">Início do Evento</label>
-            <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
-        </div>
-        <div class="col-md-6">
-            <label for="endtime" class="form-label">Fim do Evento</label>
-            <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
-        </div>
-    </div>
+                        <!-- Seção de Início e Fim do Evento -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="starttime" class="form-label">Início do Evento</label>
+                                <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endtime" class="form-label">Fim do Evento</label>
+                                <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
+                            </div>
+                        </div>
 
-    <!-- Seção de Dias da Semana -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <label for="dias_semana" class="form-label">Dias da Semana</label>
-            <select multiple class="form-select" id="dias_semana" name="dias_semana[]" required>
-                <option value="domingo">Domingo</option>
-                <option value="segunda">Segunda-feira</option>
-                <option value="terca">Terça-feira</option>
-                <option value="quarta">Quarta-feira</option>
-                <option value="quinta">Quinta-feira</option>
-                <option value="sexta">Sexta-feira</option>
-                <option value="sabado">Sábado</option>
-            </select>
-        </div>
-    </div>
+                        <!-- Seção de Dias da Semana -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="dias_semana" class="form-label">Dias da Semana</label>
+                                <select multiple class="form-select" id="dias_semana" name="dias_semana[]" required>
+                                    <option value="domingo">Domingo</option>
+                                    <option value="segunda">Segunda-feira</option>
+                                    <option value="terca">Terça-feira</option>
+                                    <option value="quarta">Quarta-feira</option>
+                                    <option value="quinta">Quinta-feira</option>
+                                    <option value="sexta">Sexta-feira</option>
+                                    <option value="sabado">Sábado</option>
+                                </select>
+                            </div>
+                        </div>
 
-    <!-- Seção de Horários -->
-    <div id="horarios_dia" class="mb-4">
-        <!-- Espaço para adicionar campos de horário para cada dia da semana -->
-    </div>
+                        <!-- Seção de Horários -->
+                        <div id="horarios_dia" class="mb-4">
+                            <!-- Espaço para adicionar campos de horário para cada dia da semana -->
+                        </div>
 
-    <!-- Seção de Coordenadas -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
-            <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
-        </div>
-    </div>
+                        <!-- Seção de Coordenadas -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
+                                <input type="text" class="form-control" id="coordenadas" name="coordenadas" required placeholder="Clique no mapa para definir as coordenadas" readonly>
+                            </div>
+                        </div>
 
-    <!-- Seção de Rua -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <label for="rua" class="form-label">Selecione a Rua</label>
-            <select class="form-select" id="rua" name="rua" required>
-                <option value="">Selecione uma rua</option>
-                <!-- As opções de rua serão preenchidas dinamicamente aqui -->
-            </select>
-        </div>
-    </div>
+                        <!-- Seção de Rua -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label for="rua" class="form-label">Selecione a Rua</label>
+                                <select class="form-select" id="rua" name="rua" required>
+                                    <option value="">Selecione uma rua</option>
+                                    <!-- As opções de rua serão preenchidas dinamicamente aqui -->
+                                </select>
+                            </div>
+                        </div>
 
-    <!-- Botão de envio -->
-    <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
-    </div>
-</form>
-
-
-
+                        <!-- Botão de envio -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -107,8 +104,8 @@
             <div id="vias-proximas" class="alert alert-info">
                 <!-- As vias próximas serão inseridas aqui -->
             </div>
-            
-            <!-- Controles de Sentido (Adicionado) -->
+
+            <!-- Controles de Sentido -->
             <div id="controles" class="mt-3"></div> 
         </div>
     </div>
@@ -223,6 +220,9 @@ async function getStreetSegment(lat, lon) {
 
                     // Logar as coordenadas do segmento
                     console.log('Coordenadas do segmento:', segmentNodes);
+                    
+                    // Chamar a função para inverter as coordenadas
+                    invertCoordinates(segmentNodes);
                 } else {
                     console.log('Não foi possível encontrar duas interseções na via.');
                 }
@@ -237,11 +237,100 @@ async function getStreetSegment(lat, lon) {
     }
 }
 
-// Evento de clique no mapa
-map.on('click', async (e) => {
-    const { lat, lng } = e.latlng;
-    console.log(`Coordenadas clicadas: ${lat}, ${lng}`);
-    await getStreetSegment(lat, lng);
-});
+// Função para inverter as coordenadas
+function invertCoordinates(segmentNodes) {
+    const invertedSegment = segmentNodes.reverse(); // Inverte a ordem das coordenadas
+    console.log('Segmento invertido:', invertedSegment);
 
+    // Atualizar o campo de coordenadas com o novo valor
+    document.getElementById('coordenadas').value = invertedSegment.map(coord => coord.join(', ')).join(' | ');
+}
+
+// Função para exibir ruas próximas
+async function displayNearbyStreets(lat, lon) {
+    const query = `
+        [out:json];
+        (
+            node(around:20, ${lat}, ${lon});
+            way(bn)["highway"];
+            >;
+        );
+        out geom;
+    `;
+    
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        let streets = [];
+        
+        if (data.elements) {
+            data.elements.forEach(element => {
+                if (element.type === 'way') {
+                    let streetName = element.tags.name || 'Rua sem nome';
+                    streets.push(streetName);
+                }
+            });
+            
+            // Mostrar as ruas próximas no div "vias-proximas"
+            document.getElementById('vias-proximas').innerHTML = `
+                <strong>Ruas Próximas:</strong><br>
+                ${streets.join('<br>')}
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao buscar ruas próximas:', error);
+    }
+}
+
+// Função para atualizar os subtipos com base no tipo selecionado
+function updateSubtypes() {
+    const tipoSelect = document.getElementById('tipo');
+    const subtipoSelect = document.getElementById('subtipo');
+    const selectedTipo = tipoSelect.value;
+
+    // Limpar as opções de subtipos
+    subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+
+    // Adicionar os subtipos dependendo do tipo
+    if (selectedTipo) {
+        const subtipos = getSubtypesForType(selectedTipo);
+        
+        subtipos.forEach(subtipo => {
+            const option = document.createElement('option');
+            option.value = subtipo.id;
+            option.textContent = subtipo.name;
+            subtipoSelect.appendChild(option);
+        });
+    }
+}
+
+// Função fictícia para retornar os subtipos com base no tipo (substitua com dados reais)
+function getSubtypesForType(tipoId) {
+    // Exemplo de subtipos com base no tipo
+    const subtipos = {
+        '1': [{id: '1.1', name: 'Subtipo 1.1'}, {id: '1.2', name: 'Subtipo 1.2'}],
+        '2': [{id: '2.1', name: 'Subtipo 2.1'}, {id: '2.2', name: 'Subtipo 2.2'}]
+    };
+    
+    return subtipos[tipoId] || [];
+}
+
+// Atualizar subtipos quando o tipo for alterado
+document.getElementById('tipo').addEventListener('change', updateSubtypes);
+
+// Atualizar ruas e subtipos quando o mapa for clicado
+map.on('click', (e) => {
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+    console.log('Coordenadas do clique:', lat, lon);
+
+    // Exibir ruas próximas
+    displayNearbyStreets(lat, lon);
+    
+    // Chama a função para buscar o segmento
+    getStreetSegment(lat, lon);
+});
 </script>
