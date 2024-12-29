@@ -124,6 +124,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+// Variável global para armazenar o segmento anterior (se houver)
+let previousSegmentLayer = null;
+
 // Localizar o usuário
 function locateUser() {
     map.locate({ setView: true, maxZoom: 16 });
@@ -186,7 +189,7 @@ async function getStreetSegment(lat, lon) {
     const query = `
         [out:json];
         (
-            node(around:100, ${lat}, ${lon});
+            node(around:50, ${lat}, ${lon});
             way(bn)["highway"];
             >;
         );
@@ -250,8 +253,13 @@ async function getStreetSegment(lat, lon) {
                         }
                     };
 
-                    // Adicionar ao mapa
-                    L.geoJSON(segment).addTo(map);
+                    // Remover o segmento anterior, se existir
+                    if (previousSegmentLayer) {
+                        map.removeLayer(previousSegmentLayer);
+                    }
+
+                    // Adicionar o novo segmento ao mapa
+                    previousSegmentLayer = L.geoJSON(segment).addTo(map);
                     console.log('Trecho identificado entre interseções:', segment);
 
                     // Logar as coordenadas do segmento
@@ -275,12 +283,22 @@ async function getStreetSegment(lat, lon) {
 
 // Função para inverter as coordenadas
 function invertCoordinates(segmentNodes) {
-    const invertedSegment = segmentNodes.reverse(); // Inverte a ordem das coordenadas
-    console.log('Segmento invertido:', invertedSegment);
+    // Verificar se há pelo menos 2 pontos no segmento
+    if (segmentNodes.length >= 2) {
+        // Inverter as coordenadas dos dois primeiros pontos (se existirem)
+        const temp = segmentNodes[0];
+        segmentNodes[0] = segmentNodes[1];
+        segmentNodes[1] = temp;
 
-    // Atualizar o campo de coordenadas com o novo valor
-    document.getElementById('coordenadas').value = invertedSegment.map(coord => coord.join(', ')).join(' | ');
+        console.log('Segmento invertido:', segmentNodes);
+
+        // Atualizar o campo de coordenadas com o novo valor
+        document.getElementById('coordenadas').value = segmentNodes.map(coord => coord.join(', ')).join(' | ');
+    } else {
+        console.log('Não há pontos suficientes para inverter as coordenadas');
+    }
 }
+
 
 // Função para exibir ruas próximas
 async function displayNearbyStreets(lat, lon) {
@@ -321,42 +339,6 @@ async function displayNearbyStreets(lat, lon) {
     }
 }
 
-// Função para atualizar os subtipos com base no tipo selecionado
-function updateSubtypes() {
-    const tipoSelect = document.getElementById('tipo');
-    const subtipoSelect = document.getElementById('subtipo');
-    const selectedTipo = tipoSelect.value;
-
-    // Limpar as opções de subtipos
-    subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-
-    // Adicionar os subtipos dependendo do tipo
-    if (selectedTipo) {
-        const subtipos = getSubtypesForType(selectedTipo);
-        
-        subtipos.forEach(subtipo => {
-            const option = document.createElement('option');
-            option.value = subtipo.id;
-            option.textContent = subtipo.name;
-            subtipoSelect.appendChild(option);
-        });
-    }
-}
-
-// Função fictícia para retornar os subtipos com base no tipo (substitua com dados reais)
-function getSubtypesForType(tipoId) {
-    // Exemplo de subtipos com base no tipo
-    const subtipos = {
-        '1': [{id: '1.1', name: 'Subtipo 1.1'}, {id: '1.2', name: 'Subtipo 1.2'}],
-        '2': [{id: '2.1', name: 'Subtipo 2.1'}, {id: '2.2', name: 'Subtipo 2.2'}]
-    };
-    
-    return subtipos[tipoId] || [];
-}
-
-// Atualizar subtipos quando o tipo for alterado
-document.getElementById('tipo').addEventListener('change', updateSubtypes);
-
 // Atualizar ruas e subtipos quando o mapa for clicado
 map.on('click', (e) => {
     const lat = e.latlng.lat;
@@ -384,4 +366,141 @@ map.on('click', (e) => {
         console.log("Erro ao consultar a API do Waze");
     });
 });
+
+// Função para localizar o usuário assim que a página é carregada
+function locateUserOnPageLoad() {
+    map.locate({ setView: true, maxZoom: 16 }); // Localizar o usuário e centralizar no mapa
+}
+
+locateUserOnPageLoad();
+</script>
+
+<script>
+// Função para calcular os dias da semana entre as duas datas
+function calcularDiasSemana() {
+    const startDate = document.getElementById('starttime').value;
+    const endDate = document.getElementById('endtime').value;
+    
+    if (!startDate || !endDate) return;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diasSemana = [];
+    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+
+    // Verifica cada dia entre as datas
+    while (start <= end) {
+        const dayOfWeek = start.getDay(); // 0=domingo, 1=segunda-feira, etc.
+        if (!diasSemana.includes(dias[dayOfWeek])) {
+            diasSemana.push(dias[dayOfWeek]);
+        }
+        start.setDate(start.getDate() + 1); // Move para o próximo dia
+    }
+
+    // Preenche o select de dias da semana
+    const diasSelect = document.getElementById('dias_semana');
+    Array.from(diasSelect.options).forEach(option => {
+        if (diasSemana.includes(option.value)) {
+            option.disabled = false;
+        } else {
+            option.disabled = true;
+        }
+    });
+
+    // Limpa horários anteriores e adiciona novos campos de horário
+    atualizarHorarios(diasSemana);
+}
+
+// Função para adicionar os campos de horário para cada dia da semana selecionado
+function atualizarHorarios(diasSelecionados) {
+    const horariosDiv = document.getElementById('horarios_dia');
+    horariosDiv.innerHTML = ''; // Limpa horários anteriores
+
+    diasSelecionados.forEach(dia => {
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('mb-3');
+        dayDiv.setAttribute('data-dia', dia); // Adiciona o atributo data-dia
+
+        const label = document.createElement('label');
+        label.classList.add('form-label');
+        label.innerText = `Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
+
+        // Campos de horário de início e fim
+        const inputHora = document.createElement('input');
+        inputHora.type = 'time';
+        inputHora.name = `${dia}_inicio`;
+        inputHora.classList.add('form-control');
+        inputHora.placeholder = 'Início do horário';
+
+        const inputHoraFim = document.createElement('input');
+        inputHoraFim.type = 'time';
+        inputHoraFim.name = `${dia}_fim`;
+        inputHoraFim.classList.add('form-control');
+        inputHoraFim.placeholder = 'Fim do horário';
+
+        // Botão para adicionar intervalos
+        const addButton = document.createElement('button');
+        addButton.classList.add('btn', 'btn-secondary', 'mt-2');
+        addButton.innerText = 'Adicionar intervalo';
+        addButton.onclick = function (event) {
+            event.preventDefault();  // Evita o comportamento padrão do botão
+            addHorarioIntervalo(dia);
+        };
+
+        // Adiciona os campos de horário para cada dia selecionado
+        dayDiv.appendChild(label);
+        dayDiv.appendChild(inputHora);
+        dayDiv.appendChild(inputHoraFim);
+        dayDiv.appendChild(addButton);
+
+        horariosDiv.appendChild(dayDiv);
+    });
+}
+
+// Função para adicionar intervalos de horário dentro do mesmo dia
+function addHorarioIntervalo(dia) {
+    // Encontra o div com os horários do dia específico
+    const dayDiv = document.querySelector(`div[data-dia="${dia}"]`);
+
+    // Cria um novo formulário de intervalo
+    const intervaloDiv = document.createElement('div');
+    intervaloDiv.classList.add('mt-3');
+    intervaloDiv.classList.add('alert', 'alert-warning');
+
+    // Cria novos campos para "Início" e "Fim" do intervalo
+    const inputIntervaloHoraInicio = document.createElement('input');
+    inputIntervaloHoraInicio.type = 'time';
+    inputIntervaloHoraInicio.name = `${dia}_intervalo_inicio[]`;
+    inputIntervaloHoraInicio.classList.add('form-control');
+    inputIntervaloHoraInicio.placeholder = 'Início do intervalo';
+
+    const inputIntervaloHoraFim = document.createElement('input');
+    inputIntervaloHoraFim.type = 'time';
+    inputIntervaloHoraFim.name = `${dia}_intervalo_fim[]`;
+    inputIntervaloHoraFim.classList.add('form-control');
+    inputIntervaloHoraFim.placeholder = 'Fim do intervalo';
+
+    // Botão para remover o intervalo
+    const removeButton = document.createElement('button');
+    removeButton.classList.add('btn', 'btn-danger', 'mt-2');
+    removeButton.innerText = 'Remover intervalo';
+    removeButton.onclick = function () {
+        intervaloDiv.remove();
+    };
+
+    // Adiciona os novos campos de horário e o botão de remover
+    intervaloDiv.appendChild(inputIntervaloHoraInicio);
+    intervaloDiv.appendChild(inputIntervaloHoraFim);
+    intervaloDiv.appendChild(removeButton);
+
+    // Adiciona o novo intervalo ao div do dia
+    dayDiv.appendChild(intervaloDiv);
+}
+
+// Evento para atualizar os dias da semana e horários sempre que as datas de início ou fim mudarem
+document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
+document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
+
+// Chama a função inicialmente para garantir que o campo de dias da semana seja atualizado corretamente
+calcularDiasSemana();
 </script>
