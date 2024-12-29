@@ -115,187 +115,80 @@
 </div>
 
 <script>
-    // Inicializa o mapa
-    var map = L.map('map').setView([-23.550520, -46.633308], 13); // São Paulo
+        const map = L.map('map').setView([-23.5505, -46.6333], 12); // Coordenadas de São Paulo como exemplo
 
-    // Adiciona camada OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-    }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-    // Variáveis globais
-    var pontosSelecionados = [];
-    var trechoSelecionado = null; // Para armazenar o polígono do trecho
-    var marcadorSelecionado = []; // Marcadores dos pontos clicados
-
-    // Localiza o usuário e centraliza o mapa
-    function localizarUsuario() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (posicao) {
-                var latitude = posicao.coords.latitude;
-                var longitude = posicao.coords.longitude;
-                map.setView([latitude, longitude], 13);
-                L.marker([latitude, longitude])
-                    .addTo(map)
-                    .bindPopup("Você está aqui")
-                    .openPopup();
-            }, function () {
-                alert("Não foi possível obter sua localização.");
-            });
-        } else {
-            alert("Geolocalização não é suportada neste navegador.");
-        }
-    }
-
-    localizarUsuario();
-
-    // Evento de clique para selecionar os pontos no mapa
-    map.on('click', function (e) {
-        if (pontosSelecionados.length >= 2) {
-            limparTrecho();
-        }
-
-        // Adiciona o ponto clicado à lista
-        pontosSelecionados.push([e.latlng.lat, e.latlng.lng]);
-
-        // Adiciona marcador no mapa
-        var marcador = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-        marcadorSelecionado.push(marcador);
-
-        // Se dois pontos forem selecionados, desenha o trecho
-        if (pontosSelecionados.length === 2) {
-            consultarTrechoEntrePontos(pontosSelecionados[0], pontosSelecionados[1]);
-        }
-    });
-
-    // Função para consultar e desenhar o trecho entre dois pontos
-    function consultarTrechoEntrePontos(ponto1, ponto2) {
-        const [lat1, lon1] = ponto1;
-        const [lat2, lon2] = ponto2;
-
-        // Query na API Overpass para obter a via conectando os dois pontos
-        const query = `
-            [out:json];
-            (
-                way(around:200,${lat1},${lon1})[highway];
-                way(around:200,${lat2},${lon2})[highway];
-            );
-            out body;
-        `;
-
-        const urlOverpass = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-        fetch(urlOverpass)
-            .then(response => response.json())
-            .then(data => {
-                const vias = data.elements.filter(via => via.nodes);
-                console.log("Vias encontradas:", vias);
-
-                if (vias.length === 0) {
-                    alert("Nenhuma via conectando os dois pontos foi encontrada.");
-                    return;
+        // Dados GeoJSON representando os segmentos das ruas (SUBSTITUA COM SEUS DADOS)
+        // Este é um exemplo simplificado, você precisará adaptar para seus dados reais.
+        const geojsonData = {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 1, "name": "Rua Eugenio Feio Segmento 1" },
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [[-46.64, -23.54], [-46.63, -23.53]]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": { "id": 2, "name": "Rua Eugenio Feio Segmento 2" },
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [[-46.63, -23.53], [-46.62, -23.52]]
+              }
+            },
+            {
+                "type": "Feature",
+                "properties": { "id": 3, "name": "Rua Eugenio Feio Segmento 3" },
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [[-46.62, -23.52], [-46.61, -23.51]]
                 }
+              },
+              {
+                "type": "Feature",
+                "properties": { "id": 4, "name": "Rua Eugenio Feio Segmento 4" },
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [[-46.61, -23.51], [-46.60, -23.50]]
+                }
+              }
 
-                // Seleciona a primeira via que conecta os dois pontos
-                const viaSelecionada = vias[0];
-                consultarCoordenadasNodes(viaSelecionada.nodes, (coordenadas) => {
-                    desenharTrecho(coordenadas, ponto1, ponto2);
-                });
-            })
-            .catch(error => console.error("Erro ao consultar trecho:", error));
-    }
+          ]
+        };
 
-    // Função para consultar coordenadas dos nodes
-    function consultarCoordenadasNodes(nodeIds, callback) {
-        const coordenadas = [];
-        const totalNodes = nodeIds.length;
-        let processados = 0;
+        let selectedLayer = null;
 
-        nodeIds.forEach(nodeId => {
-            const nodeUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(${nodeId});out body;`;
-
-            fetch(nodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.elements && data.elements.length > 0) {
-                        const node = data.elements[0];
-                        coordenadas.push([node.lat, node.lon]);
+        L.geoJSON(geojsonData, {
+            onEachFeature: function (feature, layer) {
+                layer.on('click', function (e) {
+                    if (selectedLayer) {
+                      map.removeLayer(selectedLayer); // Remove a camada anterior
                     }
-                })
-                .finally(() => {
-                    processados++;
-                    if (processados === totalNodes) {
-                        callback(coordenadas);
-                    }
+
+                    selectedLayer = L.geoJSON(feature, {
+                        style: {
+                            color: 'red', // Cor da linha selecionada
+                            weight: 5     // Espessura da linha selecionada
+                        }
+                    }).addTo(map);
+
+
+                    // Obter as coordenadas do segmento clicado
+                    const coordinates = feature.geometry.coordinates;
+                    console.log("Coordenadas do segmento:", coordinates);
+                    alert("Segmento Selecionado: " + feature.properties.name + "\nCoordenadas: " + JSON.stringify(coordinates));
+
                 });
-        });
-    }
-
-    // Função para desenhar o trecho no mapa
-    function desenharTrecho(coordenadas, ponto1, ponto2) {
-        // Filtrar coordenadas entre os dois pontos selecionados
-        const trechoFiltrado = filtrarTrecho(coordenadas, ponto1, ponto2);
-
-        // Desenhar o trecho no mapa
-        trechoSelecionado = L.polyline(trechoFiltrado, { color: 'blue', weight: 5 }).addTo(map);
-        map.fitBounds(trechoSelecionado.getBounds()); // Centralizar o mapa no trecho
-    }
-
-    // Função para filtrar o trecho entre dois pontos
-    function filtrarTrecho(coordenadas, ponto1, ponto2) {
-        const index1 = encontrarNodeMaisProximo(coordenadas, ponto1);
-        const index2 = encontrarNodeMaisProximo(coordenadas, ponto2);
-
-        if (index1 < index2) {
-            return coordenadas.slice(index1, index2 + 1);
-        } else {
-            return coordenadas.slice(index2, index1 + 1);
-        }
-    }
-
-    // Função para encontrar o node mais próximo de um ponto
-    function encontrarNodeMaisProximo(coordenadas, ponto) {
-        const [lat, lon] = ponto;
-
-        let menorDistancia = Infinity;
-        let indexMaisProximo = -1;
-
-        coordenadas.forEach((coord, index) => {
-            const distancia = calcularDistancia(lat, lon, coord[0], coord[1]);
-            if (distancia < menorDistancia) {
-                menorDistancia = distancia;
-                indexMaisProximo = index;
+            },
+            style: {
+                color: 'blue', // Cor padrão das linhas
+                weight: 3      // Espessura padrão das linhas
             }
-        });
-
-        return indexMaisProximo;
-    }
-
-    // Função para calcular a distância entre dois pontos
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Raio da Terra em metros
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c; // Distância em metros
-    }
-
-    // Função para limpar o trecho selecionado
-    function limparTrecho() {
-        if (trechoSelecionado) {
-            map.removeLayer(trechoSelecionado);
-            trechoSelecionado = null;
-        }
-
-        marcadorSelecionado.forEach(marcador => map.removeLayer(marcador));
-        marcadorSelecionado = [];
-        pontosSelecionados = [];
-    }
-</script>
+        }).addTo(map);
+    </script>
