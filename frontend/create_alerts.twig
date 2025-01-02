@@ -292,8 +292,6 @@ function invertCoordinates(segmentNodes) {
 
         console.log('Segmento invertido:', segmentNodes);
 
-        // Atualizar o campo de coordenadas com o novo valor
-        document.getElementById('coordenadas').value = segmentNodes.map(coord => coord.join(', ')).join(' | ');
     } else {
         console.log('Não há pontos suficientes para inverter as coordenadas');
     }
@@ -350,6 +348,9 @@ map.on('click', (e) => {
     
     // Chama a função para buscar o segmento
     getStreetSegment(lat, lon);
+
+    // Atualizar o campo de coordenadas com o novo valor
+    document.getElementById('coordenadas').value = `${lat}, ${lon}`;
 
     // Consultar a rua do Waze ao clicar no mapa
     consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
@@ -503,4 +504,43 @@ document.getElementById('endtime').addEventListener('change', calcularDiasSemana
 
 // Chama a função inicialmente para garantir que o campo de dias da semana seja atualizado corretamente
 calcularDiasSemana();
+
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tipoSelect = document.getElementById('tipo');
+        const subtipoSelect = document.getElementById('subtipo');
+
+        // Dados de subtipos por tipo fornecidos pelo Twig
+        const subtiposPorTipo = {{ subtiposPorTipo|json_encode|raw }};
+
+        // Desabilita o campo de subtipo inicialmente
+        subtipoSelect.disabled = true;
+
+        tipoSelect.addEventListener('change', function () {
+            const selectedTipoId = tipoSelect.value;
+
+            // Limpa os subtipos
+            subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+
+            if (selectedTipoId) {
+                // Habilita o campo de subtipo
+                subtipoSelect.disabled = false;
+
+                // Adiciona os subtipos correspondentes ao tipo selecionado
+                if (subtiposPorTipo[selectedTipoId]) {
+                    subtiposPorTipo[selectedTipoId].forEach(function (subtipo) {
+                        const option = document.createElement('option');
+                        option.value = subtipo.id;
+                        option.textContent = subtipo.name;
+                        subtipoSelect.appendChild(option);
+                    });
+                }
+            } else {
+                // Desabilita o campo de subtipo caso nenhum tipo seja selecionado
+                subtipoSelect.disabled = true;
+            }
+        });
+    });
 </script>
