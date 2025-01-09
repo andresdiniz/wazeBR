@@ -732,6 +732,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $quinta_fim = $_POST['quinta_fim'] ?? null;
                 $coordenadas = $_POST['coordenadas'] ?? null;
                 $rua = $_POST['rua'] ?? null;
+                $direcao = $_POST['directionSelect'] ?? null;
             
                 // Validação dos campos obrigatórios
                 if (!$nome || !$descricao || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
@@ -746,7 +747,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Inserir evento na tabela events
                     $sqlEvent = "
                         INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, description, street, polyline, direction, starttime, endtime)
-                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, 'ONE_DIRECTION', :starttime, :endtime)
+                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, :direction, :starttime, :endtime)
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
                     $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
@@ -756,6 +757,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':direction', $direcao, PDO:PARAM_STR );
             
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
