@@ -166,12 +166,47 @@ map.on('locationfound', (e) => {
     L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     L.circle(e.latlng, radius).addTo(map);
     console.log('Localização do usuário:', e.latlng);
+
+    // Consultar a rua do Waze ao localizar o usuário
+    consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            console.log("Rua encontrada (Waze):", nomeRuaWaze);
+            // Adiciona o nome da rua ao select
+            const ruaSelect = document.getElementById('ruaSelect');
+            const optionWaze = document.createElement('option');
+            optionWaze.value = nomeRuaWaze;
+            optionWaze.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(optionWaze);
+            ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
+        }
+    }).catch(() => {
+        console.log("Erro ao consultar a API do Waze");
+    });
 });
 
-// Evento para quando a localização não for encontrada
-map.on('locationerror', (e) => {
-    console.error('Erro ao localizar o usuário:', e.message);
-});
+// Função para consultar a rua via API personalizada api.php
+function consultarRuaWaze(lat, lon) {
+    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+
+    return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.result && data.result.length > 0) {
+                // Ordena as ruas pela menor distância
+                data.result.sort((a, b) => a.distance - b.distance);
+
+                // Pega o nome da rua mais próxima
+                const nomeRua = data.result[0].names[0];
+                return nomeRua;
+            } else {
+                return null; // Caso a resposta não tenha dados válidos
+            }
+        })
+        .catch(() => {
+            console.log("Erro ao consultar a API do Waze");
+            return null; // Caso ocorra um erro na consulta
+        });
+}
 
 // Função para buscar o segmento da rua entre interseções
 async function getStreetSegment(lat, lon) {
@@ -225,7 +260,6 @@ async function getStreetSegment(lat, lon) {
                 );
 
                 if (intersections.length >= 2) {
-                    // Obter trecho entre as duas primeiras interseções
                     const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
                     const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
                     const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
@@ -255,7 +289,7 @@ async function getStreetSegment(lat, lon) {
 
                     previousSegmentLayer = L.geoJSON(segment).addTo(map);
 
-                    // Criar um campo select para escolher o sentido
+                    // Atualiza o campo select
                     const directionSelect = document.getElementById('directionSelect');
                     directionSelect.innerHTML = ''; // Limpa as opções existentes
                     const bothOption = document.createElement('option');
@@ -289,6 +323,16 @@ map.on('click', (e) => {
     const lon = e.latlng.lng;
     console.log('Coordenadas do clique:', lat, lon);
 
+    consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            const ruaSelect = document.getElementById('ruaSelect');
+            const option = document.createElement('option');
+            option.value = nomeRuaWaze;
+            option.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(option);
+        }
+    });
+
     getStreetSegment(lat, lon);
 });
 
@@ -296,8 +340,11 @@ map.on('click', (e) => {
 locateUser();
 </script>
 
-<!-- Campo Select para escolher o sentido -->
+<!-- Campos adicionais -->
 <div>
+    <label for="ruaSelect">Rua:</label>
+    <select id="ruaSelect"></select>
+
     <label for="directionSelect">Escolha o sentido:</label>
     <select id="directionSelect">
         <option value="both">Ambos os sentidos</option>
