@@ -88,9 +88,9 @@
                                     <!-- As opções de rua serão preenchidas dinamicamente aqui -->
                                 </select>
                             </div>
-                            <div class="col-md-12">
+                            <div class="mt-2 col-md-12">
                                 <label for="directionSelect">Escolha o sentido:</label>
-                                <select id="directionSelect"></select>
+                                <select id="directionSelect" name="directionSelect"></select>
                             </div>
                         </div>
 
@@ -157,6 +157,11 @@ function azimuthToDirection(azimuth) {
     ];
     const index = Math.round(azimuth / 45) % 8; // Divide os 360 graus em 8 setores
     return directions[index];
+}
+
+function getOppositeAzimuth(azimuth) {
+    const opposite = (azimuth + 180) % 360; // Soma 180° para inverter e usa o módulo para manter no intervalo [0, 360)
+    return opposite >= 0 ? opposite : opposite + 360; // Garante que o valor seja positivo
 }
 
 // Função para obter o sentido oposto
@@ -275,6 +280,7 @@ async function getStreetSegment(lat, lon) {
                     );
 
                     const direction = azimuthToDirection(azimuth);
+                    const opossiteAngule = getOppositeAzimuth(azimuth);
                     const oppositeDirection = getOppositeDirection(direction);
 
                     const segment = {
@@ -301,12 +307,12 @@ async function getStreetSegment(lat, lon) {
                     directionSelect.appendChild(bothOption);
 
                     const singleOption = document.createElement('option');
-                    singleOption.value = direction;
+                    singleOption.value = azimuth;
                     singleOption.textContent = `Sentido: ${direction}`;
                     directionSelect.appendChild(singleOption);
 
                     const oppositeOption = document.createElement('option');
-                    oppositeOption.value = oppositeDirection;
+                    oppositeOption.value = opossiteAngule;
                     oppositeOption.textContent = `Sentido: ${oppositeDirection}`;
                     directionSelect.appendChild(oppositeOption);
 
