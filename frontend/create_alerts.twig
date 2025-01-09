@@ -532,7 +532,7 @@ calcularDiasSemana();
                 if (subtiposPorTipo[selectedTipoId]) {
                     subtiposPorTipo[selectedTipoId].forEach(function (subtipo) {
                         const option = document.createElement('option');
-                        option.value = subtipo.name;
+                        option.value = subtipo.subtype_value;
                         option.textContent = subtipo.name;
                         subtipoSelect.appendChild(option);
                     });
