@@ -15,7 +15,7 @@ try {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
 
-// Consulta para eventos e dados relacionados, incluindo agendamentos
+// Consulta para eventos ativos e dados relacionados, incluindo agendamentos
 $query = "
     SELECT 
         e.id AS event_id, e.parent_event_id, e.creationtime, e.updatetime,
@@ -32,7 +32,10 @@ $query = "
         lane_impacts l ON e.id = l.event_id
     LEFT JOIN 
         schedules sc ON e.id = sc.event_id
-    ORDER BY e.id, s.id, l.id, sc.id
+    WHERE 
+        e.is_active = 1 -- Filtra apenas eventos ativos
+    ORDER BY 
+        e.id, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
@@ -118,7 +121,7 @@ foreach ($events as $event) {
         }
     }
 
-    // Adicionar elementos solicitados
+    // Adicionar elementos opcionais
     foreach (['direction', 'endtime', 'description', 'subtype'] as $key) {
         if (!empty($event[$key])) {
             $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
@@ -154,7 +157,7 @@ foreach ($events as $event) {
         $eventNode->appendChild($laneImpactsNode);
     }
 
-    // Adicionar agendamentos, caso existam
+    // Adicionar agendamentos
     if (!empty($event['schedules'])) {
         $schedulesNode = $xml->createElement('schedules');
         foreach ($event['schedules'] as $schedule) {
@@ -174,4 +177,5 @@ foreach ($events as $event) {
 header('Content-Type: application/xml; charset=utf-8');
 $xml->save('events.xml');
 echo $xml->saveXML();
+
 ?>

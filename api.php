@@ -746,8 +746,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
                     // Inserir evento na tabela events
                     $sqlEvent = "
-                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, description, street, polyline, direction, starttime, endtime)
-                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, :direction, :starttime, :endtime)
+                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, description, street, polyline, direction, starttime, endtime, is_active)
+                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, :direction, :starttime, :endtime,'1')
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
                     $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
