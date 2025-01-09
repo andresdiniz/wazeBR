@@ -166,48 +166,12 @@ map.on('locationfound', (e) => {
     L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     L.circle(e.latlng, radius).addTo(map);
     console.log('Localização do usuário:', e.latlng);
-
-    // Chama a função para consultar a rua após localizar o usuário
-    consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
-        if (nomeRuaWaze) {
-            console.log("Rua encontrada (Waze):", nomeRuaWaze);
-            const ruaSelect = document.getElementById('ruaSelect');
-            const optionWaze = document.createElement('option');
-            optionWaze.value = nomeRuaWaze;
-            optionWaze.textContent = nomeRuaWaze;
-            ruaSelect.appendChild(optionWaze);
-            ruaSelect.value = nomeRuaWaze;
-        }
-    }).catch(() => {
-        console.log("Erro ao consultar a API do Waze");
-    });
 });
 
 // Evento para quando a localização não for encontrada
 map.on('locationerror', (e) => {
     console.error('Erro ao localizar o usuário:', e.message);
 });
-
-// Função para consultar a rua via API personalizada api.php usando fetch
-function consultarRuaWaze(lat, lon) {
-    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
-
-    return fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.result && data.result.length > 0) {
-                data.result.sort((a, b) => a.distance - b.distance);
-                const nomeRua = data.result[0].names[0];
-                return nomeRua;
-            } else {
-                return null;
-            }
-        })
-        .catch(() => {
-            console.log("Erro ao consultar a API do Waze");
-            return null;
-        });
-}
 
 // Função para buscar o segmento da rua entre interseções
 async function getStreetSegment(lat, lon) {
@@ -255,32 +219,59 @@ async function getStreetSegment(lat, lon) {
             if (closestWay) {
                 const wayNodes = closestWay.nodes.map(id => nodes[id]);
 
-                const azimuth = calculateAzimuth(
-                    wayNodes[0][1], wayNodes[0][0],
-                    wayNodes[1][1], wayNodes[1][0]
+                // Identificar interseções (nós compartilhados por múltiplas vias)
+                const intersections = closestWay.nodes.filter(nodeId =>
+                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
                 );
 
-                const direction = azimuthToDirection(azimuth);
+                if (intersections.length >= 2) {
+                    // Obter trecho entre as duas primeiras interseções
+                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                    const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
 
-                console.log(`Azimute: ${azimuth}°`);
-                console.log(`Direção Cardinal: ${direction}`);
+                    const azimuth = calculateAzimuth(
+                        segmentNodes[0][1], segmentNodes[0][0],
+                        segmentNodes[1][1], segmentNodes[1][0]
+                    );
 
-                const segment = {
-                    type: 'Feature',
-                    properties: {},
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: wayNodes
+                    const direction = azimuthToDirection(azimuth);
+
+                    console.log(`Azimute: ${azimuth}°`);
+                    console.log(`Direção Cardinal: ${direction}`);
+
+                    const segment = {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: segmentNodes
+                        }
+                    };
+
+                    if (previousSegmentLayer) {
+                        map.removeLayer(previousSegmentLayer);
                     }
-                };
 
-                if (previousSegmentLayer) {
-                    map.removeLayer(previousSegmentLayer);
+                    previousSegmentLayer = L.geoJSON(segment).addTo(map);
+
+                    // Criar um campo select para escolher o sentido
+                    const directionSelect = document.getElementById('directionSelect');
+                    directionSelect.innerHTML = ''; // Limpa as opções existentes
+                    const bothOption = document.createElement('option');
+                    bothOption.value = 'both';
+                    bothOption.textContent = 'Ambos os sentidos';
+                    directionSelect.appendChild(bothOption);
+
+                    const singleOption = document.createElement('option');
+                    singleOption.value = direction;
+                    singleOption.textContent = `Somente 1 direção: ${direction}`;
+                    directionSelect.appendChild(singleOption);
+
+                    alert(`Segmento carregado. Sentido: ${direction} (${azimuth.toFixed(2)}°)`);
+                } else {
+                    console.log('Não foi possível encontrar duas interseções na via.');
                 }
-
-                previousSegmentLayer = L.geoJSON(segment).addTo(map);
-
-                alert(`Segmento carregado. Sentido: ${direction} (${azimuth.toFixed(2)}°)`);
             } else {
                 console.log('Nenhuma via encontrada próxima.');
             }
@@ -304,6 +295,14 @@ map.on('click', (e) => {
 // Localizar o usuário na inicialização
 locateUser();
 </script>
+
+<!-- Campo Select para escolher o sentido -->
+<div>
+    <label for="directionSelect">Escolha o sentido:</label>
+    <select id="directionSelect">
+        <option value="both">Ambos os sentidos</option>
+    </select>
+</div>
 
 
 <script>
