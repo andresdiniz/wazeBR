@@ -15,7 +15,7 @@ try {
     $pdo = Database::getConnection();
 // Consultas para tipos e subtipos
 $sqlTipos = "SELECT id, name, value FROM alert_type";
-$sqlSubtipos = "SELECT id, alert_type_id, subtype_value, name, FROM alert_subtype";
+$sqlSubtipos = "SELECT id, alert_type_id, subtype_value, name FROM alert_subtype";
 
 $tipos = $pdo->query($sqlTipos)->fetchAll(PDO::FETCH_ASSOC);
 $subtipos = $pdo->query($sqlSubtipos)->fetchAll(PDO::FETCH_ASSOC);
