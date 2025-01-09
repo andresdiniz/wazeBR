@@ -757,7 +757,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
-                    $stmtEvent->bindParam(':direction', $direcao, PDO:PARAM_STR );
+                    $stmtEvent->bindParam(':direction', $direcao, PDO::PARAM_STR);
             
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
