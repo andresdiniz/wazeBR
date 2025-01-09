@@ -88,6 +88,10 @@
                                     <!-- As opções de rua serão preenchidas dinamicamente aqui -->
                                 </select>
                             </div>
+                            <div class="col-md-12">
+                                <label for="directionSelect">Escolha o sentido:</label>
+                                <select id="directionSelect"></select>
+                            </div>
                         </div>
 
                         <!-- Botão de envio -->
@@ -337,19 +341,6 @@ map.on('click', (e) => {
 // Localizar o usuário na inicialização
 locateUser();
 </script>
-
-<!-- Campos adicionais -->
-<div>
-    <label for="coordenadas">Coordenadas:</label>
-    <input type="text" id="coordenadas" readonly>
-
-    <label for="ruaSelect">Rua:</label>
-    <select id="ruaSelect"></select>
-
-    <label for="directionSelect">Escolha o sentido:</label>
-    <select id="directionSelect"></select>
-</div>
-
 
 <script>
 // Função para calcular os dias da semana entre as duas datas
