@@ -112,7 +112,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
-
 <script>
 // Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
 
@@ -127,7 +126,51 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // Variável global para armazenar o segmento anterior (se houver)
 let previousSegmentLayer = null;
 
-// Localizar o usuário
+// Função para calcular o azimute entre dois pontos
+function calculateAzimuth(lat1, lon1, lat2, lon2) {
+    const toRadians = Math.PI / 180;
+    const toDegrees = 180 / Math.PI;
+
+    const dLon = (lon2 - lon1) * toRadians;
+    const y = Math.sin(dLon) * Math.cos(lat2 * toRadians);
+    const x = Math.cos(lat1 * toRadians) * Math.sin(lat2 * toRadians) -
+              Math.sin(lat1 * toRadians) * Math.cos(lat2 * toRadians) * Math.cos(dLon);
+
+    let azimuth = Math.atan2(y, x) * toDegrees;
+
+    // Garantir que o azimute esteja entre 0 e 360 graus
+    if (azimuth < 0) {
+        azimuth += 360;
+    }
+
+    return azimuth;
+}
+
+// Função para converter azimute em direção cardinal
+function azimuthToDirection(azimuth) {
+    const directions = [
+        "Norte", "Nordeste", "Leste", "Sudeste", "Sul", "Sudoeste", "Oeste", "Noroeste", "Norte"
+    ];
+    const index = Math.round(azimuth / 45) % 8; // Divide os 360 graus em 8 setores
+    return directions[index];
+}
+
+// Função para obter o sentido oposto
+function getOppositeDirection(direction) {
+    const opposites = {
+        "Norte": "Sul",
+        "Nordeste": "Sudoeste",
+        "Leste": "Oeste",
+        "Sudeste": "Noroeste",
+        "Sul": "Norte",
+        "Sudoeste": "Nordeste",
+        "Oeste": "Leste",
+        "Noroeste": "Sudeste"
+    };
+    return opposites[direction] || "Desconhecido";
+}
+
+// Função para localizar o usuário
 function locateUser() {
     map.locate({ setView: true, maxZoom: 16 });
 }
@@ -137,30 +180,20 @@ map.on('locationfound', (e) => {
     const radius = e.accuracy / 2;
     L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     L.circle(e.latlng, radius).addTo(map);
-    console.log('Localização do usuário:', e.latlng);
-    
-    // Chama a função para consultar a rua após localizar o usuário
+
     consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
         if (nomeRuaWaze) {
-            console.log("Rua encontrada (Waze):", nomeRuaWaze);
-            // Adiciona o nome da rua do Waze ao select
+            const ruaSelect = document.getElementById('ruaSelect');
             const optionWaze = document.createElement('option');
             optionWaze.value = nomeRuaWaze;
             optionWaze.textContent = nomeRuaWaze;
             ruaSelect.appendChild(optionWaze);
-            ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
+            ruaSelect.value = nomeRuaWaze;
         }
-    }).catch(() => {
-        console.log("Erro ao consultar a API do Waze");
     });
 });
 
-// Evento para quando a localização não for encontrada
-map.on('locationerror', (e) => {
-    console.error('Erro ao localizar o usuário:', e.message);
-});
-
-// Função para consultar a rua via API personalizada api.php usando fetch
+// Função para consultar a rua via API personalizada api.php
 function consultarRuaWaze(lat, lon) {
     const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
 
@@ -168,20 +201,13 @@ function consultarRuaWaze(lat, lon) {
         .then(response => response.json())
         .then(data => {
             if (data && data.result && data.result.length > 0) {
-                // Ordena as ruas pela menor distância
                 data.result.sort((a, b) => a.distance - b.distance);
-                
-                // Pega o nome da rua mais próxima
-                const nomeRua = data.result[0].names[0];  // Assumindo que sempre há pelo menos um nome de rua
-                return nomeRua;
+                return data.result[0].names[0]; // Nome da rua mais próxima
             } else {
-                return null; // Caso a resposta não tenha dados válidos
+                return null;
             }
         })
-        .catch(() => {
-            console.log("Erro ao consultar a API do Waze");
-            return null; // Caso ocorra um erro na consulta
-        });
+        .catch(() => null);
 }
 
 // Função para buscar o segmento da rua entre interseções
@@ -206,7 +232,6 @@ async function getStreetSegment(lat, lon) {
             const nodes = {};
             const ways = [];
 
-            // Separar nós e vias
             data.elements.forEach(el => {
                 if (el.type === 'node') {
                     nodes[el.id] = [el.lon, el.lat];
@@ -215,7 +240,6 @@ async function getStreetSegment(lat, lon) {
                 }
             });
 
-            // Encontrar a via mais próxima e dividir entre interseções
             let closestWay = null;
             let minDistance = Infinity;
 
@@ -232,18 +256,23 @@ async function getStreetSegment(lat, lon) {
             if (closestWay) {
                 const wayNodes = closestWay.nodes.map(id => nodes[id]);
 
-                // Identificar interseções (nós compartilhados por múltiplas vias)
                 const intersections = closestWay.nodes.filter(nodeId =>
                     data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
                 );
 
                 if (intersections.length >= 2) {
-                    // Obter trecho entre as duas primeiras interseções
                     const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
                     const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
                     const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
 
-                    // Criar segmento como GeoJSON
+                    const azimuth = calculateAzimuth(
+                        segmentNodes[0][1], segmentNodes[0][0],
+                        segmentNodes[1][1], segmentNodes[1][0]
+                    );
+
+                    const direction = azimuthToDirection(azimuth);
+                    const oppositeDirection = getOppositeDirection(direction);
+
                     const segment = {
                         type: 'Feature',
                         properties: {},
@@ -253,87 +282,36 @@ async function getStreetSegment(lat, lon) {
                         }
                     };
 
-                    // Remover o segmento anterior, se existir
                     if (previousSegmentLayer) {
                         map.removeLayer(previousSegmentLayer);
                     }
 
-                    // Adicionar o novo segmento ao mapa
                     previousSegmentLayer = L.geoJSON(segment).addTo(map);
-                    console.log('Trecho identificado entre interseções:', segment);
 
-                    // Logar as coordenadas do segmento
-                    console.log('Coordenadas do segmento:', segmentNodes);
-                    
-                    // Chamar a função para inverter as coordenadas
-                    invertCoordinates(segmentNodes);
-                } else {
-                    console.log('Não foi possível encontrar duas interseções na via.');
+                    // Atualizar o select de sentido
+                    const directionSelect = document.getElementById('directionSelect');
+                    directionSelect.innerHTML = '';
+                    const bothOption = document.createElement('option');
+                    bothOption.value = 'both';
+                    bothOption.textContent = 'Ambos os sentidos';
+                    directionSelect.appendChild(bothOption);
+
+                    const singleOption = document.createElement('option');
+                    singleOption.value = direction;
+                    singleOption.textContent = `Sentido: ${direction}`;
+                    directionSelect.appendChild(singleOption);
+
+                    const oppositeOption = document.createElement('option');
+                    oppositeOption.value = oppositeDirection;
+                    oppositeOption.textContent = `Sentido: ${oppositeDirection}`;
+                    directionSelect.appendChild(oppositeOption);
+
+                    console.log(`Segmento carregado. Sentido: ${direction} (${azimuth.toFixed(2)}°). Oposto: ${oppositeDirection}`);
                 }
-            } else {
-                console.log('Nenhuma via encontrada próxima.');
             }
-        } else {
-            console.log('Nenhum elemento encontrado na consulta.');
         }
     } catch (error) {
         console.error('Erro ao buscar segmento:', error);
-    }
-}
-
-// Função para inverter as coordenadas
-function invertCoordinates(segmentNodes) {
-    // Verificar se há pelo menos 2 pontos no segmento
-    if (segmentNodes.length >= 2) {
-        // Inverter as coordenadas dos dois primeiros pontos (se existirem)
-        const temp = segmentNodes[0];
-        segmentNodes[0] = segmentNodes[1];
-        segmentNodes[1] = temp;
-
-        console.log('Segmento invertido:', segmentNodes);
-
-    } else {
-        console.log('Não há pontos suficientes para inverter as coordenadas');
-    }
-}
-
-
-// Função para exibir ruas próximas
-async function displayNearbyStreets(lat, lon) {
-    const query = `
-        [out:json];
-        (
-            node(around:20, ${lat}, ${lon});
-            way(bn)["highway"];
-            >;
-        );
-        out geom;
-    `;
-    
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        let streets = [];
-        
-        if (data.elements) {
-            data.elements.forEach(element => {
-                if (element.type === 'way') {
-                    let streetName = element.tags.name || 'Rua sem nome';
-                    streets.push(streetName);
-                }
-            });
-            
-            // Mostrar as ruas próximas no div "vias-proximas"
-            document.getElementById('vias-proximas').innerHTML = `
-                <strong>Ruas Próximas:</strong><br>
-                ${streets.join('<br>')}
-            `;
-        }
-    } catch (error) {
-        console.error('Erro ao buscar ruas próximas:', error);
     }
 }
 
@@ -341,40 +319,37 @@ async function displayNearbyStreets(lat, lon) {
 map.on('click', (e) => {
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
-    console.log('Coordenadas do clique:', lat, lon);
 
-    // Exibir ruas próximas
-    displayNearbyStreets(lat, lon);
-    
-    // Chama a função para buscar o segmento
-    getStreetSegment(lat, lon);
-
-    // Atualizar o campo de coordenadas com o novo valor
     document.getElementById('coordenadas').value = `${lat}, ${lon}`;
-
-    // Consultar a rua do Waze ao clicar no mapa
     consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
         if (nomeRuaWaze) {
-            console.log("Rua encontrada (Waze):", nomeRuaWaze);
-            // Adiciona o nome da rua do Waze ao select
-            const optionWaze = document.createElement('option');
-            optionWaze.value = nomeRuaWaze;
-            optionWaze.textContent = nomeRuaWaze;
-            ruaSelect.appendChild(optionWaze);
-            ruaSelect.value = nomeRuaWaze; // Marca automaticamente a opção
+            const ruaSelect = document.getElementById('ruaSelect');
+            const option = document.createElement('option');
+            option.value = nomeRuaWaze;
+            option.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(option);
         }
-    }).catch(() => {
-        console.log("Erro ao consultar a API do Waze");
     });
+
+    getStreetSegment(lat, lon);
 });
 
-// Função para localizar o usuário assim que a página é carregada
-function locateUserOnPageLoad() {
-    map.locate({ setView: true, maxZoom: 16 }); // Localizar o usuário e centralizar no mapa
-}
-
-locateUserOnPageLoad();
+// Localizar o usuário na inicialização
+locateUser();
 </script>
+
+<!-- Campos adicionais -->
+<div>
+    <label for="coordenadas">Coordenadas:</label>
+    <input type="text" id="coordenadas" readonly>
+
+    <label for="ruaSelect">Rua:</label>
+    <select id="ruaSelect"></select>
+
+    <label for="directionSelect">Escolha o sentido:</label>
+    <select id="directionSelect"></select>
+</div>
+
 
 <script>
 // Função para calcular os dias da semana entre as duas datas
