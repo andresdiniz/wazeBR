@@ -486,7 +486,7 @@
         if (subtiposPorTipo[selectedTipoId]) {
             subtiposPorTipo[selectedTipoId].forEach(function (subtipo) {
                 const option = document.createElement('option');
-                option.value = subtipo.id;
+                option.value = subtipo.value;
                 option.textContent = subtipo.name;
                 subtipoSelect.appendChild(option);
             });
