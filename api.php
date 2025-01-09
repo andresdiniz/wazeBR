@@ -637,38 +637,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
-            if (!$email) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Email obrigatórios.']);
-            }
-
-            if (!$nome) {
-                http_response_code(400);
-                echo json_encode(['error' => 'nome obrigatórios.']);
-            }
-
-            if (!$username) {
-                http_response_code(400);
-                echo json_encode(['error' => 'username obrigatórios.']);
-            }
-
-            if (!$id_parceiro) {
-                http_response_code(400);
-                echo json_encode(['error' => 'id obrigatórios.']);
-            }
-
-            if (!$password) {
-                http_response_code(400);
-                echo json_encode(['error' => 'senha obrigatórios.']);
-            }
-
-            if (!$type) {
-                http_response_code(400);
-                echo json_encode(['error' => 'tipo obrigatórios.']);
-            }
-
-
-
             // Validação básica
             if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
                 http_response_code(400);
@@ -751,6 +719,80 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
             break;
+
+            case 'cadastrar_evento':
+                // Dados recebidos via POST
+                $nome = $_POST['nome'] ?? null;
+                $descricao = $_POST['descricao'] ?? null;
+                $tipo = $_POST['tipo'] ?? null;
+                $subtipo = $_POST['subtipo'] ?? null;
+                $starttime = $_POST['starttime'] ?? null;
+                $endtime = $_POST['endtime'] ?? null;
+                $quinta_inicio = $_POST['quinta_inicio'] ?? null;
+                $quinta_fim = $_POST['quinta_fim'] ?? null;
+                $coordenadas = $_POST['coordenadas'] ?? null;
+                $rua = $_POST['rua'] ?? null;
+            
+                // Validação dos campos obrigatórios
+                if (!$nome || !$descricao || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
+                    exit;
+                }
+            
+                try {
+                    $pdo = Database::getConnection();
+            
+                    // Inserir evento na tabela events
+                    $sqlEvent = "
+                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, description, street, polyline, direction, starttime, endtime)
+                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, 'ONE_DIRECTION', :starttime, :endtime)
+                    ";
+                    $stmtEvent = $pdo->prepare($sqlEvent);
+                    $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':subtype', $subtipo, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':description', $descricao, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':street', $rua, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
+            
+                    if ($stmtEvent->execute()) {
+                        $eventId = $pdo->lastInsertId();
+            
+                        // Inserir horários na tabela schedules (exemplo para quinta-feira)
+                        if ($quinta_inicio && $quinta_fim) {
+                            $sqlSchedule = "
+                                INSERT INTO schedules (event_id, day_of_week, start_time, end_time)
+                                VALUES (:event_id, 'thursday', :start_time, :end_time)
+                            ";
+                            $stmtSchedule = $pdo->prepare($sqlSchedule);
+                            $stmtSchedule->bindParam(':event_id', $eventId, PDO::PARAM_INT);
+                            $stmtSchedule->bindParam(':start_time', $quinta_inicio, PDO::PARAM_STR);
+                            $stmtSchedule->bindParam(':end_time', $quinta_fim, PDO::PARAM_STR);
+            
+                            if (!$stmtSchedule->execute()) {
+                                throw new Exception('Erro ao inserir dados na tabela schedules.');
+                            }
+                        }
+            
+                        http_response_code(200);
+                        echo json_encode([
+                            'success' => true,
+                            'message' => 'Evento e horários cadastrados com sucesso.',
+                        ]);
+                    } else {
+                        throw new Exception('Erro ao inserir dados na tabela events.');
+                    }
+                } catch (Exception $e) {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Erro interno do servidor: ' . $e->getMessage(),
+                    ]);
+                }
+                break;
+            
 
         default:
             http_response_code(401);
