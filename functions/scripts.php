@@ -174,7 +174,7 @@ function sendEmailAlert($stationName, $valor, $cotaMaxima) {
 
     Por favor, tome as devidas providências.
     ";
-    $headers = "From: sac@clouatacado.com\r\n";
+    $headers = "From: wazebrasil@fenixsmm.store\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     
     // Envia o e-mail
@@ -220,6 +220,7 @@ function sendEmail($userEmail, $emailBody) {
     
     // Cabeçalhos do e-mail
     $headers = "From: wazebrasil@fenixsmm.store\r\n";
+    $headers .= "Reply-To: wazebrasil@fenixsmm.store\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     
     // Envia o e-mail
