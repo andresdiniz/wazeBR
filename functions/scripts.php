@@ -217,7 +217,7 @@ require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instal
 function sendEmail($userEmail, $emailBody) {
     // Caminho do arquivo de log
     $logFilePath = __DIR__ . '/email_logs.txt';
-    echo 
+    echo "Aqui eu vim";
 
     // Função para gravar logs no arquivo
     function writeLog($logFilePath, $message) {
@@ -229,10 +229,10 @@ function sendEmail($userEmail, $emailBody) {
     try {
         // Configuração do servidor SMTP
         $mail->isSMTP();
-        $mail->Host       = 'smtp.seuprovedor.com'; // Substitua pelo seu servidor SMTP
+        $mail->Host       = 'smtp.hostinger.com'; // Substitua pelo seu servidor SMTP
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'seu_usuario@exemplo.com'; // Substitua pelo seu usuário SMTP
-        $mail->Password   = 'sua_senha';             // Substitua pela sua senha SMTP
+        $mail->Username   = 'wazebrasil@fenixsmm.store'; // Substitua pelo seu usuário SMTP
+        $mail->Password   = '@Ndre2025';             // Substitua pela sua senha SMTP
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS ou SSL
         $mail->Port       = 587; // Porta do servidor SMTP (geralmente 587 para STARTTLS ou 465 para SSL)
 
