@@ -15,7 +15,20 @@ try {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
 
-// Consulta para eventos ativos e dados relacionados, incluindo agendamentos
+// Obter a data e hora atual
+$currentDateTime = date('Y-m-d H:i:s');
+
+// Atualizar eventos cujo endtime já passou para is_active = 2
+$updateQuery = "
+    UPDATE events 
+    SET is_active = 2 
+    WHERE endtime < :currentDateTime AND is_active = 1
+";
+$updateStmt = $pdo->prepare($updateQuery);
+$updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+$updateStmt->execute();
+
+// Consulta para eventos ativos (is_active = 1) e dados relacionados, incluindo agendamentos
 $query = "
     SELECT 
         e.id AS event_id, e.parent_event_id, e.creationtime, e.updatetime,
@@ -33,12 +46,13 @@ $query = "
     LEFT JOIN 
         schedules sc ON e.id = sc.event_id
     WHERE 
-        e.is_active = 1 -- Filtra apenas eventos ativos
+        e.is_active = 1 AND e.endtime >= :currentDateTime -- Filtra eventos ativos cujo endtime ainda não passou
     ORDER BY 
         e.id, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
+$statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $statement->execute();
 $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
