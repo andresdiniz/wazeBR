@@ -209,20 +209,12 @@ function getIp() {
     }
 }
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
+
 function sendEmail($userEmail, $emailBody) {
-    $to = $userEmail; // Defina o e-mail do destinatário
-    $subject = "Notificação de Sistema"; // Assunto do e-mail (você pode customizar)
-    
-    // Corpo do e-mail
-    $message = "
-    $emailBody
-    ";
-    
-    // Cabeçalhos do e-mail
-    $headers = "From: wazebrasil@fenixsmm.store\r\n";
-    $headers .= "Reply-To: wazebrasil@fenixsmm.store\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    
     // Caminho do arquivo de log
     $logFilePath = __DIR__ . '/email_logs.txt';
 
@@ -231,11 +223,32 @@ function sendEmail($userEmail, $emailBody) {
         $logMessage = "[" . date("Y-m-d H:i:s") . "] " . $message . PHP_EOL;
         file_put_contents($logFilePath, $logMessage, FILE_APPEND);
     }
-    
-    // Envia o e-mail
-    if (mail($to, $subject, $message, $headers)) {
-        writeLog($logFilePath, "E-mail enviado para $to com sucesso.");
-    } else {
-        writeLog($logFilePath, "Falha ao enviar o e-mail para $to.");
+
+    $mail = new PHPMailer(true);
+    try {
+        // Configuração do servidor SMTP
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.seuprovedor.com'; // Substitua pelo seu servidor SMTP
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'seu_usuario@exemplo.com'; // Substitua pelo seu usuário SMTP
+        $mail->Password   = 'sua_senha';             // Substitua pela sua senha SMTP
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS ou SSL
+        $mail->Port       = 587; // Porta do servidor SMTP (geralmente 587 para STARTTLS ou 465 para SSL)
+
+        // Configuração do remetente e destinatário
+        $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Brasil'); // Remetente
+        $mail->addAddress($userEmail); // Destinatário
+
+        // Configuração do conteúdo do e-mail
+        $mail->isHTML(false); // Define que o corpo do e-mail será texto simples
+        $mail->Subject = 'Notificação de Sistema'; // Assunto do e-mail
+        $mail->Body    = $emailBody; // Corpo do e-mail
+
+        // Envia o e-mail
+        $mail->send();
+        writeLog($logFilePath, "E-mail enviado para $userEmail com sucesso.");
+    } catch (Exception $e) {
+        writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$mail->ErrorInfo}");
     }
 }
+

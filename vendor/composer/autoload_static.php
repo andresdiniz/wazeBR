@@ -24,6 +24,7 @@ class ComposerStaticInit56cdbda5b9d35e2d699f44b0b74ea756
         'P' => 
         array (
             'Predis\\' => 7,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
     );
 
@@ -43,6 +44,10 @@ class ComposerStaticInit56cdbda5b9d35e2d699f44b0b74ea756
         'Predis\\' => 
         array (
             0 => __DIR__ . '/..' . '/predis/predis/src',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
     );
 
