@@ -217,6 +217,7 @@ require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instal
 function sendEmail($userEmail, $emailBody) {
     // Caminho do arquivo de log
     $logFilePath = __DIR__ . '/email_logs.txt';
+    echo 
 
     // Função para gravar logs no arquivo
     function writeLog($logFilePath, $message) {
