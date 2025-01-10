@@ -681,27 +681,84 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $loginLink = "https://fenixsmm.store/wazeportal/";
 
                     $message = "
-                    <html>
-                    <head>
-                        <title>Conta Criada com Sucesso</title>
-                    </head>
-                    <body>
-                        <h2>Olá, $userName!</h2>
-                        <p>Sua conta foi criada com sucesso! Agora você pode acessar a sua conta através do seguinte link:</p>
-                        <p><a href='$loginLink'>Clique aqui para acessar sua conta</a></p>
-                        <p><strong>Seus dados de login são:</strong></p>
-                        <ul>
-                            <li><strong>Email:</strong> $userEmail</li>
-                            <li><strong>Senha:</strong> $userPassword</li>
-                        </ul>
-                        <p>Por favor, mantenha suas credenciais seguras.</p>
-                        <p>Obrigado por se cadastrar conosco!</p>
-                    </body>
-                    </html>
-                    ";
+                        <html>
+                        <head>
+                            <title>Conta Criada com Sucesso</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    color: #333;
+                                    background-color: #f7f7f7;
+                                    margin: 0;
+                                    padding: 0;
+                                }
+                                .email-container {
+                                    width: 100%;
+                                    max-width: 600px;
+                                    margin: 0 auto;
+                                    background-color: #ffffff;
+                                    padding: 20px;
+                                    border-radius: 8px;
+                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                                }
+                                h2 {
+                                    color: #4CAF50;
+                                }
+                                p {
+                                    font-size: 16px;
+                                    line-height: 1.6;
+                                }
+                                a {
+                                    color: #4CAF50;
+                                    text-decoration: none;
+                                    font-weight: bold;
+                                }
+                                .button {
+                                    background-color: #4CAF50;
+                                    color: #ffffff;
+                                    padding: 10px 20px;
+                                    text-align: center;
+                                    border-radius: 5px;
+                                    text-decoration: none;
+                                    display: inline-block;
+                                }
+                                ul {
+                                    list-style-type: none;
+                                    padding: 0;
+                                }
+                                ul li {
+                                    margin-bottom: 8px;
+                                }
+                                footer {
+                                    margin-top: 20px;
+                                    font-size: 14px;
+                                    text-align: center;
+                                    color: #888;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class='email-container'>
+                                <h2>Olá, $userName!</h2>
+                                <p>Sua conta foi criada com sucesso! Agora você pode acessar a sua conta através do seguinte link:</p>
+                                <p><a href='$loginLink' class='button'>Clique aqui para acessar sua conta</a></p>
+                                <p><strong>Seus dados de login são:</strong></p>
+                                <ul>
+                                    <li><strong>Email:</strong> $userEmail</li>
+                                    <li><strong>Senha:</strong> $userPassword</li>
+                                </ul>
+                                <p>Por favor, mantenha suas credenciais seguras.</p>
+                                <p>Obrigado por se cadastrar conosco!</p>
+                                <footer>
+                                    <p>&copy; " . date('Y') . " Sua Empresa. Todos os direitos reservados.</p>
+                                </footer>
+                            </div>
+                        </body>
+                        </html>
+                        ";
 
                     // Chama a função para enviar o e-mail
-                    sendEmail($userEmail, $message);
+                    sendEmailAlert($userEmail, $message);
 
                     http_response_code(200);
                     echo json_encode([
