@@ -148,7 +148,7 @@ try {
                             Cota máxima: $cotaMaxima\n\n
                             Por favor, tome as devidas providências.
                             ";
-                            sendEmail("andresoaresdiniz201218@gmail.com", $message)
+                            sendEmailAlert("andresoaresdiniz201218@gmail.com", $message)
                         }
                     } else {
                         error_log("Registro já existe: Estação $stationName, Data: $dataItem, Horário: $horario");
