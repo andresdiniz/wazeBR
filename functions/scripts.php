@@ -217,7 +217,6 @@ require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instal
 function sendEmail($userEmail, $emailBody) {
     // Caminho do arquivo de log
     $logFilePath = __DIR__ . '/email_logs.txt';
-    echo "Aqui eu vim";
 
     // Função para gravar logs no arquivo
     function writeLog($logFilePath, $message) {
@@ -235,7 +234,7 @@ function sendEmail($userEmail, $emailBody) {
         $mail->Password   = '@Ndre2025';             // Substitua pela sua senha SMTP
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS ou SSL
         $mail->Port       = 587; // Porta do servidor SMTP (geralmente 587 para STARTTLS ou 465 para SSL)
-
+        $mail->CharSet = 'UTF-8'; // Definir UTF-8 como codificação do e-mail
         // Configuração do remetente e destinatário
         $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Brasil'); // Remetente
         $mail->addAddress($userEmail); // Destinatário
