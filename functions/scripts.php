@@ -223,10 +223,19 @@ function sendEmail($userEmail, $emailBody) {
     $headers .= "Reply-To: wazebrasil@fenixsmm.store\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
     
+    // Caminho do arquivo de log
+    $logFilePath = __DIR__ . '/email_logs.txt';
+
+    // Função para gravar logs no arquivo
+    function writeLog($logFilePath, $message) {
+        $logMessage = "[" . date("Y-m-d H:i:s") . "] " . $message . PHP_EOL;
+        file_put_contents($logFilePath, $logMessage, FILE_APPEND);
+    }
+    
     // Envia o e-mail
     if (mail($to, $subject, $message, $headers)) {
-        error_log("E-mail enviado para $to com sucesso");
+        writeLog($logFilePath, "E-mail enviado para $to com sucesso.");
     } else {
-        error_log("Falha ao enviar o e-mail para $to");
+        writeLog($logFilePath, "Falha ao enviar o e-mail para $to.");
     }
 }
