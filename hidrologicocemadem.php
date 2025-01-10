@@ -10,7 +10,7 @@ ini_set('error_log', '/cron_error.log');
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
-sendEmail('seuemail@exemplo.com', 'Testando envio de e-mail.');
+sendEmail('andresoaresdiniz201218@gmail.com', 'Testando envio de e-mail.');
 
 
 $urls = [
