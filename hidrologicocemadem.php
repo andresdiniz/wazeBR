@@ -142,7 +142,13 @@ try {
                         // Verifica se o valor excede a cota_maxima
                         if ($cotaMaxima !== null && $valor > $cotaMaxima) {
                             error_log("Alerta: Valor acumulado ($valor) excedeu a cota máxima ($cotaMaxima) para a estação $stationName");
-                            sendEmailAlert($stationName, $valor, $cotaMaxima);
+                            $message = "
+                            Alerta: A estação $stationName excedeu a cota máxima definida.\n\n
+                            Valor acumulado: $valor\n
+                            Cota máxima: $cotaMaxima\n\n
+                            Por favor, tome as devidas providências.
+                            ";
+                            sendEmail("andresoaresdiniz201218@gmail.com", $message)
                         }
                     } else {
                         error_log("Registro já existe: Estação $stationName, Data: $dataItem, Horário: $horario");
