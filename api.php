@@ -761,7 +761,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </body>
                         </html>
                         ";
-                    $subject = "Bem vindo!"
+                    $subject = "Bem vindo!";
                     // Chama a função para enviar o e-mail
                     sendEmail($userEmail, $message, $subject);
 
@@ -931,7 +931,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </body>
                                 </html>
                             ";
-                            $subject = "Recuperação de Senha"
+                            $subject = "Recuperação de Senha";
                             // Enviar o e-mail
                             if (!sendEmail($email, $mensagem , $subject)) {
                                 throw new Exception("Falha ao enviar o e-mail.");

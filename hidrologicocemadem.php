@@ -154,7 +154,7 @@ try {
                                 Atenciosamente,  
                                 Equipe de Monitoramento.
                                 ";
-                            $subject = "Alerta Hidrologico - $stationName"
+                            $subject = "Alerta Hidrologico - $stationName";
                             sendEmail("andresoaresdiniz201218@gmail.com", $message, $subject);
                         }
                     } else {
