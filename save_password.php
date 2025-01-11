@@ -46,7 +46,7 @@ try {
     // Atualiza a senha no banco de dados
     $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE email = :email");
     $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-    $stmt->bindParam(':user_id', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR); // Corrigido: usar :email
     $stmt->execute();
 
     // Confirma a redefinição
