@@ -761,9 +761,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </body>
                         </html>
                         ";
-
+                    $subject = "Bem vindo!"
                     // Chama a função para enviar o e-mail
-                    sendEmail($userEmail, $message);
+                    sendEmail($userEmail, $message, $subject);
 
                     http_response_code(200);
                     echo json_encode([
@@ -931,9 +931,9 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </body>
                                 </html>
                             ";
-                
+                            $subject = "Recuperação de Senha"
                             // Enviar o e-mail
-                            if (!sendEmail($email, $mensagem)) {
+                            if (!sendEmail($email, $mensagem , $subject)) {
                                 throw new Exception("Falha ao enviar o e-mail.");
                             }
                 

@@ -220,7 +220,7 @@ function writeLog($logFilePath, $message) {
     file_put_contents($logFilePath, $logMessage, FILE_APPEND);
 }
 
-function sendEmail($userEmail, $emailBody) {
+function sendEmail($userEmail, $emailBody, $titleEmail) {
     //teste github
     $logFilePath = __DIR__ . '/email_logs.txt';
 
@@ -242,7 +242,7 @@ function sendEmail($userEmail, $emailBody) {
 
         // Corpo do e-mail
         $mail->isHTML(true); 
-        $mail->Subject = 'Recuperação de Senha'; 
+        $mail->Subject = $titleEmail; 
         $mail->Body    = $emailBody;
 
         // Envia o e-mail

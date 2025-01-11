@@ -154,8 +154,8 @@ try {
                                 Atenciosamente,  
                                 Equipe de Monitoramento.
                                 ";
-
-                            sendEmail("andresoaresdiniz201218@gmail.com", $message);
+                            $subject = "Alerta Hidrologico - $stationName"
+                            sendEmail("andresoaresdiniz201218@gmail.com", $message, $subject);
                         }
                     } else {
                         error_log("Registro já existe: Estação $stationName, Data: $dataItem, Horário: $horario");
