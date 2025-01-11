@@ -892,22 +892,18 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break; 
           
 case 'recuperar_senha':
-                    $pdo = Database::getConnection();
-    // Sanitizar e validar o e-mail
+    $pdo = Database::getConnection();
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
 
     if (!empty($email)) {
         try {
-            // Testa a conexão com o banco de dados
             if (!$pdo) {
                 throw new Exception("Falha na conexão com o banco de dados.");
             }
 
-            // Gerar token e validade
             $token = bin2hex(random_bytes(16));
             $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
 
-            // Salvar no banco de dados
             $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
             if (!$stmt) {
                 throw new Exception("Falha na preparação da query.");
@@ -920,10 +916,7 @@ case 'recuperar_senha':
                 throw new Exception("Erro ao executar a query: " . implode(", ", $stmt->errorInfo()));
             }
 
-            // Criar o link de redefinição
             $url = "https://seusite.com/redefinir_senha.php?token=$token";
-
-            // Criar o corpo do e-mail
             $mensagem = "
                 <html>
                 <head>
@@ -939,15 +932,12 @@ case 'recuperar_senha':
                 </html>
             ";
 
-            // Chamada da função de envio de e-mail (assumindo que já está implementada)
             if (!sendEmail($email, $mensagem)) {
                 throw new Exception("Falha ao enviar o e-mail.");
             }
 
-            // Retorna resposta de sucesso
             echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.']);
         } catch (Exception $e) {
-            // Retorna erro com mensagem específica
             http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
@@ -956,6 +946,7 @@ case 'recuperar_senha':
         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.']);
     }
     break;
+
 
 
         default:
