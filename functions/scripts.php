@@ -215,43 +215,46 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
 
 function sendEmail($userEmail, $emailBody) {
-    // Caminho do arquivo de log
     $logFilePath = __DIR__ . '/email_logs.txt';
-
-    // Função para gravar logs no arquivo
     function writeLog($logFilePath, $message) {
         $logMessage = "[" . date("Y-m-d H:i:s") . "] " . $message . PHP_EOL;
         file_put_contents($logFilePath, $logMessage, FILE_APPEND);
     }
 
-    // Inicializa o PHPMailer
     $mail = new PHPMailer(true);
     try {
         // Configuração do servidor SMTP
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com'; // Substitua pelo seu servidor SMTP
+        $mail->Host       = 'smtp.hostinger.com'; 
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'wazebrasil@fenixsmm.store'; // Substitua pelo seu usuário SMTP
-        $mail->Password   = '@Ndre2025';             // Substitua pela sua senha SMTP
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS ou SSL
-        $mail->Port       = 587; // Porta do servidor SMTP (geralmente 587 para STARTTLS ou 465 para SSL)
-        $mail->CharSet = 'UTF-8'; // Definir UTF-8 como codificação do e-mail
+        $mail->Username   = 'wazebrasil@fenixsmm.store'; 
+        $mail->Password   = '@Ndre2025';             
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
+        $mail->Port       = 587; 
+        $mail->CharSet = 'UTF-8'; 
 
-        // Configuração do remetente e destinatário
-        $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Brasil'); // Remetente
-        $mail->addAddress($userEmail); // Destinatário
+        // Remetente e destinatário
+        $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Brasil');
+        $mail->addAddress($userEmail); 
 
-        // Configuração do conteúdo do e-mail
-        $mail->isHTML(true); // Defina como HTML para renderizar corretamente o conteúdo
-        $mail->Subject = 'Recuperação de Senha'; // Assunto do e-mail
-        $mail->Body    = $emailBody; // Corpo do e-mail
+        // Corpo do e-mail
+        $mail->isHTML(true); 
+        $mail->Subject = 'Recuperação de Senha'; 
+        $mail->Body    = $emailBody;
 
         // Envia o e-mail
-        $mail->send();
-        writeLog($logFilePath, "E-mail enviado para $userEmail com sucesso.");
+        if ($mail->send()) {
+            writeLog($logFilePath, "E-mail enviado para $userEmail com sucesso.");
+            return true;  // Retorna true se o envio for bem-sucedido
+        } else {
+            writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$mail->ErrorInfo}");
+            return false; // Retorna false se o envio falhar
+        }
     } catch (Exception $e) {
         writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$mail->ErrorInfo}");
+        return false; // Retorna false se ocorrer uma exceção
     }
 }
+
 
 
