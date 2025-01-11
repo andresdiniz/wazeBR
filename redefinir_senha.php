@@ -28,7 +28,7 @@ if (isset($_GET['token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criação de Senha</title>
+    <title>Waze Portal - Redefinição de Senha</title>
     <style>
         /* Reset básico */
         body, h2, form, ul, li, input, button {
