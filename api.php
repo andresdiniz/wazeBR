@@ -763,7 +763,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ";
 
                     // Chama a função para enviar o e-mail
-                    sendEmailAlert($userEmail, $message);
+                    sendEmail($userEmail, $message);
 
                     http_response_code(200);
                     echo json_encode([

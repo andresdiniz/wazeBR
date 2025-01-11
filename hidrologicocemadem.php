@@ -10,9 +10,6 @@ ini_set('error_log', '/cron_error.log');
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
-sendEmail('andresoaresdiniz201218@gmail.com', 'Testando envio de e-mail.');
-
-
 $urls = [
     "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/1",
     "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/1",
@@ -148,7 +145,7 @@ try {
                             Cota máxima: $cotaMaxima\n\n
                             Por favor, tome as devidas providências.
                             ";
-                            sendEmailAlert("andresoaresdiniz201218@gmail.com", $message)
+                            sendEmail("andresoaresdiniz201218@gmail.com", $message);
                         }
                     } else {
                         error_log("Registro já existe: Estação $stationName, Data: $dataItem, Horário: $horario");
