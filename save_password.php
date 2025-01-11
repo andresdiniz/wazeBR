@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Captura os dados do formulário
-$userId = $_POST['user_id'] ?? null;
+$email = $_POST['email'] ?? null;
 $password1 = $_POST['password1'] ?? '';
 $password2 = $_POST['password2'] ?? '';
 
@@ -44,9 +44,9 @@ try {
     $pdo = Database::getConnection();
 
     // Atualiza a senha no banco de dados
-    $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :user_id");
+    $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE email = :email");
     $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $email, PDO::PARAM_STR);
     $stmt->execute();
 
     // Confirma a redefinição
