@@ -1,15 +1,24 @@
 <?php
+require_once __DIR__ . '/config/configbd.php';
 
 // Verifica se o parâmetro 'token' foi enviado na URL
 if (isset($_GET['token'])) {
     // Captura o valor do token
     $token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-
+    try {
+        // Conectar ao banco de dados
+        $pdo = Database::getConnection();
+    } catch (PDOException $e) {
+        die("Erro ao conectar ao banco de dados: " . $e->getMessage());
+    }
     // Exibe o token
     echo "O token recebido é: " . $token;
 } else {
-    // Caso o parâmetro 'token' não exista
-    echo "Token não fornecido na URL.";
+    echo "<script>
+        alert('Token não fornecido na URL. Você será redirecionado para a página de login.');
+        window.location.href = 'login.html';
+    </script>";
+    exit; // Garante que o restante do código não seja executado
 }
 
 ?>
