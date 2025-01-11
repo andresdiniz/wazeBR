@@ -1,7 +1,16 @@
 <?php
 
-$token = $_GET['token'];
-echo $token;
+// Verifica se o parâmetro 'token' foi enviado na URL
+if (isset($_GET['token'])) {
+    // Captura o valor do token
+    $token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
+
+    // Exibe o token
+    echo "O token recebido é: " . $token;
+} else {
+    // Caso o parâmetro 'token' não exista
+    echo "Token não fornecido na URL.";
+}
 
 ?>
 
