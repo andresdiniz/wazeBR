@@ -914,7 +914,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt->execute();
                 
                             // Criar o link de redefinição
-                            $url = "https://seusite.com/redefinir_senha.php?token=$token";
+                            $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
                 
                             // Criar o corpo do e-mail
                             $mensagem = "
