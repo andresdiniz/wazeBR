@@ -937,15 +937,15 @@ case 'recuperar_senha':
             }
 
             // Retornar resposta de sucesso
-            echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.']);
+            eecho json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
         } catch (Exception $e) {
             // Retornar erro com a mensagem específica
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
         }
     } else {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.']);
+        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
     }
     break;
 
