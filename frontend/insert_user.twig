@@ -40,17 +40,7 @@
                         <div class="card-body">
                             <h5 class="card-title">Reset de Senha</h5>
                             <p class="card-text">Realizar o reset de senha</p>
-
-                            {% if session.type == 1 or session.type == 2 %}
-                                <!-- Para usuários com tipo 1 ou 2, exibe o botão que abre o modal -->
-                                <button class="btn btn-primary" data-bs-toggle="modal" id="resultResetSenha" ta-bs-target="#modalResetSenha">Reset Senha</button>
-                            {% else %}
-                                <!-- Para outros tipos de usuário, o botão envia o e-mail diretamente para a API -->
-                                <form action="api.php?action=recuperar_senha" method="POST">
-                                    <input type="hidden" name="email" value="{{ session.email }}">
-                                    <button type="submit" id="resultResetSenha" class="btn btn-primary">Reset Senha</button>
-                                </form>
-                            {% endif %}
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalResetSenha">Reset Senha</button>
                         </div>
                     </div>
                 </div>
@@ -148,26 +138,26 @@
     </div>
 </div>
 
-{% if session.type == 1 or session.type == 2 %}
-    <!-- Modal para usuários com tipo 1 ou 2 -->
-    <div class="modal fade" id="modalResetSenha" tabindex="-1" aria-labelledby="modalResetSenhaLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalResetSenhaLabel">Reset de Senha</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Formulário dentro do modal -->
-                    <form action="api.php?action=recuperar_senha" method="POST">
-                        <input type="hidden" name="email" value="{{ session.email }}">
-                        <button type="submit" class="btn btn-primary">Reset Senha</button>
-                    </form>
-                </div>
+<!-- Modal Reset de Senha -->
+<div class="modal fade" id="modalResetSenha" tabindex="-1" aria-labelledby="modalResetSenhaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalResetSenhaLabel">Reset de Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="searchResetSenha" class="form-control" placeholder="Buscar por nome ou email">
+                <ul id="resultResetSenha" class="list-group mt-2"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary">Resetar Senha</button>
             </div>
         </div>
     </div>
-{% endif %}
+</div>
+
 <!-- Modal Apagar -->
 <div class="modal fade" id="modalApagar" tabindex="-1" aria-labelledby="modalApagarLabel" aria-hidden="true">
     <div class="modal-dialog">
