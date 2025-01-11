@@ -1,3 +1,10 @@
+<?php
+
+$token = $_GET['token'];
+echo $token;
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
