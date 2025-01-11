@@ -224,6 +224,7 @@ function sendEmail($userEmail, $emailBody) {
         file_put_contents($logFilePath, $logMessage, FILE_APPEND);
     }
 
+    // Inicializa o PHPMailer
     $mail = new PHPMailer(true);
     try {
         // Configuração do servidor SMTP
@@ -235,13 +236,14 @@ function sendEmail($userEmail, $emailBody) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS ou SSL
         $mail->Port       = 587; // Porta do servidor SMTP (geralmente 587 para STARTTLS ou 465 para SSL)
         $mail->CharSet = 'UTF-8'; // Definir UTF-8 como codificação do e-mail
+
         // Configuração do remetente e destinatário
         $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Brasil'); // Remetente
         $mail->addAddress($userEmail); // Destinatário
 
         // Configuração do conteúdo do e-mail
-        $mail->isHTML(false); // Define que o corpo do e-mail será texto simples
-        $mail->Subject = 'Notificação de Sistema'; // Assunto do e-mail
+        $mail->isHTML(true); // Defina como HTML para renderizar corretamente o conteúdo
+        $mail->Subject = 'Recuperação de Senha'; // Assunto do e-mail
         $mail->Body    = $emailBody; // Corpo do e-mail
 
         // Envia o e-mail
@@ -251,4 +253,5 @@ function sendEmail($userEmail, $emailBody) {
         writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$mail->ErrorInfo}");
     }
 }
+
 
