@@ -904,7 +904,7 @@ case 'recuperar_senha':
             // Gerar token e validade
             $token = bin2hex(random_bytes(16));
             $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
-
+            $pdo = Database::getConnection();
             // Salvar no banco de dados
             $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
             $stmt->bindParam(':email', $email);
