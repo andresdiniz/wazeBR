@@ -221,6 +221,7 @@ function writeLog($logFilePath, $message) {
 }
 
 function sendEmail($userEmail, $emailBody) {
+    //teste github
     $logFilePath = __DIR__ . '/email_logs.txt';
 
     $mail = new PHPMailer(true);
