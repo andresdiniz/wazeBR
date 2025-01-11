@@ -1,27 +1,55 @@
 <?php
+
 require_once __DIR__ . '/config/configbd.php';
 
 // Verifica se o parâmetro 'token' foi enviado na URL
-if (isset($_GET['token'])) {
-    // Captura o valor do token
-    $token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-    try {
-        // Conectar ao banco de dados
-        $pdo = Database::getConnection();
-    } catch (PDOException $e) {
-        die("Erro ao conectar ao banco de dados: " . $e->getMessage());
-    }
-    // Exibe o token
-    echo "O token recebido é: " . $token;
-} else {
+if (!isset($_GET['token'])) {
     echo "<script>
         alert('Token não fornecido na URL. Você será redirecionado para a página de login.');
         window.location.href = 'login.html';
     </script>";
-    exit; // Garante que o restante do código não seja executado
+    exit;
 }
 
+// Captura o valor do token
+$token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
+
+try {
+    // Usa a conexão PDO existente
+    $pdo = Database::getConnection();
+
+    // Prepara a consulta para verificar o token
+    $stmt = $pdo->prepare("
+        SELECT * 
+        FROM recuperar_senha 
+        WHERE token = :token 
+        AND valid >= NOW() 
+        AND used = 1
+    ");
+    $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+    $stmt->execute();
+
+    // Verifica se o token é válido
+    if ($stmt->rowCount() > 0) {
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Marca o token como usado no banco de dados
+        $stmtUpdate = $pdo->prepare("UPDATE recuperar_senha SET used = 2 WHERE token = :token");
+        $stmtUpdate->bindParam(':token', $token, PDO::PARAM_STR);
+        $stmtUpdate->execute();
+
+    } else {
+        echo "<script>
+            alert('Token inválido, expirado ou já utilizado. Você será redirecionado para a página de login.');
+            window.location.href = 'login.html';
+        </script>";
+        exit;
+    }
+} catch (PDOException $e) {
+    die("Erro ao conectar ou consultar o banco de dados: " . $e->getMessage());
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-br">
