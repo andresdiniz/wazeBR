@@ -896,58 +896,59 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break; 
           
-case 'recuperar_senha':
-    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-
-    if (!empty($email)) {
-        try {
-            // Gerar token e validade
-            $token = bin2hex(random_bytes(16));
-            $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
-            $pdo = Database::getConnection();
-            // Salvar no banco de dados
-            $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':token', $token);
-            $stmt->bindParam(':valid', $validade);
-            $stmt->execute();
-
-            // Criar o link de redefinição
-            $url = "https://seusite.com/redefinir_senha.php?token=$token";
-
-            // Criar o corpo do e-mail
-            $mensagem = "
-                <html>
-                <head>
-                    <title>Recuperação de Senha</title>
-                </head>
-                <body>
-                    <p>Olá,</p>
-                    <p>Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para redefinir:</p>
-                    <p><a href='$url'>Redefinir senha</a></p>
-                    <p>Este link é válido por 8 horas.</p>
-                    <p>Se você não solicitou a redefinição de senha, ignore este e-mail.</p>
-                </body>
-                </html>
-            ";
-
-            // Enviar o e-mail
-            if (!sendEmail($email, $mensagem)) {
-                throw new Exception("Falha ao enviar o e-mail.");
-            }
-
-            // Retornar resposta de sucesso
-            eecho json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
-        } catch (Exception $e) {
-            // Retornar erro com a mensagem específica
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
-        }
-    } else {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
-    }
-    break;
+                case 'recuperar_senha':
+                    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+                
+                    if (!empty($email)) {
+                        try {
+                            // Gerar token e validade
+                            $token = bin2hex(random_bytes(16));
+                            $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
+                            $pdo = Database::getConnection();
+                            
+                            // Salvar no banco de dados
+                            $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
+                            $stmt->bindParam(':email', $email);
+                            $stmt->bindParam(':token', $token);
+                            $stmt->bindParam(':valid', $validade);
+                            $stmt->execute();
+                
+                            // Criar o link de redefinição
+                            $url = "https://seusite.com/redefinir_senha.php?token=$token";
+                
+                            // Criar o corpo do e-mail
+                            $mensagem = "
+                                <html>
+                                <head>
+                                    <title>Recuperação de Senha</title>
+                                </head>
+                                <body>
+                                    <p>Olá,</p>
+                                    <p>Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para redefinir:</p>
+                                    <p><a href='$url'>Redefinir senha</a></p>
+                                    <p>Este link é válido por 8 horas.</p>
+                                    <p>Se você não solicitou a redefinição de senha, ignore este e-mail.</p>
+                                </body>
+                                </html>
+                            ";
+                
+                            // Enviar o e-mail
+                            if (!sendEmail($email, $mensagem)) {
+                                throw new Exception("Falha ao enviar o e-mail.");
+                            }
+                
+                            // Retornar resposta de sucesso
+                            echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
+                        } catch (Exception $e) {
+                            // Retornar erro com a mensagem específica
+                            http_response_code(500);
+                            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
+                        }
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
+                    }
+                    break;
 
         default:
             http_response_code(401);
