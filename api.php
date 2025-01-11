@@ -2,6 +2,11 @@
 //ini_set('display_errors', 1);
 //error_reporting(E_ALL);
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -943,8 +948,6 @@ case 'recuperar_senha':
         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.']);
     }
     break;
-
-
 
         default:
             http_response_code(401);
