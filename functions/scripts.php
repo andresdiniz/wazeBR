@@ -3,6 +3,11 @@
  * Funções principais da aplicação
  */
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
+
 // Realiza uma busca no banco de dados com base nos parâmetros fornecidos.
 function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 {
@@ -209,17 +214,14 @@ function getIp() {
     }
 }
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
+function writeLog($logFilePath, $message) {
+    $logMessage = "[" . date("Y-m-d H:i:s") . "] " . $message . PHP_EOL;
+    file_put_contents($logFilePath, $logMessage, FILE_APPEND);
+}
 
 function sendEmail($userEmail, $emailBody) {
     $logFilePath = __DIR__ . '/email_logs.txt';
-    function writeLog($logFilePath, $message) {
-        $logMessage = "[" . date("Y-m-d H:i:s") . "] " . $message . PHP_EOL;
-        file_put_contents($logFilePath, $logMessage, FILE_APPEND);
-    }
 
     $mail = new PHPMailer(true);
     try {
@@ -251,10 +253,9 @@ function sendEmail($userEmail, $emailBody) {
             return false; // Retorna false se o envio falhar
         }
     } catch (Exception $e) {
-        writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$mail->ErrorInfo}");
+        writeLog($logFilePath, "Falha ao enviar o e-mail para $userEmail. Erro: {$e->getMessage()}");
         return false; // Retorna false se ocorrer uma exceção
     }
 }
-
 
 
