@@ -916,7 +916,7 @@ case 'recuperar_senha':
                 throw new Exception("Erro ao executar a query: " . implode(", ", $stmt->errorInfo()));
             }
 
-            $url = "https://seusite.com/redefinir_senha.php?token=$token";
+            $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
             $mensagem = "
                 <html>
                 <head>
