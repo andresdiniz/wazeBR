@@ -892,6 +892,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break; 
           
 case 'recuperar_senha':
+                    $pdo = Database::getConnection();
     // Sanitizar e validar o e-mail
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
 
