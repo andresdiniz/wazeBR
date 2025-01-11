@@ -119,12 +119,19 @@ function processarRegistro($pdo, $timezone, $record) {
     $dataHora = $record['datahora'];
     $valor = $record['valor'] !== null ? (float)$record['valor'] : null;
 
+    // Ignora registros com valor nulo
+    if ($valor === null) {
+        continue;
+    }
+
     if ($valor !== null) {
         // Conversão de data/hora
-        $utcDatetime = new DateTime($dataHora, new DateTimeZone('UTC'));
-        $utcDatetime->setTimezone($timezone);
-        $dataItem = $utcDatetime->format('Y-m-d');
-        $horario = $utcDatetime->format('H:i');
+        $utcDatetime = DateTime::createFromFormat('d/m/Y H:i', "$dataItem $horario", new DateTimeZone('UTC'));
+        if ($utcDatetime) {
+            $utcDatetime->setTimezone($timezone); // Ajusta para o timezone de São Paulo
+            $dataItem = $utcDatetime->format('Y-m-d'); // Formata a data como ISO
+            $horario = $utcDatetime->format('H:i');   // Formata o horário como HH:mm
+        }
 
         // Consulta e insere dados
         $stmtCota = $pdo->prepare("SELECT cota_maxima FROM estacoes WHERE id_estacao = ?");
