@@ -892,31 +892,25 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break; 
           
 case 'recuperar_senha':
-    $pdo = Database::getConnection();
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
 
     if (!empty($email)) {
         try {
-            if (!$pdo) {
-                throw new Exception("Falha na conexão com o banco de dados.");
-            }
-
+            // Gerar token e validade
             $token = bin2hex(random_bytes(16));
             $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
 
+            // Salvar no banco de dados
             $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
-            if (!$stmt) {
-                throw new Exception("Falha na preparação da query.");
-            }
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':token', $token);
             $stmt->bindParam(':valid', $validade);
+            $stmt->execute();
 
-            if (!$stmt->execute()) {
-                throw new Exception("Erro ao executar a query: " . implode(", ", $stmt->errorInfo()));
-            }
+            // Criar o link de redefinição
+            $url = "https://seusite.com/redefinir_senha.php?token=$token";
 
-            $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
+            // Criar o corpo do e-mail
             $mensagem = "
                 <html>
                 <head>
@@ -932,20 +926,24 @@ case 'recuperar_senha':
                 </html>
             ";
 
+            // Enviar o e-mail
             if (!sendEmail($email, $mensagem)) {
                 throw new Exception("Falha ao enviar o e-mail.");
             }
 
+            // Retornar resposta de sucesso
             echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.']);
         } catch (Exception $e) {
+            // Retornar erro com a mensagem específica
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage()]);
         }
     } else {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.']);
     }
     break;
+
 
 
 
