@@ -940,7 +940,7 @@ case 'recuperar_senha':
             ";
 
             // Chamada da função de envio de e-mail (assumindo que já está implementada)
-            if (!SendEmailAlert($email, $mensagem)) {
+            if (!sendEmail($email, $mensagem)) {
                 throw new Exception("Falha ao enviar o e-mail.");
             }
 
