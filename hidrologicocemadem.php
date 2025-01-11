@@ -12,9 +12,9 @@ require_once __DIR__ . '/functions/scripts.php';
 
 // URLs das estações
 $urls = [
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/1",
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/1",
-    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=1"
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/18",
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/18",
+    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=18"
 ];
 
 // Define o timezone
