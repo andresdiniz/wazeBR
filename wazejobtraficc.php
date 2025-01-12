@@ -3,6 +3,8 @@ set_time_limit(1200);  // Define o tempo limite para 5 minutos (300 segundos)
 
 require_once __DIR__ . '/config/configbd.php';
 
+require_once __DIR__ . '/functions/scripts.php';
+
 $pdo = Database::getConnection();
 
 // URLs para o JSON
@@ -413,9 +415,7 @@ foreach ($jsonUrls as $jsonUrl) {
                         "Coordenadas: ({$irregularity['bbox']['minX']}, {$irregularity['bbox']['minY']}) a ({$irregularity['bbox']['maxX']}, {$irregularity['bbox']['maxY']})\n\n" .
                         "Por favor, tome as devidas precauções.";
 
-                    $headers = "From: atendimento@clouatacado.com";
-
-                    if (mail($to, $subject, $message, $headers)) {
+                    if (sendEmail($to, $message,$subject)) {
                         echo "Alerta de e-mail enviado para $to.\n";
                     } else {
                         echo "Erro ao enviar o alerta de e-mail.\n";
