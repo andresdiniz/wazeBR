@@ -1,7 +1,6 @@
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 </head>
 <body>
 <div class="container my-5">
@@ -76,6 +75,7 @@
                     <tr>
                         <th>${groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua'}</th>
                         <th>Quantidade</th>
+                        <th>Eventos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,7 +84,8 @@
             let label = groupBy === 'date' ? alert.alert_date :
                         groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                         alert.street || 'Rua não disponível';
-            tableContent += `<tr><td>${label}</td><td>${alert.count}</td></tr>`;
+            let events = alert.events.join(', ');
+            tableContent += `<tr><td>${label}</td><td>${alert.count}</td><td>${events}</td></tr>`;
         });
         tableContent += `</tbody></table>`;
         document.getElementById('alertsTable').innerHTML = tableContent;
