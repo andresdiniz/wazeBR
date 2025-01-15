@@ -42,6 +42,8 @@ try {
             $_SESSION['usuario_id_parceiro'] = $user['id_parceiro'];
             $_SESSION['type'] = $user['type'];
 
+            setcookie('usuario_id_parceiro', $user['id_parceiro'], time() + (86400 * 30), "/");
+
             $ip = getIp();
 
             try {
