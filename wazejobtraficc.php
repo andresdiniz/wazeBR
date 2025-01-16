@@ -406,7 +406,7 @@ foreach ($jsonUrls as $jsonUrl) {
                 // Enviar e-mail somente se a irregularidade for nova e nível >= 3
                 if ($isIrregularityNew && $irregularity['jamLevel'] >= 3) {
                     $to = "andresoaresdiniz201218@gmail.com";
-                    $subject = "Alerta de Congestionamento na Estação {$irregularity['name']}";
+                    $subject = "Alerta de Congestionamento {$irregularity['name']}";
                     $message = "Atenção! Uma irregularidade de tráfego foi detectada:\n\n" .
                         "Nome: {$irregularity['name']}\n" .
                         "Nível de Congestionamento: {$irregularity['jamLevel']}\n" .
