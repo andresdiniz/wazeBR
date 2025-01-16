@@ -119,233 +119,242 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 <script>
-// Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
-
-// Adicionar mapa ao elemento HTML
-const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
-
-// Adicionar camada do mapa base
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-
-// Variável global para armazenar o segmento atual
-let previousSegmentLayer = null;
-let currentSegmentNodes = [];
-
-// Função para localizar o usuário
-function locateUser() {
-    map.locate({ setView: true, maxZoom: 16 });
-}
-
-// Evento para quando a localização for encontrada
-map.on('locationfound', (e) => {
-    const radius = e.accuracy / 2;
-    L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
-    L.circle(e.latlng, radius).addTo(map);
-
-    consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
-        if (nomeRuaWaze) {
-            const ruaSelect = document.getElementById('ruaSelect');
-            const optionWaze = document.createElement('option');
-            optionWaze.value = nomeRuaWaze;
-            optionWaze.textContent = nomeRuaWaze;
-            ruaSelect.appendChild(optionWaze);
-            ruaSelect.value = nomeRuaWaze;
-        }
-    });
-});
-
-// Função para consultar a rua via API personalizada api.php
-function consultarRuaWaze(lat, lon) {
-    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
-
-    return fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data && data.result && data.result.length > 0) {
-                data.result.sort((a, b) => a.distance - b.distance);
-                return data.result[0].names[0]; // Nome da rua mais próxima
-            } else {
-                return null;
-            }
-        })
-        .catch(() => null);
-}
-
-// Função para desenhar o segmento no mapa com setas indicando o sentido
-function drawSegment(segmentNodes, direction = 'both') {
-    if (previousSegmentLayer) {
-        map.removeLayer(previousSegmentLayer);
+    // Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
+    
+    // Adicionar mapa ao elemento HTML
+    const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
+    
+    // Adicionar camada do mapa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Variável global para armazenar o segmento atual
+    let previousSegmentLayer = null;
+    let currentSegmentNodes = [];
+    
+    // Função para localizar o usuário
+    function locateUser() {
+        map.locate({ setView: true, maxZoom: 16 });
     }
-
-    const segment = {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-            type: 'LineString',
-            coordinates: segmentNodes
-        }
-    };
-
-    const segmentLayer = L.geoJSON(segment).addTo(map);
-
-    // Configuração das setas
-    const arrowColor = direction === 'single' ? '#FF0000' : '#0000FF';
-    const arrowLayer = L.polylineDecorator(segmentLayer, {
-        patterns: [
-            {
-                offset: 25,
-                repeat: 50,
-                symbol: L.Symbol.arrowHead({
-                    pixelSize: 15,
-                    polygon: false,
-                    pathOptions: {
-                        stroke: true,
-                        color: arrowColor,
-                        weight: 2
-                    }
-                })
+    
+    // Evento para quando a localização for encontrada
+    map.on('locationfound', (e) => {
+        const radius = e.accuracy / 2;
+        L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+        L.circle(e.latlng, radius).addTo(map);
+    
+        consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
+            if (nomeRuaWaze) {
+                const ruaSelect = document.getElementById('ruaSelect');
+                const optionWaze = document.createElement('option');
+                optionWaze.value = nomeRuaWaze;
+                optionWaze.textContent = nomeRuaWaze;
+                ruaSelect.appendChild(optionWaze);
+                ruaSelect.value = nomeRuaWaze;
             }
-        ]
+        });
     });
-
-    previousSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
-}
-
-// Função para buscar o segmento da rua entre interseções
-async function getStreetSegment(lat, lon) {
-    const query = `
-        [out:json];
-        (
-            node(around:50, ${lat}, ${lon});
-            way(bn)["highway"];
-            >;
-        );
-        out geom;
-    `;
-
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.elements.length > 0) {
-            const nodes = {};
-            const ways = [];
-
-            data.elements.forEach(el => {
-                if (el.type === 'node') {
-                    nodes[el.id] = [el.lon, el.lat];
-                } else if (el.type === 'way') {
-                    ways.push(el);
+    
+    // Função para consultar a rua via API personalizada api.php
+    function consultarRuaWaze(lat, lon) {
+        const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+    
+        return fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.result && data.result.length > 0) {
+                    data.result.sort((a, b) => a.distance - b.distance);
+                    return data.result[0].names[0]; // Nome da rua mais próxima
+                } else {
+                    return null;
                 }
-            });
-
-            let closestWay = null;
-            let minDistance = Infinity;
-
-            ways.forEach(way => {
-                const wayNodes = way.nodes.map(id => nodes[id]);
-                const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
-
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestWay = way;
-                }
-            });
-
-            if (closestWay) {
-                const wayNodes = closestWay.nodes.map(id => nodes[id]);
-
-                // Identificar interseções
-                const intersections = closestWay.nodes.filter(nodeId =>
-                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                );
-
-                if (intersections.length >= 2) {
-                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                    currentSegmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-
-                    drawSegment(currentSegmentNodes);
-
-                    // Atualizar o select de sentido
-                    const directionSelect = document.getElementById('directionSelect');
-                    directionSelect.innerHTML = '';
-
-                    const bothOption = document.createElement('option');
-                    bothOption.value = 'both';
-                    bothOption.textContent = 'Ambos os sentidos';
-                    directionSelect.appendChild(bothOption);
-
-                    const singleOption = document.createElement('option');
-                    singleOption.value = 'single';
-                    singleOption.textContent = 'Sentido único';
-                    directionSelect.appendChild(singleOption);
-
-                    directionSelect.onchange = (e) => {
-                        const direction = e.target.value;
-                        drawSegment(currentSegmentNodes, direction);
-
-                        // Mostrar botão para inverter sentido apenas em "Sentido único"
-                        const invertButton = document.getElementById('invertButton');
-                        if (direction === 'single') {
-                            invertButton.style.display = 'block';
-                        } else {
-                            invertButton.style.display = 'none';
+            })
+            .catch(() => null);
+    }
+    
+    // Função para desenhar o segmento no mapa com setas indicando o sentido
+    function drawSegment(segmentNodes, direction = 'both') {
+        if (previousSegmentLayer) {
+            map.removeLayer(previousSegmentLayer);
+        }
+    
+        const segment = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+                type: 'LineString',
+                coordinates: segmentNodes
+            }
+        };
+    
+        const segmentLayer = L.geoJSON(segment).addTo(map);
+    
+        // Configuração das setas
+        const arrowColor = direction === 'single' ? '#FF0000' : '#0000FF';
+        const arrowLayer = L.polylineDecorator(segmentLayer, {
+            patterns: [
+                {
+                    offset: 25,
+                    repeat: 50,
+                    symbol: L.Symbol.arrowHead({
+                        pixelSize: 15,
+                        polygon: false,
+                        pathOptions: {
+                            stroke: true,
+                            color: arrowColor,
+                            weight: 2
                         }
-                    };
+                    })
+                }
+            ]
+        });
+    
+        previousSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
+    }
+    
+    // Função para buscar o segmento da rua entre interseções
+    async function getStreetSegment(lat, lon) {
+        const query = `
+            [out:json];
+            (
+                node(around:50, ${lat}, ${lon});
+                way(bn)["highway"];
+                >;
+            );
+            out geom;
+        `;
+    
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+    
+            if (data.elements.length > 0) {
+                const nodes = {};
+                const ways = [];
+    
+                data.elements.forEach(el => {
+                    if (el.type === 'node') {
+                        nodes[el.id] = [el.lon, el.lat];
+                    } else if (el.type === 'way') {
+                        ways.push(el);
+                    }
+                });
+    
+                let closestWay = null;
+                let minDistance = Infinity;
+    
+                ways.forEach(way => {
+                    const wayNodes = way.nodes.map(id => nodes[id]);
+                    const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestWay = way;
+                    }
+                });
+    
+                if (closestWay) {
+                    const wayNodes = closestWay.nodes.map(id => nodes[id]);
+    
+                    // Identificar interseções
+                    const intersections = closestWay.nodes.filter(nodeId =>
+                        data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                    );
+    
+                    if (intersections.length >= 2) {
+                        const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                        const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                        currentSegmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+    
+                        // Log das coordenadas do segmento
+                        console.log('Coordenadas do segmento:', currentSegmentNodes);
+    
+                        drawSegment(currentSegmentNodes);
+    
+                        // Atualizar o select de sentido
+                        const directionSelect = document.getElementById('directionSelect');
+                        directionSelect.innerHTML = '';
+    
+                        const bothOption = document.createElement('option');
+                        bothOption.value = 'both';
+                        bothOption.textContent = 'Ambos os sentidos';
+                        directionSelect.appendChild(bothOption);
+    
+                        const singleOption = document.createElement('option');
+                        singleOption.value = 'single';
+                        singleOption.textContent = 'Sentido único';
+                        directionSelect.appendChild(singleOption);
+    
+                        directionSelect.onchange = (e) => {
+                            const direction = e.target.value;
+                            drawSegment(currentSegmentNodes, direction);
+    
+                            // Mostrar botão para inverter sentido apenas em "Sentido único"
+                            const invertButton = document.getElementById('invertButton');
+                            if (direction === 'single') {
+                                invertButton.style.display = 'block';
+                            } else {
+                                invertButton.style.display = 'none';
+                            }
+                        };
+                    }
                 }
             }
+        } catch (error) {
+            console.error('Erro ao buscar segmento:', error);
         }
-    } catch (error) {
-        console.error('Erro ao buscar segmento:', error);
     }
-}
-
-// Função para inverter a ordem das coordenadas de um segmento
-function invertSegmentCoordinates() {
-    currentSegmentNodes.reverse();
-    drawSegment(currentSegmentNodes, 'single');
-}
-
-// Atualizar ruas e subtipos quando o mapa for clicado
-map.on('click', (e) => {
-    const lat = e.latlng.lat;
-    const lon = e.latlng.lng;
-
-    // Limpar o campo da rua anterior
-    document.getElementById('ruaSelect').value = '';
-
-    // Atualizar as coordenadas
-    document.getElementById('coordenadas').value = `${lat}, ${lon}`;
-
-    consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
-        if (nomeRuaWaze) {
-            const ruaSelect = document.getElementById('ruaSelect');
-            const option = document.createElement('option');
-            option.value = nomeRuaWaze;
-            option.textContent = nomeRuaWaze;
-            ruaSelect.appendChild(option);
-        }
+    
+    // Função para inverter a ordem das coordenadas de um segmento
+    function invertSegmentCoordinates() {
+        currentSegmentNodes.reverse();
+    
+        // Log das coordenadas invertidas
+        console.log('Coordenadas invertidas:', currentSegmentNodes);
+    
+        drawSegment(currentSegmentNodes, 'single');
+    }
+    
+    // Atualizar ruas e subtipos quando o mapa for clicado
+    map.on('click', (e) => {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+    
+        // Log das coordenadas clicadas
+        console.log('Coordenadas clicadas:', { lat, lon });
+    
+        // Limpar o campo da rua anterior
+        document.getElementById('ruaSelect').value = '';
+    
+        // Atualizar as coordenadas
+        document.getElementById('coordenadas').value = `${lat}, ${lon}`;
+    
+        consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+            if (nomeRuaWaze) {
+                const ruaSelect = document.getElementById('ruaSelect');
+                const option = document.createElement('option');
+                option.value = nomeRuaWaze;
+                option.textContent = nomeRuaWaze;
+                ruaSelect.appendChild(option);
+            }
+        });
+    
+        getStreetSegment(lat, lon);
     });
-
-    getStreetSegment(lat, lon);
-});
-
-// Localizar o usuário na inicialização
-locateUser();
-
-// Adicionar botão de inverter sentido
-const invertButton = document.createElement('button');
-invertButton.id = 'invertButton';
-invertButton.textContent = 'Inverter Sentido';
-invertButton.style.display = 'none';
-invertButton.onclick = invertSegmentCoordinates;
-document.body.appendChild(invertButton);
-
+    
+    // Localizar o usuário na inicialização
+    locateUser();
+    
+    // Adicionar botão de inverter sentido
+    const invertButton = document.createElement('button');
+    invertButton.id = 'invertButton';
+    invertButton.textContent = 'Inverter Sentido';
+    invertButton.style.display = 'none';
+    invertButton.onclick = invertSegmentCoordinates;
+    document.body.appendChild(invertButton);
 </script>
 
 <script>
