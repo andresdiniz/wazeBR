@@ -129,7 +129,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-// Variável global para armazenar o segmento e direção
+// Variável global para armazenar o segmento atual
 let previousSegmentLayer = null;
 let currentSegmentNodes = [];
 
@@ -192,7 +192,7 @@ function drawSegment(segmentNodes, direction = 'both') {
 
     // Configuração das setas
     const arrowColor = direction === 'single' ? '#FF0000' : '#0000FF';
-    const arrowLayer = L.polylineDecorator(segment, {
+    const arrowLayer = L.polylineDecorator(segmentLayer, {
         patterns: [
             {
                 offset: 25,
@@ -258,36 +258,46 @@ async function getStreetSegment(lat, lon) {
 
             if (closestWay) {
                 const wayNodes = closestWay.nodes.map(id => nodes[id]);
-                currentSegmentNodes = wayNodes;
 
-                drawSegment(currentSegmentNodes);
+                // Identificar interseções
+                const intersections = closestWay.nodes.filter(nodeId =>
+                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                );
 
-                // Atualizar o select de sentido
-                const directionSelect = document.getElementById('directionSelect');
-                directionSelect.innerHTML = '';
+                if (intersections.length >= 2) {
+                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                    currentSegmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
 
-                const bothOption = document.createElement('option');
-                bothOption.value = 'both';
-                bothOption.textContent = 'Ambos os sentidos';
-                directionSelect.appendChild(bothOption);
+                    drawSegment(currentSegmentNodes);
 
-                const singleOption = document.createElement('option');
-                singleOption.value = 'single';
-                singleOption.textContent = 'Sentido único';
-                directionSelect.appendChild(singleOption);
+                    // Atualizar o select de sentido
+                    const directionSelect = document.getElementById('directionSelect');
+                    directionSelect.innerHTML = '';
 
-                directionSelect.onchange = (e) => {
-                    const direction = e.target.value;
-                    drawSegment(currentSegmentNodes, direction);
+                    const bothOption = document.createElement('option');
+                    bothOption.value = 'both';
+                    bothOption.textContent = 'Ambos os sentidos';
+                    directionSelect.appendChild(bothOption);
 
-                    // Mostrar botão para inverter sentido apenas em "Sentido único"
-                    const invertButton = document.getElementById('invertButton');
-                    if (direction === 'single') {
-                        invertButton.style.display = 'block';
-                    } else {
-                        invertButton.style.display = 'none';
-                    }
-                };
+                    const singleOption = document.createElement('option');
+                    singleOption.value = 'single';
+                    singleOption.textContent = 'Sentido único';
+                    directionSelect.appendChild(singleOption);
+
+                    directionSelect.onchange = (e) => {
+                        const direction = e.target.value;
+                        drawSegment(currentSegmentNodes, direction);
+
+                        // Mostrar botão para inverter sentido apenas em "Sentido único"
+                        const invertButton = document.getElementById('invertButton');
+                        if (direction === 'single') {
+                            invertButton.style.display = 'block';
+                        } else {
+                            invertButton.style.display = 'none';
+                        }
+                    };
+                }
             }
         }
     } catch (error) {
