@@ -119,7 +119,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 <script>
-    // Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
+// Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
 
 // Adicionar mapa ao elemento HTML
 const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
@@ -334,7 +334,12 @@ map.on('click', (e) => {
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
 
+    // Limpar o campo da rua anterior
+    document.getElementById('ruaSelect').value = '';
+
+    // Atualizar as coordenadas
     document.getElementById('coordenadas').value = `${lat}, ${lon}`;
+
     consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
         if (nomeRuaWaze) {
             const ruaSelect = document.getElementById('ruaSelect');
