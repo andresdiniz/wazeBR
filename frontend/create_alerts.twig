@@ -166,7 +166,7 @@
         });
     });
     
-    // Função para consultar a rua via API personalizada api.php
+    // Função para consultar a rua via API personalizada
     function consultarRuaWaze(lat, lon) {
         const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
     
@@ -279,9 +279,6 @@
                         const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
                         currentSegmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
     
-                        // Log das coordenadas do segmento
-                        console.log('Coordenadas do segmento:', currentSegmentNodes);
-    
                         drawSegment(currentSegmentNodes);
     
                         // Atualizar o select de sentido
@@ -302,7 +299,6 @@
                             const direction = e.target.value;
                             drawSegment(currentSegmentNodes, direction);
     
-                            // Mostrar botão para inverter sentido apenas em "Sentido único"
                             const invertButton = document.getElementById('invertButton');
                             if (direction === 'single') {
                                 invertButton.style.display = 'block';
@@ -321,10 +317,6 @@
     // Função para inverter a ordem das coordenadas de um segmento
     function invertSegmentCoordinates() {
         currentSegmentNodes.reverse();
-    
-        // Log das coordenadas invertidas
-        console.log('Coordenadas invertidas:', currentSegmentNodes);
-    
         drawSegment(currentSegmentNodes, 'single');
     }
     
@@ -333,13 +325,8 @@
         const lat = e.latlng.lat;
         const lon = e.latlng.lng;
     
-        // Log das coordenadas clicadas
-        console.log('Coordenadas clicadas:', { lat, lon });
+        document.getElementById('ruaSelect').innerHTML = '<option value="">Selecione uma rua</option>';
     
-        // Limpar o campo da rua anterior
-        document.getElementById('ruaSelect').value = '';
-    
-        // Atualizar as coordenadas
         document.getElementById('coordenadas').value = `${lat}, ${lon}`;
     
         consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
@@ -359,13 +346,10 @@
     locateUser();
     
     // Adicionar botão de inverter sentido
-    const invertButton = document.createElement('button');
-    invertButton.id = 'invertButton';
-    invertButton.textContent = 'Inverter Sentido';
-    invertButton.style.display = 'none';
+    const invertButton = document.getElementById('invertButton');
     invertButton.onclick = invertSegmentCoordinates;
-    document.body.appendChild(invertButton);
-</script>
+    </script>
+    
 
 <script>
     // Função para calcular os dias da semana entre as duas datas
