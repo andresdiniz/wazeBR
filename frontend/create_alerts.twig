@@ -129,8 +129,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-// Variável global para armazenar o segmento anterior (se houver)
+// Variável global para armazenar o segmento e direção
 let previousSegmentLayer = null;
+let currentSegmentNodes = [];
 
 // Função para localizar o usuário
 function locateUser() {
@@ -170,6 +171,46 @@ function consultarRuaWaze(lat, lon) {
             }
         })
         .catch(() => null);
+}
+
+// Função para desenhar o segmento no mapa com setas indicando o sentido
+function drawSegment(segmentNodes, direction = 'both') {
+    if (previousSegmentLayer) {
+        map.removeLayer(previousSegmentLayer);
+    }
+
+    const segment = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+            type: 'LineString',
+            coordinates: segmentNodes
+        }
+    };
+
+    const segmentLayer = L.geoJSON(segment).addTo(map);
+
+    // Configuração das setas
+    const arrowColor = direction === 'single' ? '#FF0000' : '#0000FF';
+    const arrowLayer = L.polylineDecorator(segment, {
+        patterns: [
+            {
+                offset: 25,
+                repeat: 50,
+                symbol: L.Symbol.arrowHead({
+                    pixelSize: 15,
+                    polygon: false,
+                    pathOptions: {
+                        stroke: true,
+                        color: arrowColor,
+                        weight: 2
+                    }
+                })
+            }
+        ]
+    });
+
+    previousSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
 }
 
 // Função para buscar o segmento da rua entre interseções
@@ -217,106 +258,36 @@ async function getStreetSegment(lat, lon) {
 
             if (closestWay) {
                 const wayNodes = closestWay.nodes.map(id => nodes[id]);
+                currentSegmentNodes = wayNodes;
 
-                const intersections = closestWay.nodes.filter(nodeId =>
-                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                );
+                drawSegment(currentSegmentNodes);
 
-                if (intersections.length >= 2) {
-                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                    let segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+                // Atualizar o select de sentido
+                const directionSelect = document.getElementById('directionSelect');
+                directionSelect.innerHTML = '';
 
-                    const segment = {
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: segmentNodes
-                        }
-                    };
+                const bothOption = document.createElement('option');
+                bothOption.value = 'both';
+                bothOption.textContent = 'Ambos os sentidos';
+                directionSelect.appendChild(bothOption);
 
-                    if (previousSegmentLayer) {
-                        map.removeLayer(previousSegmentLayer);
+                const singleOption = document.createElement('option');
+                singleOption.value = 'single';
+                singleOption.textContent = 'Sentido único';
+                directionSelect.appendChild(singleOption);
+
+                directionSelect.onchange = (e) => {
+                    const direction = e.target.value;
+                    drawSegment(currentSegmentNodes, direction);
+
+                    // Mostrar botão para inverter sentido apenas em "Sentido único"
+                    const invertButton = document.getElementById('invertButton');
+                    if (direction === 'single') {
+                        invertButton.style.display = 'block';
+                    } else {
+                        invertButton.style.display = 'none';
                     }
-
-                    previousSegmentLayer = L.geoJSON(segment).addTo(map);
-
-                    // Adicionar setas indicando o sentido
-                    const directionLayer = L.polylineDecorator(segment, {
-                        patterns: [
-                            {
-                                offset: 25,
-                                repeat: 50,
-                                symbol: L.Symbol.arrowHead({
-                                    pixelSize: 15,
-                                    polygon: false,
-                                    pathOptions: {
-                                        stroke: true,
-                                        color: '#0000FF',
-                                        weight: 2
-                                    }
-                                })
-                            }
-                        ]
-                    }).addTo(map);
-
-                    previousSegmentLayer = L.layerGroup([previousSegmentLayer, directionLayer]).addTo(map);
-
-                    // Atualizar o select de sentido
-                    const directionSelect = document.getElementById('directionSelect');
-                    directionSelect.innerHTML = '';
-                    const bothOption = document.createElement('option');
-                    bothOption.value = 'both';
-                    bothOption.textContent = 'Ambos os sentidos';
-                    directionSelect.appendChild(bothOption);
-
-                    const singleOption = document.createElement('option');
-                    singleOption.value = 'single';
-                    singleOption.textContent = 'Sentido único';
-                    directionSelect.appendChild(singleOption);
-
-                    // Adicionar botão para inverter o sentido
-                    const invertButton = document.createElement('button');
-                    invertButton.textContent = 'Inverter Sentido';
-                    invertButton.onclick = () => {
-                        segmentNodes = invertSegmentCoordinates(segmentNodes);
-                        map.removeLayer(previousSegmentLayer);
-                        const invertedSegment = {
-                            type: 'Feature',
-                            properties: {},
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: segmentNodes
-                            }
-                        };
-                        previousSegmentLayer = L.geoJSON(invertedSegment).addTo(map);
-
-                        const invertedDirectionLayer = L.polylineDecorator(invertedSegment, {
-                            patterns: [
-                                {
-                                    offset: 25,
-                                    repeat: 50,
-                                    symbol: L.Symbol.arrowHead({
-                                        pixelSize: 15,
-                                        polygon: false,
-                                        pathOptions: {
-                                            stroke: true,
-                                            color: '#FF0000',
-                                            weight: 2
-                                        }
-                                    })
-                                }
-                            ]
-                        }).addTo(map);
-
-                        previousSegmentLayer = L.layerGroup([previousSegmentLayer, invertedDirectionLayer]).addTo(map);
-                    };
-
-                    document.body.appendChild(invertButton);
-
-                    console.log('Segmento carregado.');
-                }
+                };
             }
         }
     } catch (error) {
@@ -325,8 +296,9 @@ async function getStreetSegment(lat, lon) {
 }
 
 // Função para inverter a ordem das coordenadas de um segmento
-function invertSegmentCoordinates(segmentNodes) {
-    return segmentNodes.reverse();
+function invertSegmentCoordinates() {
+    currentSegmentNodes.reverse();
+    drawSegment(currentSegmentNodes, 'single');
 }
 
 // Atualizar ruas e subtipos quando o mapa for clicado
@@ -355,6 +327,14 @@ map.on('click', (e) => {
 
 // Localizar o usuário na inicialização
 locateUser();
+
+// Adicionar botão de inverter sentido
+const invertButton = document.createElement('button');
+invertButton.id = 'invertButton';
+invertButton.textContent = 'Inverter Sentido';
+invertButton.style.display = 'none';
+invertButton.onclick = invertSegmentCoordinates;
+document.body.appendChild(invertButton);
 
 </script>
 
