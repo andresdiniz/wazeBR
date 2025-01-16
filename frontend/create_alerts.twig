@@ -121,60 +121,60 @@
 <script>
     // Inicializar um mapa com Leaflet e usar a API Overpass para identificar segmentos
 
-    // Adicionar mapa ao elemento HTML
-    const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
+// Adicionar mapa ao elemento HTML
+const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
 
-    // Adicionar camada do mapa base
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+// Adicionar camada do mapa base
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-    // Variável global para armazenar o segmento anterior (se houver)
-    let previousSegmentLayer = null;
+// Variável global para armazenar o segmento anterior (se houver)
+let previousSegmentLayer = null;
 
-    // Função para localizar o usuário
-    function locateUser() {
-        map.locate({ setView: true, maxZoom: 16 });
-    }
+// Função para localizar o usuário
+function locateUser() {
+    map.locate({ setView: true, maxZoom: 16 });
+}
 
-    // Evento para quando a localização for encontrada
-    map.on('locationfound', (e) => {
-        const radius = e.accuracy / 2;
-        L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
-        L.circle(e.latlng, radius).addTo(map);
+// Evento para quando a localização for encontrada
+map.on('locationfound', (e) => {
+    const radius = e.accuracy / 2;
+    L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+    L.circle(e.latlng, radius).addTo(map);
 
-        consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
-            if (nomeRuaWaze) {
-                const ruaSelect = document.getElementById('ruaSelect');
-                const optionWaze = document.createElement('option');
-                optionWaze.value = nomeRuaWaze;
-                optionWaze.textContent = nomeRuaWaze;
-                ruaSelect.appendChild(optionWaze);
-                ruaSelect.value = nomeRuaWaze;
-            }
-        });
+    consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            const ruaSelect = document.getElementById('ruaSelect');
+            const optionWaze = document.createElement('option');
+            optionWaze.value = nomeRuaWaze;
+            optionWaze.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(optionWaze);
+            ruaSelect.value = nomeRuaWaze;
+        }
     });
+});
 
-    // Função para consultar a rua via API personalizada api.php
-    function consultarRuaWaze(lat, lon) {
-        const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+// Função para consultar a rua via API personalizada api.php
+function consultarRuaWaze(lat, lon) {
+    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
 
-        return fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.result && data.result.length > 0) {
-                    data.result.sort((a, b) => a.distance - b.distance);
-                    return data.result[0].names[0]; // Nome da rua mais próxima
-                } else {
-                    return null;
-                }
-            })
-            .catch(() => null);
-    }
+    return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.result && data.result.length > 0) {
+                data.result.sort((a, b) => a.distance - b.distance);
+                return data.result[0].names[0]; // Nome da rua mais próxima
+            } else {
+                return null;
+            }
+        })
+        .catch(() => null);
+}
 
-    // Função para buscar o segmento da rua entre interseções
-    async function getStreetSegment(lat, lon) {
-        const query = `
+// Função para buscar o segmento da rua entre interseções
+async function getStreetSegment(lat, lon) {
+    const query = `
         [out:json];
         (
             node(around:50, ${lat}, ${lon});
@@ -184,50 +184,105 @@
         out geom;
     `;
 
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-            if (data.elements.length > 0) {
-                const nodes = {};
-                const ways = [];
+        if (data.elements.length > 0) {
+            const nodes = {};
+            const ways = [];
 
-                data.elements.forEach(el => {
-                    if (el.type === 'node') {
-                        nodes[el.id] = [el.lon, el.lat];
-                    } else if (el.type === 'way') {
-                        ways.push(el);
+            data.elements.forEach(el => {
+                if (el.type === 'node') {
+                    nodes[el.id] = [el.lon, el.lat];
+                } else if (el.type === 'way') {
+                    ways.push(el);
+                }
+            });
+
+            let closestWay = null;
+            let minDistance = Infinity;
+
+            ways.forEach(way => {
+                const wayNodes = way.nodes.map(id => nodes[id]);
+                const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestWay = way;
+                }
+            });
+
+            if (closestWay) {
+                const wayNodes = closestWay.nodes.map(id => nodes[id]);
+
+                const intersections = closestWay.nodes.filter(nodeId =>
+                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                );
+
+                if (intersections.length >= 2) {
+                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                    let segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+
+                    const segment = {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: segmentNodes
+                        }
+                    };
+
+                    if (previousSegmentLayer) {
+                        map.removeLayer(previousSegmentLayer);
                     }
-                });
 
-                let closestWay = null;
-                let minDistance = Infinity;
+                    previousSegmentLayer = L.geoJSON(segment).addTo(map);
 
-                ways.forEach(way => {
-                    const wayNodes = way.nodes.map(id => nodes[id]);
-                    const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+                    // Adicionar setas indicando o sentido
+                    const directionLayer = L.polylineDecorator(segment, {
+                        patterns: [
+                            {
+                                offset: 25,
+                                repeat: 50,
+                                symbol: L.Symbol.arrowHead({
+                                    pixelSize: 15,
+                                    polygon: false,
+                                    pathOptions: {
+                                        stroke: true,
+                                        color: '#0000FF',
+                                        weight: 2
+                                    }
+                                })
+                            }
+                        ]
+                    }).addTo(map);
 
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestWay = way;
-                    }
-                });
+                    previousSegmentLayer = L.layerGroup([previousSegmentLayer, directionLayer]).addTo(map);
 
-                if (closestWay) {
-                    const wayNodes = closestWay.nodes.map(id => nodes[id]);
+                    // Atualizar o select de sentido
+                    const directionSelect = document.getElementById('directionSelect');
+                    directionSelect.innerHTML = '';
+                    const bothOption = document.createElement('option');
+                    bothOption.value = 'both';
+                    bothOption.textContent = 'Ambos os sentidos';
+                    directionSelect.appendChild(bothOption);
 
-                    const intersections = closestWay.nodes.filter(nodeId =>
-                        data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                    );
+                    const singleOption = document.createElement('option');
+                    singleOption.value = 'single';
+                    singleOption.textContent = 'Sentido único';
+                    directionSelect.appendChild(singleOption);
 
-                    if (intersections.length >= 2) {
-                        const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                        const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                        const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-
-                        const segment = {
+                    // Adicionar botão para inverter o sentido
+                    const invertButton = document.createElement('button');
+                    invertButton.textContent = 'Inverter Sentido';
+                    invertButton.onclick = () => {
+                        segmentNodes = invertSegmentCoordinates(segmentNodes);
+                        map.removeLayer(previousSegmentLayer);
+                        const invertedSegment = {
                             type: 'Feature',
                             properties: {},
                             geometry: {
@@ -235,61 +290,67 @@
                                 coordinates: segmentNodes
                             }
                         };
+                        previousSegmentLayer = L.geoJSON(invertedSegment).addTo(map);
 
-                        if (previousSegmentLayer) {
-                            map.removeLayer(previousSegmentLayer);
-                        }
+                        const invertedDirectionLayer = L.polylineDecorator(invertedSegment, {
+                            patterns: [
+                                {
+                                    offset: 25,
+                                    repeat: 50,
+                                    symbol: L.Symbol.arrowHead({
+                                        pixelSize: 15,
+                                        polygon: false,
+                                        pathOptions: {
+                                            stroke: true,
+                                            color: '#FF0000',
+                                            weight: 2
+                                        }
+                                    })
+                                }
+                            ]
+                        }).addTo(map);
 
-                        previousSegmentLayer = L.geoJSON(segment).addTo(map);
+                        previousSegmentLayer = L.layerGroup([previousSegmentLayer, invertedDirectionLayer]).addTo(map);
+                    };
 
-                        // Atualizar o select de sentido
-                        const directionSelect = document.getElementById('directionSelect');
-                        directionSelect.innerHTML = '';
-                        const bothOption = document.createElement('option');
-                        bothOption.value = 'both';
-                        bothOption.textContent = 'Ambos os sentidos';
-                        directionSelect.appendChild(bothOption);
+                    document.body.appendChild(invertButton);
 
-                        const singleOption = document.createElement('option');
-                        singleOption.value = 'single';
-                        singleOption.textContent = 'Sentido único';
-                        directionSelect.appendChild(singleOption);
-
-                        console.log(`Segmento carregado.`);
-                    }
+                    console.log('Segmento carregado.');
                 }
             }
-        } catch (error) {
-            console.error('Erro ao buscar segmento:', error);
         }
+    } catch (error) {
+        console.error('Erro ao buscar segmento:', error);
     }
+}
 
-    // Função para inverter a ordem das coordenadas de um segmento
-    function invertSegmentCoordinates(segmentNodes) {
-        return segmentNodes.reverse();
-    }
+// Função para inverter a ordem das coordenadas de um segmento
+function invertSegmentCoordinates(segmentNodes) {
+    return segmentNodes.reverse();
+}
 
-    // Atualizar ruas e subtipos quando o mapa for clicado
-    map.on('click', (e) => {
-        const lat = e.latlng.lat;
-        const lon = e.latlng.lng;
+// Atualizar ruas e subtipos quando o mapa for clicado
+map.on('click', (e) => {
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
 
-        document.getElementById('coordenadas').value = `${lat}, ${lon}`;
-        consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
-            if (nomeRuaWaze) {
-                const ruaSelect = document.getElementById('ruaSelect');
-                const option = document.createElement('option');
-                option.value = nomeRuaWaze;
-                option.textContent = nomeRuaWaze;
-                ruaSelect.appendChild(option);
-            }
-        });
-
-        getStreetSegment(lat, lon);
+    document.getElementById('coordenadas').value = `${lat}, ${lon}`;
+    consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+        if (nomeRuaWaze) {
+            const ruaSelect = document.getElementById('ruaSelect');
+            const option = document.createElement('option');
+            option.value = nomeRuaWaze;
+            option.textContent = nomeRuaWaze;
+            ruaSelect.appendChild(option);
+        }
     });
 
-    // Localizar o usuário na inicialização
-    locateUser();
+    getStreetSegment(lat, lon);
+});
+
+// Localizar o usuário na inicialização
+locateUser();
+
 </script>
 
 <script>
