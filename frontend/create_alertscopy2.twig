@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Alerts</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Create Alert</h1>
+        <form action="{{ path('create_alert') }}" method="post">
+            <div class="mb-3">
+                <label for="alertTitle" class="form-label">Alert Title</label>
+                <input type="text" class="form-control" id="alertTitle" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="alertDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="alertDescription" name="description" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="alertType" class="form-label">Type</label>
+                <select class="form-select" id="alertType" name="type" required>
+                    <option value="traffic">Traffic</option>
+                    <option value="accident">Accident</option>
+                    <option value="hazard">Hazard</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Alert</button>
+        </form>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
