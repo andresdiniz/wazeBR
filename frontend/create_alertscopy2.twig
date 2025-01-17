@@ -394,12 +394,6 @@
     function inverterCoordenadas(segmentNodes) {
         const reversedSegment = [...segmentNodes].reverse(); // Inverter o segmento
         console.log('Segmento invertido:', reversedSegment);
-        
-        // Redesenhar o segmento com a direção invertida
-        if (currentSegmentLayer) {
-            map.removeLayer(currentSegmentLayer); // Remover o segmento atual
-        }
-        currentSegmentLayer = drawSegment(map, reversedSegment, 'single'); // Redesenhar com sentido único
     }
 </script>
 
