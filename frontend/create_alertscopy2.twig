@@ -292,6 +292,14 @@
         });
     }
 
+    // Esconder botão de reverso
+    function esconderBotaoReverso() {
+        const reversoBtn = document.getElementById('reversoBtn');
+        if (reversoBtn) {
+            reversoBtn.style.display = 'none';
+        }
+    }
+
     // === Funções de Tipos e Subtipos ===
     function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) { //Funcao funcionando
         subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
@@ -329,29 +337,54 @@
         });
     }
 
+    // Atualizar os valores do sentido
+    function atualizarDirecoes(selectElement) {
+        selectElement.innerHTML = ''; // Limpar opções existentes
+
+        // Adicionar opções de sentido
+        const options = [
+            { value: 'both', text: 'Ambos os sentidos' },
+            { value: 'single', text: 'Sentido único' },
+        ];
+
+        options.forEach(optionData => {
+            const option = document.createElement('option');
+            option.value = optionData.value;
+            option.textContent = optionData.text;
+            selectElement.appendChild(option);
+        });
+    }
+
+    // Mostrar botão de reverso
+    function mostrarBotaoReverso(segmentNodes, map) {
+        let reversoBtn = document.getElementById('reversoBtn');
+
+        if (!reversoBtn) {
+            // Criar o botão se ele ainda não existir
+            reversoBtn = document.createElement('button');
+            reversoBtn.id = 'reversoBtn';
+            reversoBtn.className = 'btn btn-secondary mt-3';
+            reversoBtn.textContent = 'Reverter Sentido';
+            document.getElementById('buttonContainer').appendChild(reversoBtn);
+        }
+
+        reversoBtn.style.display = 'block'; // Exibir o botão
+
+        // Adicionar evento de clique ao botão
+        reversoBtn.onclick = () => {
+            const reversedSegment = [...segmentNodes].reverse(); // Reverter as coordenadas
+            drawSegment(map, reversedSegment, 'single');
+            console.log('Segmento invertido:', reversedSegment);
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
     
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
     
-        // Atualizar os valores do sentido
-        function atualizarDirecoes(selectElement) {
-            selectElement.innerHTML = ''; // Limpar opções existentes
-    
-            // Adicionar opções de sentido
-            const options = [
-                { value: 'both', text: 'Ambos os sentidos' },
-                { value: 'single', text: 'Sentido único' },
-            ];
-    
-            options.forEach(optionData => {
-                const option = document.createElement('option');
-                option.value = optionData.value;
-                option.textContent = optionData.text;
-                selectElement.appendChild(option);
-            });
-        }
+        let currentSegment = []; // Armazena o segmento atual
     
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
@@ -387,8 +420,16 @@
     
                 // Verificar o retorno e desenhar o segmento
                 if (segmentNodes && segmentNodes.length > 1) {
+                    currentSegment = segmentNodes; // Armazenar o segmento atual
                     const selectedDirection = directionSelect.value;
                     drawSegment(map, segmentNodes, selectedDirection);
+    
+                    // Mostrar botão de reverso para sentido único
+                    if (selectedDirection === 'single') {
+                        mostrarBotaoReverso(segmentNodes, map);
+                    } else {
+                        esconderBotaoReverso(); // Esconder botão de reverso se não for sentido único
+                    }
                 } else {
                     console.warn('Nenhum segmento encontrado.');
                 }
@@ -411,6 +452,7 @@
             }
         });
     
+        
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
         const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
@@ -419,6 +461,6 @@
     
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
-    });
+    });    
         
 </script>
