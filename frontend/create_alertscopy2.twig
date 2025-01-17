@@ -381,27 +381,30 @@
     
         reversoBtn.style.display = 'block';
     }    
+</script>
 
+<!-- Trecho para chamada das funçoes e execução do script-->
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
-    
+
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
-    
-        let currentSegment = []; // Armazena o segmento atual
-    
+
+        let currentSegmentLayer = null; // Armazena a camada do segmento atual
+
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
-    
+
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-    
+
             const coordenadasInput = document.getElementById('coordenadas');
             if (coordenadasInput) {
                 coordenadasInput.value = `${lat}, ${lon}`;
             }
-    
+
             consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
@@ -414,40 +417,44 @@
                     }
                 }
             });
-    
+
             // Chamar getStreetSegment ao clicar no mapa
             const directionSelect = document.getElementById('directionSelect');
             atualizarDirecoes(directionSelect); // Atualizar o select com direções disponíveis
-    
+
             getStreetSegment(map, lat, lon, (segmentNodes) => {
                 console.log('Segmento retornado:', segmentNodes);
-    
+
                 // Verificar o retorno e desenhar o segmento
                 if (segmentNodes && segmentNodes.length > 1) {
-                    currentSegment = segmentNodes; // Armazenar o segmento atual
+                    // Limpar o mapa antes de adicionar o novo segmento
+                    if (currentSegmentLayer) {
+                        map.removeLayer(currentSegmentLayer);
+                    }
+
                     const selectedDirection = directionSelect.value;
-                    drawSegment(map, segmentNodes, selectedDirection);
-    
+                    currentSegmentLayer = drawSegment(map, segmentNodes, selectedDirection);
+
                     // Mostrar botão de reverso para sentido único
-                    if (selectedDirection === 'single' && segmentNodes && segmentNodes.length > 1) {
+                    if (selectedDirection === 'single') {
                         mostrarBotaoReverso(segmentNodes, map);
                     } else {
-                        esconderBotaoReverso(); // Esconde se não for sentido único ou segmento inválido
+                        esconderBotaoReverso();
                     }
                 } else {
                     console.warn('Nenhum segmento encontrado.');
                 }
             });
         });
-    
+
         // Botão para criar evento
         document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
             e.preventDefault(); // Evitar comportamento padrão do envio de formulário
-    
+
             const direction = document.getElementById('directionSelect').value;
-    
+
             console.log('Direção selecionada:', direction);
-    
+
             // Lógica para processar a direção e criar evento
             if (direction === 'both' || direction === 'single') {
                 alert(`Evento criado no sentido: ${direction}`);
@@ -455,16 +462,15 @@
                 alert('Por favor, selecione um sentido válido.');
             }
         });
-    
-        
+
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
         const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
-    
+
         tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
-    
+
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
-    });    
-        
+    });
 </script>
+
