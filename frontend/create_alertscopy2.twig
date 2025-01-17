@@ -318,14 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
         map.on('click', (e) => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
-    
+        
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-    
+        
             const coordenadasInput = document.getElementById('coordenadas');
             if (coordenadasInput) {
                 coordenadasInput.value = `${lat}, ${lon}`;
             }
-    
+        
             consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
@@ -338,7 +338,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-        });
+        
+            // Chamar getStreetSegment ao clicar no mapa
+            getStreetSegment(map, lat, lon, (segmentNodes) => {
+                console.log('Segmento retornado:', segmentNodes);
+        
+                // Verificar o retorno e desenhar o segmento
+                if (segmentNodes && segmentNodes.length > 1) {
+                    drawSegment(map, segmentNodes);
+                } else {
+                    console.warn('Nenhum segmento encontrado.');
+                }
+            });
+        });        
     
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
