@@ -457,7 +457,7 @@
     
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const selectedDirection = e.target.value;
-        
+            console.log('Direção selecionada:', selectedDirection);
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
                 // Redesenhar o segmento com a nova direção
                 if (currentSegmentLayer) {
