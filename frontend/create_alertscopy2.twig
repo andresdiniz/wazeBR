@@ -458,7 +458,16 @@
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const selectedDirection = e.target.value;
             console.log('Direção selecionada:', selectedDirection);
+            // Mostrar ou esconder o botão "Reverter Sentido" conforme necessário
+            if (selectedDirection === 'single') {
+                // Criar o botão de reverso e inverter as coordenadas
+                mostrarBotaoReverso(currentSegmentNodes, map);  // Criar o botão
+                inverterCoordenadas(currentSegmentNodes);       // Inverter as coordenadas
+            } else {
+                esconderBotaoReverso(); // Esconder o botão para "Ambos os sentidos"
+            }
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
+                console.log('Redesenhar segmento com nova direção:', selectedDirection);
                 // Redesenhar o segmento com a nova direção
                 if (currentSegmentLayer) {
                     map.removeLayer(currentSegmentLayer);
@@ -466,15 +475,6 @@
         
                 // Verificar a direção e desenhar o segmento
                 currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
-        
-                // Mostrar ou esconder o botão "Reverter Sentido" conforme necessário
-                if (selectedDirection === 'single') {
-                    // Criar o botão de reverso e inverter as coordenadas
-                    mostrarBotaoReverso(currentSegmentNodes, map);  // Criar o botão
-                    inverterCoordenadas(currentSegmentNodes);       // Inverter as coordenadas
-                } else {
-                    esconderBotaoReverso(); // Esconder o botão para "Ambos os sentidos"
-                }
             }
         });
     
