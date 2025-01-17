@@ -7,11 +7,29 @@
             <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">   
                 <!--Nome e descrição do evento-->
                 <div class="row mb-6">
-                    <div class="col-md-10">
+                    <div class="col-md-12">
                         <label for="nome" class="form-label">Descrição do Evento</label>
                         <input type="text" class="form-control" id="nome" name="nome" required placeholder="Escreva um descrição breve do Evento" maxlength="50">
                     </div>
+                </div>
 
+                <!-- Seção de Tipo e Subtipo -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="">Selecione um Tipo</option>
+                            {% for tipo in tipos %}
+                            <option value="{{ tipo.id }}">{{ tipo.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="subtipo" class="form-label">Subtipo</label>
+                        <select class="form-select" id="subtipo" name="subtipo" required>
+                            <option value="">Selecione um Subtipo</option>
+                        </select>
+                    </div>
                 </div>
 
 
