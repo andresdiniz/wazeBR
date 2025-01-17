@@ -388,14 +388,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
-        
+
         let currentSegmentLayer = null; // Armazena a camada do segmento atual
         let currentSegmentNodes = []; // Armazena os nós do segmento atual
 
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
-
-        let currentSegmentLayer = null; // Armazena a camada do segmento atual
 
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
