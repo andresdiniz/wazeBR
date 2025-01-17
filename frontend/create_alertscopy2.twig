@@ -299,14 +299,6 @@
         });
     }
 
-    // Esconder botão de reverso
-    function esconderBotaoReverso() {
-        const reversoBtn = document.getElementById('reversoBtn');
-        if (reversoBtn) {
-            reversoBtn.style.display = 'none';
-        }
-    }
-
     // === Funções de Tipos e Subtipos ===
     function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) { //Funcao funcionando
         subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
@@ -362,51 +354,63 @@
         });
     }
 
-    // Mostrar botão de reverso
+    // Função para mostrar o botão de reverso
     function mostrarBotaoReverso(segmentNodes, map) {
         let reversoBtn = document.getElementById('reversoBtn');
-        console.log('Botão de reverso:', reversoBtn);
-    
+
         if (!reversoBtn) {
+            // Criar o botão caso ele não exista
             reversoBtn = document.createElement('button');
             reversoBtn.id = 'reversoBtn';
             reversoBtn.className = 'btn btn-secondary mt-3';
             reversoBtn.textContent = 'Reverter Sentido';
+
+            // Adicionar evento de clique no botão para inverter as coordenadas
             reversoBtn.onclick = () => {
                 const reversedSegment = [...segmentNodes].reverse();
-                drawSegment(map, reversedSegment, 'single');
+                drawSegment(map, reversedSegment, 'single'); // Desenhar o segmento invertido
                 console.log('Segmento invertido:', reversedSegment);
             };
+
+            // Adicionar o botão ao container (certifique-se de que o contêiner exista no DOM)
             document.getElementById('buttonContainer').appendChild(reversoBtn);
         }
-    
+
+        // Garantir que o botão esteja visível
         reversoBtn.style.display = 'block';
-    }    
+    }
+
+    // Função para esconder o botão de reverso
+    function esconderBotaoReverso() {
+        const reversoBtn = document.getElementById('reversoBtn');
+        if (reversoBtn) {
+            reversoBtn.style.display = 'none'; // Esconde o botão
+        }
+    }   
 </script>
 
 <!-- Trecho para chamada das funçoes e execução do script-->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
-
         let currentSegmentLayer = null; // Armazena a camada do segmento atual
         let currentSegmentNodes = []; // Armazena os nós do segmento atual
-
+    
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
-
+    
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
-
+    
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-
+    
             const coordenadasInput = document.getElementById('coordenadas');
             if (coordenadasInput) {
                 coordenadasInput.value = `${lat}, ${lon}`;
             }
-
+    
             consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
@@ -419,24 +423,24 @@
                     }
                 }
             });
-
+    
             // Chamar getStreetSegment ao clicar no mapa
             const directionSelect = document.getElementById('directionSelect');
             atualizarDirecoes(directionSelect); // Atualizar o select com direções disponíveis
-
+    
             getStreetSegment(map, lat, lon, (segmentNodes) => {
                 console.log('Segmento retornado:', segmentNodes);
-
+    
                 // Verificar o retorno e desenhar o segmento
                 if (segmentNodes && segmentNodes.length > 1) {
                     // Limpar o mapa antes de adicionar o novo segmento
                     if (currentSegmentLayer) {
                         map.removeLayer(currentSegmentLayer);
                     }
-
+    
                     const selectedDirection = directionSelect.value;
                     currentSegmentLayer = drawSegment(map, segmentNodes, selectedDirection);
-
+    
                     // Mostrar botão de reverso para sentido único
                     if (selectedDirection === 'single') {
                         console.log('Mostrando botão de reverso.');
@@ -449,19 +453,19 @@
                 }
             });
         });
-
+    
         // Listener para mudanças no sentido selecionado
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const selectedDirection = e.target.value;
-
+    
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
                 // Redesenhar o segmento com a nova direção
                 if (currentSegmentLayer) {
                     map.removeLayer(currentSegmentLayer);
                 }
-
+    
                 currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
-
+    
                 // Mostrar ou esconder o botão "Reverter Sentido" conforme necessário
                 if (selectedDirection === 'single') {
                     mostrarBotaoReverso(currentSegmentNodes, map);
@@ -470,15 +474,15 @@
                 }
             }
         });
-
+    
         // Botão para criar evento
         document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
             e.preventDefault(); // Evitar comportamento padrão do envio de formulário
-
+    
             const direction = document.getElementById('directionSelect').value;
-
+    
             console.log('Direção selecionada:', direction);
-
+    
             // Lógica para processar a direção e criar evento
             if (direction === 'both' || direction === 'single') {
                 alert(`Evento criado no sentido: ${direction}`);
@@ -486,13 +490,13 @@
                 alert('Por favor, selecione um sentido válido.');
             }
         });
-
+    
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
         const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
-
+    
         tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
-
+    
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
     });
