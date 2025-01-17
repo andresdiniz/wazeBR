@@ -14,7 +14,7 @@
                 </div>
 
                 <!-- Seção de Tipo e Subtipo -->
-                <div class="row mb-4">
+                <div class="row mb-4 mt-2">
                     <div class="col-md-6">
                         <label for="tipo" class="form-label">Tipo</label>
                         <select class="form-select" id="tipo" name="tipo" required>
@@ -31,6 +31,69 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Seção de Início e Fim do Evento -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="starttime" class="form-label">Início do Evento</label>
+                        <input type="datetime-local" class="form-control" id="starttime" name="starttime"
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="endtime" class="form-label">Fim do Evento</label>
+                        <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
+                    </div>
+                </div>
+
+                <!-- Seção de Dias da Semana -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="dias_semana" class="form-label">Dias da Semana</label>
+                        <select multiple class="form-select" id="dias_semana" name="dias_semana[]">
+                            <option value="sunday">Domingo</option>
+                            <option value="monday">Segunda-feira</option>
+                            <option value="tuesday">Terça-feira</option>
+                            <option value="wednesday">Quarta-feira</option>
+                            <option value="thursday">Quinta-feira</option>
+                            <option value="friday">Sexta-feira</option>
+                            <option value="saturday">Sábado</option>
+                        </select>
+                    </div>
+                </div>                
+
+                <!-- Seção de Horários -->
+                <div id="horarios_dia" class="mb-4">
+                    <!-- Espaço para adicionar campos de horário para cada dia da semana -->
+                </div>
+
+                <!-- Seção de Coordenadas -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
+                        <input type="text" class="form-control" id="coordenadas" name="coordenadas" required
+                            placeholder="Clique no mapa para definir as coordenadas" readonly>
+                    </div>
+                </div>
+
+                <!-- Seção de Rua -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="rua" class="form-label">Selecione a Rua</label>
+                        <select class="form-select" id="ruaSelect" name="rua" required>
+                            <option value="">Selecione uma rua</option>
+                            <!-- As opções de rua serão preenchidas dinamicamente aqui -->
+                        </select>
+                    </div>
+                    <div class="mt-2 col-md-6">
+                        <label for="directionSelect">Escolha o sentido:</label>
+                        <select id="directionSelect" name="directionSelect"></select>
+                    </div>
+                    <!-- Botão de envio -->
+                    <div class="col-md-6 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary mt-3">Criar Evento</button>
+                    </div>
+                </div>
+
 
 
             </form>
