@@ -449,6 +449,27 @@
             });
         });
 
+        // Listener para mudanças no sentido selecionado
+        document.getElementById('directionSelect').addEventListener('change', (e) => {
+            const selectedDirection = e.target.value;
+
+            if (currentSegmentNodes && currentSegmentNodes.length > 1) {
+                // Redesenhar o segmento com a nova direção
+                if (currentSegmentLayer) {
+                    map.removeLayer(currentSegmentLayer);
+                }
+
+                currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
+
+                // Mostrar ou esconder o botão "Reverter Sentido" conforme necessário
+                if (selectedDirection === 'single') {
+                    mostrarBotaoReverso(currentSegmentNodes, map);
+                } else {
+                    esconderBotaoReverso();
+                }
+            }
+        });
+
         // Botão para criar evento
         document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
             e.preventDefault(); // Evitar comportamento padrão do envio de formulário
