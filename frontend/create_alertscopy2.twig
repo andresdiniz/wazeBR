@@ -222,10 +222,17 @@
                     if (intersections.length >= 2) {
                         const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
                         const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                        const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-
-                        drawSegmentCallback(segmentNodes);
+                        if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
+                            const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+                            console.log('Segmento de nós encontrado:', segmentNodes);
+                            drawSegmentCallback(segmentNodes);
+                        } else {
+                            console.warn('Interseções não têm índices válidos:', { startNodeIndex, endNodeIndex });
+                        }
+                    } else {
+                        console.warn('Interseções insuficientes para determinar o segmento:', intersections);
                     }
+                    
                 }
             }
         } catch (error) {
@@ -358,25 +365,22 @@
     // Mostrar botão de reverso
     function mostrarBotaoReverso(segmentNodes, map) {
         let reversoBtn = document.getElementById('reversoBtn');
-
+    
         if (!reversoBtn) {
-            // Criar o botão se ele ainda não existir
             reversoBtn = document.createElement('button');
             reversoBtn.id = 'reversoBtn';
             reversoBtn.className = 'btn btn-secondary mt-3';
             reversoBtn.textContent = 'Reverter Sentido';
+            reversoBtn.onclick = () => {
+                const reversedSegment = [...segmentNodes].reverse();
+                drawSegment(map, reversedSegment, 'single');
+                console.log('Segmento invertido:', reversedSegment);
+            };
             document.getElementById('buttonContainer').appendChild(reversoBtn);
         }
-
-        reversoBtn.style.display = 'block'; // Exibir o botão
-
-        // Adicionar evento de clique ao botão
-        reversoBtn.onclick = () => {
-            const reversedSegment = [...segmentNodes].reverse(); // Reverter as coordenadas
-            drawSegment(map, reversedSegment, 'single');
-            console.log('Segmento invertido:', reversedSegment);
-        };
-    }
+    
+        reversoBtn.style.display = 'block';
+    }    
 
     document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
@@ -425,10 +429,10 @@
                     drawSegment(map, segmentNodes, selectedDirection);
     
                     // Mostrar botão de reverso para sentido único
-                    if (selectedDirection === 'single') {
+                    if (selectedDirection === 'single' && segmentNodes && segmentNodes.length > 1) {
                         mostrarBotaoReverso(segmentNodes, map);
                     } else {
-                        esconderBotaoReverso(); // Esconder botão de reverso se não for sentido único
+                        esconderBotaoReverso(); // Esconde se não for sentido único ou segmento inválido
                     }
                 } else {
                     console.warn('Nenhum segmento encontrado.');
