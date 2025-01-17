@@ -106,7 +106,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 <script>
     // === Funções do Mapa ===
-    function initializeMap() {
+    function initializeMap() {// função funcionando
         const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -114,8 +114,8 @@
         return map;
     }
 
-    function locateUser(map) {
-        map.locate({ setView: true, maxZoom: 16 });
+    function locateUser(map) { // função funcionando
+        map.locate({ setView: true, maxZoom: 12 });
 
         map.on('locationerror', function(e) {
             alert('Não foi possível localizar a sua posição.');
@@ -127,17 +127,7 @@
         const radius = e.accuracy / 2;
         L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
         L.circle(e.latlng, radius).addTo(map);
-
-        consultarRuaWaze(e.latlng.lat, e.latlng.lng).then(nomeRuaWaze => {
-            if (nomeRuaWaze) {
-                const ruaSelect = document.getElementById('ruaSelect');
-                const optionWaze = document.createElement('option');
-                optionWaze.value = nomeRuaWaze;
-                optionWaze.textContent = nomeRuaWaze;
-                ruaSelect.appendChild(optionWaze);
-                ruaSelect.value = nomeRuaWaze;
-            }
-        });
+        console.log('Localização atual encontrada:', e.latlng);
     }
 
     function consultarRuaWaze(lat, lon) {
