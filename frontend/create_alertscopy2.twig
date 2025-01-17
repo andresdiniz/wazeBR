@@ -388,6 +388,18 @@
             reversoBtn.style.display = 'none'; // Esconde o botão
         }
     }   
+
+    // Função para inverter as coordenadas do segmento
+    function inverterCoordenadas(segmentNodes) {
+        const reversedSegment = [...segmentNodes].reverse(); // Inverter o segmento
+        console.log('Segmento invertido:', reversedSegment);
+        
+        // Redesenhar o segmento com a direção invertida
+        if (currentSegmentLayer) {
+            map.removeLayer(currentSegmentLayer); // Remover o segmento atual
+        }
+        currentSegmentLayer = drawSegment(map, reversedSegment, 'single'); // Redesenhar com sentido único
+    }
 </script>
 
 <!-- Trecho para chamada das funçoes e execução do script-->
@@ -462,6 +474,7 @@
             if (selectedDirection === 'single') {
                 // Criar o botão de reverso e inverter as coordenadas
                 mostrarBotaoReverso(currentSegmentNodes, map);  // Criar o botão
+                console.log('Invertendo coordenadas do segmento:', currentSegmentNodes);
                 inverterCoordenadas(currentSegmentNodes);       // Inverter as coordenadas
             } else {
                 esconderBotaoReverso(); // Esconder o botão para "Ambos os sentidos"
