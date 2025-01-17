@@ -365,6 +365,7 @@
     // Mostrar botão de reverso
     function mostrarBotaoReverso(segmentNodes, map) {
         let reversoBtn = document.getElementById('reversoBtn');
+        console.log('Botão de reverso:', reversoBtn);
     
         if (!reversoBtn) {
             reversoBtn = document.createElement('button');
@@ -437,6 +438,7 @@
 
                     // Mostrar botão de reverso para sentido único
                     if (selectedDirection === 'single') {
+                        console.log('Mostrando botão de reverso.');
                         mostrarBotaoReverso(segmentNodes, map);
                     } else {
                         esconderBotaoReverso();
