@@ -176,7 +176,7 @@
         const query = `
             [out:json];
             (
-                node(around:100, ${lat}, ${lon});
+                node(around:200, ${lat}, ${lon});
                 way(bn)["highway"];
                 >;
             );
