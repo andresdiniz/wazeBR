@@ -72,7 +72,9 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="directionSelect" class="form-label">Escolha o Sentido</label>
-                            <select id="directionSelect" class="form-select" name="directionSelect"></select>
+                            <select id="directionSelect" class="form-select" name="directionSelect">
+                                <!-- Opções serão populadas dinamicamente -->
+                            </select>
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-center mt-6">
                             <button type="submit" class="btn btn-primary w-100">Criar Evento</button>
@@ -308,24 +310,61 @@
         }
     }
 
-document.addEventListener('DOMContentLoaded', function() {
+    // Atualizar os valores do sentido
+    function atualizarDirecoes(selectElement) {
+        // Certifique-se de que o select está limpo
+        selectElement.innerHTML = '';
+
+        // Adicionar opções de sentido
+        const options = [
+            { value: 'both', text: 'Ambos os sentidos' },
+            { value: 'single', text: 'Sentido único' },
+        ];
+
+        options.forEach(optionData => {
+            const option = document.createElement('option');
+            option.value = optionData.value;
+            option.textContent = optionData.text;
+            selectElement.appendChild(option);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         const map = initializeMap();
     
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
     
+        // Atualizar os valores do sentido
+        function atualizarDirecoes(selectElement) {
+            selectElement.innerHTML = ''; // Limpar opções existentes
+    
+            // Adicionar opções de sentido
+            const options = [
+                { value: 'both', text: 'Ambos os sentidos' },
+                { value: 'single', text: 'Sentido único' },
+            ];
+    
+            options.forEach(optionData => {
+                const option = document.createElement('option');
+                option.value = optionData.value;
+                option.textContent = optionData.text;
+                selectElement.appendChild(option);
+            });
+        }
+    
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
-        
+    
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-        
+    
             const coordenadasInput = document.getElementById('coordenadas');
             if (coordenadasInput) {
                 coordenadasInput.value = `${lat}, ${lon}`;
             }
-        
+    
             consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
@@ -338,28 +377,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-        
+    
             // Chamar getStreetSegment ao clicar no mapa
+            const directionSelect = document.getElementById('directionSelect');
+            atualizarDirecoes(directionSelect); // Atualizar o select com direções disponíveis
+    
             getStreetSegment(map, lat, lon, (segmentNodes) => {
                 console.log('Segmento retornado:', segmentNodes);
-        
+    
                 // Verificar o retorno e desenhar o segmento
                 if (segmentNodes && segmentNodes.length > 1) {
-                    drawSegment(map, segmentNodes);
+                    const selectedDirection = directionSelect.value;
+                    drawSegment(map, segmentNodes, selectedDirection);
                 } else {
                     console.warn('Nenhum segmento encontrado.');
                 }
             });
-        });        
+        });
+    
+        // Botão para criar evento
+        document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
+            e.preventDefault(); // Evitar comportamento padrão do envio de formulário
+    
+            const direction = document.getElementById('directionSelect').value;
+    
+            console.log('Direção selecionada:', direction);
+    
+            // Lógica para processar a direção e criar evento
+            if (direction === 'both' || direction === 'single') {
+                alert(`Evento criado no sentido: ${direction}`);
+            } else {
+                alert('Por favor, selecione um sentido válido.');
+            }
+        });
     
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
         const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
-        
+    
         tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
     
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
     });
-    
+        
 </script>
