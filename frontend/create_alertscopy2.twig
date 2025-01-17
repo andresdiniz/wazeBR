@@ -237,7 +237,7 @@
     }
 
     // === Funções de Agendamento ===
-    function calcularDiasSemana() {
+    function calcularDiasSemana() { // Função funcionando
         const startDate = document.getElementById('starttime').value;
         const endDate = document.getElementById('endtime').value;
 
@@ -259,7 +259,7 @@
         atualizarHorarios(diasSemana);
     }
 
-    function atualizarHorarios(diasSelecionados) {
+    function atualizarHorarios(diasSelecionados) { // Função funcionando
         const horariosDiv = document.getElementById('horarios_dia');
         horariosDiv.innerHTML = '';
 
@@ -291,7 +291,7 @@
     }
 
     // === Funções de Tipos e Subtipos ===
-    function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
+    function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) { //Funcao funcionando
         subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
 
         const selectedTipoId = tipoSelect.value;
@@ -308,20 +308,46 @@
         }
     }
 
-    // === Funções de Inicialização e Eventos ===
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         const map = initializeMap();
-
+    
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
-
+    
+        // Evento de clique no mapa para capturar coordenadas
+        map.on('click', (e) => {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+    
+            console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+    
+            const coordenadasInput = document.getElementById('coordenadas');
+            if (coordenadasInput) {
+                coordenadasInput.value = `${lat}, ${lon}`;
+            }
+    
+            consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+                if (nomeRuaWaze) {
+                    const ruaSelect = document.getElementById('ruaSelect');
+                    if (ruaSelect) {
+                        ruaSelect.innerHTML = ''; // Limpar opções existentes
+                        const option = document.createElement('option');
+                        option.value = nomeRuaWaze;
+                        option.textContent = nomeRuaWaze;
+                        ruaSelect.appendChild(option);
+                    }
+                }
+            });
+        });
+    
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
         const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
         
         tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
-
+    
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
     });
+    
 </script>
