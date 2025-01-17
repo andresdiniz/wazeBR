@@ -358,6 +358,7 @@
     // Função para mostrar o botão de reverso
     function mostrarBotaoReverso(segmentNodes, map) {
         let reversoBtn = document.getElementById('reversoBtn');
+        console.log('Coordenadas a serem invertidas:', segmentNodes);
 
         if (!reversoBtn) {
             // Criar o botão caso ele não exista
@@ -482,9 +483,6 @@
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
                 console.log('Redesenhar segmento com nova direção:', selectedDirection);
                 // Redesenhar o segmento com a nova direção
-                if (currentSegmentLayer) {
-                    map.removeLayer(currentSegmentLayer);
-                }
         
                 // Verificar a direção e desenhar o segmento
                 currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
