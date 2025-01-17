@@ -47,20 +47,6 @@
                         </div>
                     </div>
 
-                    <!-- Dias da Semana -->
-                    <div class="mb-3">
-                        <label for="dias_semana" class="form-label">Dias da Semana</label>
-                        <select multiple class="form-select" id="dias_semana" name="dias_semana[]">
-                            <option value="sunday">Domingo</option>
-                            <option value="monday">Segunda-feira</option>
-                            <option value="tuesday">Terça-feira</option>
-                            <option value="wednesday">Quarta-feira</option>
-                            <option value="thursday">Quinta-feira</option>
-                            <option value="friday">Sexta-feira</option>
-                            <option value="saturday">Sábado</option>
-                        </select>
-                    </div>
-
                     <!-- Horários -->
                     <div id="horarios_dia" class="mb-3">
                         <!-- Espaço para adicionar campos de horário para cada dia da semana -->
@@ -123,7 +109,7 @@
 
     }
 
-    function handleLocationFound(e, map) {
+    function handleLocationFound(e, map) {//função funcionando	
         const radius = e.accuracy / 2;
         L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
         L.circle(e.latlng, radius).addTo(map);
@@ -145,7 +131,7 @@
             .catch(() => null);
     }
 
-    function drawSegment(map, segmentNodes, direction = 'both', previousSegmentLayer) {
+    function drawSegment(map, segmentNodes, direction = 'both', previousSegmentLayer) {// Função não funcionando
         if (previousSegmentLayer) {
             map.removeLayer(previousSegmentLayer);
         }
@@ -184,7 +170,7 @@
         return L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
     }
 
-    async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
+    async function getStreetSegment(map, lat, lon, drawSegmentCallback) { // Função não funcionando
         const query = `
             [out:json];
             (
@@ -245,7 +231,7 @@
         }
     }
 
-    function invertSegmentCoordinates(segmentNodes, drawSegmentCallback) {
+    function invertSegmentCoordinates(segmentNodes, drawSegmentCallback) { // Função não funcionando
         segmentNodes.reverse();
         drawSegmentCallback(segmentNodes, 'single');
     }
