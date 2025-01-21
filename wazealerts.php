@@ -123,11 +123,11 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
 
             // Calcula o KM
             $km = null;
-            try {
+            /*try {
                 $km = consultarLocalizacaoKm($alert['location']['x'], $alert['location']['y']);
             } catch (Exception $e) {
                 echo "Erro ao calcular KM para alerta {$alert['uuid']}: " . $e->getMessage() . PHP_EOL;
-            }
+            }*/
 
             // Insere ou atualiza o alerta no banco
             $stmtInsertUpdate->execute([
