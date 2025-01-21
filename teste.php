@@ -17,9 +17,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Accept-Encoding: gzip, deflate, br',
     'Connection: keep-alive'
 ]);
-
-
-
+curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
