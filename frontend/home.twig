@@ -189,27 +189,42 @@
 
         // Exibir os detalhes do alerta e consultar o DENIT ao abrir o modal
         $('#alertModal').on('show.bs.modal', function (event) {
+            console.log("Modal aberto: evento disparado.");
+        
             var button = $(event.relatedTarget); // Obtém o botão que acionou a modal
+            if (!button.length) {
+                console.log("Erro: Não foi possível encontrar o botão que acionou o modal.");
+                return;
+            }
+        
             var uuid = button.closest('tr').data('uuid'); // Obtém o UUID do alerta
             var locationX = button.closest('tr').find('td[data-toggle="tooltip"]').data('lat'); // Latitude
             var locationY = button.closest('tr').find('td[data-toggle="tooltip"]').data('lon'); // Longitude
-
-            // URL do DENIT (substitua pelos valores reais necessários)
+        
+            console.log("UUID capturado:", uuid);
+            console.log("Coordenadas capturadas: Lat =", locationX, ", Lon =", locationY);
+        
+            if (!locationX || !locationY) {
+                console.log("Erro: Coordenadas não encontradas.");
+                return;
+            }
+        
+            // URL do DENIT
             var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
-            console.log('DENIT URL:', denitUrl);
+            console.log("URL de consulta ao DENIT:", denitUrl);
+        
             // Faz a requisição ao DENIT
             $.ajax({
                 url: denitUrl,
                 type: 'GET',
                 success: function (response) {
-                    // Atualiza os campos do modal com os dados retornados
+                    console.log("Resposta da API DENIT:", response);
                     if (response && response.length > 0) {
-                        const result = response[0]; // Exemplo: obtendo o primeiro resultado
-
+                        const result = response[0]; // Obtendo o primeiro resultado
                         $('#modal-uuid').text(uuid || 'N/A');
                         $('#modal-city').text(result.uf || 'N/A');
                         $('#modal-street').text(result.br || 'N/A');
-                        $('#modal-type').text('DENIT Response'); // Ajuste conforme necessário
+                        $('#modal-type').text('DENIT Response');
                         $('#modal-subtype').text('N/A');
                         $('#modal-status').text('Ativo');
                         $('#modal-date-received').text(new Date().toLocaleString());
@@ -222,10 +237,11 @@
                     }
                 },
                 error: function (xhr, status, error) {
+                    console.error("Erro na requisição ao DENIT:", status, error);
                     alert('Erro ao consultar os dados do DENIT. Tente novamente.');
                 },
             });
-        });
+        });        
 
         // Função para confirmar o alerta no banco de dados
         function confirmarAlerta(uuid) {
