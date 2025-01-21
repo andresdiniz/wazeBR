@@ -10,18 +10,24 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 120);  // Aumenta o tempo limite
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+curl_setopt($ch, CURLOPT_TIMEOUT, 120); // Aumenta o tempo limite para 2 minutos
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30); // Aumenta o tempo para esperar pela conexão
 
-// Adiciona cabeçalhos HTTP como no navegador
+// Adiciona cabeçalhos HTTP conforme o navegador
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
     'Accept: */*',
     'Accept-Encoding: gzip, deflate, br, zstd',
     'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,tr;q=0.6',
     'Connection: keep-alive',
     'Host: servicos.dnit.gov.br',
-    'Referer: https://servicos.dnit.gov.br/vgeo/'
+    'Referer: https://servicos.dnit.gov.br/vgeo/',
+    'Sec-Fetch-Dest: empty',
+    'Sec-Fetch-Mode: cors',
+    'Sec-Fetch-Site: same-origin',
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+    'sec-ch-ua: "Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
+    'sec-ch-ua-mobile: ?0',
+    'sec-ch-ua-platform: "Windows"'
 ]);
 
 $response = curl_exec($ch);
