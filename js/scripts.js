@@ -63,12 +63,13 @@ $(document).ready(function () {
     // Preencher o modal com os dados do alerta
     $('button[data-toggle="modal"]').click(function () {
         const alertData = $(this).data('alert');
-
+    
         if (!alertData) {
             console.error('No alert data provided.');
             return;
         }
-
+    
+        // Preencher os dados do modal
         $('#modal-type-title').text(alertData.type);
         $('#modal-uuid').text(alertData.uuid || 'N/A');
         $('#modal-city').text(alertData.city || 'N/A');
@@ -82,7 +83,37 @@ $(document).ready(function () {
         // Definir a latitude e longitude para o uso no modal de mapa
         $('#modal-location').data('lat', alertData.location_y || 'N/A');
         $('#modal-location').data('lon', alertData.location_x || 'N/A');
+    
+        // Adicionando a chamada ao DENIT
+        const denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${alertData.location_x}&lat=${alertData.location_y}&r=250&data=${new Date().toISOString().split('T')[0]}`;
+        console.log('Consultando o DENIT com a URL:', denitUrl);
+    
+        // Fazer a requisição
+        $.ajax({
+            url: denitUrl,
+            type: 'GET',
+            success: function (response) {
+                if (response && response.length > 0) {
+                    const result = response[0]; // Obtém o primeiro resultado retornado
+                    console.log('Resposta do DENIT:', result);
+    
+                    // Atualiza os campos do modal com os dados retornados
+                    $('#modal-city').text(result.uf || alertData.city || 'N/A');
+                    $('#modal-street').text(result.br || alertData.street || 'N/A');
+                    $('#modal-location').text(
+                        `Lat: ${result.lat || alertData.location_y || 'N/A'}, Lon: ${result.lng || alertData.location_x || 'N/A'}`
+                    );
+                } else {
+                    alert('Nenhum dado encontrado para as coordenadas fornecidas.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Erro ao consultar o DENIT:', error);
+                alert('Erro ao consultar os dados do DENIT. Tente novamente.');
+            }
+        });
     });
+    
 
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
