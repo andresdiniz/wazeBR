@@ -72,6 +72,10 @@ try {
         echo "Nenhum KM encontrado na resposta.";
     }
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage();
+    echo "Erro capturado: " . $e->getMessage() . "\n";
+    echo "Arquivo: " . $e->getFile() . "\n";
+    echo "Linha: " . $e->getLine() . "\n";
+    // Opcional: logar o erro
+    error_log("Erro capturado: " . $e->getMessage(), 3, 'error.log');
 }
-?>
+>
