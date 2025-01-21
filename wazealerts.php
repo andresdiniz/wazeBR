@@ -1,5 +1,7 @@
 <?php
 
+set_time_limit(1200);
+
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ .'/functions/scripts.php';
 
