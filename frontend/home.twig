@@ -154,58 +154,77 @@
 
 <!-- Inicializando os tooltips e DataTables do Bootstrap -->
 <script>
-    $(document).ready(function() {
-
-        console.log($.fn.dataTable);
-
+    $(document).ready(function () {
         // Inicializa tooltips
         $('[data-toggle="tooltip"]').tooltip();
-        jQuery.noConflict(); // Isso garante que o $ não é sobrescrito por outras bibliotecas
+        jQuery.noConflict();
 
         // Inicializa DataTables para a tabela de acidentes
         $('#accidentsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "info": true,
-            "language": {
-                "search": "Buscar:",
-                "paginate": {
-                    "next": "Próximo",
-                    "previous": "Anterior"
-                }
-            }
+            paging: true,
+            searching: true,
+            info: true,
+            language: {
+                search: "Buscar:",
+                paginate: {
+                    next: "Próximo",
+                    previous: "Anterior",
+                },
+            },
         });
 
         // Inicializa DataTables para a tabela de congestionamentos
         $('#jamsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "info": true,
-            "language": {
-                "search": "Buscar:",
-                "paginate": {
-                    "next": "Próximo",
-                    "previous": "Anterior"
-                }
-            }
+            paging: true,
+            searching: true,
+            info: true,
+            language: {
+                search: "Buscar:",
+                paginate: {
+                    next: "Próximo",
+                    previous: "Anterior",
+                },
+            },
         });
 
-        // Exibir os detalhes do alerta na modal
-        // Exibir os detalhes do alerta na modal
+        // Exibir os detalhes do alerta e consultar o DENIT ao abrir o modal
         $('#alertModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget); // Obtém o botão que acionou a modal
-            var alert = button.data('alert'); // Obtém os dados do alerta
-            
-            // Atualiza os campos da modal com as informações do alerta
-            $('#modal-uuid').text(alert.uuid);
-            $('#modal-city').text(alert.city);
-            $('#modal-street').text(alert.street);
-            $('#modal-type').text(alert.type || 'N/A');
-            $('#modal-subtype').text(alert.subtype || 'N/A');
-            $('#modal-status').text(alert.status == 1 ? 'Ativo' : 'Inativo');
-            $('#modal-date-received').text(new Date(alert.pubMillis).toLocaleString());
-            $('#modal-confidence').text(alert.confidence);
-            $('#modal-location').text(`Lat: ${alert.location_x}, Lon: ${alert.location_y}`);
+            var uuid = button.closest('tr').data('uuid'); // Obtém o UUID do alerta
+            var locationX = button.closest('tr').find('td[data-toggle="tooltip"]').data('lat'); // Latitude
+            var locationY = button.closest('tr').find('td[data-toggle="tooltip"]').data('lon'); // Longitude
+
+            // URL do DENIT (substitua pelos valores reais necessários)
+            var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
+
+            // Faz a requisição ao DENIT
+            $.ajax({
+                url: denitUrl,
+                type: 'GET',
+                success: function (response) {
+                    // Atualiza os campos do modal com os dados retornados
+                    if (response && response.length > 0) {
+                        const result = response[0]; // Exemplo: obtendo o primeiro resultado
+
+                        $('#modal-uuid').text(uuid || 'N/A');
+                        $('#modal-city').text(result.uf || 'N/A');
+                        $('#modal-street').text(result.br || 'N/A');
+                        $('#modal-type').text('DENIT Response'); // Ajuste conforme necessário
+                        $('#modal-subtype').text('N/A');
+                        $('#modal-status').text('Ativo');
+                        $('#modal-date-received').text(new Date().toLocaleString());
+                        $('#modal-confidence').text('N/A');
+                        $('#modal-location').text(
+                            `Lat: ${result.lat || 'N/A'}, Lon: ${result.lng || 'N/A'}`
+                        );
+                    } else {
+                        alert('Nenhum dado encontrado para as coordenadas fornecidas.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Erro ao consultar os dados do DENIT. Tente novamente.');
+                },
+            });
         });
 
         // Função para confirmar o alerta no banco de dados
@@ -215,21 +234,20 @@
                 type: 'POST',
                 data: {
                     uuid: uuid,
-                    status: 1 // Aqui você pode definir o status como "Ativo" ao confirmar
+                    status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
                 },
-                success: function(response) {
+                success: function (response) {
                     alert('Alerta confirmado com sucesso!');
-                    // Aqui você pode atualizar a tabela ou realizar outra ação conforme necessário
                     $('#alertModal').modal('hide');
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     alert('Erro ao confirmar o alerta. Tente novamente.');
-                }
+                },
             });
         }
 
         // Adicionar evento para confirmar o alerta
-        $('#confirm-alert').on('click', function() {
+        $('#confirm-alert').on('click', function () {
             var uuid = $('#modal-uuid').text(); // Obtém o UUID do alerta da modal
             confirmarAlerta(uuid);
         });
