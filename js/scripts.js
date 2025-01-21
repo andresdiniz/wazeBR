@@ -69,6 +69,21 @@ $(document).ready(function () {
             return;
         }
     
+        // Limpar os dados do modal antes de preencher com novos dados
+        $('#modal-type-title').text('');
+        $('#modal-uuid').text('');
+        $('#modal-city').text('');
+        $('#modal-street').text('');
+        $('#modal-type').text('');
+        $('#modal-status').text('');
+        $('#modal-location').text('');
+        $('#modal-date-received').text('');
+        $('#modal-subtype').text('');
+        $('#modal-confidence').text('');
+        
+        // Remover qualquer elemento de "km" anterior
+        $('#modal-location').siblings('p').remove();
+    
         // Preencher os dados do modal
         $('#modal-type-title').text(alertData.type);
         $('#modal-uuid').text(alertData.uuid || 'N/A');
@@ -123,7 +138,8 @@ $(document).ready(function () {
                 alert('Erro ao consultar os dados do DENIT. Tente novamente.');
             }
         });
-    });    
+    });
+        
 
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
