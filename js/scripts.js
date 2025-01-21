@@ -125,9 +125,7 @@ $(document).ready(function () {
             }
         });
     });
-    
-        
-
+     
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
         if (map) {
