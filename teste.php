@@ -5,15 +5,15 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null) {
-    // Define a URL base da API
-    $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
+    $logFile = 'debug.log';
 
-    // Usa a data atual se nenhuma data for fornecida
+    file_put_contents($logFile, "Iniciando consulta\n", FILE_APPEND);
+
+    $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
     if (!$data) {
         $data = date('Y-m-d');
     }
 
-    // Constrói a URL com os parâmetros
     $url = sprintf(
         "%s?lng=%s&lat=%s&r=%d&data=%s",
         $urlBase,
@@ -23,44 +23,43 @@ function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null
         urlencode($data)
     );
 
-    // Inicializa o cURL
-    $ch = curl_init();
+    file_put_contents($logFile, "URL: $url\n", FILE_APPEND);
 
-    // Configurações do cURL
+    $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Se necessário para evitar problemas com SSL
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    // Executa a requisição
     $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-	if ($response === false) {
-		throw new Exception('Erro ao executar a requisição: ' . curl_error($ch));
-	}
-
-	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-	if ($httpCode !== 200) {
-		throw new Exception("Erro na requisição, código HTTP: $httpCode, resposta: $response");
-	}
-
-    // Verifica erros
-    if (curl_errno($ch)) {
-        throw new Exception('Erro ao executar a requisição: ' . curl_error($ch));
+    if ($response === false) {
+        $error = curl_error($ch);
+        file_put_contents($logFile, "cURL Error: $error\n", FILE_APPEND);
+        throw new Exception('Erro ao executar a requisição: ' . $error);
     }
 
-    // Fecha a conexão cURL
+    file_put_contents($logFile, "HTTP Code: $httpCode\n", FILE_APPEND);
+    file_put_contents($logFile, "Resposta: $response\n", FILE_APPEND);
+
+    if ($httpCode !== 200) {
+        throw new Exception("Erro na requisição, código HTTP: $httpCode, resposta: $response");
+    }
+
     curl_close($ch);
 
-    // Decodifica a resposta JSON
     $data = json_decode($response, true);
 
-    // Verifica se a resposta contém o campo "km"
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $jsonError = json_last_error_msg();
+        file_put_contents($logFile, "Erro no JSON: $jsonError\n", FILE_APPEND);
+        throw new Exception("Erro ao decodificar JSON: $jsonError");
+    }
+
     if (is_array($data) && isset($data[0]['km'])) {
         return $data[0]['km'];
     }
 
-    // Retorna null caso não haja "km" na resposta
     return null;
 }
 
