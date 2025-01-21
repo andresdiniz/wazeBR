@@ -12,7 +12,11 @@ $options = [
     ],
 ];
 
-$context = stream_context_create(["http" => ["timeout" => 30]] + $options);
+$context = stream_context_create([
+    "http" => [
+        "timeout" => 120 // Aumente o tempo limite para 2 minutos
+    ]
+] + $options);
 
 $response = file_get_contents($url, false, $context);
 
