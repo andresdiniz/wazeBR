@@ -196,7 +196,7 @@
 
             // URL do DENIT (substitua pelos valores reais necessários)
             var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
-
+            console.log('DENIT URL:', denitUrl);
             // Faz a requisição ao DENIT
             $.ajax({
                 url: denitUrl,
