@@ -94,12 +94,13 @@ $(document).ready(function () {
             type: 'GET',
             success: function (response) {
                 if (response && response.length > 0) {
-                    const result = response[0]; // Obtém o primeiro resultado retornado
+                    const result = response[0]; // Obtém o primeiro resultado da lista
                     console.log('Resposta do DENIT:', result);
     
-                    // Verificar e exibir o km se estiver presente
+                    // Verificar e exibir o km se estiver presente, com 2 casas decimais
                     if (result.km) {
-                        $('#modal-location').append(` - Km: ${result.km}`);
+                        const kmFormatted = parseFloat(result.km).toFixed(2);
+                        $('#modal-location').append(` - Km: ${kmFormatted}`);
                     }
     
                     // Atualizar os outros campos do modal, se necessário
@@ -119,6 +120,7 @@ $(document).ready(function () {
         });
     });
     
+
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
         if (map) {
