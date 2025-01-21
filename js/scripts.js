@@ -97,7 +97,12 @@ $(document).ready(function () {
                     const result = response[0]; // Obtém o primeiro resultado retornado
                     console.log('Resposta do DENIT:', result);
     
-                    // Atualiza os campos do modal com os dados retornados
+                    // Verificar e exibir o km se estiver presente
+                    if (result.km) {
+                        $('#modal-location').append(` - Km: ${result.km}`);
+                    }
+    
+                    // Atualizar os outros campos do modal, se necessário
                     $('#modal-city').text(result.uf || alertData.city || 'N/A');
                     $('#modal-street').text(result.br || alertData.street || 'N/A');
                     $('#modal-location').text(
@@ -114,7 +119,6 @@ $(document).ready(function () {
         });
     });
     
-
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
         if (map) {
