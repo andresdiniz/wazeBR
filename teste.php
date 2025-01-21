@@ -12,14 +12,13 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'User-Agent: Wget/1.21.1 (linux-gnu)', // Simulando um User-Agent do wget
     'Accept: */*',
     'Accept-Encoding: gzip, deflate, br',
-    'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Connection: keep-alive',
-    'Host: servicos.dnit.gov.br',
-    'Referer: https://servicos.dnit.gov.br/vgeo/',
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36'
+    'Connection: keep-alive'
 ]);
+
+
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
