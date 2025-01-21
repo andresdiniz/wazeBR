@@ -12,7 +12,8 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=-43.79274845123291&lat=-20.701415185608553&r=250&data=2025-01-21");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);          // Tempo máximo para concluir a requisição
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);   // Tempo máximo para estabelecer a conexão
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 curl_setopt($ch, CURLOPT_VERBOSE, true);
 
