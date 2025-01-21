@@ -9,9 +9,20 @@ $url = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=-43.799
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Ignora verificação SSL
-curl_setopt($ch, CURLOPT_TIMEOUT, 120); // Aumenta o tempo limite para 2 minutos
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30); // Aumenta o tempo para esperar pela conexão
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_TIMEOUT, 120);  // Aumenta o tempo limite
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+
+// Adiciona cabeçalhos HTTP como no navegador
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+    'Accept: */*',
+    'Accept-Encoding: gzip, deflate, br, zstd',
+    'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,tr;q=0.6',
+    'Connection: keep-alive',
+    'Host: servicos.dnit.gov.br',
+    'Referer: https://servicos.dnit.gov.br/vgeo/'
+]);
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
