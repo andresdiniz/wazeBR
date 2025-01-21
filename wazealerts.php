@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ .'./functions/scripts.php';
+require_once __DIR__ .'/functions/scripts.php';
 
 // Função para criar a tabela alerts se não existir
 function createAlertsTable(PDO $pdo) {
