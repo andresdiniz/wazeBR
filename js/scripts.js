@@ -100,7 +100,12 @@ $(document).ready(function () {
                     // Verificar e exibir o km se estiver presente, com 2 casas decimais
                     if (result.km) {
                         const kmFormatted = parseFloat(result.km).toFixed(2);
-                        $('#modal-location').append(` - Km: ${kmFormatted}`);
+    
+                        // Criar dinamicamente o elemento para exibir o km
+                        const kmElement = $(`<p><strong>Km:</strong> ${kmFormatted}</p>`);
+    
+                        // Adicionar o elemento ao modal na seção desejada
+                        $('#modal-location').after(kmElement);
                     }
     
                     // Atualizar os outros campos do modal, se necessário
@@ -118,8 +123,7 @@ $(document).ready(function () {
                 alert('Erro ao consultar os dados do DENIT. Tente novamente.');
             }
         });
-    });
-    
+    });    
 
     // Atualizar o mapa quando a janela for redimensionada
     $(window).on('resize', function () {
