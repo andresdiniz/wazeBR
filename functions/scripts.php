@@ -259,7 +259,6 @@ function sendEmail($userEmail, $emailBody, $titleEmail) {
     }
 }
 
-<?php
 function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null) {
     // Define a URL base da API
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
