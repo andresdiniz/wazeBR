@@ -8,7 +8,6 @@ echo $undefined_variable; // Deve gerar um erro Notice
 $logFile = 'debug.log';
 
 
-<?php
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=-43.79274845123291&lat=-20.701415185608553&r=250&data=2025-01-21");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
