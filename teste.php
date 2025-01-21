@@ -34,6 +34,16 @@ function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null
     // Executa a requisição
     $response = curl_exec($ch);
 
+	if ($response === false) {
+		throw new Exception('Erro ao executar a requisição: ' . curl_error($ch));
+	}
+
+	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+	if ($httpCode !== 200) {
+		throw new Exception("Erro na requisição, código HTTP: $httpCode, resposta: $response");
+	}
+
     // Verifica erros
     if (curl_errno($ch)) {
         throw new Exception('Erro ao executar a requisição: ' . curl_error($ch));
