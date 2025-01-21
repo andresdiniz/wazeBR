@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null) {
     // Define a URL base da API
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
