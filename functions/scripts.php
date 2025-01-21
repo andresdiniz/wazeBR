@@ -259,4 +259,53 @@ function sendEmail($userEmail, $emailBody, $titleEmail) {
     }
 }
 
+<?php
+function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null) {
+    // Define a URL base da API
+    $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
 
+    // Usa a data atual se nenhuma data for fornecida
+    if (!$data) {
+        $data = date('Y-m-d');
+    }
+
+    // Constrói a URL com os parâmetros
+    $url = sprintf(
+        "%s?lng=%s&lat=%s&r=%d&data=%s",
+        $urlBase,
+        urlencode($longitude),
+        urlencode($latitude),
+        $raio,
+        urlencode($data)
+    );
+
+    // Inicializa o cURL
+    $ch = curl_init();
+
+    // Configurações do cURL
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Se necessário para evitar problemas com SSL
+
+    // Executa a requisição
+    $response = curl_exec($ch);
+
+    // Verifica erros
+    if (curl_errno($ch)) {
+        throw new Exception('Erro ao executar a requisição: ' . curl_error($ch));
+    }
+
+    // Fecha a conexão cURL
+    curl_close($ch);
+
+    // Decodifica a resposta JSON
+    $data = json_decode($response, true);
+
+    // Verifica se a resposta contém o campo "km"
+    if (is_array($data) && isset($data[0]['km'])) {
+        return $data[0]['km'];
+    }
+
+    // Retorna null caso não haja "km" na resposta
+    return null;
+}

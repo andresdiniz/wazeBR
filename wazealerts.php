@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ .'./functions/scripts.php';
 
 // Função para criar a tabela alerts se não existir
 function createAlertsTable(PDO $pdo) {
@@ -64,82 +65,116 @@ function fetchAlertsFromApi($url) {
 
 // Função para salvar os alertas no banco de dados
 function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
-    // Configura o fuso horário para São Paulo
+    // Configuração do fuso horário (remova se global)
     date_default_timezone_set('America/Sao_Paulo');
 
-    // Busca todos os alertas existentes no banco para a URL
-    $stmt = $pdo->prepare("SELECT uuid FROM alerts WHERE source_url = ? AND status = 1");
-    $stmt->execute([$url]);
-    $dbUuids = $stmt->fetchAll(PDO::FETCH_COLUMN); // Lista de UUIDs no banco
+    // Obter a data/hora atual uma vez
+    $currentDateTime = date('Y-m-d H:i:s');
 
-    // Lista de UUIDs recebidos no JSON
-    $incomingUuids = array_column($alerts, 'uuid');
+    // Inicia uma transação para consistência
+    $pdo->beginTransaction();
 
-    // Atualizar ou inserir alertas recebidos
-    $stmtInsertUpdate = $pdo->prepare("
-        INSERT INTO alerts (
-            uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
-            reliability, type, roadType, magvar, subtype, street, location_x, location_y, pubMillis, status, source_url, date_received, date_updated
-        ) VALUES (
-            :uuid, :country, :city, :reportRating, :reportByMunicipalityUser, :confidence,
-            :reliability, :type, :roadType, :magvar, :subtype, :street, :location_x, :location_y, :pubMillis, :status, :source_url, :date_received, :date_updated
-        )
-        ON DUPLICATE KEY UPDATE
-            country = VALUES(country),
-            city = VALUES(city),
-            reportRating = VALUES(reportRating),
-            reportByMunicipalityUser = VALUES(reportByMunicipalityUser),
-            confidence = VALUES(confidence),
-            reliability = VALUES(reliability),
-            type = VALUES(type),
-            roadType = VALUES(roadType),
-            magvar = VALUES(magvar),
-            subtype = VALUES(subtype),
-            street = VALUES(street),
-            location_x = VALUES(location_x),
-            location_y = VALUES(location_y),
-            pubMillis = VALUES(pubMillis),
-            status = 1,
-            date_updated = NOW()
-    ");
+    try {
+        // Busca todos os alertas existentes no banco para a URL
+        $stmt = $pdo->prepare("SELECT uuid FROM alerts WHERE source_url = ? AND status = 1");
+        $stmt->execute([$url]);
+        $dbUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-    foreach ($alerts as $alert) {
-        $stmtInsertUpdate->execute([
-            ':uuid' => $alert['uuid'] ?? null,
-            ':country' => $alert['country'] ?? null,
-            ':city' => $alert['city'] ?? null,
-            ':reportRating' => $alert['reportRating'] ?? null,
-            ':reportByMunicipalityUser' => $alert['reportByMunicipalityUser'] ?? null,
-            ':confidence' => $alert['confidence'] ?? null,
-            ':reliability' => $alert['reliability'] ?? null,
-            ':type' => $alert['type'] ?? null,
-            ':roadType' => $alert['roadType'] ?? null,
-            ':magvar' => $alert['magvar'] ?? null,
-            ':subtype' => $alert['subtype'] ?? null,
-            ':street' => $alert['street'] ?? null,
-            ':location_x' => $alert['location']['x'] ?? null,
-            ':location_y' => $alert['location']['y'] ?? null,
-            ':pubMillis' => $alert['pubMillis'] ?? null,
-            ':status' => 1,
-            ':source_url' => $url,
-            ':date_received' => date('Y-m-d H:i:s'),
-            ':date_updated' => date('Y-m-d H:i:s'),
-        ]);
-        echo "Alerta processado: {$alert['uuid']} da URL: {$url}" . PHP_EOL;
-    }
+        // Lista de UUIDs recebidos no JSON
+        $incomingUuids = array_column($alerts, 'uuid');
 
-    // Verifica cada UUID no banco de dados para desativação, um por um
-    $stmtDeactivate = $pdo->prepare("
-        UPDATE alerts SET status = 0, date_updated = NOW()
-        WHERE uuid = ? AND source_url = ?
-    ");
-    foreach ($dbUuids as $uuid) {
-        if (!in_array($uuid, $incomingUuids)) {
-            $stmtDeactivate->execute([$uuid, $url]);
-            echo "Alerta desativado: {$uuid} da URL: {$url}" . PHP_EOL;
+        // Prepara a query para inserção/atualização
+        $stmtInsertUpdate = $pdo->prepare("
+            INSERT INTO alerts (
+                uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
+                reliability, type, roadType, magvar, subtype, street, location_x, location_y, pubMillis, status, source_url, date_received, date_updated, km
+            ) VALUES (
+                :uuid, :country, :city, :reportRating, :reportByMunicipalityUser, :confidence,
+                :reliability, :type, :roadType, :magvar, :subtype, :street, :location_x, :location_y, :pubMillis, :status, :source_url, :date_received, :date_updated, :km
+            )
+            ON DUPLICATE KEY UPDATE
+                country = VALUES(country),
+                city = VALUES(city),
+                reportRating = VALUES(reportRating),
+                reportByMunicipalityUser = VALUES(reportByMunicipalityUser),
+                confidence = VALUES(confidence),
+                reliability = VALUES(reliability),
+                type = VALUES(type),
+                roadType = VALUES(roadType),
+                magvar = VALUES(magvar),
+                subtype = VALUES(subtype),
+                street = VALUES(street),
+                location_x = VALUES(location_x),
+                location_y = VALUES(location_y),
+                pubMillis = VALUES(pubMillis),
+                status = 1,
+                date_updated = NOW(),
+                km = VALUES(km)
+        ");
+
+        foreach ($alerts as $alert) {
+            // Valida campos necessários
+            if (!isset($alert['location']['x'], $alert['location']['y'])) {
+                echo "Alerta inválido, ignorado: " . json_encode($alert) . PHP_EOL;
+                continue;
+            }
+
+            // Calcula o KM
+            $km = null;
+            try {
+                $km = consultarLocalizacaoKm($alert['location']['x'], $alert['location']['y']);
+            } catch (Exception $e) {
+                echo "Erro ao calcular KM para alerta {$alert['uuid']}: " . $e->getMessage() . PHP_EOL;
+            }
+
+            // Insere ou atualiza o alerta no banco
+            $stmtInsertUpdate->execute([
+                ':uuid' => $alert['uuid'] ?? null,
+                ':country' => $alert['country'] ?? null,
+                ':city' => $alert['city'] ?? null,
+                ':reportRating' => $alert['reportRating'] ?? null,
+                ':reportByMunicipalityUser' => $alert['reportByMunicipalityUser'] ?? null,
+                ':confidence' => $alert['confidence'] ?? null,
+                ':reliability' => $alert['reliability'] ?? null,
+                ':type' => $alert['type'] ?? null,
+                ':roadType' => $alert['roadType'] ?? null,
+                ':magvar' => $alert['magvar'] ?? null,
+                ':subtype' => $alert['subtype'] ?? null,
+                ':street' => $alert['street'] ?? null,
+                ':location_x' => $alert['location']['x'] ?? null,
+                ':location_y' => $alert['location']['y'] ?? null,
+                ':pubMillis' => $alert['pubMillis'] ?? null,
+                ':status' => 1,
+                ':source_url' => $url,
+                ':date_received' => $currentDateTime,
+                ':date_updated' => $currentDateTime,
+                ':km' => $km,
+            ]);
+
+            echo "Alerta processado: {$alert['uuid']} da URL: {$url}" . PHP_EOL;
         }
+
+        // Desativa alertas não recebidos
+        $stmtDeactivate = $pdo->prepare("
+            UPDATE alerts SET status = 0, date_updated = NOW()
+            WHERE uuid = ? AND source_url = ?
+        ");
+        foreach ($dbUuids as $uuid) {
+            if (!in_array($uuid, $incomingUuids)) {
+                $stmtDeactivate->execute([$uuid, $url]);
+                echo "Alerta desativado: {$uuid} da URL: {$url}" . PHP_EOL;
+            }
+        }
+
+        // Confirma a transação
+        $pdo->commit();
+    } catch (Exception $e) {
+        // Reverte a transação em caso de erro
+        $pdo->rollBack();
+        throw $e;
     }
 }
+
 
 // Função principal para processar os alertas
 function processAlerts(array $urls) {
