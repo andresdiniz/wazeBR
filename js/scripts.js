@@ -69,7 +69,7 @@ $(document).ready(function () {
             return;
         }
     
-        // Limpar os dados do modal antes de preencher com novos dados
+        // Limpar o conteúdo do modal antes de preencher com novos dados
         $('#modal-type-title').text('');
         $('#modal-uuid').text('');
         $('#modal-city').text('');
@@ -80,9 +80,7 @@ $(document).ready(function () {
         $('#modal-date-received').text('');
         $('#modal-subtype').text('');
         $('#modal-confidence').text('');
-        
-        // Remover qualquer elemento de "km" anterior
-        $('#modal-location').siblings('p').remove();
+        $('#modal-km').text('');  // Limpar o valor de 'km'
     
         // Preencher os dados do modal
         $('#modal-type-title').text(alertData.type);
@@ -115,20 +113,8 @@ $(document).ready(function () {
                     // Verificar e exibir o km se estiver presente, com 2 casas decimais
                     if (result.km) {
                         const kmFormatted = parseFloat(result.km).toFixed(2);
-    
-                        // Criar dinamicamente o elemento para exibir o km
-                        const kmElement = $(`<p><strong>Km:</strong> ${kmFormatted}</p>`);
-    
-                        // Adicionar o elemento ao modal na seção desejada
-                        $('#modal-location').after(kmElement);
+                        $('#modal-km').text(kmFormatted); // Inserir o valor de km no modal
                     }
-    
-                    // Atualizar os outros campos do modal, se necessário
-                    $('#modal-city').text(result.uf || alertData.city || 'N/A');
-                    $('#modal-street').text(result.br || alertData.street || 'N/A');
-                    $('#modal-location').text(
-                        `Lat: ${result.lat || alertData.location_y || 'N/A'}, Lon: ${result.lng || alertData.location_x || 'N/A'}`
-                    );
                 } else {
                     alert('Nenhum dado encontrado para as coordenadas fornecidas.');
                 }
@@ -139,6 +125,7 @@ $(document).ready(function () {
             }
         });
     });
+    
         
 
     // Atualizar o mapa quando a janela for redimensionada
