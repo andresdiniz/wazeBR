@@ -116,12 +116,13 @@ $(document).ready(function () {
                         $('#modal-km').text(kmFormatted); // Inserir o valor de km no modal
                     }
                 } else {
-                    alert('Nenhum dado encontrado para as coordenadas fornecidas.');
+                    console.error('Nenhum dado encontrado para as coordenadas fornecidas.');
+                    $('#modal-km-p').hide; // Inserir o valor de km no modal
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Erro ao consultar o DENIT:', error);
-                alert('Erro ao consultar os dados do DENIT. Tente novamente.');
+                $('#modal-km-p').hide; // Inserir o valor de km no modal
             }
         });
     });
