@@ -14,14 +14,18 @@
 *.tgz
 *.tbz2
 
-# Ignorar arquivos temporários ou de backup comuns
+# Ignorar arquivos temporários ou de backup
 *.tmp
 *.bak
 *.old
 
-# Ignorar arquivos de cache
+# Ignorar arquivos de cache e logs
 .cache/
 *.log
 
-# ignorar pastas
-/vendor
+# Ignorar pastas específicas
+vendor/
+
+# Exemplo: Adicione aqui outras pastas geradas por ferramentas específicas
+# node_modules/
+# dist/
