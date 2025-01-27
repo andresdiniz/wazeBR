@@ -22,3 +22,6 @@
 # Ignorar arquivos de cache
 .cache/
 *.log
+
+# ignorar pastas
+/vendor
