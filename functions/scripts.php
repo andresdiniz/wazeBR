@@ -7,7 +7,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
-
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 /**
  * Funções relacionadas ao banco de dados
  */
@@ -119,35 +120,17 @@ function executeScript($scriptName, $scriptFile)
  * Funções relacionadas a e-mails
  */
 
-// Envia e-mail de alerta
-function sendEmailAlert($stationName, $valor, $cotaMaxima)
-{
-    $to = "andresoaresdiniz201218@gmail.com";
-    $subject = "Alerta: Excedeu Cota Máxima de Estação";
-    $message = "
-    Alerta: A estação $stationName excedeu a cota máxima definida.
-    Valor acumulado: $valor
-    Cota máxima: $cotaMaxima
-    ";
-    $headers = "From: wazebrasil@fenixsmm.store\r\nContent-Type: text/plain; charset=UTF-8\r\n";
-
-    if (mail($to, $subject, $message, $headers)) {
-        error_log("E-mail de alerta enviado para $to");
-    }
-}
-
 // Envia um e-mail personalizado
 function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     $mail = new PHPMailer(true);
     try {
-        $mail->isSMTP();
-        $mail->Host = getenv('smtp.hostinger.com');
+        $mail->Host = getenv('SMTP_HOST');
         $mail->SMTPAuth = true;
-        $mail->Username = getenv('wazebrasil@fenixsmm.store');
-        $mail->Password = getenv('@Ndre2025');
+        $mail->Username = getenv('EMAIL_USERNAME');
+        $mail->Password = getenv('EMAIL_PASSWORD');
+        $mail->Port = getenv('SMTP_PORT');
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
         $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
         $mail->isHTML(true);
