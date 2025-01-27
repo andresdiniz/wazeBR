@@ -126,11 +126,11 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     $mail = new PHPMailer(true);
     try {
-        $mail->Host = getenv('SMTP_HOST');
+        $mail->Host = 'smtp.hostinger.com';
         $mail->SMTPAuth = true;
-        $mail->Username = getenv('EMAIL_USERNAME');
-        $mail->Password = getenv('EMAIL_PASSWORD');
-        $mail->Port = getenv('SMTP_PORT');
+        $mail->Username = 'wazebrasil@fenixsmm.store';
+        $mail->Password = '@Ndre2025';
+        $mail->Port = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
