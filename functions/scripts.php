@@ -236,8 +236,6 @@ function shouldRunScript($scriptName)
 {
     try {
         // Cria uma conexão PDO (se ainda não existir), substitua os valores pela sua configuração
-        $pdo = new PDO('mysql:host=localhost;dbname=seu_banco', 'usuario', 'senha');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Prepara a consulta SQL para buscar o script
         $stmt = $pdo->prepare("SELECT * FROM scripts WHERE script_name = :scriptName");

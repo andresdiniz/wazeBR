@@ -7,6 +7,8 @@ require_once './vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
