@@ -967,10 +967,11 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $subject = "Recuperação de Senha";
 
                             logEmail('info', "E-mail de recuperação montado para: $email");
-                
+                            error_log("Tentando enviar e-mail para: $email");
                             // Tentar enviar o e-mail
                             if (!sendEmail($email, $mensagem, $subject)) {
                                 // Log de falha no envio de e-mail
+                                error_log('Erro ao enviar email');
                                 logEmail('error', "Erro ao tentar enviar e-mail de recuperação para: $email");
                                 throw new Exception("Falha ao enviar o e-mail.");
                             }
