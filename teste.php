@@ -11,13 +11,12 @@ use Dotenv\Dotenv;
 
 echo "Autoload carregado com sucesso!\n";
 
-// Verificar se o arquivo .env existe
-if (!file_exists(__DIR__ . '.env')) {
+if (!file_exists(__DIR__ . '/.env')) { // Corrigido o caminho para o .env
     die('Arquivo .env não encontrado!');
 }
 
 // Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable(__DIR__ . '/.env');
+$dotenv = Dotenv::createImmutable(__DIR__); 
 $dotenv->load();
 
 echo "Arquivo .env carregado com sucesso!\n";
