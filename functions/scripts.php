@@ -1,5 +1,4 @@
 <?php
-// Inclui o autoloader do Composer
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -11,7 +10,6 @@ if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
-// Tenta carregar as variáveis de ambiente do arquivo .env
 try {
     $dotenv = Dotenv::createImmutable(__DIR__.'/../');
     $dotenv->load();
@@ -24,16 +22,18 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     // Configura as opções de log para ambiente de debug
     ini_set('display_errors', 0);
     ini_set('log_errors', 0);
-    ini_set('log_errors', 1);
-    ini_set('error_log', '../logs/error_log.txt');
-    error_reporting(E_ALL);
-    
-} else {
-    echo'Degug desativado';
-    // Desativa todos os logs quando não estiver em modo debug
-    ini_set('display_errors', 0);
-    ini_set('log_errors', 0);
 }
+    ini_set('display_errors', 1);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/debug.log');
+    
+    // Cria o diretório de logs se não existir
+    if (!is_dir(__DIR__ . '/../logs')) {
+        mkdir(__DIR__ . '/../logs', 0777, true);
+    }
+}
+
+
 // Configura o fuso horário padrão para São Paulo
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -68,7 +68,6 @@ function getSiteUsers(PDO $pdo)
 {
 // Obtém informações dos usuários
 // Função para buscar informações do usuário atual
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
     $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -79,7 +78,6 @@ function getSiteSettings(PDO $pdo)
 {
 // Obtém configurações do site
 // Função para obter configurações gerais do site
-    $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
@@ -96,12 +94,10 @@ function getSiteSettings(PDO $pdo)
         $pdo->beginTransaction();
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
 
-        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
                                   VALUES (?, ?, ?, ?)");
         $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
         $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message)
         $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
-        $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
         $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
 
         $pdo->commit();
@@ -117,7 +113,6 @@ function shouldRunScript($scriptName)
     try {
 // Verifica se o script pode ser executado
 // Verifica se um script deve ser executado baseado no intervalo configurado
-        $stmt = $pdo->prepare("SELECT last_execution, execution_interval, active FROM rotina_cron WHERE name_cron = ?");
         $stmt->execute([$scriptName]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -144,7 +139,6 @@ function executeScript($scriptName, $scriptFile)
             include __DIR__ . '/../' . $scriptFile;
 // Executa o script com verificação
 // Executa um script se ele estiver dentro do intervalo permitido
-        } catch (Exception $e) {
             logExecution($scriptName, 'error', $e->getMessage());
         }
     }
@@ -165,12 +159,9 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $sendTime = date('Y-m-d H:i:s');
 
         $mail->Host = $_ENV['SMTP_HOST'];
-        $mail->SMTPAuth = true;
-        // Gerar ID único para o envio do e-mail e horário de envio
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
         $mail->Port = $_ENV['SMTP_PORT'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        // Configura as credenciais do SMTP
         $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
         $mail->isHTML(true);
@@ -207,7 +198,6 @@ function logEmail($type, $message)
         mkdir(__DIR__ . '/logs', 0777, true);
     }
 
-    // Adiciona a mensagem ao arquivo de log
     // Cria o diretório de logs caso não exista
 }
  
@@ -219,7 +209,6 @@ function getIp()
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 // Obtém o endereço IP do usuário
 // Função para obter o IP real do usuário
-        return trim($ipList[0]);
     }
     return $_SERVER['REMOTE_ADDR'];
 }
@@ -232,7 +221,6 @@ function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null
     $url = sprintf("%s?lng=%s&lat=%s&r=%d&data=%s", $urlBase, $longitude, $latitude, $raio, $data);
 // Consulta localização por longitude e latitude
 // Função para consultar localização geográfica via API do DNIT
-    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
     curl_close($ch);
