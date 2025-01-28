@@ -1,10 +1,23 @@
 <?php
-require __DIR__ . '/vendor/autoload.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
+// Carregando o autoload do Composer
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Teste: verificando se o autoload está funcionando
 use Dotenv\Dotenv;
 
-if (class_exists(Dotenv::class)) {
-    echo "Dotenv está funcionando!";
-} else {
-    echo "Dotenv não foi carregado!";
+echo "Autoload carregado com sucesso!\n";
+
+if (!file_exists(__DIR__ . '/.env')) { // Corrigido o caminho para o .env
+    die('Arquivo .env não encontrado!');
 }
+
+// Carregar variáveis de ambiente
+$dotenv = Dotenv::createImmutable(__DIR__); 
+$dotenv->load();
+
+echo "Arquivo .env carregado com sucesso!\n";
+echo "EMAIL_USERNAME: " . getenv('EMAIL_USERNAME') . "\n";
