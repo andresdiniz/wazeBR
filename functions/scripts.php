@@ -117,9 +117,16 @@ function logExecution($scriptName, $status, $message)
 function shouldRunScript($scriptName)
 {
     try {
-// Verifica se o script pode ser executado
-// Verifica se um script deve ser executado baseado no intervalo configurado
-        $stmt->execute([$scriptName]);
+        // Cria uma conexão PDO (se ainda não existir), substitua os valores pela sua configuração
+        $pdo = new PDO('mysql:host=localhost;dbname=seu_banco', 'usuario', 'senha');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Prepara a consulta SQL para buscar o script
+        $stmt = $pdo->prepare("SELECT * FROM scripts WHERE script_name = :scriptName");
+        $stmt->bindParam(':scriptName', $scriptName, PDO::PARAM_STR);
+        $stmt->execute();
+
+        // Verifica se o script foi encontrado e se está ativo
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result && $result['active'] === '1') {
@@ -132,10 +139,12 @@ function shouldRunScript($scriptName)
         }
         return false;
     } catch (PDOException $e) {
+        // Caso ocorra um erro ao consultar o banco de dados
         echo "Erro ao verificar o tempo de execução para o script $scriptName: " . $e->getMessage();
         return false;
     }
 }
+
 
 // Executa o script com verificação
 function executeScript($scriptName, $scriptFile)
