@@ -4,6 +4,12 @@ RewriteEngine On
 # Define o diretório base (ajuste caso o site não esteja na raiz)
 RewriteBase /wazeportal
 
+# Bloqueia o acesso ao arquivo .env
+<Files ".env">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
 # Redireciona tudo para o index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
