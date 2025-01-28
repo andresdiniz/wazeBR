@@ -3,11 +3,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
-//echo "Autoload carregado com sucesso!\n";
-
 // Verificar se o arquivo .env existe
 $envPath = __DIR__ . '/.env';
-//echo "Caminho para .env: $envPath\n";
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
@@ -16,25 +13,28 @@ if (!file_exists($envPath)) {
 // Carregar variáveis de ambiente
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-if($_ENV[DEBUG]) {
-//logs de erros
-ini_set('display_errors', 0); // Desativa a exibição de erros
-ini_set('log_errors', 1); // Ativa o registro de erros
-ini_set('error_log', __DIR__ . '/error_log.php'); // Caminho do arquivo de log
 
-// Definir o nível de erro que será registrado
-error_reporting(E_ALL); // Registra todos os tipos de erros
+// Verificar o valor da variável DEBUG
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
+    // Ativar logs de erros
+    ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
+    ini_set('log_errors', 1); // Ativa o registro de erros
+    ini_set('error_log', __DIR__ . '/error_log.php'); // Caminho do arquivo de log
+
+    // Definir o nível de erro que será registrado
+    error_reporting(E_ALL); // Registra todos os tipos de erros
+} else {
+    // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 0);
 }
+
 /**
  * Funções principais da aplicação
  */
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
 
 /**
  * Funções relacionadas ao banco de dados
