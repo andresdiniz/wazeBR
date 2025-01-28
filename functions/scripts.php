@@ -183,12 +183,14 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->Username = $_ENV['EMAIL_USERNAME'];
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
         $mail->Port = $_ENV['SMTP_PORT'];
+        $mail->isHTML(true);
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
         $mail->isHTML(true);
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;
+        $mail->AltBody = strip_tags($emailBody);
 
         // Envia o e-mail
         if ($mail->send()) {
@@ -198,6 +200,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
             return true;
         } else {
             // Log de falha no envio
+            error_log('ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Falha ao enviar e-mail')
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Falha ao enviar e-mail";
             logEmail('error', $logMessage);
             return false;
@@ -205,7 +208,8 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
     } catch (Exception $e) {
         // Log detalhado do erro
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
-        logEmail('error', $logMessage);
+        error_log('Erro ao enviar e-mail: ' . $e->getMessage());
+     logEmail('error', $logMessage);
         return false;
     }
 }
