@@ -2,9 +2,9 @@
 //ini_set('display_errors', 1);
 //error_reporting(E_ALL);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
 
 
 header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
@@ -897,9 +897,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break; 
           
                 case 'recuperar_senha':
-                    ini_set('display_errors', 1);
-                    ini_set('display_startup_errors', 1);
-                    error_reporting(E_ALL);
                     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
                 
                     if (!empty($email)) {
