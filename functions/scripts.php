@@ -181,10 +181,14 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         error_log("SMTP Host: " . $_ENV['SMTP_HOST']);  // Log da configuração do host SMTP
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['EMAIL_USERNAME'];
+        error_log("E-mail Username: " . $_ENV['EMAIL_USERNAME']);  // Log da configuração do username
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
+        error_log("E-mail Password: " . $_ENV['EMAIL_PASSWORD']);  // Log da configuração da senha
         $mail->Port = $_ENV['SMTP_PORT'];
+        error_log("SMTP Port: " . $_ENV['SMTP_PORT']);  // Log da configuração da porta SMTP
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
+        error_log($_ENV['EMAIL_USERNAME']);
         $mail->addAddress($userEmail);
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;
