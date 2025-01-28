@@ -1,4 +1,7 @@
 <?php
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/debug.log');
+ini_set('display_errors', 1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
