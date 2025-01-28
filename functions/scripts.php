@@ -1,10 +1,11 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
-echo __DIR__ . '/../vendor/autoload.php';  // Exibe o caminho completo para verificar
-echo '';
-echo __DIR__ . '/../config/configbd.php';  // Exibe o caminho completo para verificar
-require_once __DIR__ . '/../config/configbd.php';
+require __DIR__ . '/../vendor/autoload.php'; // Inclui o autoloader do Composer
+require_once __DIR__ . '/../config/configbd.php'; // Inclui a configuração do banco de dados
 
+// Exibe os caminhos gerados para depuração
+echo __DIR__ . '/../vendor/autoload.php';  // Exibe o caminho completo para verificar
+echo '<br>'; // Quebra de linha para facilitar a leitura
+echo __DIR__ . '/../config/configbd.php';  // Exibe o caminho completo para verificar
 
 use Dotenv\Dotenv;
 
