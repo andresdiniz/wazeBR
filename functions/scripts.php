@@ -73,26 +73,27 @@ function getSiteSettings(PDO $pdo)
 {
 // Obtém configurações do site
 // Função para obter configurações gerais do site
+    $stmt = $pdo->query("SELECT * FROM site_settings");
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-/**
- * Funções relacionadas a logs e execução de rotinas
- */
-/**
+/*
  * Funções relacionadas a logs e execução de rotinas
  */
 
 // Registra log de execução e atualiza a última execução
-// Função para registrar execução de scripts e atualizar última execução
+function logExecution($scriptName, $status, $message)
+{
+    try {
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
 
+        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
                                   VALUES (?, ?, ?, ?)");
         $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
-        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message)
-        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
+
+        $stmtUpdate = $pdo->prepare("UPDATE script_status SET last_execution = ? WHERE script_name = ?");
         $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
 
         $pdo->commit();
