@@ -180,8 +180,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         // Log de início do envio de e-mail
         $logMessage = "Iniciando envio do e-mail para: $userEmail | ID: $emailId";
         logEmail('info', $logMessage);
-
-
+        $mail->isSMTP(); // Usar SMTP explicitamente
         $mail->Host = $_ENV['SMTP_HOST'];
         error_log("SMTP Host: " . $_ENV['SMTP_HOST']);  // Log da configuração do host SMTP
         $mail->SMTPAuth = true;
