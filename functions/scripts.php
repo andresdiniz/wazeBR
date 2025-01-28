@@ -202,7 +202,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->AltBody = strip_tags($emailBody);  // Converter para texto puro
 
         // Envia o e-mail
-        if ($mail->isSendmail() ){ // Utiliza o Sendmail do PHP (sem SMTP) {
+        if ($mail->send() ){ // Utiliza o Sendmail do PHP (sem SMTP) {
             // Log de sucesso do envio
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
             logEmail('success', $logMessage);
