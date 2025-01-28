@@ -5,21 +5,20 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-echo "Iniciando script...\n";
+echo "Iniciando...\n";
 
 if (!file_exists(__DIR__ . '/../.env')) {
     die('Arquivo .env não encontrado!');
 }
-echo "Arquivo .env encontrado.\n";
 
-$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__ . '/../');
-$dotenv->load();
-echo "Variáveis carregadas do .env.\n";
+use Dotenv\Dotenv;
 
-// Testando a variável do arquivo .env
-$envVar = getenv('EMAIL_USERNAME');
-if ($envVar === false) {
-    echo "Variável EMAIL_USERNAME não encontrada no .env.\n";
-} else {
-    echo "EMAIL_USERNAME: $envVar\n";
+try {
+    $dotenv = Dotenv::createUnsafeImmutable(__DIR__ . '/../');
+    $dotenv->load();
+    echo "Arquivo .env carregado com sucesso.\n";
+    echo "EMAIL_USERNAME: " . getenv('EMAIL_USERNAME') . "\n";
+    echo "SMTP_HOST: " . getenv('SMTP_HOST') . "\n";
+} catch (Exception $e) {
+    die("Erro ao carregar o .env: " . $e->getMessage());
 }
