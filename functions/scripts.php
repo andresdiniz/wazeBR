@@ -73,7 +73,7 @@ function getSiteSettings(PDO $pdo)
 {
 // Obtém configurações do site
 // Função para obter configurações gerais do site
-    $stmt = $pdo->query("SELECT * FROM site_settings");
+    $stmt = $pdo->query("SELECT * FROM settings");
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
