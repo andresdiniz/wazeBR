@@ -24,6 +24,11 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 
     // Definir o nível de erro que será registrado
     error_reporting(E_ALL); // Registra todos os tipos de erros
+    // Definir o manipulador de erros
+    set_error_handler("customErrorHandler");
+
+    // Registrar a função de captura de erros fatais
+    register_shutdown_function("shutdownHandler");
 } else {
     // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
     ini_set('display_errors', 0);
@@ -145,16 +150,19 @@ function executeScript($scriptName, $scriptFile)
         }
     }
 }
-
 /**
  * Funções relacionadas a e-mails
  */
 
-// Envia um e-mail personalizado
+// Função personalizada para enviar e-mails
 function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     $mail = new PHPMailer(true);
     try {
+        // Gerar ID único para o envio do e-mail e horário de envio
+        $emailId = uniqid('email_', true);
+        $sendTime = date('Y-m-d H:i:s');
+
         $mail->Host = $_ENV['SMTP_HOST'];
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['EMAIL_USERNAME'];
@@ -167,41 +175,56 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;
 
-        // Gerar ID único para o envio do e-mail
-        $emailId = uniqid('email_', true);
-        $sendTime = date('Y-m-d H:i:s');
-
-        // Log de sucesso do envio de e-mail
-        $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
-        logEmail('success', $logMessage);
-
-        return $mail->send();
+        // Envia o e-mail
+        if ($mail->send()) {
+            // Log de sucesso do envio de e-mail
+            $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
+            logEmail('success', $logMessage);
+            return true;
+        }
     } catch (Exception $e) {
         // Log de erro
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
         logEmail('error', $logMessage);
-
         return false;
     }
 }
+
 /**
- * Funções utilitárias
+ * Função de manipulação de erros do PHP
  */
 
- // Função para registrar logs de errro de email
+// Função para registrar logs de erros
+function logEmail($type, $message)
+{
+    $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
+    
+    // Cria o diretório de logs caso não exista
+    if (!is_dir(__DIR__ . '/logs')) {
+        mkdir(__DIR__ . '/logs', 0777, true);
+    }
 
- function logEmail($type, $message)
- {
-     $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
-     
-     // Cria o diretório de logs caso não exista
-     if (!is_dir(__DIR__ . '/logs')) {
-         mkdir(__DIR__ . '/logs', 0777, true);
-     }
- 
-     // Adiciona a mensagem ao arquivo de log
-     file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
- }
+    // Adiciona a mensagem ao arquivo de log
+    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
+}
+
+// Função para manipular erros do PHP
+function customErrorHandler($errno, $errstr, $errfile, $errline)
+{
+    $logMessage = "Erro PHP: [$errno] $errstr - Arquivo: $errfile - Linha: $errline";
+    logEmail('error', $logMessage);
+    return true; // Não propaga o erro
+}
+
+// Função para capturar erros fatais
+function shutdownHandler()
+{
+    $error = error_get_last();
+    if ($error && ($error['type'] === E_ERROR)) {
+        $logMessage = "Erro Fatal: " . $error['message'] . " - Arquivo: " . $error['file'] . " - Linha: " . $error['line'];
+        logEmail('error', $logMessage);
+    }
+}
  
 // Obtém o endereço IP do usuário
 function getIp()
