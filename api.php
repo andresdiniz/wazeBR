@@ -8,8 +8,9 @@
 //error_reporting(E_ALL);
 require_once __DIR__ . '/../vendor/autoload.php';
 
+ini_set('display_errors', 1);   
 ini_set('log_errors', 1);
-    ini_set('error_log', __DIR__ . '/../logs/debug.log');
+ini_set('error_log', __DIR__ . '/../logs/debug.log');
 
 use Dotenv\Dotenv;
 
