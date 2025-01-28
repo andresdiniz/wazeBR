@@ -26,7 +26,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     // Ativar logs de erros
     ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
     ini_set('log_errors', 1); // Ativa o registro de erros
-    ini_set('error_log', __DIR__ . '/error_log.php'); // Caminho do arquivo de log
+    ini_set('error_log', __DIR__ . '/error_log.txt'); // Caminho do arquivo de log
 
     // Definir o nível de erro que será registrado
     error_reporting(E_ALL); // Registra todos os tipos de erros
