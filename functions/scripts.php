@@ -10,16 +10,14 @@ $envPath = __DIR__ . '/../.env';
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
-}else{
-    echo $envPath;
 }
 
 try {
     $dotenv = Dotenv::createImmutable(__DIR__.'/../');
     $dotenv->load();
-    echo "Arquivo .env carregado com sucesso!\n";
+    /*echo "Arquivo .env carregado com sucesso!\n";
     echo "Conteúdo do .env carregado:\n EMAIL_USERNAME: " . $_ENV['EMAIL_USERNAME'] . "\n";
-    print_r($_ENV);  // Para ver todas as variáveis carregadas
+    print_r($_ENV);  // Para ver todas as variáveis carregadas*/
 } catch (Exception $e) {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
