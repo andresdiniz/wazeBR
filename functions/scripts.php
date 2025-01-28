@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-
+ini_set('display_errors', 1); // Desativa a exibição de erros para o usuário
+ini_set('log_errors', 1); // Ativa o registro de erros
+ini_set('error_log', __DIR__ . '/error_log.txt'); // Caminho do arquivo de log
 use Dotenv\Dotenv;
 
 // Verificar se o arquivo .env existe
