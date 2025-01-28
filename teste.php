@@ -3,21 +3,14 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-var_dump(file_exists(__DIR__ . '/../.env')); // Deve retornar true
-var_dump(realpath(__DIR__ . '/../.env'));   // Exibe o caminho absoluto do .env
+require_once __DIR__ . '/../vendor/autoload.php';
 
-if (file_exists(__DIR__ . '/../.env')) {
-    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) {
-            continue; // Ignorar comentários
-        }
-        list($name, $value) = explode('=', $line, 2);
-        putenv(trim($name) . '=' . trim($value));
-    }
-} else {
+if (!file_exists(__DIR__ . '/../.env')) {
     die('Arquivo .env não encontrado!');
 }
 
-// Testando a variável do .env
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__ . '/../');
+$dotenv->load();
+
+// Testando a variável do arquivo .env
 echo getenv('EMAIL_USERNAME');
