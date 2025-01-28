@@ -20,7 +20,7 @@ try {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-
+echo 'chegei aqui';
 // Verificar o valor da variável DEBUG
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     // Ativar logs de erros
