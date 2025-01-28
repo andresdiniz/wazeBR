@@ -1,89 +1,80 @@
 <?php
+
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
-ini_set(error_log_level(E_ALL | E_STRICT));
-ini_set('error_log', __DIR__ . '/../logs/debug.log');
-
+ini_set('error_log', __DIR__ . '/../logs/debug.log'); // Direciona logs para um arquivo
 require_once './vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
-// Verifica se o arquivo .env existe no caminho especificado
-$envPath = __DIR__ . '/.env';  // Corrigido o caminho
+// Função de logging centralizada
+function logToFile($level, $message, $context = []) {
+    // Define o caminho do log
+    $logFile = __DIR__ . '/../logs/debug.log';
 
-use Dotenv\Dotenv;
-
-if (!file_exists($envPath)) {
-    die("Arquivo .env não encontrado no caminho: $envPath");
-}
-
-try {
-    // Certifique-se de que o caminho do .env está correto
-    $dotenv = Dotenv::createImmutable(__DIR__);
-    $dotenv->load();
-} catch (Exception $e) {
-    // Em caso de erro, logar o erro no arquivo de log
-    error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado4
-    logEmail("error", "Erro ao carregar o .env: ". $e->getMessage());
-    die("Erro ao carregar o .env: " . $e->getMessage());
-}
-
-// Configura o ambiente de debug com base na variável DEBUG do .env
-if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
-    // Configura as opções de log para ambiente de debug
-    ini_set('display_errors', 1);
-    ini_set('log_errors', 1);
-    ini_set('error_log', __DIR__ . '/../logs/debug.log');
-    
-    // Cria o diretório de logs se não existir
+    // Se o diretório de logs não existir, cria-o
     if (!is_dir(__DIR__ . '/../logs')) {
         mkdir(__DIR__ . '/../logs', 0777, true);
     }
 
-// Executando os scripts com verificação
-try {
-    echo "Iniciando wazealerts.php<br>";
-    executeScript('wazealerts.php', '/wazealerts.php');
-    echo "Finalizando wazealerts.php<br>";
-} catch (Exception $e) {
-    echo 'Erro em wazealerts.php: ' . $e->getMessage() . "<br>";
-    logExecution('wazealerts.php', 'error', 'Erro: ' . $e->getMessage());
+    // Formata a mensagem de log com data, nível e contexto
+    $logMessage = sprintf(
+        "[%s] [%s] %s %s\n", 
+        date('Y-m-d H:i:s'), 
+        strtoupper($level), 
+        $message, 
+        json_encode($context)
+    );
+
+    // Registra a mensagem de log no arquivo
+    error_log($logMessage, 3, $logFile);
+}
+
+// Configurações de ambiente
+$envPath = __DIR__ . '/.env';
+
+use Dotenv\Dotenv;
+
+if (!file_exists($envPath)) {
+    logToFile('error', "Arquivo .env não encontrado no caminho: $envPath");
+    die("Arquivo .env não encontrado.");
 }
 
 try {
-    echo "Iniciando wazejobtraficc.php<br>";
-    executeScript('wazejobtraficc.php', '/wazejobtraficc.php');
-    echo "Finalizando wazejobtraficc.php<br>";
+    // Carrega o .env
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+    logToFile('info', '.env carregado com sucesso');
 } catch (Exception $e) {
-    echo 'Erro em wazejobtraficc.php: ' . $e->getMessage() . "<br>";
-    logExecution('wazejobtraficc.php', 'error', 'Erro: ' . $e->getMessage());
+    logToFile('error', "Erro ao carregar o .env: " . $e->getMessage());
+    die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-try {
-    echo "Iniciando dadoscemadem.php<br>";
-    executeScript('dadoscemadem.php', '/dadoscemadem.php');
-    echo "Finalizando dadoscemadem.php<br>";
-} catch (Exception $e) {
-    echo 'Erro em dadoscemadem.php: ' . $e->getMessage() . "<br>";
-    logExecution('dadoscemadem.php', 'error', 'Erro: ' . $e->getMessage());
+// Configuração de debug
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
+    ini_set('display_errors', 1);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/debug.log');
 }
 
-try {
-    echo "Iniciando hidrologicocemadem.php<br>";
-    executeScript('hidrologicocemadem.php', '/hidrologicocemadem.php');
-    echo "Finalizando hidrologicocemadem.php<br>";
-} catch (Exception $e) {
-    echo 'Erro em hidrologicocemadem.php: ' . $e->getMessage() . "<br>";
-    logExecution('hidrologicocemadem.php', 'error', 'Erro: ' . $e->getMessage());
+// Função de execução de scripts com log
+function executeScriptWithLogging($scriptName, $path) {
+    try {
+        logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
+        executeScript($scriptName, $path);
+        logExecution($scriptName, $status, "Finalizando script: $scriptName", ['path' => $path]);
+        logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
+    } catch (Exception $e) {
+        logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
+        logExecution($scriptName, 'error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
+    }
 }
 
-try {
-    echo "Iniciando gerar_xml.php<br>";
-    executeScript('gerar_xml.php', '/gerar_xml.php');
-    echo "Finalizando gerar_xml.php<br>";
-} catch (Exception $e) {
-    echo 'Erro em gerar_xml.php: ' . $e->getMessage() . "<br>";
-    logExecution('gerar_xml.php', 'error', 'Erro: ' . $e->getMessage());
-}
+// Executando os scripts com verificação de erros
+executeScriptWithLogging('wazealerts.php', '/wazealerts.php');
+executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php');
+executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php');
+executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php');
+executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php');
 
 ?>
