@@ -6,36 +6,36 @@
 //ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //error_reporting(E_ALL);
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
-// Verificar se o arquivo .env existe
-$envPath = __DIR__ . '/.env';
+// Verifica se o arquivo .env existe no caminho especificado
+$envPath = __DIR__ . '/../.env';
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
-// Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
-// Verificar o valor da variável DEBUG
-if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
-    // Ativar logs de erros
-    ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
-    ini_set('log_errors', 1); // Ativa o registro de erros
-    ini_set('error_log', __DIR__ . './logs/error_log.txt'); // Caminho do arquivo de log
-
-    // Definir o nível de erro que será registrado
-    error_reporting(E_ALL); // Registra todos os tipos de erros
-} else {
-    // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
-    ini_set('display_errors', 0);
-    ini_set('log_errors', 0);
+try {
+    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
+    $dotenv->load();
+} catch (Exception $e) {
+    die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
+// Configura o ambiente de debug com base na variável DEBUG do .env
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
+    // Configura as opções de log para ambiente de debug
+
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/debug.log');
+    
+    // Cria o diretório de logs se não existir
+    if (!is_dir(__DIR__ . '/../logs')) {
+        mkdir(__DIR__ . '/../logs', 0777, true);
+    }
+}
 header('Content-Type: application/json'); // Set the response content type to JSON
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
