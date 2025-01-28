@@ -208,7 +208,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 }
 
 // Obtém o endereço IP do usuário
-function getIp(
+function getIp()
 {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
