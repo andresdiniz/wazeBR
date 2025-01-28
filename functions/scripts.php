@@ -132,29 +132,31 @@ function executeScript($scriptName, $scriptFile)
 {
     if (shouldRunScript($scriptName)) {
         try {
+            // Incluir o script
             include __DIR__ . '/../' . $scriptFile;
-// Executa o script com verificação
-// Executa um script se ele estiver dentro do intervalo permitido
+        } catch (Exception $e) {
+            // Log de erro, caso a execução do script falhe
             logExecution($scriptName, 'error', $e->getMessage());
         }
     }
 }
+
 /**
  * Funções relacionadas a e-mails
  */
 
 // Função personalizada para enviar e-mails
 function sendEmail($userEmail, $emailBody, $titleEmail)
-/**
- * Funções relacionadas a e-mails
- */
+{
+    $sendTime = date('Y-m-d H:i:s');
+    $mail = new PHPMailer(true);
+    $emailId = uniqid('email_', true); // Gerar ID único para o e-mail
 
-// Função personalizada para enviar e-mails
-
-// Função para enviar e-mails usando PHPMailer
-        $sendTime = date('Y-m-d H:i:s');
-
+    try {
+        // Configurações do PHPMailer
         $mail->Host = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $_ENV['EMAIL_USERNAME'];
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
         $mail->Port = $_ENV['SMTP_PORT'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
@@ -170,42 +172,49 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
             logEmail('success', $logMessage);
             return true;
-        // Envia o e-mail
+        } else {
+            // Log de falha no envio
+            $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Falha ao enviar e-mail";
+            logEmail('error', $logMessage);
+            return false;
+        }
     } catch (Exception $e) {
-            // Log de sucesso do envio de e-mail
+        // Log de erro
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
         logEmail('error', $logMessage);
         return false;
     }
 }
-        // Log de erro
-/**
- * Função de manipulação de erros do PHP
- */
 
-// Função para registrar logs de erros
+/**
+ * Função para registrar logs de e-mail
+ */
 function logEmail($type, $message)
-/**
- * Função de manipulação de erros do PHP
- */
+{
+    $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
 
-// Função para registrar logs de erros
-// Função para registrar logs de e-mail
+    // Cria o diretório de logs caso não exista
+    if (!is_dir(__DIR__ . '/logs')) {
         mkdir(__DIR__ . '/logs', 0777, true);
     }
 
-    // Cria o diretório de logs caso não exista
+    // Adiciona a mensagem ao arquivo de log
+    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
 }
  
-// Obtém o endereço IP do usuário
-function getIp()
-    // Adiciona a mensagem ao arquivo de log
+// Função para obter o endereço IP real do usuário
+function getIp() {
+    // Verifica se o IP está no cabeçalho HTTP_CLIENT_IP (usado por proxies)
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-// Obtém o endereço IP do usuário
-// Função para obter o IP real do usuário
     }
+    // Verifica se o IP está no cabeçalho HTTP_X_FORWARDED_FOR (usado por proxies reversos)
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // Caso existam múltiplos IPs, o primeiro é o IP real
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        return trim($ipList[0]);
+    }
+    // Caso contrário, usa o REMOTE_ADDR, que pode ser o IP direto do usuário
     return $_SERVER['REMOTE_ADDR'];
 }
 
