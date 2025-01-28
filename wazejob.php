@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
+ini_set(error_log_level(E_ALL | E_STRICT));
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
 
 require_once './vendor/autoload.php';
