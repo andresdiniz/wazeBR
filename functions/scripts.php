@@ -172,6 +172,10 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
     $emailId = uniqid('email_', true); // Gerar ID único para o e-mail
 
     try {
+        // Log de início do envio de e-mail
+        $logMessage = "Iniciando envio do e-mail para: $userEmail | ID: $emailId";
+        logEmail('info', $logMessage);
+
         // Configurações do PHPMailer
         $mail->Host = $_ENV['SMTP_HOST'];
         $mail->SMTPAuth = true;
@@ -187,7 +191,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 
         // Envia o e-mail
         if ($mail->send()) {
-            // Log de sucesso do envio de e-mail
+            // Log de sucesso do envio
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
             logEmail('success', $logMessage);
             return true;
@@ -198,7 +202,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
             return false;
         }
     } catch (Exception $e) {
-        // Log de erro
+        // Log detalhado do erro
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
         logEmail('error', $logMessage);
         return false;
@@ -220,6 +224,7 @@ function logEmail($type, $message)
     // Adiciona a mensagem ao arquivo de log
     file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
 }
+
  
 // Função para obter o endereço IP real do usuário
 function getIp() {
