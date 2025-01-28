@@ -1,24 +1,26 @@
 <?php
 
+// Habilita a exibição de erros
 ini_set('display_errors', 1);   
 ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . './logs/debug.log');
 
-//require_once __DIR__ . '/vendor/autoload.php';
-
-use Dotenv\Dotenv;
+// Defina o caminho correto para o arquivo de log de erros
+ini_set('error_log', __DIR__ . '/logs/debug.log');
 
 // Verifica se o arquivo .env existe no caminho especificado
-$envPath = __DIR__ . '.env';
+$envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
 try {
-    $dotenv = Dotenv::createImmutable(__DIR__.);
+    // Certifique-se de que o caminho do .env está correto
+    $dotenv = Dotenv\Dotenv::createImmutable($envPath);
     $dotenv->load();
 } catch (Exception $e) {
+    // Em caso de erro, logar o erro no arquivo de log
+    error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
