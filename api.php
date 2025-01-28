@@ -944,7 +944,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                             // Criar o link de redefinição
                             $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
-                
+                            
                             // Criar o corpo do e-mail
                             $mensagem = "
                                 <html>
@@ -960,24 +960,37 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </body>
                                 </html>
                             ";
+                
                             $subject = "Recuperação de Senha";
-                            // Enviar o e-mail
-                            if (!sendEmail($email, $mensagem , $subject)) {
+                
+                            // Tentar enviar o e-mail
+                            if (!sendEmail($email, $mensagem, $subject)) {
+                                // Log de falha no envio de e-mail
+                                logEmail('error', "Erro ao tentar enviar e-mail de recuperação para: $email");
                                 throw new Exception("Falha ao enviar o e-mail.");
                             }
+                
+                            // Log de sucesso no envio de e-mail
+                            logEmail('success', "E-mail de recuperação enviado com sucesso para: $email");
                 
                             // Retornar resposta de sucesso
                             echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
                         } catch (Exception $e) {
+                            // Log de erro
+                            logEmail('error', "Erro no processo de recuperação de senha: " . $e->getMessage());
+                
                             // Retornar erro com a mensagem específica
                             http_response_code(500);
                             echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
                         }
                     } else {
+                        // Log de erro de e-mail inválido
+                        logEmail('error', "Tentativa de recuperação de senha com e-mail inválido: $email");
+                
                         http_response_code(400);
                         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
                     }
-                    break;
+                    break;                
 
         default:
             http_response_code(401);
