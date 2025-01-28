@@ -1,4 +1,5 @@
 <?php
+
 //ini_set('display_errors', 1);
 //error_reporting(E_ALL);
 
@@ -7,7 +8,7 @@
 //error_reporting(E_ALL);
 
 
-header('Content-Type: application/json'); // Define o conteúdo da resposta como JSON
+header('Content-Type: application/json'); // Set the response content type to JSON
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     require_once './config/configbd.php'; // Configuração do banco de dados
