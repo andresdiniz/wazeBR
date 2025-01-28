@@ -18,7 +18,7 @@ if (!file_exists($envPath)) {
 
 try {
     // Certifique-se de que o caminho do .env está correto
-    $dotenv = Dotenv\Dotenv::createImmutable($envPath);
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 } catch (Exception $e) {
     // Em caso de erro, logar o erro no arquivo de log
