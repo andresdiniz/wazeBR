@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
-echo __DIR__ . '/../vendor/autoload.php'/n;  // Exibe o caminho completo para verificar
+echo __DIR__ . '/../vendor/autoload.php';  // Exibe o caminho completo para verificar
+echo '';
 echo __DIR__ . '/../config/configbd.php';  // Exibe o caminho completo para verificar
 require_once __DIR__ . '/../config/configbd.php';
 
