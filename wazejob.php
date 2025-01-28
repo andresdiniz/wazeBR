@@ -1,12 +1,10 @@
 <?php
-
+require_once './vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
 // Verifica se o arquivo .env existe no caminho especificado
 $envPath = __DIR__ . '/.env';  // Corrigido o caminho
-
-require_once __DIR__ . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
