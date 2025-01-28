@@ -5,12 +5,24 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Exibir as funções de autoload
-var_dump(spl_autoload_functions());
+use Dotenv\Dotenv;
 
-// Teste para verificar o autoload
-if (class_exists(Dotenv\Dotenv::class)) {
-    echo "Dotenv carregado com sucesso!\n";
-} else {
-    echo "Dotenv não foi carregado.\n";
+echo "Autoload carregado com sucesso!\n";
+
+// Verificar se o arquivo .env existe
+$envPath = __DIR__ . '/.env';
+echo "Caminho para .env: $envPath\n";
+
+if (!file_exists($envPath)) {
+    die("Arquivo .env não encontrado no caminho: $envPath");
+}
+
+// Carregar variáveis de ambiente
+try {
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+    echo "Arquivo .env carregado com sucesso!\n";
+    echo "EMAIL_USERNAME: " . getenv('EMAIL_USERNAME') . "\n";
+} catch (Exception $e) {
+    die("Erro ao carregar o .env: " . $e->getMessage());
 }
