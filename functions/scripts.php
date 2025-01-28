@@ -1,57 +1,47 @@
 <?php
+// Inclui o autoloader do Composer
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
-// Verificar se o arquivo .env existe
+// Verifica se o arquivo .env existe no caminho especificado
 $envPath = __DIR__ . '/../.env';
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
+// Tenta carregar as variáveis de ambiente do arquivo .env
 try {
     $dotenv = Dotenv::createImmutable(__DIR__.'/../');
     $dotenv->load();
-    /*echo "Arquivo .env carregado com sucesso!\n";
-    echo "Conteúdo do .env carregado:\n EMAIL_USERNAME: " . $_ENV['EMAIL_USERNAME'] . "\n";
-    print_r($_ENV);  // Para ver todas as variáveis carregadas*/
 } catch (Exception $e) {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-
-// Verificar o valor da variável DEBUG
+// Configura o ambiente de debug com base na variável DEBUG do .env
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
-    // Ativar logs de erros
-    ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
-    ini_set('log_errors', 1); // Ativa o registro de erros
-    ini_set('error_log', '../logs/error_log.txt'); // Caminho do arquivo de log
-
-    // Definir o nível de erro que será registrado
-    error_reporting(E_ALL); // Registra todos os tipos de erros
+    // Configura as opções de log para ambiente de debug
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', '../logs/error_log.txt');
+    error_reporting(E_ALL);
     
 } else {
     echo'Degug desativado';
-    // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
+    // Desativa todos os logs quando não estiver em modo debug
     ini_set('display_errors', 0);
     ini_set('log_errors', 0);
 }
-//Define o fuso horário padrão
+// Configura o fuso horário padrão para São Paulo
 date_default_timezone_set('America/Sao_Paulo');
 
-/**
- * Funções principais da aplicação
- */
-
+// Importação das classes necessárias para envio de e-mail
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-/**
- * Funções relacionadas ao banco de dados
- */
-
-// Realiza uma busca no banco de dados com base nos parâmetros fornecidos.
+// Função para realizar consultas SELECT no banco de dados
 function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 {
     try {
@@ -76,7 +66,8 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 // Obtém informações dos usuários
 function getSiteUsers(PDO $pdo)
 {
-    $userId = $_SESSION['usuario_id'] ?? 1;
+// Obtém informações dos usuários
+// Função para buscar informações do usuário atual
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
     $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
     $stmt->execute();
@@ -86,7 +77,8 @@ function getSiteUsers(PDO $pdo)
 // Obtém configurações do site
 function getSiteSettings(PDO $pdo)
 {
-    $stmt = $pdo->prepare("SELECT * FROM settings LIMIT 1");
+// Obtém configurações do site
+// Função para obter configurações gerais do site
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -94,11 +86,12 @@ function getSiteSettings(PDO $pdo)
 /**
  * Funções relacionadas a logs e execução de rotinas
  */
+/**
+ * Funções relacionadas a logs e execução de rotinas
+ */
 
 // Registra log de execução e atualiza a última execução
-function logExecution($scriptName, $status, $message = null)
-{
-    try {
+// Função para registrar execução de scripts e atualizar última execução
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
@@ -106,7 +99,8 @@ function logExecution($scriptName, $status, $message = null)
         $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
                                   VALUES (?, ?, ?, ?)");
         $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
-
+        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message)
+        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
         $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
         $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
 
@@ -121,7 +115,8 @@ function logExecution($scriptName, $status, $message = null)
 function shouldRunScript($scriptName)
 {
     try {
-        $pdo = Database::getConnection();
+// Verifica se o script pode ser executado
+// Verifica se um script deve ser executado baseado no intervalo configurado
         $stmt = $pdo->prepare("SELECT last_execution, execution_interval, active FROM rotina_cron WHERE name_cron = ?");
         $stmt->execute([$scriptName]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -147,7 +142,8 @@ function executeScript($scriptName, $scriptFile)
     if (shouldRunScript($scriptName)) {
         try {
             include __DIR__ . '/../' . $scriptFile;
-            logExecution($scriptName, 'success', 'Execução bem-sucedida.');
+// Executa o script com verificação
+// Executa um script se ele estiver dentro do intervalo permitido
         } catch (Exception $e) {
             logExecution($scriptName, 'error', $e->getMessage());
         }
@@ -159,19 +155,22 @@ function executeScript($scriptName, $scriptFile)
 
 // Função personalizada para enviar e-mails
 function sendEmail($userEmail, $emailBody, $titleEmail)
-{
-    $mail = new PHPMailer(true);
-    try {
-        // Gerar ID único para o envio do e-mail e horário de envio
-        $emailId = uniqid('email_', true);
+/**
+ * Funções relacionadas a e-mails
+ */
+
+// Função personalizada para enviar e-mails
+
+// Função para enviar e-mails usando PHPMailer
         $sendTime = date('Y-m-d H:i:s');
 
         $mail->Host = $_ENV['SMTP_HOST'];
         $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['EMAIL_USERNAME'];
+        // Gerar ID único para o envio do e-mail e horário de envio
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
         $mail->Port = $_ENV['SMTP_PORT'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        // Configura as credenciais do SMTP
         $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
         $mail->isHTML(true);
@@ -184,40 +183,42 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
             logEmail('success', $logMessage);
             return true;
-        }
+        // Envia o e-mail
     } catch (Exception $e) {
-        // Log de erro
+            // Log de sucesso do envio de e-mail
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
         logEmail('error', $logMessage);
         return false;
     }
 }
-
+        // Log de erro
 /**
  * Função de manipulação de erros do PHP
  */
 
 // Função para registrar logs de erros
 function logEmail($type, $message)
-{
-    $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
-    
-    // Cria o diretório de logs caso não exista
-    if (!is_dir(__DIR__ . '/logs')) {
+/**
+ * Função de manipulação de erros do PHP
+ */
+
+// Função para registrar logs de erros
+// Função para registrar logs de e-mail
         mkdir(__DIR__ . '/logs', 0777, true);
     }
 
     // Adiciona a mensagem ao arquivo de log
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
+    // Cria o diretório de logs caso não exista
 }
  
 // Obtém o endereço IP do usuário
 function getIp()
-{
+    // Adiciona a mensagem ao arquivo de log
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+// Obtém o endereço IP do usuário
+// Função para obter o IP real do usuário
         return trim($ipList[0]);
     }
     return $_SERVER['REMOTE_ADDR'];
@@ -229,7 +230,8 @@ function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
     $data = $data ?? date('Y-m-d');
     $url = sprintf("%s?lng=%s&lat=%s&r=%d&data=%s", $urlBase, $longitude, $latitude, $raio, $data);
-
+// Consulta localização por longitude e latitude
+// Função para consultar localização geográfica via API do DNIT
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
