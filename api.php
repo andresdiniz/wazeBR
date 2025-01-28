@@ -11,14 +11,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Verifica se o arquivo .env existe no caminho especificado
-$envPath = __DIR__ . '/../.env';
+$envPath = __DIR__ . '.env';
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
 try {
-    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
+    $dotenv = Dotenv::createImmutable(__DIR__.);
     $dotenv->load();
 } catch (Exception $e) {
     die("Erro ao carregar o .env: " . $e->getMessage());
