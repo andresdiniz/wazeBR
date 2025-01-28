@@ -169,7 +169,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     try {
         $mail = new PHPMailer(true);  // Cria a instância do PHPMailer
-        echo "PHPMailer carregado corretamente!";
+        error_log("PHPMailer carregado corretamente!");
     } catch (Exception $e) {
         error_log("Erro ao carregar PHPMailer: " . $e->getMessage());  // Log de erro, caso o PHPMailer não seja carregado corretamente
     }
