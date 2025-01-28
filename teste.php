@@ -12,7 +12,7 @@ use Dotenv\Dotenv;
 echo "Autoload carregado com sucesso!\n";
 
 // Verificar se o arquivo .env existe
-if (!file_exists(__DIR__ . '/../.env')) {
+if (!file_exists(__DIR__ . '.env')) {
     die('Arquivo .env não encontrado!');
 }
 
