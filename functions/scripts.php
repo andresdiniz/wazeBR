@@ -58,15 +58,25 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
     }
 }
 
-// Obtém informações dos usuários
-function getSiteUsers(PDO $pdo)
+// Função para obter informações dos usuários
+function getSiteUsers(PDO $pdo, $userId)
 {
-// Obtém informações dos usuários
-// Função para buscar informações do usuário atual
+    // Consulta SQL para buscar informações do usuário
+    $sql = "SELECT * FROM users WHERE id = :id";
+    
+    // Prepara a consulta SQL
+    $stmt = $pdo->prepare($sql);
+    
+    // Vincula o valor do ID do usuário
     $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+    
+    // Executa a consulta
     $stmt->execute();
+    
+    // Retorna as informações do usuário como um array associativo
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
 
 // Obtém configurações do site
 function getSiteSettings(PDO $pdo)
