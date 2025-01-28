@@ -16,7 +16,7 @@ if (!file_exists($envPath)) {
 // Carregar variáveis de ambiente
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-if($_ENV[debug]) {
+if($_ENV[DEBUG]) {
 //logs de erros
 ini_set('display_errors', 0); // Desativa a exibição de erros
 ini_set('log_errors', 1); // Ativa o registro de erros
