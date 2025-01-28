@@ -143,6 +143,38 @@ function is_assoc(array $array): bool
     return array_keys($array) !== range(0, count($array) - 1);
 }
 
+//Função de teste redisCache
+
+function getSiteUsersWithMemcachedSession(PDO $pdo, $userId, $memcache) 
+{
+    // Inicia a sessão, se ainda não estiver iniciada
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $sessionId = session_id(); // Obtém o ID único da sessão
+    $cacheKey = "session_{$sessionId}_user_{$userId}";
+
+    // Tenta buscar no cache
+    $cachedData = $memcache->get($cacheKey);
+    if ($cachedData) {
+        return json_decode($cachedData, true);
+    }
+
+    // Consulta ao banco de dados
+    $users = selectFromDatabase($pdo, 'users', ['id' => $userId]);
+
+    if ($users) {
+        // Salva no cache, vinculado à sessão (não expira automaticamente)
+        $memcache->set($cacheKey, json_encode($users));
+
+        // Opcional: Configure o tempo de expiração (por exemplo, 30 minutos)
+        // $memcache->set($cacheKey, json_encode($users), 1800); // Expiração em 1800 segundos (30 minutos)
+    }
+
+    return $users;
+}
+
 
 // Função para obter informações dos usuários
 /*function getSiteUsers(PDO $pdo, $userId)
