@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/config/configbd.php';
+echo __DIR__ . '/../config/configbd.php';  // Exibe o caminho completo para verificar
+require_once __DIR__ . '/../config/configbd.php';
+
 
 use Dotenv\Dotenv;
 
