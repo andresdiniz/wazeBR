@@ -7,7 +7,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 echo "Iniciando...\n";
 
-if (!file_exists(__DIR__ . '/../.env')) {
+if (!file_exists(__DIR__ . '/.env')) {
     die('Arquivo .env não encontrado!');
 }
 
