@@ -6,14 +6,14 @@ ini_set('error_log', __DIR__ . '/error_log.txt'); // Caminho do arquivo de log
 use Dotenv\Dotenv;
 
 // Verificar se o arquivo .env existe
-$envPath = '/../.env';
+__DIR__ . '/../../.env';
 
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
 // Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable('/../.env'); // Corrigido o caminho para subir um nível
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../'); // Caminho para public_html
 $dotenv->load();
 
 try {
