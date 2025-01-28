@@ -1,4 +1,22 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+//echo "Autoload carregado com sucesso!\n";
+
+// Verificar se o arquivo .env existe
+$envPath = __DIR__ . '/.env';
+//echo "Caminho para .env: $envPath\n";
+
+if (!file_exists($envPath)) {
+    die("Arquivo .env não encontrado no caminho: $envPath");
+}
+
+// Carregar variáveis de ambiente
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+if($_ENV[debug]) {
 //logs de erros
 ini_set('display_errors', 0); // Desativa a exibição de erros
 ini_set('log_errors', 1); // Ativa o registro de erros
@@ -6,6 +24,7 @@ ini_set('error_log', __DIR__ . '/error_log.php'); // Caminho do arquivo de log
 
 // Definir o nível de erro que será registrado
 error_reporting(E_ALL); // Registra todos os tipos de erros
+}
 /**
  * Funções principais da aplicação
  */
