@@ -10,6 +10,8 @@ ini_set('error_log', __DIR__ . '/logs/debug.log');
 // Verifica se o arquivo .env existe no caminho especificado
 $envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
