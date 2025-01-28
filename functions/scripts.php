@@ -37,6 +37,23 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Função para realizar consultas SELECT no banco de dados
+function getSiteUsers(PDO $pdo, $userId)
+{
+    // Reutilizando a função selectFromDatabase para buscar informações do usuário
+    $result = selectFromDatabase($pdo, 'users', ['id' => $userId]);
+
+    // Retornar apenas o primeiro resultado, pois o ID é único
+    return $result ? $result[0] : null;
+}
+
+/**
+ * Função genérica para realizar consultas SELECT no banco de dados.
+ *
+ * @param PDO $pdo Instância do PDO.
+ * @param string $table Nome da tabela no banco de dados.
+ * @param array $where Condições para o WHERE (opcional).
+ * @return array|false Retorna os resultados como um array associativo ou false em caso de falha.
+ */
 function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 {
     try {
@@ -58,8 +75,77 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
     }
 }
 
+
+/**
+ * Função para realizar inserções no banco de dados com suporte a transações e múltiplas linhas.
+ *
+ * @param PDO $pdo Instância do PDO.
+ * @param string $table Nome da tabela no banco de dados.
+ * @param array $data Dados a serem inseridos (array associativo ou array de arrays associativos para múltiplos registros).
+ *
+ * @return int|bool Retorna o ID do último registro inserido ou true se for uma inserção múltipla; false em caso de falha.
+ */
+function insertIntoDatabase(PDO $pdo, string $table, array $data)
+{
+    try {
+        // Verificar se há dados para inserir
+        if (empty($data)) {
+            throw new Exception("Nenhum dado fornecido para inserção.");
+        }
+
+        // Garantir que o formato do dado seja consistente (suporte a múltiplas linhas)
+        $data = is_assoc($data) ? [$data] : $data;
+
+        // Começar a transação
+        $pdo->beginTransaction();
+
+        // Gerar os nomes das colunas (baseado no primeiro registro)
+        $columns = implode(", ", array_keys($data[0]));
+        $placeholders = implode(", ", array_map(fn($key) => ":{$key}", array_keys($data[0])));
+        $query = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+
+        $stmt = $pdo->prepare($query);
+
+        // Inserir cada linha
+        foreach ($data as $row) {
+            foreach ($row as $key => $value) {
+                $stmt->bindValue(":{$key}", $value);
+            }
+            $stmt->execute();
+        }
+
+        // Commit da transação
+        $pdo->commit();
+
+        // Retornar o ID do último registro inserido (ou true no caso de múltiplas linhas)
+        return count($data) === 1 ? $pdo->lastInsertId() : true;
+    } catch (PDOException $e) {
+        // Reverter transação em caso de erro
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Erro ao executar inserção: " . $e->getMessage());
+        return false;
+    } catch (Exception $e) {
+        error_log("Erro: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Verifica se um array é associativo.
+ *
+ * @param array $array O array a ser verificado.
+ * @return bool Retorna true se o array for associativo; false caso contrário.
+ */
+function is_assoc(array $array): bool
+{
+    return array_keys($array) !== range(0, count($array) - 1);
+}
+
+
 // Função para obter informações dos usuários
-function getSiteUsers(PDO $pdo, $userId)
+/*function getSiteUsers(PDO $pdo, $userId)
 {
     // Consulta SQL para buscar informações do usuário
     $sql = "SELECT * FROM users WHERE id = :id";
@@ -76,7 +162,7 @@ function getSiteUsers(PDO $pdo, $userId)
     // Retorna as informações do usuário como um array associativo
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
+*/
 
 // Obtém configurações do site
 function getSiteSettings(PDO $pdo)
@@ -182,17 +268,12 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         logEmail('info', $logMessage);
         $mail->isSMTP(); // Usar SMTP explicitamente
         $mail->Host = $_ENV['SMTP_HOST'];
-        error_log("SMTP Host: " . $_ENV['SMTP_HOST']);  // Log da configuração do host SMTP
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['EMAIL_USERNAME'];
-        error_log("E-mail Username: " . $_ENV['EMAIL_USERNAME']);  // Log da configuração do username
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
-        error_log("E-mail Password: " . $_ENV['EMAIL_PASSWORD']);  // Log da configuração da senha
         $mail->Port = $_ENV['SMTP_PORT'];
-        error_log("SMTP Port: " . $_ENV['SMTP_PORT']);  // Log da configuração da porta SMTP
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
-        error_log($_ENV['EMAIL_USERNAME']);
         $mail->addAddress($userEmail);
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;

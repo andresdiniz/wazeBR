@@ -978,6 +978,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                             // Log de sucesso no envio de e-mail
                             logEmail('success', "E-mail de recuperação enviado com sucesso para: $email");
+                            error_log('Email enviado com sucesso');
                 
                             // Retornar resposta de sucesso
                             echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
