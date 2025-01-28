@@ -191,23 +191,18 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
  // Função para registrar logs de errro de email
 
  function logEmail($type, $message)
-{
-    // Definir o caminho para o arquivo de log
-    $logDirectory = __DIR__ . '/logs'; // Ou qualquer outro diretório que queira usar para logs
-    if (!file_exists($logDirectory)) {
-        mkdir($logDirectory, 0777, true);  // Criar o diretório de logs se não existir
-    }
-
-    // Definir o arquivo de log dependendo do tipo (success ou error)
-    $logFile = $logDirectory . '/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
-
-    // Formatar a mensagem de log
-    $logMessage = "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL;
-
-    // Gravar a mensagem no arquivo de log
-    file_put_contents($logFile, $logMessage, FILE_APPEND);
-}
-
+ {
+     $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
+     
+     // Cria o diretório de logs caso não exista
+     if (!is_dir(__DIR__ . '/logs')) {
+         mkdir(__DIR__ . '/logs', 0777, true);
+     }
+ 
+     // Adiciona a mensagem ao arquivo de log
+     file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
+ }
+ 
 // Obtém o endereço IP do usuário
 function getIp()
 {
