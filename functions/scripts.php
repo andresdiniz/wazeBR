@@ -23,7 +23,7 @@ echo $_ENV["DEBUG"];
 // Funções de inicialização
 
 // Verificar o valor da variável DEBUG
-if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     // Ativar logs de erros
     ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
     ini_set('log_errors', 1); // Ativa o registro de erros
