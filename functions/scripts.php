@@ -167,8 +167,13 @@ function executeScript($scriptName, $scriptFile)
 // Função personalizada para enviar e-mails
 function sendEmail($userEmail, $emailBody, $titleEmail)
 {
+    try {
+        $mail = new PHPMailer(true);  // Cria a instância do PHPMailer
+        echo "PHPMailer carregado corretamente!";
+    } catch (Exception $e) {
+        error_log("Erro ao carregar PHPMailer: " . $e->getMessage());  // Log de erro, caso o PHPMailer não seja carregado corretamente
+    }
     $sendTime = date('Y-m-d H:i:s');
-    $mail = new PHPMailer(true);
     $emailId = uniqid('email_', true); // Gerar ID único para o e-mail
 
     try {
@@ -176,7 +181,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $logMessage = "Iniciando envio do e-mail para: $userEmail | ID: $emailId";
         logEmail('info', $logMessage);
 
-        // Configurações do PHPMailer
+
         $mail->Host = $_ENV['SMTP_HOST'];
         error_log("SMTP Host: " . $_ENV['SMTP_HOST']);  // Log da configuração do host SMTP
         $mail->SMTPAuth = true;
