@@ -8,13 +8,15 @@ $envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Dotenv\Dotenv;
+
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
 try {
     // Certifique-se de que o caminho do .env está correto
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv = Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 } catch (Exception $e) {
     // Em caso de erro, logar o erro no arquivo de log
