@@ -178,6 +178,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 
         // Configurações do PHPMailer
         $mail->Host = $_ENV['SMTP_HOST'];
+        error_log($_ENV['SMTP_HOST']);
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['EMAIL_USERNAME'];
         $mail->Password = $_ENV['EMAIL_PASSWORD'];
