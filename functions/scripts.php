@@ -13,7 +13,7 @@ if (!file_exists($envPath)) {
 }
 
 // Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../../'); // Caminho para public_html
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../'); // Caminho para public_html
 $dotenv->load();
 
 try {
