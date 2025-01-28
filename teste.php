@@ -6,17 +6,18 @@ error_reporting(E_ALL);
 var_dump(file_exists(__DIR__ . '/../.env')); // Deve retornar true
 var_dump(realpath(__DIR__ . '/../.env'));   // Exibe o caminho absoluto do .env
 
-
-use Dotenv\Dotenv;
-
-var_dump(realpath(__DIR__ . '/../.env')); // Deve exibir o caminho absoluto do arquivo .env
-
-var_dump(getenv('EMAIL_USERNAME'));
-
-
-if (!file_exists(__DIR__ . '/../.env')) {
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue; // Ignorar comentários
+        }
+        list($name, $value) = explode('=', $line, 2);
+        putenv(trim($name) . '=' . trim($value));
+    }
+} else {
     die('Arquivo .env não encontrado!');
 }
 
-$dotenv = Dotenv::createUnsafeImmutable(__DIR__ . '/../');
-$dotenv->load();
+// Testando a variável do .env
+echo getenv('EMAIL_USERNAME');
