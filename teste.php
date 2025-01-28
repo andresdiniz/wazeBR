@@ -17,7 +17,7 @@ if (!file_exists(__DIR__ . '.env')) {
 }
 
 // Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv = Dotenv::createImmutable(__DIR__ . '/.env');
 $dotenv->load();
 
 echo "Arquivo .env carregado com sucesso!\n";
