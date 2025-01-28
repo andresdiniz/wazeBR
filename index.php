@@ -35,7 +35,7 @@ $pdo = Database::getConnection();
 // Recupera dados gerais para o template
 $settings = getSiteSettings($pdo);
 $data = [
-    'user' => getSiteUsers($pdo),       // Usuário logado
+    'user' => getSiteUsers($pdo,$_SESSION['usuario_id']),       // Usuário logado
     'settings' => $settings,           // Configurações do site
     'session' => $_SESSION
 ];
