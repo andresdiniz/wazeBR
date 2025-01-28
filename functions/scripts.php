@@ -30,11 +30,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 
     // Definir o nível de erro que será registrado
     error_reporting(E_ALL); // Registra todos os tipos de erros
-    // Definir o manipulador de erros
-    set_error_handler("customErrorHandler");
-
-    // Registrar a função de captura de erros fatais
-    register_shutdown_function("shutdownHandler");
+    
 } else {
     echo'Degug desativado';
     // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
@@ -213,24 +209,6 @@ function logEmail($type, $message)
 
     // Adiciona a mensagem ao arquivo de log
     file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
-}
-
-// Função para manipular erros do PHP
-function customErrorHandler($errno, $errstr, $errfile, $errline)
-{
-    $logMessage = "Erro PHP: [$errno] $errstr - Arquivo: $errfile - Linha: $errline";
-    logEmail('error', $logMessage);
-    return true; // Não propaga o erro
-}
-
-// Função para capturar erros fatais
-function shutdownHandler()
-{
-    $error = error_get_last();
-    if ($error && ($error['type'] === E_ERROR)) {
-        $logMessage = "Erro Fatal: " . $error['message'] . " - Arquivo: " . $error['file'] . " - Linha: " . $error['line'];
-        logEmail('error', $logMessage);
-    }
 }
  
 // Obtém o endereço IP do usuário
