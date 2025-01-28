@@ -192,6 +192,8 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->addAddress($userEmail);
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;
+        $mail->SMTPDebug = 2;  // Mostra detalhes de depuração
+        $mail->Debugoutput = 'html';  // Saída de depuração em formato HTML
         $mail->AltBody = strip_tags($emailBody);  // Converter para texto puro
 
         // Envia o e-mail
