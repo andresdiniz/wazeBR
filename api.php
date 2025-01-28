@@ -957,6 +957,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ";
                 
                             $subject = "Recuperação de Senha";
+
+                            logEmail('info', "E-mail de recuperação montado para: $email");
                 
                             // Tentar enviar o e-mail
                             if (!sendEmail($email, $mensagem, $subject)) {
