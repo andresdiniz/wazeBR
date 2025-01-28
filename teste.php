@@ -5,6 +5,11 @@ error_reporting(E_ALL);
 
 use Dotenv\Dotenv;
 
+var_dump(realpath(__DIR__ . '/../.env')); // Deve exibir o caminho absoluto do arquivo .env
+
+var_dump(getenv('EMAIL_USERNAME'));
+
+
 if (!file_exists(__DIR__ . '/../.env')) {
     die('Arquivo .env não encontrado!');
 }
