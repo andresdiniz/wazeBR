@@ -20,10 +20,7 @@ try {
 // Configura o ambiente de debug com base na variável DEBUG do .env
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     // Configura as opções de log para ambiente de debug
-    ini_set('display_errors', 0);
-    ini_set('log_errors', 0);
-}
-    ini_set('display_errors', 1);
+
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
     
@@ -32,8 +29,6 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
         mkdir(__DIR__ . '/../logs', 0777, true);
     }
 }
-
-
 // Configura o fuso horário padrão para São Paulo
 date_default_timezone_set('America/Sao_Paulo');
 
