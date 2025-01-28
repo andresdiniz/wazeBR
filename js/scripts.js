@@ -449,3 +449,37 @@ function calculateDistance(coords) {
     });
 });
 
+// Função para apagar cookies
+function deleteAllCookies() {
+    var cookies = document.cookie.split(";");
+
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+
+        // Apaga todos os cookies configurando a data para o passado
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+    }
+}
+
+// Função para destruir a sessão
+function destroySession() {
+    // Você pode adicionar mais variáveis de sessão aqui, dependendo da sua implementação
+    sessionStorage.clear(); // Limpa o sessionStorage
+    localStorage.clear(); // Limpa o localStorage
+}
+
+// Função para realizar o logout
+function logout() {
+    // Apaga os cookies e destrói a sessão
+    deleteAllCookies();
+    destroySession();
+
+    // Redireciona o usuário para a página de login
+    window.location.href = "login.html";
+}
+
+// Adiciona um evento para o clique no botão de logout
+document.querySelector('.btn-primary').addEventListener('click', logout);
+
