@@ -936,6 +936,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $stmt->bindParam(':token', $token);
                             $stmt->bindParam(':valid', $validade);
                             $stmt->execute();
+
+                            logEmail('info', "Token criado para: $email");
                 
                             // Criar o link de redefinição
                             $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
