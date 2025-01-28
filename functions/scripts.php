@@ -11,8 +11,9 @@ if (!file_exists($envPath)) {
 }
 
 // Carregar variáveis de ambiente
-$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../'); // Corrigido o caminho para subir um nível
 $dotenv->load();
+
 
 // Verificar o valor da variável DEBUG
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
