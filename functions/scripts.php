@@ -243,7 +243,7 @@ function getIp() {
 }
 
 // Consulta localização por longitude e latitude
-function consultarLocalizacaoKm($longitude, $latitude, $raio = 250, $data = null)
+function consultarLocalizacaoKm($longitude, $latitude, $raio = 150, $data = null)
 {
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
     $data = $data ?? date('Y-m-d');
