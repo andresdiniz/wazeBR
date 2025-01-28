@@ -6,7 +6,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
+require '/../vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
@@ -126,13 +126,13 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     $mail = new PHPMailer(true);
     try {
-        $mail->Host = 'smtp.hostinger.com';
+        $mail->Host = $_ENV['SMTP_HOST'];
         $mail->SMTPAuth = true;
-        $mail->Username = 'wazebrasil@fenixsmm.store';
-        $mail->Password = '@Ndre2025';
-        $mail->Port = 587;
+        $mail->Username = $_ENV['EMAIL_USERNAME'];
+        $mail->Password = $_ENV['EMAIL_PASSWORD'];
+        $mail->Port = $_ENV['SMTP_PORT'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->setFrom('wazebrasil@fenixsmm.store', 'Waze Portal Brasil');
+        $mail->setFrom($_ENV['EMAIL_USERNAME'], 'Waze Portal Brasil');
         $mail->addAddress($userEmail);
         $mail->isHTML(true);
         $mail->Subject = $titleEmail;
