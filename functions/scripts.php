@@ -138,18 +138,49 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->Subject = $titleEmail;
         $mail->Body = $emailBody;
 
+        // Gerar ID único para o envio do e-mail
+        $emailId = uniqid('email_', true);
+        $sendTime = date('Y-m-d H:i:s');
+
+        // Log de sucesso do envio de e-mail
+        $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
+        logEmail('success', $logMessage);
+
         return $mail->send();
     } catch (Exception $e) {
+        // Log de erro
+        $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
+        logEmail('error', $logMessage);
+
         return false;
     }
 }
-
 /**
  * Funções utilitárias
  */
 
+ // Função para registrar logs de errro de email
+ 
+ function logEmail($type, $message)
+{
+    // Definir o caminho para o arquivo de log
+    $logDirectory = __DIR__ . '/logs'; // Ou qualquer outro diretório que queira usar para logs
+    if (!file_exists($logDirectory)) {
+        mkdir($logDirectory, 0777, true);  // Criar o diretório de logs se não existir
+    }
+
+    // Definir o arquivo de log dependendo do tipo (success ou error)
+    $logFile = $logDirectory . '/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
+
+    // Formatar a mensagem de log
+    $logMessage = "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL;
+
+    // Gravar a mensagem no arquivo de log
+    file_put_contents($logFile, $logMessage, FILE_APPEND);
+}
+
 // Obtém o endereço IP do usuário
-function getIp()
+function getIp(
 {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
