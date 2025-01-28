@@ -12,7 +12,7 @@ if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
 }
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../'); // Subir um diretório para acessar public_html/wazeportal
+$dotenv = Dotenv::createImmutable('/../'); // Subir um diretório para acessar public_html/wazeportal
 $dotenv->load();
 
 
