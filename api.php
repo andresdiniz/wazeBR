@@ -26,7 +26,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     // Ativar logs de erros
     ini_set('display_errors', 0); // Desativa a exibição de erros para o usuário
     ini_set('log_errors', 1); // Ativa o registro de erros
-    ini_set('error_log', __DIR__ . '/error_log.txt'); // Caminho do arquivo de log
+    ini_set('error_log', __DIR__ . './logs/error_log.txt'); // Caminho do arquivo de log
 
     // Definir o nível de erro que será registrado
     error_reporting(E_ALL); // Registra todos os tipos de erros
@@ -976,9 +976,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Retornar resposta de sucesso
                             echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
                         } catch (Exception $e) {
-                            // Log de erro
+                            // Adiciona mais informações ao log para diagnosticar melhor o erro
                             logEmail('error', "Erro no processo de recuperação de senha: " . $e->getMessage());
-                
+                            logEmail('error', "Detalhes: " . $e->getTraceAsString());
+
                             // Retornar erro com a mensagem específica
                             http_response_code(500);
                             echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
