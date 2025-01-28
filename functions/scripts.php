@@ -28,6 +28,8 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     ini_set('display_errors', 0);
     ini_set('log_errors', 0);
 }
+//Define o fuso horário padrão
+date_default_timezone_set('America/Sao_Paulo');
 
 /**
  * Funções principais da aplicação
