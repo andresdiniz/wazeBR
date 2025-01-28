@@ -19,8 +19,9 @@ try {
 } catch (Exception $e) {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
+echo $_ENV["DEBUG"];
+// Funções de inicialização
 
-echo 'chegei aqui';
 // Verificar o valor da variável DEBUG
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     // Ativar logs de erros
