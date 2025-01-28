@@ -1,8 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-ini_set('display_errors', 1); // Desativa a exibição de erros para o usuário
-ini_set('log_errors', 1); // Ativa o registro de erros
-ini_set('error_log', __DIR__ . '/error_log.txt'); // Caminho do arquivo de log
+
 use Dotenv\Dotenv;
 
 // Verificar se o arquivo .env existe
@@ -38,6 +36,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
     // Registrar a função de captura de erros fatais
     register_shutdown_function("shutdownHandler");
 } else {
+    echo'Degug desativado';
     // Caso DEBUG esteja desativado, garantir que os erros não sejam exibidos ou registrados
     ini_set('display_errors', 0);
     ini_set('log_errors', 0);
