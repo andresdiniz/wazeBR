@@ -24,7 +24,7 @@
 *.log
 
 # Ignorar pastas específicas
-vendor/
+# vendor/
 
 # Exemplo: Adicione aqui outras pastas geradas por ferramentas específicas
 # node_modules/
