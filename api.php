@@ -18,7 +18,8 @@ try {
     $dotenv->load();
 } catch (Exception $e) {
     // Em caso de erro, logar o erro no arquivo de log
-    error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado
+    error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado4
+    logEmail("error", "Erro ao carregar o .env: ". $e->getMessage());
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
