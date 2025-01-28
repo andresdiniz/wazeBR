@@ -6,7 +6,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '/../vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
+require 'vendor/autoload.php'; // Certifique-se de que o PHPMailer esteja instalado via Composer
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
