@@ -5,23 +5,6 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
 // Função de logging centralizada
-function logToFile($level, $message, $context = []) {
-    // Define o caminho do log
-    echo''. $level .''. $message .'';
-    $logFile = __DIR__ . '/../logs/logs.log';
-
-    // Formata a mensagem de log com data, nível e contexto
-    $logMessage = sprintf(
-        "[%s] [%s] %s %s\n", 
-        date('Y-m-d H:i:s'), 
-        strtoupper($level), 
-        $message, 
-        json_encode($context)
-    );
-
-    // Registra a mensagem de log no arquivo
-    error_log($logMessage, 3, $logFile);
-}
 
 // Configurações de ambiente
 $envPath = __DIR__ . '/.env';
