@@ -1,4 +1,5 @@
 <?php
+
 // Configurações do Banco de Dados
 define('DB_HOST', '82.197.82.45');
 define('DB_NAME', 'u509716858_wazeportal');
@@ -15,10 +16,7 @@ class Database {
      * @throws PDOException
      */
     public static function getConnection() {
-        // Usar o PDO global, se a instância já foi criada
-        global $pdo;
-        
-        if ($pdo === null) {
+        if (self::$instance === null) {
             try {
                 // Criar a conexão PDO apenas uma vez
                 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
@@ -28,13 +26,13 @@ class Database {
                     PDO::ATTR_PERSISTENT => true, // Habilitar conexões persistentes
                 ];
 
-                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
             } catch (PDOException $e) {
                 // Em produção, evite exibir a mensagem diretamente para maior segurança
                 die("Erro ao conectar ao banco de dados: " . $e->getMessage());
             }
         }
 
-        return $pdo;
+        return self::$instance;
     }
 }
