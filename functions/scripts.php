@@ -214,6 +214,7 @@ function logExecution($scriptName, $status, $message, $pdo)
 {
     try {
         $pdo->beginTransaction();
+        echo "Iniciando transação\n";
 
         // Obtém o tempo de execução
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
