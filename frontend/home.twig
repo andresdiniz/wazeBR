@@ -1,152 +1,102 @@
 <!-- Content Row -->
 <div class="container">
-<div class="row">
-    <!-- Area Chart -->
-    <div class="col-xl-6 col-lg-6">
-        <div class="card-header bg-primary text-white">Acidentes</div>
-            <!-- Card Body -->
-            <div class="card-body">
-                {% if accidentAlerts is not empty %}
-                <div class="table-responsive">
-                    <table class="table" id="accidentsTable">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data Evento</th>
-                                <th>Nota</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in accidentAlerts %}
-                            <tr data-uuid="{{ alert.uuid }}">
-                                <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
-                                <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
-                                <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
-                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                        Ver no Waze
-                                    </a>
-                                </td>
-                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
-                                    title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
-                                    {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
-                                </td>
-                                <td>
-                                    <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                        {{ alert.confidence }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-info btn-sm" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal" 
-                                            data-alert='{{ alert|json_encode }}'>
-                                        VER +
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-xl-12 col-lg-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Acidentes</div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    {% if accidentAlerts is not empty %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered" id="accidentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Cidade</th>
+                                    <th>Rua</th>
+                                    <th>Localização</th>
+                                    <th>Data Evento</th>
+                                    <th>Nota</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in accidentAlerts %}
+                                <tr data-uuid="{{ alert.uuid }}">
+                                    <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
+                                    <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
+                                    <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                           class="btn btn-link" target="_blank">
+                                            Ver no Waze
+                                        </a>
+                                    </td>
+                                    <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" 
+                                        data-toggle="tooltip" title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
+                                        {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                            {{ alert.confidence }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal" 
+                                                data-alert='{{ alert|json_encode }}'>
+                                            Ver Mais
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
+                    {% endif %}
                 </div>
-                {% else %}
-                <p>Não há eventos de acidentes registrados no momento.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Content Column (Congestionamentos) -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow mb-4">
-            <div class="card-header bg-danger text-white">Acidentes</div>
-            <div class="card-body">
-                {% if jamAlerts is not empty %}
-                <div class="table-responsive">
-                    <table class="table" id="jamsTable">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data do Evento</th>
-                                <th>Nota</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in jamAlerts %}
-                            <tr>
-                                <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
-                                <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
-                                <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
-                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                        Ver no Waze
-                                    </a>
-                                </td>
-                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
-                                    title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
-                                    {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
-                                </td>
-                                <td>
-                                    <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                        {{ alert.confidence }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-info btn-sm" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal" 
-                                            data-alert='{{ alert|json_encode }}'>
-                                        VER +
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p>Não há alertas de congestionamento registrados no momento.</p>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Atualizado -->
+<!-- Modal -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="alertModalLabel">
-                    Detalhes do Alerta: <span id="modal-type-title"></span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Atualizado para Bootstrap 5 -->
+                <h5 class="modal-title" id="alertModalLabel">Detalhes do Acidente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <p><strong>UUID:</strong> <span id="modal-uuid"></span></p>
-                <p><strong>Cidade:</strong> <span id="modal-city"></span></p>
-                <p><strong>Rua:</strong> <span id="modal-street"></span></p>
-                <p><strong>Tipo:</strong> <span id="modal-type"></span></p>
-                <p><strong>Subtipo:</strong> <span id='modal-subtype'></span></p>
-                <p><strong>Status:</strong> <span id="modal-status"></span></p>
-                <p><strong>Localização:</strong> 
-                    <span id="modal-location" data-lat="" data-lon=""></span>
-                </p>
-                <p id="modal-km-p"><strong>Km:</strong> <span id="modal-km"></span></p> <!-- Novo campo para exibir km -->
-                <p><strong>Data Recebida:</strong> <span id="modal-date-received"></span></p>
-                <p><strong>Confiança:</strong> <span id="modal-confidence"></span></p>
+                <p id="alertDetails"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button> <!-- Atualizado para Bootstrap 5 -->
-                <button type="button" class="btn btn-success" id="confirm-alert">Confirmar Alerta</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // Inicializar o DataTable
+        $('#accidentsTable').DataTable({
+            "responsive": true,
+            "autoWidth": false
+        });
+
+        // Modificar o conteúdo do modal ao clicar no botão
+        $('#alertModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var alertData = button.data('alert');
+            var modal = $(this);
+            modal.find('#alertDetails').text(JSON.stringify(alertData, null, 2)); // Exibe os detalhes
+        });
+    });
+</script>
 
 <!-- Inicializando os tooltips e DataTables do Bootstrap -->
 <script>
