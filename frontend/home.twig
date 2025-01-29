@@ -226,7 +226,7 @@
             if (locationX && locationY) {
                 var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
                 console.log("Consultando o DNIT com a URL:", denitUrl);
-
+            
                 // Faz a requisição ao DENIT
                 $.ajax({
                     url: denitUrl,
@@ -236,8 +236,15 @@
                         if (response && response.length > 0) {
                             const result = response[0]; // Obtendo o primeiro resultado
                             console.log('Km obtido do DENIT:', result.km);
-                            modal.find('#modal-via-KM').text(parseFloat(result.km).toFixed(2));
-
+            
+                            // Verifica se 'km' é um número válido
+                            var km = parseFloat(result.km);
+                            if (!isNaN(km)) {
+                                // Exibe o 'km' com duas casas decimais
+                                modal.find('#modal-via-KM').text(km.toFixed(2));
+                            } else {
+                                modal.find('#modal-via-KM').text('N/A');
+                            }
                         } else {
                             alert('Nenhum dado encontrado para as coordenadas fornecidas no DENIT.');
                         }
@@ -249,7 +256,7 @@
                 });
             } else {
                 console.log("Sem coordenadas válidas para consulta ao DENIT.");
-            }
+            }            
 
             // Log para verificar os dados
             console.log("Dados do alerta:", alertData);
