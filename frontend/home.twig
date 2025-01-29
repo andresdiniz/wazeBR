@@ -240,6 +240,7 @@
 
         // Função para confirmar alerta
         function confirmarAlerta(uuid) {
+            console.log('Confirmar alerta:', uuid);
             $.ajax({
                 url: '/api.php?action=confirm_alert',
                 type: 'POST',
