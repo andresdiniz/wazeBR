@@ -1,0 +1,117 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">Acidentes</div>
+                <div class="card-body">
+                    {% if accidentAlerts is not empty %}
+                    <div class="table-responsive">
+                        <table class="table" id="accidentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Cidade</th>
+                                    <th>Rua</th>
+                                    <th>Localização</th>
+                                    <th>Data Evento</th>
+                                    <th>Nota</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in accidentAlerts %}
+                                <tr data-uuid="{{ alert.uuid }}">
+                                    <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
+                                    <td><a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a></td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                    <td><span class="badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">{{ alert.confidence }}</span></td>
+                                    <td><button class="btn btn-info btn-sm view-alert" data-alert='{{ alert|json_encode }}'>VER +</button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>Não há eventos de acidentes registrados no momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger text-white">Congestionamentos</div>
+                <div class="card-body">
+                    {% if jamAlerts is not empty %}
+                    <div class="table-responsive">
+                        <table class="table" id="jamsTable">
+                            <thead>
+                                <tr>
+                                    <th>Cidade</th>
+                                    <th>Rua</th>
+                                    <th>Localização</th>
+                                    <th>Data Evento</th>
+                                    <th>Nota</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in jamAlerts %}
+                                <tr data-uuid="{{ alert.uuid }}">
+                                    <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
+                                    <td><a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a></td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                    <td><span class="badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">{{ alert.confidence }}</span></td>
+                                    <td><button class="btn btn-info btn-sm view-alert" data-alert='{{ alert|json_encode }}'>VER +</button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>Não há alertas de congestionamento registrados no momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Detalhes do Alerta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Cidade:</strong> <span id="modal-city"></span></p>
+                <p><strong>Rua:</strong> <span id="modal-street"></span></p>
+                <p><strong>Localização:</strong> <a id="modal-location" href="#" target="_blank">Ver no Mapa</a></p>
+                <p><strong>Data:</strong> <span id="modal-date"></span></p>
+                <p><strong>Confiança:</strong> <span id="modal-confidence"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#accidentsTable, #jamsTable').DataTable();
+
+        $('.view-alert').on('click', function () {
+            var alert = $(this).data('alert');
+            $('#modal-city').text(alert.city);
+            $('#modal-street').text(alert.street);
+            $('#modal-location').attr('href', `https://www.google.com/maps?q=${alert.location_y},${alert.location_x}`);
+            $('#modal-date').text(new Date(alert.pubMillis).toLocaleString());
+            $('#modal-confidence').text(alert.confidence);
+            $('#alertModal').modal('show');
+        });
+    });
+</script>

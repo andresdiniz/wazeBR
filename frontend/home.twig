@@ -38,6 +38,7 @@
                                         Ver no Waze
                                     </a>
                                 </td>
+                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip"
                                 <!-- Timestamp formatted as date -->
                                 <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
                                     title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
@@ -51,6 +52,9 @@
                                 </td>
                                 <!-- Action button to view details -->
                                 <td>
+                                    <button class="btn btn-info btn-sm"
+                                            data-toggle="modal"
+                                            data-target="#alertModal"
                                     <button class="btn btn-info btn-sm" 
                                             data-toggle="modal" 
                                             data-target="#alertModal" 
@@ -265,22 +269,18 @@
         
             // Faz a requisição ao DENIT
             $.ajax({
-            // URL do DENIT
-            // Build DENIT API URL
+                url: denitUrl,
                 type: 'GET',
                 success: function (response) {
                     console.log("Resposta da API DENIT:", response);
-            // Faz a requisição ao DENIT
-            // Make DENIT API request
+                    if (response && response.length > 0) {
                         const result = response[0]; // Obtendo o primeiro resultado
                         $('#modal-uuid').text(uuid || 'N/A');
                         $('#modal-city').text(result.uf || 'N/A');
                         $('#modal-street').text(result.br || 'N/A');
                         $('#modal-type').text('DENIT Response');
                         $('#modal-subtype').text('N/A');
-                        const result = response[0]; // Obtendo o primeiro resultado
-                        // Update modal with DENIT response data
-                        const result = response[0];
+                        $('#modal-status').text('Ativo');
                         $('#modal-date-received').text(new Date().toLocaleString());
                         $('#modal-confidence').text('N/A');
                         $('#modal-location').text(
@@ -301,20 +301,16 @@
         function confirmarAlerta(uuid) {
             $.ajax({
                 url: '/confirmar_alerta', // URL da sua API ou rota para confirmar o alerta
-        });
-        });        
+                type: 'POST',
                 data: {
-        // Função para confirmar o alerta no banco de dados
-        // Function to confirm alert in database
+                    uuid: uuid,
                     status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
                 },
-                url: '/confirmar_alerta', // URL da sua API ou rota para confirmar o alerta
-                url: '/confirmar_alerta',
+                success: function (response) {
                     alert('Alerta confirmado com sucesso!');
                     $('#alertModal').modal('hide');
                 },
-                    status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
-                    status: 1,
+                error: function (xhr, status, error) {
                     alert('Erro ao confirmar o alerta. Tente novamente.');
                 },
             });
@@ -326,8 +322,4 @@
             confirmarAlerta(uuid);
         });
     });
-        // Adicionar evento para confirmar o alerta
-        // Handle confirm alert button click
-
-            var uuid = $('#modal-uuid').text(); // Obtém o UUID do alerta da modal
-            var uuid = $('#modal-uuid').text();
+</script>
