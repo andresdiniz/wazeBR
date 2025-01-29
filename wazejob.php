@@ -61,7 +61,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 $pdo = Database::getConnection();
 
 // Função de execução de scripts com log
-function executeScriptWithLogging($scriptName, $path) {
+function executeScriptWithLogging($scriptName, $path, $pdo) {
     try {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
         executeScript($scriptName, $path,$pdo);
@@ -74,10 +74,10 @@ function executeScriptWithLogging($scriptName, $path) {
 }
 
 // Executando os scripts com verificação de erros
-executeScriptWithLogging('wazealerts.php', '/wazealerts.php');
-executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php');
-executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php');
-executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php');
-executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php');
+executeScriptWithLogging('wazealerts.php', '/wazealerts.php',$pdo);
+executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php',$pdo);
+executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php',$pdo);
+executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php',$pdo);
+executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php',$pdo);
 
 ?>
