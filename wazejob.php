@@ -7,7 +7,7 @@ require_once __DIR__ . '/functions/scripts.php';
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
-    $logFile = __DIR__ . '/../logs/debug.log';
+    $logFile = __DIR__ . '/../logs/logs.log';
 
     // Formata a mensagem de log com data, nível e contexto
     $logMessage = sprintf(
@@ -61,7 +61,6 @@ function executeScriptWithLogging($scriptName, $path, $pdo) {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
         executeScript($scriptName, $path, $pdo); // Passando $pdo aqui
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
-        echo'cheguei aqui';
     } catch (Exception $e) {
         logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
         error_log('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
