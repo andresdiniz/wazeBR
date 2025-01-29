@@ -53,11 +53,11 @@ function executeScriptWithLogging($scriptName, $path, $pdo) {
     }
 }
 
-/* Executando os scripts com verificação de erros
+// Executando os scripts com verificação de erros
 executeScriptWithLogging('wazealerts.php', '/wazealerts.php', $pdo);
 executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php', $pdo);
 executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php', $pdo);
 executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php', $pdo);
 executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php', $pdo);
-*/
+
 ?>
