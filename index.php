@@ -67,15 +67,8 @@ $pdo = Database::getConnection();
 // Recupera dados gerais para o template
 $settings = getSiteSettings($pdo);
 
-$memcache = new Memcached();
-$memcache->addServer('127.0.0.1', 11211);  // Conecta-se ao servidor Memcached
-
-// Agora você pode usar a função com o Memcached
-$userData = getSiteUsersWithMemcachedSession($pdo, $userId, $memcache);
-
 $data = [
-    'user'=>getSiteUsersWithMemcachedSession($pdo, $_SESSION['usuario_id'], $memcache);
-    //'user' => getSiteUsers($pdo,$_SESSION['usuario_id']),       // Usuário logado
+    'user' => getSiteUsers($pdo,$_SESSION['usuario_id']),       // Usuário logado
     'settings' => $settings,           // Configurações do site
     'session' => $_SESSION
 ];
