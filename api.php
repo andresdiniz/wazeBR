@@ -996,7 +996,33 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         http_response_code(400);
                         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
                     }
-                    break;                
+                    break;           
+                    
+                case 'confirm_alert':
+                    // Recebe os dados do alerta
+                    $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
+                    $status = isset($_POST['status']) ? $_POST['status'] : 0;
+
+                    // Verifica se o UUID foi enviado
+                    if (!empty($uuid)) {
+                        // Atualiza o status do alerta no banco de dados
+                        $stmt = $conn->prepare("UPDATE alerts SET status = ? WHERE uuid = ?");
+                        $stmt->bind_param("is", $status, $uuid);
+
+                        if ($stmt->execute()) {
+                            logToFile('success', "Alerta confirmado com sucesso: $uuid");
+                            echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
+                        } else {
+                            logToFile('error', "Alerta não confirmado: $uuid");
+                            echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);  
+                        }
+                        
+                        // Fecha a declaração
+                        $stmt->close();
+                    } else {
+                        echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
+                    }
+                    break;
 
         default:
             http_response_code(401);

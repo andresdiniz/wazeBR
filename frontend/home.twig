@@ -243,7 +243,9 @@
             $.ajax({
                 url: '/api.php?action=confirm_alert',
                 type: 'POST',
-                data: { uuid: uuid, status: 1 },
+                data: { uuid: uuid, 
+                    km : km,
+                    status: 1 },
                 success: function(response) {
                     alert('Alerta confirmado com sucesso!');
                     $('#alertModal').modal('hide');
@@ -257,7 +259,8 @@
         // Evento para confirmar alerta
         $('#confirm-alert').on('click', function() {
             var uuid = $('#modal-uuid').text();
-            confirmarAlerta(uuid);
+            var km = $('#modal-via-KM').text();
+            confirmarAlerta(uuid,km);
         });
     });
     </script>
