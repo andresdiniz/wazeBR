@@ -431,6 +431,17 @@ function confirmarAlerta(uuid) {
     });
 }
 
+function confirmarAlertaModal(uuid,km) {
+    console.log('Confirmar alerta clicado');
+
+    if (uuid && km) {
+        console.log('UUID:', uuid, 'KM:', km);
+        confirmarAlerta(uuid, km); // Chama a função de confirmação
+    } else {
+        console.log('Erro: UUID ou KM não encontrados');
+    }
+}
+
 // Adiciona um evento para o clique no botão de logout
 document.querySelector('.btn-primary').addEventListener('click', logout);
 
