@@ -213,7 +213,10 @@
             modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
             modal.find('#modal-type').text('Alerta');
             modal.find('#modal-subtype').text('N/A');
-            modal.find('#modal-status').text(alertData.status || 'N/A');
+            
+            // Definir status do alerta baseado no valor do banco de dados
+            var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
+            modal.find('#modal-status').text(status);
 
             // Agora faz a consulta ao DENIT usando as coordenadas (se existirem)
             var locationX = alertData.location_x;
@@ -257,7 +260,7 @@
         // Função para confirmar o alerta no banco de dados
         function confirmarAlerta(uuid) {
             $.ajax({
-                url: '/confirmar_alerta', // URL da sua API ou rota para confirmar o alerta
+                url: '/api.php?action=confirm_alert', // URL da sua API ou rota para confirmar o alerta
                 type: 'POST',
                 data: {
                     uuid: uuid,
