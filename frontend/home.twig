@@ -239,19 +239,27 @@
             var locationY = alertData.location_y;
         
     });
-    //Evento de confirmação de alerta
-    $(document).on('click', '#confirm-alert', function() {
-        console.log('Confirmar alerta clicado');
-        
-        var uuid = $('#modal-uuid').text();  // Pega o UUID do modal
-        var km = $('#modal-via-KM').text();  // Pega o KM do modal
+
     
-        if (uuid && km) {
-            console.log('UUID:', uuid, 'KM:', km);
-            confirmarAlerta(uuid, km); // Chama a função de confirmação
-        } else {
-            console.log('Erro: UUID ou KM não encontrados');
-        }
+    $(document).ready(function() {
+        console.log('Página carregada');
+        console.log('Botão confirm-alert:', $('#confirm-alert').length);  // Verifica se o botão existe
+    
+        // Evento de confirmação de alerta
+        $(document).on('click', '#confirm-alert', function() {
+            console.log('Confirmar alerta clicado');
+            
+            var uuid = $('#modal-uuid').text();  // Pega o UUID do modal
+            var km = $('#modal-via-KM').text();  // Pega o KM do modal
+        
+            if (uuid && km) {
+                console.log('UUID:', uuid, 'KM:', km);
+                confirmarAlerta(uuid, km); // Chama a função de confirmação
+            } else {
+                console.log('Erro: UUID ou KM não encontrados');
+            }
+        });
     });
+    
 </script>
     
