@@ -143,39 +143,6 @@ function is_assoc(array $array): bool
     return array_keys($array) !== range(0, count($array) - 1);
 }
 
-//Função de teste redisCache
-
-function getSiteUsersWithMemcachedSession(PDO $pdo, $userId, $memcache) 
-{
-    // Inicia a sessão, se ainda não estiver iniciada
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    $sessionId = session_id(); // Obtém o ID único da sessão
-    $cacheKey = "session_{$sessionId}_user_{$userId}";
-
-    // Tenta buscar no cache
-    $cachedData = $memcache->get($cacheKey);
-    if ($cachedData) {
-        return json_decode($cachedData, true);
-    }
-
-    // Consulta ao banco de dados
-    $users = selectFromDatabase($pdo, 'users', ['id' => $userId]);
-
-    if ($users) {
-        // Salva no cache, vinculado à sessão (não expira automaticamente)
-        $memcache->set($cacheKey, json_encode($users));
-
-        // Opcional: Configure o tempo de expiração (por exemplo, 30 minutos)
-        // $memcache->set($cacheKey, json_encode($users), 1800); // Expiração em 1800 segundos (30 minutos)
-    }
-
-    return $users;
-}
-
-
 // Função para obter informações dos usuários
 /*function getSiteUsers(PDO $pdo, $userId)
 {
@@ -217,16 +184,23 @@ function logExecution($scriptName, $status, $message, $pdo)
         echo "Iniciando transação\n";
 
         // Obtém o tempo de execução
-        $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
+        $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 
-        // Preparação e execução do log na tabela execution_log
-        $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
-                                  VALUES (?, ?, ?, ?)");
-        $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
+        // Inserção na tabela execution_log usando a função genérica
+        $insertLog = insertIntoDatabase($pdo, 'execution_log', [
+            'script_name'    => $scriptName,
+            'execution_time' => $executionTime,
+            'status'         => $status,
+            'message'        => $message
+        ]);
+
+        if (!$insertLog) {
+            throw new Exception("Erro ao inserir log na tabela execution_log.");
+        }
 
         // Atualiza a última execução na tabela rotina_cron
         $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
-        $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
+        $stmtUpdate->execute([$executionTime, $scriptName]);
 
         // Commit da transação
         $pdo->commit();
@@ -242,17 +216,20 @@ function logExecution($scriptName, $status, $message, $pdo)
 
         // Mensagem de erro
         $errorMessage = "Erro ao registrar log de execução e atualizar rotina: " . $e->getMessage();
-        
+
         // Log de erro
         error_log($errorMessage); // Registra no log de erros do PHP
         logToFile('error', $errorMessage); // Registra no arquivo de log personalizado
 
         // Exibe o erro
         echo $errorMessage;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        error_log("Erro: " . $e->getMessage());
+        logToFile('error', $e->getMessage());
+        echo "Erro: " . $e->getMessage();
     }
 }
-
-
 
 // Verifica se o script pode ser executado
 function shouldRunScript($scriptName, $pdo)
