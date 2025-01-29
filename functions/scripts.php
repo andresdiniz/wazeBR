@@ -218,13 +218,13 @@ function logExecution($scriptName, $status, $message, $pdo)
         // Obtém o tempo de execução
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
 
-        // Preparação e execução do log
+        // Preparação e execução do log na tabela execution_log
         $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
                                   VALUES (?, ?, ?, ?)");
         $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
 
-        // Atualiza a última execução
-        $stmtUpdate = $pdo->prepare("UPDATE script_status SET last_execution = ? WHERE script_name = ?");
+        // Atualiza a última execução na tabela rotina_cron
+        $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
         $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
 
         // Commit da transação
@@ -250,6 +250,7 @@ function logExecution($scriptName, $status, $message, $pdo)
         echo $errorMessage;
     }
 }
+
 
 
 // Verifica se o script pode ser executado
