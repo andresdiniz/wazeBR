@@ -148,16 +148,13 @@
 </div>
 
 <script>
-    // Liberar o $ para outras bibliotecas, mantendo o jQuery com o alias '$'
-    var jq = jQuery.noConflict(true); // Libera o '$' global para outras bibliotecas
-
     // Alias 'DT' para DataTable
-    var DT = jq.fn.dataTable; // Agora o DataTable estará disponível como 'DT'
+    var DT = $.fn.dataTable; // Agora o DataTable estará disponível como 'DT'
 
-    jq(document).ready(function() {
+    $(document).ready(function() {
         // Inicializar DataTables apenas se ainda não estiverem inicializados
         if (!DT.isDataTable('#accidentsTable')) {
-            jq('#accidentsTable').DataTable({
+            $('#accidentsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -174,7 +171,7 @@
         }
 
         if (!DT.isDataTable('#trafficTable')) {
-            jq('#trafficTable').DataTable({
+            $('#trafficTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -192,7 +189,7 @@
 
         // Verifica se a tabela de congestionamento foi inicializada
         if (!DT.isDataTable('#jamsTable')) {
-            jq('#jamsTable').DataTable({
+            $('#jamsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -209,16 +206,16 @@
         }
 
         // Inicializa os tooltips
-        jq('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip();
 
         // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
         setTimeout(function() {
-            jq('[data-toggle="tooltip"]').tooltip('update');
+            $('[data-toggle="tooltip"]').tooltip('update');
         }, 1000); // Espera um tempo antes de atualizar os tooltips
 
         // Evento para abrir o modal e carregar os dados do alerta
-        jq('#alertModal').on('show.bs.modal', function(event) {
-            var button = jq(event.relatedTarget); // Elemento que acionou o modal
+        $('#alertModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget); // Elemento que acionou o modal
             var alertData = button.data('alert'); // Dados do alerta passados no botão
 
             if (!alertData) {
@@ -226,7 +223,7 @@
                 return;
             }
 
-            var modal = jq(this);
+            var modal = $(this);
             modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
             modal.find('#modal-city').text(alertData.city || 'N/A');
             modal.find('#modal-street').text(alertData.street || 'N/A');
