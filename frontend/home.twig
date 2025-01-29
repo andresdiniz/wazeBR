@@ -1,22 +1,16 @@
 <!-- Content Row -->
-<!-- Main content row containing accident and traffic jam tables -->
 <div class="row">
     <!-- Area Chart -->
-    <!-- Left column for accidents table -->
     <div class="col-xl-6 col-lg-6">
         <div class="card shadow mb-4">
             <!-- Card Header - Dropdown -->
-            <!-- Header for accidents card with title -->
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 class="m-0 font-weight-bold text-primary">Acidentes</h6>
             </div>
             <!-- Card Body -->
-            <!-- Body containing accidents data table -->
             <div class="card-body">
-                <!-- Check if there are accident alerts to display -->
                 {% if accidentAlerts is not empty %}
                 <div class="table-responsive">
-                    <!-- Accidents data table with sortable columns -->
                     <table class="table" id="accidentsTable">
                         <thead>
                             <tr>
@@ -31,14 +25,8 @@
                         <tbody>
                             {% for alert in accidentAlerts %}
                             <tr data-uuid="{{ alert.uuid }}">
-                            <!-- Loop through accident alerts -->
-                            {% for alert in accidentAlerts %}
-                            <tr data-uuid="{{ alert.uuid }}">
-                                <!-- City name with tooltip -->
                                 <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
-                                <!-- Street name with tooltip -->
                                 <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
-                                <!-- Location with Waze link -->
                                 <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
                                     <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
                                         Ver no Waze
