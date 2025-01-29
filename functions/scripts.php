@@ -473,6 +473,11 @@ function writeLog($logFilePath, $message)
 
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
+
+    if (!is_dir(__DIR__ . '/logs/)) {
+        mk__DIR__ . '/logs/, 0777, true);  // Cria o diretório com permissões adequadas
+    }
+
     echo''. $level .''. $message .'';
     $url = __DIR__ . '/logs/logs.log'; // Sobe um nível e acessa o diretório logs
     echo''. $url . PHP_EOL;
