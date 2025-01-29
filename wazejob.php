@@ -57,6 +57,9 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
 }
 
+// Conexão com o banco de dados
+$pdo = Database::getConnection();
+
 // Função de execução de scripts com log
 function executeScriptWithLogging($scriptName, $path) {
     try {
