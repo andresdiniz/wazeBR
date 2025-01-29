@@ -41,23 +41,38 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
-// Função de execução de scripts com log
-function executeScriptWithLogging($scriptName, $path, $pdo) {
+/**
+ * Executa um script e registra logs antes e depois da execução
+ */
+function executeScriptWithLogging(string $scriptName, string $path, PDO $pdo)
+{
     try {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
-        executeScript($scriptName, $path, $pdo); // Passando $pdo aqui
+        executeScript($scriptName, $path, $pdo);
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
     } catch (Exception $e) {
-        logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
-        error_log('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
+        logToFile('error', "Erro ao executar $scriptName", [
+            'message' => $e->getMessage(),
+            'path' => $path
+        ]);
+        error_log("Erro em $scriptName: " . $e->getMessage());
     }
 }
 
-// Executando os scripts com verificação de erros
-executeScriptWithLogging('wazealerts.php', '/wazealerts.php', $pdo);
-executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php', $pdo);
-executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php', $pdo);
-executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php', $pdo);
+// Lista de scripts a serem executados
+$scripts = [
+    'wazealerts.php'        => '/wazealerts.php',
+    'wazejobtraficc.php'    => '/wazejobtraficc.php',
+    'dadoscemadem.php'      => '/dadoscemadem.php',
+    'hidrologicocemadem.php'=> '/hidrologicocemadem.php',
+    'gerar_xml.php'         => '/gerar_xml.php'
+];
+
+// Executa cada script da lista
+foreach ($scripts as $scriptName => $path) {
+    executeScriptWithLogging($scriptName, $path, $pdo);
+}
+?>cemadem.php', $pdo);
 executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php', $pdo);
 
 ?>
