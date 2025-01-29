@@ -1,6 +1,5 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../config/configbd.php';
 
 use Dotenv\Dotenv;
 
@@ -233,7 +232,7 @@ function logExecution($scriptName, $status, $message)
 }
 
 // Verifica se o script pode ser executado
-function shouldRunScript($scriptName)
+function shouldRunScript($scriptName,$pdo)
 {
     try {
         // Cria uma conexão PDO (se ainda não existir), substitua os valores pela sua configuração
@@ -264,9 +263,9 @@ function shouldRunScript($scriptName)
 
 
 // Executa o script com verificação
-function executeScript($scriptName, $scriptFile)
+function executeScript($scriptName, $scriptFile, $pdo)
 {
-    if (shouldRunScript($scriptName)) {
+    if (shouldRunScript($scriptName,$pdo)) {
         try {
             // Incluir o script
             include __DIR__ . '/../' . $scriptFile;

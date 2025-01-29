@@ -60,8 +60,8 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 function executeScriptWithLogging($scriptName, $path) {
     try {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
-        executeScript($scriptName, $path);
-        logExecution($scriptName, $status, "Finalizando script: $scriptName", ['path' => $path]);
+        executeScript($scriptName, $path,$pdo);
+        logExecution($scriptName, $status, "Finalizando script: $scriptName", ['path' => $path],$pdo);
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
     } catch (Exception $e) {
         logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
