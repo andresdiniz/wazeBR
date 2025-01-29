@@ -7,6 +7,7 @@ require_once __DIR__ . '/functions/scripts.php';
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
+    echo''. $level .''. $message .'';
     $logFile = __DIR__ . '/../logs/logs.log';
 
     // Formata a mensagem de log com data, nível e contexto
