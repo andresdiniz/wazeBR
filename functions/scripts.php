@@ -232,31 +232,42 @@ function logExecution($scriptName, $status, $message)
 }
 
 // Verifica se o script pode ser executado
-function shouldRunScript($scriptName,$pdo)
+function shouldRunScript($scriptName, $pdo)
 {
     try {
-        // Cria uma conexão PDO (se ainda não existir), substitua os valores pela sua configuração
-
-        // Prepara a consulta SQL para buscar o script
+        // Prepara a consulta SQL para buscar o script no banco de dados
         $stmt = $pdo->prepare("SELECT * FROM execution_log WHERE script_name = :scriptName");
         $stmt->bindParam(':scriptName', $scriptName, PDO::PARAM_STR);
         $stmt->execute();
 
-        // Verifica se o script foi encontrado e se está ativo
+        // Verifica se o script foi encontrado
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result && $result['active'] === '1') {
+        // Se o script foi encontrado e está ativo
+        if ($result && isset($result['active']) && $result['active'] === '1') {
+            // Obtém a data da última execução do script e a converte para o fuso horário correto
             $lastExecution = new DateTime($result['last_execution'], new DateTimeZone('America/Sao_Paulo'));
+            
+            // Obtém a data e hora atuais no fuso horário correto
             $currentDateTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
-            $interval = new DateInterval("PT" . $result['execution_interval'] . "M");
-            $nextExecutionTime = $lastExecution->add($interval);
+            
+            // Cria o intervalo para a execução (em minutos)
+            $executionInterval = isset($result['execution_interval']) ? (int)$result['execution_interval'] : 0;
+            $interval = new DateInterval("PT{$executionInterval}M");
+            
+            // Calcula o próximo horário de execução
+            $nextExecutionTime = clone $lastExecution;
+            $nextExecutionTime->add($interval);
 
+            // Verifica se a data e hora atual já passou do tempo de próxima execução
             return $currentDateTime >= $nextExecutionTime;
         }
+
+        // Caso o script não seja encontrado ou não esteja ativo
         return false;
     } catch (PDOException $e) {
         // Caso ocorra um erro ao consultar o banco de dados
-        echo "Erro ao verificar o tempo de execução para o script $scriptName: " . $e->getMessage();
+        error_log("Erro ao verificar o tempo de execução para o script $scriptName: " . $e->getMessage());
         return false;
     }
 }
