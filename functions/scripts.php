@@ -260,7 +260,7 @@ function shouldRunScript($scriptName, $pdo)
         logToFile('info', "Verificando se o script '$scriptName' deve ser executado.", ['scriptName' => $scriptName]);
 
         // Usando a função genérica selectFromDatabase para consultar a tabela 'rotina_cron'
-        $result = selectFromDatabase($pdo, 'rotina_cron', ['script_name' => $scriptName]);
+        $result = selectFromDatabase($pdo, 'rotina_cron', ['name_cron' => $scriptName]);
 
         // Verifica se o script foi encontrado e está ativo
         if (empty($result)) {
