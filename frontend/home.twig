@@ -226,44 +226,42 @@ $(document).ready(function() {
         if (locationX && locationY) {
             var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
             console.log("Consultando o DNIT com a URL:", denitUrl);
-
             $.ajax({
                 url: denitUrl,
                 type: 'GET',
                 success: function(response, textStatus, xhr) {
-                    console.log("Status da resposta:", xhr.status);  // Verifica se o status é 200
-                    console.log("Resposta do DNIT:", response);
+                    console.log("Status da resposta:", xhr.status);
+                    console.log("Resposta completa do DNIT:", JSON.stringify(response, null, 2));
             
-                    if (xhr.status === 200) {  // Confirma que a resposta foi bem-sucedida
+                    if (xhr.status === 200) {
                         try {
-                            // Se a resposta for uma string, converter para JSON
                             if (typeof response === "string") {
                                 response = JSON.parse(response);
                                 console.log("Resposta convertida para JSON:", response);
                             }
             
-                            // Caso a resposta seja um objeto válido
-                            if (response && typeof response === 'object') {
-                                console.log("Estrutura do JSON DNIT:", response);
+                            let km = null;
             
-                                // Procura o campo 'km' dentro do JSON (verifique se está aninhado)
-                                var km = response.km || (response.data ? response.data.km : null);
+                            // Verifica diferentes possíveis estruturas do JSON
+                            if (Array.isArray(response) && response.length > 0) {
+                                console.log("Resposta é um array, pegando o primeiro elemento.");
+                                km = response[0].km;
+                            } else if (typeof response === 'object') {
+                                km = response.km || (response.data ? response.data.km : null);
+                            }
             
-                                if (km !== null) {
-                                    km = parseFloat(km);
-                                    if (!isNaN(km)) {
-                                        console.log("KM convertido:", km.toFixed(2));
-                                        $('#modal-via-KM').text(km.toFixed(2)); // Atualiza o modal
-                                    } else {
-                                        console.warn("O valor de KM não é um número válido:", km);
-                                        $('#modal-via-KM').text('N/A');
-                                    }
+                            // Converte e exibe o KM, se válido
+                            if (km !== null) {
+                                km = parseFloat(km);
+                                if (!isNaN(km)) {
+                                    console.log("KM convertido:", km.toFixed(2));
+                                    $('#modal-via-KM').text(km.toFixed(2)); // Atualiza o modal
                                 } else {
-                                    console.warn("Campo 'km' não encontrado na resposta.");
+                                    console.warn("O valor de KM não é um número válido:", km);
                                     $('#modal-via-KM').text('N/A');
                                 }
                             } else {
-                                console.error("Resposta inválida do DNIT.", response);
+                                console.warn("Campo 'km' não encontrado na resposta.");
                                 $('#modal-via-KM').text('N/A');
                             }
                         } catch (e) {
@@ -279,7 +277,7 @@ $(document).ready(function() {
                     console.error("Erro na requisição ao DNIT:", status, error);
                     alert('Erro ao consultar os dados do DNIT. Tente novamente.');
                 }
-            });        
+            });                    
         } else {
             console.log("Sem coordenadas válidas para consulta ao DNIT.");
             modal.find('#modal-via-KM').text('N/A');
