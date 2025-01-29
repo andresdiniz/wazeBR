@@ -153,91 +153,94 @@
 
     // Usar jQuery em modo sem conflito
     var $j = jQuery.noConflict();
-    $j(document).ready(function() {
-        // Inicializar DataTables apenas se ainda não estiverem inicializados
-        if (!DT.isDataTable('#accidentsTable')) {
-            $j('#accidentsTable').DataTable({
-                responsive: true,
-                autoWidth: false,
-                paging: true,
-                searching: true,
-                info: true,
-                language: {
-                    search: "Buscar:",
-                    paginate: {
-                        next: "Próximo",
-                        previous: "Anterior",
+
+    (function($) {
+        $(document).ready(function() {
+            // Inicializar DataTables apenas se ainda não estiverem inicializados
+            if (!DT.isDataTable('#accidentsTable')) {
+                $('#accidentsTable').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    language: {
+                        search: "Buscar:",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                        },
                     },
-                },
-            });
-        }
-
-        if (!DT.isDataTable('#trafficTable')) {
-            $j('#trafficTable').DataTable({
-                responsive: true,
-                autoWidth: false,
-                paging: true,
-                searching: true,
-                info: true,
-                language: {
-                    search: "Buscar:",
-                    paginate: {
-                        next: "Próximo",
-                        previous: "Anterior",
-                    },
-                },
-            });
-        }
-
-        // Verifica se a tabela de congestionamento foi inicializada
-        if (!DT.isDataTable('#jamsTable')) {
-            $j('#jamsTable').DataTable({
-                responsive: true,
-                autoWidth: false,
-                paging: true,
-                searching: true,
-                info: true,
-                language: {
-                    search: "Buscar:",
-                    paginate: {
-                        next: "Próximo",
-                        previous: "Anterior",
-                    },
-                },
-            });
-        }
-
-        // Inicializa os tooltips
-        $j('[data-toggle="tooltip"]').tooltip();
-
-        // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
-        setTimeout(function() {
-            $j('[data-toggle="tooltip"]').tooltip('update');
-        }, 1000); // Espera um tempo antes de atualizar os tooltips
-
-        // Evento para abrir o modal e carregar os dados do alerta
-        $j('#alertModal').on('show.bs.modal', function(event) {
-            var button = $j(event.relatedTarget); // Elemento que acionou o modal
-            var alertData = button.data('alert'); // Dados do alerta passados no botão
-
-            if (!alertData) {
-                console.error("Erro: Não foi possível obter os dados do alerta.");
-                return;
+                });
             }
 
-            var modal = $j(this);
-            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-            modal.find('#modal-city').text(alertData.city || 'N/A');
-            modal.find('#modal-street').text(alertData.street || 'N/A');
-            modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
-            modal.find('#modal-date-received').text(new Date(alertData.pubMillis).toLocaleString() || 'N/A');
-            modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-            modal.find('#modal-type').text('Alerta');
-            modal.find('#modal-subtype').text('N/A');
+            if (!DT.isDataTable('#trafficTable')) {
+                $('#trafficTable').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    language: {
+                        search: "Buscar:",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                        },
+                    },
+                });
+            }
 
-            // Define o status do alerta
-            var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
-            modal.find('#modal-status').text(status);
+            // Verifica se a tabela de congestionamento foi inicializada
+            if (!DT.isDataTable('#jamsTable')) {
+                $('#jamsTable').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    language: {
+                        search: "Buscar:",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                        },
+                    },
+                });
+            }
+
+            // Inicializa os tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
+            setTimeout(function() {
+                $('[data-toggle="tooltip"]').tooltip('update');
+            }, 1000); // Espera um tempo antes de atualizar os tooltips
+
+            // Evento para abrir o modal e carregar os dados do alerta
+            $('#alertModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget); // Elemento que acionou o modal
+                var alertData = button.data('alert'); // Dados do alerta passados no botão
+
+                if (!alertData) {
+                    console.error("Erro: Não foi possível obter os dados do alerta.");
+                    return;
+                }
+
+                var modal = $(this);
+                modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+                modal.find('#modal-city').text(alertData.city || 'N/A');
+                modal.find('#modal-street').text(alertData.street || 'N/A');
+                modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
+                modal.find('#modal-date-received').text(new Date(alertData.pubMillis).toLocaleString() || 'N/A');
+                modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+                modal.find('#modal-type').text('Alerta');
+                modal.find('#modal-subtype').text('N/A');
+
+                // Define o status do alerta
+                var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
+                modal.find('#modal-status').text(status);
+            });
         });
-    });
+    })(jQuery);
 </script>
