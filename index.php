@@ -4,6 +4,10 @@
 $envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
 require_once __DIR__ . '/vendor/autoload.php';
+// Inclui os arquivos de configuração e funções
+require_once './config/configbd.php';
+require_once './functions/scripts.php';
+
 
 use Dotenv\Dotenv;
 
@@ -35,11 +39,6 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     }
 }
 date_default_timezone_set('America/Sao_Paulo');
-
-
-// Inclui os arquivos de configuração e funções
-require_once './config/configbd.php';
-require_once './functions/scripts.php';
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
