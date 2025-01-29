@@ -157,11 +157,11 @@
 
             // Usar jQuery em modo sem conflito
             var $j = jQuery.noConflict();
-            // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
+            /* Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
             setTimeout(function() {
                 $('[data-toggle="tooltip"]').tooltip('update');
             }, 1000); // Espera um tempo antes de atualizar os tooltips
-
+*/
             // Inicializar DataTables apenas se ainda não estiverem inicializados
             if (!DT.isDataTable('#accidentsTable')) {
                 $('#accidentsTable').DataTable({
