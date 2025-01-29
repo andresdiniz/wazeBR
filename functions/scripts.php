@@ -289,6 +289,7 @@ function shouldRunScript($scriptName, $pdo)
             // Calcula o próximo horário de execução
             $nextExecutionTime = clone $lastExecution;
             $nextExecutionTime->add($interval);
+            logToFile('info', "Próxima execução do script '$scriptName': " . $nextExecutionTime->format('Y-m-d H:i:s'), ['scriptName' => $scriptName]);
 
             // Verifica se a data e hora atual já passou do tempo de próxima execução
             if ($currentDateTime >= $nextExecutionTime) {
@@ -316,7 +317,7 @@ function shouldRunScript($scriptName, $pdo)
 // Executa o script com verificação
 function executeScript($scriptName, $scriptFile, $pdo)
 {
-    echo "Executando o script: $scriptName\n";
+    echo "Verificando se é para executar o script: $scriptName\n";
     if (shouldRunScript($scriptName, $pdo)) {
         try {
             // Marca o tempo de início da execução
