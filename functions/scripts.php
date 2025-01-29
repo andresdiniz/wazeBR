@@ -471,7 +471,7 @@ function logToFile($level, $message, $context = []) {
     // Define o caminho do log
     echo''. $level .''. $message .'';
     $url = dirname(__DIR__) . '/logs/logs.log'; // Sobe um nível e acessa o diretório logs
-    //echo''. $url . PHP_EOL;
+    echo''. $url . PHP_EOL;
     $logFile = $url;
 
     // Formata a mensagem de log com data, nível e contexto
