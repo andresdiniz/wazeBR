@@ -4,8 +4,6 @@ require_once './vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
-// Função de logging centralizada
-
 // Configurações de ambiente
 $envPath = __DIR__ . '/.env';
 
