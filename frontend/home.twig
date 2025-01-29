@@ -256,14 +256,22 @@
                 },
             });
         }
-    
-        // Evento para confirmar alerta
-        $('#confirm-alert').on('click', function() {
+        
+        //Evento de confirmação de alerta
+        $(document).on('click', '#confirm-alert', function() {
             console.log('Confirmar alerta clicado');
-            var uuid = $('#modal-uuid').text();
-            var km = $('#modal-via-KM').text();
-            confirmarAlerta(uuid,km);
+            
+            var uuid = $('#modal-uuid').text();  // Pega o UUID do modal
+            var km = $('#modal-via-KM').text();  // Pega o KM do modal
+        
+            if (uuid && km) {
+                console.log('UUID:', uuid, 'KM:', km);
+                confirmarAlerta(uuid, km); // Chama a função de confirmação
+            } else {
+                console.log('Erro: UUID ou KM não encontrados');
+            }
         });
+        
     });
     </script>
     
