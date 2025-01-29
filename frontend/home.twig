@@ -156,6 +156,14 @@
 
     (function($) {
         $(document).ready(function() {
+            // Inicializa os tooltips primeiro
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
+            setTimeout(function() {
+                $('[data-toggle="tooltip"]').tooltip('update');
+            }, 1000); // Espera um tempo antes de atualizar os tooltips
+
             // Inicializar DataTables apenas se ainda não estiverem inicializados
             if (!DT.isDataTable('#accidentsTable')) {
                 $('#accidentsTable').DataTable({
@@ -208,14 +216,6 @@
                     },
                 });
             }
-
-            // Inicializa os tooltips
-            $('[data-toggle="tooltip"]').tooltip();
-
-            // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
-            setTimeout(function() {
-                $('[data-toggle="tooltip"]').tooltip('update');
-            }, 1000); // Espera um tempo antes de atualizar os tooltips
 
             // Evento para abrir o modal e carregar os dados do alerta
             $('#alertModal').on('show.bs.modal', function(event) {
