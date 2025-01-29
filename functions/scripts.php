@@ -209,27 +209,48 @@ function getSiteSettings(PDO $pdo)
  * Funções relacionadas a logs e execução de rotinas
  */
 
-// Registra log de execução e atualiza a última execução
-function logExecution($scriptName, $status, $message)
+// Função para registrar log de execução e atualizar a última execução
+function logExecution($scriptName, $status, $message, $pdo)
 {
     try {
-        $pdo = Database::getConnection();
         $pdo->beginTransaction();
+
+        // Obtém o tempo de execução
         $executionTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
 
+        // Preparação e execução do log
         $stmtLog = $pdo->prepare("INSERT INTO execution_log (script_name, execution_time, status, message) 
                                   VALUES (?, ?, ?, ?)");
         $stmtLog->execute([$scriptName, $executionTime->format('Y-m-d H:i:s'), $status, $message]);
 
+        // Atualiza a última execução
         $stmtUpdate = $pdo->prepare("UPDATE script_status SET last_execution = ? WHERE script_name = ?");
         $stmtUpdate->execute([$executionTime->format('Y-m-d H:i:s'), $scriptName]);
 
+        // Commit da transação
         $pdo->commit();
+
+        // Log de execução bem-sucedida
+        $logMessage = "Script '$scriptName' executado com sucesso. Status: $status - $message";
+        error_log($logMessage); // Registra no log de erros do PHP
+        logToFile('info', $logMessage); // Registra no arquivo de log personalizado
+
     } catch (PDOException $e) {
+        // Rollback da transação em caso de erro
         $pdo->rollBack();
-        echo "Erro ao registrar log de execução e atualizar rotina: " . $e->getMessage();
+
+        // Mensagem de erro
+        $errorMessage = "Erro ao registrar log de execução e atualizar rotina: " . $e->getMessage();
+        
+        // Log de erro
+        error_log($errorMessage); // Registra no log de erros do PHP
+        logToFile('error', $errorMessage); // Registra no arquivo de log personalizado
+
+        // Exibe o erro
+        echo $errorMessage;
     }
 }
+
 
 // Verifica se o script pode ser executado
 function shouldRunScript($scriptName, $pdo)
@@ -282,7 +303,7 @@ function executeScript($scriptName, $scriptFile, $pdo)
             include __DIR__ . '/../' . $scriptFile;
         } catch (Exception $e) {
             // Log de erro, caso a execução do script falhe
-            logExecution($scriptName, 'error', $e->getMessage());
+            logExecution($scriptName, 'error', $e->getMessage(), $pdo);
         }
     }
 }
