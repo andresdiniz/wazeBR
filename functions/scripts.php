@@ -349,6 +349,8 @@ function executeScript($scriptName, $scriptFile, $pdo)
             // Log no erro do PHP
             error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
         }
+    }else{
+        echo "Script $scriptName não deve ser executado.\n";
     }
 }
 
