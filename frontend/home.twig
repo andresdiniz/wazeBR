@@ -230,30 +230,56 @@ $(document).ready(function() {
             $.ajax({
                 url: denitUrl,
                 type: 'GET',
-                success: function(response) {
+                success: function(response, textStatus, xhr) {
+                    console.log("Status da resposta:", xhr.status);  // Verifica se o status é 200
                     console.log("Resposta do DNIT:", response);
-
-                    if (response && typeof response === 'object' && 'km' in response) {
-                        console.log("Estrutura do JSON DNIT:", response);
-                        var km = parseFloat(response.km);
-                        if (!isNaN(km)) {
-                            console.log("KM convertido:", km.toFixed(2));
-                            modal.find('#modal-via-KM').text(km.toFixed(2)); // Atualiza corretamente o modal
-                        } else {
-                            console.warn("O valor de KM não é um número válido:", response.km);
-                            modal.find('#modal-via-KM').text('N/A');
+            
+                    if (xhr.status === 200) {  // Confirma que a resposta foi bem-sucedida
+                        try {
+                            // Se a resposta for uma string, converter para JSON
+                            if (typeof response === "string") {
+                                response = JSON.parse(response);
+                                console.log("Resposta convertida para JSON:", response);
+                            }
+            
+                            // Caso a resposta seja um objeto válido
+                            if (response && typeof response === 'object') {
+                                console.log("Estrutura do JSON DNIT:", response);
+            
+                                // Procura o campo 'km' dentro do JSON (verifique se está aninhado)
+                                var km = response.km || (response.data ? response.data.km : null);
+            
+                                if (km !== null) {
+                                    km = parseFloat(km);
+                                    if (!isNaN(km)) {
+                                        console.log("KM convertido:", km.toFixed(2));
+                                        $('#modal-via-KM').text(km.toFixed(2)); // Atualiza o modal
+                                    } else {
+                                        console.warn("O valor de KM não é um número válido:", km);
+                                        $('#modal-via-KM').text('N/A');
+                                    }
+                                } else {
+                                    console.warn("Campo 'km' não encontrado na resposta.");
+                                    $('#modal-via-KM').text('N/A');
+                                }
+                            } else {
+                                console.error("Resposta inválida do DNIT.", response);
+                                $('#modal-via-KM').text('N/A');
+                            }
+                        } catch (e) {
+                            console.error("Erro ao processar a resposta JSON:", e);
+                            $('#modal-via-KM').text('N/A');
                         }
                     } else {
-                        console.error("Resposta inválida do DNIT ou sem campo 'km'.", response);
-                        modal.find('#modal-via-KM').text('N/A');
+                        console.warn("Resposta não foi 200 OK:", xhr.status);
+                        $('#modal-via-KM').text('N/A');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error("Erro na requisição ao DNIT:", status, error);
                     alert('Erro ao consultar os dados do DNIT. Tente novamente.');
                 }
-            });
-
+            });        
         } else {
             console.log("Sem coordenadas válidas para consulta ao DNIT.");
             modal.find('#modal-via-KM').text('N/A');

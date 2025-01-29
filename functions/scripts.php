@@ -432,7 +432,7 @@ function getIp() {
     return $_SERVER['REMOTE_ADDR'];
 }
 
-// Consulta localização por longitude e latitude
+// Consulta localização por longitude e latitude NAO FUNCIONA EM PHP
 function consultarLocalizacaoKm($longitude, $latitude, $raio = 150, $data = null)
 {
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
