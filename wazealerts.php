@@ -1,5 +1,41 @@
 <?php
 
+// Verifica se o arquivo .env existe no caminho especificado
+$envPath = __DIR__ . '/.env';  // Corrigido o caminho
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+if (!file_exists($envPath)) {
+    die("Arquivo .env não encontrado no caminho: $envPath");
+}
+
+try {
+    // Certifique-se de que o caminho do .env está correto
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+} catch (Exception $e) {
+    // Em caso de erro, logar o erro no arquivo de log
+    error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado4
+    logEmail("error", "Erro ao carregar o .env: ". $e->getMessage());
+    die("Erro ao carregar o .env: " . $e->getMessage());
+}
+
+// Configura o ambiente de debug com base na variável DEBUG do .env
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
+    // Configura as opções de log para ambiente de debug
+
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/debug.log');
+    
+    // Cria o diretório de logs se não existir
+    if (!is_dir(__DIR__ . '/../logs')) {
+        mkdir(__DIR__ . '/../logs', 0777, true);
+    }
+}
+
+
 set_time_limit(1200);
 
 require_once __DIR__ . '/config/configbd.php';

@@ -34,6 +34,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
         mkdir(__DIR__ . '/../logs', 0777, true);
     }
 }
+
 header('Content-Type: application/json'); // Set the response content type to JSON
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {

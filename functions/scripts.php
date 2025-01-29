@@ -259,22 +259,19 @@ function shouldRunScript($scriptName, $pdo)
         // Inicia o processo de log
         logToFile('info', "Verificando se o script '$scriptName' deve ser executado.", ['scriptName' => $scriptName]);
 
-        // Prepara a consulta SQL para buscar o script no banco de dados
-        $stmt = $pdo->prepare("SELECT * FROM rotina_cron WHERE name_cron = :scriptName");
-        $stmt->bindParam(':scriptName', $scriptName, PDO::PARAM_STR);
-        $stmt->execute();
+        // Usando a função genérica selectFromDatabase para consultar a tabela 'rotina_cron'
+        $result = selectFromDatabase($pdo, 'rotina_cron', ['script_name' => $scriptName]);
 
-        // Verifica se o script foi encontrado
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Caso o script não seja encontrado ou não esteja ativo
-        if (!$result) {
+        // Verifica se o script foi encontrado e está ativo
+        if (empty($result)) {
             logToFile('warning', "Script '$scriptName' não encontrado ou não está ativo.", ['scriptName' => $scriptName]);
             error_log("Script '$scriptName' não encontrado ou não está ativo.");
             return false;
         }
 
         // Se o script foi encontrado e está ativo
+        $result = $result[0]; // Como esperamos um único resultado, pegamos o primeiro elemento
+
         if (isset($result['active']) && $result['active'] === '1') {
             // Obtém a data da última execução do script e a converte para o fuso horário correto
             $lastExecution = new DateTime($result['last_execution'], new DateTimeZone('America/Sao_Paulo'));
