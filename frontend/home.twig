@@ -149,8 +149,11 @@
 
 <script>
     $(document).ready(function() {
+        // Defina uma variável para DataTables e evite conflitos
+        var DataTablePlugin = $.fn.dataTable;
+
         // Inicializar DataTables apenas se ainda não estiverem inicializados
-        if (!$.fn.DataTable.isDataTable('#accidentsTable')) {
+        if (!DataTablePlugin.isDataTable('#accidentsTable')) {
             $('#accidentsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -167,7 +170,7 @@
             });
         }
 
-        if (!$.fn.DataTable.isDataTable('#trafficTable')) {
+        if (!DataTablePlugin.isDataTable('#trafficTable')) {
             $('#trafficTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -185,7 +188,7 @@
         }
 
         // Verifica se a tabela de congestionamento foi inicializada
-        if (!$.fn.DataTable.isDataTable('#jamsTable')) {
+        if (!DataTablePlugin.isDataTable('#jamsTable')) {
             $('#jamsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -233,8 +236,13 @@
             // Define o status do alerta
             var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
             modal.find('#modal-status').text(status);
+
+            // Exibe o KM se disponível ou 'N/A'
+            var km = alertData.km || 'N/A'; // Ajuste para usar o campo 'km' diretamente no alertData
+            modal.find('#modal-via-KM').text(km);
         });
     });
 </script>
+
 
     
