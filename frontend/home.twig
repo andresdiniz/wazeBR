@@ -1,16 +1,18 @@
 <!-- Content Row -->
 <div class="row">
-    <!-- Area Chart -->
+    <!-- Left column for accidents table -->
     <div class="col-xl-6 col-lg-6">
         <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
+            <!-- Header for accidents card with title -->
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 class="m-0 font-weight-bold text-primary">Acidentes</h6>
             </div>
-            <!-- Card Body -->
+            <!-- Body containing accidents data table -->
             <div class="card-body">
+                <!-- Check if there are accident alerts to display -->
                 {% if accidentAlerts is not empty %}
                 <div class="table-responsive">
+                    <!-- Accidents data table with sortable columns -->
                     <table class="table" id="accidentsTable">
                         <thead>
                             <tr>
@@ -23,24 +25,31 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Loop through accident alerts -->
                             {% for alert in accidentAlerts %}
                             <tr data-uuid="{{ alert.uuid }}">
+                                <!-- City name with tooltip -->
                                 <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
+                                <!-- Street name with tooltip -->
                                 <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
+                                <!-- Location with Waze link -->
                                 <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
                                     <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
                                         Ver no Waze
                                     </a>
                                 </td>
+                                <!-- Timestamp formatted as date -->
                                 <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
                                     title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
                                     {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
                                 </td>
+                                <!-- Confidence score with color-coded badge -->
                                 <td>
                                     <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                         {{ alert.confidence }}
                                     </span>
                                 </td>
+                                <!-- Action button to view details -->
                                 <td>
                                     <button class="btn btn-info btn-sm" 
                                             data-toggle="modal" 
@@ -56,21 +65,27 @@
                 </div>
                 {% else %}
                 <p>Não há eventos de acidentes registrados no momento.</p>
+                <!-- Message when no accidents are found -->
                 {% endif %}
             </div>
         </div>
     </div>
 
     <!-- Content Column (Congestionamentos) -->
-    <div class="col-lg-6 mb-4">
+    <!-- Content Column (Congestionamentos) -->
+    <!-- Right column for traffic jams table -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
+            <!-- Header for traffic jams card -->
                 <h6 class="m-0 font-weight-bold text-primary">Congestionamentos</h6>
             </div>
             <div class="card-body">
+            <!-- Body containing traffic jams data table -->
                 {% if jamAlerts is not empty %}
+                <!-- Check if there are traffic jam alerts to display -->
                 <div class="table-responsive">
                     <table class="table" id="jamsTable">
+                    <!-- Traffic jams data table with sortable columns -->
                         <thead>
                             <tr>
                                 <th>Cidade</th>
@@ -84,30 +99,43 @@
                         <tbody>
                             {% for alert in jamAlerts %}
                             <tr>
-                                <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
-                                <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
+                            {% for alert in jamAlerts %}
+                            <tr>
+                            <!-- Loop through traffic jam alerts -->
+                            {% for alert in jamAlerts %}
+                            <tr>
+                                <!-- City name with tooltip -->
                                 <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
+                                <!-- Street name with tooltip -->
                                     <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
                                         Ver no Waze
+                                <!-- Location with Waze link -->
                                     </a>
                                 </td>
                                 <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
                                     title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
                                     {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
-                                </td>
+                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip"
+                                <!-- Timestamp formatted as date -->
+                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip" 
                                 <td>
                                     <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                         {{ alert.confidence }}
                                     </span>
+                                <!-- Confidence score with color-coded badge -->
                                 </td>
                                 <td>
                                     <button class="btn btn-info btn-sm" 
                                             data-toggle="modal" 
                                             data-target="#alertModal" 
+                                <!-- Action button to view details -->
                                             data-alert='{{ alert|json_encode }}'>
-                                        VER +
-                                    </button>
-                                </td>
+                                    <button class="btn btn-info btn-sm"
+                                            data-toggle="modal"
+                                            data-target="#alertModal"
+                                    <button class="btn btn-info btn-sm" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal" 
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -118,6 +146,7 @@
                 {% endif %}
             </div>
         </div>
+                <!-- Message when no traffic jams are found -->
     </div>
 </div>
 
@@ -125,48 +154,60 @@
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+<!-- Modal Atualizado -->
+<!-- Modal for displaying alert details -->
                 <h5 class="modal-title" id="alertModalLabel">
                     Detalhes do Alerta: <span id="modal-type-title"></span>
                 </h5>
+            <!-- Modal header with title -->
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Atualizado para Bootstrap 5 -->
             </div>
             <div class="modal-body">
                 <p><strong>UUID:</strong> <span id="modal-uuid"></span></p>
-                <p><strong>Cidade:</strong> <span id="modal-city"></span></p>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <!-- Atualizado para Bootstrap 5 -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <p><strong>Rua:</strong> <span id="modal-street"></span></p>
+            <!-- Modal body with alert details -->
                 <p><strong>Tipo:</strong> <span id="modal-type"></span></p>
+                <!-- Alert information fields -->
                 <p><strong>Subtipo:</strong> <span id='modal-subtype'></span></p>
                 <p><strong>Status:</strong> <span id="modal-status"></span></p>
                 <p><strong>Localização:</strong> 
                     <span id="modal-location" data-lat="" data-lon=""></span>
                 </p>
                 <p id="modal-km-p"><strong>Km:</strong> <span id="modal-km"></span></p> <!-- Novo campo para exibir km -->
-                <p><strong>Data Recebida:</strong> <span id="modal-date-received"></span></p>
+                <p><strong>Localização:</strong>
+                <p><strong>Localização:</strong> 
                 <p><strong>Confiança:</strong> <span id="modal-confidence"></span></p>
             </div>
-            <div class="modal-footer">
+                <p id="modal-km-p"><strong>Km:</strong> <span id="modal-km"></span></p> <!-- Novo campo para exibir km -->
+                <p id="modal-km-p"><strong>Km:</strong> <span id="modal-km"></span></p>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button> <!-- Atualizado para Bootstrap 5 -->
                 <button type="button" class="btn btn-success" id="confirm-alert">Confirmar Alerta</button>
             </div>
+            <!-- Modal footer with action buttons -->
         </div>
-    </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button> <!-- Atualizado para Bootstrap 5 -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
 </div>
 
 <!-- Inicializando os tooltips e DataTables do Bootstrap -->
 <script>
     $(document).ready(function () {
         // Inicializa tooltips
-        $('[data-toggle="tooltip"]').tooltip();
+<!-- Inicializando os tooltips e DataTables do Bootstrap -->
+<!-- JavaScript for initializing components and handling interactions -->
         jQuery.noConflict();
 
-        // Inicializa DataTables para a tabela de acidentes
+        // Inicializa tooltips
+        // Initialize Bootstrap tooltips
         $('#accidentsTable').DataTable({
             paging: true,
             searching: true,
             info: true,
             language: {
-                search: "Buscar:",
+        // Inicializa DataTables para a tabela de acidentes
+        // Initialize DataTables for accidents table with Portuguese localization
                 paginate: {
                     next: "Próximo",
                     previous: "Anterior",
@@ -180,7 +221,8 @@
             searching: true,
             info: true,
             language: {
-                search: "Buscar:",
+        // Inicializa DataTables para a tabela de congestionamentos
+        // Initialize DataTables for traffic jams table with Portuguese localization
                 paginate: {
                     next: "Próximo",
                     previous: "Anterior",
@@ -194,19 +236,26 @@
         
             var button = $(event.relatedTarget); // Obtém o botão que acionou a modal
             if (!button.length) {
-                console.log("Erro: Não foi possível encontrar o botão que acionou o modal.");
+        // Exibir os detalhes do alerta e consultar o DENIT ao abrir o modal
+        // Handle modal show event and DENIT API integration
                 return;
             }
         
-            var uuid = button.closest('tr').data('uuid'); // Obtém o UUID do alerta
+            var button = $(event.relatedTarget); // Obtém o botão que acionou a modal
+            // Get trigger button and extract data
+            var button = $(event.relatedTarget);
             var locationX = button.closest('tr').find('td[data-toggle="tooltip"]').data('lat'); // Latitude
             var locationY = button.closest('tr').find('td[data-toggle="tooltip"]').data('lon'); // Longitude
         
             console.log("UUID capturado:", uuid);
             console.log("Coordenadas capturadas: Lat =", locationX, ", Lon =", locationY);
-        
-            if (!locationX || !locationY) {
-                console.log("Erro: Coordenadas não encontradas.");
+            var uuid = button.closest('tr').data('uuid'); // Obtém o UUID do alerta
+            var locationX = button.closest('tr').find('td[data-toggle="tooltip"]').data('lat'); // Latitude
+            var locationY = button.closest('tr').find('td[data-toggle="tooltip"]').data('lon'); // Longitude
+            // Extract location data from row
+            var uuid = button.closest('tr').data('uuid');
+            var locationX = button.closest('tr').find('td[data-toggle="tooltip"]').data('lat');
+            var locationY = button.closest('tr').find('td[data-toggle="tooltip"]').data('lon');
                 return;
             }
         
@@ -216,18 +265,22 @@
         
             // Faz a requisição ao DENIT
             $.ajax({
-                url: denitUrl,
+            // URL do DENIT
+            // Build DENIT API URL
                 type: 'GET',
                 success: function (response) {
                     console.log("Resposta da API DENIT:", response);
-                    if (response && response.length > 0) {
+            // Faz a requisição ao DENIT
+            // Make DENIT API request
                         const result = response[0]; // Obtendo o primeiro resultado
                         $('#modal-uuid').text(uuid || 'N/A');
                         $('#modal-city').text(result.uf || 'N/A');
                         $('#modal-street').text(result.br || 'N/A');
                         $('#modal-type').text('DENIT Response');
                         $('#modal-subtype').text('N/A');
-                        $('#modal-status').text('Ativo');
+                        const result = response[0]; // Obtendo o primeiro resultado
+                        // Update modal with DENIT response data
+                        const result = response[0];
                         $('#modal-date-received').text(new Date().toLocaleString());
                         $('#modal-confidence').text('N/A');
                         $('#modal-location').text(
@@ -248,16 +301,20 @@
         function confirmarAlerta(uuid) {
             $.ajax({
                 url: '/confirmar_alerta', // URL da sua API ou rota para confirmar o alerta
-                type: 'POST',
+        });
+        });        
                 data: {
-                    uuid: uuid,
+        // Função para confirmar o alerta no banco de dados
+        // Function to confirm alert in database
                     status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
                 },
-                success: function (response) {
+                url: '/confirmar_alerta', // URL da sua API ou rota para confirmar o alerta
+                url: '/confirmar_alerta',
                     alert('Alerta confirmado com sucesso!');
                     $('#alertModal').modal('hide');
                 },
-                error: function (xhr, status, error) {
+                    status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
+                    status: 1,
                     alert('Erro ao confirmar o alerta. Tente novamente.');
                 },
             });
@@ -269,4 +326,8 @@
             confirmarAlerta(uuid);
         });
     });
-</script>
+        // Adicionar evento para confirmar o alerta
+        // Handle confirm alert button click
+
+            var uuid = $('#modal-uuid').text(); // Obtém o UUID do alerta da modal
+            var uuid = $('#modal-uuid').text();

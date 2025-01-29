@@ -37,7 +37,6 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('display_errors', 1);
 }
 
-
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
