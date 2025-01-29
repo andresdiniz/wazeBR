@@ -233,20 +233,16 @@
                     type: 'GET',
                     success: function (response) {
                         console.log("Resposta da API DNIT:", response);
-                        if (response) {
-                            const result = response[0]; // Obtendo o primeiro resultado
-                            console.log('Km obtido do DENIT:', result.km);
-            
-                            // Verifica se 'km' é um número válido
-                            var km = parseFloat(result.km);
-                            if (!isNaN(km)) {
-                                // Exibe o 'km' com duas casas decimais
-                                modal.find('#modal-via-KM').text(km.toFixed(2));
-                            } else {
-                                modal.find('#modal-via-KM').text('N/A');
-                            }
+                        const result = response[0]; // Obtendo o primeiro resultado
+                        console.log('Km obtido do DENIT:', result.km);
+        
+                        // Verifica se 'km' é um número válido
+                        var km = parseFloat(result.km);
+                        if (!isNaN(km)) {
+                            // Exibe o 'km' com duas casas decimais
+                            modal.find('#modal-via-KM').text(km.toFixed(2));
                         } else {
-                            alert('Nenhum dado encontrado para as coordenadas fornecidas no DENIT.');
+                            modal.find('#modal-via-KM').text('N/A');
                         }
                     },
                     error: function (xhr, status, error) {
