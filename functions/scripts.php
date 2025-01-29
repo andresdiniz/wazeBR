@@ -473,15 +473,18 @@ function writeLog($logFilePath, $message)
 
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
-
-    if (!is_dir(__DIR__ . '/logs/)) {
-        mk__DIR__ . '/logs/, 0777, true);  // Cria o diretório com permissões adequadas
+    $logDirectory = __DIR__ . '/logs/';
+    
+    // Verifica se o diretório "logs" existe, caso contrário, cria o diretório
+    if (!is_dir($logDirectory)) {
+        mkdir($logDirectory, 0777, true);  // Cria o diretório com permissões adequadas
     }
 
-    echo''. $level .''. $message .'';
-    $url = __DIR__ . '/logs/logs.log'; // Sobe um nível e acessa o diretório logs
-    echo''. $url . PHP_EOL;
-    $logFile = $url;
+    // Exibe o nível do log e a mensagem para depuração
+    echo $level . ' ' . $message . PHP_EOL;
+    
+    // Define o caminho completo do arquivo de log
+    $logFile = $logDirectory . 'logs.log'; 
 
     // Formata a mensagem de log com data, nível e contexto
     $logMessage = sprintf(
