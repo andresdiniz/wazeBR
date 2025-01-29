@@ -71,6 +71,7 @@ function executeScriptWithLogging($scriptName, $path, $pdo) {
     }
 }
 
+echo'cheguei aqui';
 // Executando os scripts com verificação de erros
 executeScriptWithLogging('wazealerts.php', '/wazealerts.php', $pdo);
 executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php', $pdo);
