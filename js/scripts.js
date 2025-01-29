@@ -113,7 +113,7 @@ $(document).ready(function () {
                     // Verificar e exibir o km se estiver presente, com 2 casas decimais
                     if (result.km) {
                         const kmFormatted = parseFloat(result.km).toFixed(2);
-                        $('#modal-km').text(kmFormatted); // Inserir o valor de km no modal
+                        $('#modal-via-KM').text(kmFormatted); // Inserir o valor de km no modal
                     }
                 } else {
                     console.error('Nenhum dado encontrado para as coordenadas fornecidas.');

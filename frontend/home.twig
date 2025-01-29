@@ -131,7 +131,7 @@
                 <p><strong>UUID:</strong> <span id="modal-uuid">N/A</span></p>
                 <p><strong>Cidade:</strong> <span id="modal-city">N/A</span></p>
                 <p><strong>Via:</strong> <span id="modal-street">N/A</span></p>
-                <p><strong>KM:</strong> <span id="modal-via-KM">N/A</span></p>
+                <p id="modal-km-p"><strong>KM:</strong> <span id="modal-via-KM">N/A</span></p>
                 <p><strong>Localização:</strong> <span id="modal-location">N/A</span></p>
                 <p><strong>Data Recebido:</strong> <span id="modal-date-received">N/A</span></p>
                 <p><strong>Confiança:</strong> <span id="modal-confidence">N/A</span></p>
@@ -237,66 +237,7 @@
             // Consulta ao DNIT para obter o KM
             var locationX = alertData.location_x;
             var locationY = alertData.location_y;
-    
-            if (locationX && locationY) {
-                var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
-                console.log("Consultando o DNIT com a URL:", denitUrl);
-                $.ajax({
-                    url: denitUrl,
-                    type: 'GET',
-                    success: function(response, textStatus, xhr) {
-                        console.log("Status da resposta:", xhr.status);
-                        console.log("Resposta completa do DNIT:", JSON.stringify(response, null, 2));
-    
-                        if (xhr.status === 200) {
-                            try {
-                                // Se a resposta for uma string JSON, converte para objeto
-                                if (typeof response === "string") {
-                                    response = JSON.parse(response);
-                                    console.log("Resposta convertida para JSON:", response);
-                                }
-    
-                                let km = null;
-    
-                                // Se for um array, pega o primeiro objeto
-                                if (Array.isArray(response) && response.length > 0) {
-                                    console.log("Resposta é um array, pegando o primeiro elemento.");
-                                    km = response[0].km;
-                                } else {
-                                    console.warn("Resposta inesperada do DNIT.");
-                                }
-    
-                                // Converte e exibe o KM, se válido
-                                if (km !== null && !isNaN(km)) {
-                                    console.log("KM convertido:", km.toFixed(2));
-                                    $('#modal-via-KM').text(km.toFixed(2)); // Atualiza o modal
-                                } else {
-                                    console.warn("O valor de KM não é válido:", km);
-                                    $('#modal-via-KM').text('N/A');
-                                }
-                            } catch (e) {
-                                console.error("Erro ao processar a resposta JSON:", e);
-                                $('#modal-via-KM').text('N/A');
-                            }
-                        } else {
-                            console.warn("Resposta não foi 200 OK:", xhr.status);
-                            $('#modal-via-KM').text('N/A');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Erro na requisição ao DNIT:", status, error);
-                        alert('Erro ao consultar os dados do DNIT. Tente novamente.');
-                        $('#modal-via-KM').text('N/A');
-                    }
-                });
-            } else {
-                console.log("Sem coordenadas válidas para consulta ao DNIT.");
-                $('#modal-via-KM').text('N/A');
-            }
-    
-            console.log("Dados do alerta:", alertData);
-        });
-    
+
         // Função para confirmar alerta
         function confirmarAlerta(uuid) {
             $.ajax({
