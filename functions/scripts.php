@@ -293,10 +293,10 @@ function shouldRunScript($scriptName, $pdo)
     }
 }
 
-
 // Executa o script com verificação
 function executeScript($scriptName, $scriptFile, $pdo)
 {
+    echo "Executando o script: $scriptName\n";
     if (shouldRunScript($scriptName, $pdo)) {
         try {
             // Marca o tempo de início da execução
