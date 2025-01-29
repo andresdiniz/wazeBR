@@ -11,9 +11,9 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
 $urls = [
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/1",
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/1",
-    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=1"
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/8",
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/8",
+    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=8"
 ];
 
 
