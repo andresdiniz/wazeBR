@@ -148,17 +148,17 @@
 </div>
 
 <script>
-    // Alias 'DT' para DataTable
-    var DT = $.fn.dataTable; // Agora o DataTable estará disponível como 'DT'
-
-    // Usar jQuery em modo sem conflito
-    var $j = jQuery.noConflict();
 
     (function($) {
         $(document).ready(function() {
             // Inicializa os tooltips primeiro
             $('[data-toggle="tooltip"]').tooltip();
 
+            // Alias 'DT' para DataTable
+            var DT = $.fn.dataTable; // Agora o DataTable estará disponível como 'DT'
+
+            // Usar jQuery em modo sem conflito
+            var $j = jQuery.noConflict();
             // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
             setTimeout(function() {
                 $('[data-toggle="tooltip"]').tooltip('update');
