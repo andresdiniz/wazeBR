@@ -4,8 +4,6 @@ ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log'); // Direciona logs para um arquivo
 require_once './vendor/autoload.php';
-require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ . '/functions/scripts.php';
 
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
@@ -57,6 +55,8 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
 }
 
+require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ . '/functions/scripts.php';
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
@@ -64,20 +64,18 @@ $pdo = Database::getConnection();
 function executeScriptWithLogging($scriptName, $path, $pdo) {
     try {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
-        executeScript($scriptName, $path,$pdo);
-        logExecution($scriptName, $status, "Finalizando script: $scriptName", ['path' => $path],$pdo);
+        executeScript($scriptName, $path, $pdo); // Passando $pdo aqui
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
     } catch (Exception $e) {
         logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
-        logExecution($scriptName, 'error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
     }
 }
 
 // Executando os scripts com verificação de erros
-executeScriptWithLogging('wazealerts.php', '/wazealerts.php',$pdo);
-executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php',$pdo);
-executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php',$pdo);
-executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php',$pdo);
-executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php',$pdo);
+executeScriptWithLogging('wazealerts.php', '/wazealerts.php', $pdo);
+executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php', $pdo);
+executeScriptWithLogging('dadoscemadem.php', '/dadoscemadem.php', $pdo);
+executeScriptWithLogging('hidrologicocemadem.php', '/hidrologicocemadem.php', $pdo);
+executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php', $pdo);
 
 ?>
