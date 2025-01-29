@@ -260,7 +260,7 @@ function shouldRunScript($scriptName, $pdo)
         logToFile('info', "Verificando se o script '$scriptName' deve ser executado.", ['scriptName' => $scriptName]);
 
         // Prepara a consulta SQL para buscar o script no banco de dados
-        $stmt = $pdo->prepare("SELECT * FROM execution_log WHERE script_name = :scriptName");
+        $stmt = $pdo->prepare("SELECT * FROM rotina_cron WHERE name_cron = :scriptName");
         $stmt->bindParam(':scriptName', $scriptName, PDO::PARAM_STR);
         $stmt->execute();
 
@@ -282,35 +282,39 @@ function shouldRunScript($scriptName, $pdo)
             // Obtém a data e hora atuais no fuso horário correto
             $currentDateTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
             
-            // Cria o intervalo para a execução (em minutos)
+            // Obtém o intervalo de execução em minutos a partir do banco de dados
             $executionInterval = isset($result['execution_interval']) ? (int)$result['execution_interval'] : 0;
+            
+            // Cria o intervalo em minutos (DateInterval precisa de um formato específico)
             $interval = new DateInterval("PT{$executionInterval}M");
             
             // Calcula o próximo horário de execução
             $nextExecutionTime = clone $lastExecution;
             $nextExecutionTime->add($interval);
+            
+            // Registra o horário da próxima execução no log
             logToFile('info', "Próxima execução do script '$scriptName': " . $nextExecutionTime->format('Y-m-d H:i:s'), ['scriptName' => $scriptName]);
 
             // Verifica se a data e hora atual já passou do tempo de próxima execução
             if ($currentDateTime >= $nextExecutionTime) {
                 logToFile('info', "Script '$scriptName' pode ser executado. Próxima execução: " . $nextExecutionTime->format('Y-m-d H:i:s'), ['scriptName' => $scriptName]);
-                return true;
+                return true; // Momento de executar o script
             } else {
                 logToFile('info', "Script '$scriptName' não deve ser executado ainda. Próxima execução: " . $nextExecutionTime->format('Y-m-d H:i:s'), ['scriptName' => $scriptName]);
-                return false;
+                return false; // Não é o momento de executar
             }
         }
 
         // Caso o script não esteja ativo
         logToFile('warning', "Script '$scriptName' está inativo.", ['scriptName' => $scriptName]);
         error_log("Script '$scriptName' está inativo.");
-        return false;
+        return false; // Caso o script esteja inativo
     } catch (PDOException $e) {
         // Caso ocorra um erro ao consultar o banco de dados
         $errorMessage = "Erro ao verificar o tempo de execução para o script '$scriptName': " . $e->getMessage();
         logToFile('error', $errorMessage, ['scriptName' => $scriptName]);
         error_log($errorMessage);
-        return false;
+        return false; // Caso haja erro ao consultar o banco
     }
 }
 
@@ -318,7 +322,7 @@ function shouldRunScript($scriptName, $pdo)
 function executeScript($scriptName, $scriptFile, $pdo)
 {
     echo "Verificando se é para executar o script: $scriptName\n";
-    if (shouldRunScript($scriptName, $pdo)) {
+    if(shouldRunScript($scriptName, $pdo)) {
         try {
             // Marca o tempo de início da execução
             $startTime = microtime(true);
