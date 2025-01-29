@@ -1,9 +1,8 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../logs/debug.log'); // Direciona logs para um arquivo
 require_once './vendor/autoload.php';
+require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ . '/functions/scripts.php';
 
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
@@ -53,10 +52,11 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('display_errors', 1);
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
+}else{
+    ini_set('display_errors', 1);
 }
 
-require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ . '/functions/scripts.php';
+
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
