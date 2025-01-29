@@ -238,7 +238,7 @@ function shouldRunScript($scriptName,$pdo)
         // Cria uma conexão PDO (se ainda não existir), substitua os valores pela sua configuração
 
         // Prepara a consulta SQL para buscar o script
-        $stmt = $pdo->prepare("SELECT * FROM scripts WHERE script_name = :scriptName");
+        $stmt = $pdo->prepare("SELECT * FROM execution_log WHERE script_name = :scriptName");
         $stmt->bindParam(':scriptName', $scriptName, PDO::PARAM_STR);
         $stmt->execute();
 
