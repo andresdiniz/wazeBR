@@ -5,6 +5,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log'); // Direciona logs para um arquivo
 require_once './vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ . '/functions/scripts.php';
 
 // Função de logging centralizada
 function logToFile($level, $message, $context = []) {
