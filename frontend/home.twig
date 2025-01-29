@@ -59,7 +59,7 @@
         </div>
 
         <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-6">
+        <div class="col-xl-6 col-lg-6 pt-2">
             <div class="card">
                 <div class="card-header bg-warning text-white">Congestionamentos</div>
                 <!-- Card Body -->
@@ -78,28 +78,28 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for alert in jamAlerts %}
+                                {% for alerts in jamAlerts %}
                                 <tr data-uuid="{{ alert.uuid }}">
-                                    <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
-                                    <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
-                                    <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                    <td data-toggle="tooltip" title="{{ alerts.city }}">{{ alerts.city }}</td>
+                                    <td data-toggle="tooltip" title="{{ alerts.street }}">{{ alerts.street }}</td>
+                                    <td data-toggle="tooltip" title="Lat: {{ alerts.location_x }}, Lon: {{ alerts.location_y }}">
+                                        <a href="https://www.waze.com/ul?ll={{ alerts.location_y }},{{ alerts.location_x }}" 
                                            class="btn btn-link" target="_blank">
                                             Ver no Waze
                                         </a>
                                     </td>
-                                    <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" 
-                                        data-toggle="tooltip" title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
-                                        {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
+                                    <td class="alert-date" data-pubmillis="{{ alerts.pubMillis }}" 
+                                        data-toggle="tooltip" title="{{ (alerts.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
+                                        {{ (alerts.pubMillis / 1000) | date("d/m/Y H:i:s") }}
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ alert.severity > 80 ? 'danger' : (alert.severity > 50 ? 'warning' : 'success') }}">
-                                            {{ alert.severity }}
+                                        <span class="badge badge-{{ alerts.severity > 80 ? 'danger' : (alerts.severity > 50 ? 'warning' : 'success') }}">
+                                            {{ alerts.severity }}
                                         </span>
                                     </td>
                                     <td>
                                         <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal" 
-                                                data-alert='{{ alert|json_encode }}'>
+                                                data-alert='{{ alerts|json_encode }}'>
                                             Ver Mais
                                         </button>
                                     </td>
