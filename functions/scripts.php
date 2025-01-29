@@ -306,7 +306,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
     try {
         // Log de início do envio de e-mail
         $logMessage = "Iniciando envio do e-mail para: $userEmail | ID: $emailId";
-        logEmail('info', $logMessage);
+        logToFile('info', $logMessage);
         $mail->isSMTP(); // Usar SMTP explicitamente
         $mail->Host = $_ENV['SMTP_HOST'];
         $mail->SMTPAuth = true;
@@ -329,19 +329,19 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         if ($mail->send() ){ // Utiliza o Sendmail do PHP (sem SMTP) {
             // Log de sucesso do envio
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
-            logEmail('success', $logMessage);
+            logToFile('success', $logMessage);
             return true;
         } else {
             // Log de falha no envio
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Falha ao enviar e-mail";
-            logEmail('error', $logMessage);
+            logToFile('error', $logMessage);
             return false;
         }
     } catch (Exception $e) {
         // Log detalhado do erro
         $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Erro: " . $e->getMessage();
         error_log('Erro ao enviar e-mail: ' . $e->getMessage());
-        logEmail('error', $logMessage);
+        logToFile('error', $logMessage);
         return false;
     }
 }
@@ -406,7 +406,7 @@ function logToFile($level, $message, $context = []) {
     // Define o caminho do log
     echo''. $level .''. $message .'';
     $url = dirname(__DIR__) . '/logs/logs.log'; // Sobe um nível e acessa o diretório logs
-    echo''. $url . PHP_EOL;
+    //echo''. $url . PHP_EOL;
     $logFile = $url;
 
     // Formata a mensagem de log com data, nível e contexto
