@@ -235,6 +235,7 @@
                         console.log("Resposta da API DNIT:", response);
                         if (response && response.length > 0) {
                             const result = response[0]; // Obtendo o primeiro resultado
+                            console.log('Km obtido do DENIT:', result.km);
                             modal.find('#modal-via-KM').text(parseFloat(result.km).toFixed(2));
 
                         } else {
