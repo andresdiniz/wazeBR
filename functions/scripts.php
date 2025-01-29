@@ -321,14 +321,22 @@ function shouldRunScript($scriptName, $pdo)
 function executeScript($scriptName, $scriptFile, $pdo)
 {
     echo "Verificando se é para executar o script: $scriptName\n";
-    if(shouldRunScript($scriptName, $pdo)) {
+    
+    if (shouldRunScript($scriptName, $pdo)) {
         try {
             // Marca o tempo de início da execução
             $startTime = microtime(true);
 
-            // Incluir o script
-            $url = dirname(__DIR__) . $scriptFile;
+            // Obtém o caminho completo do script
+            $url = dirname(__DIR__) . '/' . ltrim($scriptFile, '/');
             echo 'Endereço do script é: ' . $url . PHP_EOL;
+
+            // Verifica se o arquivo existe antes de incluí-lo
+            if (!file_exists($url)) {
+                throw new Exception("O script '$scriptFile' não foi encontrado no caminho '$url'.");
+            }
+
+            // Inclui o script
             include $url;
 
             // Marca o tempo de fim da execução
@@ -337,24 +345,21 @@ function executeScript($scriptName, $scriptFile, $pdo)
             // Calcula o tempo total de execução
             $executionTime = $endTime - $startTime;
 
-            // Log do tempo de execução
+            // Mensagem de sucesso
             $logMessage = "Script '$scriptName' executado com sucesso. Tempo de execução: " . number_format($executionTime, 4) . " segundos.";
-            logToFile('info', $logMessage); // Registra no arquivo de log personalizado
-            error_log($logMessage); // Registra no log de erros do PHP
+
+            // Registra logs
+            logToFile('info', $logMessage); 
+            logExecution($scriptName, 'success', $logMessage, $pdo);
+            error_log($logMessage);
         } catch (Exception $e) {
-            // Registra o erro no banco de dados e no arquivo de log
-
-            // Log de erro no banco de dados
+            // Log de erro
             logExecution($scriptName, 'error', $e->getMessage(), $pdo);
-
-            // Log de erro no arquivo de log
             logToFile('error', $e->getMessage(), ['scriptName' => $scriptName]);
-
-            // Log no erro do PHP
             error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
         }
-    }else{
-        echo "Script $scriptName não deve ser executado.\n";
+    } else {
+        echo "Script '$scriptName' não deve ser executado.\n";
     }
 }
 
