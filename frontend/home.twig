@@ -232,38 +232,35 @@
                     url: denitUrl,
                     type: 'GET',
                     success: function (response) {
-                        console.log("Resposta completa da API DNIT:", response);
+                        console.log("Resposta do DNIT:", response);
 
-                        // Verifica se response é um array e contém pelo menos um item
-                        if (Array.isArray(response) && response.length > 0) {
-                            const result = response[0]; // Obtendo o primeiro resultado
-                            console.log("Objeto retornado pelo DNIT:", result);
+                        // Garante que a resposta seja um objeto válido
+                        if (response && typeof response === 'object' && 'km' in response) {
+                            console.log("Objeto retornado pelo DNIT:", response);
 
-                            // Verifica se 'km' existe e é um número válido
-                            if (result.km !== undefined && result.km !== null) {
-                                var km = parseFloat(result.km);
-                                if (!isNaN(km)) {
-                                    console.log("KM convertido:", km.toFixed(2));
-                                    modal.find('#modal-via-KM').text(km.toFixed(2)); // Exibe com duas casas decimais
-                                } else {
-                                    console.warn("O valor de KM não é um número válido:", result.km);
-                                    modal.find('#modal-via-KM').text('N/A');
-                                }
+                            // Converte 'km' para número e exibe com duas casas decimais
+                            var km = parseFloat(response.km);
+                            if (!isNaN(km)) {
+                                console.log("KM convertido:", km.toFixed(2));
+                                $('#modal-via-KM').text(km.toFixed(2)); // Exibe no modal
                             } else {
-                                console.warn("Campo 'km' ausente na resposta do DNIT");
-                                modal.find('#modal-via-KM').text('N/A');
+                                console.warn("O valor de KM não é um número válido:", response.km);
+                                $('#modal-via-KM').text('N/A');
                             }
                         } else {
-                            console.error("Nenhum dado válido encontrado na resposta do DNIT.");
-                            alert('Nenhum dado encontrado para as coordenadas fornecidas no DNIT.');
+                            console.error("Resposta inválida do DNIT ou sem campo 'km'.", response);
+                            $('#modal-via-KM').text('N/A');
                         }
                     },
                     error: function (xhr, status, error) {
                         console.error("Erro na requisição ao DNIT:", status, error);
                         alert('Erro ao consultar os dados do DNIT. Tente novamente.');
-                    },
+                    }
                 });
-         
+
+            } else {
+                console.log("Sem coordenadas válidas para consulta ao DENIT.");
+            }            
 
             // Log para verificar os dados
             console.log("Dados do alerta:", alertData);
