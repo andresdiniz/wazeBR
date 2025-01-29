@@ -61,8 +61,8 @@ function executeScriptWithLogging($scriptName, $path, $pdo) {
         logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
         executeScript($scriptName, $path, $pdo); // Passando $pdo aqui
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
-    } catch (Exception $e) {
         echo'cheguei aqui';
+    } catch (Exception $e) {
         logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
         error_log('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
     }
