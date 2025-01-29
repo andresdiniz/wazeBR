@@ -259,6 +259,7 @@
     
         // Evento para confirmar alerta
         $('#confirm-alert').on('click', function() {
+            console.log('Confirmar alerta clicado');
             var uuid = $('#modal-uuid').text();
             var km = $('#modal-via-KM').text();
             confirmarAlerta(uuid,km);
