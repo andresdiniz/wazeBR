@@ -1,9 +1,9 @@
 <?php
 
-ini_set('display_errors', 1);
+/*ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
-
+*/
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
@@ -39,7 +39,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 
 
 // Conexão com o banco de dados
-//$pdo = Database::getConnection();
+$pdo = Database::getConnection();
 
 // Função de execução de scripts com log
 function executeScriptWithLogging($scriptName, $path, $pdo) {
