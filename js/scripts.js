@@ -412,6 +412,25 @@ function logout() {
     window.location.href = "login.html";
 }
 
+// Função para confirmar alerta
+function confirmarAlerta(uuid) {
+    console.log('Confirmar alerta:', uuid);
+    $.ajax({
+        url: '/api.php?action=confirm_alert',
+        type: 'POST',
+        data: { uuid: uuid, 
+            km : km,
+            status: 1 },
+        success: function(response) {
+            alert('Alerta confirmado com sucesso!');
+            $('#alertModal').modal('hide');
+        },
+        error: function(xhr, status, error) {
+            alert('Erro ao confirmar o alerta. Tente novamente.');
+        },
+    });
+}
+
 // Adiciona um evento para o clique no botão de logout
 document.querySelector('.btn-primary').addEventListener('click', logout);
 
