@@ -233,7 +233,7 @@
                     type: 'GET',
                     success: function (response) {
                         console.log("Resposta da API DNIT:", response);
-                        if (response && response.length > 0) {
+                        if (response) {
                             const result = response[0]; // Obtendo o primeiro resultado
                             console.log('Km obtido do DENIT:', result.km);
             
