@@ -303,7 +303,7 @@ function executeScript($scriptName, $scriptFile, $pdo)
             $startTime = microtime(true);
 
             // Incluir o script
-            include __DIR__ . '/../' . $scriptFile;
+            include dirname(__DIR__) . $scriptFile;
 
             // Marca o tempo de fim da execução
             $endTime = microtime(true);
