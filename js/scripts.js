@@ -1,7 +1,4 @@
-// Ativando o modo noConflict do jQuery e criando uma variável jq
-var jq = jQuery.noConflict();
-
-jq(document).ready(function () {
+$(document).ready(function () {
     // Variáveis para o mapa
     let map;
     const markersLayer = L.layerGroup(); // Para gerenciar os marcadores
@@ -18,12 +15,12 @@ jq(document).ready(function () {
         markersLayer.clearLayers(); // Limpar marcadores antigos
 
         const popupContent = `
-            <strong>jq{alertType}</strong><br>
-            <strong>Cidade:</strong> jq{city || 'N/A'}<br>
-            <strong>Rua:</strong> jq{street || 'N/A'}<br>
-            <strong>UUID:</strong> jq{uuid || 'N/A'}<br>
-            <strong>Status:</strong> jq{status || 'N/A'}<br>
-            <strong>Confiança:</strong> jq{confidence || 'N/A'}
+            <strong>${alertType}</strong><br>
+            <strong>Cidade:</strong> ${city || 'N/A'}<br>
+            <strong>Rua:</strong> ${street || 'N/A'}<br>
+            <strong>UUID:</strong> ${uuid || 'N/A'}<br>
+            <strong>Status:</strong> ${status || 'N/A'}<br>
+            <strong>Confiança:</strong> ${confidence || 'N/A'}
         `;
 
         const marker = L.marker([lat, lon])
@@ -41,15 +38,15 @@ jq(document).ready(function () {
     }
 
     // Quando o botão "Visualizar no mapa" for clicado, abrir o modal do mapa
-    jq('#view-on-map').click(function () {
-        const lat = jq('#modal-location').data('lat');
-        const lon = jq('#modal-location').data('lon');
-        const alertType = jq('#modal-type').text();
-        const city = jq('#modal-city').text();
-        const street = jq('#modal-street').text();
-        const uuid = jq('#modal-uuid').text();
-        const status = jq('#modal-status').text();
-        const confidence = jq('#modal-confidence').text();
+    $('#view-on-map').click(function () {
+        const lat = $('#modal-location').data('lat');
+        const lon = $('#modal-location').data('lon');
+        const alertType = $('#modal-type').text();
+        const city = $('#modal-city').text();
+        const street = $('#modal-street').text();
+        const uuid = $('#modal-uuid').text();
+        const status = $('#modal-status').text();
+        const confidence = $('#modal-confidence').text();
 
         if (!isValidLocation(lat, lon)) {
             alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
@@ -58,12 +55,12 @@ jq(document).ready(function () {
 
         initMap(lat, lon, alertType, city, street, uuid, status, confidence);
 
-        jq('#mapModal').modal('show').one('shown.bs.modal', function () {
+        $('#mapModal').modal('show').one('shown.bs.modal', function () {
             map.invalidateSize(); // Atualiza o tamanho do mapa
         });
     });
     // Atualizar o mapa quando a janela for redimensionada
-    jq(window).on('resize', function () {
+    $(window).on('resize', function () {
         if (map) {
             map.invalidateSize(); // Redimensiona o mapa quando a janela for redimensionada
         }
@@ -158,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showLoadingIndicator(); // Mostrar indicador de carregamento
 
         // Carregar as linhas da rota principal
-        fetch(`../wazeportal/api.php?action=get_route_lines&route_id=jq{routeId}`)
+        fetch(`../wazeportal/api.php?action=get_route_lines&route_id=${routeId}`)
             .then(response => response.json())
             .then(routeData => {
                 console.log("Dados da rota:", routeData);
@@ -237,9 +234,9 @@ function drawSubrouteOnSegments(subroute) {
         // Exibir o balão com as informações de velocidade, tempo e distância
         polyline.bindPopup(`
             <strong>Detalhes do trecho</strong><br>
-            <b>Velocidade Média:</b> jq{formattedSpeed} km/h<br>
-            <b>Distância:</b> jq{formattedDistance} km<br>
-            <b>Tempo estimado:</b> jq{formattedTime} minutos
+            <b>Velocidade Média:</b> ${formattedSpeed} km/h<br>
+            <b>Distância:</b> ${formattedDistance} km<br>
+            <b>Tempo estimado:</b> ${formattedTime} minutos
         `).openPopup();
 
         // Centralizar o mapa no segmento clicado
@@ -320,7 +317,7 @@ function calculateDistance(coords) {
     function loadSubroutes(routeId, routeCoordinates) {
         showLoadingIndicator();
 
-        fetch(`../wazeportal/api.php?action=get_subroutes&route_id=jq{routeId}&is_active=1`)
+        fetch(`../wazeportal/api.php?action=get_subroutes&route_id=${routeId}&is_active=1`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Erro ao carregar as subrotas");
@@ -362,7 +359,7 @@ function calculateDistance(coords) {
     document.querySelectorAll('.view-route').forEach(button => {
         button.addEventListener('click', function () {
             const routeId = this.getAttribute('data-route-id');
-            console.log(`Botão clicado, carregando a rota com ID: jq{routeId}`);
+            console.log(`Botão clicado, carregando a rota com ID: ${routeId}`);
 
             clearRouteMap();         // Limpar o mapa antes de carregar nova rota
             initializeRouteMap();    // Inicializar o mapa, se necessário
@@ -371,12 +368,12 @@ function calculateDistance(coords) {
             loadRouteLinesWithSubroutes(routeId);
 
             // Mostrar o modal
-            jq('#mapModal').modal('show');
+            $('#mapModal').modal('show');
         });
     });
 
     // Atualizar tamanho do mapa quando o modal for exibido
-    jq('#mapModal').on('shown.bs.modal', function () {
+    $('#mapModal').on('shown.bs.modal', function () {
         console.log("Modal aberto, atualizando o tamanho do mapa...");
         if (routeMap) {
             routeMap.invalidateSize(); // Corrige problemas de redimensionamento do mapa
@@ -418,7 +415,7 @@ function logout() {
 // Função para confirmar alerta
 function confirmarAlerta(uuid) {
     console.log('Confirmar alerta:', uuid);
-    jq.ajax({
+    $.ajax({
         url: '/api.php?action=confirm_alert',
         type: 'POST',
         data: { uuid: uuid, 
@@ -426,7 +423,7 @@ function confirmarAlerta(uuid) {
             status: 1 },
         success: function(response) {
             alert('Alerta confirmado com sucesso!');
-            jq('#alertModal').modal('hide');
+            $('#alertModal').modal('hide');
         },
         error: function(xhr, status, error) {
             alert('Erro ao confirmar o alerta. Tente novamente.');
@@ -434,21 +431,16 @@ function confirmarAlerta(uuid) {
     });
 }
 
-function confirmarAlertaModal(uuid, km) {
+function confirmarAlertaModal(uuid,km) {
     console.log('Confirmar alerta clicado');
 
-    // Verifica se o UUID existe e se o KM não é indefinido ou nulo
-    if (uuid) {
-        // Se o KM não for fornecido, define um valor padrão como 'N/A'
-        km = km || 'N/A';  // Se km não existir ou for falsy, usa 'N/A'
-
+    if (uuid && km) {
         console.log('UUID:', uuid, 'KM:', km);
-        confirmarAlerta(uuid, km); // Chama a função de confirmação com os dados
+        confirmarAlerta(uuid, km); // Chama a função de confirmação
     } else {
-        console.log('Erro: UUID não encontrado');
+        console.log('Erro: UUID ou KM não encontrados');
     }
 }
-
 
 // Adiciona um evento para o clique no botão de logout
 document.querySelector('.btn-primary').addEventListener('click', logout);

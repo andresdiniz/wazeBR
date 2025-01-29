@@ -25,26 +25,24 @@
                                 <tr data-uuid="{{ alert.uuid }}">
                                     <td data-toggle="tooltip" title="{{ alert.city }}">{{ alert.city }}</td>
                                     <td data-toggle="tooltip" title="{{ alert.street }}">{{ alert.street }}</td>
-                                    <td data-toggle="tooltip"
-                                        title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                            class="btn btn-link" target="_blank">
+                                    <td data-toggle="tooltip" title="Lat: {{ alert.location_x }}, Lon: {{ alert.location_y }}">
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                           class="btn btn-link" target="_blank">
                                             Ver no Waze
                                         </a>
                                     </td>
-                                    <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" data-toggle="tooltip"
-                                        title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
+                                    <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}" 
+                                        data-toggle="tooltip" title="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
                                         {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}
                                     </td>
                                     <td>
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm" data-toggle="modal"
-                                            data-target="#alertModal" data-alert='{{ alert|json_encode }}'>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal" 
+                                                data-alert='{{ alert|json_encode }}'>
                                             Ver Mais
                                         </button>
                                     </td>
@@ -84,26 +82,24 @@
                                 <tr data-uuid="{{ alert.uuid }}">
                                     <td data-toggle="tooltip" title="{{ alerts.city }}">{{ alerts.city }}</td>
                                     <td data-toggle="tooltip" title="{{ alerts.street }}">{{ alerts.street }}</td>
-                                    <td data-toggle="tooltip"
-                                        title="Lat: {{ alerts.location_x }}, Lon: {{ alerts.location_y }}">
-                                        <a href="https://www.waze.com/ul?ll={{ alerts.location_y }},{{ alerts.location_x }}"
-                                            class="btn btn-link" target="_blank">
+                                    <td data-toggle="tooltip" title="Lat: {{ alerts.location_x }}, Lon: {{ alerts.location_y }}">
+                                        <a href="https://www.waze.com/ul?ll={{ alerts.location_y }},{{ alerts.location_x }}" 
+                                           class="btn btn-link" target="_blank">
                                             Ver no Waze
                                         </a>
                                     </td>
-                                    <td class="alert-date" data-pubmillis="{{ alerts.pubMillis }}" data-toggle="tooltip"
-                                        title="{{ (alerts.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
+                                    <td class="alert-date" data-pubmillis="{{ alerts.pubMillis }}" 
+                                        data-toggle="tooltip" title="{{ (alerts.pubMillis / 1000) | date('d/m/Y H:i:s') }}">
                                         {{ (alerts.pubMillis / 1000) | date("d/m/Y H:i:s") }}
                                     </td>
                                     <td>
-                                        <span
-                                            class="badge badge-{{ alerts.severity > 80 ? 'danger' : (alerts.severity > 50 ? 'warning' : 'success') }}">
+                                        <span class="badge badge-{{ alerts.severity > 80 ? 'danger' : (alerts.severity > 50 ? 'warning' : 'success') }}">
                                             {{ alerts.severity }}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm" data-toggle="modal"
-                                            data-target="#alertModal" data-alert='{{ alerts|json_encode }}'>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal" 
+                                                data-alert='{{ alerts|json_encode }}'>
                                             Ver Mais
                                         </button>
                                     </td>
@@ -145,22 +141,20 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="confirm-alert"
-                    onclick="confirmarAlertaModal('{{ uuid }}', '{{ km }}')">Confirmar Alerta</button>
+                <button type="button" class="btn btn-primary" id="confirm-alert" onclick="confirmarAlertaModal('{{ uuid }}', '{{ km }}')">Confirmar Alerta</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Ativando o modo noConflict do jQuery
-    var $jq = jQuery.noConflict();
+    $(document).ready(function() {
+        // Atribuindo o alias DT para DataTable
+        var DT = $.fn.dataTable;
 
-    // Usando o jQuery no lugar de $ para evitar conflito
-    $jq(document).ready(function () {
         // Inicializar DataTables apenas se ainda não estiverem inicializados
-        if (!$jq.fn.DataTable.isDataTable('#accidentsTable')) {
-            $jq('#accidentsTable').DataTable({
+        if (!DT.isDataTable('#accidentsTable')) {
+            $('#accidentsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -176,8 +170,8 @@
             });
         }
 
-        if (!$jq.fn.DataTable.isDataTable('#trafficTable')) {
-            $jq('#trafficTable').DataTable({
+        if (!DT.isDataTable('#trafficTable')) {
+            $('#trafficTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -194,8 +188,8 @@
         }
 
         // Verifica se a tabela de congestionamento foi inicializada
-        if (!$jq.fn.DataTable.isDataTable('#jamsTable')) {
-            $jq('#jamsTable').DataTable({
+        if (!DT.isDataTable('#jamsTable')) {
+            $('#jamsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -212,16 +206,16 @@
         }
 
         // Inicializa os tooltips
-        $jq('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip();
 
         // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
-        setTimeout(function () {
-            $jq('[data-toggle="tooltip"]').tooltip('update');
+        setTimeout(function() {
+            $('[data-toggle="tooltip"]').tooltip('update');
         }, 1000); // Espera um tempo antes de atualizar os tooltips
 
         // Evento para abrir o modal e carregar os dados do alerta
-        $jq('#alertModal').on('show.bs.modal', function (event) {
-            var button = $jq(event.relatedTarget); // Elemento que acionou o modal
+        $('#alertModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget); // Elemento que acionou o modal
             var alertData = button.data('alert'); // Dados do alerta passados no botão
 
             if (!alertData) {
@@ -229,7 +223,7 @@
                 return;
             }
 
-            var modal = $jq(this);
+            var modal = $(this);
             modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
             modal.find('#modal-city').text(alertData.city || 'N/A');
             modal.find('#modal-street').text(alertData.street || 'N/A');
@@ -243,9 +237,9 @@
             var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
             modal.find('#modal-status').text(status);
 
-            // Exibe o KM se disponível ou 'N/A'
-            var km = alertData.km || 'N/A'; // Ajuste para usar o campo 'km' diretamente no alertData
-            modal.find('#modal-via-KM').text(km);
         });
     });
 </script>
+
+
+    
