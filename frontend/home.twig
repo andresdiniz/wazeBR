@@ -130,7 +130,8 @@
             <div class="modal-body">
                 <p><strong>UUID:</strong> <span id="modal-uuid">N/A</span></p>
                 <p><strong>Cidade:</strong> <span id="modal-city">N/A</span></p>
-                <p><strong>Rua:</strong> <span id="modal-street">N/A</span></p>
+                <p><strong>Via:</strong> <span id="modal-street">N/A</span></p>
+                <p><strong>KM:</strong> <span id="modal-via-KM">N/A</span></p>
                 <p><strong>Localização:</strong> <span id="modal-location">N/A</span></p>
                 <p><strong>Data Recebido:</strong> <span id="modal-date-received">N/A</span></p>
                 <p><strong>Confiança:</strong> <span id="modal-confidence">N/A</span></p>
@@ -213,7 +214,7 @@
             modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
             modal.find('#modal-type').text('Alerta');
             modal.find('#modal-subtype').text('N/A');
-            
+
             // Definir status do alerta baseado no valor do banco de dados
             var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
             modal.find('#modal-status').text(status);
@@ -234,12 +235,8 @@
                         console.log("Resposta da API DENIT:", response);
                         if (response && response.length > 0) {
                             const result = response[0]; // Obtendo o primeiro resultado
-                            modal.find('#modal-type').text(result.uf || 'N/A');
-                            modal.find('#modal-subtype').text(result.br || 'N/A');
-                            modal.find('#modal-status').text('Ativo');
-                            modal.find('#modal-location').text(`Lat: ${result.lat || 'N/A'}, Lon: ${result.lng || 'N/A'}`);
-                            modal.find('#modal-date-received').text(new Date().toLocaleString());
-                            modal.find('#modal-confidence').text('N/A');
+                            modal.find('#modal-via-KM').text(parseFloat(result.km).toFixed(2));
+
                         } else {
                             alert('Nenhum dado encontrado para as coordenadas fornecidas no DENIT.');
                         }
