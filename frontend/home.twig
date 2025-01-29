@@ -148,13 +148,14 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        // Defina uma variável para DataTables e evite conflitos
-        var DataTablePlugin = $.fn.dataTable;
+    // Ativando o modo noConflict do jQuery
+    var $jq = jQuery.noConflict();
 
+    // Usando o jQuery no lugar de $ para evitar conflito
+    $jq(document).ready(function() {
         // Inicializar DataTables apenas se ainda não estiverem inicializados
-        if (!DataTablePlugin.isDataTable('#accidentsTable')) {
-            $('#accidentsTable').DataTable({
+        if (!$jq.fn.DataTable.isDataTable('#accidentsTable')) {
+            $jq('#accidentsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -170,8 +171,8 @@
             });
         }
 
-        if (!DataTablePlugin.isDataTable('#trafficTable')) {
-            $('#trafficTable').DataTable({
+        if (!$jq.fn.DataTable.isDataTable('#trafficTable')) {
+            $jq('#trafficTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -188,8 +189,8 @@
         }
 
         // Verifica se a tabela de congestionamento foi inicializada
-        if (!DataTablePlugin.isDataTable('#jamsTable')) {
-            $('#jamsTable').DataTable({
+        if (!$jq.fn.DataTable.isDataTable('#jamsTable')) {
+            $jq('#jamsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 paging: true,
@@ -206,16 +207,16 @@
         }
 
         // Inicializa os tooltips
-        $('[data-toggle="tooltip"]').tooltip();
+        $jq('[data-toggle="tooltip"]').tooltip();
 
         // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
         setTimeout(function() {
-            $('[data-toggle="tooltip"]').tooltip('update');
+            $jq('[data-toggle="tooltip"]').tooltip('update');
         }, 1000); // Espera um tempo antes de atualizar os tooltips
 
         // Evento para abrir o modal e carregar os dados do alerta
-        $('#alertModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget); // Elemento que acionou o modal
+        $jq('#alertModal').on('show.bs.modal', function(event) {
+            var button = $jq(event.relatedTarget); // Elemento que acionou o modal
             var alertData = button.data('alert'); // Dados do alerta passados no botão
 
             if (!alertData) {
@@ -223,7 +224,7 @@
                 return;
             }
 
-            var modal = $(this);
+            var modal = $jq(this);
             modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
             modal.find('#modal-city').text(alertData.city || 'N/A');
             modal.find('#modal-street').text(alertData.street || 'N/A');
