@@ -405,7 +405,7 @@ function writeLog($logFilePath, $message)
 function logToFile($level, $message, $context = []) {
     // Define o caminho do log
     echo''. $level .''. $message .'';
-    $logFile = __DIR__ . '/logs/logs.log';
+    $logFile = __DIR__ . '/../logs/logs.log';
 
     // Formata a mensagem de log com data, nível e contexto
     $logMessage = sprintf(
