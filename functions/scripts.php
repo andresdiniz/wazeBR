@@ -166,10 +166,11 @@ function is_assoc(array $array): bool
 // Obtém configurações do site
 function getSiteSettings(PDO $pdo)
 {
-// Obtém configurações do site
-// Função para obter configurações gerais do site
-    $stmt = $pdo->query("SELECT * FROM settings");
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    // Obtém configurações do site da tabela 'settings' usando a função genérica
+    $result = selectFromDatabase($pdo, 'settings');
+
+    // Retorna apenas o primeiro registro, assumindo que há apenas uma configuração geral
+    return $result ? $result[0] : null;
 }
 
 /*
@@ -181,7 +182,6 @@ function logExecution($scriptName, $status, $message, $pdo)
 {
     try {
         $pdo->beginTransaction();
-        echo "Iniciando transação\n";
 
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
