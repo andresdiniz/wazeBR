@@ -303,7 +303,9 @@ function executeScript($scriptName, $scriptFile, $pdo)
             $startTime = microtime(true);
 
             // Incluir o script
-            include dirname(__DIR__) . $scriptFile;
+            $url = dirname(__DIR__) . $scriptFile;
+            echo 'Endereço do script é: ' . $url . PHP_EOL;
+            include $url;
 
             // Marca o tempo de fim da execução
             $endTime = microtime(true);
