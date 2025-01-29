@@ -242,12 +242,12 @@ $(document).ready(function() {
             
                             let km = null;
             
-                            // Verifica diferentes possíveis estruturas do JSON
+                            // Se for um array, pega o primeiro objeto
                             if (Array.isArray(response) && response.length > 0) {
                                 console.log("Resposta é um array, pegando o primeiro elemento.");
                                 km = response[0].km;
-                            } else if (typeof response === 'object') {
-                                km = response.km || (response.data ? response.data.km : null);
+                            } else {
+                                console.warn("Resposta inesperada do DNIT.");
                             }
             
                             // Converte e exibe o KM, se válido
@@ -277,7 +277,7 @@ $(document).ready(function() {
                     console.error("Erro na requisição ao DNIT:", status, error);
                     alert('Erro ao consultar os dados do DNIT. Tente novamente.');
                 }
-            });                    
+            });            
         } else {
             console.log("Sem coordenadas válidas para consulta ao DNIT.");
             modal.find('#modal-via-KM').text('N/A');
