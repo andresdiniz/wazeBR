@@ -9,11 +9,6 @@ function logToFile($level, $message, $context = []) {
     // Define o caminho do log
     $logFile = __DIR__ . '/../logs/debug.log';
 
-    // Se o diretório de logs não existir, cria-o
-    if (!is_dir(__DIR__ . '/../logs')) {
-        mkdir(__DIR__ . '/../logs', 0777, true);
-    }
-
     // Formata a mensagem de log com data, nível e contexto
     $logMessage = sprintf(
         "[%s] [%s] %s %s\n", 
@@ -67,11 +62,12 @@ function executeScriptWithLogging($scriptName, $path, $pdo) {
         executeScript($scriptName, $path, $pdo); // Passando $pdo aqui
         logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
     } catch (Exception $e) {
+        echo'cheguei aqui';
         logToFile('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
+        error_log('error', "Erro em $scriptName", ['message' => $e->getMessage(), 'path' => $path]);
     }
 }
 
-echo'cheguei aqui';
 // Executando os scripts com verificação de erros
 executeScriptWithLogging('wazealerts.php', '/wazealerts.php', $pdo);
 executeScriptWithLogging('wazejobtraficc.php', '/wazejobtraficc.php', $pdo);
