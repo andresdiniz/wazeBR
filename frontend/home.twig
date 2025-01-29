@@ -166,7 +166,7 @@
                 },
             });
         }
-    
+
         if (!$.fn.DataTable.isDataTable('#trafficTable')) {
             $('#trafficTable').DataTable({
                 responsive: true,
@@ -183,7 +183,7 @@
                 },
             });
         }
-    
+
         // Verifica se a tabela de congestionamento foi inicializada
         if (!$.fn.DataTable.isDataTable('#jamsTable')) {
             $('#jamsTable').DataTable({
@@ -201,25 +201,25 @@
                 },
             });
         }
-    
+
         // Inicializa os tooltips
         $('[data-toggle="tooltip"]').tooltip();
-    
+
         // Certifique-se de inicializar os tooltips depois que o conteúdo dinâmico for carregado
         setTimeout(function() {
             $('[data-toggle="tooltip"]').tooltip('update');
         }, 1000); // Espera um tempo antes de atualizar os tooltips
-    
+
         // Evento para abrir o modal e carregar os dados do alerta
         $('#alertModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget);
-            var alertData = button.data('alert');
-    
+            var button = $(event.relatedTarget); // Elemento que acionou o modal
+            var alertData = button.data('alert'); // Dados do alerta passados no botão
+
             if (!alertData) {
                 console.error("Erro: Não foi possível obter os dados do alerta.");
                 return;
             }
-    
+
             var modal = $(this);
             modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
             modal.find('#modal-city').text(alertData.city || 'N/A');
@@ -229,17 +229,12 @@
             modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
             modal.find('#modal-type').text('Alerta');
             modal.find('#modal-subtype').text('N/A');
-    
+
             // Define o status do alerta
             var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
             modal.find('#modal-status').text(status);
-    
-            // Consulta ao DNIT para obter o KM
-            var locationX = alertData.location_x;
-            var locationY = alertData.location_y;
         });
     });
-
-    
 </script>
+
     
