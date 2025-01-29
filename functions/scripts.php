@@ -297,13 +297,35 @@ function shouldRunScript($scriptName, $pdo)
 // Executa o script com verificação
 function executeScript($scriptName, $scriptFile, $pdo)
 {
-    if (shouldRunScript($scriptName,$pdo)) {
+    if (shouldRunScript($scriptName, $pdo)) {
         try {
+            // Marca o tempo de início da execução
+            $startTime = microtime(true);
+
             // Incluir o script
             include __DIR__ . '/../' . $scriptFile;
+
+            // Marca o tempo de fim da execução
+            $endTime = microtime(true);
+
+            // Calcula o tempo total de execução
+            $executionTime = $endTime - $startTime;
+
+            // Log do tempo de execução
+            $logMessage = "Script '$scriptName' executado com sucesso. Tempo de execução: " . number_format($executionTime, 4) . " segundos.";
+            logToFile('info', $logMessage); // Registra no arquivo de log personalizado
+            error_log($logMessage); // Registra no log de erros do PHP
         } catch (Exception $e) {
-            // Log de erro, caso a execução do script falhe
+            // Registra o erro no banco de dados e no arquivo de log
+
+            // Log de erro no banco de dados
             logExecution($scriptName, 'error', $e->getMessage(), $pdo);
+
+            // Log de erro no arquivo de log
+            logToFile('error', $e->getMessage(), ['scriptName' => $scriptName]);
+
+            // Log no erro do PHP
+            error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
         }
     }
 }
