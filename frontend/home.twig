@@ -147,40 +147,36 @@
     </div>
 </div>
 
-
-<script>
-    $(document).ready(function() {
-        // Inicializar o DataTable para acidentes e congestionamentos
+$(document).ready(function() {
+    // Inicializar DataTables apenas se ainda não estiverem inicializados
+    if (!$.fn.DataTable.isDataTable('#accidentsTable')) {
         $('#accidentsTable').DataTable({
-            "responsive": true,
-            "autoWidth": false
+            responsive: true,
+            autoWidth: false,
+            paging: true,
+            searching: true,
+            info: true,
+            language: {
+                search: "Buscar:",
+                paginate: {
+                    next: "Próximo",
+                    previous: "Anterior",
+                },
+            },
         });
+    }
 
+    if (!$.fn.DataTable.isDataTable('#trafficTable')) {
         $('#trafficTable').DataTable({
-            "responsive": true,
-            "autoWidth": false
+            responsive: true,
+            autoWidth: false
         });
+    }
 
-        // Inicializa tooltips
-        $('[data-toggle="tooltip"]').tooltip();
-        jQuery.noConflict();
-
-        // Inicializa DataTables para a tabela de acidentes
-        $('#accidentsTable').DataTable({
-            paging: true,
-            searching: true,
-            info: true,
-            language: {
-                search: "Buscar:",
-                paginate: {
-                    next: "Próximo",
-                    previous: "Anterior",
-                },
-            },
-        });
-
-        // Inicializa DataTables para a tabela de congestionamentos
+    if (!$.fn.DataTable.isDataTable('#jamsTable')) {
         $('#jamsTable').DataTable({
+            responsive: true,
+            autoWidth: false,
             paging: true,
             searching: true,
             info: true,
@@ -192,103 +188,98 @@
                 },
             },
         });
+    }
 
-        // Exibir os detalhes do alerta e consultar o DENIT ao abrir o modal
-        $('#alertModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Obtém o botão que acionou o modal
-            var alertData = button.data('alert'); // Obtém os dados do alerta (json) do botão
+    // Inicializa tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    jQuery.noConflict();
 
-            // Verifica se o alertData existe
-            if (!alertData) {
-                console.error("Erro: Não foi possível obter os dados do alerta.");
-                return;
-            }
+    // Evento para abrir o modal e carregar os dados do alerta
+    $('#alertModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var alertData = button.data('alert');
 
-            // Preenche o modal com os dados extraídos
-            var modal = $(this);
-            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-            modal.find('#modal-city').text(alertData.city || 'N/A');
-            modal.find('#modal-street').text(alertData.street || 'N/A');
-            modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
-            modal.find('#modal-date-received').text(new Date(alertData.pubMillis / 1000).toLocaleString() || 'N/A');
-            modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-            modal.find('#modal-type').text('Alerta');
-            modal.find('#modal-subtype').text('N/A');
-
-            // Definir status do alerta baseado no valor do banco de dados
-            var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
-            modal.find('#modal-status').text(status);
-
-            // Agora faz a consulta ao DENIT usando as coordenadas (se existirem)
-            var locationX = alertData.location_x;
-            var locationY = alertData.location_y;
-
-            if (locationX && locationY) {
-                var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
-                console.log("Consultando o DNIT com a URL:", denitUrl);
-
-                // Faz a requisição ao DNIT
-                $.ajax({
-                    url: denitUrl,
-                    type: 'GET',
-                    success: function (response) {
-                        console.log("Resposta do DNIT:", response);
-
-                        // Garante que a resposta seja um objeto válido
-                        if (response && typeof response === 'object' && 'km' in response) {
-                            console.log("Objeto retornado pelo DNIT:", response);
-
-                            // Converte 'km' para número e exibe com duas casas decimais
-                            var km = parseFloat(response.km);
-                            if (!isNaN(km)) {
-                                console.log("KM convertido:", km.toFixed(2));
-                                $('#modal-via-KM').text(km.toFixed(2)); // Exibe no modal
-                            } else {
-                                console.warn("O valor de KM não é um número válido:", response.km);
-                                $('#modal-via-KM').text('N/A');
-                            }
-                        } else {
-                            console.error("Resposta inválida do DNIT ou sem campo 'km'.", response);
-                            $('#modal-via-KM').text('N/A');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Erro na requisição ao DNIT:", status, error);
-                        alert('Erro ao consultar os dados do DNIT. Tente novamente.');
-                    }
-                });
-
-            } else {
-                console.log("Sem coordenadas válidas para consulta ao DENIT.");
-            }            
-
-            // Log para verificar os dados
-            console.log("Dados do alerta:", alertData);
-        });
-
-        // Função para confirmar o alerta no banco de dados
-        function confirmarAlerta(uuid) {
-            $.ajax({
-                url: '/api.php?action=confirm_alert', // URL da sua API ou rota para confirmar o alerta
-                type: 'POST',
-                data: {
-                    uuid: uuid,
-                    status: 1, // Aqui você pode definir o status como "Ativo" ao confirmar
-                },
-                success: function (response) {
-                    alert('Alerta confirmado com sucesso!');
-                    $('#alertModal').modal('hide');
-                },
-                error: function (xhr, status, error) {
-                    alert('Erro ao confirmar o alerta. Tente novamente.');
-                },
-            });
+        if (!alertData) {
+            console.error("Erro: Não foi possível obter os dados do alerta.");
+            return;
         }
 
-        // Adicionar evento para confirmar o alerta
-        $('#confirm-alert').on('click', function () {
-            var uuid = $('#modal-uuid').text(); // Obtém o UUID do alerta da modal
-            confirmarAlerta(uuid);
-        });
+        var modal = $(this);
+        modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+        modal.find('#modal-city').text(alertData.city || 'N/A');
+        modal.find('#modal-street').text(alertData.street || 'N/A');
+        modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
+        modal.find('#modal-date-received').text(new Date(alertData.pubMillis).toLocaleString() || 'N/A');
+        modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+        modal.find('#modal-type').text('Alerta');
+        modal.find('#modal-subtype').text('N/A');
+
+        // Define o status do alerta
+        var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
+        modal.find('#modal-status').text(status);
+
+        // Consulta ao DNIT para obter o KM
+        var locationX = alertData.location_x;
+        var locationY = alertData.location_y;
+
+        if (locationX && locationY) {
+            var denitUrl = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${locationX}&lat=${locationY}&r=250&data=${new Date().toISOString().split('T')[0]}`;
+            console.log("Consultando o DNIT com a URL:", denitUrl);
+
+            $.ajax({
+                url: denitUrl,
+                type: 'GET',
+                success: function(response) {
+                    console.log("Resposta do DNIT:", response);
+
+                    if (response && typeof response === 'object' && 'km' in response) {
+                        console.log("Estrutura do JSON DNIT:", response);
+                        var km = parseFloat(response.km);
+                        if (!isNaN(km)) {
+                            console.log("KM convertido:", km.toFixed(2));
+                            modal.find('#modal-via-KM').text(km.toFixed(2)); // Atualiza corretamente o modal
+                        } else {
+                            console.warn("O valor de KM não é um número válido:", response.km);
+                            modal.find('#modal-via-KM').text('N/A');
+                        }
+                    } else {
+                        console.error("Resposta inválida do DNIT ou sem campo 'km'.", response);
+                        modal.find('#modal-via-KM').text('N/A');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Erro na requisição ao DNIT:", status, error);
+                    alert('Erro ao consultar os dados do DNIT. Tente novamente.');
+                }
+            });
+
+        } else {
+            console.log("Sem coordenadas válidas para consulta ao DNIT.");
+            modal.find('#modal-via-KM').text('N/A');
+        }
+
+        console.log("Dados do alerta:", alertData);
     });
-</script>
+
+    // Função para confirmar alerta
+    function confirmarAlerta(uuid) {
+        $.ajax({
+            url: '/api.php?action=confirm_alert',
+            type: 'POST',
+            data: { uuid: uuid, status: 1 },
+            success: function(response) {
+                alert('Alerta confirmado com sucesso!');
+                $('#alertModal').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                alert('Erro ao confirmar o alerta. Tente novamente.');
+            },
+        });
+    }
+
+    // Evento para confirmar alerta
+    $('#confirm-alert').on('click', function() {
+        var uuid = $('#modal-uuid').text();
+        confirmarAlerta(uuid);
+    });
+});
