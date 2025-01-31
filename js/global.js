@@ -88,46 +88,45 @@ function initializeDataTables() {
     /**
  * Configura o modal de alerta, preenchendo os dados corretamente.
  */
-function setupAlertModal() {
-    document.querySelectorAll("#vermais").forEach(btn => console.log("Botão encontrado:", btn.dataset.alert));
-
-    $j('#vermais').on('show.bs.modal', function (event) {
-        const button = event.relatedTarget; // Obtém o botão que acionou o modal
-
-        if (!button) {
-            console.error("Erro: Nenhum botão acionador foi detectado.");
-            return;
-        }
-
-        console.log("Botão acionador detectado:", button);
-
-        let alertData;
-        try {
-            alertData = JSON.parse(button.getAttribute("data-alert"));
-            console.log("Dados do alerta:", alertData);
-        } catch (error) {
-            console.error("Erro ao processar JSON do alerta:", error);
-            return;
-        }
-
-        if (!alertData || Object.keys(alertData).length === 0) {
-            console.error("Erro: Dados do alerta estão vazios.");
-            return;
-        }
-
-        const modal = $j(this);
-        modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-        modal.find('#modal-city').text(alertData.city || 'N/A');
-        modal.find('#modal-street').text(alertData.street || 'N/A');
-        modal.find('#modal-via-KM').text(alertData.km || 'N/A');
-        modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
-        modal.find('#modal-date-received').text(alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A');
-        modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-        modal.find('#modal-type').text(alertData.type || 'N/A');
-        modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
-        modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
-    });
-}
+    function setupAlertModal() {
+        // Verifica se os botões existem
+        document.querySelectorAll('[data-target="#vermais"]').forEach(btn => {
+            console.log("Botão encontrado:", btn.dataset.alert);
+        });
+    
+        // Configura o evento no modal CORRETO
+        $j('#vermais').on('show.bs.modal', function (event) {
+            const button = $j(event.relatedTarget); // Usar jQuery para garantir compatibilidade
+    
+            if (!button.length) {
+                console.error("Erro: Botão acionador não encontrado.");
+                return;
+            }
+    
+            console.log("Botão acionador:", button);
+    
+            let alertData;
+            try {
+                alertData = JSON.parse(button.attr('data-alert')); // Usar .attr() do jQuery
+                console.log("Dados parseados:", alertData);
+            } catch (error) {
+                console.error("Erro ao parsear JSON:", error, "Dados:", button.attr('data-alert'));
+                return;
+            }
+    
+            const modal = $j(this);
+            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+            modal.find('#modal-city').text(alertData.city || 'N/A');
+            modal.find('#modal-street').text(alertData.street || 'N/A');
+            modal.find('#modal-via-KM').text(alertData.km || 'N/A');
+            modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
+            modal.find('#modal-date-received').text(alertData.pubMillis ? new Date(parseInt(alertData.pubMillis)).toLocaleString() : 'N/A');
+            modal.find('#modal-confidence').text(alertData.confidence ? `${alertData.confidence}%` : 'N/A');
+            modal.find('#modal-type').text(alertData.type || 'N/A');
+            modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
+            modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
+        });
+    }
     /**
      * Atualiza as cores das linhas da tabela conforme a data do alerta.
      */
