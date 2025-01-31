@@ -5,7 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
- * Criado em: 31/01/2025, 17:17 (Horário de São Paulo)
+ * Criado em: 31/01/2025, 17:20 (Horário de São Paulo)
  */
 
 (function ($) {
@@ -67,19 +67,26 @@
      */
     function setupAlertModal() {
         $j('#alertModal').on('show.bs.modal', function (event) {
-            console.log(document.querySelector("button[data-alert]").dataset.alert);
-            const button = $j(event.relatedTarget);
-            let alertData;
+            const button = event.relatedTarget;
     
-            try {
-                alertData = JSON.parse(button.attr('data-alert').replace(/&quot;/g, '"')); // Corrige JSON inválido
-            } catch (error) {
-                console.error("Erro ao processar dados do alerta:", error);
+            if (!button) {
+                console.error("Erro: Nenhum botão acionador foi detectado.");
                 return;
             }
     
-            if (!alertData) {
-                console.error("Erro: Nenhum dado de alerta encontrado.");
+            console.log("Botão acionador detectado:", button); // Verifica se o botão existe
+    
+            let alertData;
+            try {
+                alertData = JSON.parse(button.getAttribute("data-alert").replace(/&quot;/g, '"'));
+                console.log("Dados do alerta:", alertData); // Verifica os dados carregados
+            } catch (error) {
+                console.error("Erro ao processar JSON do alerta:", error);
+                return;
+            }
+    
+            if (!alertData || Object.keys(alertData).length === 0) {
+                console.error("Erro: Dados do alerta estão vazios.");
                 return;
             }
     
@@ -88,18 +95,15 @@
             modal.find('#modal-city').text(alertData.city || 'N/A');
             modal.find('#modal-street').text(alertData.street || 'N/A');
             modal.find('#modal-via-KM').text(alertData.km || 'N/A');
-    
             modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
-            
-            modal.find('#modal-date-received').text(
-                alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A'
-            );
+            modal.find('#modal-date-received').text(alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A');
             modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
             modal.find('#modal-type').text(alertData.type || 'N/A');
             modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
             modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
         });
     }
+    
     
 
     /**
