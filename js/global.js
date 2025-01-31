@@ -4,6 +4,7 @@
  * Este arquivo contém funções para inicializar tooltips, DataTables, configurar modais,
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
+ * 
  */
 
 (function ($) {
@@ -11,13 +12,12 @@
     const $j = $.noConflict();
 
     $j(document).ready(function () {
-        
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll('[data-toggle="tooltip"]').forEach(function (el) {
-                new bootstrap.Tooltip(el);
-            });
+
+        // Inicializa tooltips
+        document.querySelectorAll('[data-toggle="tooltip"]').forEach(function (el) {
+            new bootstrap.Tooltip(el);
         });
-        
+
         // Inicializa tabelas com DataTables
         initializeDataTables();
 
@@ -68,7 +68,7 @@
     function setupAlertModal() {
         $j('#alertModal').on('show.bs.modal', function (event) {
             const button = $j(event.relatedTarget);
-            const alertData = button.data('alert');
+            const alertData = JSON.parse(button.attr('data-alert')); // Correção: Usa JSON.parse para evitar erro de parsing
 
             if (!alertData) {
                 console.error("Erro: Não foi possível obter os dados do alerta.");
@@ -81,98 +81,12 @@
             modal.find('#modal-street').text(alertData.street || 'N/A');
             modal.find('#modal-via-KM').text(alertData.km || 'N/A');
             modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
-            modal.find('#modal-date-received').text(new Date(alertData.pubMillis).toLocaleString() || 'N/A');
+            modal.find('#modal-date-received').text(new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() || 'N/A');
             modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
             modal.find('#modal-type').text(alertData.type || 'N/A');
             modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
-            modal.find('#modal-status').text(alertData.status === 1 ? 'Ativo' : 'Inativo');
+            modal.find('#modal-status').text(alertData.status === "1" ? "Ativo" : "Inativo");
         });
-    }
-
-    /**
-     * Configura e exibe o mapa interativo para visualização dos alertas.
-     */
-    function setupMap() {
-        let map;
-        const markersLayer = L.layerGroup();
-
-        function initMap(lat, lon, alertType, city, street, uuid, status, confidence) {
-            if (!map) {
-                map = L.map('map').setView([lat, lon], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                }).addTo(map);
-            }
-
-            markersLayer.clearLayers();
-
-            const popupContent = `
-                <strong>${alertType}</strong><br>
-                <strong>Cidade:</strong> ${city || 'N/A'}<br>
-                <strong>Rua:</strong> ${street || 'N/A'}<br>
-                <strong>UUID:</strong> ${uuid || 'N/A'}<br>
-                <strong>Status:</strong> ${status || 'N/A'}<br>
-                <strong>Confiança:</strong> ${confidence || 'N/A'}
-            `;
-
-            L.marker([lat, lon])
-                .addTo(markersLayer)
-                .bindPopup(popupContent)
-                .openPopup();
-
-            markersLayer.addTo(map);
-            map.setView([lat, lon], 13);
-        }
-
-        // Verifica se o botão #view-on-map existe antes de adicionar o evento
-        const viewOnMapButton = document.getElementById('view-on-map');
-        if (viewOnMapButton) {
-            viewOnMapButton.addEventListener('click', function () {
-                const lat = $j('#modal-location').data('lat');
-                const lon = $j('#modal-location').data('lon');
-
-                if (!lat || !lon || lat === 'N/A' || lon === 'N/A') {
-                    alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
-                    return;
-                }
-
-                initMap(lat, lon);
-                $j('#mapModal').modal('show').one('shown.bs.modal', function () {
-                    map.invalidateSize();
-                });
-            });
-        }
-    }
-
-    /**
-     * Configura a confirmação de alertas via AJAX.
-     */
-    function setupAlertConfirmation() {
-        const confirmAlertButton = document.getElementById('confirm-alert');
-        if (confirmAlertButton) {
-            confirmAlertButton.addEventListener('click', function () {
-                const uuid = $j('#modal-uuid').text();
-                const km = $j('#modal-via-KM').text();
-
-                if (!uuid || uuid === 'N/A') {
-                    console.error('Erro: UUID não encontrado.');
-                    return;
-                }
-
-                $j.ajax({
-                    url: '/api.php?action=confirm_alert',
-                    type: 'POST',
-                    data: { uuid: uuid, km: km, status: 1 },
-                    success: function () {
-                        alert('Alerta confirmado com sucesso!');
-                        $j('#alertModal').modal('hide');
-                    },
-                    error: function () {
-                        alert('Erro ao confirmar o alerta. Tente novamente.');
-                    },
-                });
-            });
-        }
     }
 
     /**
@@ -200,4 +114,5 @@
             row.style.color = textColor;
         });
     }
+
 })(jQuery);
