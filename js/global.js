@@ -5,7 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
- * Criado em: 31/01/2025, 17:00 (Horário de São Paulo)
+ * Criado em: 31/01/2025, 17:10 (Horário de São Paulo)
  */
 
 (function ($) {
@@ -26,11 +26,11 @@
 
         // Configura o mapa interativo (se o elemento #map existir)
         if (document.getElementById('map')) {
-            setupMap();
+            //setupMap();
         }
 
         // Configura confirmação de alerta
-        setupAlertConfirmation();
+        //setupAlertConfirmation();
 
         // Atualiza as cores das linhas com base na data do alerta
         updateRowColors();
