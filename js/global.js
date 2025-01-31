@@ -88,9 +88,14 @@
      * Configura os eventos de clique nos botões de alerta.
      */
     function setupAlertButtons() {
-        $j('[data-target="#vermais"]').on('click', function (event) {
-            const button = $j(this); // O botão que acionou o modal
-            console.log("Botão clicado:", button);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleciona todos os botões com o atributo data-target="#vermais"
+            const buttons = document.querySelectorAll('[data-target="#vermais"]');
+            
+            // Adiciona o evento de clique a cada botão
+            buttons.forEach(function(button) {
+                button.addEventListener('click', function(event) {
+                    console.log("Botão clicado:", button); // Exibe o botão no console
             
             console.log("Botão encontrado:", button.attr('data-alert'));
 
