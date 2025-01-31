@@ -5,7 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
- * Criado em: 31/01/2025, 17:20 (Horário de São Paulo)
+ * Criado em: 31/01/2025, 17:30 (Horário de São Paulo)
  */
 
 (function ($) {
@@ -86,50 +86,48 @@ function initializeDataTables() {
 
 
     /**
-     * Configura o modal de alerta, preenchendo os dados corretamente.
-     */
-    function setupAlertModal() {
-        document.querySelectorAll("button[data-alert]").forEach(btn => console.log(btn.dataset.alert));
-        $j('#alertModal').on('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-    
-            if (!button) {
-                console.error("Erro: Nenhum botão acionador foi detectado.");
-                return;
-            }
-    
-            console.log("Botão acionador detectado:", button); // Verifica se o botão existe
-    
-            let alertData;
-            try {
-                alertData = JSON.parse(button.getAttribute("data-alert").replace(/&quot;/g, '"'));
-                console.log("Dados do alerta:", alertData); // Verifica os dados carregados
-            } catch (error) {
-                console.error("Erro ao processar JSON do alerta:", error);
-                return;
-            }
-    
-            if (!alertData || Object.keys(alertData).length === 0) {
-                console.error("Erro: Dados do alerta estão vazios.");
-                return;
-            }
-    
-            const modal = $j(this);
-            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-            modal.find('#modal-city').text(alertData.city || 'N/A');
-            modal.find('#modal-street').text(alertData.street || 'N/A');
-            modal.find('#modal-via-KM').text(alertData.km || 'N/A');
-            modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
-            modal.find('#modal-date-received').text(alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A');
-            modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-            modal.find('#modal-type').text(alertData.type || 'N/A');
-            modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
-            modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
-        });
-    }
-    
-    
+ * Configura o modal de alerta, preenchendo os dados corretamente.
+ */
+function setupAlertModal() {
+    document.querySelectorAll("button[data-alert]").forEach(btn => console.log("Botão encontrado:", btn.dataset.alert));
 
+    $j('#alertModal').on('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Obtém o botão que acionou o modal
+
+        if (!button) {
+            console.error("Erro: Nenhum botão acionador foi detectado.");
+            return;
+        }
+
+        console.log("Botão acionador detectado:", button);
+
+        let alertData;
+        try {
+            alertData = JSON.parse(button.getAttribute("data-alert"));
+            console.log("Dados do alerta:", alertData);
+        } catch (error) {
+            console.error("Erro ao processar JSON do alerta:", error);
+            return;
+        }
+
+        if (!alertData || Object.keys(alertData).length === 0) {
+            console.error("Erro: Dados do alerta estão vazios.");
+            return;
+        }
+
+        const modal = $j(this);
+        modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+        modal.find('#modal-city').text(alertData.city || 'N/A');
+        modal.find('#modal-street').text(alertData.street || 'N/A');
+        modal.find('#modal-via-KM').text(alertData.km || 'N/A');
+        modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
+        modal.find('#modal-date-received').text(alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A');
+        modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+        modal.find('#modal-type').text(alertData.type || 'N/A');
+        modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
+        modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
+    });
+}
     /**
      * Atualiza as cores das linhas da tabela conforme a data do alerta.
      */
