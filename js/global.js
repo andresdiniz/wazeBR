@@ -1,18 +1,25 @@
-// global.js (Código compartilhado para ambas as páginas)
+/**
+ * global.js - Script de inicialização e manipulação de alertas no sistema.
+ * 
+ * Este arquivo contém funções para inicializar tooltips, DataTables, configurar modais,
+ * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
+ * com base no tempo do alerta.
+ */
+
 $(document).ready(function () {
-    // Inicializa os tooltips
+    // Inicializa tooltips do Bootstrap
     $('[data-toggle="tooltip"]').tooltip();
 
-    // Inicializa DataTables
+    // Inicializa tabelas com DataTables
     initializeDataTables();
 
-    // Configura o modal de alerta
+    // Configura modal de alerta
     setupAlertModal();
 
-    // Configura o mapa e eventos relacionados
+    // Configura o mapa interativo
     setupMap();
 
-    // Configura a confirmação de alerta
+    // Configura confirmação de alerta
     setupAlertConfirmation();
 
     // Atualiza as cores das linhas com base na data do alerta
@@ -20,7 +27,9 @@ $(document).ready(function () {
     setInterval(updateRowColors, 60000); // Atualiza a cada 1 minuto
 });
 
-// Inicializa as tabelas DataTables
+/**
+ * Inicializa as tabelas DataTables para melhor experiência do usuário.
+ */
 function initializeDataTables() {
     const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
     tables.forEach(table => {
@@ -43,7 +52,9 @@ function initializeDataTables() {
     });
 }
 
-// Configura o modal de alerta
+/**
+ * Configura o modal de alerta, preenchendo os dados corretamente.
+ */
 function setupAlertModal() {
     $('#alertModal').on('show.bs.modal', function (event) {
         const button = $(event.relatedTarget);
@@ -68,7 +79,9 @@ function setupAlertModal() {
     });
 }
 
-// Configura o mapa e eventos relacionados
+/**
+ * Configura e exibe o mapa interativo para visualização dos alertas.
+ */
 function setupMap() {
     let map;
     const markersLayer = L.layerGroup();
@@ -77,7 +90,7 @@ function setupMap() {
         if (!map) {
             map = L.map('map').setView([lat, lon], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                attribution: '&copy; OpenStreetMap contributors',
             }).addTo(map);
         }
 
@@ -92,7 +105,7 @@ function setupMap() {
             <strong>Confiança:</strong> ${confidence || 'N/A'}
         `;
 
-        const marker = L.marker([lat, lon])
+        L.marker([lat, lon])
             .addTo(markersLayer)
             .bindPopup(popupContent)
             .openPopup();
@@ -104,32 +117,22 @@ function setupMap() {
     $('#view-on-map').click(function () {
         const lat = $('#modal-location').data('lat');
         const lon = $('#modal-location').data('lon');
-        const alertType = $('#modal-type').text();
-        const city = $('#modal-city').text();
-        const street = $('#modal-street').text();
-        const uuid = $('#modal-uuid').text();
-        const status = $('#modal-status').text();
-        const confidence = $('#modal-confidence').text();
 
         if (!lat || !lon || lat === 'N/A' || lon === 'N/A') {
             alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
             return;
         }
 
-        initMap(lat, lon, alertType, city, street, uuid, status, confidence);
+        initMap(lat, lon);
         $('#mapModal').modal('show').one('shown.bs.modal', function () {
             map.invalidateSize();
         });
     });
-
-    $(window).on('resize', function () {
-        if (map) {
-            map.invalidateSize();
-        }
-    });
 }
 
-// Configura a confirmação de alerta
+/**
+ * Configura a confirmação de alertas via AJAX.
+ */
 function setupAlertConfirmation() {
     $('#confirm-alert').click(function () {
         const uuid = $('#modal-uuid').text();
@@ -140,54 +143,42 @@ function setupAlertConfirmation() {
             return;
         }
 
-        confirmarAlerta(uuid, km);
-    });
-
-    function confirmarAlerta(uuid, km) {
         $.ajax({
             url: '/api.php?action=confirm_alert',
             type: 'POST',
             data: { uuid: uuid, km: km, status: 1 },
-            success: function (response) {
+            success: function () {
                 alert('Alerta confirmado com sucesso!');
                 $('#alertModal').modal('hide');
             },
-            error: function (xhr, status, error) {
+            error: function () {
                 alert('Erro ao confirmar o alerta. Tente novamente.');
             },
         });
-    }
+    });
 }
 
-// Atualiza as cores das linhas com base na data do alerta
+/**
+ * Atualiza as cores das linhas da tabela conforme a data do alerta.
+ */
 function updateRowColors() {
     const dateCells = document.querySelectorAll(".alert-date");
-
-    function getRowColor(minutesDiff) {
-        if (minutesDiff <= 5) {
-            return { bgColor: "#ff0000", textColor: "blue" };
-        } else if (minutesDiff <= 15) {
-            return { bgColor: "#ff3333", textColor: "blue" };
-        } else if (minutesDiff <= 30) {
-            return { bgColor: "#ff6666", textColor: "blue" };
-        } else if (minutesDiff <= 60) {
-            return { bgColor: "#ff9999", textColor: "blue" };
-        } else if (minutesDiff <= 90) {
-            return { bgColor: "#ffcccc", textColor: "blue" };
-        } else {
-            return { bgColor: "", textColor: "" }; // Cor padrão
-        }
-    }
-
     const now = new Date().getTime();
 
     dateCells.forEach((cell) => {
         const eventMillis = parseInt(cell.getAttribute("data-pubmillis"), 10);
         const minutesDiff = (now - eventMillis) / (1000 * 60);
 
-        const row = cell.parentElement;
-        const { bgColor, textColor } = getRowColor(minutesDiff);
+        let bgColor = "";
+        let textColor = "";
 
+        if (minutesDiff <= 5) bgColor = "#ff0000";
+        else if (minutesDiff <= 15) bgColor = "#ff3333";
+        else if (minutesDiff <= 30) bgColor = "#ff6666";
+        else if (minutesDiff <= 60) bgColor = "#ff9999";
+        else if (minutesDiff <= 90) bgColor = "#ffcccc";
+
+        const row = cell.parentElement;
         row.style.backgroundColor = bgColor;
         row.style.color = textColor;
     });
