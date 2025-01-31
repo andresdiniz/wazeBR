@@ -68,31 +68,38 @@
     function setupAlertModal() {
         $j('#alertModal').on('show.bs.modal', function (event) {
             const button = $j(event.relatedTarget);
-            
-            // Corrigido: Adicionado tratamento para dados inválidos
+            let alertData;
+    
             try {
-                const alertData = JSON.parse(button.attr('data-alert'));
-                const modal = $j(this);
-                
-                modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-                modal.find('#modal-city').text(alertData.city || 'N/A');
-                modal.find('#modal-street').text(alertData.street || 'N/A');
-                modal.find('#modal-via-KM').text(alertData.km || 'N/A');
-                modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
-                modal.find('#modal-date-received').text(
-                    alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A'
-                );
-                modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-                modal.find('#modal-type').text(alertData.type || 'N/A');
-                modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
-                modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo"); // Corrigido operador de comparação
-
+                alertData = JSON.parse(button.attr('data-alert').replace(/&quot;/g, '"')); // Corrige JSON inválido
             } catch (error) {
                 console.error("Erro ao processar dados do alerta:", error);
-                $j('#alertModal').modal('hide');
+                return;
             }
+    
+            if (!alertData) {
+                console.error("Erro: Nenhum dado de alerta encontrado.");
+                return;
+            }
+    
+            const modal = $j(this);
+            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+            modal.find('#modal-city').text(alertData.city || 'N/A');
+            modal.find('#modal-street').text(alertData.street || 'N/A');
+            modal.find('#modal-via-KM').text(alertData.km || 'N/A');
+    
+            modal.find('#modal-location').text(`Lat: ${alertData.location_y || 'N/A'}, Lon: ${alertData.location_x || 'N/A'}`);
+            
+            modal.find('#modal-date-received').text(
+                alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A'
+            );
+            modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+            modal.find('#modal-type').text(alertData.type || 'N/A');
+            modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
+            modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
         });
     }
+    
 
     /**
      * Atualiza as cores das linhas da tabela conforme a data do alerta.
