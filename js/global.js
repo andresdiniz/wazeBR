@@ -89,7 +89,7 @@ function initializeDataTables() {
  * Configura o modal de alerta, preenchendo os dados corretamente.
  */
 function setupAlertModal() {
-    document.querySelectorAll("button[data-alert]").forEach(btn => console.log("Botão encontrado:", btn.dataset.alert));
+    document.querySelectorAll(".btn-info").forEach(btn => console.log("Botão encontrado:", btn.dataset.alert));
 
     $j('#alertModal').on('show.bs.modal', function (event) {
         const button = event.relatedTarget; // Obtém o botão que acionou o modal
