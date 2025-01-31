@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal de Detalhes do Alerta -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -137,11 +137,11 @@
                 <p><strong>Confiança:</strong> <span id="modal-confidence">N/A</span></p>
                 <p><strong>Tipo:</strong> <span id="modal-type">N/A</span></p>
                 <p><strong>Subtipo:</strong> <span id="modal-subtype">N/A</span></p>
-                <p><strong>Status:</strong> <span>Ativo</span></p>
+                <p><strong>Status:</strong> <span id="modal-status">N/A</span></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="confirm-alert" onclick="confirmarAlertaModal('{{ uuid }}', '{{ km }}')">Confirmar Alerta</button>
+                <button type="button" class="btn btn-primary" id="confirm-alert">Confirmar Alerta</button>
             </div>
         </div>
     </div>
