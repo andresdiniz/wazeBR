@@ -5,7 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
- * Criado em: 31/01/2025, 17:15 (Horário de São Paulo)
+ * Criado em: 31/01/2025, 17:17 (Horário de São Paulo)
  */
 
 (function ($) {
@@ -67,6 +67,7 @@
      */
     function setupAlertModal() {
         $j('#alertModal').on('show.bs.modal', function (event) {
+            console.log(document.querySelector("button[data-alert]").dataset.alert);
             const button = $j(event.relatedTarget);
             let alertData;
     
