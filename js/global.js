@@ -5,7 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
- * Criado em: 28/10/2023, 14:00 (Horário de São Paulo)
+ * Criado em: 31/01/2025, 17:00 (Horário de São Paulo)
  */
 
 (function ($) {
