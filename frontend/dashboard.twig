@@ -433,79 +433,8 @@
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
-<!-- Inicialização do DataTable com recursos adicionais -->
-<script>
-    // Garante que o $ não é sobrescrito por outras bibliotecas
-    var $j = jQuery.noConflict();
+<!-- Leaflet JS (para o mapa) -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-    // Usando o $j em vez do $
-    $j(document).ready(function() {
-        $j('#accidentsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "language": {
-                "lengthMenu": "Mostrar _MENU_ registros por página",
-                "zeroRecords": "Nenhum registro encontrado",
-                "info": "Exibindo página _PAGE_ de _PAGES_",
-                "infoEmpty": "Nenhum registro disponível",
-                "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                "search": "Buscar:"
-            }
-        });
-
-        $j('#hazardsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "language": {
-                "lengthMenu": "Mostrar _MENU_ registros por página",
-                "zeroRecords": "Nenhum registro encontrado",
-                "info": "Exibindo página _PAGE_ de _PAGES_",
-                "infoEmpty": "Nenhum registro disponível",
-                "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                "search": "Buscar:"
-            }
-        });
-
-        $j('#jamAlertsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "language": {
-                "lengthMenu": "Mostrar _MENU_ registros por página",
-                "zeroRecords": "Nenhum registro encontrado",
-                "info": "Exibindo página _PAGE_ de _PAGES_",
-                "infoEmpty": "Nenhum registro disponível",
-                "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                "search": "Buscar:"
-            }
-        });
-
-        $j('#otherAlertsTable').DataTable({
-            "paging": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "language": {
-                "lengthMenu": "Mostrar _MENU_ registros por página",
-                "zeroRecords": "Nenhum registro encontrado",
-                "info": "Exibindo página _PAGE_ de _PAGES_",
-                "infoEmpty": "Nenhum registro disponível",
-                "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                "search": "Buscar:"
-            }
-        });
-    });
-</script>
+<!-- Código JavaScript Unificado -->
+<script src="global.js"></script>
