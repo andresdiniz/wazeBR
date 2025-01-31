@@ -5,6 +5,7 @@
  * configurar mapas interativos, confirmar alertas e atualizar cores das linhas da tabela
  * com base no tempo do alerta.
  * 
+ * Criado em: 28/10/2023, 14:00 (Horário de São Paulo)
  */
 
 (function ($) {
@@ -12,8 +13,7 @@
     const $j = $.noConflict();
 
     $j(document).ready(function () {
-
-        // Inicializa tooltips
+        // Inicializa tooltips do Bootstrap
         document.querySelectorAll('[data-toggle="tooltip"]').forEach(function (el) {
             new bootstrap.Tooltip(el);
         });
@@ -68,24 +68,29 @@
     function setupAlertModal() {
         $j('#alertModal').on('show.bs.modal', function (event) {
             const button = $j(event.relatedTarget);
-            const alertData = JSON.parse(button.attr('data-alert')); // Correção: Usa JSON.parse para evitar erro de parsing
+            
+            // Corrigido: Adicionado tratamento para dados inválidos
+            try {
+                const alertData = JSON.parse(button.attr('data-alert'));
+                const modal = $j(this);
+                
+                modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+                modal.find('#modal-city').text(alertData.city || 'N/A');
+                modal.find('#modal-street').text(alertData.street || 'N/A');
+                modal.find('#modal-via-KM').text(alertData.km || 'N/A');
+                modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
+                modal.find('#modal-date-received').text(
+                    alertData.pubMillis ? new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() : 'N/A'
+                );
+                modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+                modal.find('#modal-type').text(alertData.type || 'N/A');
+                modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
+                modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo"); // Corrigido operador de comparação
 
-            if (!alertData) {
-                console.error("Erro: Não foi possível obter os dados do alerta.");
-                return;
+            } catch (error) {
+                console.error("Erro ao processar dados do alerta:", error);
+                $j('#alertModal').modal('hide');
             }
-
-            const modal = $j(this);
-            modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
-            modal.find('#modal-city').text(alertData.city || 'N/A');
-            modal.find('#modal-street').text(alertData.street || 'N/A');
-            modal.find('#modal-via-KM').text(alertData.km || 'N/A');
-            modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
-            modal.find('#modal-date-received').text(new Date(parseInt(alertData.pubMillis, 10)).toLocaleString() || 'N/A');
-            modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
-            modal.find('#modal-type').text(alertData.type || 'N/A');
-            modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
-            modal.find('#modal-status').text(alertData.status === "1" ? "Ativo" : "Inativo");
         });
     }
 
@@ -98,10 +103,11 @@
 
         dateCells.forEach((cell) => {
             const eventMillis = parseInt(cell.getAttribute("data-pubmillis"), 10);
-            const minutesDiff = (now - eventMillis) / (1000 * 60);
+            
+            if (isNaN(eventMillis)) return; // Corrigido: Verifica se é número válido
 
+            const minutesDiff = (now - eventMillis) / (1000 * 60);
             let bgColor = "";
-            let textColor = "";
 
             if (minutesDiff <= 5) bgColor = "#ff0000";
             else if (minutesDiff <= 15) bgColor = "#ff3333";
@@ -111,7 +117,6 @@
 
             const row = cell.parentElement;
             row.style.backgroundColor = bgColor;
-            row.style.color = textColor;
         });
     }
 
