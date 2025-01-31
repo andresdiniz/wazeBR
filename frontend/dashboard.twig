@@ -382,33 +382,31 @@
                 <!-- /.container-fluid -->
 
 
-<!-- Primeiro Modal -->
+<!-- Modal -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="alertModalLabel">Detalhes do Alerta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <p><strong>UUID:</strong> <span id="modal-uuid"></span></p>
-                <p><strong>Cidade:</strong> <span id="modal-city"></span></p>
-                <p><strong>Rua:</strong> <span id="modal-street"></span></p>
-                <p><strong>Tipo:</strong> <span id="modal-type"></span></p>
-                <p><strong>Status:</strong> <span id="modal-status"></span></p>
-                <p><strong>Localização:</strong> <span id="modal-location" data-lat="" data-lon=""></span></p>
-                <p><strong>Data Recebida:</strong> <span id="modal-date-received"></span></p>
-                <p><strong>Confiança:</strong> <span id="modal-confidence"></span></p>
+                <p><strong>UUID:</strong> <span id="modal-uuid">N/A</span></p>
+                <p><strong>Cidade:</strong> <span id="modal-city">N/A</span></p>
+                <p><strong>Via:</strong> <span id="modal-street">N/A</span></p>
+                <p id="modal-km-p"><strong>KM:</strong> <span id="modal-via-KM">N/A</span></p>
+                <p><strong>Localização:</strong> <span id="modal-location">N/A</span></p>
+                <p><strong>Data Recebido:</strong> <span id="modal-date-received">N/A</span></p>
+                <p><strong>Confiança:</strong> <span id="modal-confidence">N/A</span></p>
+                <p><strong>Tipo:</strong> <span id="modal-type">N/A</span></p>
+                <p><strong>Subtipo:</strong> <span id="modal-subtype">N/A</span></p>
+                <p><strong>Status:</strong> <span>Ativo</span></p>
             </div>
             <div class="modal-footer">
-                <button 
-                    type="button" 
-                    class="btn btn-secondary" 
-                    data-bs-dismiss="modal" 
-                    data-target="#mapModal"
-                    id="view-on-map">
-                    Visualizar no mapa
-                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="confirm-alert" onclick="confirmarAlertaModal('{{ uuid }}', '{{ km }}')">Confirmar Alerta</button>
             </div>
         </div>
     </div>

@@ -1,9 +1,81 @@
-$(document).ready(function () {
-    // Variáveis para o mapa
-    let map;
-    const markersLayer = L.layerGroup(); // Para gerenciar os marcadores
 
-    // Função para inicializar o mapa no modal
+// Usar jQuery em modo sem conflito
+var $j = jQuery.noConflict();
+
+$j(document).ready(function() {
+    // Inicializa os DataTables
+    initializeDataTables();
+    
+    // Configura o modal de alerta
+    setupAlertModal();
+
+    // Configura o mapa e eventos relacionados
+    setupMap();
+
+    // Configura a atualização das cores das linhas com base na data do alerta
+    setupRowColorUpdate();
+
+    // Configura o mapa de rotas e subrotas
+    setupRouteMap();
+
+    // Configura o logout
+    setupLogout();
+
+    // Configura a confirmação de alerta
+    setupAlertConfirmation();
+});
+
+function initializeDataTables() {
+    const tables = ['#accidentsTable', '#trafficTable', '#jamsTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
+    tables.forEach(table => {
+        if (!$j.fn.DataTable.isDataTable(table)) {
+            $j(table).DataTable({
+                responsive: true,
+                autoWidth: false,
+                paging: true,
+                searching: true,
+                info: true,
+                language: {
+                    search: "Buscar:",
+                    paginate: {
+                        next: "Próximo",
+                        previous: "Anterior",
+                    },
+                },
+            });
+        }
+    });
+}
+
+function setupAlertModal() {
+    $j('#alertModal').on('show.bs.modal', function(event) {
+        var button = $j(event.relatedTarget);
+        var alertData = button.data('alert');
+
+        if (!alertData) {
+            console.error("Erro: Não foi possível obter os dados do alerta.");
+            return;
+        }
+
+        var modal = $j(this);
+        modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
+        modal.find('#modal-city').text(alertData.city || 'N/A');
+        modal.find('#modal-street').text(alertData.street || 'N/A');
+        modal.find('#modal-location').text(`Lat: ${alertData.location_x || 'N/A'}, Lon: ${alertData.location_y || 'N/A'}`);
+        modal.find('#modal-date-received').text(new Date(alertData.pubMillis).toLocaleString() || 'N/A');
+        modal.find('#modal-confidence').text(alertData.confidence || 'N/A');
+        modal.find('#modal-type').text('Alerta');
+        modal.find('#modal-subtype').text('N/A');
+
+        var status = alertData.status === 1 ? 'Ativo' : (alertData.status === 0 ? 'Inativo' : 'N/A');
+        modal.find('#modal-status').text(status);
+    });
+}
+
+function setupMap() {
+    let map;
+    const markersLayer = L.layerGroup();
+
     function initMap(lat, lon, alertType, city, street, uuid, status, confidence) {
         if (!map) {
             map = L.map('map').setView([lat, lon], 13);
@@ -12,7 +84,7 @@ $(document).ready(function () {
             }).addTo(map);
         }
 
-        markersLayer.clearLayers(); // Limpar marcadores antigos
+        markersLayer.clearLayers();
 
         const popupContent = `
             <strong>${alertType}</strong><br>
@@ -29,24 +101,22 @@ $(document).ready(function () {
             .openPopup();
 
         markersLayer.addTo(map);
-        map.setView([lat, lon], 13); // Ajustar visualização do mapa
+        map.setView([lat, lon], 13);
     }
 
-    // Função para verificar dados de localização antes de inicializar o mapa
     function isValidLocation(lat, lon) {
         return lat && lon && lat !== 'N/A' && lon !== 'N/A';
     }
 
-    // Quando o botão "Visualizar no mapa" for clicado, abrir o modal do mapa
-    $('#view-on-map').click(function () {
-        const lat = $('#modal-location').data('lat');
-        const lon = $('#modal-location').data('lon');
-        const alertType = $('#modal-type').text();
-        const city = $('#modal-city').text();
-        const street = $('#modal-street').text();
-        const uuid = $('#modal-uuid').text();
-        const status = $('#modal-status').text();
-        const confidence = $('#modal-confidence').text();
+    $j('#view-on-map').click(function () {
+        const lat = $j('#modal-location').data('lat');
+        const lon = $j('#modal-location').data('lon');
+        const alertType = $j('#modal-type').text();
+        const city = $j('#modal-city').text();
+        const street = $j('#modal-street').text();
+        const uuid = $j('#modal-uuid').text();
+        const status = $j('#modal-status').text();
+        const confidence = $j('#modal-confidence').text();
 
         if (!isValidLocation(lat, lon)) {
             alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
@@ -55,23 +125,21 @@ $(document).ready(function () {
 
         initMap(lat, lon, alertType, city, street, uuid, status, confidence);
 
-        $('#mapModal').modal('show').one('shown.bs.modal', function () {
-            map.invalidateSize(); // Atualiza o tamanho do mapa
+        $j('#mapModal').modal('show').one('shown.bs.modal', function () {
+            map.invalidateSize();
         });
     });
-    // Atualizar o mapa quando a janela for redimensionada
-    $(window).on('resize', function () {
+
+    $j(window).on('resize', function () {
         if (map) {
-            map.invalidateSize(); // Redimensiona o mapa quando a janela for redimensionada
+            map.invalidateSize();
         }
     });
-});
+}
 
-// Atualizar cores das linhas com base na data do alerta
-document.addEventListener("DOMContentLoaded", function () {
+function setupRowColorUpdate() {
     const dateCells = document.querySelectorAll(".alert-date");
 
-    // Função para calcular a cor com base na diferença de tempo
     function getRowColor(minutesDiff) {
         if (minutesDiff <= 5) {
             return { bgColor: "#ff0000", textColor: "blue" };
@@ -84,11 +152,10 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (minutesDiff <= 90) {
             return { bgColor: "#ffcccc", textColor: "blue" };
         } else {
-            return { bgColor: "", textColor: "" }; // Cor padrão
+            return { bgColor: "", textColor: "" };
         }
     }
 
-    // Função para atualizar as cores das linhas
     function updateRowColors() {
         const now = new Date().getTime();
 
@@ -104,67 +171,54 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    updateRowColors(); // Atualiza cores na inicialização
-    setInterval(updateRowColors, 60000); // Atualiza periodicamente a cada 1 minuto
-});
+    updateRowColors();
+    setInterval(updateRowColors, 60000);
+}
 
-
-document.addEventListener("DOMContentLoaded", function () {
+function setupRouteMap() {
     const mapModal = document.getElementById('mapModal');
     const routeMapContainer = document.getElementById('mapContainer');
     const loadingIndicator = document.getElementById('loadingIndicator');
     let routeMap;
 
-    // Inicializa o mapa de rotas se ainda não existir
     function initializeRouteMap() {
         if (!routeMap) {
-            console.log("Inicializando mapa...");
-            routeMap = L.map(routeMapContainer).setView([0, 0], 2); // Centro inicial genérico
+            routeMap = L.map(routeMapContainer).setView([0, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(routeMap);
         }
     }
 
-    // Limpa o mapa de rotas
     function clearRouteMap() {
-        console.log("Limpando o mapa...");
         if (routeMap) {
             routeMap.eachLayer((layer) => {
-                if (!(layer instanceof L.TileLayer)) { // Mantém apenas a camada base
+                if (!(layer instanceof L.TileLayer)) {
                     routeMap.removeLayer(layer);
                 }
             });
         }
     }
 
-    // Mostra o indicador de carregamento
     function showLoadingIndicator() {
-        console.log("Mostrando indicador de carregamento...");
         loadingIndicator.style.display = 'block';
     }
 
-    // Oculta o indicador de carregamento
     function hideLoadingIndicator() {
-        console.log("Ocultando indicador de carregamento...");
         loadingIndicator.style.display = 'none';
     }
 
-    // Função para carregar as linhas de rota com subrotas ativas e velocidades
     function loadRouteLinesWithSubroutes(routeId) {
-        showLoadingIndicator(); // Mostrar indicador de carregamento
+        showLoadingIndicator();
 
-        // Carregar as linhas da rota principal
         fetch(`../wazeportal/api.php?action=get_route_lines&route_id=${routeId}`)
             .then(response => response.json())
             .then(routeData => {
-                console.log("Dados da rota:", routeData);
                 if (Array.isArray(routeData) && routeData.length > 0) {
                     const lineCoordinates = [];
                     let latSum = 0, lngSum = 0;
                     let validPointsCount = 0;
 
-                    // Iterar sobre os pontos da rota principal e adicionar ao array de coordenadas
                     routeData.forEach(point => {
                         const x = parseFloat(point.x);
                         const y = parseFloat(point.y);
@@ -177,15 +231,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
 
-                    // Calcular a posição central da rota
                     const latAvg = latSum / validPointsCount;
                     const lngAvg = lngSum / validPointsCount;
 
-                    // Desenhar a rota principal no mapa
                     L.polyline(lineCoordinates, { color: 'blue' }).addTo(routeMap);
-                    routeMap.setView([latAvg, lngAvg], 12); // Zoom ajustado para se adaptar melhor à rota
+                    routeMap.setView([latAvg, lngAvg], 12);
 
-                    // Agora, carregar as subrotas ativas
                     loadSubroutes(routeId, lineCoordinates);
                 } else {
                     console.error("Nenhum dado válido para a rota.");
@@ -201,119 +252,84 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // Função para desenhar as subrotas corretamente usando os pontos de rota
-   // Função para desenhar as subrotas corretamente
-function drawSubrouteOnSegments(subroute) {
-    const subrouteCoordinates = subroute.route_points.map(point => [parseFloat(point.y), parseFloat(point.x)]);
+    function drawSubrouteOnSegments(subroute) {
+        const subrouteCoordinates = subroute.route_points.map(point => [parseFloat(point.y), parseFloat(point.x)]);
+        const color = getColorForSpeed(subroute.avg_speed);
 
-    // Calcular a cor da subrota com base na velocidade média
-    const color = getColorForSpeed(subroute.avg_speed);
-
-    // Desenha a linha da subrota, conectando os pontos
-    const polyline = L.polyline(subrouteCoordinates, {
-        color: color, // Cor definida pela velocidade média
-        weight: 6,
-        opacity: 0.8
-    }).addTo(routeMap);
-
-    // Armazenar a cor original para restaurar mais tarde
-    polyline.originalColor = color;
-
-    // Adicionar informações ao clicar sobre a subrota
-    polyline.on('click', function () {
-        const distance = calculateDistance(subrouteCoordinates);
-        
-        // Garantir que avg_speed seja um número válido antes de usar toFixed()
-        const avgSpeed = parseFloat(subroute.avg_speed);
-        const formattedSpeed = !isNaN(avgSpeed) ? avgSpeed.toFixed(2) : 'N/A'; // Valor padrão caso não seja um número
-
-        const time = (distance / avgSpeed) * 60; // Tempo em minutos (distância / velocidade)
-        const formattedTime = !isNaN(time) && time > 0 ? time.toFixed(2) : 'N/A'; // Valor padrão caso não seja um número
-        const formattedDistance = distance.toFixed(2); // Distância formatada
-
-        // Exibir o balão com as informações de velocidade, tempo e distância
-        polyline.bindPopup(`
-            <strong>Detalhes do trecho</strong><br>
-            <b>Velocidade Média:</b> ${formattedSpeed} km/h<br>
-            <b>Distância:</b> ${formattedDistance} km<br>
-            <b>Tempo estimado:</b> ${formattedTime} minutos
-        `).openPopup();
-
-        // Centralizar o mapa no segmento clicado
-        routeMap.setView(polyline.getBounds().getCenter(), 14); // Centraliza no meio da linha com zoom 14
-
-        // Destacar o trecho clicado com uma cor diferente
-        polyline.setStyle({
-            color: 'purple', // Cor para destacar o trecho
-            weight: 8,       // Aumentar a espessura da linha para destacá-la
-            opacity: 1       // Aumentar a opacidade para tornar a linha mais visível
-        });
-
-        // Restaurar a cor original de outras linhas
-        routeMap.eachLayer(function(layer) {
-            if (layer instanceof L.Polyline && layer !== polyline) {
-                layer.setStyle({
-                    color: layer.originalColor, // Restaura a cor original baseada na velocidade média
-                    weight: 6,
-                    opacity: 0.8
-                });
-            }
-        });
-    });
-
-    // Evento para restaurar a cor da linha ao fechar o popup (ao clicar fora)
-    polyline.on('popupclose', function () {
-        polyline.setStyle({
-            color: polyline.originalColor, // Restaurar a cor original
+        const polyline = L.polyline(subrouteCoordinates, {
+            color: color,
             weight: 6,
             opacity: 0.8
+        }).addTo(routeMap);
+
+        polyline.originalColor = color;
+
+        polyline.on('click', function () {
+            const distance = calculateDistance(subrouteCoordinates);
+            const avgSpeed = parseFloat(subroute.avg_speed);
+            const formattedSpeed = !isNaN(avgSpeed) ? avgSpeed.toFixed(2) : 'N/A';
+            const time = (distance / avgSpeed) * 60;
+            const formattedTime = !isNaN(time) && time > 0 ? time.toFixed(2) : 'N/A';
+            const formattedDistance = distance.toFixed(2);
+
+            polyline.bindPopup(
+                `<strong>Detalhes do trecho</strong><br>
+                <b>Velocidade Média:</b> ${formattedSpeed} km/h<br>
+                <b>Distância:</b> ${formattedDistance} km<br>
+                <b>Tempo estimado:</b> ${formattedTime} minutos`
+            ).openPopup();
+
+            routeMap.setView(polyline.getBounds().getCenter(), 14);
+
+            polyline.setStyle({
+                color: 'purple',
+                weight: 8,
+                opacity: 1
+            });
+
+            routeMap.eachLayer(function(layer) {
+                if (layer instanceof L.Polyline && layer !== polyline) {
+                    layer.setStyle({
+                        color: layer.originalColor,
+                        weight: 6,
+                        opacity: 0.8
+                    });
+                }
+            });
         });
-    });
-}
 
-// Função para calcular a distância entre dois pontos (em quilômetros)
-function calculateDistance(coords) {
-    let totalDistance = 0;
-
-    for (let i = 0; i < coords.length - 1; i++) {
-        const lat1 = coords[i][0], lon1 = coords[i][1];
-        const lat2 = coords[i + 1][0], lon2 = coords[i + 1][1];
-
-        // Calcular a distância usando a fórmula de Haversine
-        const R = 6371; // Raio da Terra em km
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        totalDistance += R * c; // Distância em km
+        polyline.on('popupclose', function () {
+            polyline.setStyle({
+                color: polyline.originalColor,
+                weight: 6,
+                opacity: 0.8
+            });
+        });
     }
 
-    return totalDistance;
-}
+    function calculateDistance(coords) {
+        let totalDistance = 0;
 
-    // Função para calcular a distância Haversine entre dois pontos (em km)
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Raio da Terra em km
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distância em km
+        for (let i = 0; i < coords.length - 1; i++) {
+            const lat1 = coords[i][0], lon1 = coords[i][1];
+            const lat2 = coords[i + 1][0], lon2 = coords[i + 1][1];
+
+            const R = 6371;
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                        Math.cos(φ1) * Math.cos(φ2) *
+                        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            totalDistance += R * c;
+        }
+
+        return totalDistance;
     }
 
-    // Função para converter graus para radianos
-    function toRad(degrees) {
-        return degrees * Math.PI / 180;
-    }
-
-    // Função para carregar as subrotas e desenhá-las sobre a rota principal
     function loadSubroutes(routeId, routeCoordinates) {
         showLoadingIndicator();
 
@@ -325,10 +341,8 @@ function calculateDistance(coords) {
                 return response.json();
             })
             .then(subroutes => {
-                console.log("Dados das subrotas:", subroutes);
                 if (Array.isArray(subroutes) && subroutes.length > 0) {
                     subroutes.forEach((subroute, index) => {
-                        // Desenhar a rota dentro da caixa com a cor baseada na velocidade média
                         drawSubrouteOnSegments(subroute);
                     });
                 } else {
@@ -344,104 +358,96 @@ function calculateDistance(coords) {
             });
     }
 
-    // Função para obter cor baseada na velocidade média
     function getColorForSpeed(avgSpeed) {
         if (avgSpeed < 30) {
-            return 'red'; // Atraso (velocidade baixa)
+            return 'red';
         } else if (avgSpeed < 60) {
-            return 'orange'; // Velocidade moderada
+            return 'orange';
         } else {
-            return 'green'; // Alta velocidade
+            return 'green';
         }
     }
 
-    // Evento para botão "VER +" associado a rotas
     document.querySelectorAll('.view-route').forEach(button => {
         button.addEventListener('click', function () {
             const routeId = this.getAttribute('data-route-id');
             console.log(`Botão clicado, carregando a rota com ID: ${routeId}`);
 
-            clearRouteMap();         // Limpar o mapa antes de carregar nova rota
-            initializeRouteMap();    // Inicializar o mapa, se necessário
+            clearRouteMap();
+            initializeRouteMap();
 
-            // Carregar a rota com subrotas
             loadRouteLinesWithSubroutes(routeId);
 
-            // Mostrar o modal
             $('#mapModal').modal('show');
         });
     });
 
-    // Atualizar tamanho do mapa quando o modal for exibido
     $('#mapModal').on('shown.bs.modal', function () {
-        console.log("Modal aberto, atualizando o tamanho do mapa...");
         if (routeMap) {
-            routeMap.invalidateSize(); // Corrige problemas de redimensionamento do mapa
+            routeMap.invalidateSize();
         }
     });
-});
+}
 
-// Função para apagar cookies
-function deleteAllCookies() {
-    var cookies = document.cookie.split(";");
+function setupLogout() {
+    function deleteAllCookies() {
+        var cookies = document.cookie.split(";");
 
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var eqPos = cookie.indexOf("=");
-        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i];
+            var eqPos = cookie.indexOf("=");
+            var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
 
-        // Apaga todos os cookies configurando a data para o passado
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+        }
     }
+
+    function destroySession() {
+        sessionStorage.clear();
+        localStorage.clear();
+    }
+
+    function logout() {
+        deleteAllCookies();
+        destroySession();
+        window.location.href = "login.html";
+    }
+
+    document.querySelector('.btn-primary').addEventListener('click', logout);
 }
 
-// Função para destruir a sessão
-function destroySession() {
-    // Você pode adicionar mais variáveis de sessão aqui, dependendo da sua implementação
-    sessionStorage.clear(); // Limpa o sessionStorage
-    localStorage.clear(); // Limpa o localStorage
-}
+function setupAlertConfirmation() {
+    function confirmarAlerta(uuid) {
+        console.log('Confirmar alerta:', uuid);
+        $j.ajax({
+            url: '/api.php?action=confirm_alert',
+            type: 'POST',
+            data: { uuid: uuid, status: 1 },
+            success: function(response) {
+                alert('Alerta confirmado com sucesso!');
+                $('#alertModal').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                alert('Erro ao confirmar o alerta. Tente novamente.');
+            },
+        });
+    }
 
-// Função para realizar o logout
-function logout() {
-    // Apaga os cookies e destrói a sessão
-    deleteAllCookies();
-    destroySession();
+    function confirmarAlertaModal(uuid) {
+        console.log('Confirmar alerta clicado');
 
-    // Redireciona o usuário para a página de login
-    window.location.href = "login.html";
-}
+        if (uuid) {
+            console.log('UUID:', uuid);
+            confirmarAlerta(uuid);
+        } else {
+            console.log('Erro: UUID não encontrado');
+        }
+    }
 
-// Função para confirmar alerta
-function confirmarAlerta(uuid) {
-    console.log('Confirmar alerta:', uuid);
-    $.ajax({
-        url: '/api.php?action=confirm_alert',
-        type: 'POST',
-        data: { uuid: uuid, 
-            km : km,
-            status: 1 },
-        success: function(response) {
-            alert('Alerta confirmado com sucesso!');
-            $('#alertModal').modal('hide');
-        },
-        error: function(xhr, status, error) {
-            alert('Erro ao confirmar o alerta. Tente novamente.');
-        },
+    document.querySelectorAll('.confirm-alert').forEach(button => {
+        button.addEventListener('click', function () {
+            const uuid = this.getAttribute('data-uuid');
+            confirmarAlertaModal(uuid);
+        });
     });
 }
-
-function confirmarAlertaModal(uuid,km) {
-    console.log('Confirmar alerta clicado');
-
-    if (uuid && km) {
-        console.log('UUID:', uuid, 'KM:', km);
-        confirmarAlerta(uuid, km); // Chama a função de confirmação
-    } else {
-        console.log('Erro: UUID ou KM não encontrados');
-    }
-}
-
-// Adiciona um evento para o clique no botão de logout
-document.querySelector('.btn-primary').addEventListener('click', logout);
-
