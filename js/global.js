@@ -38,29 +38,52 @@
     });
 
     /**
-     * Inicializa as tabelas DataTables para melhor experiência do usuário.
-     */
-    function initializeDataTables() {
-        const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
-        tables.forEach(table => {
-            if (!$j.fn.DataTable.isDataTable(table) && document.querySelector(table)) {
-                $j(table).DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    paging: true,
-                    searching: true,
-                    info: true,
-                    language: {
-                        search: "Buscar:",
-                        paginate: {
-                            next: "Próximo",
-                            previous: "Anterior",
-                        },
+ * Inicializa as tabelas DataTables para melhor experiência do usuário.
+ */
+function initializeDataTables() {
+    const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
+    
+    tables.forEach(table => {
+        if (!$j.fn.DataTable.isDataTable(table) && document.querySelector(table)) {
+            $j(table).DataTable({
+                responsive: true,
+                autoWidth: false,
+                paging: true,
+                searching: true,
+                info: true,
+                dom: 'Bfrtip', // Adiciona os botões acima da tabela
+                buttons: [
+                    {
+                        extend: 'csv',
+                        text: 'Exportar CSV',
+                        titleAttr: 'Exportar para CSV',
+                        className: 'btn btn-primary'
                     },
-                });
-            }
-        });
-    }
+                    {
+                        extend: 'excel',
+                        text: 'Exportar Excel',
+                        titleAttr: 'Exportar para Excel',
+                        className: 'btn btn-success'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'Exportar PDF',
+                        titleAttr: 'Exportar para PDF',
+                        className: 'btn btn-danger'
+                    }
+                ],
+                language: {
+                    search: "Buscar:",
+                    paginate: {
+                        next: "Próximo",
+                        previous: "Anterior",
+                    },
+                },
+            });
+        }
+    });
+}
+
 
     /**
      * Configura o modal de alerta, preenchendo os dados corretamente.
