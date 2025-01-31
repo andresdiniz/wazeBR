@@ -11,9 +11,13 @@
     const $j = $.noConflict();
 
     $j(document).ready(function () {
-        // Inicializa tooltips do Bootstrap
-        $j('[data-toggle="tooltip"]').tooltip();
-
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('[data-toggle="tooltip"]').forEach(function (el) {
+                new bootstrap.Tooltip(el);
+            });
+        });
+        
         // Inicializa tabelas com DataTables
         initializeDataTables();
 
