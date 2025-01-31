@@ -21,9 +21,6 @@
         // Inicializa tabelas com DataTables
         initializeDataTables();
 
-        // Configura modal de alerta
-        setupAlertModal();
-
         // Configura o mapa interativo (se o elemento #map existir)
         if (document.getElementById('map')) {
             //setupMap();
@@ -35,76 +32,68 @@
         // Atualiza as cores das linhas com base na data do alerta
         updateRowColors();
         setInterval(updateRowColors, 60000); // Atualiza a cada 1 minuto
+
+        // Configura modal de alerta
+        setupAlertModal();
     });
 
     /**
- * Inicializa as tabelas DataTables para melhor experiência do usuário.
- */
-function initializeDataTables() {
-    const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
-    
-    tables.forEach(table => {
-        if (!$j.fn.DataTable.isDataTable(table) && document.querySelector(table)) {
-            $j(table).DataTable({
-                responsive: true,
-                autoWidth: false,
-                paging: true,
-                searching: true,
-                info: true,
-                dom: 'Bfrtip', // Adiciona os botões acima da tabela
-                buttons: [
-                    {
-                        extend: 'csv',
-                        text: 'Exportar CSV',
-                        titleAttr: 'Exportar para CSV',
-                        className: 'btn btn-primary'
+     * Inicializa as tabelas DataTables para melhor experiência do usuário.
+     */
+    function initializeDataTables() {
+        const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
+        
+        tables.forEach(table => {
+            if (!$j.fn.DataTable.isDataTable(table) && document.querySelector(table)) {
+                $j(table).DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    paging: true,
+                    searching: true,
+                    info: true,
+                    dom: 'Bfrtip', // Adiciona os botões acima da tabela
+                    buttons: [
+                        {
+                            extend: 'csv',
+                            text: 'Exportar CSV',
+                            titleAttr: 'Exportar para CSV',
+                            className: 'btn btn-primary'
+                        },
+                        {
+                            extend: 'excel',
+                            text: 'Exportar Excel',
+                            titleAttr: 'Exportar para Excel',
+                            className: 'btn btn-success'
+                        },
+                        {
+                            extend: 'pdf',
+                            text: 'Exportar PDF',
+                            titleAttr: 'Exportar para PDF',
+                            className: 'btn btn-danger'
+                        }
+                    ],
+                    language: {
+                        search: "Buscar:",
+                        paginate: {
+                            next: "Próximo",
+                            previous: "Anterior",
+                        },
                     },
-                    {
-                        extend: 'excel',
-                        text: 'Exportar Excel',
-                        titleAttr: 'Exportar para Excel',
-                        className: 'btn btn-success'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: 'Exportar PDF',
-                        titleAttr: 'Exportar para PDF',
-                        className: 'btn btn-danger'
-                    }
-                ],
-                language: {
-                    search: "Buscar:",
-                    paginate: {
-                        next: "Próximo",
-                        previous: "Anterior",
-                    },
-                },
-            });
-        }
-    });
-}
-
-
-    /**
- * Configura o modal de alerta, preenchendo os dados corretamente.
- */
-    function setupAlertModal() {
-        // Verifica se os botões existem
-        document.querySelectorAll('[data-target="#vermais"]').forEach(btn => {
-            console.log("Botão encontrado:", btn.dataset.alert);
-        });
-    
-        // Configura o evento no modal CORRETO
-        $j('#vermais').on('show.bs.modal', function (event) {
-            const button = $j(event.relatedTarget); // Usar jQuery para garantir compatibilidade
-    
-            if (!button.length) {
-                console.error("Erro: Botão acionador não encontrado.");
-                return;
+                });
             }
-    
+        });
+    }
+
+    /**
+     * Configura o modal de alerta, preenchendo os dados corretamente.
+     */
+    function setupAlertModal() {
+        // Configura o evento no botão para abrir o modal
+        $j('[data-target="#vermais"]').on('click', function (event) {
+            const button = $j(this); // O botão que acionou o modal
+
             console.log("Botão acionador:", button);
-    
+
             let alertData;
             try {
                 alertData = JSON.parse(button.attr('data-alert')); // Usar .attr() do jQuery
@@ -113,8 +102,8 @@ function initializeDataTables() {
                 console.error("Erro ao parsear JSON:", error, "Dados:", button.attr('data-alert'));
                 return;
             }
-    
-            const modal = $j(this);
+
+            const modal = $j('#alertModal'); // Supondo que o ID do modal seja 'alertModal'
             modal.find('#modal-uuid').text(alertData.uuid || 'N/A');
             modal.find('#modal-city').text(alertData.city || 'N/A');
             modal.find('#modal-street').text(alertData.street || 'N/A');
@@ -125,8 +114,12 @@ function initializeDataTables() {
             modal.find('#modal-type').text(alertData.type || 'N/A');
             modal.find('#modal-subtype').text(alertData.subtype || 'N/A');
             modal.find('#modal-status').text(alertData.status == 1 ? "Ativo" : "Inativo");
+            
+            // Abre o modal após carregar os dados
+            modal.modal('show');
         });
     }
+
     /**
      * Atualiza as cores das linhas da tabela conforme a data do alerta.
      */
