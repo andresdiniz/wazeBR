@@ -90,6 +90,7 @@
     function setupAlertButtons() {
         $j('[data-target="#vermais"]').on('click', function (event) {
             const button = $j(this); // O botão que acionou o modal
+            console.log("Botão clicado:", button);
             
             console.log("Botão encontrado:", button.attr('data-alert'));
 
