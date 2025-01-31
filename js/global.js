@@ -30,48 +30,56 @@ document.addEventListener('DOMContentLoaded', function () {
  */
 function initializeDataTables() {
     const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
-    
+
     tables.forEach(tableId => {
         const tableElement = document.querySelector(tableId);
-        if (tableElement && !tableElement.classList.contains('dataTable')) {
-            new DataTable(tableElement, {
-                responsive: true,
-                autoWidth: false,
-                paging: true,
-                searching: true,
-                info: true,
-                dom: 'Bfrtip', // Adiciona os botões acima da tabela
-                buttons: [
-                    {
-                        extend: 'csv',
-                        text: 'Exportar CSV',
-                        titleAttr: 'Exportar para CSV',
-                        className: 'btn btn-primary'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Exportar Excel',
-                        titleAttr: 'Exportar para Excel',
-                        className: 'btn btn-success'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: 'Exportar PDF',
-                        titleAttr: 'Exportar para PDF',
-                        className: 'btn btn-danger'
-                    }
-                ],
-                language: {
-                    search: "Buscar:",
-                    paginate: {
-                        next: "Próximo",
-                        previous: "Anterior",
-                    },
-                },
-            });
+        if (tableElement) {
+            try {
+                if (!tableElement.classList.contains('dataTable')) {
+                    // Inicializa o DataTable apenas uma vez
+                    new DataTable(tableElement, {
+                        responsive: true,
+                        autoWidth: false,
+                        paging: true,
+                        searching: true,
+                        info: true,
+                        dom: 'Bfrtip', // Adiciona os botões acima da tabela
+                        buttons: [
+                            {
+                                extend: 'csv',
+                                text: 'Exportar CSV',
+                                titleAttr: 'Exportar para CSV',
+                                className: 'btn btn-primary'
+                            },
+                            {
+                                extend: 'excel',
+                                text: 'Exportar Excel',
+                                titleAttr: 'Exportar para Excel',
+                                className: 'btn btn-success'
+                            },
+                            {
+                                extend: 'pdf',
+                                text: 'Exportar PDF',
+                                titleAttr: 'Exportar para PDF',
+                                className: 'btn btn-danger'
+                            }
+                        ],
+                        language: {
+                            search: "Buscar:",
+                            paginate: {
+                                next: "Próximo",
+                                previous: "Anterior",
+                            },
+                        },
+                    });
+                }
+            } catch (error) {
+                console.error("Erro ao inicializar o DataTable: ", error);
+            }
         }
     });
 }
+
 
 /**
  * Configura os eventos de clique nos botões de alerta.
