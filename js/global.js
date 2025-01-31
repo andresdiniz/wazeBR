@@ -16,8 +16,10 @@ $(document).ready(function () {
     // Configura modal de alerta
     setupAlertModal();
 
-    // Configura o mapa interativo
-    setupMap();
+    // Configura o mapa interativo (se o elemento #map existir)
+    if (document.getElementById('map')) {
+        setupMap();
+    }
 
     // Configura confirmação de alerta
     setupAlertConfirmation();
@@ -33,7 +35,7 @@ $(document).ready(function () {
 function initializeDataTables() {
     const tables = ['#accidentsTable', '#trafficTable', '#hazardsTable', '#jamAlertsTable', '#otherAlertsTable'];
     tables.forEach(table => {
-        if (!$.fn.DataTable.isDataTable(table)) {
+        if (!$.fn.DataTable.isDataTable(table) && document.querySelector(table)) {
             $(table).DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -114,48 +116,55 @@ function setupMap() {
         map.setView([lat, lon], 13);
     }
 
-    $('#view-on-map').click(function () {
-        const lat = $('#modal-location').data('lat');
-        const lon = $('#modal-location').data('lon');
+    // Verifica se o botão #view-on-map existe antes de adicionar o evento
+    const viewOnMapButton = document.getElementById('view-on-map');
+    if (viewOnMapButton) {
+        viewOnMapButton.addEventListener('click', function () {
+            const lat = $('#modal-location').data('lat');
+            const lon = $('#modal-location').data('lon');
 
-        if (!lat || !lon || lat === 'N/A' || lon === 'N/A') {
-            alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
-            return;
-        }
+            if (!lat || !lon || lat === 'N/A' || lon === 'N/A') {
+                alert('Dados de localização inválidos. Não foi possível mostrar o mapa.');
+                return;
+            }
 
-        initMap(lat, lon);
-        $('#mapModal').modal('show').one('shown.bs.modal', function () {
-            map.invalidateSize();
+            initMap(lat, lon);
+            $('#mapModal').modal('show').one('shown.bs.modal', function () {
+                map.invalidateSize();
+            });
         });
-    });
+    }
 }
 
 /**
  * Configura a confirmação de alertas via AJAX.
  */
 function setupAlertConfirmation() {
-    $('#confirm-alert').click(function () {
-        const uuid = $('#modal-uuid').text();
-        const km = $('#modal-via-KM').text();
+    const confirmAlertButton = document.getElementById('confirm-alert');
+    if (confirmAlertButton) {
+        confirmAlertButton.addEventListener('click', function () {
+            const uuid = $('#modal-uuid').text();
+            const km = $('#modal-via-KM').text();
 
-        if (!uuid || uuid === 'N/A') {
-            console.error('Erro: UUID não encontrado.');
-            return;
-        }
+            if (!uuid || uuid === 'N/A') {
+                console.error('Erro: UUID não encontrado.');
+                return;
+            }
 
-        $.ajax({
-            url: '/api.php?action=confirm_alert',
-            type: 'POST',
-            data: { uuid: uuid, km: km, status: 1 },
-            success: function () {
-                alert('Alerta confirmado com sucesso!');
-                $('#alertModal').modal('hide');
-            },
-            error: function () {
-                alert('Erro ao confirmar o alerta. Tente novamente.');
-            },
+            $.ajax({
+                url: '/api.php?action=confirm_alert',
+                type: 'POST',
+                data: { uuid: uuid, km: km, status: 1 },
+                success: function () {
+                    alert('Alerta confirmado com sucesso!');
+                    $('#alertModal').modal('hide');
+                },
+                error: function () {
+                    alert('Erro ao confirmar o alerta. Tente novamente.');
+                },
+            });
         });
-    });
+    }
 }
 
 /**
