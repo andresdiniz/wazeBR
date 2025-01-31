@@ -33,8 +33,8 @@
         updateRowColors();
         setInterval(updateRowColors, 60000); // Atualiza a cada 1 minuto
 
-        // Configura modal de alerta
-        setupAlertModal();
+        // Configura o evento de clique nos botões que abrem o modal
+        setupAlertButtons();
     });
 
     /**
@@ -85,14 +85,13 @@
     }
 
     /**
-     * Configura o modal de alerta, preenchendo os dados corretamente.
+     * Configura os eventos de clique nos botões de alerta.
      */
-    function setupAlertModal() {
-        // Configura o evento no botão para abrir o modal
+    function setupAlertButtons() {
         $j('[data-target="#vermais"]').on('click', function (event) {
             const button = $j(this); // O botão que acionou o modal
-
-            console.log("Botão acionador:", button);
+            
+            console.log("Botão encontrado:", button.attr('data-alert'));
 
             let alertData;
             try {
