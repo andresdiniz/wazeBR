@@ -566,7 +566,6 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
             }
         }
 
-        
         // Desativar todas as irregularidades se nenhuma foi encontrada
         if (!$irregularitiesFound) {
             echo "Nenhuma irregularidade encontrada em nenhuma URL. Desativando todas...\n";
@@ -580,4 +579,5 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
         echo "Erro ao processar os dados na consulta: " . $e->getMessage() . "\n";
         echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n"; 
     }
+}
 }
