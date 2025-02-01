@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 set_time_limit(1200);  // Define o tempo limite para 5 minutos (300 segundos)
 
 require_once __DIR__ . '/config/configbd.php';
