@@ -520,11 +520,13 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
                             $shouldSend = false;
                         } else {
                             // Aumentar o cooldown baseado no número de envios anteriores
-                            $newCooldown = match(true) {
-                                $sendCount >= 5 => '24 HOUR',    // Após 5 alertas, cooldown de 24h
-                                $sendCount >= 3 => '6 HOUR',     // Após 3 alertas, cooldown de 6h
-                                default => '1 HOUR'              // Cooldown inicial de 1h
-                            };
+                            if ($sendCount >= 5) {
+                                $newCooldown = '24 HOUR';
+                            } elseif ($sendCount >= 3) {
+                                $newCooldown = '6 HOUR';
+                            } else {
+                                $newCooldown = '1 HOUR';
+                            }
                         }
                     } else {
                         $newCooldown = '30 MINUTE'; // Primeiro alerta tem cooldown curto
