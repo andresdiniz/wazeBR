@@ -521,11 +521,11 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
                         } else {
                             // Aumentar o cooldown baseado no número de envios anteriores
                             if ($sendCount >= 5) {
-                                $newCooldown = '24 HOUR';
+                                $newCooldown = '30 MINUTE';
                             } elseif ($sendCount >= 3) {
-                                $newCooldown = '6 HOUR';
+                                $newCooldown = '15 MINUTE';
                             } else {
-                                $newCooldown = '1 HOUR';
+                                $newCooldown = '1 MINUTE';
                             }
                         }
                     } else {
