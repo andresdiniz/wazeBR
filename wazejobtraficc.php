@@ -564,7 +564,6 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
                 }
 
             }
-        }
 
         // Desativar todas as irregularidades se nenhuma foi encontrada
         if (!$irregularitiesFound) {
