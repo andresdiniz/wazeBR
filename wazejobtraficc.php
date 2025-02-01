@@ -354,7 +354,7 @@ function generateDailyReport($pdo) {
         $stmt->execute($params);
         
     } catch (Exception $e) {
-        logError("Erro gerando relatório: " . $e->getMessage());
+        logToFile('error', "Erro gerando relatório: " . $e->getMessage());
     }
 }
 
