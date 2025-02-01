@@ -7,7 +7,6 @@ error_reporting(E_ALL);
 set_time_limit(1200);
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
-require_once __DIR__ . '/functions/email_service.php'; // Novo arquivo para e-mails
 
 $pdo = Database::getConnection();
 
