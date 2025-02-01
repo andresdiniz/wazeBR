@@ -48,7 +48,7 @@ foreach ($jsonUrls as $jsonUrl) {
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();
-        logError("Erro processando $jsonUrl: " . $e->getMessage());
+        logToFile('error', "Erro processando $jsonUrl: " . $e->getMessage());
     }
 }
 
@@ -346,7 +346,7 @@ function generateDailyReport($pdo) {
         
         $stmt->execute([uniqid('rep_')]);
     } catch (Exception $e) {
-        logError("Erro gerando relatório: " . $e->getMessage());
+        logToFile('error', "Erro gerando relatório: " . $e->getMessage());
     }
 }
 
