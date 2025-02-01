@@ -415,7 +415,8 @@ foreach ($jsonUrls as $jsonUrl) {
                     // Coordenadas para o mapa
                     $centerX = ($irregularity['bbox']['minX'] + $irregularity['bbox']['maxX']) / 2;
                     $centerY = ($irregularity['bbox']['minY'] + $irregularity['bbox']['maxY']) / 2;
-                    $mapUrl = "https://maps.googleapis.com/maps/api/staticmap?center={$centerY},{$centerX}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C{$centerY},{$centerX}&key=SUA_CHAVE_API";
+                    // Substitua a linha do mapa por:
+$mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY}&z=14&size=600,300&pt={$centerX},{$centerY},pm2rdl";
                 
                     $message = '
                     <!DOCTYPE html>
@@ -481,6 +482,10 @@ foreach ($jsonUrls as $jsonUrl) {
                         </div>
                     </body>
                     </html>';
+
+                    $message .= '<div style="font-size: 8px; color: #666;">
+                            Map data © <a href="https://openstreetmap.org" style="color: #666;">OpenStreetMap</a> contributors
+                        </div>';
                 
                 }
                     // Gerar hash único estável baseado na localização e características
