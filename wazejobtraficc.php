@@ -328,25 +328,33 @@ function handleAlerts($pdo, $irregularityId, $irreg, $impactScore) {
 
 function generateDailyReport($pdo) {
     try {
-        $reportDate = date('Y-m-d');
+        $reportDate = date('Y-m-d', strtotime('-1 day'));
+        
         $stmt = $pdo->prepare("
             INSERT INTO daily_reports 
-            (id, report_date, total_congestions, avg_duration, max_jam_level, affected_area, hotspots)
+                (id, report_date, total_congestions, avg_duration, max_jam_level, affected_area, hotspots)
             SELECT 
-                ?, 
-                CURDATE(),
-                COUNT(*),
-                AVG(time),
-                MAX(jam_level),
-                ST_Union(area),
-                JSON_ARRAYAGG(id)
-            FROM irregularities
-            WHERE DATE(created_at) = CURDATE() - INTERVAL 1 DAY
+                :report_id,
+                :report_date,
+                COUNT(i.id),
+                AVG(i.time),
+                MAX(i.jam_level),
+                ST_Union(ca.area),
+                JSON_ARRAYAGG(i.id)
+            FROM irregularities i
+            INNER JOIN congestion_areas ca ON i.id = ca.irregularity_id
+            WHERE DATE(i.created_at) = :report_date
         ");
         
-        $stmt->execute([uniqid('rep_')]);
+        $params = [
+            ':report_id' => uniqid('rep_'),
+            ':report_date' => $reportDate
+        ];
+        
+        $stmt->execute($params);
+        
     } catch (Exception $e) {
-        logToFile('error', "Erro gerando relatório: " . $e->getMessage());
+        logError("Erro gerando relatório: " . $e->getMessage());
     }
 }
 
