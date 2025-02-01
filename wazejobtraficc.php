@@ -580,4 +580,3 @@ $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY
         echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n"; 
     }
 }
-}
