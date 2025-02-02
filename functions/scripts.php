@@ -176,8 +176,6 @@ function getSiteSettings(PDO $pdo)
 function logExecution($scriptName, $status, $message, $pdo)
 {
     try {
-        $pdo->beginTransaction();
-
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 
