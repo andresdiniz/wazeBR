@@ -58,29 +58,27 @@
                 return;
             }
 
-            const modal = document.getElementById("alertModal");
-            if (!modal) {
-                console.error("Erro: Modal não encontrado.");
-                return;
-            }
+            // Use jQuery para selecionar os elementos do modal
+        const $modal = $j("#alertModal"); // Seleciona o modal usando jQuery
 
-            // Preenche os dados do modal (usando jQuery para consistência)
-            $j("#modal-uuid").text(parsedData.uuid || "N/A");
-            $j("#modal-city").text(parsedData.city || "N/A");
-            $j("#modal-street").text(parsedData.street || "N/A");
-            $j("#modal-via-KM").text(parsedData.km || "N/A");
-            $j("#modal-location").text(`Lat: ${parsedData.location_y || 'N/A'}, Lon: ${parsedData.location_x || 'N/A'}`);
-            $j("#modal-date-received").text(parsedData.pubMillis ? new Date(parseInt(parsedData.pubMillis, 10)).toLocaleString() : "N/A");
-            $j("#modal-confidence").text(parsedData.confidence || "N/A");
-            $j("#modal-type").text(parsedData.type || "N/A");
-            $j("#modal-subtype").text(parsedData.subtype || "N/A");
-            $j("#modal-status").text(parsedData.status == "1" ? "Ativo" : "Inativo");
+        if (!$modal.length) { // Verifica se o modal foi encontrado
+            console.error("Erro: Modal não encontrado.");
+            return;
+        }
 
-            // Abre o modal *depois* de preencher os dados
-            const bootstrapModal = new bootstrap.Modal(modal);
-            bootstrapModal.show();
-        });
-    }
+        $modal.find("#modal-uuid").text(parsedData.uuid || "N/A");
+        $modal.find("#modal-city").text(parsedData.city || "N/A");
+        $modal.find("#modal-street").text(parsedData.street || "N/A");
+        $modal.find("#modal-via-KM").text(parsedData.km || "N/A");
+        $modal.find("#modal-location").text(`Lat: ${parsedData.location_y || 'N/A'}, Lon: ${parsedData.location_x || 'N/A'}`);
+        $modal.find("#modal-date-received").text(parsedData.pubMillis ? new Date(parseInt(parsedData.pubMillis, 10)).toLocaleString() : "N/A");
+        $modal.find("#modal-confidence").text(parsedData.confidence || "N/A");
+        $modal.find("#modal-type").text(parsedData.type || "N/A");
+        $modal.find("#modal-subtype").text(parsedData.subtype || "N/A");
+        $modal.find("#modal-status").text(parsedData.status == "1" ? "Ativo" : "Inativo");
 
 
-})(jQuery);
+        const bootstrapModal = new bootstrap.Modal($modal[0]); // Passa o elemento DOM para o Bootstrap
+        bootstrapModal.show();
+    });
+}
