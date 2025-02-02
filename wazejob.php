@@ -71,7 +71,4 @@ $scripts = [
 foreach ($scripts as $scriptName => $path) {
     executeScriptWithLogging($scriptName, $path, $pdo);
 }
-?>cemadem.php', $pdo);
-executeScriptWithLogging('gerar_xml.php', '/gerar_xml.php', $pdo);
-
 ?>
