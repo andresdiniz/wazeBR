@@ -76,15 +76,6 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 }
 
 
-/**
- * Função para realizar inserções no banco de dados com suporte a transações e múltiplas linhas.
- *
- * @param PDO $pdo Instância do PDO.
- * @param string $table Nome da tabela no banco de dados.
- * @param array $data Dados a serem inseridos (array associativo ou array de arrays associativos para múltiplos registros).
- *
- * @return int|bool Retorna o ID do último registro inserido ou true se for uma inserção múltipla; false em caso de falha.
- */
 function insertIntoDatabase(PDO $pdo, string $table, array $data) {
     try {
         if (empty($data)) {
@@ -94,24 +85,26 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
         $data = is_assoc($data) ? [$data] : $data;
         $expectedKeys = array_keys($data[0]);
 
-        // Valida consistência das colunas
         foreach ($data as $index => $row) {
             if (array_keys($row) !== $expectedKeys) {
                 throw new Exception("Linha {$index} possui colunas inconsistentes.");
             }
         }
 
-        $pdo->beginTransaction();
+        // Garante que não haja transação ativa antes de iniciar uma nova
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+        }
 
-        // Escapa colunas e monta a query
         $columns = implode(", ", array_map(fn($key) => "`{$key}`", $expectedKeys));
         $placeholders = implode(", ", array_map(fn($key) => ":{$key}", $expectedKeys));
         $query = "INSERT INTO `{$table}` ({$columns}) VALUES ({$placeholders})";
 
         $stmt = $pdo->prepare($query);
+        logToFile('info', "Query de inserção: " . $query);
 
         foreach ($data as $row) {
-            $stmt->execute($row); // Executa com os dados da linha
+            $stmt->execute($row);
         }
 
         $pdo->commit();
@@ -121,21 +114,18 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        $errorInfo = [
-            'message' => $e->getMessage(),
-            'query' => $query ?? 'N/A',
-            'data' => $data ?? 'N/A',
-            'trace' => $e->getTraceAsString()
-        ];
-        error_log("Erro PDO: " . print_r($errorInfo, true));
-        logToFile('error', "Erro PDO: " . print_r($errorInfo, true));
+        error_log("Erro PDO: " . $e->getMessage());
+        logToFile('error', "Erro PDO: " . $e->getMessage());
         return false;
     } catch (Exception $e) {
         error_log("Erro Geral: " . $e->getMessage());
-        logToFile('error', "Erro Geral: " . $e->getMessage());
+        logToFile('error', "Erro PDO: " . $e->getMessage());
         return false;
+    } finally {
+        $stmt = null; // Fecha statement
     }
 }
+
 
 /**
  * Verifica se um array é associativo.
