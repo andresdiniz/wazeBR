@@ -195,7 +195,7 @@ function logExecution($scriptName, $status, $message, $pdo) {
         if (!$insertLog) {
             throw new Exception("Erro ao inserir log na tabela execution_log.");
         }
-
+        $pdo->beginTransaction();
         // Atualiza a última execução na tabela rotina_cron
         $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
         $stmtUpdate->execute([$executionTime, $scriptName]);
