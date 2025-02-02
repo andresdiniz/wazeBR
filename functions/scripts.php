@@ -328,11 +328,11 @@ function executeScript($scriptName, $scriptFile, $pdo)
 
             // Registra logs
             logToFile('info', $logMessage); 
-            logExecution($scriptName, 'success', $logMessage, $pdo);
+            //logExecution($scriptName, 'success', $logMessage, $pdo);
             error_log($logMessage);
         } catch (Exception $e) {
             // Log de erro
-            logExecution($scriptName, 'error', $e->getMessage(), $pdo);
+            //logExecution($scriptName, 'error', $e->getMessage(), $pdo);
             logToFile('error', $e->getMessage(), ['scriptName' => $scriptName]);
             error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
         }
