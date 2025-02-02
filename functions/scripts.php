@@ -91,13 +91,15 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
             }
         }
 
-        // Garante que não haja transação ativa antes de iniciar uma nova
+        /* Garante que não haja transação ativa antes de iniciar uma nova
         if (!$pdo->inTransaction()) {
             $pdo->beginTransaction();
-        }
+        }*/
 
         $columns = implode(", ", array_map(fn($key) => "`{$key}`", $expectedKeys));
         $placeholders = implode(", ", array_map(fn($key) => ":{$key}", $expectedKeys));
+        logToFile('info', "Colunas: " . $columns);
+        logToFile('info', "Placeholders: " . $placeholders);
         $query = "INSERT INTO `{$table}` ({$columns}) VALUES ({$placeholders})";
 
         $stmt = $pdo->prepare($query);
@@ -176,6 +178,8 @@ function getSiteSettings(PDO $pdo)
 function logExecution($scriptName, $status, $message, $pdo)
 {
     try {
+        $pdo->beginTransaction();
+
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 
