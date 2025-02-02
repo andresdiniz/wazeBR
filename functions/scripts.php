@@ -114,7 +114,7 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
         }
 
         $pdo->commit();
-        return count($data) === 1 ? $pdo->lastInsertId() : true;
+        return true;
 
     } catch (PDOException $e) {
         if ($pdo->inTransaction()) {
