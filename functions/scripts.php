@@ -179,15 +179,12 @@ function getSiteSettings(PDO $pdo)
  */
 
 // Função para registrar log de execução e atualizar a última execução
-function logExecution($scriptName, $status, $message, $pdo)
-{
+function logExecution($scriptName, $status, $message, $pdo) {
     try {
-        $pdo->beginTransaction();
-
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 
-        // Inserção na tabela execution_log usando a função genérica
+        // Inserção na tabela execution_log
         $insertLog = insertIntoDatabase($pdo, 'execution_log', [
             'script_name'    => $scriptName,
             'execution_time' => $executionTime,
@@ -203,29 +200,16 @@ function logExecution($scriptName, $status, $message, $pdo)
         $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
         $stmtUpdate->execute([$executionTime, $scriptName]);
 
-        // Commit da transação
-        $pdo->commit();
-
         // Log de execução bem-sucedida
         $logMessage = "Script '$scriptName' executado com sucesso. Status: $status - $message";
-        error_log($logMessage); // Registra no log de erros do PHP
-        logToFile('info', $logMessage); // Registra no arquivo de log personalizado
+        error_log($logMessage);
+        logToFile('info', $logMessage);
 
     } catch (PDOException $e) {
-        // Rollback da transação em caso de erro
-        $pdo->rollBack();
-
-        // Mensagem de erro
-        $errorMessage = "Erro ao registrar log de execução e atualizar rotina: " . $e->getMessage();
-
-        // Log de erro
-        error_log($errorMessage); // Registra no log de erros do PHP
-        logToFile('error', $errorMessage); // Registra no arquivo de log personalizado
-
-        // Exibe o erro
-        echo $errorMessage;
+        error_log("Erro no banco de dados: " . $e->getMessage());
+        logToFile('error', "Erro no banco de dados: " . $e->getMessage());
+        echo "Erro: " . $e->getMessage();
     } catch (Exception $e) {
-        $pdo->rollBack();
         error_log("Erro: " . $e->getMessage());
         logToFile('error', $e->getMessage());
         echo "Erro: " . $e->getMessage();
@@ -328,11 +312,11 @@ function executeScript($scriptName, $scriptFile, $pdo)
 
             // Registra logs
             logToFile('info', $logMessage); 
-            //logExecution($scriptName, 'success', $logMessage, $pdo);
+            logExecution($scriptName, 'success', $logMessage, $pdo);
             error_log($logMessage);
         } catch (Exception $e) {
             // Log de erro
-            //logExecution($scriptName, 'error', $e->getMessage(), $pdo);
+            logExecution($scriptName, 'error', $e->getMessage(), $pdo);
             logToFile('error', $e->getMessage(), ['scriptName' => $scriptName]);
             error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
         }
