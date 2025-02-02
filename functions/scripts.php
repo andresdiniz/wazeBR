@@ -184,6 +184,10 @@ function logExecution($scriptName, $status, $message, $pdo) {
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
 
+        // Atualiza a última execução na tabela rotina_cron
+        $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
+        $stmtUpdate->execute([$executionTime, $scriptName]);
+
         // Inserção na tabela execution_log
         $insertLog = insertIntoDatabase($pdo, 'execution_log', [
             'script_name'    => $scriptName,
@@ -195,10 +199,6 @@ function logExecution($scriptName, $status, $message, $pdo) {
         if (!$insertLog) {
             throw new Exception("Erro ao inserir log na tabela execution_log.");
         }
-        $pdo->beginTransaction();
-        // Atualiza a última execução na tabela rotina_cron
-        $stmtUpdate = $pdo->prepare("UPDATE rotina_cron SET last_execution = ? WHERE name_cron = ?");
-        $stmtUpdate->execute([$executionTime, $scriptName]);
 
         // Log de execução bem-sucedida
         $logMessage = "Script '$scriptName' executado com sucesso. Status: $status - $message";
