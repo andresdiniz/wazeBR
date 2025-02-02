@@ -96,8 +96,9 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
             error_log("Nenhuma transação ativa antes da inserção. Iniciando transação...");
             logToFile('info', "Nenhuma transação ativa antes da inserção. Iniciando transação...");
             $pdo->beginTransaction();
+        }else{
+            logToFile('info', "Transação ativa antes da inserção. Iniciando Inserção...");
         }
-        
 
         $columns = implode(", ", array_map(fn($key) => "`{$key}`", $expectedKeys));
         $placeholders = implode(", ", array_map(fn($key) => ":{$key}", $expectedKeys));
