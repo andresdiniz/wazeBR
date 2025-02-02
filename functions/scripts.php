@@ -125,8 +125,10 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data)
             $pdo->rollBack();
         }
         error_log("Erro ao executar inserção: " . $e->getMessage());
+        logToFile('error', "Erro ao executar inserção: " . $e->getMessage());
         return false;
     } catch (Exception $e) {
+        logToFile('error', "Erro ao executar inserção: " . $e->getMessage());
         error_log("Erro: " . $e->getMessage());
         return false;
     }
