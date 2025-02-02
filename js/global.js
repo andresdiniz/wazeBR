@@ -49,47 +49,44 @@
      * Configura o modal de alerta e preenche os dados corretamente.
      */
     function setupAlertModal() {
-        document.querySelectorAll("[data-toggle='modal']").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const alertData = this.getAttribute("data-alert");
+        // Delegação de eventos para elementos dinâmicos
+        $j(document).on("click", "[data-toggle='modal']", function () {
+            const alertData = $j(this).data("alert"); // Usando jQuery.data()
 
-                if (!alertData) {
-                    console.error("Erro: Nenhum dado de alerta encontrado.");
-                    return;
-                }
+            if (!alertData) {
+                console.error("Erro: Nenhum dado de alerta encontrado.");
+                return;
+            }
 
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(alertData);
-                } catch (error) {
-                    console.error("Erro ao analisar JSON:", error);
-                    return;
-                }
+            let parsedData;
+            try {
+                parsedData = JSON.parse(alertData);
+            } catch (error) {
+                console.error("Erro ao analisar JSON:", error);
+                return;
+            }
 
-                const modal = document.getElementById("alertModal");
-                if (!modal) {
-                    console.error("Erro: Modal não encontrado.");
-                    return;
-                }
+            const modal = document.getElementById("alertModal");
+            if (!modal) {
+                console.error("Erro: Modal não encontrado.");
+                return;
+            }
 
-                // Preenchendo os dados no modal
-                modal.querySelector("#modal-uuid").textContent = parsedData.uuid || "N/A";
-                modal.querySelector("#modal-city").textContent = parsedData.city || "N/A";
-                modal.querySelector("#modal-street").textContent = parsedData.street || "N/A";
-                modal.querySelector("#modal-via-KM").textContent = parsedData.km || "N/A";
-                modal.querySelector("#modal-location").textContent = `Lat: ${parsedData.location_y || 'N/A'}, Lon: ${parsedData.location_x || 'N/A'}`;
-                modal.querySelector("#modal-date-received").textContent = parsedData.pubMillis 
-                    ? new Date(parseInt(parsedData.pubMillis, 10)).toLocaleString() 
-                    : "N/A";
-                modal.querySelector("#modal-confidence").textContent = parsedData.confidence || "N/A";
-                modal.querySelector("#modal-type").textContent = parsedData.type || "N/A";
-                modal.querySelector("#modal-subtype").textContent = parsedData.subtype || "N/A";
-                modal.querySelector("#modal-status").textContent = parsedData.status == "1" ? "Ativo" : "Inativo";
+            // Preenchendo os dados no modal usando jQuery
+            $j("#modal-uuid").text(parsedData.uuid || "N/A");
+            $j("#modal-city").text(parsedData.city || "N/A");
+            $j("#modal-street").text(parsedData.street || "N/A");
+            $j("#modal-via-KM").text(parsedData.km || "N/A");
+            $j("#modal-location").text(`Lat: ${parsedData.location_y || 'N/A'}, Lon: ${parsedData.location_x || 'N/A'}`);
+            $j("#modal-date-received").text(parsedData.pubMillis ? new Date(parseInt(parsedData.pubMillis, 10)).toLocaleString() : "N/A");
+            $j("#modal-confidence").text(parsedData.confidence || "N/A");
+            $j("#modal-type").text(parsedData.type || "N/A");
+            $j("#modal-subtype").text(parsedData.subtype || "N/A");
+            $j("#modal-status").text(parsedData.status == "1" ? "Ativo" : "Inativo");
 
-                // Abre o modal corretamente
-                const bootstrapModal = new bootstrap.Modal(modal);
-                bootstrapModal.show();
-            });
+            // Abre o modal corretamente
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
         });
     }
 
