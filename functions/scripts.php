@@ -85,51 +85,54 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
  *
  * @return int|bool Retorna o ID do último registro inserido ou true se for uma inserção múltipla; false em caso de falha.
  */
-function insertIntoDatabase(PDO $pdo, string $table, array $data)
-{
+function insertIntoDatabase(PDO $pdo, string $table, array $data) {
     try {
-        // Verificar se há dados para inserir
         if (empty($data)) {
             throw new Exception("Nenhum dado fornecido para inserção.");
         }
 
-        // Garantir que o formato do dado seja consistente (suporte a múltiplas linhas)
         $data = is_assoc($data) ? [$data] : $data;
+        $expectedKeys = array_keys($data[0]);
 
-        // Começar a transação
+        // Valida consistência das colunas
+        foreach ($data as $index => $row) {
+            if (array_keys($row) !== $expectedKeys) {
+                throw new Exception("Linha {$index} possui colunas inconsistentes.");
+            }
+        }
+
         $pdo->beginTransaction();
 
-        // Gerar os nomes das colunas (baseado no primeiro registro)
-        $columns = implode(", ", array_keys($data[0]));
-        $placeholders = implode(", ", array_map(fn($key) => ":{$key}", array_keys($data[0])));
-        $query = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+        // Escapa colunas e monta a query
+        $columns = implode(", ", array_map(fn($key) => "`{$key}`", $expectedKeys));
+        $placeholders = implode(", ", array_map(fn($key) => ":{$key}", $expectedKeys));
+        $query = "INSERT INTO `{$table}` ({$columns}) VALUES ({$placeholders})";
 
         $stmt = $pdo->prepare($query);
 
-        // Inserir cada linha
         foreach ($data as $row) {
-            foreach ($row as $key => $value) {
-                $stmt->bindValue(":{$key}", $value);
-            }
-            $stmt->execute();
+            $stmt->execute($row); // Executa com os dados da linha
         }
 
-        // Commit da transação
         $pdo->commit();
-
-        // Retornar o ID do último registro inserido (ou true no caso de múltiplas linhas)
         return count($data) === 1 ? $pdo->lastInsertId() : true;
+
     } catch (PDOException $e) {
-        // Reverter transação em caso de erro
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        error_log("Erro ao executar inserção: " . $e->getMessage());
-        logToFile('error', "Erro ao executar inserção: " . $e->getMessage());
+        $errorInfo = [
+            'message' => $e->getMessage(),
+            'query' => $query ?? 'N/A',
+            'data' => $data ?? 'N/A',
+            'trace' => $e->getTraceAsString()
+        ];
+        error_log("Erro PDO: " . print_r($errorInfo, true));
+        logToFile('error', "Erro PDO: " . print_r($errorInfo, true));
         return false;
     } catch (Exception $e) {
-        logToFile('error', "Erro ao executar inserção: " . $e->getMessage());
-        error_log("Erro: " . $e->getMessage());
+        error_log("Erro Geral: " . $e->getMessage());
+        logToFile('error', "Erro Geral: " . $e->getMessage());
         return false;
     }
 }
