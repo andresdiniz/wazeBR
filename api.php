@@ -1058,37 +1058,32 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                         // Verifica se o UUID foi enviado
                         if (!empty($uuid)) {
-                            // Verifica se a conexão com o banco de dados foi bem-sucedida
-                            if (!$conn) {
-                                die("Conexão falhou: " . mysqli_connect_error());
+                            try {
+                                // Atualiza o status do alerta e a data de confirmação no banco de dados
+                                $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
+                    
+                                // Vincula os parâmetros
+                                $stmt->bindParam(':confirmado', $status, PDO::PARAM_INT);
+                                $stmt->bindParam(':data_confirmado', $data_confirmado, PDO::PARAM_STR);
+                                $stmt->bindParam(':uuid', $uuid, PDO::PARAM_STR);
+                    
+                                // Executa a query
+                                if ($stmt->execute()) {
+                                    logToFile('success', "Alerta confirmado com sucesso: $uuid");
+                                    echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
+                                } else {
+                                    logToFile('error', "Alerta não confirmado: $uuid");
+                                    echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);
+                                }
+                            } catch (PDOException $e) {
+                                // Se ocorrer erro, exibe a mensagem
+                                echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta: " . $e->getMessage()]);
                             }
-                    
-                            // Debug: Verifique os dados antes de executar a query
-                            var_dump($status, $data_confirmado, $uuid);
-                    
-                            // Atualiza o status do alerta e a data de confirmação no banco de dados
-                            $stmt = $conn->prepare("UPDATE alerts SET confirmado = ?, data_confirmado = ? WHERE uuid = ?");
-                            
-                            if ($stmt === false) {
-                                die('Erro na preparação da query: ' . $conn->error);
-                            }
-                    
-                            $stmt->bind_param("iss", $status, $data_confirmado, $uuid);  // Parâmetros: status (int), data_confirmado (string), uuid (string)
-                    
-                            if ($stmt->execute()) {
-                                logToFile('success', "Alerta confirmado com sucesso: $uuid");
-                                echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
-                            } else {
-                                logToFile('error', "Alerta não confirmado: $uuid");
-                                echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);
-                            }
-                    
-                            // Fecha a declaração
-                            $stmt->close();
                         } else {
                             echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
-                        break;                                       
+                        break;
+                                    
 
         default:
             http_response_code(401);
