@@ -415,8 +415,10 @@ foreach ($jsonUrls as $jsonUrl) {
                     // Coordenadas para o mapa
                     $centerX = ($irregularity['bbox']['minX'] + $irregularity['bbox']['maxX']) / 2;
                     $centerY = ($irregularity['bbox']['minY'] + $irregularity['bbox']['maxY']) / 2;
-                    // Substitua a linha do mapa por:
-                    $mapUrl = "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-l+ff0000($centerX,$centerY)/$centerX,$centerY,14/600x300@2x?access_token=SEU_TOKEN_MAPBOX";
+
+                    // Supondo que a variável $centerX e $centerY contenham as coordenadas de latitude e longitude
+                    $wazeUrl = "https://waze.com/ul?ll=$centerY,$centerX&z=12"; // Link do Waze
+                    $mapEmbedUrl = "https://embed.waze.com/pt-BR/iframe?zoom=12&lat=$centerY&lon=$centerX"; // iframe do Waze
 
                     $message = '
                     <!DOCTYPE html>
@@ -437,6 +439,8 @@ foreach ($jsonUrls as $jsonUrl) {
                             .stat-number { font-size: 24px; font-weight: 700; color: #005792; }
                             .footer { background: #f8f9fa; padding: 24px; text-align: center; font-size: 12px; color: #666666; }
                             a { color: #005792; text-decoration: none; }
+                            .map-container { width: 100%; text-align: center; margin: 24px 0; }
+                            iframe { width: 100%; height: 240px; border: none; border-radius: 8px; }
                         </style>
                     </head>
                     <body>
@@ -445,8 +449,11 @@ foreach ($jsonUrls as $jsonUrl) {
                                 <img src="https://exemplo.com/logo.png" alt="Logo" style="height: 40px;">
                             </div>
                             
-                            <img src="'.$mapUrl.'" alt="Mapa da Área" class="map-img">
-                            
+                            <!-- Mapa Embutido (Iframe) do Waze -->
+                            <div class="map-container">
+                                <iframe src="'.$mapEmbedUrl.'" title="Mapa do Waze"></iframe>
+                            </div>
+
                             <div class="content">
                                 <div class="alert-badge">ALERTA DE TRÁFEGO • NÍVEL '.$irregularity['jamLevel'].'/5</div>
                                 <h1 class="title">'.$irregularity['name'].'</h1>
@@ -462,14 +469,14 @@ foreach ($jsonUrls as $jsonUrl) {
                                         <div>Velocidade atual</div>
                                     </div>
                                 </div>
-                    
+
                                 <h3 style="margin: 24px 0 16px; color: #005792;">📌 Detalhes</h3>
                                 <div style="line-height: 1.6;">
                                     <p><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</p>
                                     <p><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</p>
                                     <p><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</p>
                                 </div>
-                    
+
                                 <h3 style="margin: 24px 0 16px; color: #005792;">📊 Engajamento</h3>
                                 <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                                     <div style="text-align: center;">
@@ -485,14 +492,14 @@ foreach ($jsonUrls as $jsonUrl) {
                                         <div>Relatos</div>
                                     </div>
                                 </div>
-                    
+
                                 <div style="text-align: center; margin: 32px 0;">
-                                    <a href="https://www.google.com/maps?q='.$centerY.','.$centerX.'" style="background: #005792; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block;">
-                                        🗺️ Abrir no Google Maps
+                                    <a href="'.$wazeUrl.'" style="background: #005792; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block;">
+                                        🗺️ Abrir no Waze
                                     </a>
                                 </div>
                             </div>
-                    
+
                             <div class="footer">
                                 <div style="margin-bottom: 12px;">
                                     <a href="[UNSUBSCRIBE_URL]" style="color: #666; margin: 0 8px;">Cancelar inscrição</a>
@@ -505,7 +512,6 @@ foreach ($jsonUrls as $jsonUrl) {
                         </div>
                     </body>
                     </html>';
-                
                 }
                     // Gerar hash único estável baseado na localização e características
                     $alertHash = sha1(json_encode([
