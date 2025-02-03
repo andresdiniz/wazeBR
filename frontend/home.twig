@@ -2,12 +2,16 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div class="container">
+<!-- Início do conteúdo -->
+<div class="container mt-5">
+
     <div class="row">
         <!-- Acidentes -->
-        <div class="col-xl-6 col-lg-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">Acidentes</div>
+        <div class="col-xl-6 col-lg-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-car-crash"></i> Acidentes
+                </div>
                 <div class="card-body">
                     {% if accidentAlerts is not empty %}
                     <div class="table-responsive">
@@ -59,9 +63,11 @@
         </div>
 
         <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-8">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">Congestionamentos</div>
+        <div class="col-xl-6 col-lg-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-traffic-light"></i> Congestionamentos
+                </div>
                 <div class="card-body">
                     {% if jamAlerts is not empty %}
                     <div class="table-responsive">
@@ -150,8 +156,6 @@
     });
 </script>
 
-<script src="./js/global.js"></script>
-
 <!-- CSS do DataTables (Se necessário) -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
@@ -171,3 +175,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
