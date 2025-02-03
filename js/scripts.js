@@ -69,3 +69,23 @@ function confirmarAlertaModal(uuid, km) {
         alert('Dados inválidos para confirmar o alerta');
     }
 }
+
+async function buscarKmDnit(latitude, longitude, raio = 5) {
+    const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
+    const dataAtual = new Date().toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
+    const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data[0]?.km ?? null;
+    } catch (error) {
+        console.error("Erro ao buscar o KM no DNIT:", error);
+        return null;
+    }
+}
+

@@ -1,4 +1,5 @@
-<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
+     data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-3 shadow-lg rounded">
             <!-- Cabeçalho -->
@@ -27,7 +28,9 @@
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm p-3 mb-3">
                             <p><strong>📅 Data:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
-                            <p><strong>🛣️ KM Estimado:</strong> <span id="km-value-{{ alert.uuid }}" class="badge badge-info">Buscando...</span></p>
+                            <p><strong>🛣️ KM Estimado:</strong> 
+                                <span id="km-value-{{ alert.uuid }}" class="badge badge-info">Buscando...</span>
+                            </p>
                             <p>
                                 <strong>🔍 Confiança:</strong> 
                                 <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
@@ -69,3 +72,50 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    async function buscarKmDnit(latitude, longitude, uuid) {
+        const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
+        const dataAtual = new Date().toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
+        const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=5&data=${dataAtual}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const km = data[0]?.km ?? "Não disponível";
+            document.getElementById(`km-value-${uuid}`).textContent = km;
+        } catch (error) {
+            console.error("Erro ao buscar o KM no DNIT:", error);
+            document.getElementById(`km-value-${uuid}`).textContent = "Erro ao carregar";
+        }
+    }
+
+    function inicializarMapa(uuid, latitude, longitude) {
+        const map = L.map(`map-${uuid}`).setView([latitude, longitude], 14);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([latitude, longitude]).addTo(map)
+            .bindPopup("Localização do Evento")
+            .openPopup();
+    }
+
+    document.querySelectorAll("[id^=alertModal]").forEach(modal => {
+        modal.addEventListener("show.bs.modal", function () {
+            const uuid = modal.id.replace("alertModal", "");
+            const latitude = parseFloat(modal.getAttribute("data-lat"));
+            const longitude = parseFloat(modal.getAttribute("data-lon"));
+
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                buscarKmDnit(latitude, longitude, uuid);
+                inicializarMapa(uuid, latitude, longitude);
+            }
+        });
+    });
+});
+</script>
