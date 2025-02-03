@@ -35,12 +35,39 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal"
-                                                data-alert='{{ alert|json_encode }}'>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal{{ alert.uuid }}">
                                             Ver Mais
                                         </button>
                                     </td>
                                 </tr>
+
+                                <!-- Modal para cada acidente -->
+                                <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Detalhes do Acidente</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>UUID:</strong> {{ alert.uuid }}</p>
+                                                <p><strong>Cidade:</strong> {{ alert.city }}</p>
+                                                <p><strong>Rua:</strong> {{ alert.street }}</p>
+                                                <p><strong>Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
+                                                <p><strong>Data Recebido:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                                                <p><strong>Confiança:</strong> {{ alert.confidence }}</p>
+                                                <p><strong>Tipo:</strong> {{ alert.type }}</p>
+                                                <p><strong>Subtipo:</strong> {{ alert.subtype }}</p>
+                                                <p><strong>Status:</strong> {{ alert.status == "1" ? "Ativo" : "Inativo" }}</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -86,12 +113,36 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal"
-                                                data-alert='{{ alert|json_encode }}'>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#alertModal{{ alert.uuid }}">
                                             Ver Mais
                                         </button>
                                     </td>
                                 </tr>
+
+                                <!-- Modal para cada congestionamento -->
+                                <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Detalhes do Congestionamento</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>UUID:</strong> {{ alert.uuid }}</p>
+                                                <p><strong>Cidade:</strong> {{ alert.city }}</p>
+                                                <p><strong>Rua:</strong> {{ alert.street }}</p>
+                                                <p><strong>Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
+                                                <p><strong>Data Recebido:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                                                <p><strong>Intensidade:</strong> {{ alert.severity }}</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>
