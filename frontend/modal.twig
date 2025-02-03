@@ -33,10 +33,18 @@
                             </p>
                             <p>
                                 <strong>🔍 Confiança:</strong> 
-                                <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                    {{ alert.confidence }}%
+                                <span class="badge badge-{{
+                                    alert.confidence == 5 ? 'danger' :    /* Vermelho para 0% */
+                                    alert.confidence == 4 ? 'warning' :   /* Laranja para 40% */
+                                    alert.confidence == 3 ? 'warning' :   /* Amarelo para 60% */
+                                    alert.confidence == 3 ? 'primary' :   /* Verde azulado para 80% */
+                                    alert.confidence == 1 ? 'success' :   /* Verde forte para 100% */
+                                    'dark' /* Cinza para 0% */
+                                }}">
+                                    {{ (alert.confidence - 1) * 25 }}% / 100%
                                 </span>
                             </p>
+                                              
                             <p>
                                 <strong>⚠️ Status:</strong> 
                                 <span class="badge badge-{{ alert.status == '1' ? 'success' : 'danger' }}">
@@ -62,19 +70,19 @@
 
             <!-- Rodapé -->
             <div class="modal-footer d-flex justify-content-between">
-                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" class="btn btn-outline-primary" target="_blank">
+                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                   class="btn btn-outline-primary" target="_blank">
                     <i class="fab fa-waze"></i> Ver no Waze
                 </a>
-                
-                <!-- Botão Visível apenas em dispositivos móveis e tablets -->
-                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" class="btn btn-outline-success d-none d-sm-block d-md-none" target="_blank">
-                    <i class="fab fa-waze"></i> Criar Rota no Waze
-                </a>
-
+            
+                <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
+                    <i class="fas fa-check"></i> Confirmar Alerta
+                </button>
+            
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Fechar
                 </button>
-            </div>
+            </div>            
         </div>
     </div>
 </div>
