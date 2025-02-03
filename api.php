@@ -1056,6 +1056,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $km = isset($_POST['km']) ? $_POST['km'] : '';  // KM é opcional
                         $status = 1;  // Status do alerta (confirmado)
                         $data_confirmado = date('Y-m-d H:i:s');  // Data e hora atual para a confirmação
+                        $pdo = Database::getConnection();
                     
                         // Verifica se o UUID foi enviado
                         if (!empty($uuid)) {
