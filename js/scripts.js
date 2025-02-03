@@ -41,16 +41,16 @@ function confirmarAlerta(uuid, km) {
     $.ajax({
         url: '/api.php?action=confirm_alert',
         type: 'POST',
-        data: { 
+        data: {
             uuid: uuid,
             km: km,
-            status: 1 
+            status: 1
         },
-        success: function(response) {
+        success: function (response) {
             alert('Alerta confirmado com sucesso!');
             $('#alertModal').modal('hide');
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             alert('Erro ao confirmar o alerta. Tente novamente.');
             console.error('Error:', error);
         },
