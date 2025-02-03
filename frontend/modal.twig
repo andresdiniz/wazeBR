@@ -34,17 +34,16 @@
                             <p>
                                 <strong>🔍 Confiança:</strong> 
                                 <span class="badge badge-{{
-                                    alert.confidence == 5 ? 'danger' :    /* Vermelho para 0% */
-                                    alert.confidence == 4 ? 'warning' :   /* Laranja para 40% */
-                                    alert.confidence == 3 ? 'warning' :   /* Amarelo para 60% */
-                                    alert.confidence == 3 ? 'primary' :   /* Verde azulado para 80% */
-                                    alert.confidence == 1 ? 'success' :   /* Verde forte para 100% */
-                                    'dark' /* Cinza para 0% */
+                                    alert.confidence == 1 ? 'success' :   /* Verde forte */
+                                    alert.confidence == 2 ? 'primary' :   /* Verde azulado */
+                                    alert.confidence == 3 ? 'warning' :   /* Amarelo */
+                                    alert.confidence == 4 ? 'orange' :    /* Laranja (custom) */
+                                    alert.confidence == 5 ? 'danger' :    /* Vermelho forte */
+                                    'dark' /* Cinza para 0 */
                                 }}">
-                                    {{alert.confidence}}
+                                    {{ alert.confidence }}/5
                                 </span>
-                            </p>
-                                              
+                            </p>                        
                             <p>
                                 <strong>⚠️ Status:</strong> 
                                 <span class="badge badge-{{ alert.status == '1' ? 'success' : 'danger' }}">
