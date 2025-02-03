@@ -416,76 +416,95 @@ foreach ($jsonUrls as $jsonUrl) {
                     $centerX = ($irregularity['bbox']['minX'] + $irregularity['bbox']['maxX']) / 2;
                     $centerY = ($irregularity['bbox']['minY'] + $irregularity['bbox']['maxY']) / 2;
                     // Substitua a linha do mapa por:
-$mapUrl = "https://static-maps.yandex.ru/1.x/?lang=pt_BR&ll={$centerX},{$centerY}&z=14&size=600,300&pt={$centerX},{$centerY},pm2rdl";
-                
+                    $mapUrl = "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-l+ff0000($centerX,$centerY)/$centerX,$centerY,14/600x300@2x?access_token=SEU_TOKEN_MAPBOX";
+
                     $message = '
                     <!DOCTYPE html>
                     <html>
                     <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
                         <style>
-                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                            .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
-                            .header { background-color: #005792; color: white; padding: 15px; border-radius: 10px 10px 0 0; }
-                            .map { width: 100%; height: 300px; border: 1px solid #ddd; margin: 15px 0; }
-                            .details { padding: 15px; background-color: #f8f9fa; border-radius: 5px; }
-                            .alert-level { color: #dc3545; font-weight: bold; }
-                            .footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; font-size: 0.9em; color: #666; }
+                            * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+                            .container { max-width: 680px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                            .header { background: #005792; padding: 32px; text-align: center; }
+                            .map-img { width: 100%; height: 240px; object-fit: cover; border-bottom: 4px solid #005792; }
+                            .content { padding: 32px; color: #444444; }
+                            .alert-badge { background: #dc3545; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: 600; margin-bottom: 16px; }
+                            .title { font-size: 24px; font-weight: 700; color: #005792; margin: 16px 0; }
+                            .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0; }
+                            .info-card { background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #005792; }
+                            .stat-number { font-size: 24px; font-weight: 700; color: #005792; }
+                            .footer { background: #f8f9fa; padding: 24px; text-align: center; font-size: 12px; color: #666666; }
+                            a { color: #005792; text-decoration: none; }
                         </style>
                     </head>
                     <body>
                         <div class="container">
                             <div class="header">
-                                <h2>🚨 Alerta de Tráfego</h2>
+                                <img src="https://exemplo.com/logo.png" alt="Logo" style="height: 40px;">
                             </div>
                             
-                            <img src="'.$mapUrl.'" alt="Mapa da Área" class="map">
+                            <img src="'.$mapUrl.'" alt="Mapa da Área" class="map-img">
                             
-                            <div class="details">
-                                <h3>'.$irregularity['name'].'</h3>
+                            <div class="content">
+                                <div class="alert-badge">ALERTA DE TRÁFEGO • NÍVEL '.$irregularity['jamLevel'].'/5</div>
+                                <h1 class="title">'.$irregularity['name'].'</h1>
                                 
-                                <table>
-                                    <tr>
-                                        <td><strong>Local:</strong></td>
-                                        <td>'.$irregularity['fromName'].' para '.$irregularity['toName'].'</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Nível:</strong></td>
-                                        <td><span class="alert-level">'.$irregularity['jamLevel'].'/5</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Tipo:</strong></td>
-                                        <td>'.$irregularity['type'].' ('.$subType.')</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Extensão:</strong></td>
-                                        <td>'.number_format($irregularity['length']/1000, 2).' km</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Velocidade:</strong></td>
-                                        <td>'.number_format($avgSpeed, 1).' km/h</td>
-                                    </tr>
-                                </table>
-                                
-                                <h4>📌 Detalhes Adicionais</h4>
-                                <ul>
-                                    <li>Comentários: '.$numComments.'</li>
-                                    <li>Confirmações: '.$numThumbsUp.'</li>
-                                    <li>Relatos de inexistência: '.$numNotThereReports.'</li>
-                                </ul>
+                                <div class="info-grid">
+                                    <div class="info-card">
+                                        <div class="stat-number">'.number_format($irregularity['length']/1000, 2).' km</div>
+                                        <div>Extensão do congestionamento</div>
+                                    </div>
+                                    
+                                    <div class="info-card">
+                                        <div class="stat-number">'.number_format($avgSpeed, 1).' km/h</div>
+                                        <div>Velocidade atual</div>
+                                    </div>
+                                </div>
+                    
+                                <h3 style="margin: 24px 0 16px; color: #005792;">📌 Detalhes</h3>
+                                <div style="line-height: 1.6;">
+                                    <p><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</p>
+                                    <p><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</p>
+                                    <p><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</p>
+                                </div>
+                    
+                                <h3 style="margin: 24px 0 16px; color: #005792;">📊 Engajamento</h3>
+                                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numThumbsUp.'</div>
+                                        <div>Confirmações</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numComments.'</div>
+                                        <div>Comentários</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numNotThereReports.'</div>
+                                        <div>Relatos</div>
+                                    </div>
+                                </div>
+                    
+                                <div style="text-align: center; margin: 32px 0;">
+                                    <a href="https://www.google.com/maps?q='.$centerY.','.$centerX.'" style="background: #005792; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block;">
+                                        🗺️ Abrir no Google Maps
+                                    </a>
+                                </div>
                             </div>
-                            
+                    
                             <div class="footer">
-                                <p>🔔 Você está recebendo este e-mail porque se inscreveu em alertas de trânsito.</p>
-                                <p><a href="[URL_DE_DESINSCRIÇÃO]" style="color: #005792;">Gerenciar preferências</a> | 
-                                <a href="https://www.google.com/maps?q='.$centerY.','.$centerX.'" style="color: #005792;">Abrir no Maps</a></p>
+                                <div style="margin-bottom: 12px;">
+                                    <a href="[UNSUBSCRIBE_URL]" style="color: #666; margin: 0 8px;">Cancelar inscrição</a>
+                                    <a href="[VIEW_IN_BROWSER_URL]" style="color: #666; margin: 0 8px;">Ver no navegador</a>
+                                </div>
+                                <div style="font-size: 10px; color: #999;">
+                                    Dados de mapa © <a href="https://www.mapbox.com/" style="color: #999;">Mapbox</a>, © <a href="https://www.openstreetmap.org/" style="color: #999;">OpenStreetMap</a>
+                                </div>
                             </div>
                         </div>
                     </body>
                     </html>';
-
-                    $message .= '<div style="font-size: 8px; color: #666;">
-                            Map data © <a href="https://openstreetmap.org" style="color: #666;">OpenStreetMap</a> contributors
-                        </div>';
                 
                 }
                     // Gerar hash único estável baseado na localização e características
