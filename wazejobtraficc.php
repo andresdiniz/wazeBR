@@ -390,7 +390,7 @@ foreach ($jsonUrls as $jsonUrl) {
                     ':sub_type' => $subType,
                     ':position' => $position,
                     ':num_not_there_reports' => $numNotThereReports,
-                    ':impact_score' => $impactScore
+                    //':impact_score' => $impactScore
                 ]);
 
                 // Gravar coordenadas da linha (route_lines)
