@@ -6,7 +6,6 @@
  * - destroySession: Clears session storage
  * - logout: Performs full logout by clearing cookies/session and redirecting
  * - confirmarAlerta: Makes AJAX call to confirm alert with given UUID and KM
- * - confirmarAlertaModal: Handles alert confirmation from modal UI
  */
 
 function deleteAllCookies() {
@@ -60,19 +59,6 @@ function confirmarAlerta(uuid, km) {
             console.error('Error:', error);
         },
     });
-}
-
-// Handles alert confirmation from modal UI by validating and calling confirmarAlerta
-function confirmarAlertaModal(uuid, km) {
-    console.log('Confirmar alerta clicado');
-
-    if (uuid && km) {
-        console.log('UUID:', uuid, 'KM:', km);
-        confirmarAlerta(uuid, km);
-    } else {
-        console.error('Erro: UUID ou KM não encontrados');
-        alert('Dados inválidos para confirmar o alerta');
-    }
 }
 
 async function buscarKmDnit(latitude, longitude, raio = 5) {
