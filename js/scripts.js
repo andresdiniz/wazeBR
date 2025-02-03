@@ -32,6 +32,7 @@ function logout() {
 }
 
 // Makes AJAX call to confirm alert with given UUID and KM
+// Makes AJAX call to confirm alert with given UUID and KM
 function confirmarAlerta(uuid, km) {
     if (!uuid) {
         console.error('UUID missing');
@@ -53,12 +54,15 @@ function confirmarAlerta(uuid, km) {
             status: 1
         },
         success: function (response) {
+            // Parse the JSON response from PHP
             const result = JSON.parse(response);
+
+            // Check if the response was successful
             if (result.success) {
-                alert('Alerta confirmado com sucesso!');
+                alert(result.message);  // Success message from PHP
                 $('#alertModal').modal('hide');
             } else {
-                alert(result.message); // Mensagem personalizada do PHP
+                alert(result.message);  // Error message from PHP
             }
         },
         error: function (xhr, status, error) {
@@ -67,7 +71,6 @@ function confirmarAlerta(uuid, km) {
         },
     });
 }
-
 
 async function buscarKmDnit(latitude, longitude, raio = 5) {
     const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
