@@ -141,8 +141,8 @@
                     .bindPopup("Localização do Alerta")
                     .openPopup();
             }, 500);
-
-            fetch(`https://apigateway.dnit.gov.br/rodovias/v1/localizacao/latitude/${lat}/longitude/${lon}`)
+            url = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${lon}&lat=${lat}&r=150&data=${new Date().toISOString().split('T')[0]}`;
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     let km = data?.km || "Não encontrado";
