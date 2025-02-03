@@ -5,6 +5,8 @@ $envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+require_once __DIR__ . '/functions/scripts.php'; // Funções de suporte
+
 use Dotenv\Dotenv;
 
 if (!file_exists($envPath)) {
