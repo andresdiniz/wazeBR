@@ -34,11 +34,11 @@
                             <p>
                                 <strong>🔍 Confiança:</strong> 
                                 <span class="badge badge-{{
-                                    alert.confidence == 1 ? 'success' :   /* Verde forte */
-                                    alert.confidence == 2 ? 'primary' :   /* Verde azulado */
+                                    alert.confidence == 5 ? 'success' :   /* Verde forte */
+                                    alert.confidence == 4 ? 'primary' :   /* Verde azulado */
                                     alert.confidence == 3 ? 'warning' :   /* Amarelo */
-                                    alert.confidence == 4 ? 'orange' :    /* Laranja (custom) */
-                                    alert.confidence == 5 ? 'danger' :    /* Vermelho forte */
+                                    alert.confidence == 2 ? 'orange' :    /* Laranja (custom) */
+                                    alert.confidence == 1 ? 'danger' :    /* Vermelho forte */
                                     'dark' /* Cinza para 0 */
                                 }}">
                                     {{ alert.confidence }}/5
