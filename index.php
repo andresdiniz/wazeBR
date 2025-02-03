@@ -78,8 +78,8 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $basePath = 'wazeportal'; // Subpasta onde o site está hospedado
 
 $pages = getSitepages($pdo, $uri);
-echo $uri;
 $title = $pages['title'] ?? '';  // Se não houver título, usa um padrão
+echo $title;
 
 $data = [
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
