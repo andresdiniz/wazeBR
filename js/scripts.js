@@ -42,7 +42,7 @@ function confirmarAlerta(uuid, km) {
         km = null;
     }
     $.ajax({
-        url: '/api.php?action=confirm_alert',
+        url: './api.php?action=confirm_alert',
         type: 'POST',
         data: {
             uuid: uuid,
