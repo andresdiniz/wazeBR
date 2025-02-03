@@ -75,10 +75,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    async function buscarKmDnit(latitude, longitude, uuid) {
+    async function consultarLocalizacaoKm(longitude, latitude, raio = 150) {
         const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
         const dataAtual = new Date().toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
-        const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=5&data=${dataAtual}`;
+        const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
 
         try {
             const response = await fetch(url);
@@ -88,10 +88,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const data = await response.json();
             const km = data[0]?.km ?? "Não disponível";
-            document.getElementById(`km-value-${uuid}`).textContent = km;
+            return km;
         } catch (error) {
             console.error("Erro ao buscar o KM no DNIT:", error);
-            document.getElementById(`km-value-${uuid}`).textContent = "Erro ao carregar";
+            return "Erro ao carregar";
         }
     }
 
@@ -106,13 +106,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     document.querySelectorAll("[id^=alertModal]").forEach(modal => {
-        modal.addEventListener("show.bs.modal", function () {
+        modal.addEventListener("show.bs.modal", async function () {
             const uuid = modal.id.replace("alertModal", "");
             const latitude = parseFloat(modal.getAttribute("data-lat"));
             const longitude = parseFloat(modal.getAttribute("data-lon"));
 
             if (!isNaN(latitude) && !isNaN(longitude)) {
-                buscarKmDnit(latitude, longitude, uuid);
+                // Chama a função para buscar o KM do DNIT
+                const km = await consultarLocalizacaoKm(longitude, latitude);
+                document.getElementById(`km-value-${uuid}`).textContent = km;
+                
+                // Inicializa o mapa
                 inicializarMapa(uuid, latitude, longitude);
             }
         });
