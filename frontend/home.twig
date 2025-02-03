@@ -123,54 +123,65 @@
 <!-- Script para Mapas e API DNIT -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", async function () {
-            let lat = $(this).data("lat");
-            let lon = $(this).data("lon");
-            let modalId = $(this).attr("data-target");
-            let mapId = modalId.replace("#alertModal", "map-");
-            let kmId = modalId.replace("#alertModal", "km-value-");
-            let tipo = $(this).data("tipo"); // Obtém o tipo do alerta
-            let subtipo = $(this).data("subtipo"); // Obtém o subtipo do alerta
     
-            // Inicialização do mapa
-            setTimeout(() => {
-                let map = L.map(mapId).setView([lat, lon], 13);
+        function inicializarMapa(uuid, latitude, longitude) {
+            const map = L.map(`map-${uuid}`).setView([latitude, longitude], 14);
     
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
+            // Configuração do mapa com OpenStreetMap
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
     
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
-            }, 500);
+            // Marca o local no mapa
+            L.marker([latitude, longitude]).addTo(map)
+                .bindPopup("Localização do Evento")
+                .openPopup();
     
-            // Buscar KM do DNIT
-            const km = await buscarKmDnit(lat, lon, 150); // Raio de 150 metros
-            $(`#${kmId}`).text(km || "Não encontrado");
+            // Centraliza o mapa no ponto
+            map.setView([latitude, longitude], 14);
+        }
     
-            // Chamar API para traduzir o alerta
-            try {
-                const response = await fetch("api.php?action=traduzir&tipo=" + encodeURIComponent(tipo) + "&subtipo=" + encodeURIComponent(subtipo));
-                const data = await response.json();
+        // Evento para abrir o modal corretamente
+        document.querySelectorAll("[id^=alertModal]").forEach(modal => {
+            modal.addEventListener("show.bs.modal", async function () {
+                const uuid = modal.id.replace("alertModal", "");
+                const latitude = parseFloat(modal.getAttribute("data-lat"));
+                const longitude = parseFloat(modal.getAttribute("data-lon"));
+                const tipo = modal.getAttribute("data-tipo");   // Obtém o tipo
+                const subtipo = modal.getAttribute("data-subtipo"); // Obtém o subtipo
     
-                if (data.success) {
-                    $("#tipo-alerta").text(`🚨 Tipo: ${data.tipo}`);
-                    $("#subtipo-alerta").text(`📌 Subtipo: ${data.subtipo}`);
-                } else {
-                    console.error("Erro na API:", data.message);
-                    $("#tipo-alerta").text(`🚨 Tipo: ${tipo}`);
-                    $("#subtipo-alerta").text(`📌 Subtipo: ${subtipo}`);
+                if (!isNaN(latitude) && !isNaN(longitude)) {
+                    // Busca KM do DNIT
+                    const km = await buscarKmDnit(longitude, latitude);
+                    document.getElementById(`km-value-${uuid}`).textContent = km || "Não encontrado";
+                    
+                    // Inicializa o mapa
+                    inicializarMapa(uuid, latitude, longitude);
                 }
-            } catch (error) {
-                console.error("Erro ao buscar tradução:", error);
-                $("#tipo-alerta").text(`🚨 Tipo: ${tipo}`);
-                $("#subtipo-alerta").text(`📌 Subtipo: ${subtipo}`);
-            }
+    
+                // Chama a API para traduzir tipo e subtipo
+                try {
+                    const response = await fetch(`api.php?action=traduzir&tipo=${encodeURIComponent(tipo)}&subtipo=${encodeURIComponent(subtipo)}`);
+                    const data = await response.json();
+    
+                    if (data.success) {
+                        document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${data.tipo}`;
+                        document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${data.subtipo}`;
+                    } else {
+                        console.error("Erro na API:", data.message);
+                        document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${tipo}`;
+                        document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${subtipo}`;
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar tradução:", error);
+                    document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${tipo}`;
+                    document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${subtipo}`;
+                }
+            });
         });
     });
-    
 </script>
+    
 
 
 <!-- CSS do DataTables (Se necessário) -->
