@@ -1,32 +1,71 @@
 <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content p-2">
-            <div class="modal-header">
-                <h5 class="modal-title">Detalhes do Evento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="modal-content p-3 shadow-lg rounded">
+            <!-- Cabeçalho -->
+            <div class="modal-header bg-primary text-white rounded-top">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <p><strong>UUID:</strong> {{ alert.uuid }}</p>
-                <p><strong>Cidade:</strong> {{ alert.city }}</p>
-                <p><strong>Rua:</strong> {{ alert.street }}</p>
-                <p><strong>Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
-                <p><strong>Data Recebido:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
-                <p><strong>Confiança:</strong> {{ alert.confidence }}</p>
-                <p><strong>Tipo:</strong> {{ alert.type }}</p>
-                <p><strong>Subtipo:</strong> {{ alert.subtype }}</p>
-                <p><strong>Status:</strong> {{ alert.status == "1" ? "Ativo" : "Inativo" }}</p>
-                <p><strong>KM Estimado:</strong> <span id="km-value-{{ alert.uuid }}">Buscando...</span></p>
 
-                <div class="p-2 border-2 shadow-sm"  id="map-{{ alert.uuid }}" style="height: 300px;"></div>
+            <!-- Corpo -->
+            <div class="modal-body">
+                <!-- Grid de Informações -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 mb-3">
+                            <p><strong>📌 UUID:</strong> {{ alert.uuid }}</p>
+                            <p><strong>🏙️ Cidade:</strong> {{ alert.city }}</p>
+                            <p><strong>📍 Rua:</strong> {{ alert.street }}</p>
+                            <p><strong>📡 Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 mb-3">
+                            <p><strong>📅 Data:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                            <p><strong>🛣️ KM Estimado:</strong> <span id="km-value-{{ alert.uuid }}" class="badge badge-info">Buscando...</span></p>
+                            <p>
+                                <strong>🔍 Confiança:</strong> 
+                                <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                    {{ alert.confidence }}%
+                                </span>
+                            </p>
+                            <p>
+                                <strong>⚠️ Status:</strong> 
+                                <span class="badge badge-{{ alert.status == '1' ? 'success' : 'danger' }}">
+                                    {{ alert.status == "1" ? "Ativo" : "Inativo" }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo/Subtipo -->
+                <div class="card border-0 shadow-sm p-3 mb-3">
+                    <p><strong>🚨 Tipo:</strong> {{ alert.type }}</p>
+                    <p><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
+                </div>
+
+                <!-- Mapa -->
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
+                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 300px;"></div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+
+            <!-- Rodapé -->
+            <div class="modal-footer d-flex justify-content-between">
+                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="fab fa-waze"></i> Ver no Waze
+                </a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
             </div>
         </div>
     </div>
 </div>
-
-
-<script src="./js/global.js"></script>
