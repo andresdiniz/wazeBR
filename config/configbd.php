@@ -6,6 +6,9 @@ define('DB_NAME', 'u509716858_wazeportal');
 define('DB_USER', 'u509716858_wazeportal');
 define('DB_PASS', '@Ndre2024.');
 
+// Definir o caminho do arquivo de log
+define('LOG_FILE', __DIR__ . '/error_log.txt');
+
 class Database {
     private static $instance = null; // Instância única do PDO
 
@@ -28,11 +31,31 @@ class Database {
 
                 self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
             } catch (PDOException $e) {
-                // Em produção, evite exibir a mensagem diretamente para maior segurança
-                die("Erro ao conectar ao banco de dados: " . $e->getMessage());
+                // Em produção, evite exibir a mensagem diretamente
+                self::logError($e);  // Logar o erro no arquivo de log
+                die("Erro ao conectar ao banco de dados. Por favor, tente novamente mais tarde."); // Mensagem genérica para o usuário
             }
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Registra o erro no arquivo de log.
+     *
+     * @param Exception $e
+     */
+    private static function logError($e) {
+        // Verifica se o arquivo de log é gravável
+        if (is_writable(LOG_FILE)) {
+            // Cria uma string com os detalhes do erro
+            $errorDetails = date('Y-m-d H:i:s') . " | " . $e->getMessage() . " | Arquivo: " . $e->getFile() . " | Linha: " . $e->getLine() . "\n";
+
+            // Grava o erro no arquivo de log
+            file_put_contents(LOG_FILE, $errorDetails, FILE_APPEND);
+        } else {
+            // Se o arquivo de log não for gravável, logar no sistema de erro padrão
+            error_log("Erro ao registrar no log: " . $e->getMessage());
+        }
     }
 }
