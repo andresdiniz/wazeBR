@@ -5,9 +5,6 @@
         initializeDataTables();
     });
 
-    /**
-     * Inicializa as tabelas DataTables para melhorar a experiência do usuário.
-     */
     function initializeDataTables() {
         const tables = ['#accidentsTable', '#trafficTable'];
 
@@ -28,21 +25,18 @@
                         { extend: 'csv', text: 'Exportar CSV', className: 'btn btn-primary' },
                         { extend: 'excel', text: 'Exportar Excel', className: 'btn btn-success' },
                         { extend: 'pdf', text: 'Exportar PDF', className: 'btn btn-danger' },
-                        { extend: 'print', text: 'Imprimir', className: 'btn btn-warning' } // Botão de Imprimir
+                        { extend: 'print', text: 'Imprimir', className: 'btn btn-warning' }
                     ],
-                    // Introduz um pequeno delay no campo de pesquisa para melhorar o desempenho
                     searchDelay: 500,
-                    // Ajustar o comportamento das colunas em telas pequenas
                     columnDefs: [
                         {
-                            targets: 0, // Exemplo: Ajustar a coluna 0 para não ser exibida em dispositivos móveis
+                            targets: 0,
                             visible: true,
-                            className: 'd-none d-sm-table-cell' 
+                            className: 'd-none d-sm-table-cell'
                         }
                     ],
                 };
 
-                // Inicializar DataTable
                 $j(table).DataTable(tableConfig);
             }
         });
