@@ -53,10 +53,10 @@
                     <p><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
                 </div>
 
-                <!-- Mapa -->
+                <!-- Mapa Responsivo -->
                 <div class="card border-0 shadow-sm p-3">
                     <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
-                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 300px;"></div>
+                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 300px; width: 100%;"></div>
                 </div>
             </div>
 
@@ -65,6 +65,12 @@
                 <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" class="btn btn-outline-primary" target="_blank">
                     <i class="fab fa-waze"></i> Ver no Waze
                 </a>
+                
+                <!-- Botão Visível apenas em dispositivos móveis e tablets -->
+                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" class="btn btn-outline-success d-none d-sm-block d-md-none" target="_blank">
+                    <i class="fab fa-waze"></i> Criar Rota no Waze
+                </a>
+
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Fechar
                 </button>
