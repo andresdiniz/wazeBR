@@ -46,6 +46,38 @@ function getSiteUsers(PDO $pdo, $userId)
     return $result ? $result[0] : null;
 }
 
+function getSitepages($pdo, $pageurl) {
+    // Inicia o array para armazenar os dados da página
+    $data = [];
+
+    // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
+    try {
+        // Preparar a consulta SQL para buscar os dados da página com base na URL
+        $stmt = $pdo->prepare("SELECT * FROM pages WHERE url = :url LIMIT 1");
+        $stmt->bindParam(':url', $pageurl, PDO::PARAM_STR);  // Usando o parâmetro correto $pageurl
+        $stmt->execute();
+
+        // Verifica se encontrou a página
+        $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($pageData) {
+            // Se encontrou, adiciona os dados da página ao array $data
+            $data['pageData'] = $pageData;
+        } else {
+            // Se não encontrou, pode adicionar uma mensagem de erro ou página não encontrada
+            $data['pageData'] = null;
+        }
+    } catch (PDOException $e) {
+        // Caso ocorra erro na consulta
+        $data['pageData'] = null;
+        error_log("Erro ao consultar a tabela 'pages': " . $e->getMessage());
+    }
+
+    // Retorna o array com os dados da página ou null se não encontrada
+    return $data;
+}
+
+
 /**
  * Função genérica para realizar consultas SELECT no banco de dados.
  *

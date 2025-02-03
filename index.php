@@ -67,25 +67,28 @@ $pdo = Database::getConnection();
 // Recupera dados gerais para o template
 $settings = getSiteSettings($pdo);
 
-$data = [
-    'user' => getSiteUsers($pdo,$_SESSION['usuario_id']),       // Usuário logado
-    'settings' => $settings,           // Configurações do site
-    'session' => $_SESSION
-];
-
 // Verifica se o site está em manutenção
 if ($settings['manutencao'] ?? false) {
     header('Location: manutencao.html');
     exit();
 }
 
-// Renderiza os componentes fixos
-echo $twig->render('header.twig', $data);
-echo $twig->render('sidebar.twig', $data);
-
 // Determina a página solicitada
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $basePath = 'wazeportal'; // Subpasta onde o site está hospedado
+
+$pages = getSitepages($pdo, $uri);
+
+$data = [
+    'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
+    'settings' => $settings,  // Configurações do site
+    'session' => $_SESSION,
+    'pageTitle' => $title,  // Passando o título para o template
+];
+
+// Renderiza os componentes fixos
+echo $twig->render('header.twig', $data);
+echo $twig->render('sidebar.twig', $data);
 
 // Remove o basePath da URI, se necessário
 if (!empty($basePath) && strpos($uri, $basePath) === 0) {
