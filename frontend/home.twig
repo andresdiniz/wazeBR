@@ -123,13 +123,14 @@
 <!-- Script para Mapas e API DNIT -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", function () {
+        $(".open-modal").on("click", async function () {
             let lat = $(this).data("lat");
             let lon = $(this).data("lon");
             let modalId = $(this).attr("data-target");
             let mapId = modalId.replace("#alertModal", "map-");
             let kmId = modalId.replace("#alertModal", "km-value-");
 
+            // Inicialização do mapa
             setTimeout(() => {
                 let map = L.map(mapId).setView([lat, lon], 13);
 
@@ -141,17 +142,10 @@
                     .bindPopup("Localização do Alerta")
                     .openPopup();
             }, 500);
-            url = `https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm?lng=${lon}&lat=${lat}&r=150&data=${new Date().toISOString().split('T')[0]}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let km = data?.km || "Não encontrado";
-                    $(`#${kmId}`).text(km);
-                })
-                .catch(error => {
-                    console.error("Erro ao buscar KM do DNIT:", error);
-                    $(`#${kmId}`).text("Erro ao buscar");
-                });
+
+            // Chama a função assíncrona para buscar o KM
+            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
+            $(`#${kmId}`).text(km || "Não encontrado");
         });
     });
 </script>
