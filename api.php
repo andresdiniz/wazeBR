@@ -1050,31 +1050,32 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     break;           
                     
-                case 'confirm_alert':
-                    // Recebe os dados do alerta
-                    $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
-                    $status = isset($_POST['status']) ? $_POST['status'] : 0;
-
-                    // Verifica se o UUID foi enviado
-                    if (!empty($uuid)) {
-                        // Atualiza o status do alerta no banco de dados
-                        $stmt = $conn->prepare("UPDATE alerts SET status = ? WHERE uuid = ?");
-                        $stmt->bind_param("is", $status, $uuid);
-
-                        if ($stmt->execute()) {
-                            logToFile('success', "Alerta confirmado com sucesso: $uuid");
-                            echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
+                    case 'confirm_alert':
+                        // Recebe os dados do alerta
+                        $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
+                        $status = 1;  // Status do alerta (confirmado)
+                        $data_confirmado = date('Y-m-d H:i:s');  // Data e hora atual para a confirmação
+                    
+                        // Verifica se o UUID foi enviado
+                        if (!empty($uuid)) {
+                            // Atualiza o status do alerta e a data de confirmação no banco de dados
+                            $stmt = $conn->prepare("UPDATE alerts SET confirmado = ?, data_confirmado = ? WHERE uuid = ?");
+                            $stmt->bind_param("iss", $status, $data_confirmado, $uuid);  // Parâmetros: status (int), data_confirmado (string), uuid (string)
+                    
+                            if ($stmt->execute()) {
+                                logToFile('success', "Alerta confirmado com sucesso: $uuid");
+                                echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
+                            } else {
+                                logToFile('error', "Alerta não confirmado: $uuid");
+                                echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);  
+                            }
+                    
+                            // Fecha a declaração
+                            $stmt->close();
                         } else {
-                            logToFile('error', "Alerta não confirmado: $uuid");
-                            echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);  
+                            echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
-                        
-                        // Fecha a declaração
-                        $stmt->close();
-                    } else {
-                        echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
-                    }
-                    break;
+                        break;                   
 
         default:
             http_response_code(401);

@@ -34,8 +34,8 @@ function logout() {
 
 // Makes AJAX call to confirm alert with given UUID and KM
 function confirmarAlerta(uuid, km) {
-    if (!uuid || !km) {
-        console.error('UUID or KM missing');
+    if (!uuid) {
+        console.error('UUID missing');
         return;
     }
     $.ajax({
