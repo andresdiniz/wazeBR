@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!isNaN(latitude) && !isNaN(longitude)) {
                 // Chama a função para buscar o KM do DNIT
-                const km = await buscarKmDnit(longitude, latitude);
+                const km = buscarKmDnit(longitude, latitude);
                 document.getElementById(`km-value-${uuid}`).textContent = km;
                 
                 // Inicializa o mapa
@@ -118,3 +118,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
+<script src="./js/scripts.js"></script>
