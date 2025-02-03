@@ -1053,6 +1053,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     case 'confirm_alert':
                         // Recebe os dados do alerta
                         $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
+                        $uuid = isset($_POST['km']) ? $_POST['km'] : '';
                         $status = 1;  // Status do alerta (confirmado)
                         $data_confirmado = date('Y-m-d H:i:s');  // Data e hora atual para a confirmação
                     
