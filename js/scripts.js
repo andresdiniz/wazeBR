@@ -56,6 +56,7 @@ function confirmarAlerta(uuid, km) {
             try {
                 // Parse da resposta JSON
                 const result = JSON.parse(response);
+                console.log('Resposta recebida:', response);  // Log de resposta
 
                 // Verificar o campo 'success' da resposta
                 if (result.success) {
