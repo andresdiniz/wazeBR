@@ -1081,7 +1081,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 // Executa a query
                                 if ($stmt->execute()) {
-                                    logToFile('success', "Alerta confirmado com sucesso: $uuid");
+                                    //logToFile('success', "Alerta confirmado com sucesso: $uuid");
                                     http_response_code(200);  // Retorna o código 200 (sucesso)
                                     echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
                                 } else {
