@@ -49,7 +49,6 @@ function getSiteUsers(PDO $pdo, $userId)
 function getSitepages($pdo, $pageurl) {
     // Inicia o array para armazenar os dados da página
     $data = [];
-    echo $pageurl;
     // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
     try {
         // Preparar a consulta SQL para buscar os dados da página com base na URL
