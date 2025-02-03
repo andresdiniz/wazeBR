@@ -331,12 +331,12 @@ foreach ($jsonUrls as $jsonUrl) {
 
             foreach ($data['irregularities'] as $irregularity) {
                 // Gerando um ID único para a irregularidade
-                $radius = calculateRadius($irregularity['bbox']);
-                $impactScore = calculateImpactScore(
+                //$radius = calculateRadius($irregularity['bbox']);
+                $impactScore = /*calculateImpactScore(
                     $irregularity['jamLevel'],
                     $irregularity['length'],
                     $radius
-                );
+                );*/0;
 
                 $irregularityId = uniqid('irreg_', true);
                 
