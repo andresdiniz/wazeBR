@@ -28,7 +28,7 @@
                             className: 'btn btn-primary',
                             exportOptions: {
                                 // Aqui você pode configurar quais colunas exportar
-                                columns: [0, 1, 2, 3, 4, 5] // Index das colunas que serão exportadas (pode incluir colunas ocultas)
+                                columns: [0, 1, 2, 3, 4] // Index das colunas que serão exportadas (pode incluir colunas ocultas)
                             }
                         },
                         { 
@@ -36,7 +36,7 @@
                             text: 'Exportar Excel', 
                             className: 'btn btn-success',
                             exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5] // Ajuste conforme necessário
+                                columns: [0, 1, 2, 3, 4] // Ajuste conforme necessário
                             }
                         },
                         { 
@@ -44,7 +44,7 @@
                             text: 'Exportar PDF', 
                             className: 'btn btn-danger',
                             exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5], // Aqui, você também pode especificar as colunas para exportação
+                                columns: [0, 1, 2, 3, 4], // Aqui, você também pode especificar as colunas para exportação
                                 modifier: {
                                     page: 'all', // Para garantir que todas as páginas sejam exportadas
                                     search: 'none' // Evita filtrar durante a exportação
@@ -56,7 +56,7 @@
                             text: 'Imprimir', 
                             className: 'btn btn-warning',
                             exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5], // Escolha as colunas a serem impressas
+                                columns: [0, 1, 2, 3, 4], // Escolha as colunas a serem impressas
                                 modifier: {
                                     page: 'all', 
                                     search: 'none'
