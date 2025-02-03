@@ -16,16 +16,53 @@
                     paging: true,
                     searching: true,
                     info: true,
-                    dom: 'Bfrtip',
+                    dom: 'Bfrtip', // B = Buttons, f = Filtering, r = Processing, t = Table, i = Information, p = Pagination
                     language: {
                         search: "Buscar:",
                         paginate: { next: "Próximo", previous: "Anterior" },
                     },
                     buttons: [
-                        { extend: 'csv', text: 'Exportar CSV', className: 'btn btn-primary' },
-                        { extend: 'excel', text: 'Exportar Excel', className: 'btn btn-success' },
-                        { extend: 'pdf', text: 'Exportar PDF', className: 'btn btn-danger' },
-                        { extend: 'print', text: 'Imprimir', className: 'btn btn-warning' }
+                        { 
+                            extend: 'csv', 
+                            text: 'Exportar CSV', 
+                            className: 'btn btn-primary',
+                            exportOptions: {
+                                // Aqui você pode configurar quais colunas exportar
+                                columns: [0, 1, 2, 3, 4, 5] // Index das colunas que serão exportadas (pode incluir colunas ocultas)
+                            }
+                        },
+                        { 
+                            extend: 'excel', 
+                            text: 'Exportar Excel', 
+                            className: 'btn btn-success',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5] // Ajuste conforme necessário
+                            }
+                        },
+                        { 
+                            extend: 'pdf', 
+                            text: 'Exportar PDF', 
+                            className: 'btn btn-danger',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5], // Aqui, você também pode especificar as colunas para exportação
+                                modifier: {
+                                    page: 'all', // Para garantir que todas as páginas sejam exportadas
+                                    search: 'none' // Evita filtrar durante a exportação
+                                }
+                            }
+                        },
+                        { 
+                            extend: 'print', 
+                            text: 'Imprimir', 
+                            className: 'btn btn-warning',
+                            exportOptions: {
+                                columns: [0, 1, 2, 3, 4, 5], // Escolha as colunas a serem impressas
+                                modifier: {
+                                    page: 'all', 
+                                    search: 'none'
+                                }
+                            }
+                        }
                     ],
                     searchDelay: 500,
                     columnDefs: [
