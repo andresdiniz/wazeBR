@@ -58,7 +58,7 @@ function confirmarAlerta(uuid, km) {
             if (xhr.status === 200) {
                 // Se o código de status for 200, mostra a mensagem de sucesso
                 alert(response.message);
-                $('#alertModal').modal('hide');  // Fecha o modal após sucesso
+                $('.modal').modal('hide');  // Fecha o modal após sucesso
             } else if (xhr.status === 400 || xhr.status === 500) {
                 // Se o código de status for 400 ou 500, mostra a mensagem de erro
                 alert(response.message);
