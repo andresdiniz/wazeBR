@@ -32,11 +32,6 @@
                     ],
                     // Melhor desempenho ao usar processamento do lado do servidor (para grandes volumes de dados)
                     serverSide: true,
-                    ajax: function(data, callback, settings) {
-                        // Adicionar lógica de chamada para buscar dados no servidor aqui, caso necessário
-                        // Exemplo: fetch('/api/data', { params: { page: settings.page, ...}})
-                        callback({ draw: settings.iDraw, recordsTotal: 1000, recordsFiltered: 1000, data: [] });
-                    },
                     // Introduz um pequeno delay no campo de pesquisa para melhorar o desempenho
                     searchDelay: 500,
                     // Ajustar o comportamento das colunas em telas pequenas
