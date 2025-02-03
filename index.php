@@ -78,6 +78,7 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $basePath = 'wazeportal'; // Subpasta onde o site está hospedado
 
 $pages = getSitepages($pdo, $uri);
+var_dump($pages); // Debugging line to check the content of $pages
 $title = $pages['title'] ?? '';  // Se não houver título, usa um padrão
 
 $data = [

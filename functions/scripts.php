@@ -63,7 +63,7 @@ function getSitepages($pdo, $pageurl) {
             // Se encontrou, adiciona os dados da página ao array $data
             $data['pageData'] = $pageData;
             logToFile('info','pages', $data); // Adicionado para depuração
-            var_dump($data); // Adicionado para depuração
+            //var_dump($data); // Adicionado para depuração
         } else {
             // Se não encontrou, pode adicionar uma mensagem de erro ou página não encontrada
             $data['pageData'] = null;
