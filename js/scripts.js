@@ -82,7 +82,7 @@ async function buscarKmDnit(latitude, longitude, raio = 5) {
         }
 
         const data = await response.json();
-        return data[0]?.km ?? null;
+        return data[0]?.km ? parseFloat(data[0].km).toFixed(2) : null;
     } catch (error) {
         console.error("Erro ao buscar o KM no DNIT:", error);
         return null;
