@@ -82,7 +82,7 @@ async function buscarKmDnit(latitude, longitude, raio = 5) {
         }
 
         const data = await response.json();
-        return km !== null ? km.toFixed(2) : null; // Retorna o valor com 2 casas decimais
+        return data[0]?.km ?? null;
     } catch (error) {
         console.error("Erro ao buscar o KM no DNIT:", error);
         return null;
