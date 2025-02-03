@@ -120,68 +120,35 @@
     </div>
 </div>
 
+<!-- Script para Mapas e API DNIT -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        
-        function inicializarMapa(uuid, latitude, longitude) {
-            const mapaId = `map-${uuid}`;
-            let mapaElemento = document.getElementById(mapaId);
-    
-            if (!mapaElemento) {
-                console.error(`Mapa não encontrado para UUID: ${uuid}`);
-                return;
-            }
-    
-            // Verifica se o mapa já foi criado para evitar reinicialização
-            if (mapaElemento.getAttribute("data-map-initialized") === "true") {
-                return;
-            }
-    
-            const map = L.map(mapaId).setView([latitude, longitude], 14);
-    
-            // Configuração do mapa com OpenStreetMap
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-    
-            // Marca o local no mapa
-            L.marker([latitude, longitude]).addTo(map)
-                .bindPopup("Localização do Evento")
-                .openPopup();
-    
-            // Centraliza o mapa no ponto
-            map.setView([latitude, longitude], 14);
-    
-            // Marca que o mapa foi inicializado
-            mapaElemento.setAttribute("data-map-initialized", "true");
-        }
-    
-        // Evento para abrir o modal corretamente
-        document.querySelectorAll("[id^=alertModal]").forEach(modal => {
-            modal.addEventListener("show.bs.modal", async function () {
-                const uuid = modal.id.replace("alertModal", "");
-                const latitude = parseFloat(modal.getAttribute("data-lat"));
-                const longitude = parseFloat(modal.getAttribute("data-lon"));
-    
-                if (!isNaN(latitude) && !isNaN(longitude)) {
-                    try {
-                        // Chama a função para buscar o KM do DNIT
-                        const km = await buscarKmDnit(latitude, longitude); 
-                        document.getElementById(`km-value-${uuid}`).textContent = km || "Não encontrado";
-                    } catch (error) {
-                        console.error("Erro ao buscar KM DNIT:", error);
-                        document.getElementById(`km-value-${uuid}`).textContent = "Erro ao buscar";
-                    }
-    
-                    // Inicializa o mapa
-                    inicializarMapa(uuid, latitude, longitude);
-                }
-            });
+        $(".open-modal").on("click", async function () {
+            let lat = $(this).data("lat");
+            let lon = $(this).data("lon");
+            let modalId = $(this).attr("data-target");
+            let mapId = modalId.replace("#alertModal", "map-");
+            let kmId = modalId.replace("#alertModal", "km-value-");
+
+            // Inicialização do mapa
+            setTimeout(() => {
+                let map = L.map(mapId).setView([lat, lon], 13);
+
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(map);
+
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup("Localização do Alerta")
+                    .openPopup();
+            }, 500);
+
+            // Chama a função assíncrona para buscar o KM
+            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
+            $(`#${kmId}`).text(km || "Não encontrado");
         });
     });
 </script>
-    
-    
 
 
 <!-- CSS do DataTables (Se necessário) -->
