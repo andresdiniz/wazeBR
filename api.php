@@ -1049,15 +1049,18 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
                     }
                     break;           
-                    
+
+                    // Após definir o tipo de conteúdo, envie o JSON de resposta
                     case 'confirm_alert':
+                        // Antes de qualquer saída, defina o tipo de conteúdo
+                        header('Content-Type: application/json');
                         // Recebe os dados do alerta
                         $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
                         $km = isset($_POST['km']) ? $_POST['km'] : '';  // KM é opcional
                         $status = 1;  // Status do alerta (confirmado)
                         $data_confirmado = date('Y-m-d H:i:s');  // Data e hora atual para a confirmação
                         $pdo = Database::getConnection();
-                    
+
                         // Verifica se o UUID foi enviado
                         if (!empty($uuid)) {
                             try {
@@ -1070,12 +1073,12 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     // Se o valor de $km não foi enviado, não atualiza o campo km
                                     $stmt = $pdo->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
                                 }
-                    
+
                                 // Vincula os outros parâmetros
                                 $stmt->bindParam(':confirmado', $status, PDO::PARAM_INT);
                                 $stmt->bindParam(':data_confirmado', $data_confirmado, PDO::PARAM_STR);
                                 $stmt->bindParam(':uuid', $uuid, PDO::PARAM_STR);
-                    
+
                                 // Executa a query
                                 if ($stmt->execute()) {
                                     logToFile('success', "Alerta confirmado com sucesso: $uuid");
@@ -1096,6 +1099,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
                         break;
+
                                   
 
         default:
