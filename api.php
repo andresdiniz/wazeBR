@@ -1063,11 +1063,11 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 // Prepara a query de atualização
                                 if (!empty($km)) {
                                     // Se o valor de $km foi enviado, inclui na query
-                                    $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado, km = :km WHERE uuid = :uuid");
+                                    $stmt = $pdo->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado, km = :km WHERE uuid = :uuid");
                                     $stmt->bindParam(':km', $km, PDO::PARAM_STR);  // Vincula o parâmetro km
                                 } else {
                                     // Se o valor de $km não foi enviado, não atualiza o campo km
-                                    $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
+                                    $stmt = $pdo->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
                                 }
                     
                                 // Vincula os outros parâmetros
@@ -1090,7 +1090,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                             echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
-                        break;                       
+                        break;              
 
         default:
             http_response_code(401);
