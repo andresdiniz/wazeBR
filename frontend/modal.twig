@@ -12,8 +12,8 @@
                 </button>
             </div>
 
-            <!-- Corpo -->
-            <div class="modal-body">
+            <!-- Corpo (Com rolagem interna) -->
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <!-- Grid de Informações -->
                 <div class="row">
                     <div class="col-md-6">
@@ -56,7 +56,7 @@
                 <!-- Mapa Responsivo -->
                 <div class="card border-0 shadow-sm p-3">
                     <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
-                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 500px; width: 100%;"></div>
+                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 400px; width: 100%;"></div>
                 </div>
             </div>
 
@@ -81,36 +81,25 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    async function consultarLocalizacaoKm(longitude, latitude, raio = 150) {
-        const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
-        const dataAtual = new Date().toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
-        const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const km = data[0]?.km ?? "Não disponível";
-            return km;
-        } catch (error) {
-            console.error("Erro ao buscar o KM no DNIT:", error);
-            return "Erro ao carregar";
-        }
-    }
 
     function inicializarMapa(uuid, latitude, longitude) {
         const map = L.map(`map-${uuid}`).setView([latitude, longitude], 14);
+
+        // Configuração do mapa com OpenStreetMap
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        // Marca o local no mapa
         L.marker([latitude, longitude]).addTo(map)
             .bindPopup("Localização do Evento")
             .openPopup();
+
+        // Centraliza o mapa no ponto
+        map.setView([latitude, longitude], 14);
     }
 
+    // Evento para abrir o modal
     document.querySelectorAll("[id^=alertModal]").forEach(modal => {
         modal.addEventListener("show.bs.modal", async function () {
             const uuid = modal.id.replace("alertModal", "");
@@ -127,5 +116,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
 });
 </script>
