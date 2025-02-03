@@ -38,6 +38,11 @@ function confirmarAlerta(uuid, km) {
         console.error('UUID missing');
         return;
     }
+    if (!km) {
+        console.error('km missing');
+        km = null;
+        return;
+    }
     $.ajax({
         url: '/api.php?action=confirm_alert',
         type: 'POST',
