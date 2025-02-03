@@ -124,7 +124,20 @@
     document.addEventListener("DOMContentLoaded", function () {
         
         function inicializarMapa(uuid, latitude, longitude) {
-            const map = L.map(`map-${uuid}`).setView([latitude, longitude], 14);
+            const mapaId = `map-${uuid}`;
+            let mapaElemento = document.getElementById(mapaId);
+    
+            if (!mapaElemento) {
+                console.error(`Mapa não encontrado para UUID: ${uuid}`);
+                return;
+            }
+    
+            // Verifica se o mapa já foi criado para evitar reinicialização
+            if (mapaElemento.getAttribute("data-map-initialized") === "true") {
+                return;
+            }
+    
+            const map = L.map(mapaId).setView([latitude, longitude], 14);
     
             // Configuração do mapa com OpenStreetMap
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -138,6 +151,9 @@
     
             // Centraliza o mapa no ponto
             map.setView([latitude, longitude], 14);
+    
+            // Marca que o mapa foi inicializado
+            mapaElemento.setAttribute("data-map-initialized", "true");
         }
     
         // Evento para abrir o modal corretamente
@@ -146,42 +162,25 @@
                 const uuid = modal.id.replace("alertModal", "");
                 const latitude = parseFloat(modal.getAttribute("data-lat"));
                 const longitude = parseFloat(modal.getAttribute("data-lon"));
-                const tipo = modal.getAttribute("data-tipo");   // Obtém o tipo corretamente
-                const subtipo = modal.getAttribute("data-subtipo"); // Obtém o subtipo corretamente
     
                 if (!isNaN(latitude) && !isNaN(longitude)) {
-                    // Busca KM do DNIT
-                    const km = await buscarKmDnit(latitude, longitude);
-                    document.getElementById(`km-value-${uuid}`).textContent = km || "Não encontrado";
-                    
+                    try {
+                        // Chama a função para buscar o KM do DNIT
+                        const km = await buscarKmDnit(latitude, longitude); 
+                        document.getElementById(`km-value-${uuid}`).textContent = km || "Não encontrado";
+                    } catch (error) {
+                        console.error("Erro ao buscar KM DNIT:", error);
+                        document.getElementById(`km-value-${uuid}`).textContent = "Erro ao buscar";
+                    }
+    
                     // Inicializa o mapa
                     inicializarMapa(uuid, latitude, longitude);
-                }
-    
-                // Chama a API para traduzir tipo e subtipo
-                if (tipo && subtipo) {
-                    try {
-                        const response = await fetch(`api.php?action=traduzir&tipo=${encodeURIComponent(tipo)}&subtipo=${encodeURIComponent(subtipo)}`);
-                        const data = await response.json();
-    
-                        if (data.success) {
-                            document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${data.tipo}`;
-                            document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${data.subtipo}`;
-                        } else {
-                            console.error("Erro na API:", data.message);
-                            document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${tipo}`;
-                            document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${subtipo}`;
-                        }
-                    } catch (error) {
-                        console.error("Erro ao buscar tradução:", error);
-                        document.getElementById(`tipo-alerta-${uuid}`).textContent = `🚨 Tipo: ${tipo}`;
-                        document.getElementById(`subtipo-alerta-${uuid}`).textContent = `📌 Subtipo: ${subtipo}`;
-                    }
                 }
             });
         });
     });
 </script>
+    
     
 
 
