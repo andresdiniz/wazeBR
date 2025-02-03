@@ -1053,17 +1053,24 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     case 'confirm_alert':
                         // Recebe os dados do alerta
                         $uuid = isset($_POST['uuid']) ? $_POST['uuid'] : '';
-                        $km = isset($_POST['km']) ? $_POST['km'] : '';
+                        $km = isset($_POST['km']) ? $_POST['km'] : '';  // KM é opcional
                         $status = 1;  // Status do alerta (confirmado)
                         $data_confirmado = date('Y-m-d H:i:s');  // Data e hora atual para a confirmação
                     
                         // Verifica se o UUID foi enviado
                         if (!empty($uuid)) {
                             try {
-                                // Atualiza o status do alerta e a data de confirmação no banco de dados
-                                $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
+                                // Prepara a query de atualização
+                                if (!empty($km)) {
+                                    // Se o valor de $km foi enviado, inclui na query
+                                    $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado, km = :km WHERE uuid = :uuid");
+                                    $stmt->bindParam(':km', $km, PDO::PARAM_STR);  // Vincula o parâmetro km
+                                } else {
+                                    // Se o valor de $km não foi enviado, não atualiza o campo km
+                                    $stmt = $conn->prepare("UPDATE alerts SET confirmado = :confirmado, data_confirmado = :data_confirmado WHERE uuid = :uuid");
+                                }
                     
-                                // Vincula os parâmetros
+                                // Vincula os outros parâmetros
                                 $stmt->bindParam(':confirmado', $status, PDO::PARAM_INT);
                                 $stmt->bindParam(':data_confirmado', $data_confirmado, PDO::PARAM_STR);
                                 $stmt->bindParam(':uuid', $uuid, PDO::PARAM_STR);
@@ -1083,8 +1090,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                             echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
-                        break;
-                                    
+                        break;                       
 
         default:
             http_response_code(401);
