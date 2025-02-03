@@ -129,25 +129,47 @@
             let modalId = $(this).attr("data-target");
             let mapId = modalId.replace("#alertModal", "map-");
             let kmId = modalId.replace("#alertModal", "km-value-");
-
+            let tipo = $(this).data("tipo"); // Obtém o tipo do alerta
+            let subtipo = $(this).data("subtipo"); // Obtém o subtipo do alerta
+    
             // Inicialização do mapa
             setTimeout(() => {
                 let map = L.map(mapId).setView([lat, lon], 13);
-
+    
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     attribution: "&copy; OpenStreetMap contributors"
                 }).addTo(map);
-
+    
                 L.marker([lat, lon]).addTo(map)
                     .bindPopup("Localização do Alerta")
                     .openPopup();
             }, 500);
-
-            // Chama a função assíncrona para buscar o KM
-            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
+    
+            // Buscar KM do DNIT
+            const km = await buscarKmDnit(lat, lon, 150); // Raio de 150 metros
             $(`#${kmId}`).text(km || "Não encontrado");
+    
+            // Chamar API para traduzir o alerta
+            try {
+                const response = await fetch("api.php?action=traduzir&tipo=" + encodeURIComponent(tipo) + "&subtipo=" + encodeURIComponent(subtipo));
+                const data = await response.json();
+    
+                if (data.success) {
+                    $("#tipo-alerta").text(`🚨 Tipo: ${data.tipo}`);
+                    $("#subtipo-alerta").text(`📌 Subtipo: ${data.subtipo}`);
+                } else {
+                    console.error("Erro na API:", data.message);
+                    $("#tipo-alerta").text(`🚨 Tipo: ${tipo}`);
+                    $("#subtipo-alerta").text(`📌 Subtipo: ${subtipo}`);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar tradução:", error);
+                $("#tipo-alerta").text(`🚨 Tipo: ${tipo}`);
+                $("#subtipo-alerta").text(`📌 Subtipo: ${subtipo}`);
+            }
         });
     });
+    
 </script>
 
 

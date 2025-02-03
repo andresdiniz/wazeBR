@@ -637,6 +637,20 @@ case 'alterar':
 
     break;
 
+case 'traduzir':
+        $tipo = $_GET['tipo']; 
+        $subtipo= $_GET['subtipo']; 
+
+        $alertaTraduzido = traduzirAlerta($tipo, $subtipo);
+
+        echo json_encode([
+            "tipo" => $alertaTraduzido["tipo"],
+            "subtipo" => $alertaTraduzido["subtipo"]
+        ]);
+
+        break;
+
+
 
         default:
             http_response_code(400);

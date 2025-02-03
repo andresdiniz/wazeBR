@@ -465,3 +465,24 @@ function logToFile($level, $message, $context = []) {
     // Registra a mensagem de log no arquivo
     error_log($logMessage, 3, $logFile);
 }
+
+function traduzirAlerta($tipo, $subtipo) {
+    try {
+        $pdo = Database::getConnection();
+        $sql = "SELECT alert_type.name AS tipo, alert_subtype.name AS subtipo
+                FROM alert_type
+                JOIN alert_subtype ON alert_type.id = alert_subtype.alert_type_id
+                WHERE alert_type.value = :tipo AND alert_subtype.subtype_value = :subtipo";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':tipo', $tipo, PDO::PARAM_STR);
+        $stmt->bindParam(':subtipo', $subtipo, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $resultado ?: ["tipo" => $tipo, "subtipo" => $subtipo]; // Retorna original caso não encontre
+    } catch (PDOException $e) {
+        error_log("Erro ao buscar tradução do alerta: " . $e->getMessage());
+        return ["tipo" => $tipo, "subtipo" => $subtipo];
+    }
+}
