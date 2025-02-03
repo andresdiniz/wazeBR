@@ -637,20 +637,56 @@ case 'alterar':
 
     break;
 
-case 'traduzir':
-        $tipo = $_GET['tipo']; 
-        $subtipo= $_GET['subtipo']; 
-
-        $alertaTraduzido = traduzirAlerta($tipo, $subtipo);
-
-        echo json_encode([
-            "tipo" => $alertaTraduzido["tipo"],
-            "subtipo" => $alertaTraduzido["subtipo"]
-        ]);
-
+    case 'traduzir':
+        try {
+            // Verificar se os parâmetros foram enviados
+            if (!isset($_GET['tipo']) || !isset($_GET['subtipo'])) {
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Parâmetros tipo e subtipo são obrigatórios."
+                ]);
+                exit;
+            }
+    
+            $tipo = $_GET['tipo'];
+            $subtipo = $_GET['subtipo'];
+    
+            // Verificar se a função existe antes de chamá-la
+            if (!function_exists('traduzirAlerta')) {
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Função traduzirAlerta não encontrada."
+                ]);
+                exit;
+            }
+    
+            // Chamar a função para traduzir
+            $alertaTraduzido = traduzirAlerta($tipo, $subtipo);
+    
+            // Verificar se obteve um resultado válido
+            if (!$alertaTraduzido) {
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Nenhuma tradução encontrada para o alerta.",
+                    "tipo" => $tipo,
+                    "subtipo" => $subtipo
+                ]);
+                exit;
+            }
+    
+            // Retornar a tradução em JSON
+            echo json_encode([
+                "success" => true,
+                "tipo" => $alertaTraduzido["tipo"],
+                "subtipo" => $alertaTraduzido["subtipo"]
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                "success" => false,
+                "message" => "Erro interno no servidor: " . $e->getMessage()
+            ]);
+        }
         break;
-
-
 
         default:
             http_response_code(400);
