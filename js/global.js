@@ -30,8 +30,6 @@
                         { extend: 'pdf', text: 'Exportar PDF', className: 'btn btn-danger' },
                         { extend: 'print', text: 'Imprimir', className: 'btn btn-warning' } // Botão de Imprimir
                     ],
-                    // Melhor desempenho ao usar processamento do lado do servidor (para grandes volumes de dados)
-                    serverSide: true,
                     // Introduz um pequeno delay no campo de pesquisa para melhorar o desempenho
                     searchDelay: 500,
                     // Ajustar o comportamento das colunas em telas pequenas
