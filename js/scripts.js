@@ -32,6 +32,7 @@ function logout() {
 }
 
 // Faz a chamada AJAX para confirmar o alerta com UUID e KM fornecidos
+// Faz a chamada AJAX para confirmar o alerta com UUID e KM fornecidos
 function confirmarAlerta(uuid, km) {
     if (!uuid) {
         console.error('UUID missing');
@@ -52,34 +53,25 @@ function confirmarAlerta(uuid, km) {
             km: km,
             status: 1
         },
-        success: function (response) {
-            try {
-                // Parse da resposta JSON
-                const result = JSON.parse(response);
-                console.log('Resposta recebida:', response);  // Log de resposta
-
-                // Verificar o campo 'success' da resposta
-                if (result.success) {
-                    // Se 'success' for true, mostramos a mensagem de sucesso
-                    alert(result.message);  // Alerta com a mensagem de sucesso
-                    $('#alertModal').modal('hide');  // Fecha o modal após sucesso
-                } else {
-                    // Se 'success' for false, mostramos a mensagem de erro
-                    alert(result.message);  // Alerta com a mensagem de erro
-                }
-            } catch (error) {
-                // Caso ocorra erro no parse da resposta
-                console.error('Erro ao interpretar a resposta:', error);
-                alert('Erro inesperado ao processar a resposta.');
+        success: function (response, textStatus, xhr) {
+            // Verifica o código de status HTTP da resposta
+            if (xhr.status === 200) {
+                // Se o código de status for 200, mostra a mensagem de sucesso
+                alert(response.message);
+                $('#alertModal').modal('hide');  // Fecha o modal após sucesso
+            } else if (xhr.status === 400 || xhr.status === 500) {
+                // Se o código de status for 400 ou 500, mostra a mensagem de erro
+                alert(response.message);
             }
         },
         error: function (xhr, status, error) {
-            // Se a requisição AJAX falhar
+            // Se a requisição AJAX falhar (por exemplo, erro de rede)
             console.error('Erro na requisição:', error);
             alert('Erro ao confirmar o alerta. Tente novamente.');
         },
     });
 }
+
 
 async function buscarKmDnit(latitude, longitude, raio = 5) {
     const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";

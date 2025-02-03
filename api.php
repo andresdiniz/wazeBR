@@ -1079,19 +1079,24 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 // Executa a query
                                 if ($stmt->execute()) {
                                     logToFile('success', "Alerta confirmado com sucesso: $uuid");
+                                    http_response_code(200);  // Retorna o código 200 (sucesso)
                                     echo json_encode(["success" => true, "message" => "Alerta confirmado com sucesso!"]);
                                 } else {
                                     logToFile('error', "Alerta não confirmado: $uuid");
+                                    http_response_code(400);  // Retorna o código 400 (erro)
                                     echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta. Tente novamente."]);
                                 }
                             } catch (PDOException $e) {
                                 // Se ocorrer erro, exibe a mensagem
+                                http_response_code(500);  // Retorna o código 500 (erro interno)
                                 echo json_encode(["success" => false, "message" => "Erro ao confirmar o alerta: " . $e->getMessage()]);
                             }
                         } else {
+                            http_response_code(400);  // Retorna o código 400 (erro)
                             echo json_encode(["success" => false, "message" => "UUID não fornecido."]);
                         }
-                        break;              
+                        break;
+                                  
 
         default:
             http_response_code(401);
