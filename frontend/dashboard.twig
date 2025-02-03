@@ -192,6 +192,8 @@
                                 </button>
                             </td>
                         </tr>
+                        {# Inclui modal individual para cada alerta #}
+                        {% include 'modal.twig' with {'alert': alert} %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -258,6 +260,8 @@
                                     </button>
                                 </td>
                             </tr>
+                            {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -310,6 +314,8 @@
                                     </button>
                                 </td>
                             </tr>
+                            {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -366,6 +372,8 @@
                                     </button>
                                 </td>
                             </tr>
+                            {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -382,61 +390,10 @@
                 <!-- /.container-fluid -->
 
 
-<!-- Modal -->
-<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="alertModalLabel">Detalhes do Alerta</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p><strong>UUID:</strong> <span id="modal-uuid">N/A</span></p>
-                <p><strong>Cidade:</strong> <span id="modal-city">N/A</span></p>
-                <p><strong>Via:</strong> <span id="modal-street">N/A</span></p>
-                <p id="modal-km-p"><strong>KM:</strong> <span id="modal-via-KM">N/A</span></p>
-                <p><strong>Localização:</strong> <span id="modal-location">N/A</span></p>
-                <p><strong>Data Recebido:</strong> <span id="modal-date-received">N/A</span></p>
-                <p><strong>Confiança:</strong> <span id="modal-confidence">N/A</span></p>
-                <p><strong>Tipo:</strong> <span id="modal-type">N/A</span></p>
-                <p><strong>Subtipo:</strong> <span id="modal-subtype">N/A</span></p>
-                <p><strong>Status:</strong> <span>Ativo</span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="confirm-alert" onclick="confirmarAlertaModal('{{ uuid }}', '{{ km }}')">Confirmar Alerta</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Mapa -->
-<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mapModalLabel">Mapa do Alerta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="map" style="height: 500px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- jQuery (necessário para o DataTables) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <!-- DataTables JS -->
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -445,7 +402,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-
 
 <!-- Leaflet JS (para o mapa) -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
