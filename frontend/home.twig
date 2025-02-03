@@ -147,8 +147,8 @@
                 const uuid = modal.id.replace("alertModal", "");
                 const latitude = parseFloat(modal.getAttribute("data-lat"));
                 const longitude = parseFloat(modal.getAttribute("data-lon"));
-                const tipo = modal.getAttribute("data-tipo");   // Obtém o tipo
-                const subtipo = modal.getAttribute("data-subtipo"); // Obtém o subtipo
+                const tipo = modal.getAttribute(`tipo-alerta-${uuid}`);   // Obtém o tipo
+                const subtipo = modal.getAttribute(`subtipo-alerta-${uuid}`); // Obtém o subtipo
     
                 if (!isNaN(latitude) && !isNaN(longitude)) {
                     // Busca KM do DNIT
