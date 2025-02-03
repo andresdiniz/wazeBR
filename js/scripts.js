@@ -31,8 +31,7 @@ function logout() {
     window.location.href = "login.html";
 }
 
-// Makes AJAX call to confirm alert with given UUID and KM
-// Makes AJAX call to confirm alert with given UUID and KM
+// Faz a chamada AJAX para confirmar o alerta com UUID e KM fornecidos
 function confirmarAlerta(uuid, km) {
     if (!uuid) {
         console.error('UUID missing');
@@ -42,7 +41,7 @@ function confirmarAlerta(uuid, km) {
 
     if (!km) {
         console.error('KM missing');
-        km = null;
+        km = null;  // Se km não for fornecido, definimos como null
     }
 
     $.ajax({
@@ -54,19 +53,28 @@ function confirmarAlerta(uuid, km) {
             status: 1
         },
         success: function (response) {
-            // Parse the JSON response from PHP
-            const result = JSON.parse(response);
+            try {
+                // Parse da resposta JSON
+                const result = JSON.parse(response);
 
-            // Check if the response was successful
-            if (result.success) {
-                alert(result.message);  // Success message from PHP
-                $('#alertModal').modal('hide');
-            } else {
-                alert(result.message);  // Error message from PHP
+                // Verificar o campo 'success' da resposta
+                if (result.success) {
+                    // Se 'success' for true, mostramos a mensagem de sucesso
+                    alert(result.message);  // Alerta com a mensagem de sucesso
+                    $('#alertModal').modal('hide');  // Fecha o modal após sucesso
+                } else {
+                    // Se 'success' for false, mostramos a mensagem de erro
+                    alert(result.message);  // Alerta com a mensagem de erro
+                }
+            } catch (error) {
+                // Caso ocorra erro no parse da resposta
+                console.error('Erro ao interpretar a resposta:', error);
+                alert('Erro inesperado ao processar a resposta.');
             }
         },
         error: function (xhr, status, error) {
-            console.error('Error:', error);
+            // Se a requisição AJAX falhar
+            console.error('Erro na requisição:', error);
             alert('Erro ao confirmar o alerta. Tente novamente.');
         },
     });
