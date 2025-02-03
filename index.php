@@ -81,9 +81,6 @@ $pages = getSitepages($pdo, $uri);
 
 $title = $pages['pageData']['title'] ?? '';  // Valor padrão caso 'title' não esteja presente
 
-
-var_dump($title);
-
 $data = [
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
     'settings' => $settings,  // Configurações do site
