@@ -35,12 +35,15 @@ function logout() {
 function confirmarAlerta(uuid, km) {
     if (!uuid) {
         console.error('UUID missing');
+        alert('UUID não fornecido!');
         return;
     }
+
     if (!km) {
-        console.error('km missing');
+        console.error('KM missing');
         km = null;
     }
+
     $.ajax({
         url: './api.php?action=confirm_alert',
         type: 'POST',
@@ -50,15 +53,21 @@ function confirmarAlerta(uuid, km) {
             status: 1
         },
         success: function (response) {
-            alert('Alerta confirmado com sucesso!');
-            $('#alertModal').modal('hide');
+            const result = JSON.parse(response);
+            if (result.success) {
+                alert('Alerta confirmado com sucesso!');
+                $('#alertModal').modal('hide');
+            } else {
+                alert(result.message); // Mensagem personalizada do PHP
+            }
         },
         error: function (xhr, status, error) {
-            alert('Erro ao confirmar o alerta. Tente novamente.');
             console.error('Error:', error);
+            alert('Erro ao confirmar o alerta. Tente novamente.');
         },
     });
 }
+
 
 async function buscarKmDnit(latitude, longitude, raio = 5) {
     const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
