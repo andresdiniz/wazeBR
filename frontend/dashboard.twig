@@ -184,9 +184,12 @@
                             <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                             <td>{{ alert.confidence }}</td>
                             <td>
-                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal">
-                                    VER +
-                                </button>                                
+                                <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                        data-target="#alertModal{{ alert.uuid }}" 
+                                        data-lat="{{ alert.location_y }}" 
+                                        data-lon="{{ alert.location_x }}">
+                                    Detalhes
+                                </button>
                             </td>
                         </tr>
                         {# Inclui modal individual para cada alerta #}
@@ -249,9 +252,12 @@
                                 <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                 <td>{{ alert.reportRating }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal">
-                                        VER +
-                                    </button>                                    
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
@@ -300,9 +306,12 @@
                                 <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                 <td>{{ alert.confidence }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal">
-                                        VER +
-                                    </button>                                    
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
@@ -355,9 +364,12 @@
                                 <td>{{ alertTypeTranslations[alert.subtype] | default(alert.subtype) }}</td>
                                 <td>{{ alert.confidence }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal">
-                                        VER +
-                                    </button>                                    
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
