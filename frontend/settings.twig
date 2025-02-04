@@ -1,38 +1,61 @@
+{# container.twig #}
+
 <div class="container-fluid">
     <!-- Título da Página -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
     </div>
 
-    <!-- Configurações do Sistema -->
+    <!-- Configurações Gerais -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-primary text-white d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold">Configurações Gerais</h6>
-            <button class="btn btn-sm btn-warning btn-edit-settings">
-                <i class="fas fa-cog"></i> Editar Configurações
-            </button>
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
         </div>
         <div class="card-body">
-            <ul class="list-group">
-                <li class="list-group-item"><strong>Nome do Site:</strong> {{ settings.site_name }}</li>
-                <li class="list-group-item"><strong>Email de Contato:</strong> {{ settings.contact_email }}</li>
-                <li class="list-group-item"><strong>Idioma Padrão:</strong> {{ settings.default_language }}</li>
-            </ul>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="settingsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome Sistema</th>
+                            <th>Logo</th>
+                            <th>Manutenção</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setting in settingsdata %}
+                        <tr>
+                            <td>{{ setting.id }}</td>
+                            <td>{{ setting.systemname }}</td>
+                            <td>{{ setting.logo }}</td>
+                            <td>{{ setting.manutencao ? 'Ativo' : 'Inativo' }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-edit-setting" 
+                                    data-id="{{ setting.id }}"
+                                    data-systemname="{{ setting.systemname }}"
+                                    data-logo="{{ setting.logo }}"
+                                    data-manutencao="{{ setting.manutencao }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- Páginas do Site -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-info text-white d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold">Páginas do Site</h6>
-            <button class="btn btn-sm btn-success btn-new-page">
-                <i class="fas fa-plus"></i> Criar Página
-            </button>
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Páginas do Site</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="pagesTable" width="100%" cellspacing="0">
-                    <thead class="thead-dark">
+                <table class="table table-bordered" id="pagesTable" width="100%" cellspacing="0">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Título</th>
@@ -42,25 +65,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for page in pagesdata %}
+                        {% for page in pagesdata.pageData %}
                         <tr>
                             <td>{{ page.id }}</td>
                             <td>{{ page.title }}</td>
                             <td>{{ page.url }}</td>
-                            <td>{{ page.description }}</td>
+                            <td>{{ page.descripton }}</td>
                             <td>
-                                <button class="btn btn-sm btn-warning btn-edit-page"
+                                <button class="btn btn-primary btn-edit-page" 
                                     data-id="{{ page.id }}"
                                     data-title="{{ page.title }}"
                                     data-url="{{ page.url }}"
-                                    data-description="{{ page.description }}">
-                                    <i class="fas fa-edit"></i> Editar
+                                    data-descripton="{{ page.descripton }}">
+                                    <i class="fas fa-edit"></i>
                                 </button>
                             </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center">Nenhuma página encontrada.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -70,29 +89,32 @@
     </div>
 </div>
 
-<!-- Modal de Edição de Configurações -->
+<!-- Modal Edição Configurações -->
 <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="settingsModalLabel">Editar Configurações</h5>
-                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form id="formSettings" action="update_settings.php" method="POST">
+            <form id="formSettings" action="update_setting.php" method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="id" id="setting_id">
                     <div class="form-group">
-                        <label for="site_name">Nome do Site</label>
-                        <input type="text" class="form-control" id="site_name" name="site_name" value="{{ settings.site_name }}" required>
+                        <label for="systemname">Nome do Sistema</label>
+                        <input type="text" class="form-control" id="systemname" name="systemname" required>
                     </div>
                     <div class="form-group">
-                        <label for="contact_email">Email de Contato</label>
-                        <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ settings.contact_email }}" required>
+                        <label for="logo">Caminho do Logo</label>
+                        <input type="text" class="form-control" id="logo" name="logo" required>
                     </div>
                     <div class="form-group">
-                        <label for="default_language">Idioma Padrão</label>
-                        <input type="text" class="form-control" id="default_language" name="default_language" value="{{ settings.default_language }}" required>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="manutencao" name="manutencao">
+                            <label class="custom-control-label" for="manutencao">Modo Manutenção</label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -104,13 +126,13 @@
     </div>
 </div>
 
-<!-- Modal de Edição/Criação de Páginas -->
+<!-- Modal Edição Páginas -->
 <div class="modal fade" id="pagesModal" tabindex="-1" role="dialog" aria-labelledby="pagesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="pagesModalLabel">Gerenciar Página</h5>
-                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
@@ -126,8 +148,8 @@
                         <input type="text" class="form-control" id="url" name="url" required>
                     </div>
                     <div class="form-group">
-                        <label for="description">Descrição</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        <label for="descripton">Descrição</label>
+                        <textarea class="form-control" id="descripton" name="descripton" rows="3" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -141,31 +163,46 @@
 
 <script>
 $(document).ready(function() {
-    // Modal de Configurações
-    $(document).on('click', '.btn-edit-settings', function() {
+    // Configurações - Abrir Modal
+    $('.btn-edit-setting').click(function() {
+        var $btn = $(this);
+        $('#setting_id').val($btn.data('id'));
+        $('#systemname').val($btn.data('systemname'));
+        $('#logo').val($btn.data('logo'));
+        $('#manutencao').prop('checked', $btn.data('manutencao') == 1);
         $('#settingsModal').modal('show');
     });
 
-    // Modal de Páginas
-    $(document).on('click', '.btn-new-page', function() {
-        $('#formPages')[0].reset();
-        $('#pagesModalLabel').text('Criar Nova Página');
+    // Páginas - Abrir Modal
+    $('.btn-edit-page').click(function() {
+        var $btn = $(this);
+        $('#page_id').val($btn.data('id'));
+        $('#title').val($btn.data('title'));
+        $('#url').val($btn.data('url'));
+        $('#descripton').val($btn.data('descripton'));
         $('#pagesModal').modal('show');
     });
 
-    $(document).on('click', '.btn-edit-page', function() {
-        let data = $(this).data();
-        $('#page_id').val(data.id);
-        $('#title').val(data.title);
-        $('#url').val(data.url);
-        $('#description').val(data.description);
-        $('#pagesModalLabel').text('Editar Página');
-        $('#pagesModal').modal('show');
-    });
-
-    // Fechar modais ao clicar no "x" ou no "Cancelar"
-    $('#settingsModal, #pagesModal').on('click', '.close, .btn-secondary', function() {
-        $(this).closest('.modal').modal('hide');
+    // Envio do Formulário via AJAX
+    $('#formSettings, #formPages').on('submit', function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        
+        $.ajax({
+            type: 'POST',
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            success: function(response) {
+                if(response.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao salvar: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Erro na comunicação com o servidor');
+            }
+        });
     });
 });
 </script>
