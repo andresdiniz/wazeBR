@@ -24,3 +24,8 @@ function getsettings(PDO $pdo) {
 
 // Uso da função
 $settingsData = getsettings($pdo);
+
+$data = [
+    'accidentAlerts' => getsettings($pdo)
+
+];
