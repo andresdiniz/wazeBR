@@ -104,11 +104,6 @@ $page = $uri ?: 'home'; // Define 'home' como padrão se vazio
 $controllerPath = "./backend/{$page}.php";
 $templatePath = "{$page}.twig";
 
-// Define título da página usando um arquivo JSON de títulos
-$pageTitlesFile = './pages_titles.json';
-$pageTitles = file_exists($pageTitlesFile) ? json_decode(file_get_contents($pageTitlesFile), true) : [];
-$data['pageTitle'] = $pageTitles[$page] ?? 'Página Não Encontrada';
-
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
