@@ -65,72 +65,6 @@
     </tbody>
 </table>
 
-<!-- Modal Settings com novos campos -->
-<div class="modal-body px-4 py-3">
-    <input type="hidden" name="id" id="setting_id">
-    
-    <!-- Seção Principal -->
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="mb-4">
-                <label for="systemname" class="form-label fw-bold text-primary">
-                    <i class="fas fa-signature me-2"></i>Nome do Sistema
-                </label>
-                <input type="text" class="form-control" id="systemname" name="systemname" required>
-            </div>
-            
-            <div class="mb-4">
-                <label for="theme_color" class="form-label fw-bold text-primary">
-                    <i class="fas fa-palette me-2"></i>Cor do Tema
-                </label>
-                <input type="color" class="form-control form-control-color" 
-                    id="theme_color" name="theme_color" value="#007bff">
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="mb-4">
-                <label for="timezone" class="form-label fw-bold text-primary">
-                    <i class="fas fa-clock me-2"></i>Fuso Horário
-                </label>
-                <select class="form-select" id="timezone" name="timezone" required>
-                    <option value="America/Sao_Paulo">São Paulo (UTC-3)</option>
-                    <option value="Europe/Lisbon">Lisboa (UTC+1)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- Seção de Contatos -->
-    <div class="border-top pt-4 mt-4">
-        <h6 class="fw-bold text-primary mb-4">
-            <i class="fas fa-envelope me-2"></i>Configurações de Email
-        </h6>
-        
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="mb-4">
-                    <label for="contact_email" class="form-label fw-bold">
-                        Email de Contato
-                    </label>
-                    <input type="email" class="form-control" 
-                        id="contact_email" name="contact_email" required>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="mb-4">
-                    <label for="admin_email" class="form-label fw-bold">
-                        Email Administrativo
-                    </label>
-                    <input type="email" class="form-control" 
-                        id="admin_email" name="admin_email" required>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Tabela Pages com novos campos -->
 <table class="table table-bordered table-hover" id="pagesTable" width="100%" cellspacing="0">
     <thead class="table-dark">
@@ -175,60 +109,47 @@
     </tbody>
 </table>
 
-<!-- Modal Pages com novos campos -->
-<div class="modal-body px-4 py-3">
-    <input type="hidden" name="id" id="page_id">
-    
-    <!-- Seção de Status -->
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="mb-4">
-                <label for="status" class="form-label fw-bold text-primary">
-                    <i class="fas fa-toggle-on me-2"></i>Status
-                </label>
-                <select class="form-select" id="status" name="status" required>
-                    <option value="draft">Rascunho</option>
-                    <option value="published">Publicado</option>
-                    <option value="archived">Arquivado</option>
-                </select>
+{# Estrutura completa dos modais #}
+<!-- Modal Settings -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fs-5">
+                    <i class="fas fa-cog me-2"></i>Editar Configuração
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="mb-4">
-                <label for="featured_image" class="form-label fw-bold text-primary">
-                    <i class="fas fa-image me-2"></i>Imagem Destaque
-                </label>
-                <input type="text" class="form-control" 
-                    id="featured_image" name="featured_image">
-            </div>
+            <form id="formSettings" action="update_setting.php" method="POST">
+                <div class="modal-body px-4 py-3">
+                    <!-- Conteúdo do modal settings -->
+                </div>
+                <div class="modal-footer bg-light py-3">
+                    <!-- Botões do footer -->
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Seção SEO -->
-    <div class="border-top pt-4 mt-4">
-        <h6 class="fw-bold text-primary mb-4">
-            <i class="fas fa-search me-2"></i>Configurações SEO
-        </h6>
-        
-        <div class="mb-4">
-            <label for="meta_title" class="form-label fw-bold">
-                Meta Título
-            </label>
-            <input type="text" class="form-control" 
-                id="meta_title" name="meta_title"
-                maxlength="60">
-            <div class="form-text text-end"><span id="meta-title-counter">0</span>/60</div>
-        </div>
-        
-        <div class="mb-4">
-            <label for="meta_description" class="form-label fw-bold">
-                Meta Descrição
-            </label>
-            <textarea class="form-control" 
-                id="meta_description" name="meta_description"
-                rows="2" maxlength="160"></textarea>
-            <div class="form-text text-end"><span id="meta-description-counter">0</span>/160</div>
+<!-- Modal Pages -->
+<div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fs-5">
+                    <i class="fas fa-file-alt me-2"></i>Editar Página
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formPages" action="update_page.php" method="POST">
+                <div class="modal-body px-4 py-3">
+                    <!-- Conteúdo do modal pages -->
+                </div>
+                <div class="modal-footer bg-light py-3">
+                    <!-- Botões do footer -->
+                </div>
+            </form>
         </div>
     </div>
 </div>
