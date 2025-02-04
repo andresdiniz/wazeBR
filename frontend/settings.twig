@@ -8,13 +8,16 @@
 
     <!-- Configurações Gerais -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
+            <button class="btn btn-sm btn-success" id="btn-refresh-settings">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="settingsTable" width="100%" cellspacing="0">
-                    <thead>
+                <table class="table table-bordered table-hover" id="settingsTable" width="100%" cellspacing="0">
+                    <thead class="table-dark">
                         <tr>
                             <th>ID</th>
                             <th>Nome Sistema</th>
@@ -28,10 +31,16 @@
                         <tr>
                             <td>{{ setting.id }}</td>
                             <td>{{ setting.systemname }}</td>
-                            <td>{{ setting.logo }}</td>
-                            <td>{{ setting.manutencao ? 'Ativo' : 'Inativo' }}</td>
+                            <td class="text-truncate" style="max-width: 200px;">{{ setting.logo }}</td>
                             <td>
-                                <button class="btn btn-primary btn-edit-setting" 
+                                <span class="badge bg-{{ setting.manutencao ? 'danger' : 'success' }}">
+                                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary btn-edit-setting" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#settingsModal"
                                     data-id="{{ setting.id }}"
                                     data-systemname="{{ setting.systemname }}"
                                     data-logo="{{ setting.logo }}"
@@ -51,12 +60,16 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Páginas do Site</h6>
-            <button class="btn btn-success" id="btn-create-page"><i class="fas fa-plus"></i> Criar Nova Página</button>
+            <div>
+                <button class="btn btn-sm btn-success me-2" id="btn-create-page">
+                    <i class="fas fa-plus me-2"></i>Nova Página
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="pagesTable" width="100%" cellspacing="0">
-                    <thead>
+                <table class="table table-bordered table-hover" id="pagesTable" width="100%" cellspacing="0">
+                    <thead class="table-dark">
                         <tr>
                             <th>ID</th>
                             <th>Título</th>
@@ -71,9 +84,11 @@
                             <td>{{ page.id }}</td>
                             <td>{{ page.title }}</td>
                             <td>{{ page.url }}</td>
-                            <td>{{ page.descripton }}</td>
+                            <td class="text-truncate" style="max-width: 300px;">{{ page.descripton }}</td>
                             <td>
-                                <button class="btn btn-primary btn-edit-page" 
+                                <button class="btn btn-sm btn-primary btn-edit-page" 
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#pagesModal"
                                     data-id="{{ page.id }}"
                                     data-title="{{ page.title }}"
                                     data-url="{{ page.url }}"
@@ -90,26 +105,100 @@
     </div>
 </div>
 
+<!-- Modal Edição Configurações -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formSettings" action="update_setting.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="setting_id">
+                    <div class="mb-3">
+                        <label for="systemname" class="form-label">Nome do Sistema</label>
+                        <input type="text" class="form-control" id="systemname" name="systemname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Caminho do Logo</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="logo" name="logo" required>
+                            <button class="btn btn-outline-secondary" type="button" id="btn-upload-logo">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="manutencao" name="manutencao">
+                            <label class="form-check-label" for="manutencao">Modo Manutenção</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edição Páginas -->
+<div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formPages" action="update_page.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="page_id">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text">{{ app.base_url }}/</span>
+                            <input type="text" class="form-control" id="url" name="url" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripton" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descripton" name="descripton" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     // Configurações - Abrir Modal
-    $('.btn-edit-setting').click(function() {
-        var $btn = $(this);
+    $(document).on('click', '.btn-edit-setting', function() {
+        const $btn = $(this);
         $('#setting_id').val($btn.data('id'));
         $('#systemname').val($btn.data('systemname'));
         $('#logo').val($btn.data('logo'));
         $('#manutencao').prop('checked', $btn.data('manutencao') == 1);
-        $('#settingsModal').modal('show');
     });
 
-    // Páginas - Abrir Modal
-    $('.btn-edit-page').click(function() {
-        var $btn = $(this);
+    // Páginas - Abrir Modal de Edição
+    $(document).on('click', '.btn-edit-page', function() {
+        const $btn = $(this);
         $('#page_id').val($btn.data('id'));
         $('#title').val($btn.data('title'));
         $('#url').val($btn.data('url'));
         $('#descripton').val($btn.data('descripton'));
-        $('#pagesModal').modal('show');
     });
 
     // Criar Nova Página - Abrir Modal Limpo
@@ -121,9 +210,10 @@ $(document).ready(function() {
         $('#pagesModal').modal('show');
     });
 
-    // Fechar Modais no X e no Cancelar
-    $('.btn-close, [data-dismiss="modal"]').click(function() {
-        $('.modal').modal('hide');
+    // Upload de Logo
+    $('#btn-upload-logo').click(function() {
+        // Implementar lógica de upload aqui
+        console.log('Upload de imagem...');
     });
 });
 </script>
