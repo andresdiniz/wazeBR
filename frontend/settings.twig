@@ -6,6 +6,55 @@
         <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
     </div>
 
+    <!-- Configurações Gerais -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 font-weight-bold">Configurações Gerais</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="settingsTable" width="100%" cellspacing="0">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome do Sistema</th>
+                            <th>Logo</th>
+                            <th>Manutenção</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setting in settingsdata %}
+                        <tr>
+                            <td>{{ setting.id }}</td>
+                            <td>{{ setting.systemname }}</td>
+                            <td><img src="{{ setting.logo }}" alt="Logo" width="50"></td>
+                            <td>
+                                <span class="badge {{ setting.manutencao ? 'badge-danger' : 'badge-success' }}">
+                                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning btn-edit-setting"
+                                    data-id="{{ setting.id }}"
+                                    data-systemname="{{ setting.systemname }}"
+                                    data-logo="{{ setting.logo }}"
+                                    data-manutencao="{{ setting.manutencao }}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhuma configuração encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Páginas do Site -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-info text-white">
@@ -24,29 +73,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if pagesdata.pageData is not empty %}
-                            {% for page in pagesdata.pageData %}
-                            <tr>
-                                <td>{{ page.id }}</td>
-                                <td>{{ page.title }}</td>
-                                <td>{{ page.url }}</td>
-                                <td>{{ page.descripton }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning btn-edit-page"
-                                        data-id="{{ page.id }}"
-                                        data-title="{{ page.title }}"
-                                        data-url="{{ page.url }}"
-                                        data-descripton="{{ page.descripton }}">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                        {% for page in pagesdata.pageData %}
+                        <tr>
+                            <td>{{ page.id }}</td>
+                            <td>{{ page.title }}</td>
+                            <td>{{ page.url }}</td>
+                            <td>{{ page.descripton }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning btn-edit-page"
+                                    data-id="{{ page.id }}"
+                                    data-title="{{ page.title }}"
+                                    data-url="{{ page.url }}"
+                                    data-descripton="{{ page.descripton }}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                            </td>
+                        </tr>
                         {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center">Nenhuma página encontrada.</td>
-                            </tr>
-                        {% endif %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhuma página encontrada.</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -54,30 +101,33 @@
     </div>
 </div>
 
-<!-- Modal Edição Páginas -->
-<div class="modal fade" id="pagesModal" tabindex="-1" role="dialog" aria-labelledby="pagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<!-- Modal Edição Configurações -->
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
-                <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
+                <button class="close text-white" type="button" data-dismiss="modal">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form id="formPages" action="update_page.php" method="POST">
+            <form id="formSettings" action="update_setting.php" method="POST">
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="page_id">
+                    <input type="hidden" name="id" id="setting_id">
                     <div class="form-group">
-                        <label for="title">Título</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
+                        <label for="systemname">Nome do Sistema</label>
+                        <input type="text" class="form-control" id="systemname" name="systemname" required>
                     </div>
                     <div class="form-group">
-                        <label for="url">URL</label>
-                        <input type="text" class="form-control" id="url" name="url" required>
+                        <label for="logo">Caminho do Logo</label>
+                        <input type="text" class="form-control" id="logo" name="logo" required>
                     </div>
                     <div class="form-group">
-                        <label for="descripton">Descrição</label>
-                        <textarea class="form-control" id="descripton" name="descripton" rows="3" required></textarea>
+                        <label>Modo Manutenção</label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="manutencao" name="manutencao">
+                            <label class="custom-control-label" for="manutencao">Ativar</label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -91,7 +141,17 @@
 
 <script>
 $(document).ready(function() {
-    // Abrir Modal de Edição de Página e Popular Dados
+    // Abrir modal e popular os dados das Configurações
+    $(document).on('click', '.btn-edit-setting', function() {
+        let data = $(this).data();
+        $('#setting_id').val(data.id);
+        $('#systemname').val(data.systemname);
+        $('#logo').val(data.logo);
+        $('#manutencao').prop('checked', data.manutencao == 1);
+        $('#settingsModal').modal('show');
+    });
+
+    // Abrir modal e popular os dados das Páginas
     $(document).on('click', '.btn-edit-page', function() {
         let data = $(this).data();
         $('#page_id').val(data.id);
@@ -106,8 +166,8 @@ $(document).ready(function() {
         $(this).closest('.modal').modal('hide');
     });
 
-    // Envio do Formulário via AJAX
-    $('#formPages').on('submit', function(e) {
+    // Envio do Formulário via AJAX (Configurações e Páginas)
+    $('#formSettings, #formPages').on('submit', function(e) {
         e.preventDefault();
         let $form = $(this);
 
@@ -118,7 +178,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if(response.success) {
-                    $('#pagesModal').modal('hide'); // Fechar modal após salvar
+                    $('.modal').modal('hide'); // Fechar modal após salvar
                     location.reload();
                 } else {
                     alert('Erro ao salvar: ' + response.message);
