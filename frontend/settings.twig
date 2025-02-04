@@ -1,283 +1,250 @@
-{# container.twig #}
+{# ... (código anterior mantido) ... #}
 
-<div class="container-fluid">
-    <!-- Título da Página -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
-    </div>
-
-    <!-- Configurações Gerais -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
-            <button class="btn btn-sm btn-success" id="btn-refresh-settings">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="settingsTable" width="100%" cellspacing="0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome Sistema</th>
-                            <th>Logo</th>
-                            <th>Manutenção</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for setting in settingsdata %}
-                        <tr>
-                            <td>{{ setting.id }}</td>
-                            <td>{{ setting.systemname }}</td>
-                            <td class="text-truncate" style="max-width: 200px;">{{ setting.logo }}</td>
-                            <td>
-                                <span class="badge bg-{{ setting.manutencao ? 'danger' : 'success' }}">
-                                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-primary btn-edit-setting" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#settingsModal"
-                                    data-id="{{ setting.id }}"
-                                    data-systemname="{{ setting.systemname }}"
-                                    data-logo="{{ setting.logo }}"
-                                    data-manutencao="{{ setting.manutencao }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Páginas do Site -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Páginas do Site</h6>
-            <div>
-                <button class="btn btn-sm btn-success me-2" id="btn-create-page">
-                    <i class="fas fa-plus me-2"></i>Nova Página
+<!-- Tabela Settings com novos campos -->
+<table class="table table-bordered table-hover" id="settingsTable" width="100%" cellspacing="0">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nome Sistema</th>
+            <th>Tema</th>
+            <th>Contato</th>
+            <th>Manutenção</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for setting in settingsdata %}
+        <tr>
+            <td>{{ setting.id }}</td>
+            <td>{{ setting.systemname }}</td>
+            <td>
+                <span class="color-preview" style="background:{{ setting.theme_color }}"></span>
+                {{ setting.theme_color }}
+            </td>
+            <td>{{ setting.contact_email }}</td>
+            <td>
+                <span class="badge bg-{{ setting.manutencao ? 'danger' : 'success' }}">
+                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-primary btn-edit-setting" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#settingsModal"
+                    data-id="{{ setting.id }}"
+                    data-systemname="{{ setting.systemname }}"
+                    data-logo="{{ setting.logo }}"
+                    data-manutencao="{{ setting.manutencao }}"
+                    data-theme_color="{{ setting.theme_color }}"
+                    data-contact_email="{{ setting.contact_email }}"
+                    data-admin_email="{{ setting.admin_email }}"
+                    data-timezone="{{ setting.timezone }}">
+                    <i class="fas fa-edit"></i>
                 </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal Settings com novos campos -->
+<div class="modal-body px-4 py-3">
+    <input type="hidden" name="id" id="setting_id">
+    
+    <!-- Seção Principal -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="mb-4">
+                <label for="systemname" class="form-label fw-bold text-primary">
+                    <i class="fas fa-signature me-2"></i>Nome do Sistema
+                </label>
+                <input type="text" class="form-control" id="systemname" name="systemname" required>
+            </div>
+            
+            <div class="mb-4">
+                <label for="theme_color" class="form-label fw-bold text-primary">
+                    <i class="fas fa-palette me-2"></i>Cor do Tema
+                </label>
+                <input type="color" class="form-control form-control-color" 
+                    id="theme_color" name="theme_color" value="#007bff">
             </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="pagesTable" width="100%" cellspacing="0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>URL</th>
-                            <th>Descrição</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for page in pagesdata.pageData %}
-                        <tr>
-                            <td>{{ page.id }}</td>
-                            <td>{{ page.title }}</td>
-                            <td>{{ page.url }}</td>
-                            <td class="text-truncate" style="max-width: 300px;">{{ page.descripton }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary btn-edit-page" 
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#pagesModal"
-                                    data-id="{{ page.id }}"
-                                    data-title="{{ page.title }}"
-                                    data-url="{{ page.url }}"
-                                    data-descripton="{{ page.descripton }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        
+        <div class="col-md-6">
+            <div class="mb-4">
+                <label for="timezone" class="form-label fw-bold text-primary">
+                    <i class="fas fa-clock me-2"></i>Fuso Horário
+                </label>
+                <select class="form-select" id="timezone" name="timezone" required>
+                    <option value="America/Sao_Paulo">São Paulo (UTC-3)</option>
+                    <option value="Europe/Lisbon">Lisboa (UTC+1)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Contatos -->
+    <div class="border-top pt-4 mt-4">
+        <h6 class="fw-bold text-primary mb-4">
+            <i class="fas fa-envelope me-2"></i>Configurações de Email
+        </h6>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <label for="contact_email" class="form-label fw-bold">
+                        Email de Contato
+                    </label>
+                    <input type="email" class="form-control" 
+                        id="contact_email" name="contact_email" required>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <label for="admin_email" class="form-label fw-bold">
+                        Email Administrativo
+                    </label>
+                    <input type="email" class="form-control" 
+                        id="admin_email" name="admin_email" required>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Edição Configurações -->
-{# Modal Edição Configurações #}
-<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white py-3">
-                <h5 class="modal-title fs-5" id="settingsModalLabel">
-                    <i class="fas fa-cog me-2"></i>Editar Configuração
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="formSettings" action="update_setting.php" method="POST">
-                <div class="modal-body px-4 py-3">
-                    <input type="hidden" name="id" id="setting_id">
-                    <div class="mb-4">
-                        <label for="systemname" class="form-label fw-bold text-primary">
-                            <i class="fas fa-signature me-2"></i>Nome do Sistema
-                        </label>
-                        <input type="text" class="form-control form-control-lg border-2 rounded-3" 
-                               id="systemname" name="systemname" required
-                               placeholder="Digite o nome do sistema">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="logo" class="form-label fw-bold text-primary">
-                            <i class="fas fa-image me-2"></i>Caminho do Logo
-                        </label>
-                        <div class="input-group">
-                            <input type="text" class="form-control border-2 rounded-start-3" 
-                                   id="logo" name="logo" required
-                                   placeholder="Caminho completo ou URL da imagem">
-                            <button class="btn btn-outline-primary border-2 rounded-end-3" 
-                                    type="button" id="btn-upload-logo">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                            </button>
-                        </div>
-                        <small class="form-text text-muted mt-2 d-block">
-                            <i class="fas fa-info-circle me-2"></i>Tamanho recomendado: 300x100px
-                        </small>
-                        <div class="mt-2 text-center" id="logo-preview"></div>
-                    </div>
+<!-- Tabela Pages com novos campos -->
+<table class="table table-bordered table-hover" id="pagesTable" width="100%" cellspacing="0">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Status</th>
+            <th>URL</th>
+            <th>Atualização</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for page in pagesdata.pageData %}
+        <tr>
+            <td>{{ page.id }}</td>
+            <td>{{ page.title }}</td>
+            <td>
+                <span class="badge bg-{{ page.status == 'published' ? 'success' : 'warning' }}">
+                    {{ page.status|capitalize }}
+                </span>
+            </td>
+            <td>{{ page.url }}</td>
+            <td>{{ page.updated_at|date('d/m/Y H:i') }}</td>
+            <td>
+                <button class="btn btn-sm btn-primary btn-edit-page" 
+                    data-bs-toggle="modal"
+                    data-bs-target="#pagesModal"
+                    data-id="{{ page.id }}"
+                    data-title="{{ page.title }}"
+                    data-url="{{ page.url }}"
+                    data-descripton="{{ page.descripton }}"
+                    data-status="{{ page.status }}"
+                    data-meta_title="{{ page.meta_title }}"
+                    data-meta_description="{{ page.meta_description }}"
+                    data-featured_image="{{ page.featured_image }}">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-                    <div class="mb-3 form-switch form-switch-lg">
-                        <input class="form-check-input" type="checkbox" role="switch" 
-                               id="manutencao" name="manutencao">
-                        <label class="form-check-label fw-bold text-primary ms-3" for="manutencao">
-                            <i class="fas fa-tools me-2"></i>Modo Manutenção
-                        </label>
-                        <div class="form-text text-muted mt-1">
-                            Ative para restringir o acesso ao site apenas para administradores
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light py-3">
-                    <button type="button" class="btn btn-lg btn-secondary rounded-pill px-4" 
-                            data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-lg btn-primary rounded-pill px-4">
-                        <i class="fas fa-save me-2"></i>Salvar
-                    </button>
-                </div>
-            </form>
+<!-- Modal Pages com novos campos -->
+<div class="modal-body px-4 py-3">
+    <input type="hidden" name="id" id="page_id">
+    
+    <!-- Seção de Status -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="mb-4">
+                <label for="status" class="form-label fw-bold text-primary">
+                    <i class="fas fa-toggle-on me-2"></i>Status
+                </label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="draft">Rascunho</option>
+                    <option value="published">Publicado</option>
+                    <option value="archived">Arquivado</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="mb-4">
+                <label for="featured_image" class="form-label fw-bold text-primary">
+                    <i class="fas fa-image me-2"></i>Imagem Destaque
+                </label>
+                <input type="text" class="form-control" 
+                    id="featured_image" name="featured_image">
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Edição Páginas -->
-<div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white py-3">
-                <h5 class="modal-title fs-5" id="pagesModalLabel">
-                    <i class="fas fa-file-alt me-2"></i>Editar Página
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="formPages" action="update_page.php" method="POST">
-                <div class="modal-body px-4 py-3">
-                    <input type="hidden" name="id" id="page_id">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <label for="title" class="form-label fw-bold text-primary">
-                                    <i class="fas fa-heading me-2"></i>Título
-                                </label>
-                                <input type="text" class="form-control form-control-lg border-2 rounded-3" 
-                                       id="title" name="title" required
-                                       placeholder="Título da página (max. 20 caracteres)"
-                                       maxlength="20">
-                                <div class="form-text text-end"><span id="title-counter">0</span>/20</div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <label for="url" class="form-label fw-bold text-primary">
-                                    <i class="fas fa-link me-2"></i>URL
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-2">{{ app.base_url }}/</span>
-                                    <input type="text" class="form-control border-2 rounded-end-3" 
-                                           id="url" name="url" required
-                                           placeholder="ex: sobre-nos"
-                                           pattern="[a-z0-9-]+"
-                                           title="Use apenas letras minúsculas, números e hífens">
-                                </div>
-                                <small class="form-text text-muted mt-2">
-                                    <i class="fas fa-info-circle me-2"></i>URLs devem ser amigáveis e sem espaços
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="descripton" class="form-label fw-bold text-primary">
-                            <i class="fas fa-align-left me-2"></i>Descrição
-                        </label>
-                        <textarea class="form-control border-2 rounded-3" 
-                                  id="descripton" name="descripton" 
-                                  rows="5" required
-                                  placeholder="Descreva o conteúdo desta página (max. 255 caracteres)"
-                                  maxlength="255"></textarea>
-                        <div class="form-text text-end"><span id="description-counter">0</span>/255</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light py-3">
-                    <button type="button" class="btn btn-lg btn-secondary rounded-pill px-4" 
-                            data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-lg btn-primary rounded-pill px-4">
-                        <i class="fas fa-save me-2"></i>Salvar
-                    </button>
-                </div>
-            </form>
+    <!-- Seção SEO -->
+    <div class="border-top pt-4 mt-4">
+        <h6 class="fw-bold text-primary mb-4">
+            <i class="fas fa-search me-2"></i>Configurações SEO
+        </h6>
+        
+        <div class="mb-4">
+            <label for="meta_title" class="form-label fw-bold">
+                Meta Título
+            </label>
+            <input type="text" class="form-control" 
+                id="meta_title" name="meta_title"
+                maxlength="60">
+            <div class="form-text text-end"><span id="meta-title-counter">0</span>/60</div>
+        </div>
+        
+        <div class="mb-4">
+            <label for="meta_description" class="form-label fw-bold">
+                Meta Descrição
+            </label>
+            <textarea class="form-control" 
+                id="meta_description" name="meta_description"
+                rows="2" maxlength="160"></textarea>
+            <div class="form-text text-end"><span id="meta-description-counter">0</span>/160</div>
         </div>
     </div>
 </div>
 
 <script>
 $(document).ready(function() {
-    // Configurações - Abrir Modal
+    // Settings - Preencher Novos Campos
     $(document).on('click', '.btn-edit-setting', function() {
         const $btn = $(this);
-        $('#setting_id').val($btn.data('id'));
-        $('#systemname').val($btn.data('systemname'));
-        $('#logo').val($btn.data('logo'));
-        $('#manutencao').prop('checked', $btn.data('manutencao') == 1);
+        $('#theme_color').val($btn.data('theme_color'));
+        $('#contact_email').val($btn.data('contact_email'));
+        $('#admin_email').val($btn.data('admin_email'));
+        $('#timezone').val($btn.data('timezone'));
     });
 
-    // Páginas - Abrir Modal de Edição
+    // Pages - Preencher Novos Campos
     $(document).on('click', '.btn-edit-page', function() {
         const $btn = $(this);
-        $('#page_id').val($btn.data('id'));
-        $('#title').val($btn.data('title'));
-        $('#url').val($btn.data('url'));
-        $('#descripton').val($btn.data('descripton'));
+        $('#status').val($btn.data('status'));
+        $('#meta_title').val($btn.data('meta_title'));
+        $('#meta_description').val($btn.data('meta_description'));
+        $('#featured_image').val($btn.data('featured_image'));
     });
 
-    // Criar Nova Página - Abrir Modal Limpo
-    $('#btn-create-page').click(function() {
-        $('#page_id').val('');
-        $('#title').val('');
-        $('#url').val('');
-        $('#descripton').val('');
-        $('#pagesModal').modal('show');
-    });
+    // Contadores de Caracteres SEO
+    $('#meta_title').on('input', updateMetaTitleCounter);
+    $('#meta_description').on('input', updateMetaDescriptionCounter);
 
-    // Upload de Logo
-    $('#btn-upload-logo').click(function() {
-        // Implementar lógica de upload aqui
-        console.log('Upload de imagem...');
-    });
+    function updateMetaTitleCounter() {
+        $('#meta-title-counter').text($(this).val().length);
+    }
+
+    function updateMetaDescriptionCounter() {
+        $('#meta-description-counter').text($(this).val().length);
+    }
 });
 </script>
