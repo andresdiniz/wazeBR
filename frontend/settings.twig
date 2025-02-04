@@ -235,7 +235,7 @@
 
 <script>
     $(document).ready(function() {
-        // Configurações - Abrir Modal e Preencher Dados (CORRETO)
+        // Configurações - Abrir Modal e Preencher Dados
         $('#settingsModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -250,7 +250,7 @@
             modal.find('#timezone').val(button.data('timezone'));
         });
     
-        // Páginas - Abrir Modal e Preencher Dados (CORRETO)
+        // Páginas - Abrir Modal e Preencher Dados
         $('#pagesModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -264,14 +264,12 @@
             modal.find('#meta_description').val(button.data('meta_description'));
             modal.find('#featured_image').val(button.data('featured_image'));
     
-            // Atualizar contadores (mantido)
+            // Atualizar contadores
             $('#meta-title-counter').text(button.data('meta_title')?.length || 0);
             $('#meta-description-counter').text(button.data('meta_description')?.length || 0);
         });
     
-        // ... (resto do seu código, incluindo contadores e envio de formulário)
-    
-        // Contadores de Caracteres em Tempo Real (mantido)
+        // Contadores de Caracteres em Tempo Real
         $('#meta_title').on('input', function() {
             $('#meta-title-counter').text(this.value.length);
         });
@@ -280,22 +278,16 @@
             $('#meta-description-counter').text(this.value.length);
         });
     
-        // Configurações - Abrir Modal (REMOVIDO - conflito com show.bs.modal)
-        // $('.btn-edit-setting').click(function() { ... });
-    
-        // Páginas - Abrir Modal (REMOVIDO - conflito com show.bs.modal)
-        // $('.btn-edit-page').click(function() { ... });
-    
-        // Criar Nova Página - Abrir Modal Limpo (mantido)
+        // Criar Nova Página - Abrir Modal Limpo
         $('#btn-create-page').click(function() {
             const modal = $('#pagesModal');
             modal.find('input, textarea, select').val('');
             modal.find('#status').val('draft');
             modal.modal('show');
         });
-    
     });
 </script>
+
     
     <!-- Adicione esses scripts ANTES do seu script customizado -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
