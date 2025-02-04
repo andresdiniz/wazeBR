@@ -25,37 +25,29 @@ function getsettings(PDO $pdo) {
 }
 
 function getSitepagesAll($pdo) {
-    // Inicia o array para armazenar os dados da página
-    $data = [];
-    // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
+    $data = []; // Array para armazenar os dados das páginas
+
     try {
-        // Preparar a consulta SQL para buscar os dados da página com base na URL
+        // Preparar e executar a consulta para buscar todas as páginas
         $stmt = $pdo->prepare("SELECT * FROM pages");
         $stmt->execute();
 
-        // Verifica se encontrou a página
-        $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Buscar todas as páginas e armazenar no array
+        $pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($pageData) {
-            // Se encontrou, adiciona os dados da página ao array $data
-            $data['pageData'] = $pageData;
-            //logToFile('info','pages', $data); // Adicionado para depuração
-            //var_dump($data); // Adicionado para depuração
+        if ($pages) {
+            $data['pageData'] = $pages; // Armazena todas as páginas no array
         } else {
-            // Se não encontrou, pode adicionar uma mensagem de erro ou página não encontrada
-            $data['pageData'] = null;
+            $data['pageData'] = []; // Retorna um array vazio se não houver páginas
         }
     } catch (PDOException $e) {
-        // Caso ocorra erro na consulta
-        $data['pageData'] = null;
+        // Captura e registra qualquer erro
+        $data['pageData'] = [];
         error_log("Erro ao consultar a tabela 'pages': " . $e->getMessage());
     }
 
-    // Retorna o array com os dados da página ou null se não encontrada
-    return $data;
+    return $data; // Retorna todas as páginas
 }
-// Uso da função
-$settingsData = getsettings($pdo);
 
 
 $data = [
