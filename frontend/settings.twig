@@ -235,7 +235,7 @@
 
 <script>
     $(document).ready(function() {
-        // Configurações - Abrir Modal e Preencher Dados (CORRETO)
+        // Configurações - Abrir Modal e Preencher Dados
         $('#settingsModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -243,14 +243,14 @@
             modal.find('#setting_id').val(button.data('id'));
             modal.find('#systemname').val(button.data('systemname'));
             modal.find('#logo').val(button.data('logo'));
-            modal.find('#manutencao').prop('checked', button.data('manutencao') === 1 || button.data('manutencao') === '1' || button.data('manutencao') === true); // Tratamento de booleanos/strings
+            modal.find('#manutencao').prop('checked', button.data('manutencao') === 1 || button.data('manutencao') === '1' || button.data('manutencao') === true);
             modal.find('#theme_color').val(button.data('theme_color'));
             modal.find('#contact_email').val(button.data('contact_email'));
             modal.find('#admin_email').val(button.data('admin_email'));
             modal.find('#timezone').val(button.data('timezone'));
         });
     
-        // Páginas - Abrir Modal e Preencher Dados (CORRETO)
+        // Páginas - Abrir Modal e Preencher Dados
         $('#pagesModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -264,12 +264,12 @@
             modal.find('#meta_description').val(button.data('meta_description'));
             modal.find('#featured_image').val(button.data('featured_image'));
     
-            // Atualizar contadores (mantido)
+            // Atualizar contadores
             $('#meta-title-counter').text(button.data('meta_title')?.length || 0);
             $('#meta-description-counter').text(button.data('meta_description')?.length || 0);
         });
     
-        // Contadores de Caracteres em Tempo Real (mantido)
+        // Contadores de Caracteres em Tempo Real
         $('#meta_title').on('input', function() {
             $('#meta-title-counter').text(this.value.length);
         });
@@ -278,7 +278,7 @@
             $('#meta-description-counter').text(this.value.length);
         });
     
-        // Criar Nova Página - Abrir Modal Limpo (mantido)
+        // Criar Nova Página - Abrir Modal Limpo
         $('#btn-create-page').click(function() {
             const modal = $('#pagesModal');
             modal.find('input, textarea, select').val('');
@@ -286,28 +286,20 @@
             modal.modal('show');
         });
     
-        // Inicializando os modais explicitamente, garantindo que os backdrops sejam configurados corretamente.
-        const settingsModalElement = document.getElementById('settingsModal');
-        const settingsModal = new bootstrap.Modal(settingsModalElement, {
-            backdrop: 'static' // ou true, caso você queira permitir o fechamento clicando fora
+        // Configuração dos Modais do Bootstrap sem a necessidade de inicialização manual
+        // O Bootstrap já cuida do modal automaticamente, então não há necessidade de inicializar com "new bootstrap.Modal"
+        // As opções de backdrop e outros ajustes são feitos diretamente no modal, ou usando as configurações da biblioteca
+    
+        // Inicialização do Modal Settings
+        var settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'), {
+            backdrop: 'static' // Modal não fecha ao clicar fora
         });
-
-        const pagesModalElement = document.getElementById('pagesModal');
-        const pagesModal = new bootstrap.Modal(pagesModalElement, {
-            backdrop: 'static' // ou true, caso você queira permitir o fechamento clicando fora
+    
+        // Inicialização do Modal Pages
+        var pagesModal = new bootstrap.Modal(document.getElementById('pagesModal'), {
+            backdrop: 'static' // Modal não fecha ao clicar fora
         });
-
-        // Abrir o modal manualmente
-        $('#settingsModal').on('show.bs.modal', function() {
-            settingsModal.show();
-        });
-
-        $('#pagesModal').on('show.bs.modal', function() {
-            pagesModal.show();
-        });
+    
+        // Use `settingsModal.show()` ou `pagesModal.show()` se você precisar abrir os modais programaticamente
     });
 </script>
-    
-    <!-- Adicione esses scripts ANTES do seu script customizado -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
