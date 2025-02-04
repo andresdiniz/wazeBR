@@ -106,39 +106,66 @@
 </div>
 
 <!-- Modal Edição Configurações -->
+{# Modal Edição Configurações #}
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fs-5" id="settingsModalLabel">
+                    <i class="fas fa-cog me-2"></i>Editar Configuração
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formSettings" action="update_setting.php" method="POST">
-                <div class="modal-body">
+                <div class="modal-body px-4 py-3">
                     <input type="hidden" name="id" id="setting_id">
-                    <div class="mb-3">
-                        <label for="systemname" class="form-label">Nome do Sistema</label>
-                        <input type="text" class="form-control" id="systemname" name="systemname" required>
+                    <div class="mb-4">
+                        <label for="systemname" class="form-label fw-bold text-primary">
+                            <i class="fas fa-signature me-2"></i>Nome do Sistema
+                        </label>
+                        <input type="text" class="form-control form-control-lg border-2 rounded-3" 
+                               id="systemname" name="systemname" required
+                               placeholder="Digite o nome do sistema">
                     </div>
-                    <div class="mb-3">
-                        <label for="logo" class="form-label">Caminho do Logo</label>
+                    
+                    <div class="mb-4">
+                        <label for="logo" class="form-label fw-bold text-primary">
+                            <i class="fas fa-image me-2"></i>Caminho do Logo
+                        </label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="logo" name="logo" required>
-                            <button class="btn btn-outline-secondary" type="button" id="btn-upload-logo">
-                                <i class="fas fa-upload"></i>
+                            <input type="text" class="form-control border-2 rounded-start-3" 
+                                   id="logo" name="logo" required
+                                   placeholder="Caminho completo ou URL da imagem">
+                            <button class="btn btn-outline-primary border-2 rounded-end-3" 
+                                    type="button" id="btn-upload-logo">
+                                <i class="fas fa-cloud-upload-alt"></i>
                             </button>
                         </div>
+                        <small class="form-text text-muted mt-2 d-block">
+                            <i class="fas fa-info-circle me-2"></i>Tamanho recomendado: 300x100px
+                        </small>
+                        <div class="mt-2 text-center" id="logo-preview"></div>
                     </div>
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="manutencao" name="manutencao">
-                            <label class="form-check-label" for="manutencao">Modo Manutenção</label>
+
+                    <div class="mb-3 form-switch form-switch-lg">
+                        <input class="form-check-input" type="checkbox" role="switch" 
+                               id="manutencao" name="manutencao">
+                        <label class="form-check-label fw-bold text-primary ms-3" for="manutencao">
+                            <i class="fas fa-tools me-2"></i>Modo Manutenção
+                        </label>
+                        <div class="form-text text-muted mt-1">
+                            Ative para restringir o acesso ao site apenas para administradores
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                <div class="modal-footer bg-light py-3">
+                    <button type="button" class="btn btn-lg btn-secondary rounded-pill px-4" 
+                            data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-lg btn-primary rounded-pill px-4">
+                        <i class="fas fa-save me-2"></i>Salvar
+                    </button>
                 </div>
             </form>
         </div>
@@ -148,33 +175,70 @@
 <!-- Modal Edição Páginas -->
 <div class="modal fade" id="pagesModal" tabindex="-1" aria-labelledby="pagesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fs-5" id="pagesModalLabel">
+                    <i class="fas fa-file-alt me-2"></i>Editar Página
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formPages" action="update_page.php" method="POST">
-                <div class="modal-body">
+                <div class="modal-body px-4 py-3">
                     <input type="hidden" name="id" id="page_id">
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Título</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="url" class="form-label">URL</label>
-                        <div class="input-group">
-                            <span class="input-group-text">{{ app.base_url }}/</span>
-                            <input type="text" class="form-control" id="url" name="url" required>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="title" class="form-label fw-bold text-primary">
+                                    <i class="fas fa-heading me-2"></i>Título
+                                </label>
+                                <input type="text" class="form-control form-control-lg border-2 rounded-3" 
+                                       id="title" name="title" required
+                                       placeholder="Título da página (max. 20 caracteres)"
+                                       maxlength="20">
+                                <div class="form-text text-end"><span id="title-counter">0</span>/20</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label for="url" class="form-label fw-bold text-primary">
+                                    <i class="fas fa-link me-2"></i>URL
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-2">{{ app.base_url }}/</span>
+                                    <input type="text" class="form-control border-2 rounded-end-3" 
+                                           id="url" name="url" required
+                                           placeholder="ex: sobre-nos"
+                                           pattern="[a-z0-9-]+"
+                                           title="Use apenas letras minúsculas, números e hífens">
+                                </div>
+                                <small class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-2"></i>URLs devem ser amigáveis e sem espaços
+                                </small>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="descripton" class="form-label">Descrição</label>
-                        <textarea class="form-control" id="descripton" name="descripton" rows="4" required></textarea>
+
+                    <div class="mb-4">
+                        <label for="descripton" class="form-label fw-bold text-primary">
+                            <i class="fas fa-align-left me-2"></i>Descrição
+                        </label>
+                        <textarea class="form-control border-2 rounded-3" 
+                                  id="descripton" name="descripton" 
+                                  rows="5" required
+                                  placeholder="Descreva o conteúdo desta página (max. 255 caracteres)"
+                                  maxlength="255"></textarea>
+                        <div class="form-text text-end"><span id="description-counter">0</span>/255</div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                <div class="modal-footer bg-light py-3">
+                    <button type="button" class="btn btn-lg btn-secondary rounded-pill px-4" 
+                            data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-lg btn-primary rounded-pill px-4">
+                        <i class="fas fa-save me-2"></i>Salvar
+                    </button>
                 </div>
             </form>
         </div>
