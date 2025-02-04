@@ -24,7 +24,7 @@ function getsettings(PDO $pdo) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getSitepages($pdo) {
+function getSitepagesAll($pdo) {
     // Inicia o array para armazenar os dados da página
     $data = [];
     // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
