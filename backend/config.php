@@ -13,7 +13,7 @@ $twig = new Environment($loader);
 $pdo = Database::getConnection();
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getsetings(PDO $pdo) {
+function getsettings(PDO $pdo) {
     $stmt = $pdo->prepare("
         SELECT * 
         FROM settings
@@ -21,3 +21,6 @@ function getsetings(PDO $pdo) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+// Uso da função
+$settingsData = getsettings($pdo);
