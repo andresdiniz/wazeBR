@@ -234,35 +234,60 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    // Settings - Preencher Novos Campos
-    $(document).on('click', '.btn-edit-setting', function() {
-        const $btn = $(this);
-        $('#theme_color').val($btn.data('theme_color'));
-        $('#contact_email').val($btn.data('contact_email'));
-        $('#admin_email').val($btn.data('admin_email'));
-        $('#timezone').val($btn.data('timezone'));
+    $(document).ready(function() {
+        // Configurações - Abrir Modal e Preencher Dados
+        $('#settingsModal').on('show.bs.modal', function(event) {
+            const button = $(event.relatedTarget);
+            const modal = $(this);
+            
+            modal.find('#setting_id').val(button.data('id'));
+            modal.find('#systemname').val(button.data('systemname'));
+            modal.find('#logo').val(button.data('logo'));
+            modal.find('#manutencao').prop('checked', button.data('manutencao') === '1');
+            modal.find('#theme_color').val(button.data('theme_color'));
+            modal.find('#contact_email').val(button.data('contact_email'));
+            modal.find('#admin_email').val(button.data('admin_email'));
+            modal.find('#timezone').val(button.data('timezone'));
+        });
+    
+        // Páginas - Abrir Modal e Preencher Dados
+        $('#pagesModal').on('show.bs.modal', function(event) {
+            const button = $(event.relatedTarget);
+            const modal = $(this);
+            
+            modal.find('#page_id').val(button.data('id'));
+            modal.find('#title').val(button.data('title'));
+            modal.find('#url').val(button.data('url'));
+            modal.find('#descripton').val(button.data('descripton'));
+            modal.find('#status').val(button.data('status'));
+            modal.find('#meta_title').val(button.data('meta_title'));
+            modal.find('#meta_description').val(button.data('meta_description'));
+            modal.find('#featured_image').val(button.data('featured_image'));
+            
+            // Atualizar contadores
+            $('#meta-title-counter').text(button.data('meta_title')?.length || 0);
+            $('#meta-description-counter').text(button.data('meta_description')?.length || 0);
+        });
+    
+        // Criar Nova Página - Abrir Modal Limpo
+        $('#btn-create-page').click(function() {
+            const modal = $('#pagesModal');
+            modal.find('input, textarea, select').val('');
+            modal.find('#status').val('draft');
+            modal.modal('show');
+        });
+    
+        // Contadores de Caracteres em Tempo Real
+        $('#meta_title').on('input', function() {
+            $('#meta-title-counter').text(this.value.length);
+        });
+    
+        $('#meta_description').on('input', function() {
+            $('#meta-description-counter').text(this.value.length);
+        });
     });
-
-    // Pages - Preencher Novos Campos
-    $(document).on('click', '.btn-edit-page', function() {
-        const $btn = $(this);
-        $('#status').val($btn.data('status'));
-        $('#meta_title').val($btn.data('meta_title'));
-        $('#meta_description').val($btn.data('meta_description'));
-        $('#featured_image').val($btn.data('featured_image'));
-    });
-
-    // Contadores de Caracteres SEO
-    $('#meta_title').on('input', updateMetaTitleCounter);
-    $('#meta_description').on('input', updateMetaDescriptionCounter);
-
-    function updateMetaTitleCounter() {
-        $('#meta-title-counter').text($(this).val().length);
-    }
-
-    function updateMetaDescriptionCounter() {
-        $('#meta-description-counter').text($(this).val().length);
-    }
-});
-</script>
+    </script>
+    
+    <!-- Adicione esses scripts ANTES do seu script customizado -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
