@@ -1,172 +1,208 @@
-<!-- Adicionando Leaflet.js -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{# container.twig #}
 
-<!-- Início do conteúdo -->
-<div class="container mt-5">
+<div class="container-fluid">
+    <!-- Título da Página -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
+    </div>
 
-    <div class="row">
-        <!-- Acidentes -->
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-car-crash"></i> Acidentes
-                </div>
-                <div class="card-body">
-                    {% if accidentAlerts is not empty %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="accidentsTable">
-                            <thead>
-                                <tr>
-                                    <th>Cidade</th>
-                                    <th>Rua</th>
-                                    <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for alert in accidentAlerts %}
-                                <tr>
-                                    <td>{{ alert.city }}</td>
-                                    <td>{{ alert.street }}</td>
-                                    <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
-                                    </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
-                                            Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                {% include 'modal.twig' with {'alert': alert} %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
-                    {% endif %}
-                </div>
+    <!-- Configurações Gerais -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="settingsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome Sistema</th>
+                            <th>Logo</th>
+                            <th>Manutenção</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setting in settingsdata %}
+                        <tr>
+                            <td>{{ setting.id }}</td>
+                            <td>{{ setting.systemname }}</td>
+                            <td>{{ setting.logo }}</td>
+                            <td>{{ setting.manutencao ? 'Ativo' : 'Inativo' }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-edit-setting" 
+                                    data-id="{{ setting.id }}"
+                                    data-systemname="{{ setting.systemname }}"
+                                    data-logo="{{ setting.logo }}"
+                                    data-manutencao="{{ setting.manutencao }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-        <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <i class="fas fa-traffic-light"></i> Congestionamentos
-                </div>
-                <div class="card-body">
-                    {% if jamAlerts is not empty %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="trafficTable">
-                            <thead>
-                                <tr>
-                                    <th>Cidade</th>
-                                    <th>Rua</th>
-                                    <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for alert in jamAlerts %}
-                                <tr>
-                                    <td>{{ alert.city }}</td>
-                                    <td>{{ alert.street }}</td>
-                                    <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
-                                    </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
-                                            Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                {% include 'modal.twig' with {'alert': alert} %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-center">Não há congestionamentos registrados no momento.</p>
-                    {% endif %}
-                </div>
+    <!-- Páginas do Site -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Páginas do Site</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="pagesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>URL</th>
+                            <th>Descrição</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for page in pagesdata.pageData %}
+                        <tr>
+                            <td>{{ page.id }}</td>
+                            <td>{{ page.title }}</td>
+                            <td>{{ page.url }}</td>
+                            <td>{{ page.descripton }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-edit-page" 
+                                    data-id="{{ page.id }}"
+                                    data-title="{{ page.title }}"
+                                    data-url="{{ page.url }}"
+                                    data-descripton="{{ page.descripton }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Script para Mapas e API DNIT -->
+<!-- Modal Edição Configurações -->
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form id="formSettings" action="update_setting.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="setting_id">
+                    <div class="form-group">
+                        <label for="systemname">Nome do Sistema</label>
+                        <input type="text" class="form-control" id="systemname" name="systemname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logo">Caminho do Logo</label>
+                        <input type="text" class="form-control" id="logo" name="logo" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="manutencao" name="manutencao">
+                            <label class="custom-control-label" for="manutencao">Modo Manutenção</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edição Páginas -->
+<div class="modal fade" id="pagesModal" tabindex="-1" role="dialog" aria-labelledby="pagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form id="formPages" action="update_page.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="page_id">
+                    <div class="form-group">
+                        <label for="title">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">URL</label>
+                        <input type="text" class="form-control" id="url" name="url" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripton">Descrição</label>
+                        <textarea class="form-control" id="descripton" name="descripton" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", async function () {
-            let lat = $(this).data("lat");
-            let lon = $(this).data("lon");
-            let modalId = $(this).attr("data-target");
-            let mapId = modalId.replace("#alertModal", "map-");
-            let kmId = modalId.replace("#alertModal", "km-value-");
+$(document).ready(function() {
+    // Configurações - Abrir Modal
+    $('.btn-edit-setting').click(function() {
+        var $btn = $(this);
+        $('#setting_id').val($btn.data('id'));
+        $('#systemname').val($btn.data('systemname'));
+        $('#logo').val($btn.data('logo'));
+        $('#manutencao').prop('checked', $btn.data('manutencao') == 1);
+        $('#settingsModal').modal('show');
+    });
 
-            // Inicialização do mapa
-            setTimeout(() => {
-                let map = L.map(mapId).setView([lat, lon], 13);
+    // Páginas - Abrir Modal
+    $('.btn-edit-page').click(function() {
+        var $btn = $(this);
+        $('#page_id').val($btn.data('id'));
+        $('#title').val($btn.data('title'));
+        $('#url').val($btn.data('url'));
+        $('#descripton').val($btn.data('descripton'));
+        $('#pagesModal').modal('show');
+    });
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
-
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
-            }, 500);
-
-            // Chama a função assíncrona para buscar o KM
-            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
-            $(`#${kmId}`).text(km || "Não encontrado");
+    // Envio do Formulário via AJAX
+    $('#formSettings, #formPages').on('submit', function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        
+        $.ajax({
+            type: 'POST',
+            url: $form.attr('action'),
+            data: $form.serialize(),
+            success: function(response) {
+                if(response.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao salvar: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Erro na comunicação com o servidor');
+            }
         });
     });
+});
 </script>
-
-
-<!-- CSS do DataTables (Se necessário) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-
-<!-- CSS dos Botões do DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
-
-
-<!-- JS do DataTables -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-
-<!-- JS dos Botões do DataTables -->
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-
-<!-- JS para exportação para CSV, Excel, PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
