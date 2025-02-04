@@ -49,8 +49,9 @@
 
     <!-- Páginas do Site -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Páginas do Site</h6>
+            <button class="btn btn-success" id="btn-create-page"><i class="fas fa-plus"></i> Criar Nova Página</button>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -89,78 +90,6 @@
     </div>
 </div>
 
-<!-- Modal Edição Configurações -->
-<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="settingsModalLabel">Editar Configuração</h5>
-                <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <form id="formSettings" action="update_setting.php" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="setting_id">
-                    <div class="form-group">
-                        <label for="systemname">Nome do Sistema</label>
-                        <input type="text" class="form-control" id="systemname" name="systemname" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="logo">Caminho do Logo</label>
-                        <input type="text" class="form-control" id="logo" name="logo" required>
-                    </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="manutencao" name="manutencao">
-                            <label class="custom-control-label" for="manutencao">Modo Manutenção</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-close" type="button" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Edição Páginas -->
-<div class="modal fade" id="pagesModal" tabindex="-1" role="dialog" aria-labelledby="pagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="pagesModalLabel">Editar Página</h5>
-                <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <form id="formPages" action="update_page.php" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="page_id">
-                    <div class="form-group">
-                        <label for="title">Título</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="url">URL</label>
-                        <input type="text" class="form-control" id="url" name="url" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descripton">Descrição</label>
-                        <textarea class="form-control" id="descripton" name="descripton" rows="3" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-close" type="button" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
 $(document).ready(function() {
     // Configurações - Abrir Modal
@@ -183,26 +112,18 @@ $(document).ready(function() {
         $('#pagesModal').modal('show');
     });
 
-    // Envio do Formulário via AJAX
-    $('#formSettings, #formPages').on('submit', function(e) {
-        e.preventDefault();
-        var $form = $(this);
-        
-        $.ajax({
-            type: 'POST',
-            url: $form.attr('action'),
-            data: $form.serialize(),
-            success: function(response) {
-                if(response.success) {
-                    location.reload();
-                } else {
-                    alert('Erro ao salvar: ' + response.message);
-                }
-            },
-            error: function() {
-                alert('Erro na comunicação com o servidor');
-            }
-        });
+    // Criar Nova Página - Abrir Modal Limpo
+    $('#btn-create-page').click(function() {
+        $('#page_id').val('');
+        $('#title').val('');
+        $('#url').val('');
+        $('#descripton').val('');
+        $('#pagesModal').modal('show');
+    });
+
+    // Fechar Modais no X e no Cancelar
+    $('.btn-close, [data-dismiss="modal"]').click(function() {
+        $('.modal').modal('hide');
     });
 });
 </script>
