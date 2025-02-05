@@ -68,19 +68,27 @@
                         </select>
                     </div>
 
-                    <!-- Sentido e Botão de Envio -->
+                    <!-- Sentido, Botão de Reversão e Botão de Envio -->
                     <div class="row mb-3">
+                        <!-- Coluna para o sentido e botão de reversão -->
                         <div class="col-md-6">
+                        <div class="mb-2">
                             <label for="directionSelect" class="form-label">Escolha o Sentido</label>
                             <select id="directionSelect" class="form-select" name="directionSelect">
-                                <!-- Opções serão populadas dinamicamente -->
+                            <!-- Opções serão populadas dinamicamente -->
                             </select>
                         </div>
-                        <div id="buttonContainer"></div>
-                        <div class="col-md-6 d-flex justify-content-end align-items-center mt-6 pt-2">
-                            <button type="submit" class="btn btn-primary w-100">Criar Evento</button>
+                        <!-- Container para o botão de reversão -->
+                        <div id="buttonContainer" class="mt-2">
+                            <!-- O botão de reversão será injetado aqui dinamicamente -->
+                        </div>
+                        </div>
+                        <!-- Coluna para o botão de envio -->
+                        <div class="col-md-6 d-flex align-items-end justify-content-end">
+                        <button type="submit" class="btn btn-primary">Criar Evento</button>
                         </div>
                     </div>
+  
                 </form>
             </div>
         </div>
