@@ -139,7 +139,8 @@
         if (window.currentSegmentLayer) {
             map.removeLayer(window.currentSegmentLayer);
         }
-
+        localStorage.setItem('segmentNodes', JSON.stringify(segmentNodes));
+        localStorage.setItem('direction', direction);
         // Criar nova camada
         const segmentLayer = L.polyline(segmentNodes.map(coord => [coord[1], coord[0]]), {
             color: direction === 'single' ? '#ff0000' : '#0000ff',
