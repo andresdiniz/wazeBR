@@ -576,6 +576,34 @@ document.addEventListener('DOMContentLoaded', function () {
         tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
     }
 });
+
+document.getElementById('eventoForm').addEventListener('submit', function(e) {
+    // Recupere os valores do localStorage
+    const segment = localStorage.getItem('streetSegment');
+    const direction = localStorage.getItem('segmentDirection');
+    
+    // Cria inputs ocultos (hidden) com os dados do localStorage
+    // Verifica se já não existem (opcional, para evitar duplicação)
+    let segmentInput = document.querySelector('input[name="streetSegment"]');
+    if (!segmentInput) {
+        segmentInput = document.createElement('input');
+        segmentInput.type = 'hidden';
+        segmentInput.name = 'streetSegment';
+        document.getElementById('eventoForm').appendChild(segmentInput);
+    }
+    segmentInput.value = segment ? segment : '';
+
+    let directionInput = document.querySelector('input[name="segmentDirection"]');
+    if (!directionInput) {
+        directionInput = document.createElement('input');
+        directionInput.type = 'hidden';
+        directionInput.name = 'segmentDirection';
+        document.getElementById('eventoForm').appendChild(directionInput);
+    }
+    directionInput.value = direction ? direction : '';
+    
+    // Ao inserir os inputs, o formulário seguirá o envio normalmente e os valores serão enviados via POST
+});
 </script>
 
 
