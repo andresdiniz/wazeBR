@@ -127,8 +127,17 @@ const MAP_CONFIG = {
 
 // Inicializa calendarios
 // Inicialize os datepickers e timepickers
-flatpickr("#starttime", { dateFormat: "Y-m-d H:i" });
-flatpickr("#endtime", { dateFormat: "Y-m-d H:i" });
+flatpickr("#starttime", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i", // Formato: ano-mês-dia hora:minutos
+    time_24hr: true         // Para exibir o tempo no formato 24 horas
+});
+flatpickr("#endtime", { 
+    
+    enableTime: true,
+    dateFormat: "Y-m-d H:i", // Formato: ano-mês-dia hora:minutos
+    time_24hr: true         // Para exibir o tempo no formato 24 horas
+ });
 // Para inputs de tempo, também pode ser configurado o modo time
 // ===== Funções de Inicialização e Localização =====
 function initializeMap() {
