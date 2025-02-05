@@ -1,3 +1,7 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
 <div class="container mt-4 mb-4">
     <div class="row">
         <div class="col-lg-6 mb-3">
@@ -35,22 +39,21 @@
                         </div>
                     </div>
 
-                    <!-- Início e Fim do Evento -->
+                    <!-- Exemplo de inputs para datas e container para horários -->
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="starttime" class="form-label">Início do Evento</label>
-                            <input type="datetime-local" class="form-control" id="starttime" name="starttime" required>
+                        <label for="starttime" class="form-label">Data de Início</label>
+                        <input type="date" id="starttime" class="form-control" name="starttime">
                         </div>
                         <div class="col-md-6">
-                            <label for="endtime" class="form-label">Fim do Evento</label>
-                            <input type="datetime-local" class="form-control" id="endtime" name="endtime" required>
+                        <label for="endtime" class="form-label">Data de Término</label>
+                        <input type="date" id="endtime" class="form-control" name="endtime">
                         </div>
                     </div>
-
-                    <!-- Horários -->
                     <div id="horarios_dia" class="mb-3">
-                        <!-- Espaço para adicionar campos de horário para cada dia da semana -->
+                        <!-- Os horários serão injetados aqui -->
                     </div>
+  
 
                     <!-- Coordenadas -->
                     <div class="mb-3">
@@ -122,6 +125,11 @@ const MAP_CONFIG = {
     }
 };
 
+// Inicializa calendarios
+// Inicialize os datepickers e timepickers
+flatpickr("#starttime", { dateFormat: "Y-m-d" });
+flatpickr("#endtime", { dateFormat: "Y-m-d" });
+// Para inputs de tempo, também pode ser configurado o modo time
 // ===== Funções de Inicialização e Localização =====
 function initializeMap() {
     const map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
@@ -356,58 +364,76 @@ function showAlert(message, type = 'info') {
     setTimeout(() => alert.remove(), 5000);
 }
 
-// ===== Funções de Agendamento e Subtipos =====
 function calcularDiasSemana() {
-    const startDate = document.getElementById('starttime').value;
-    const endDate = document.getElementById('endtime').value;
+    const startDateStr = document.getElementById('starttime').value;
+    const endDateStr = document.getElementById('endtime').value;
+    
+    // Validação: verifica se as datas foram preenchidas
+    if (!startDateStr || !endDateStr) {
+        return;
+    }
+    
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
 
-    if (!startDate || !endDate) return;
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diasSemana = [];
-    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-
-    while (start <= end) {
-        const dayOfWeek = start.getDay();
-        if (!diasSemana.includes(dias[dayOfWeek])) {
-            diasSemana.push(dias[dayOfWeek]);
-        }
-        start.setDate(start.getDate() + 1);
+    // Validação: garante que a data de início seja menor ou igual à data de término
+    if (start > end) {
+        showAlert('A data de início deve ser anterior ou igual à data de término.', 'warning');
+        return;
     }
 
-    atualizarHorarios(diasSemana);
+    const diasSemana = new Set();
+    const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        diasSemana.add(dias[d.getDay()]);
+    }
+    
+    atualizarHorarios([...diasSemana]);
 }
 
 function atualizarHorarios(diasSelecionados) {
     const horariosDiv = document.getElementById('horarios_dia');
     horariosDiv.innerHTML = '';
 
+    // Exibir os horários dos dias em um layout responsivo (por exemplo, cards)
+    const container = document.createElement('div');
+    container.className = 'row';
+
     diasSelecionados.forEach(dia => {
-        const dayDiv = document.createElement('div');
-        dayDiv.classList.add('mb-3');
-        dayDiv.setAttribute('data-dia', dia);
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-3';
+        
+        const card = document.createElement('div');
+        card.className = 'card';
 
-        const label = document.createElement('label');
-        label.classList.add('form-label');
-        label.innerText = `Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
 
-        const inputHora = document.createElement('input');
-        inputHora.type = 'time';
-        inputHora.name = `${dia}_inicio`;
-        inputHora.classList.add('form-control');
+        const label = document.createElement('h5');
+        label.className = 'card-title';
+        label.innerText = dia;
 
-        const inputHoraFim = document.createElement('input');
-        inputHoraFim.type = 'time';
-        inputHoraFim.name = `${dia}_fim`;
-        inputHoraFim.classList.add('form-control');
-
-        dayDiv.appendChild(label);
-        dayDiv.appendChild(inputHora);
-        dayDiv.appendChild(inputHoraFim);
-
-        horariosDiv.appendChild(dayDiv);
+        // Inputs para início e fim do horário
+        const inputInicio = document.createElement('input');
+        inputInicio.type = 'time';
+        inputInicio.name = `${dia.toLowerCase()}_inicio`;
+        inputInicio.className = 'form-control mb-2';
+        
+        const inputFim = document.createElement('input');
+        inputFim.type = 'time';
+        inputFim.name = `${dia.toLowerCase()}_fim`;
+        inputFim.className = 'form-control';
+        
+        cardBody.appendChild(label);
+        cardBody.appendChild(inputInicio);
+        cardBody.appendChild(inputFim);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        container.appendChild(col);
     });
+
+    horariosDiv.appendChild(container);
 }
 
 function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
