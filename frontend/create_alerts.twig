@@ -92,422 +92,491 @@
     </div>
 </div>
 
+<!-- Inclua a biblioteca do Turf -->
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
+<!-- Inclua as bibliotecas do Leaflet e PolylineDecorator antes deste script -->
+
 <script>
-    // === Funções do Mapa ===
-    function initializeMap() {// função funcionando
-        const map = L.map('map').setView([-23.55052, -46.633308], 15); // São Paulo como exemplo
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        return map;
+// ===== Configurações Globais =====
+const MAP_CONFIG = {
+    SEGMENT_COLORS: {
+        original: '#0000ff',
+        reversed: '#ff0000',
+        both: '#00ff00'
+    },
+    ARROW_OPTIONS: {
+        pixelSize: 15,
+        weight: 2
+    },
+    LOCAL_STORAGE_KEYS: {
+        SEGMENT: 'streetSegment',
+        DIRECTION: 'segmentDirection'
     }
+};
 
-    function locateUser(map) { // função funcionando
-        map.locate({ setView: true, maxZoom: 12 });
+// ===== Funções de Inicialização e Localização =====
+function initializeMap() {
+    const map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    return map;
+}
 
-        map.on('locationerror', function (e) {
-            alert('Não foi possível localizar a sua posição.');
-        });
+function locateUser(map) {
+    map.locate({ setView: true, maxZoom: 12 });
+    map.on('locationerror', function (e) {
+        alert('Não foi possível localizar a sua posição.');
+    });
+}
 
-    }
+function handleLocationFound(e, map) {
+    const radius = e.accuracy / 2;
+    L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+    L.circle(e.latlng, radius).addTo(map);
+    console.log('Localização atual encontrada:', e.latlng);
+}
 
-    function handleLocationFound(e, map) {//função funcionando	
-        const radius = e.accuracy / 2;
-        L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
-        L.circle(e.latlng, radius).addTo(map);
-        console.log('Localização atual encontrada:', e.latlng);
-    }
+// ===== Consulta de Rua e Segmento =====
+function consultarRuaWaze(lat, lon) {
+    const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+    return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.result && data.result.length > 0) {
+                data.result.sort((a, b) => a.distance - b.distance);
+                return data.result[0].names[0]; // Retorna o nome da rua mais próxima
+            } else {
+                return null;
+            }
+        })
+        .catch(() => null);
+}
 
-    function consultarRuaWaze(lat, lon) {
-        const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
-        return fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.result && data.result.length > 0) {
-                    data.result.sort((a, b) => a.distance - b.distance);
-                    return data.result[0].names[0]; // Nome da rua mais próxima
-                } else {
-                    return null;
+/**
+ * Consulta um segmento de rua próximo às coordenadas informadas.
+ * São realizadas duas abordagens:
+ * - Uma consulta simples (primeira parte do código) usando um raio menor;
+ * - Uma consulta com interseções (segunda parte do código) usando um raio maior.
+ *
+ * O callback `drawSegmentCallback` é chamado com os nós do segmento encontrado.
+ */
+async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
+    // Você pode ajustar a consulta conforme o que for mais adequado para o seu caso.
+    // Exemplo: consulta utilizando Overpass API com um raio de 300 metros.
+    const query = `
+        [out:json];
+        (
+            node(around:300, ${lat}, ${lon});
+            way(bn)["highway"];
+            >;
+        );
+        out geom;
+    `;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.elements.length > 0) {
+            const nodes = {};
+            const ways = [];
+
+            data.elements.forEach(el => {
+                if (el.type === 'node') {
+                    nodes[el.id] = [el.lon, el.lat];
+                } else if (el.type === 'way') {
+                    ways.push(el);
                 }
+            });
+
+            let closestWay = null;
+            let minDistance = Infinity;
+
+            ways.forEach(way => {
+                const wayNodes = way.nodes.map(id => nodes[id]);
+                const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestWay = way;
+                }
+            });
+
+            if (closestWay) {
+                const wayNodes = closestWay.nodes.map(id => nodes[id]);
+                // Tentar identificar interseções para delimitar o segmento
+                const intersections = closestWay.nodes.filter(nodeId =>
+                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                );
+
+                if (intersections.length >= 2) {
+                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                    if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
+                        const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+                        console.log('Segmento de nós encontrado (com interseções):', segmentNodes);
+                        drawSegmentCallback(segmentNodes);
+                        return;
+                    } else {
+                        console.warn('Interseções não têm índices válidos:', { startNodeIndex, endNodeIndex });
+                    }
+                }
+                // Se não identificar interseções, envia o conjunto completo de nós
+                console.log('Segmento de nós encontrado (completo):', wayNodes);
+                drawSegmentCallback(wayNodes);
+            } else {
+                console.warn('Nenhum segmento próximo encontrado.');
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao buscar segmento:', error);
+        showAlert('Erro ao carregar dados da via', 'danger');
+    }
+}
+
+// ===== Desenho do Segmento e Controle de Sentido =====
+function drawSegment(map, segmentNodes, direction = 'both') {
+    // Remover camada anterior, se existir
+    if (window.currentSegmentLayer) {
+        map.removeLayer(window.currentSegmentLayer);
+    }
+    // Converter as coordenadas para o formato [lat, lng]
+    const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
+    
+    // Configurar o estilo da linha conforme o sentido
+    // Caso o sentido seja 'single' (ou 'reversed'), usamos uma cor; se for 'both', outra.
+    let color;
+    if (direction === 'single' || direction === 'reversed') {
+        color = (direction === 'reversed') ? MAP_CONFIG.SEGMENT_COLORS.reversed : MAP_CONFIG.SEGMENT_COLORS.original;
+    } else {
+        color = MAP_CONFIG.SEGMENT_COLORS.both;
+    }
+    
+    const lineStyle = {
+        color: color,
+        weight: 4
+    };
+
+    // Criar a camada do segmento (linha)
+    const segmentLayer = L.polyline(latLngs, lineStyle);
+
+    // Adicionar setas indicando a direção
+    const arrowLayer = L.polylineDecorator(segmentLayer, {
+        patterns: [{
+            offset: '50%',
+            repeat: '100px',
+            symbol: L.Symbol.arrowHead({
+                ...MAP_CONFIG.ARROW_OPTIONS,
+                pathOptions: lineStyle
             })
-            .catch(() => null);
+        }]
+    });
+
+    // Salvar o estado do segmento no localStorage
+    localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segmentNodes));
+    localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
+
+    // Atualizar indicador e controles de direção
+    updateDirectionIndicator(direction);
+    updateDirectionControls(direction);
+
+    // Agrupar as camadas e adicioná-las ao mapa
+    window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
+    return window.currentSegmentLayer;
+}
+
+function updateDirectionControls(direction) {
+    const directionSelect = document.getElementById('directionSelect');
+    if (directionSelect) {
+        directionSelect.value = direction;
     }
-
-    function drawSegment(map, segmentNodes, direction = 'both') {
-        // Remover camadas anteriores
-        if (window.currentSegmentLayer) {
-            map.removeLayer(window.currentSegmentLayer);
-        }
-        localStorage.setItem('segmentNodes', JSON.stringify(segmentNodes));
-        localStorage.setItem('direction', direction);
-        // Criar nova camada
-        const segmentLayer = L.polyline(segmentNodes.map(coord => [coord[1], coord[0]]), {
-            color: direction === 'single' ? '#ff0000' : '#0000ff',
-            weight: 4
-        });
-
-        // Adicionar setas de direção
-        const arrowLayer = L.polylineDecorator(segmentLayer, {
-            patterns: [
-                {
-                    offset: '50%',
-                    repeat: 100,
-                    symbol: L.Symbol.arrowHead({
-                        pixelSize: 15,
-                        polygon: false,
-                        pathOptions: {
-                            stroke: true,
-                            color: direction === 'single' ? '#ff0000' : '#0000ff',
-                            weight: 2
-                        }
-                    })
-                }
-            ]
-        });
-
-        // Agrupar camadas
-        window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
-        return window.currentSegmentLayer;
+    // Exibe ou oculta o botão de reversão conforme o sentido
+    const reverseBtn = document.getElementById('reverseBtn');
+    if (reverseBtn) {
+        reverseBtn.style.display = (direction === 'single') ? 'block' : 'none';
     }
+}
 
-    async function getStreetSegment(map, lat, lon, drawSegmentCallback) { // Função não funcionando
-        const query = `
-            [out:json];
-            (
-                node(around:300, ${lat}, ${lon});
-                way(bn)["highway"];
-                >;
-            );
-            out geom;
+function updateDirectionIndicator(direction) {
+    const indicator = document.getElementById('directionIndicator');
+    if (indicator) {
+        indicator.innerHTML = `
+            <span class="badge bg-${direction === 'both' ? 'success' : 'primary'}">
+                Sentido selecionado: ${direction.toUpperCase()}
+            </span>
         `;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    }
+}
 
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
+function saveSegmentState(segment, direction) {
+    localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segment));
+    localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
+}
 
-            if (data.elements.length > 0) {
-                const nodes = {};
-                const ways = [];
+function loadSavedSegment(map) {
+    const savedSegment = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
+    const savedDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION);
+    
+    if (savedSegment && savedDirection) {
+        drawSegment(map, JSON.parse(savedSegment), savedDirection);
+        updateDirectionControls(savedDirection);
+    }
+}
 
-                data.elements.forEach(el => {
-                    if (el.type === 'node') {
-                        nodes[el.id] = [el.lon, el.lat];
-                    } else if (el.type === 'way') {
-                        ways.push(el);
-                    }
-                });
+// ===== Funções para Inverter Coordenadas =====
+function inverterCoordenadas(segmentNodes, map, currentDirection) {
+    const reversedSegment = [...segmentNodes].reverse();
+    // Se o sentido atual for 'original' ou 'single', ao inverter consideramos 'reversed'
+    const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
+    drawSegment(map, reversedSegment, newDirection);
+    saveSegmentState(reversedSegment, newDirection);
+    return reversedSegment;
+}
 
-                let closestWay = null;
-                let minDistance = Infinity;
+// ===== Funções Auxiliares =====
+function showAlert(message, type = 'info') {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.prepend(alert);
+    
+    setTimeout(() => alert.remove(), 5000);
+}
 
-                ways.forEach(way => {
-                    const wayNodes = way.nodes.map(id => nodes[id]);
-                    const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+// ===== Funções de Agendamento e Subtipos =====
+function calcularDiasSemana() {
+    const startDate = document.getElementById('starttime').value;
+    const endDate = document.getElementById('endtime').value;
 
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestWay = way;
-                    }
-                });
+    if (!startDate || !endDate) return;
 
-                if (closestWay) {
-                    const wayNodes = closestWay.nodes.map(id => nodes[id]);
-                    const intersections = closestWay.nodes.filter(nodeId =>
-                        data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                    );
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diasSemana = [];
+    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
 
-                    if (intersections.length >= 2) {
-                        const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                        const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                        if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
-                            const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-                            console.log('Segmento de nós encontrado:', segmentNodes);
-                            drawSegmentCallback(segmentNodes);
-                        } else {
-                            console.warn('Interseções não têm índices válidos:', { startNodeIndex, endNodeIndex });
-                        }
-                    } else {
-                        console.warn('Interseções insuficientes para determinar o segmento:', intersections);
-                    }
+    while (start <= end) {
+        const dayOfWeek = start.getDay();
+        if (!diasSemana.includes(dias[dayOfWeek])) {
+            diasSemana.push(dias[dayOfWeek]);
+        }
+        start.setDate(start.getDate() + 1);
+    }
 
+    atualizarHorarios(diasSemana);
+}
+
+function atualizarHorarios(diasSelecionados) {
+    const horariosDiv = document.getElementById('horarios_dia');
+    horariosDiv.innerHTML = '';
+
+    diasSelecionados.forEach(dia => {
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('mb-3');
+        dayDiv.setAttribute('data-dia', dia);
+
+        const label = document.createElement('label');
+        label.classList.add('form-label');
+        label.innerText = `Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
+
+        const inputHora = document.createElement('input');
+        inputHora.type = 'time';
+        inputHora.name = `${dia}_inicio`;
+        inputHora.classList.add('form-control');
+
+        const inputHoraFim = document.createElement('input');
+        inputHoraFim.type = 'time';
+        inputHoraFim.name = `${dia}_fim`;
+        inputHoraFim.classList.add('form-control');
+
+        dayDiv.appendChild(label);
+        dayDiv.appendChild(inputHora);
+        dayDiv.appendChild(inputHoraFim);
+
+        horariosDiv.appendChild(dayDiv);
+    });
+}
+
+function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
+    subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+    const selectedTipoId = tipoSelect.value;
+    if (selectedTipoId && subtiposPorTipo[selectedTipoId]) {
+        subtipoSelect.disabled = false;
+        subtiposPorTipo[selectedTipoId].forEach(subtipo => {
+            const option = document.createElement('option');
+            option.value = subtipo.subtype_value;
+            option.textContent = subtipo.name;
+            subtipoSelect.appendChild(option);
+        });
+    } else {
+        subtipoSelect.disabled = true;
+    }
+}
+
+function atualizarDirecoes(selectElement) {
+    selectElement.innerHTML = ''; // Limpar opções existentes
+    const options = [
+        { value: 'both', text: 'Ambos os sentidos' },
+        { value: 'single', text: 'Sentido único' },
+    ];
+    options.forEach(optionData => {
+        const option = document.createElement('option');
+        option.value = optionData.value;
+        option.textContent = optionData.text;
+        selectElement.appendChild(option);
+    });
+}
+
+// ===== Gerenciamento do Botão de Reversão =====
+function mostrarBotaoReverso(segmentNodes, map) {
+    let reverseBtn = document.getElementById('reverseBtn');
+    if (!reverseBtn) {
+        // Caso não exista, cria o botão e insere em um container (garanta que o elemento com id "buttonContainer" exista no HTML)
+        reverseBtn = document.createElement('button');
+        reverseBtn.id = 'reverseBtn';
+        reverseBtn.className = 'btn btn-warning mt-2';
+        reverseBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Inverter Sentido';
+        document.getElementById('buttonContainer').appendChild(reverseBtn);
+    }
+    reverseBtn.style.display = 'block';
+    // Evento de clique para inverter as coordenadas
+    reverseBtn.onclick = () => {
+        // Obtém o sentido atual salvo (se não existir, assume "original")
+        const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
+        currentSegmentNodes = inverterCoordenadas(segmentNodes, map, currentDirection);
+    };
+}
+
+function esconderBotaoReverso() {
+    const reverseBtn = document.getElementById('reverseBtn');
+    if (reverseBtn) {
+        reverseBtn.style.display = 'none';
+    }
+}
+
+// ===== Execução Principal =====
+document.addEventListener('DOMContentLoaded', function () {
+    const map = initializeMap();
+    let currentSegmentNodes = []; // Armazena os nós do segmento atual
+    let currentSegmentLayer = null; // Armazena a camada atual do segmento
+
+    // Carregar segmento salvo (se houver)
+    loadSavedSegment(map);
+
+    // Localização do usuário
+    map.on('locationfound', (e) => handleLocationFound(e, map));
+    locateUser(map);
+
+    // Atualiza o select de sentido
+    const directionSelect = document.getElementById('directionSelect');
+    if (directionSelect) {
+        atualizarDirecoes(directionSelect);
+    }
+
+    // Evento de clique no mapa: captura coordenadas, consulta rua e segmento
+    map.on('click', (e) => {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+        console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+
+        // Atualiza campo de coordenadas (se existir)
+        const coordenadasInput = document.getElementById('coordenadas');
+        if (coordenadasInput) {
+            coordenadasInput.value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        }
+
+        // Consulta o nome da rua via Waze (se aplicável)
+        consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+            if (nomeRuaWaze) {
+                const ruaSelect = document.getElementById('ruaSelect');
+                if (ruaSelect) {
+                    ruaSelect.innerHTML = ''; // Limpa as opções existentes
+                    const option = document.createElement('option');
+                    option.value = nomeRuaWaze;
+                    option.textContent = nomeRuaWaze;
+                    ruaSelect.appendChild(option);
                 }
             }
-        } catch (error) {
-            console.error('Erro ao buscar segmento:', error);
-        }
-    }
-
-    function invertSegmentCoordinates(segmentNodes, drawSegmentCallback) { // Função não funcionando
-        segmentNodes.reverse();
-        drawSegmentCallback(segmentNodes, 'single');
-    }
-
-    // === Funções de Agendamento ===
-    function calcularDiasSemana() { // Função funcionando
-        const startDate = document.getElementById('starttime').value;
-        const endDate = document.getElementById('endtime').value;
-
-        if (!startDate || !endDate) return;
-
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const diasSemana = [];
-        const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-
-        while (start <= end) {
-            const dayOfWeek = start.getDay();
-            if (!diasSemana.includes(dias[dayOfWeek])) {
-                diasSemana.push(dias[dayOfWeek]);
-            }
-            start.setDate(start.getDate() + 1);
-        }
-
-        atualizarHorarios(diasSemana);
-    }
-
-    function atualizarHorarios(diasSelecionados) { // Função funcionando
-        const horariosDiv = document.getElementById('horarios_dia');
-        horariosDiv.innerHTML = '';
-
-        diasSelecionados.forEach(dia => {
-            const dayDiv = document.createElement('div');
-            dayDiv.classList.add('mb-3');
-            dayDiv.setAttribute('data-dia', dia);
-
-            const label = document.createElement('label');
-            label.classList.add('form-label');
-            label.innerText = `Horários para ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
-
-            const inputHora = document.createElement('input');
-            inputHora.type = 'time';
-            inputHora.name = `${dia}_inicio`;
-            inputHora.classList.add('form-control');
-
-            const inputHoraFim = document.createElement('input');
-            inputHoraFim.type = 'time';
-            inputHoraFim.name = `${dia}_fim`;
-            inputHoraFim.classList.add('form-control');
-
-            dayDiv.appendChild(label);
-            dayDiv.appendChild(inputHora);
-            dayDiv.appendChild(inputHoraFim);
-
-            horariosDiv.appendChild(dayDiv);
         });
-    }
 
-    // === Funções de Tipos e Subtipos ===
-    function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) { //Funcao funcionando
-        subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-
-        const selectedTipoId = tipoSelect.value;
-        if (selectedTipoId && subtiposPorTipo[selectedTipoId]) {
-            subtipoSelect.disabled = false;
-            subtiposPorTipo[selectedTipoId].forEach(subtipo => {
-                const option = document.createElement('option');
-                option.value = subtipo.subtype_value;
-                option.textContent = subtipo.name;
-                subtipoSelect.appendChild(option);
-            });
-        } else {
-            subtipoSelect.disabled = true;
-        }
-    }
-
-    // Atualizar os valores do sentido
-    function atualizarDirecoes(selectElement) {
-        // Certifique-se de que o select está limpo
-        selectElement.innerHTML = '';
-
-        // Adicionar opções de sentido
-        const options = [
-            { value: 'both', text: 'Ambos os sentidos' },
-            { value: 'single', text: 'Sentido único' },
-        ];
-
-        options.forEach(optionData => {
-            const option = document.createElement('option');
-            option.value = optionData.value;
-            option.textContent = optionData.text;
-            selectElement.appendChild(option);
-        });
-    }
-
-    // Atualizar os valores do sentido
-    function atualizarDirecoes(selectElement) {
-        selectElement.innerHTML = ''; // Limpar opções existentes
-
-        // Adicionar opções de sentido
-        const options = [
-            { value: 'both', text: 'Ambos os sentidos' },
-            { value: 'single', text: 'Sentido único' },
-        ];
-
-        options.forEach(optionData => {
-            const option = document.createElement('option');
-            option.value = optionData.value;
-            option.textContent = optionData.text;
-            selectElement.appendChild(option);
-        });
-    }
-
-    // Função para mostrar o botão de reverso
-    function mostrarBotaoReverso(segmentNodes, map) {
-        let reversoBtn = document.getElementById('reversoBtn');
-        console.log('Coordenadas a serem invertidas:', segmentNodes);
-
-        if (!reversoBtn) {
-            // Criar o botão caso ele não exista
-            reversoBtn = document.createElement('button');
-            reversoBtn.id = 'reversoBtn';
-            reversoBtn.className = 'btn btn-secondary mt-3';
-            reversoBtn.textContent = 'Reverter Sentido';
-
-            // Adicionar evento de clique no botão para inverter as coordenadas
-            reversoBtn.onclick = () => {
-                const reversedSegment = [...segmentNodes].reverse();
-                drawSegment(map, reversedSegment, 'single'); // Desenhar o segmento invertido
-                console.log('Segmento invertido:', reversedSegment);
-            };
-
-            // Adicionar o botão ao container (certifique-se de que o contêiner exista no DOM)
-            document.getElementById('buttonContainer').appendChild(reversoBtn);
-        }
-
-        // Garantir que o botão esteja visível
-        reversoBtn.style.display = 'block';
-    }
-
-    // Função para esconder o botão de reverso
-    function esconderBotaoReverso() {
-        const reversoBtn = document.getElementById('reversoBtn');
-        if (reversoBtn) {
-            reversoBtn.style.display = 'none'; // Esconde o botão
-        }
-    }
-
-    // Função para inverter as coordenadas do segmento
-    function inverterCoordenadas(segmentNodes) {
-        const reversedSegment = [...segmentNodes].reverse(); // Inverter o segmento
-        console.log('Segmento invertido:', reversedSegment);
-    }
-</script>
-
-<!-- Trecho para chamada das funçoes e execução do script-->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const map = initializeMap();
-        var currentSegmentLayer = null; // Armazena a camada do segmento atual
-        let currentSegmentNodes = []; // Armazena os nós do segmento atual
-
-        map.on('locationfound', (e) => handleLocationFound(e, map));
-        locateUser(map);
-
-        // Evento de clique no mapa para capturar coordenadas
-        map.on('click', (e) => {
-            const lat = e.latlng.lat;
-            const lon = e.latlng.lng;
-
-            console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-
-            const coordenadasInput = document.getElementById('coordenadas');
-            if (coordenadasInput) {
-                coordenadasInput.value = `${lat}, ${lon}`;
-            }
-
-            consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
-                if (nomeRuaWaze) {
-                    const ruaSelect = document.getElementById('ruaSelect');
-                    if (ruaSelect) {
-                        ruaSelect.innerHTML = ''; // Limpar opções existentes
-                        const option = document.createElement('option');
-                        option.value = nomeRuaWaze;
-                        option.textContent = nomeRuaWaze;
-                        ruaSelect.appendChild(option);
-                    }
+        // Consulta o segmento de rua próximo e desenha-o
+        getStreetSegment(map, lat, lon, (segmentNodes) => {
+            if (segmentNodes && segmentNodes.length > 1) {
+                currentSegmentNodes = segmentNodes; // Atualiza a variável global de nós
+                // Remove camada anterior, se houver
+                if (currentSegmentLayer) {
+                    map.removeLayer(currentSegmentLayer);
                 }
-            });
+                const selectedDirection = directionSelect.value;
+                currentSegmentLayer = drawSegment(map, segmentNodes, selectedDirection);
 
-            // Chamar getStreetSegment ao clicar no mapa
-            const directionSelect = document.getElementById('directionSelect');
-            atualizarDirecoes(directionSelect); // Atualizar o select com direções disponíveis
-
-            getStreetSegment(map, lat, lon, (segmentNodes) => {
-                console.log('Segmento retornado:', segmentNodes);
-
-                // Verificar o retorno e desenhar o segmento
-                if (segmentNodes && segmentNodes.length > 1) {
-                    // Limpar o mapa antes de adicionar o novo segmento
-                    if (currentSegmentLayer) {
-                        map.removeLayer(currentSegmentLayer);
-                    }
-
-                    const selectedDirection = directionSelect.value;
-                    currentSegmentLayer = drawSegment(map, segmentNodes, selectedDirection);
-
-                    // Mostrar botão de reverso para sentido único
-                    if (selectedDirection === 'single') {
-                        console.log('Mostrando botão de reverso. Com as coordenadas', segmentNodes);
-                        mostrarBotaoReverso(segmentNodes, map);
-                    } else {
-                        esconderBotaoReverso();
-                    }
+                // Se o sentido for único, mostra o botão para inverter
+                if (selectedDirection === 'single') {
+                    mostrarBotaoReverso(segmentNodes, map);
                 } else {
-                    console.warn('Nenhum segmento encontrado.');
+                    esconderBotaoReverso();
                 }
-            });
+            } else {
+                console.warn('Nenhum segmento encontrado.');
+            }
         });
+    });
 
-        document.getElementById('directionSelect').addEventListener('change', (e) => {
+    // Evento para alteração do sentido via select
+    if (directionSelect) {
+        directionSelect.addEventListener('change', (e) => {
             const selectedDirection = e.target.value;
             console.log('Direção selecionada:', selectedDirection);
-            // Mostrar ou esconder o botão "Reverter Sentido" conforme necessário
-            if (selectedDirection === 'single') {
-                // Criar o botão de reverso e inverter as coordenadas
-                mostrarBotaoReverso(currentSegmentNodes, map);  // Criar o botão
-                console.log('Invertendo coordenadas do segmento:', currentSegmentNodes);
-                inverterCoordenadas(currentSegmentNodes);       // Inverter as coordenadas
-            } else {
-                esconderBotaoReverso(); // Esconder o botão para "Ambos os sentidos"
-            }
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
-                console.log('Redesenhar segmento com nova direção:', selectedDirection);
-                // Redesenhar o segmento com a nova direção
-
-                // Verificar a direção e desenhar o segmento
                 currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
+                saveSegmentState(currentSegmentNodes, selectedDirection);
+                // Mostra ou esconde o botão de reversão conforme o sentido
+                if (selectedDirection === 'single') {
+                    mostrarBotaoReverso(currentSegmentNodes, map);
+                } else {
+                    esconderBotaoReverso();
+                }
             }
         });
+    }
 
-        // Botão para criar evento
-        document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
-            e.preventDefault(); // Evitar comportamento padrão do envio de formulário
-
-            const direction = document.getElementById('directionSelect').value;
-
-            console.log('Direção selecionada:', direction);
-
-            // Lógica para processar a direção e criar evento
+    // Evento do botão de envio (por exemplo, para criar um evento)
+    const submitBtn = document.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita o envio padrão do formulário
+            const direction = directionSelect.value;
             if (direction === 'both' || direction === 'single') {
                 alert(`Evento criado no sentido: ${direction}`);
             } else {
                 alert('Por favor, selecione um sentido válido.');
             }
         });
+    }
 
-        const tipoSelect = document.getElementById('tipo');
-        const subtipoSelect = document.getElementById('subtipo');
-        const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw
-    }};
+    // Eventos para agendamento
+    const starttimeInput = document.getElementById('starttime');
+    const endtimeInput = document.getElementById('endtime');
+    if (starttimeInput && endtimeInput) {
+        starttimeInput.addEventListener('change', calcularDiasSemana);
+        endtimeInput.addEventListener('change', calcularDiasSemana);
+    }
 
-    tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
-
-    document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
-    document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
-    });
+    // Carregamento de subtipos conforme o tipo selecionado
+    const tipoSelect = document.getElementById('tipo');
+    const subtipoSelect = document.getElementById('subtipo');
+    // Supondo que a variável "subtiposPorTipo" seja injetada pelo backend (por exemplo, via template)
+    const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
+    if (tipoSelect && subtipoSelect) {
+        tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
+    }
+});
 </script>
+
 
 <style>
     /* Estilos Aprimorados */
