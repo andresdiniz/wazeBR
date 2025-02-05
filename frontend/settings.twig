@@ -121,13 +121,40 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formSettings" action="update_setting.php" method="POST">
-                <div class="modal-body px-4 py-3">
-                    <!-- Conteúdo do modal settings -->
+                <input type="hidden" id="setting_id" name="id">
+                
+                <div class="mb-3">
+                    <label for="systemname" class="form-label">Nome do Sistema</label>
+                    <input type="text" class="form-control" id="systemname" name="systemname" required>
                 </div>
-                <div class="modal-footer bg-light py-3">
-                    <!-- Botões do footer -->
+            
+                <div class="mb-3">
+                    <label for="theme_color" class="form-label">Cor do Tema</label>
+                    <input type="color" class="form-control" id="theme_color" name="theme_color">
                 </div>
-            </form>
+            
+                <div class="mb-3">
+                    <label for="contact_email" class="form-label">E-mail de Contato</label>
+                    <input type="email" class="form-control" id="contact_email" name="contact_email">
+                </div>
+            
+                <div class="mb-3">
+                    <label for="admin_email" class="form-label">E-mail do Admin</label>
+                    <input type="email" class="form-control" id="admin_email" name="admin_email">
+                </div>
+            
+                <div class="mb-3">
+                    <label for="timezone" class="form-label">Fuso Horário</label>
+                    <input type="text" class="form-control" id="timezone" name="timezone">
+                </div>
+            
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="manutencao" name="manutencao">
+                    <label class="form-check-label" for="manutencao">Modo Manutenção</label>
+                </div>
+            
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>            
         </div>
     </div>
 </div>
@@ -142,36 +169,60 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="formPages" action="update_page.php" method="POST">
-                <div class="modal-body px-4 py-3">
-                    <!-- Conteúdo do modal pages -->
+            <form id="formSettings" action="update_setting.php" method="POST">
+                <input type="hidden" id="setting_id" name="id">
+                
+                <div class="mb-3">
+                    <label for="systemname" class="form-label">Nome do Sistema</label>
+                    <input type="text" class="form-control" id="systemname" name="systemname" required>
                 </div>
-                <div class="modal-footer bg-light py-3">
-                    <!-- Botões do footer -->
+            
+                <div class="mb-3">
+                    <label for="theme_color" class="form-label">Cor do Tema</label>
+                    <input type="color" class="form-control" id="theme_color" name="theme_color">
                 </div>
-            </form>
+            
+                <div class="mb-3">
+                    <label for="contact_email" class="form-label">E-mail de Contato</label>
+                    <input type="email" class="form-control" id="contact_email" name="contact_email">
+                </div>
+            
+                <div class="mb-3">
+                    <label for="admin_email" class="form-label">E-mail do Admin</label>
+                    <input type="email" class="form-control" id="admin_email" name="admin_email">
+                </div>
+            
+                <div class="mb-3">
+                    <label for="timezone" class="form-label">Fuso Horário</label>
+                    <input type="text" class="form-control" id="timezone" name="timezone">
+                </div>
+            
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="manutencao" name="manutencao">
+                    <label class="form-check-label" for="manutencao">Modo Manutenção</label>
+                </div>
+            
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>            
         </div>
     </div>
 </div>
 
 <script>
     $(document).ready(function() {
-        // Configurações - Abrir Modal e Preencher Dados
         $('#settingsModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
-    
+            
             modal.find('#setting_id').val(button.data('id'));
             modal.find('#systemname').val(button.data('systemname'));
-            modal.find('#logo').val(button.data('logo'));
-            modal.find('#manutencao').prop('checked', button.data('manutencao') === 1 || button.data('manutencao') === '1' || button.data('manutencao') === true);
             modal.find('#theme_color').val(button.data('theme_color'));
             modal.find('#contact_email').val(button.data('contact_email'));
             modal.find('#admin_email').val(button.data('admin_email'));
             modal.find('#timezone').val(button.data('timezone'));
+            modal.find('#manutencao').prop('checked', button.data('manutencao') == 1);
         });
     
-        // Páginas - Abrir Modal e Preencher Dados
         $('#pagesModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -179,48 +230,19 @@
             modal.find('#page_id').val(button.data('id'));
             modal.find('#title').val(button.data('title'));
             modal.find('#url').val(button.data('url'));
-            modal.find('#descripton').val(button.data('descripton'));
+            modal.find('#descripton').val(button.data('descripton')); // Corrigido
             modal.find('#status').val(button.data('status'));
             modal.find('#meta_title').val(button.data('meta_title'));
             modal.find('#meta_description').val(button.data('meta_description'));
             modal.find('#featured_image').val(button.data('featured_image'));
-    
-            // Atualizar contadores
-            $('#meta-title-counter').text(button.data('meta_title')?.length || 0);
-            $('#meta-description-counter').text(button.data('meta_description')?.length || 0);
         });
     
-        // Contadores de Caracteres em Tempo Real
-        $('#meta_title').on('input', function() {
-            $('#meta-title-counter').text(this.value.length);
-        });
-    
-        $('#meta_description').on('input', function() {
-            $('#meta-description-counter').text(this.value.length);
-        });
-    
-        // Criar Nova Página - Abrir Modal Limpo
         $('#btn-create-page').click(function() {
             const modal = $('#pagesModal');
             modal.find('input, textarea, select').val('');
             modal.find('#status').val('draft');
             modal.modal('show');
         });
-    
-        // Configuração dos Modais do Bootstrap sem a necessidade de inicialização manual
-        // O Bootstrap já cuida do modal automaticamente, então não há necessidade de inicializar com "new bootstrap.Modal"
-        // As opções de backdrop e outros ajustes são feitos diretamente no modal, ou usando as configurações da biblioteca
-    
-        // Inicialização do Modal Settings
-        var settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'), {
-            backdrop: 'static' // Modal não fecha ao clicar fora
-        });
-    
-        // Inicialização do Modal Pages
-        var pagesModal = new bootstrap.Modal(document.getElementById('pagesModal'), {
-            backdrop: 'static' // Modal não fecha ao clicar fora
-        });
-    
-        // Use `settingsModal.show()` ou `pagesModal.show()` se você precisar abrir os modais programaticamente
     });
+    
 </script>
