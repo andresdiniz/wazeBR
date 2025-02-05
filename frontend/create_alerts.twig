@@ -161,79 +161,80 @@ function consultarRuaWaze(lat, lon) {
  *
  * O callback `drawSegmentCallback` é chamado com os nós do segmento encontrado.
  */
-async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
-    // Você pode ajustar a consulta conforme o que for mais adequado para o seu caso.
-    // Exemplo: consulta utilizando Overpass API com um raio de 300 metros.
-    const query = `
-        [out:json];
-        (
-            node(around:300, ${lat}, ${lon});
-            way(bn)["highway"];
-            >;
-        );
-        out geom;
-    `;
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+ async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
+    const radiusValues = [50, 100, 200, 300]; // Por exemplo, tente esses valores em sequência
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
+    for (let radius of radiusValues) {
+        const query = `
+            [out:json];
+            (
+                node(around:${radius}, ${lat}, ${lon});
+                way(bn)["highway"];
+                >;
+            );
+            out geom;
+        `;
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
-        if (data.elements.length > 0) {
-            const nodes = {};
-            const ways = [];
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
 
-            data.elements.forEach(el => {
-                if (el.type === 'node') {
-                    nodes[el.id] = [el.lon, el.lat];
-                } else if (el.type === 'way') {
-                    ways.push(el);
-                }
-            });
+            if (data.elements.length > 0) {
+                const nodes = {};
+                const ways = [];
 
-            let closestWay = null;
-            let minDistance = Infinity;
-
-            ways.forEach(way => {
-                const wayNodes = way.nodes.map(id => nodes[id]);
-                const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestWay = way;
-                }
-            });
-
-            if (closestWay) {
-                const wayNodes = closestWay.nodes.map(id => nodes[id]);
-                // Tentar identificar interseções para delimitar o segmento
-                const intersections = closestWay.nodes.filter(nodeId =>
-                    data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                );
-
-                if (intersections.length >= 2) {
-                    const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                    const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                    if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
-                        const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-                        console.log('Segmento de nós encontrado (com interseções):', segmentNodes);
-                        drawSegmentCallback(segmentNodes);
-                        return;
-                    } else {
-                        console.warn('Interseções não têm índices válidos:', { startNodeIndex, endNodeIndex });
+                data.elements.forEach(el => {
+                    if (el.type === 'node') {
+                        nodes[el.id] = [el.lon, el.lat];
+                    } else if (el.type === 'way') {
+                        ways.push(el);
                     }
+                });
+
+                let closestWay = null;
+                let minDistance = Infinity;
+
+                ways.forEach(way => {
+                    const wayNodes = way.nodes.map(id => nodes[id]);
+                    const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestWay = way;
+                    }
+                });
+
+                if (closestWay) {
+                    const wayNodes = closestWay.nodes.map(id => nodes[id]);
+                    const intersections = closestWay.nodes.filter(nodeId =>
+                        data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
+                    );
+
+                    if (intersections.length >= 2) {
+                        const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
+                        const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
+                        if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
+                            const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
+                            console.log(`Segmento encontrado com raio de ${radius} metros:`, segmentNodes);
+                            drawSegmentCallback(segmentNodes);
+                            return; // Segmento encontrado, encerra a função
+                        }
+                    }
+                    // Se não encontrar interseções suficientes, podemos optar por retornar o conjunto completo de nós
+                    console.log(`Segmento completo encontrado com raio de ${radius} metros:`, wayNodes);
+                    drawSegmentCallback(wayNodes);
+                    return;
                 }
-                // Se não identificar interseções, envia o conjunto completo de nós
-                console.log('Segmento de nós encontrado (completo):', wayNodes);
-                drawSegmentCallback(wayNodes);
-            } else {
-                console.warn('Nenhum segmento próximo encontrado.');
             }
+        } catch (error) {
+            console.error('Erro na consulta com raio ' + radius + ':', error);
         }
-    } catch (error) {
-        console.error('Erro ao buscar segmento:', error);
-        showAlert('Erro ao carregar dados da via', 'danger');
     }
+    // Se nenhum raio resultar em um segmento adequado, notifica o usuário ou toma outra ação
+    console.warn('Nenhum segmento adequado foi encontrado para os raios testados.');
+    showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
 }
+
 
 // ===== Desenho do Segmento e Controle de Sentido =====
 function drawSegment(map, segmentNodes, direction = 'both') {
