@@ -181,7 +181,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-success text-white py-3">
                 <h5 class="modal-title fs-5">
-                    <i class="fas fa-file-alt me-2"></i>Criar Nova Página
+                    <i class="fas fa-file-alt me-2"></i> Criar Nova Página
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -221,41 +221,95 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="submit" class="btn btn-success">Criar Página</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Scripts para os modais -->
+<!-- Modal Editar Página -->
+<div class="modal fade" id="editPageModal" tabindex="-1" aria-labelledby="editPageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fs-5">
+                    <i class="fas fa-edit me-2"></i> Editar Página
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditPage" action="update_page.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_page_id" name="id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_title" class="form-label">Título</label>
+                            <input type="text" class="form-control" id="edit_title" name="title" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_url" class="form-label">URL</label>
+                            <input type="text" class="form-control" id="edit_url" name="url">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_status" class="form-label">Status</label>
+                            <select class="form-control" id="edit_status" name="status">
+                                <option value="draft">Rascunho</option>
+                                <option value="published">Publicado</option>
+                                <option value="archived">Arquivado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_featured_image" class="form-label">Imagem Destacada</label>
+                            <input type="text" class="form-control" id="edit_featured_image" name="featured_image">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para os Modais -->
 <script>
     $(document).ready(function () {
+        // Abrir modal de criação de página
         $('#btn-create-page').click(function () {
-            const modal = $('#createPageModal');
-            modal.find('input, textarea, select').val('');
-            modal.find('#status').val('draft');
-            modal.modal('show');
+            $('#createPageModal').modal('show');
         });
 
-        $('#settingsModal').on('show.bs.modal', function (event) {
+        // Preencher dados no modal de edição de página
+        $('#editPageModal').on('show.bs.modal', function (event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
 
-            modal.find('#setting_id').val(button.data('id'));
-            modal.find('#systemname').val(button.data('systemname'));
-            modal.find('#theme_color').val(button.data('theme_color'));
-            modal.find('#contact_email').val(button.data('contact_email'));
-            modal.find('#admin_email').val(button.data('admin_email'));
-            modal.find('#timezone').val(button.data('timezone'));
-            modal.find('#manutencao').prop('checked', button.data('manutencao') == 1);
+            modal.find('#edit_page_id').val(button.data('id'));
+            modal.find('#edit_title').val(button.data('title'));
+            modal.find('#edit_url').val(button.data('url'));
+            modal.find('#edit_description').val(button.data('description'));
+            modal.find('#edit_status').val(button.data('status'));
+            modal.find('#edit_featured_image').val(button.data('featured_image'));
         });
 
+        // Fechar um modal ao abrir outro
         $('#createPageModal').on('show.bs.modal', function () {
-            $('#settingsModal').modal('hide');
+            $('#editPageModal').modal('hide');
         });
 
-        $('#settingsModal').on('show.bs.modal', function () {
+        $('#editPageModal').on('show.bs.modal', function () {
             $('#createPageModal').modal('hide');
         });
     });
