@@ -170,71 +170,28 @@
         return window.currentSegmentLayer;
     }
 
-    async function getStreetSegment(map, lat, lon, drawSegmentCallback) { // Função não funcionando
-        const query = `
-            [out:json];
-            (
-                node(around:300, ${lat}, ${lon});
-                way(bn)["highway"];
-                >;
-            );
-            out geom;
-        `;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
+    async function getStreetSegment(map, lat, lon) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(`https://overpass-api.de/api/interpreter?data=[out:json];way(around:50,${lat},${lon})["highway"];out geom;`);
             const data = await response.json();
-
-            if (data.elements.length > 0) {
-                const nodes = {};
-                const ways = [];
-
-                data.elements.forEach(el => {
-                    if (el.type === 'node') {
-                        nodes[el.id] = [el.lon, el.lat];
-                    } else if (el.type === 'way') {
-                        ways.push(el);
-                    }
-                });
-
-                let closestWay = null;
-                let minDistance = Infinity;
-
-                ways.forEach(way => {
-                    const wayNodes = way.nodes.map(id => nodes[id]);
-                    const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
-
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestWay = way;
-                    }
-                });
-
-                if (closestWay) {
-                    const wayNodes = closestWay.nodes.map(id => nodes[id]);
-                    const intersections = closestWay.nodes.filter(nodeId =>
-                        data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes.includes(nodeId))
-                    );
-
-                    if (intersections.length >= 2) {
-                        const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                        const endNodeIndex = closestWay.nodes.indexOf(intersections[1]);
-                        if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
-                            const segmentNodes = wayNodes.slice(startNodeIndex, endNodeIndex + 1);
-                            console.log('Segmento de nós encontrado:', segmentNodes);
-                            drawSegmentCallback(segmentNodes);
-                        } else {
-                            console.warn('Interseções não têm índices válidos:', { startNodeIndex, endNodeIndex });
-                        }
-                    } else {
-                        console.warn('Interseções insuficientes para determinar o segmento:', intersections);
-                    }
-
-                }
-            }
+    
+            if (data.elements.length === 0) return null;
+    
+            // Encontrar way mais próximo
+            const closestWay = data.elements.reduce((closest, current) => {
+                const currentDist = turf.distance(turf.point([lon, lat]), turf.lineString(current.geometry.map(p => [p.lon, p.lat])));
+                return currentDist < closest.dist ? {way: current, dist: currentDist} : closest;
+            }, {way: null, dist: Infinity});
+    
+            if (!closestWay.way) return null;
+    
+            // Converter geometria para formato [lon, lat]
+            const nodes = closestWay.way.geometry.map(point => [point.lon, point.lat]);
+            return nodes;
+            
         } catch (error) {
             console.error('Erro ao buscar segmento:', error);
+            return null;
         }
     }
 
