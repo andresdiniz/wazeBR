@@ -1,7 +1,6 @@
 {# container.twig #}
 
 <div class="container-fluid">
-    <!-- Título da Página -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Configurações do Sistema</h1>
     </div>
@@ -16,114 +15,109 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                {# ... (código anterior mantido) ... #}
+                <table class="table table-striped table-hover align-middle" id="settingsTable">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome Sistema</th>
+                            <th>Tema</th>
+                            <th>Contato</th>
+                            <th>Manutenção</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setting in settingsdata %}
+                        <tr>
+                            <td class="text-center">{{ setting.id }}</td>
+                            <td>{{ setting.systemname }}</td>
+                            <td>
+                                <span class="color-preview" style="background:{{ setting.theme_color }}; padding: 5px; border-radius: 3px;"></span>
+                                {{ setting.theme_color }}
+                            </td>
+                            <td>{{ setting.contact_email }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-{{ setting.manutencao ? 'danger' : 'success' }}">
+                                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary btn-edit-setting" data-bs-toggle="modal" 
+                                    data-bs-target="#settingsModal" data-id="{{ setting.id }}" 
+                                    data-systemname="{{ setting.systemname }}" data-theme_color="{{ setting.theme_color }}" 
+                                    data-contact_email="{{ setting.contact_email }}" data-admin_email="{{ setting.admin_email }}" 
+                                    data-timezone="{{ setting.timezone }}" data-manutencao="{{ setting.manutencao }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Nenhuma configuração encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<!-- Tabela Settings com novos campos -->
-<table class="table table-bordered table-hover" id="settingsTable" width="100%" cellspacing="0">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nome Sistema</th>
-            <th>Tema</th>
-            <th>Contato</th>
-            <th>Manutenção</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for setting in settingsdata %}
-        <tr>
-            <td>{{ setting.id }}</td>
-            <td>{{ setting.systemname }}</td>
-            <td>
-                <span class="color-preview" style="background:{{ setting.theme_color }}"></span>
-                {{ setting.theme_color }}
-            </td>
-            <td>{{ setting.contact_email }}</td>
-            <td>
-                <span class="badge bg-{{ setting.manutencao ? 'danger' : 'success' }}">
-                    {{ setting.manutencao ? 'Ativo' : 'Inativo' }}
-                </span>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-primary btn-edit-setting" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#settingsModal"
-                    data-id="{{ setting.id }}"
-                    data-systemname="{{ setting.systemname }}"
-                    data-logo="{{ setting.logo }}"
-                    data-manutencao="{{ setting.manutencao }}"
-                    data-theme_color="{{ setting.theme_color }}"
-                    data-contact_email="{{ setting.contact_email }}"
-                    data-admin_email="{{ setting.admin_email }}"
-                    data-timezone="{{ setting.timezone }}">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Tabela Pages com novos campos -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="m-0 text-primary"><i class="fas fa-file-alt me-2"></i>Gerenciar Páginas</h5>
-    <button class="btn btn-sm btn-success" id="btn-create-page" data-bs-toggle="modal" data-bs-target="#createPageModal">
-        <i class="fas fa-plus"></i> Criar Nova Página
-    </button>
-</div>
-
-<div class="table-responsive">
-    <table class="table table-striped table-hover align-middle" id="pagesTable">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>ID</th>
-                <th>Título</th>
-                <th>Status</th>
-                <th>URL</th>
-                <th>Última Atualização</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for page in pagesdata.pageData %}
-            <tr>
-                <td class="text-center">{{ page.id }}</td>
-                <td>{{ page.title }}</td>
-                <td class="text-center">
-                    <span class="badge bg-{{ page.status == 'published' ? 'success' : 'warning' }}">
-                        {{ page.status|capitalize }}
-                    </span>
-                </td>
-                <td>
-                    <a href="{{ page.url }}" target="_blank" class="text-decoration-none">
-                        {{ page.url }}
-                    </a>
-                </td>
-                <td class="text-center">{{ page.updated_at|date('d/m/Y H:i') }}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-primary btn-edit-page" 
-                        data-bs-toggle="modal"
-                        data-bs-target="#pagesModal"
-                        data-id="{{ page.id }}"
-                        data-title="{{ page.title }}"
-                        data-url="{{ page.url }}"
-                        data-descripton="{{ page.descripton }}"
-                        data-status="{{ page.status }}"
-                        data-meta_title="{{ page.meta_title }}"
-                        data-meta_description="{{ page.meta_description }}"
-                        data-featured_image="{{ page.featured_image }}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6" class="text-center text-muted">Nenhuma página encontrada.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Gerenciamento de Páginas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Gerenciar Páginas</h6>
+            <button class="btn btn-sm btn-success" id="btn-create-page" data-bs-toggle="modal" data-bs-target="#createPageModal">
+                <i class="fas fa-plus"></i> Criar Nova Página
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle" id="pagesTable">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Status</th>
+                            <th>URL</th>
+                            <th>Última Atualização</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for page in pagesdata.pageData %}
+                        <tr>
+                            <td class="text-center">{{ page.id }}</td>
+                            <td>{{ page.title }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-{{ page.status == 'published' ? 'success' : 'warning' }}">
+                                    {{ page.status|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ page.url }}" target="_blank" class="text-decoration-none">{{ page.url }}</a>
+                            </td>
+                            <td class="text-center">{{ page.updated_at|date('d/m/Y H:i') }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary btn-edit-page" data-bs-toggle="modal"
+                                    data-bs-target="#pagesModal" data-id="{{ page.id }}"
+                                    data-title="{{ page.title }}" data-url="{{ page.url }}"
+                                    data-descripton="{{ page.descripton }}" data-status="{{ page.status }}"
+                                    data-meta_title="{{ page.meta_title }}" data-meta_description="{{ page.meta_description }}"
+                                    data-featured_image="{{ page.featured_image }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Nenhuma página encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 
