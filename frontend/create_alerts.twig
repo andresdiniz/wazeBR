@@ -106,7 +106,7 @@
     function locateUser(map) { // função funcionando
         map.locate({ setView: true, maxZoom: 12 });
 
-        map.on('locationerror', function(e) {
+        map.on('locationerror', function (e) {
             alert('Não foi possível localizar a sua posição.');
         });
 
@@ -134,35 +134,30 @@
             .catch(() => null);
     }
 
-    function drawSegment(map, segmentNodes, direction = 'both', previousSegmentLayer) {// Função não funcionando
-        if (previousSegmentLayer) {
-            map.removeLayer(previousSegmentLayer);
+    function drawSegment(map, segmentNodes, direction = 'both') {
+        // Remover camadas anteriores
+        if (window.currentSegmentLayer) {
+            map.removeLayer(window.currentSegmentLayer);
         }
 
-        const segment = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-                type: 'LineString',
-                coordinates: segmentNodes
-            }
-        };
+        // Criar nova camada
+        const segmentLayer = L.polyline(segmentNodes.map(coord => [coord[1], coord[0]]), {
+            color: direction === 'single' ? '#ff0000' : '#0000ff',
+            weight: 4
+        });
 
-        const segmentLayer = L.geoJSON(segment).addTo(map);
-
-        // Configuração das setas
-        const arrowColor = direction === 'single' ? '#FF0000' : '#0000FF';
+        // Adicionar setas de direção
         const arrowLayer = L.polylineDecorator(segmentLayer, {
             patterns: [
                 {
-                    offset: 25,
-                    repeat: 50,
+                    offset: '50%',
+                    repeat: 100,
                     symbol: L.Symbol.arrowHead({
                         pixelSize: 15,
                         polygon: false,
                         pathOptions: {
                             stroke: true,
-                            color: arrowColor,
+                            color: direction === 'single' ? '#ff0000' : '#0000ff',
                             weight: 2
                         }
                     })
@@ -170,7 +165,9 @@
             ]
         });
 
-        return L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
+        // Agrupar camadas
+        window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
+        return window.currentSegmentLayer;
     }
 
     async function getStreetSegment(map, lat, lon, drawSegmentCallback) { // Função não funcionando
@@ -233,7 +230,7 @@
                     } else {
                         console.warn('Interseções insuficientes para determinar o segmento:', intersections);
                     }
-                    
+
                 }
             }
         } catch (error) {
@@ -388,7 +385,7 @@
         if (reversoBtn) {
             reversoBtn.style.display = 'none'; // Esconde o botão
         }
-    }   
+    }
 
     // Função para inverter as coordenadas do segmento
     function inverterCoordenadas(segmentNodes) {
@@ -403,22 +400,22 @@
         const map = initializeMap();
         var currentSegmentLayer = null; // Armazena a camada do segmento atual
         let currentSegmentNodes = []; // Armazena os nós do segmento atual
-    
+
         map.on('locationfound', (e) => handleLocationFound(e, map));
         locateUser(map);
-    
+
         // Evento de clique no mapa para capturar coordenadas
         map.on('click', (e) => {
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
-    
+
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-    
+
             const coordenadasInput = document.getElementById('coordenadas');
             if (coordenadasInput) {
                 coordenadasInput.value = `${lat}, ${lon}`;
             }
-    
+
             consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
@@ -431,27 +428,27 @@
                     }
                 }
             });
-    
+
             // Chamar getStreetSegment ao clicar no mapa
             const directionSelect = document.getElementById('directionSelect');
             atualizarDirecoes(directionSelect); // Atualizar o select com direções disponíveis
-    
+
             getStreetSegment(map, lat, lon, (segmentNodes) => {
                 console.log('Segmento retornado:', segmentNodes);
-    
+
                 // Verificar o retorno e desenhar o segmento
                 if (segmentNodes && segmentNodes.length > 1) {
                     // Limpar o mapa antes de adicionar o novo segmento
                     if (currentSegmentLayer) {
                         map.removeLayer(currentSegmentLayer);
                     }
-    
+
                     const selectedDirection = directionSelect.value;
                     currentSegmentLayer = drawSegment(map, segmentNodes, selectedDirection);
-    
+
                     // Mostrar botão de reverso para sentido único
                     if (selectedDirection === 'single') {
-                        console.log('Mostrando botão de reverso. Com as coordenadas',segmentNodes);
+                        console.log('Mostrando botão de reverso. Com as coordenadas', segmentNodes);
                         mostrarBotaoReverso(segmentNodes, map);
                     } else {
                         esconderBotaoReverso();
@@ -461,7 +458,7 @@
                 }
             });
         });
-    
+
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const selectedDirection = e.target.value;
             console.log('Direção selecionada:', selectedDirection);
@@ -477,20 +474,20 @@
             if (currentSegmentNodes && currentSegmentNodes.length > 1) {
                 console.log('Redesenhar segmento com nova direção:', selectedDirection);
                 // Redesenhar o segmento com a nova direção
-        
+
                 // Verificar a direção e desenhar o segmento
                 currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
             }
         });
-    
+
         // Botão para criar evento
         document.querySelector('button[type="submit"]').addEventListener('click', (e) => {
             e.preventDefault(); // Evitar comportamento padrão do envio de formulário
-    
+
             const direction = document.getElementById('directionSelect').value;
-    
+
             console.log('Direção selecionada:', direction);
-    
+
             // Lógica para processar a direção e criar evento
             if (direction === 'both' || direction === 'single') {
                 alert(`Evento criado no sentido: ${direction}`);
@@ -498,15 +495,15 @@
                 alert('Por favor, selecione um sentido válido.');
             }
         });
-    
+
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
-        const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }};
-    
-        tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
-    
-        document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
-        document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
+        const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw
+    }};
+
+    tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
+
+    document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
+    document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
     });
 </script>
-
