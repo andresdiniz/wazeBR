@@ -121,38 +121,39 @@
 </div>
 
 
-<!-- Modal Settings -->
+<!-- MODAL DE CONFIGURAÇÕES -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white py-3">
-                <h5 class="modal-title fs-5">
-                    <i class="fas fa-cog me-2"></i>Editar Configuração
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-cog me-2"></i> Configurações do Sistema
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="formSettings" action="update_setting.php" method="POST">
+                <input type="hidden" id="setting_id" name="id">
                 <div class="modal-body">
-                    <input type="hidden" id="setting_id" name="id">
-
-                    <div class="mb-3">
-                        <label for="systemname" class="form-label">Nome do Sistema</label>
-                        <input type="text" class="form-control" id="systemname" name="systemname" required>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="systemname" class="form-label">Nome do Sistema</label>
+                            <input type="text" class="form-control" id="systemname" name="systemname" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="theme_color" class="form-label">Cor do Tema</label>
+                            <input type="color" class="form-control form-control-color" id="theme_color" name="theme_color">
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="theme_color" class="form-label">Cor do Tema</label>
-                        <input type="color" class="form-control form-control-color" id="theme_color" name="theme_color">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="contact_email" class="form-label">E-mail de Contato</label>
-                        <input type="email" class="form-control" id="contact_email" name="contact_email">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="admin_email" class="form-label">E-mail do Admin</label>
-                        <input type="email" class="form-control" id="admin_email" name="admin_email">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_email" class="form-label">E-mail de Contato</label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="admin_email" class="form-label">E-mail do Admin</label>
+                            <input type="email" class="form-control" id="admin_email" name="admin_email">
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -165,60 +166,47 @@
                         <label class="form-check-label" for="manutencao">Modo Manutenção</label>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Configurações</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Criar Página -->
-<div class="modal fade" id="createPageModal" tabindex="-1" aria-labelledby="createPageModalLabel" aria-hidden="true">
+<!-- MODAL CRIAR PÁGINA -->
+<div class="modal fade" id="createPageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white py-3">
-                <h5 class="modal-title fs-5">
-                    <i class="fas fa-file-alt me-2"></i> Criar Nova Página
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i> Criar Nova Página
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="formCreatePage" action="create_page.php" method="POST">
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="title" class="form-label">Título</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="url" class="form-label">URL</label>
-                            <input type="text" class="form-control" id="url" name="url">
-                        </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
                     </div>
-
+                    <div class="mb-3">
+                        <label for="url" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="url" name="url">
+                    </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Descrição</label>
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="status">
-                                <option value="draft">Rascunho</option>
-                                <option value="published">Publicado</option>
-                                <option value="archived">Arquivado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="featured_image" class="form-label">Imagem Destacada</label>
-                            <input type="text" class="form-control" id="featured_image" name="featured_image">
-                        </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="draft">Rascunho</option>
+                            <option value="published">Publicado</option>
+                        </select>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success">Criar Página</button>
@@ -228,89 +216,58 @@
     </div>
 </div>
 
-<!-- Modal Editar Página -->
-<div class="modal fade" id="editPageModal" tabindex="-1" aria-labelledby="editPageModalLabel" aria-hidden="true">
+<!-- MODAL EDITAR PÁGINA -->
+<div class="modal fade" id="editPageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white py-3">
-                <h5 class="modal-title fs-5">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">
                     <i class="fas fa-edit me-2"></i> Editar Página
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="formEditPage" action="update_page.php" method="POST">
+                <input type="hidden" id="edit_page_id" name="id">
                 <div class="modal-body">
-                    <input type="hidden" id="edit_page_id" name="id">
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_title" class="form-label">Título</label>
-                            <input type="text" class="form-control" id="edit_title" name="title" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_url" class="form-label">URL</label>
-                            <input type="text" class="form-control" id="edit_url" name="url">
-                        </div>
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
                     </div>
-
+                    <div class="mb-3">
+                        <label for="edit_url" class="form-label">URL</label>
+                        <input type="text" class="form-control" id="edit_url" name="url">
+                    </div>
                     <div class="mb-3">
                         <label for="edit_description" class="form-label">Descrição</label>
                         <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_status" class="form-label">Status</label>
-                            <select class="form-control" id="edit_status" name="status">
-                                <option value="draft">Rascunho</option>
-                                <option value="published">Publicado</option>
-                                <option value="archived">Arquivado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="edit_featured_image" class="form-label">Imagem Destacada</label>
-                            <input type="text" class="form-control" id="edit_featured_image" name="featured_image">
-                        </div>
-                    </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <button type="submit" class="btn btn-warning">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Scripts para os Modais -->
 <script>
     $(document).ready(function () {
-        // Abrir modal de criação de página
-        $('#btn-create-page').click(function () {
-            $('#createPageModal').modal('show');
+        $('#settingsModal').on('show.bs.modal', function (event) {
+            let button = $(event.relatedTarget);
+            let modal = $(this);
+            modal.find('#setting_id').val(button.data('id'));
+            modal.find('#systemname').val(button.data('systemname'));
+            modal.find('#theme_color').val(button.data('theme_color'));
         });
 
-        // Preencher dados no modal de edição de página
         $('#editPageModal').on('show.bs.modal', function (event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
-
+            let button = $(event.relatedTarget);
+            let modal = $(this);
             modal.find('#edit_page_id').val(button.data('id'));
             modal.find('#edit_title').val(button.data('title'));
             modal.find('#edit_url').val(button.data('url'));
             modal.find('#edit_description').val(button.data('description'));
-            modal.find('#edit_status').val(button.data('status'));
-            modal.find('#edit_featured_image').val(button.data('featured_image'));
-        });
-
-        // Fechar um modal ao abrir outro
-        $('#createPageModal').on('show.bs.modal', function () {
-            $('#editPageModal').modal('hide');
-        });
-
-        $('#editPageModal').on('show.bs.modal', function () {
-            $('#createPageModal').modal('hide');
         });
     });
 </script>
