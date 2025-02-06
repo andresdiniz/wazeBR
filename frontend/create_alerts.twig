@@ -307,6 +307,8 @@ function drawSegment(map, segmentNodes, direction = 'both') {
     updateDirectionIndicator(direction);
     updateDirectionControls(direction);
 
+    directionSelect.value = direction; // Restaura o valor original
+
     // Agrupar as camadas e adicioná-las ao mapa
     window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
     return window.currentSegmentLayer;
@@ -314,7 +316,9 @@ function drawSegment(map, segmentNodes, direction = 'both') {
 
 function updateDirectionControls(direction) {
     const directionSelect = document.getElementById('directionSelect');
-    
+    if (directionSelect) {
+        directionSelect.value = direction;
+    }
     // Exibe ou oculta o botão de reversão conforme o sentido
     const reverseBtn = document.getElementById('reverseBtn');
     if (reverseBtn) {
@@ -352,7 +356,7 @@ function loadSavedSegment(map) {
 function inverterCoordenadas(segmentNodes, map, currentDirection) {
     const reversedSegment = [...segmentNodes].reverse();
     // Se o sentido atual for 'original' ou 'single', ao inverter consideramos 'reversed'
-    const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
+    //const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
     drawSegment(map, reversedSegment, newDirection);
     saveSegmentState(reversedSegment, newDirection);
     return reversedSegment;
