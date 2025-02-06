@@ -187,7 +187,7 @@ function consultarRuaWaze(lat, lon) {
  * O callback `drawSegmentCallback` é chamado com os nós do segmento encontrado.
  */
  async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
-    const radiusValues = [50, 100, 200, 300]; // Por exemplo, tente esses valores em sequência
+    const radiusValues = [50, 100, 200, 300, 500]; // Por exemplo, tente esses valores em sequência
 
     for (let radius of radiusValues) {
         const query = `
@@ -521,9 +521,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Atualiza o select de sentido
     const directionSelect = document.getElementById('directionSelect');
-    if (directionSelect) {
+    /*if (directionSelect) {
         atualizarDirecoes(directionSelect);
-    }
+    }*/
 
     // Evento de clique no mapa: captura coordenadas, consulta rua e segmento
     map.on('click', (e) => {
