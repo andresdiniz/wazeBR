@@ -866,7 +866,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             case 'cadastrar_evento':
                 // Log dos dados recebidos via POST para depuração
-                logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
+                //logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
             
                 // Recebe os dados enviados
                 $description     = $_POST['nome'] ?? null;
