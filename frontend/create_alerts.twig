@@ -613,21 +613,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function(event) {
     const submitBtn = document.querySelector('button[type="submit"]');
     console.log("Botão de envio:", submitBtn); // Verificação
     if (submitBtn) {
+        // Recupera os dados do localStorage
         const segment = localStorage.getItem('streetSegment');
         const direction = localStorage.getItem('segmentDirection');
 
-        if (segment && direction) { // Verifica se os dados existem
+        // Se os dados existirem, adiciona os campos ocultos ao formulário
+        if (segment && direction) {
+            // Declaração das variáveis para os inputs
+            let segmentInput = document.querySelector('input[name="streetSegment"]');
+            let directionInput = document.querySelector('input[name="segmentDirection"]');
+
             if (!segmentInput) {
                 segmentInput = document.createElement('input');
                 segmentInput.type = 'hidden';
                 segmentInput.name = 'streetSegment';
                 document.getElementById('eventoForm').appendChild(segmentInput);
             }
-            f (!direction) {
+            if (!directionInput) {
                 directionInput = document.createElement('input');
                 directionInput.type = 'hidden';
                 directionInput.name = 'segmentDirection';
@@ -638,9 +644,11 @@ document.addEventListener('DOMContentLoaded', function() {
             directionInput.value = direction;
 
             console.log("Campos ocultos adicionados:", segmentInput, directionInput); // Verificação
-            this.submit(); // ou, preferencialmente, document.getElementById('eventoForm').submit();
+
+            // Envia o formulário
+            document.getElementById('eventoForm').submit();
         } else {
-            preventDefault();
+            event.preventDefault();
             console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
         }
     } else {   
