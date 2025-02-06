@@ -461,17 +461,11 @@ function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
     }
 }
 
-const directionRadios = document.querySelectorAll('input[name="direction"]');
-directionRadios.forEach(radio => {
-    if (radio.value === newDirection) {
-        radio.checked = true;
-    }
-});
-
 function atualizarDirecoes(selectElement) {
     selectElement.innerHTML = ''; // Limpar opções existentes
     const options = [
         { value: 'both', text: 'Ambos os sentidos' },
+        { value: 'original', text: 'Sentido original' },
         { value: 'single', text: 'Sentido único' },
     ];
     options.forEach(optionData => {
@@ -629,12 +623,23 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.getElementById('eventoForm').addEventListener('submit', function(e) {
+
+    const directionSelect = document.getElementById('directionSelect');
+    if (directionSelect.value === "") { // Verifica se nenhuma opção está selecionada
+        e.preventDefault(); // Impede o envio do formulário
+        alert("Por favor, selecione um sentido."); // Exibe uma mensagem de erro
+        return; // Sai da função
+    }
+
+    // *** NOVAS LINHAS ***
+    // Se chegou aqui, é porque uma opção foi selecionada.
+    // Agora podemos prosseguir com a lógica original.
+
     // Recupere os valores do localStorage
     const segment = localStorage.getItem('streetSegment');
     const direction = localStorage.getItem('segmentDirection');
-    
+
     // Cria inputs ocultos (hidden) com os dados do localStorage
-    // Verifica se já não existem (opcional, para evitar duplicação)
     let segmentInput = document.querySelector('input[name="streetSegment"]');
     if (!segmentInput) {
         segmentInput = document.createElement('input');
@@ -652,8 +657,8 @@ document.getElementById('eventoForm').addEventListener('submit', function(e) {
         document.getElementById('eventoForm').appendChild(directionInput);
     }
     directionInput.value = direction ? direction : '';
-    
-    // Ao inserir os inputs, o formulário seguirá o envio normalmente e os valores serão enviados via POST
+
+    // O formulário seguirá o envio normalmente e os valores serão enviados via POST
 });
 </script>
 
