@@ -638,8 +638,9 @@ document.addEventListener('DOMContentLoaded', function() {
             directionInput.value = direction;
 
             console.log("Campos ocultos adicionados:", segmentInput, directionInput); // Verificação
-            this.submit(); // Envia o formulário
+            this.submit(); // ou, preferencialmente, document.getElementById('eventoForm').submit();
         } else {
+            preventDefault();
             console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
         }
     } else {   

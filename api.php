@@ -861,48 +861,74 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
             break;
-
+            
             case 'cadastrar_evento':
                 // Dados recebidos via POST
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
-                errorlog('info',''. json_encode($_POST));
-            
-                $nome = $_POST['nome'] ?? null;
-                $tipo = $_POST['tipo'] ?? null;
-                $subtipo = $_POST['subtipo'] ?? null;
-                $starttime = $_POST['starttime'] ?? null;
-                $endtime = $_POST['endtime'] ?? null;
-                $coordenadas = $_POST['coordenadas'] ?? null;
-                $rua = $_POST['rua'] ?? null;
-                $streetSegment = $_POST['streetSegment'] ?? null;
-                $segmentDirection = $_POST['streetSegment'] ?? null;
-                $polyline = $_POST['polyline'] ?? null;
-                $direction = $_POST['direction'] ?? null;
 
+                $nome            = $_POST['nome'] ?? null;
+                $tipo            = $_POST['tipo'] ?? null;
+                $subtipo         = $_POST['subtipo'] ?? null;
+                $starttime       = $_POST['starttime'] ?? null;
+                $endtime         = $_POST['endtime'] ?? null;
+                $coordenadas     = $_POST['coordenadas'] ?? null;
+                $rua             = $_POST['rua'] ?? null;
+                $streetSegment   = $_POST['streetSegment'] ?? null;
+                $segmentDirection= $_POST['segmentDirection'] ?? null; // Corrigido
+                $polylineInput   = $_POST['polyline'] ?? null; // Caso seja enviado, mas usaremos as coordenadas
+                $direction       = $_POST['direction'] ?? null; // Caso seja enviado, mas não será usado
             
                 // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
-                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$direction || !$polyline) {
+                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$direction || !$polylineInput) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                     exit;
                 }
+            
+                // Formatação da polyline:
+                // Espera-se que $coordenadas seja um JSON no formato:
+                // [ [longitude, latitude], [longitude, latitude] ]
+                $polylineFormatted = null;
+                $coordsArray = json_decode($coordenadas, true);
+                if (is_array($coordsArray)) {
+                    $formattedCoords = [];
+                    foreach ($coordsArray as $coord) {
+                        // Verifica se há ao menos 2 valores e inverte a ordem para: latitude, longitude
+                        if (is_array($coord) && count($coord) >= 2) {
+                            $formattedCoords[] = $coord[1];
+                            $formattedCoords[] = $coord[0];
+                        }
+                    }
+                    $polylineFormatted = implode(', ', $formattedCoords);
+                } else {
+                    // Se não for um array válido, utiliza o valor original (ou pode-se abortar com erro)
+                    $polylineFormatted = $coordenadas;
+                }
+            
+                // Mapeamento da direção: se segmentDirection for "BOTH_DIRECTION", utiliza esse valor;
+                // caso contrário, utiliza "ONE_DIRECTION"
+                $directionValue = ($segmentDirection === 'BOTH_DIRECTION') ? 'BOTH_DIRECTION' : 'ONE_DIRECTION';
             
                 try {
                     $pdo = Database::getConnection();
             
                     // Inserir evento na tabela events
                     $sqlEvent = "
-                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active)
-                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1')
+                        INSERT INTO events (
+                            parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active
+                        )
+                        VALUES (
+                            NULL, NOW(), NOW(), :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1'
+                        )
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
                     $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':subtype', $subtipo, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':street', $rua, PDO::PARAM_STR);
-                    $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':polyline', $polylineFormatted, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
-                    $stmtEvent->bindParam(':direction', $segmentDirection, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':direction', $directionValue, PDO::PARAM_STR);
             
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
@@ -927,6 +953,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
                 }
                 break;
+            
 
                     // Após definir o tipo de conteúdo, envie o JSON de resposta
                     case 'confirm_alert':
