@@ -7,6 +7,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', 'error_log.log');
 
 require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ . '/config/configs.php';
 
 try {
     // Conectar ao banco de dados
@@ -17,6 +18,7 @@ try {
 
 // Obter a data e hora atual
 $currentDateTime = date('Y-m-d H:i:s');
+$TIMEZONE;
 
 // Atualizar eventos cujo endtime já passou para is_active = 2
 $updateQuery = "
