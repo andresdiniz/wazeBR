@@ -463,6 +463,7 @@ function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
     }
 }
 
+// ===== Atualização de Direções =====
 function atualizarDirecoes(selectElement) {
     selectElement.innerHTML = ''; // Limpar opções existentes
     const options = [
@@ -521,9 +522,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Atualiza o select de sentido
     const directionSelect = document.getElementById('directionSelect');
-    /*if (directionSelect) {
-        atualizarDirecoes(directionSelect);
-    }*/
+    if (directionSelect) {
+        //atualizarDirecoes(directionSelect);
+    }
 
     // Evento de clique no mapa: captura coordenadas, consulta rua e segmento
     map.on('click', (e) => {
