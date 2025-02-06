@@ -356,7 +356,7 @@ function loadSavedSegment(map) {
 function inverterCoordenadas(segmentNodes, map, currentDirection) {
     const reversedSegment = [...segmentNodes].reverse();
     // Se o sentido atual for 'original' ou 'single', ao inverter consideramos 'reversed'
-    //const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
+    const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
     drawSegment(map, reversedSegment, newDirection);
     saveSegmentState(reversedSegment, newDirection);
     return reversedSegment;
