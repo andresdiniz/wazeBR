@@ -114,14 +114,60 @@
     function renderChart(labels, dataCounts, jams, groupBy) {
         const ctx = document.getElementById('alertsChart').getContext('2d');
         if (window.myChart) window.myChart.destroy();
-
+    
+        const totalJams = jams.length; // Calcula o total de congestionamentos
+    
         window.myChart = new Chart(ctx, {
-          // ... (chart configuration - same as before)
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Número de Congestionamentos',
+                    data: dataCounts,
+                    backgroundColor: dataCounts.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => {
+                            const percentage = (value / totalJams) * 100; // Calcula a porcentagem
+                            return `${value} (${percentage.toFixed(1)}%)`; // Exibe o valor e a porcentagem
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Grupo'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Número de Congestionamentos'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
         });
-
-        // Adiciona o evento de clique no gráfico
+    
         const chartCanvas = document.getElementById('alertsChart');
-        chartCanvas.onclick = function(e) {
+        chartCanvas.onclick = function (e) {
             const points = window.myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
             if (points.length) {
                 const clickedLabel = window.myChart.data.labels[points[0].index];
@@ -131,7 +177,7 @@
                 updateTable(currentJams); // Exibe todos se clicar fora das barras
             }
         };
-
+    
         updateTable(jams); // Exibe a tabela inicialmente
     }
 
