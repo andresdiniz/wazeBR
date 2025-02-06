@@ -79,13 +79,13 @@ $basePath = 'wazeportal'; // Subpasta onde o site está hospedado
 
 $pages = getSitepages($pdo, $uri);
 
-$title = $pages['pageData']['title'] ?? '';  // Valor padrão caso 'title' não esteja presente
+$pageData = $pages['pageData'] ?? '';  // Valor padrão caso 'title' não esteja presente
 
 $data = [
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
     'settings' => $settings,  // Configurações do site
     'session' => $_SESSION,
-    'pageTitle' => $title,  // Passando o título para o template
+    'pagedata' => $pageData,  // Passando o título para o template
 ];
 
 // Renderiza os componentes fixos
