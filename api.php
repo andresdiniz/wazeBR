@@ -869,7 +869,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
             
                 // Recebe os dados enviados
-                $nome            = $_POST['nome'] ?? null;
+                $description     = $_POST['nome'] ?? null;
                 $tipo            = $_POST['tipo'] ?? null;
                 $subtipo         = $_POST['subtipo'] ?? null;
                 $starttime       = $_POST['starttime'] ?? null;
@@ -880,7 +880,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $segmentDirection= $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
             
                 // Validação dos campos obrigatórios (você pode incluir outros se necessário)
-                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
+                if (!$description || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                     exit;
@@ -921,10 +921,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Inserção na tabela events (conforme o DESCRIBE fornecido)
                     $sqlEvent = "
                         INSERT INTO events (
-                            parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active
+                            parent_event_id, creationtime, updatetime, description, type, subtype, street, polyline, direction, starttime, endtime, is_active
                         )
                         VALUES (
-                            NULL, NOW(), NOW(), :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1'
+                            NULL, NOW(), NOW(), :description, :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1'
                         )
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
@@ -935,6 +935,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':direction', $directionValue, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':description', $description, PDO::PARAM_STR);
             
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
