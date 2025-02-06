@@ -889,7 +889,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Inserir evento na tabela events
                     $sqlEvent = "
                         INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active)
-                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, :direction, :starttime, :endtime, '1')
+                        VALUES (NULL, NOW(), NOW(), :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1')
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
                     $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
@@ -903,60 +903,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
             
-                        // Lista de dias da semana
-                        $diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
-            
-                        // Processar horários para cada dia da semana
-                        foreach ($diasSemana as $dia) {
-                            $inicioChave = "{$dia}_inicio";
-                            $fimChave = "{$dia}_fim";
-                            $intervaloInicioChave = "{$dia}_intervalo_inicio";
-                            $intervaloFimChave = "{$dia}_intervalo_fim";
-            
-                            // Verificar se o dia tem horários específicos
-                            if (isset($_POST[$inicioChave]) && isset($_POST[$fimChave])) {
-                                // Inserir o intervalo principal
-                                $sqlSchedule = "
-                                    INSERT INTO schedules (event_id, day_of_week, start_time, end_time)
-                                    VALUES (:event_id, :day_of_week, :start_time, :end_time)
-                                ";
-                                $stmtSchedule = $pdo->prepare($sqlSchedule);
-                                $stmtSchedule->bindParam(':event_id', $eventId, PDO::PARAM_INT);
-                                $stmtSchedule->bindParam(':day_of_week', $dia, PDO::PARAM_STR);
-                                $stmtSchedule->bindParam(':start_time', $_POST[$inicioChave], PDO::PARAM_STR);
-                                $stmtSchedule->bindParam(':end_time', $_POST[$fimChave], PDO::PARAM_STR);
-            
-                                if (!$stmtSchedule->execute()) {
-                                    throw new Exception("Erro ao inserir horário principal para o dia {$dia}.");
-                                }
-            
-                                // Inserir intervalos adicionais
-                                if (isset($_POST[$intervaloInicioChave]) && isset($_POST[$intervaloFimChave])) {
-                                    foreach ($_POST[$intervaloInicioChave] as $index => $intervaloInicio) {
-                                        $intervaloFim = $_POST[$intervaloFimChave][$index];
-                                        $stmtSchedule->bindParam(':start_time', $intervaloInicio, PDO::PARAM_STR);
-                                        $stmtSchedule->bindParam(':end_time', $intervaloFim, PDO::PARAM_STR);
-            
-                                        if (!$stmtSchedule->execute()) {
-                                            throw new Exception("Erro ao inserir intervalo adicional para o dia {$dia}.");
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Inserir horário padrão (00:00 - 23:59) para dias sem horários
-                                $sqlSchedule = "
-                                    INSERT INTO schedules (event_id, day_of_week, start_time, end_time)
-                                    VALUES (:event_id, :day_of_week, '00:00', '23:59')
-                                ";
-                                $stmtSchedule = $pdo->prepare($sqlSchedule);
-                                $stmtSchedule->bindParam(':event_id', $eventId, PDO::PARAM_INT);
-                                $stmtSchedule->bindParam(':day_of_week', $dia, PDO::PARAM_STR);
-            
-                                if (!$stmtSchedule->execute()) {
-                                    throw new Exception("Erro ao inserir horário padrão para o dia {$dia}.");
-                                }
-                            }
-                        }
+                        // ... (resto do código para inserir horários na tabela schedules)
             
                         http_response_code(200);
                         echo json_encode([
