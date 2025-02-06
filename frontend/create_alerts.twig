@@ -656,6 +656,20 @@ document.getElementById('eventoForm').addEventListener('submit', function(e) {
 </script>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // Impede o envio padrão do formulário
+                alert("Botão clicado!"); // Exibe um alerta para confirmar o evento
+            });
+        } else {
+            console.error("Botão de envio não encontrado.");
+        }
+    });
+</script>
+
 <style>
     /* Estilos Aprimorados */
     #map {
