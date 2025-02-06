@@ -631,28 +631,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const segment = localStorage.getItem('streetSegment');
     const direction = localStorage.getItem('segmentDirection');
 
-    if (segment && direction) { // Verifica se os dados existem
-        let segmentInput = document.querySelector('input[name="streetSegment"]');
-        if (!segmentInput) {
-            segmentInput = document.createElement('input');
-            segmentInput.type = 'hidden';
-            segmentInput.name = 'streetSegment';
-            document.getElementById('eventoForm').appendChild(segmentInput);
-        }
-        segmentInput.value = segment;
+        if (segment && direction) { // Verifica se os dados existem
+            let segmentInput = document.querySelector('input[name="streetSegment"]');
+            if (!segmentInput) {
+                segmentInput = document.createElement('input');
+                segmentInput.type = 'hidden';
+                segmentInput.name = 'streetSegment';
+                document.getElementById('eventoForm').appendChild(segmentInput);
+            }
+            segmentInput.value = segment;
 
-        let directionInput = document.querySelector('input[name="segmentDirection"]');
-        if (!directionInput) {
-            directionInput = document.createElement('input');
-            directionInput.type = 'hidden';
-            directionInput.name = 'segmentDirection';
-            document.getElementById('eventoForm').appendChild(directionInput);
-        }
+            let directionInput = document.querySelector('input[name="segmentDirection"]');
+            if (!directionInput) {
+                directionInput = document.createElement('input');
+                directionInput.type = 'hidden';
+                directionInput.name = 'segmentDirection';
+                document.getElementById('eventoForm').appendChild(directionInput);
+            }
 
-        console.log("Campos ocultos adicionados:", segmentInput, directionInput); // Verificação
-        this.submit(); // Envia o formulário
-    } else {
-        console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
+            console.log("Campos ocultos adicionados:", segmentInput, directionInput); // Verificação
+            this.submit(); // Envia o formulário
+        } else {
+            console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
+        }
+    } else {   
+        console.error("Botão de envio não encontrado.");
     }
 });
 </script>
