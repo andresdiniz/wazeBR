@@ -865,6 +865,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'cadastrar_evento':
                 // Dados recebidos via POST
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
+            
                 $nome = $_POST['nome'] ?? null;
                 $descricao = $_POST['descricao'] ?? null;
                 $tipo = $_POST['tipo'] ?? null;
@@ -873,12 +874,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $endtime = $_POST['endtime'] ?? null;
                 $coordenadas = $_POST['coordenadas'] ?? null;
                 $rua = $_POST['rua'] ?? null;
-                $direcao = $_POST['directionSelect'] ?? null;
+                $streetSegment = $_POST['streetSegment'] ?? null;
+                $segmentDirection = $_POST['segmentDirection'] ?? null;
             
-                // Lista de dias da semana
-                $diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
-            
-                // Validação dos campos obrigatórios
+                // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
                 if (!$nome || !$descricao || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
@@ -901,10 +900,13 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
-                    $stmtEvent->bindParam(':direction', $direcao, PDO::PARAM_STR);
+                    $stmtEvent->bindParam(':direction', $segmentDirection, PDO::PARAM_STR);
             
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
+            
+                        // Lista de dias da semana
+                        $diasSemana = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
             
                         // Processar horários para cada dia da semana
                         foreach ($diasSemana as $dia) {
@@ -975,81 +977,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'message' => 'Erro interno do servidor: ' . $e->getMessage(),
                     ]);
                 }
-                break; 
-          
-                case 'recuperar_senha':
-                    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-                
-                    if (!empty($email)) {
-                        try {
-                            // Gerar token e validade
-                            $token = bin2hex(random_bytes(16));
-                            $validade = date('Y-m-d H:i:s', strtotime('+8 hours'));
-                            $pdo = Database::getConnection();
-                            
-                            // Salvar no banco de dados
-                            $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, :valid)");
-                            $stmt->bindParam(':email', $email);
-                            $stmt->bindParam(':token', $token);
-                            $stmt->bindParam(':valid', $validade);
-                            $stmt->execute();
-
-                            logEmail('info', "Token criado para: $email");
-                
-                            // Criar o link de redefinição
-                            $url = "https://fenixsmm.store/wazeportal/redefinir_senha.php?token=$token";
-                            
-                            // Criar o corpo do e-mail
-                            $mensagem = "
-                                <html>
-                                <head>
-                                    <title>Recuperação de Senha</title>
-                                </head>
-                                <body>
-                                    <p>Olá,</p>
-                                    <p>Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para redefinir:</p>
-                                    <p><a href='$url'>Redefinir senha</a></p>
-                                    <p>Este link é válido por 8 horas.</p>
-                                    <p>Se você não solicitou a redefinição de senha, ignore este e-mail.</p>
-                                </body>
-                                </html>
-                            ";
-                
-                            $subject = "Recuperação de Senha";
-
-                            logEmail('info', "E-mail de recuperação montado para: $email");
-                            error_log("Tentando enviar e-mail para: $email");
-                            // Tentar enviar o e-mail
-                            if (!sendEmail($email, $mensagem, $subject)) {
-                                // Log de falha no envio de e-mail
-                                error_log('Erro ao enviar email');
-                                logEmail('error', "Erro ao tentar enviar e-mail de recuperação para: $email");
-                                throw new Exception("Falha ao enviar o e-mail.");
-                            }
-                
-                            // Log de sucesso no envio de e-mail
-                            logEmail('success', "E-mail de recuperação enviado com sucesso para: $email");
-                            error_log('Email enviado com sucesso');
-                
-                            // Retornar resposta de sucesso
-                            echo json_encode(['status' => 'success', 'message' => 'Solicitação processada. Verifique seu e-mail para redefinir sua senha.', 'redirect' => 'login.html']);
-                        } catch (Exception $e) {
-                            // Adiciona mais informações ao log para diagnosticar melhor o erro
-                            logEmail('error', "Erro no processo de recuperação de senha: " . $e->getMessage());
-                            logEmail('error', "Detalhes: " . $e->getTraceAsString());
-
-                            // Retornar erro com a mensagem específica
-                            http_response_code(500);
-                            echo json_encode(['status' => 'error', 'message' => 'Erro: ' . $e->getMessage(), 'redirect' => 'login.html']);
-                        }
-                    } else {
-                        // Log de erro de e-mail inválido
-                        logEmail('error', "Tentativa de recuperação de senha com e-mail inválido: $email");
-                
-                        http_response_code(400);
-                        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.', 'redirect' => 'login.html']);
-                    }
-                    break;           
+                break;
 
                     // Após definir o tipo de conteúdo, envie o JSON de resposta
                     case 'confirm_alert':
