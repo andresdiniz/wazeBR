@@ -867,7 +867,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
             
                 $nome = $_POST['nome'] ?? null;
-                $descricao = $_POST['descricao'] ?? null;
                 $tipo = $_POST['tipo'] ?? null;
                 $subtipo = $_POST['subtipo'] ?? null;
                 $starttime = $_POST['starttime'] ?? null;
@@ -878,7 +877,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $segmentDirection = $_POST['segmentDirection'] ?? null;
             
                 // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
-                if (!$nome || !$descricao || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
+                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                     exit;
@@ -889,13 +888,12 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
                     // Inserir evento na tabela events
                     $sqlEvent = "
-                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, description, street, polyline, direction, starttime, endtime, is_active)
+                        INSERT INTO events (parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active)
                         VALUES (NULL, NOW(), NOW(), :type, :subtype, :description, :street, :polyline, :direction, :starttime, :endtime, '1')
                     ";
                     $stmtEvent = $pdo->prepare($sqlEvent);
                     $stmtEvent->bindParam(':type', $tipo, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':subtype', $subtipo, PDO::PARAM_STR);
-                    $stmtEvent->bindParam(':description', $descricao, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':street', $rua, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':polyline', $coordenadas, PDO::PARAM_STR);
                     $stmtEvent->bindParam(':starttime', $starttime, PDO::PARAM_STR);
