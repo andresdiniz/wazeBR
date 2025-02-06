@@ -865,6 +865,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'cadastrar_evento':
                 // Dados recebidos via POST
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
+                errorlog('info',''. json_encode($_POST));
             
                 $nome = $_POST['nome'] ?? null;
                 $tipo = $_POST['tipo'] ?? null;
@@ -875,12 +876,12 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rua = $_POST['rua'] ?? null;
                 $streetSegment = $_POST['streetSegment'] ?? null;
                 $segmentDirection = $_POST['streetSegment'] ?? null;
-
+                $polyline = $_POST['polyline'] ?? null;
                 $direction = $_POST['direction'] ?? null;
 
             
                 // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
-                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
+                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$direction || !$polyline) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                     exit;
