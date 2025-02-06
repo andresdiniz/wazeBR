@@ -70,6 +70,7 @@
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         const groupBy = document.getElementById('group_by').value;
+        document.getElementById('alertsTable').innerHTML = '<p class="text-center">🔄 Carregando dados...</p>';
 
         fetch(`api.php?action=get_jams&start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
