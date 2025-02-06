@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> <!-- Plugin para rótulos de dados -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
@@ -13,7 +13,6 @@
 <div class="container my-5">
     <h1 class="text-center">Painel de Congestionamentos</h1>
 
-    <!-- Filtros -->
     <form id="filterForm" class="my-4">
         <div class="row g-3">
             <div class="col-md-5">
@@ -38,236 +37,148 @@
         </div>
     </form>
 
-    <!-- Gráficos -->
     <div class="chart-container my-5">
         <canvas id="alertsChart"></canvas>
     </div>
 
-    <!-- Tabela -->
-    <div id="alertsTable">
-        <!-- Tabela será carregada via AJAX -->
-    </div>
+    <div id="alertsTable"></div>
 </div>
 
 <script>
-    var $j = jQuery.noConflict(); // Garante que $j represente o jQuery
+    var $j = jQuery.noConflict();
 
-    window.onload = function() {
-        const today = new Date(); // Obtém a data de hoje
-    
-        const startDate = new Date(today.getFullYear(), today.getMonth(), 1); // Primeiro dia do mês
-        today.setDate(today.getDate() + 1); // Soma 1 dia à data de hoje
-    
-        // Para formatar as datas no formato YYYY-MM-DD
-        const startDateFormatted = startDate.toISOString().split('T')[0];
-        const endDateFormatted = today.toISOString().split('T')[0];
-    
-        // Atribui as datas aos campos de input
-        document.getElementById('start_date').value = startDateFormatted;
-        document.getElementById('end_date').value = endDateFormatted;
-    
-        const groupBy = document.getElementById('group_by').value; // Obtém o valor do filtro "Agrupar por"
-        updateData(startDateFormatted, endDateFormatted, groupBy); // Atualiza os dados
-    };
+    document.addEventListener("DOMContentLoaded", function () {
+        initializeFilters();
+        fetchData();
+    });
 
-    function initializeDataTable(selector) {
-        if (typeof $j.fn.DataTable === 'undefined') {
-            console.error("DataTables não está carregado.");
-            return;
-        }
+    function initializeFilters() {
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        today.setDate(today.getDate() + 1);
 
-        if ($j(selector).length === 0) {
-            console.error(`Elemento '${selector}' não encontrado.`);
-            return;
-        }
+        document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
+        document.getElementById('end_date').value = today.toISOString().split('T')[0];
 
-        if ($j.fn.DataTable.isDataTable(selector)) {
-            $j(selector).DataTable().destroy();
-            $j(selector).empty();
-        }
-
-        $j(selector).DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-            },
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'excel', 'csv', 'pdf', 'print'
-            ],
-            initComplete: function() {
-                // Inicializando tooltips do Bootstrap
-                $j('[data-bs-toggle="tooltip"]').tooltip();
-            }
+        document.getElementById('filterForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            fetchData();
         });
     }
 
-    function updateData(startDate, endDate, groupBy) {
+    function fetchData() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const groupBy = document.getElementById('group_by').value;
+
         fetch(`api.php?action=get_jams&start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
-            .then(data => {
-                console.log("Dados da API:", data); // Verifica os dados recebidos da API
-
-                const labels = [];
-                const dataCounts = [];
-                let filteredJams = [];
-
-                if (data.jams.length === 0) {
-                    console.log("Nenhum dado encontrado na resposta da API.");
-                }
-
-                // Agrupar por data, rua ou hora
-                if (groupBy === 'date') {
-                    data.jams.forEach(jam => {
-                        const date = jam['date_received'].substring(0, 10); // Obtém a data no formato YYYY-MM-DD
-                        if (!labels.includes(date)) {
-                            labels.push(date);
-                            dataCounts.push(1);
-                        } else {
-                            const index = labels.indexOf(date);
-                            dataCounts[index]++;
-                        }
-                    });
-                } else if (groupBy === 'street') {
-                    data.jams.forEach(jam => {
-                        const street = jam['street'] || 'Desconhecida'; // Caso a rua esteja ausente
-                        if (!labels.includes(street)) {
-                            labels.push(street);
-                            dataCounts.push(1);
-                        } else {
-                            const index = labels.indexOf(street);
-                            dataCounts[index]++;
-                        }
-                    });
-                } else if (groupBy === 'hour') {
-                    const hourCounts = Array(24).fill(0);
-                    data.jams.forEach(jam => {
-                        const hour = parseInt(jam['date_received'].substring(11, 13));
-                        hourCounts[hour]++;
-                    });
-
-                    labels.push(...Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')));
-                    dataCounts.push(...hourCounts);
-                }
-
-                // Verificação adicional para garantir que os dados estão corretos
-                console.log("Labels: ", labels);
-                console.log("Data Counts: ", dataCounts);
-
-                const ctx = document.getElementById('alertsChart').getContext('2d');
-                if (window.myChart) {
-                    window.myChart.destroy();
-                }
-
-                const config = {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Número de Congestionamentos',
-                            data: dataCounts,
-                            backgroundColor: dataCounts.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        onClick: function(evt, elements) {
-                            if (elements.length > 0) {
-                                const index = elements[0].index; // Ajuste para pegar o índice corretamente
-                                const selectedLabel = labels[index]; // A etiqueta associada ao índice
-                                console.log(`Índice do gráfico clicado: ${index}`);
-                                console.log(`Etiqueta selecionada: ${selectedLabel}`);
-                
-                                if (selectedLabel === undefined) {
-                                    console.error("Erro: Nenhuma etiqueta encontrada para o índice:", index);
-                                    return; // Previne erros de execução caso o índice seja inválido
-                                }
-
-                                // Filtra os congestionamentos de acordo com o valor selecionado
-                                filteredJams = data.jams.filter(jam => {
-                                    if (groupBy === 'date') {
-                                        return jam['date_received'].substring(0, 10) === selectedLabel;
-                                    } else if (groupBy === 'street') {
-                                        return jam['street'] === selectedLabel;
-                                    } else if (groupBy === 'hour') {
-                                        return jam['date_received'].substring(11, 13) === selectedLabel;
-                                    }
-                                    return false;
-                                });
-
-                                console.log("Congestionamentos filtrados:", filteredJams); // Verifique os dados filtrados
-                                updateTable(filteredJams); // Atualiza a tabela com os congestionamentos filtrados
-                            } else {
-                                console.error("Nenhum elemento do gráfico foi clicado.");
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function(tooltipItem) {
-                                        const value = tooltipItem.raw;
-                                        const total = dataCounts.reduce((sum, current) => sum + current, 0);
-                                        const percentage = ((value / total) * 100).toFixed(1);
-                                        return `${tooltipItem.label}: ${value} congestionamentos (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: { title: { display: true, text: groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua' } },
-                            y: { title: { display: true, text: 'Número de Congestionamentos' }, beginAtZero: true }
-                        }
-                    }
-                };
-
-                window.myChart = new Chart(ctx, config);
-                updateTable(data.jams); // Exibe todos os dados na tabela
-            })
-            .catch(error => console.error('Erro na requisição:', error));
+            .then(data => processChartData(data.jams, groupBy))
+            .catch(error => console.error('Erro ao buscar dados:', error));
     }
 
-    // Função para atualizar a tabela
-    function updateTable(data) {
-        const alertsTable = document.getElementById('alertsTable');
-        alertsTable.innerHTML = ''; // Limpa o conteúdo anterior da tabela
-    
-        if (data.length === 0) {
-            alertsTable.innerHTML = '<p class="text-center text-muted">Nenhum congestionamento encontrado para as datas selecionadas.</p>';
+    function processChartData(jams, groupBy) {
+        if (!jams || jams.length === 0) {
+            console.warn("Nenhum dado encontrado.");
+            return;
+        }
+
+        let labels = [];
+        let dataCounts = [];
+
+        if (groupBy === 'date') {
+            jams.forEach(jam => addOrIncrement(labels, dataCounts, jam['date_received'].substring(0, 10)));
+        } else if (groupBy === 'street') {
+            jams.forEach(jam => addOrIncrement(labels, dataCounts, jam['street'] || 'Desconhecida'));
+        } else if (groupBy === 'hour') {
+            let hourCounts = Array(24).fill(0);
+            jams.forEach(jam => hourCounts[parseInt(jam['date_received'].substring(11, 13))]++);
+            labels = [...Array(24).keys()].map(i => i.toString().padStart(2, '0'));
+            dataCounts = hourCounts;
+        }
+
+        renderChart(labels, dataCounts, jams, groupBy);
+    }
+
+    function addOrIncrement(labels, dataCounts, key) {
+        let index = labels.indexOf(key);
+        if (index === -1) {
+            labels.push(key);
+            dataCounts.push(1);
         } else {
-            let tableContent = '<table id="jamsTable" class="table table-bordered table-striped"><thead><tr>';
-            tableContent += '<th>Cidade</th><th>Rua</th><th>Confiança</th><th>Data Recebida</th><th>Status</th></tr></thead><tbody>';
-    
-            data.forEach(jam => {
-                tableContent += `<tr>
-                    <td title="Cidade: ${jam.city}">${jam.city}</td>
-                    <td title="Rua: ${jam.street}">${jam.street}</td>
-                    <td title="Confiança: ${jam.confidence}">${jam.confidence}</td>
-                    <td title="Data Recebida: ${jam.date_received}">${jam.date_received}</td>
-                    <td title="Status: ${jam.status == 1 ? "Ativo" : "Inativo"}">${jam.status == 1 ? "Ativo" : "Inativo"}</td>
-                </tr>`;
-            });
-    
-            tableContent += '</tbody></table>';
-            alertsTable.innerHTML = tableContent;
-    
-            setTimeout(() => {
-                initializeDataTable('#jamsTable');
-            }, 100); // Pequeno atraso de 100ms para garantir que a tabela foi renderizada no DOM
+            dataCounts[index]++;
         }
     }
 
-    $j(function () {
-        $j('#filterForm').on('submit', function (event) {
-            event.preventDefault();
-            const startDate = $j('#start_date').val();
-            const endDate = $j('#end_date').val();
-            const groupBy = $j('#group_by').val();
-            updateData(startDate, endDate, groupBy);
+    function renderChart(labels, dataCounts, jams, groupBy) {
+        const ctx = document.getElementById('alertsChart').getContext('2d');
+        if (window.myChart) window.myChart.destroy();
+
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Número de Congestionamentos',
+                    data: dataCounts,
+                    backgroundColor: dataCounts.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                onClick: (evt, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const selectedLabel = labels[index];
+                        updateTable(jams.filter(jam => filterByGroup(jam, selectedLabel, groupBy)));
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: tooltipItem => {
+                                const value = tooltipItem.raw;
+                                const total = dataCounts.reduce((sum, current) => sum + current, 0);
+                                return `${tooltipItem.label}: ${value} congestionamentos (${((value / total) * 100).toFixed(1)}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua' } },
+                    y: { title: { display: true, text: 'Número de Congestionamentos' }, beginAtZero: true }
+                }
+            }
         });
-    });
+
+        updateTable(jams);
+    }
+
+    function filterByGroup(jam, selectedLabel, groupBy) {
+        if (groupBy === 'date') return jam['date_received'].substring(0, 10) === selectedLabel;
+        if (groupBy === 'street') return jam['street'] === selectedLabel;
+        if (groupBy === 'hour') return jam['date_received'].substring(11, 13) === selectedLabel;
+        return false;
+    }
+
+    function updateTable(jams) {
+        const tableContainer = document.getElementById('alertsTable');
+        tableContainer.innerHTML = jams.length ? generateTableHTML(jams) : '<p class="text-center text-muted">Nenhum congestionamento encontrado.</p>';
+
+        setTimeout(() => initializeDataTable('#jamsTable'), 100);
+    }
+
+    function generateTableHTML(jams) {
+        return `
+            <table id="jamsTable" class="table table-bordered table-striped">
+                <thead><tr><th>Cidade</th><th>Rua</th><th>Confiança</th><th>Data Recebida</th><th>Status</th></tr></thead>
+                <tbody>${jams.map(jam => `<tr><td>${jam.city}</td><td>${jam.street}</td><td>${jam.confidence}</td><td>${jam.date_received}</td><td>${jam.status == 1 ? "Ativo" : "Inativo"}</td></tr>`).join('')}</tbody>
+            </table>`;
+    }
+
+    function initializeDataTable(selector) {
+        $j(selector).DataTable({ paging: true, searching: true, ordering: true, responsive: true });
+    }
 </script>
