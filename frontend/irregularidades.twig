@@ -1,7 +1,7 @@
 <div class="container">
     <h2>Irregularidades</h2>
     {% if irregularities is not empty %}
-        <!-- Para telas grandes, exibe tabela -->
+        <!-- Tabela para telas grandes -->
         <div class="d-none d-lg-block">
             <div class="table-responsive">
                 <table id="irregularitiesTable" class="table table-striped table-bordered">
@@ -34,7 +34,8 @@
                                 <td>
                                     <button class="btn btn-primary btn-sm view-map" 
                                             data-route-id="{{ irregularity.id }}" 
-                                            data-bs-toggle="modal" data-bs-target="#mapModal">
+                                            data-bs-toggle="modal" data-bs-target="#mapModal"
+                                            aria-label="Ver irregularidade no mapa">
                                         Ver no Mapa
                                     </button>
                                 </td>
@@ -45,10 +46,10 @@
             </div>
         </div>
 
-        <!-- Para telas pequenas, exibe cartões -->
+        <!-- Cartões para telas pequenas -->
         <div class="d-lg-none">
             {% for irregularity in irregularities %}
-                <div class="card mb-3">
+                <div class="card mb-3 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ irregularity.name }}</h5>
                         <p class="card-text">
@@ -58,11 +59,12 @@
                             <strong>Tempo Médio:</strong> {{ (irregularity.avg_time / 60)|default('')|number_format(2) }} min<br>
                             <strong>Velocidade Histórica:</strong> {{ irregularity.historic_speed|default('')|number_format(2) }} km/h<br>
                             <strong>Tempo Histórico:</strong> {{ (irregularity.historic_time / 60)|default('')|number_format(2) }} min<br>
-                            <strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}<br>
+                            <strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}
                         </p>
                         <button class="btn btn-primary btn-sm view-map" 
                                 data-route-id="{{ irregularity.id }}" 
-                                data-bs-toggle="modal" data-bs-target="#mapModal">
+                                data-bs-toggle="modal" data-bs-target="#mapModal"
+                                aria-label="Ver irregularidade no mapa">
                             Ver no Mapa
                         </button>
                     </div>
@@ -75,14 +77,20 @@
 </div>
 
 <!-- Modal para o Mapa -->
-<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="mapModalLabel">Mapa da Irregularidade</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
+                <!-- Placeholder para spinner -->
+                <div id="mapLoader" class="text-center my-3" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
                 <div id="mapContainer" style="width: 100%; height: 500px;"></div>
             </div>
             <div class="modal-footer">
@@ -91,61 +99,72 @@
         </div>
     </div>
 </div>
+
 <script>
-var $j = jQuery.noConflict();
-var map = null; // Inicializa a variável map no escopo global
+// Use a notação moderna para evitar conflitos com jQuery
+(function($){
+    let map = null; // Escopo local para o mapa
 
-$j(document).ready(function() {
-    // Código para exibir o mapa no modal
-    $j('.view-map').on('click', async function () {
-        const routeId = this.dataset.routeId; // ID da rota do botão
-        const baseUrl = '../wazeportal/api.php'; // URL base da API
-        const action = 'get_route_lines_irre'; // Ação da API
+    $(document).ready(function() {
+        // Função para inicializar e exibir o mapa
+        async function loadMap(routeId) {
+            const baseUrl = '../wazeportal/api.php';
+            const action = 'get_route_lines_irre';
+            const $mapContainer = $('#mapContainer');
+            const $mapLoader = $('#mapLoader');
 
-        const mapContainer = document.getElementById('mapContainer');
-        mapContainer.innerHTML = ''; // Limpa o conteúdo do container de mapa
+            // Exibe o spinner enquanto carrega
+            $mapLoader.show();
+            $mapContainer.empty();
 
-        // Remover o mapa existente
-        if (map) {
-            map.remove();
-            map = null;
-        }
-
-        try {
-            const response = await fetch(`${baseUrl}?action=${action}&route_id_irre=${routeId}`);
-            if (!response.ok) {
-                throw new Error('Erro ao obter coordenadas.');
+            // Remove instância anterior do mapa, se existir
+            if (map) {
+                map.remove();
+                map = null;
             }
 
-            const data = await response.json();
+            try {
+                const response = await fetch(`${baseUrl}?action=${action}&route_id_irre=${routeId}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao obter coordenadas.');
+                }
 
-            if (data.length > 0) {
-                const coordinates = data.map(coord => [parseFloat(coord.y), parseFloat(coord.x)]);
+                const data = await response.json();
 
-                map = L.map('mapContainer').setView(coordinates[0], 13);
+                if (data.length > 0) {
+                    const coordinates = data.map(coord => [parseFloat(coord.y), parseFloat(coord.x)]);
+                    map = L.map('mapContainer').setView(coordinates[0], 13);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                }).addTo(map);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
 
-                L.polyline(coordinates, { color: 'red' }).addTo(map);
-            } else {
-                mapContainer.innerHTML = '<p>Não foi possível carregar as coordenadas.</p>';
+                    L.polyline(coordinates, { color: 'red' }).addTo(map);
+                } else {
+                    $mapContainer.html('<p>Não foi possível carregar as coordenadas.</p>');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar coordenadas:', error);
+                $mapContainer.html('<p>Erro ao buscar as coordenadas. Tente novamente mais tarde.</p>');
+            } finally {
+                // Oculta o spinner quando finalizado
+                $mapLoader.hide();
             }
-        } catch (error) {
-            console.error('Erro ao buscar coordenadas:', error);
-            mapContainer.innerHTML = '<p>Erro ao buscar as coordenadas. Tente novamente mais tarde.</p>';
         }
-    });
 
-    // Limpa o mapa ao fechar o modal
-    $j('#mapModal').on('hidden.bs.modal', function () {
-        if (map) {
-            map.remove();
-            map = null;
-        }
-    });
-});
+        // Evento para abrir o mapa ao clicar no botão "Ver no Mapa"
+        $('.view-map').on('click', function () {
+            const routeId = this.dataset.routeId;
+            loadMap(routeId);
+        });
 
+        // Limpa o mapa ao fechar o modal
+        $('#mapModal').on('hidden.bs.modal', function () {
+            if (map) {
+                map.remove();
+                map = null;
+            }
+        });
+    });
+})(jQuery);
 </script>
-
