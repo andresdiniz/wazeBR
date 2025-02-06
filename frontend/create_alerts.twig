@@ -614,48 +614,74 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function(event) {
+    const eventoForm = document.getElementById('eventoForm');
     const submitBtn = document.querySelector('button[type="submit"]');
+    
     console.log("Botão de envio:", submitBtn); // Verificação
-    if (submitBtn) {
-        // Recupera os dados do localStorage
-        const segment = localStorage.getItem('streetSegment');
-        const direction = localStorage.getItem('segmentDirection');
 
-        // Verifica se os dados estão presentes
-        if (segment && direction) {
-            // Declaração dos inputs ocultos
-            let segmentInput = document.querySelector('input[name="streetSegment"]');
-            let directionInput = document.querySelector('input[name="segmentDirection"]');
+    if (eventoForm && submitBtn) {
+        eventoForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Interrompe o envio padrão
 
-            if (!segmentInput) {
-                segmentInput = document.createElement('input');
-                segmentInput.type = 'hidden';
-                segmentInput.name = 'streetSegment';
-                document.getElementById('eventoForm').appendChild(segmentInput);
-            }
-            if (!directionInput) {
-                directionInput = document.createElement('input');
-                directionInput.type = 'hidden';
-                directionInput.name = 'segmentDirection';
-                document.getElementById('eventoForm').appendChild(directionInput);
+            // Cria um objeto FormData com os dados do formulário
+            const formData = new FormData(eventoForm);
+
+            // Recupera os dados do localStorage
+            const segment = localStorage.getItem('streetSegment');
+            const direction = localStorage.getItem('segmentDirection');
+
+            // Adiciona os dados do localStorage ao FormData, se existirem
+            if (segment && direction) {
+                formData.append('streetSegment', segment);
+                formData.append('segmentDirection', direction);
+            } else {
+                console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
             }
 
-            segmentInput.value = segment;
-            directionInput.value = direction;
+            // Opção: Converter o FormData em objeto para log ou para enviar como JSON
+            // Se o endpoint espera multipart/form-data, mantenha o FormData
+            // Caso contrário, converta para JSON:
+            /*
+            const formObj = {};
+            formData.forEach((value, key) => {
+                formObj[key] = value;
+            });
+            const bodyData = JSON.stringify(formObj);
+            */
 
-            console.log("Campos ocultos adicionados:", segmentInput, directionInput); // Verificação
-
-            // Envia o formulário
-            document.getElementById('eventoForm').submit();
-        } else {
-            event.preventDefault();
-            console.warn("Dados ausentes no localStorage. O formulário pode não enviar os dados corretamente.");
-        }
-    } else {   
-        console.error("Botão de envio não encontrado.");
+            // Envia os dados usando fetch. A URL de envio é definida no atributo action do formulário
+            fetch(eventoForm.action, {
+                method: 'POST',
+                body: formData
+                // Se estiver enviando JSON, lembre de definir o header e usar body: bodyData
+                // headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na requisição: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Resposta do servidor:", data);
+                // Faça o tratamento da resposta, por exemplo redirecione ou exiba uma mensagem
+                // Exemplo:
+                if (data.success) {
+                    window.location.href = "https://fenixsmm.store/wazeportal/create_alerts";
+                } else {
+                    alert(data.message || "Ocorreu um erro no envio dos dados.");
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao enviar os dados:", error);
+            });
+        });
+    } else {
+        console.error("Formulário ou botão de envio não encontrado.");
     }
 });
-</script>
+</>
+    
 
 <!-- 
 <script>
