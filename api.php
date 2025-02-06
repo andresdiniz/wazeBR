@@ -7,6 +7,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/functions/scripts.php'; // Funções de suporte
 
+require_once __DIR__ . '/config/configbd.php'; // Configuração de dados basicos do sistema
+
 use Dotenv\Dotenv;
 
 if (!file_exists($envPath)) {
