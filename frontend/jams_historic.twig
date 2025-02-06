@@ -128,31 +128,21 @@
             },
             options: {
                 responsive: true,
-                onClick: (evt, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        const selectedLabel = labels[index];
-                        updateTable(jams.filter(jam => filterByGroup(jam, selectedLabel, groupBy)));
-                    }
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
                 },
                 plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: tooltipItem => {
-                                const value = tooltipItem.raw;
-                                const total = dataCounts.reduce((sum, current) => sum + current, 0);
-                                return `${tooltipItem.label}: ${value} congestionamentos (${((value / total) * 100).toFixed(1)}%)`;
-                            }
-                        }
-                    }
+                    legend: { display: true },
+                    datalabels: { anchor: 'end', align: 'top', formatter: val => val }
                 },
                 scales: {
-                    x: { title: { display: true, text: groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua' } },
+                    x: { title: { display: true, text: 'Grupo' } },
                     y: { title: { display: true, text: 'Número de Congestionamentos' }, beginAtZero: true }
                 }
             }
+            
         });
-
         updateTable(jams);
     }
 
@@ -179,6 +169,20 @@
     }
 
     function initializeDataTable(selector) {
-        $j(selector).DataTable({ paging: true, searching: true, ordering: true, responsive: true });
+        $j(selector).DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            responsive: true,
+            dom: 'Bfrtip', // Adiciona a barra de botões
+            buttons: [
+                { extend: 'copy', text: 'Copiar' },
+                { extend: 'csv', text: 'Exportar CSV' },
+                { extend: 'excel', text: 'Exportar Excel' },
+                { extend: 'pdf', text: 'Exportar PDF' },
+                { extend: 'print', text: 'Imprimir' }
+            ]
+        });
     }
+    
 </script>
