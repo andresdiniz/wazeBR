@@ -520,12 +520,6 @@ document.addEventListener('DOMContentLoaded', function () {
     map.on('locationfound', (e) => handleLocationFound(e, map));
     locateUser(map);
 
-    // Atualiza o select de sentido
-    const directionSelect = document.getElementById('directionSelect');
-    if (directionSelect) {
-        //atualizarDirecoes(directionSelect);
-    }
-
     // Evento de clique no mapa: captura coordenadas, consulta rua e segmento
     map.on('click', (e) => {
         const lat = e.latlng.lat;
@@ -574,6 +568,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Atualiza o select de sentido
+    const directionSelect = document.getElementById('directionSelect');
+    if (directionSelect) {
+        atualizarDirecoes(directionSelect);
+    }
 
     // Evento para alteração do sentido via select
     if (directionSelect) {
