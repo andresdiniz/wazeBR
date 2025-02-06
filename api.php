@@ -874,7 +874,10 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $coordenadas = $_POST['coordenadas'] ?? null;
                 $rua = $_POST['rua'] ?? null;
                 $streetSegment = $_POST['streetSegment'] ?? null;
-                $segmentDirection = $_POST['segmentDirection'] ?? null;
+                $segmentDirection = $_POST['streetSegment'] ?? null;
+
+                $direction = $_POST['direction'] ?? null;
+
             
                 // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
                 if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua) {
