@@ -593,20 +593,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Evento do botão de envio (por exemplo, para criar um evento)
-    const submitBtn = document.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Evita o envio padrão do formulário
-            /*const direction = directionSelect.value;
-            if (direction === 'both' || direction === 'single') {
-                alert(`Evento criado no sentido: ${direction}`);
-            } else {
-                alert('Por favor, selecione um sentido válido.');
-            }*/
-        });
-    }
-
     // Eventos para agendamento
     const starttimeInput = document.getElementById('starttime');
     const endtimeInput = document.getElementById('endtime');
@@ -627,6 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.querySelector('button[type="submit"]');
+    console.log("Botão de envio:", submitBtn); // Verificação
     if (submitBtn) {
     const segment = localStorage.getItem('streetSegment');
     const direction = localStorage.getItem('segmentDirection');
