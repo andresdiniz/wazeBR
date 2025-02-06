@@ -948,7 +948,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'message' => 'Evento e horários cadastrados com sucesso.',
                         ]);
                         // Redireciona, se necessário
-                        header('Location: https://fenixsmm.store/wazeportal/create_alerts');
+                        //header('Location: https://fenixsmm.store/wazeportal/create_alerts');
                         exit;
                     } else {
                         throw new Exception('Erro ao inserir dados na tabela events.');
