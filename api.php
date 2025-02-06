@@ -863,56 +863,61 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
             
             case 'cadastrar_evento':
-                // Dados recebidos via POST
+                // Log dos dados recebidos via POST para depuração
                 logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
-
+                errorlog('info', json_encode($_POST));
+            
+                // Recebe os dados enviados
                 $nome            = $_POST['nome'] ?? null;
                 $tipo            = $_POST['tipo'] ?? null;
                 $subtipo         = $_POST['subtipo'] ?? null;
                 $starttime       = $_POST['starttime'] ?? null;
                 $endtime         = $_POST['endtime'] ?? null;
-                $coordenadas     = $_POST['coordenadas'] ?? null;
+                $coordenadas     = $_POST['coordenadas'] ?? null; // Geralmente o ponto central
                 $rua             = $_POST['rua'] ?? null;
-                $streetSegment   = $_POST['streetSegment'] ?? null;
-                $segmentDirection= $_POST['segmentDirection'] ?? null; // Corrigido
-                $polylineInput   = $_POST['polyline'] ?? null; // Caso seja enviado, mas usaremos as coordenadas
-                $direction       = $_POST['direction'] ?? null; // Caso seja enviado, mas não será usado
+                $streetSegment   = $_POST['streetSegment'] ?? null; // JSON com array de coordenadas
+                $segmentDirection= $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
             
-                // Validação dos campos obrigatórios (exceto streetSegment e segmentDirection)
-                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$direction || !$polylineInput) {
+                // Validação dos campos obrigatórios (você pode incluir outros se necessário)
+                if (!$nome || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                     exit;
                 }
             
-                // Formatação da polyline:
-                // Espera-se que $coordenadas seja um JSON no formato:
-                // [ [longitude, latitude], [longitude, latitude] ]
-                $polylineFormatted = null;
-                $coordsArray = json_decode($coordenadas, true);
+                // === Formatação da polyline ===
+                // A coluna polyline deverá receber as coordenadas formatadas no padrão:
+                // latitude1, longitude1, latitude2, longitude2, ... 
+                // (Note que no JSON, cada par vem na ordem [longitude, latitude])
+                $polylineFormatted = '';
+                $coordsArray = json_decode($streetSegment, true);
                 if (is_array($coordsArray)) {
                     $formattedCoords = [];
                     foreach ($coordsArray as $coord) {
-                        // Verifica se há ao menos 2 valores e inverte a ordem para: latitude, longitude
                         if (is_array($coord) && count($coord) >= 2) {
+                            // Inverte a ordem para [latitude, longitude]
                             $formattedCoords[] = $coord[1];
                             $formattedCoords[] = $coord[0];
                         }
                     }
+                    // Junta os valores separados por vírgula e espaço
                     $polylineFormatted = implode(', ', $formattedCoords);
                 } else {
-                    // Se não for um array válido, utiliza o valor original (ou pode-se abortar com erro)
-                    $polylineFormatted = $coordenadas;
+                    // Se o JSON não estiver correto, aborta a operação
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Formato inválido para streetSegment.']);
+                    exit;
                 }
             
-                // Mapeamento da direção: se segmentDirection for "BOTH_DIRECTION", utiliza esse valor;
-                // caso contrário, utiliza "ONE_DIRECTION"
-                $directionValue = ($segmentDirection === 'BOTH_DIRECTION') ? 'BOTH_DIRECTION' : 'ONE_DIRECTION';
+                // === Mapeamento do campo de direção ===
+                // Se o valor de segmentDirection for "both" (ou similar), envia "BOTH_DIRECTION"
+                // Caso contrário, utiliza "ONE_DIRECTION". Assim, "reversed" será mapeado para "ONE_DIRECTION".
+                $directionValue = (strtolower($segmentDirection) === 'both') ? 'BOTH_DIRECTION' : 'ONE_DIRECTION';
             
                 try {
                     $pdo = Database::getConnection();
             
-                    // Inserir evento na tabela events
+                    // Inserção na tabela events (conforme o DESCRIBE fornecido)
                     $sqlEvent = "
                         INSERT INTO events (
                             parent_event_id, creationtime, updatetime, type, subtype, street, polyline, direction, starttime, endtime, is_active
@@ -933,13 +938,14 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($stmtEvent->execute()) {
                         $eventId = $pdo->lastInsertId();
             
-                        // ... (resto do código para inserir horários na tabela schedules)
+                        // ... (inserção de horários ou outras operações, se necessário)
             
                         http_response_code(200);
                         echo json_encode([
                             'success' => true,
                             'message' => 'Evento e horários cadastrados com sucesso.',
                         ]);
+                        // Redireciona, se necessário
                         header('Location: https://fenixsmm.store/wazeportal/create_alerts');
                         exit;
                     } else {
