@@ -461,6 +461,13 @@ function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
     }
 }
 
+const directionRadios = document.querySelectorAll('input[name="direction"]');
+directionRadios.forEach(radio => {
+    if (radio.value === newDirection) {
+        radio.checked = true;
+    }
+});
+
 function atualizarDirecoes(selectElement) {
     selectElement.innerHTML = ''; // Limpar opções existentes
     const options = [
