@@ -135,7 +135,9 @@
                         <a class="collapse-item" href="insert_user">Usuarios</a>
                         {% if session.type == 1 or session.type == 2 %}
                             <a class="collapse-item" href="parceiros">Parceiro</a>
+                            {% if session.type == 1 %}
                             <a class="collapse-item" href="settings">Configurações</a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
