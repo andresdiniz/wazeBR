@@ -599,11 +599,11 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.addEventListener('click', (e) => {
             e.preventDefault(); // Evita o envio padrão do formulário
             const direction = directionSelect.value;
-            if (direction === 'both' || direction === 'single') {
+            /*if (direction === 'both' || direction === 'single') {
                 alert(`Evento criado no sentido: ${direction}`);
             } else {
                 alert('Por favor, selecione um sentido válido.');
-            }
+            }*/
         });
     }
 
@@ -628,11 +628,11 @@ document.addEventListener('DOMContentLoaded', function () {
 document.getElementById('eventoForm').addEventListener('submit', function(e) {
 
     const directionSelect = document.getElementById('directionSelect');
-    if (directionSelect.value === "") { // Verifica se nenhuma opção está selecionada
+    /*if (directionSelect.value === "") { // Verifica se nenhuma opção está selecionada
         e.preventDefault(); // Impede o envio do formulário
         alert("Por favor, selecione um sentido."); // Exibe uma mensagem de erro
         return; // Sai da função
-    }
+    }*/
 
     // *** NOVAS LINHAS ***
     // Se chegou aqui, é porque uma opção foi selecionada.
