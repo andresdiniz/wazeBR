@@ -621,9 +621,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
         const segment = localStorage.getItem('streetSegment');
         const direction = localStorage.getItem('segmentDirection');
 
-        // Se os dados existirem, adiciona os campos ocultos ao formulário
+        // Verifica se os dados estão presentes
         if (segment && direction) {
-            // Declaração das variáveis para os inputs
+            // Declaração dos inputs ocultos
             let segmentInput = document.querySelector('input[name="streetSegment"]');
             let directionInput = document.querySelector('input[name="segmentDirection"]');
 
