@@ -278,7 +278,7 @@ function drawSegment(map, segmentNodes, direction = 'both') {
     } else {
         color = MAP_CONFIG.SEGMENT_COLORS.both;
     }
-    
+
     const lineStyle = {
         color: color,
         weight: 4
@@ -306,6 +306,8 @@ function drawSegment(map, segmentNodes, direction = 'both') {
     // Atualizar indicador e controles de direção
     updateDirectionIndicator(direction);
     updateDirectionControls(direction);
+
+    directionSelect.value = direction; // Restaura o valor original
 
     // Agrupar as camadas e adicioná-las ao mapa
     window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
