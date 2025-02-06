@@ -488,6 +488,7 @@ function mostrarBotaoReverso(segmentNodes, map) {
     }
     reverseBtn.style.display = 'block';
     // Evento de clique para inverter as coordenadas
+    reverseBtn.type = "button";
     reverseBtn.onclick = () => {
         // Obtém o sentido atual salvo (se não existir, assume "original")
         const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
