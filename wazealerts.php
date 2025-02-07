@@ -209,6 +209,7 @@ function processAlerts(array $urls) {
         $id_parceiro = $entry['id_parceiro'];
 
         $jsonData = fetchAlertsFromApi($url);
+        var_dump($jsonData);
 
         if ($jsonData && isset($jsonData['alerts'])) {
             saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
