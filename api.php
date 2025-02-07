@@ -129,8 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     try {
                         $pdo = Database::getConnection();
                 
-                        // Recupera o valor do 'id_parceiro' do cookie
-                        $idParceiro = isset($_COOKIE['id_parceiro']) ? $_COOKIE['id_parceiro'] : 99; // Default para 99 se não existir no cookie
+                        // Recupera o valor do 'id_parceiro' da session
+                        $id_parceiro = $_SESSION['usuario_id_parceiro']; // Default para 99 se não existir na session
                 
                         // Recupera as datas e o agrupamento do parâmetro GET
                         $startDate = $_GET['start_date'] ?? date('Y-m-01');
