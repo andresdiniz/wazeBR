@@ -1,28 +1,29 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
 </head>
 <body>
 <div class="container my-5">
-    <h1 class="text-center">Histórico de Acidentes</h1>
+    <h1 class="text-center mb-4">Histórico de Acidentes</h1>
 
     <!-- Filtro de Datas e Agrupamento -->
     <form id="filterForm" class="my-4">
         <div class="row g-3">
             <div class="col-md-4">
                 <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                <input type="date" class="form-control" id="start_date" name="start_date">
             </div>
             <div class="col-md-4">
                 <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                <input type="date" class="form-control" id="end_date" name="end_date">
             </div>
             <div class="col-md-4">
                 <label for="group_by" class="form-label">Agrupar por:</label>
                 <select class="form-control" id="group_by" name="group_by">
-                    <option value="date" {% if group_by == 'date' %}selected{% endif %}>Data</option>
-                    <option value="hour" {% if group_by == 'hour' %}selected{% endif %}>Hora</option>
-                    <option value="street" {% if group_by == 'street' %}selected{% endif %}>Rua</option>
+                    <option value="date">Data</option>
+                    <option value="hour">Hora</option>
+                    <option value="street">Rua</option>
                 </select>
             </div>
         </div>
@@ -30,7 +31,7 @@
     </form>
 
     <!-- Gráfico de Alertas -->
-    <div id="alertsChartContainer" class="my-5" style="width: 100%; height: 50vh; max-height: 400px;">
+    <div id="alertsChartContainer" class="my-5" style="display: none; width: 100%; height: 50vh; max-height: 400px;">
         <canvas id="alertsChart"></canvas>
     </div>
 
@@ -42,9 +43,9 @@
 
 <script>
     // Função para buscar e exibir dados
-    async function fetchAccidentAlerts(startDate, endDate, groupBy) {
+    async function fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro) {
         try {
-            const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`);
+            const response = await fetch(`../api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro={{ session.usuario.id_parceiro }}`);
             const data = await response.json();
 
             if (data.error) {
@@ -138,12 +139,17 @@
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         const groupBy = document.getElementById('group_by').value;
-        fetchAccidentAlerts(startDate, endDate, groupBy);
+        const idParceiro = 123;  // AQUI VOCÊ PODE PEGAR O ID DO PARCEIRO DE ALGUMA FORMA (ex: login, token)
+        fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
     });
 
     // Carrega gráfico inicial
     document.addEventListener('DOMContentLoaded', () => {
-        fetchAccidentAlerts('{{ start_date }}', '{{ end_date }}', 'date');
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const groupBy = 'date';  // Padrão
+        const idParceiro = 123;  // AQUI VOCÊ PODE PEGAR O ID DO PARCEIRO DE ALGUMA FORMA
+        fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
     });
 </script>
 </body>
