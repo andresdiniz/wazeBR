@@ -34,6 +34,9 @@
                     <option value="street">Rua</option>
                 </select>
             </div>
+            <div>
+                <input type="hidden" id="id_parceiro" value="{{user.id_parceiro}}">
+            </div>
         </div>
         <button type="submit" class="btn btn-primary w-100 mt-3">Filtrar</button>
     </form>
@@ -63,7 +66,8 @@
 
         async function fetchAccidentAlerts(startDate, endDate, groupBy) {
             try {
-                const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`);
+                let id_parceiro = $('#id_parceiro').val();
+                const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro=${id_parceiro}`);
                 const data = await response.json();
     
                 if (data.error) {
