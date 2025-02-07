@@ -1,6 +1,14 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
 
 <div class="container my-5">
     <h1 class="text-center mb-4">Histórico de Acidentes</h1>
@@ -28,19 +36,23 @@
         <button type="submit" class="btn btn-primary w-100 mt-3">Filtrar</button>
     </form>
 
-    <!-- Gráfico de Alertas -->
-    <div id="alertsChartContainer" class="my-5" style="display: none; width: 100%; height: 50vh; max-height: 400px;">
-        <canvas id="alertsChart"></canvas>
-    </div>
-
     <!-- Lista de Alertas -->
-    <div id="alertsTable" class="my-5">
-        <p>Nenhum alerta carregado.</p>
+    <div id="alertsTableContainer" class="my-5">
+        <table id="alertsTable" class="display table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="2">Nenhum alerta carregado.</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    // Função para buscar e exibir dados
     // Função para buscar e exibir dados
 async function fetchAccidentAlerts(startDate, endDate, groupBy) {
     try {
@@ -69,7 +81,6 @@ async function fetchAccidentAlerts(startDate, endDate, groupBy) {
 
 // Atualiza gráfico
 function updateChart(labels, dataCounts, groupBy) {
-    // Converte os valores de data_counts para números
     const dataValues = dataCounts.map(count => parseInt(count, 10));
 
     const ctx = document.getElementById('alertsChart').getContext('2d');
@@ -84,7 +95,7 @@ function updateChart(labels, dataCounts, groupBy) {
                 ? labels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`)
                 : 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
-            data: dataValues // Usando os valores numéricos
+            data: dataValues
         }]
     };
 
@@ -113,49 +124,45 @@ function updateChart(labels, dataCounts, groupBy) {
     window.alertsChartInstance = new Chart(ctx, config);
 }
 
-
-    // Atualiza tabela
+// Atualiza tabela
 function updateTable(alerts, groupBy) {
-    let tableContent = `
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>${groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua'}</th>
-                    <th>Quantidade</th>
-                    <th>Eventos</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    let tableContent = '';
     alerts.forEach(alert => {
         let label = groupBy === 'date' ? alert.alert_date :
                     groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                     alert.street || 'Rua não disponível';
-        // Verifica se 'events' existe e é um array antes de tentar fazer join
-        let events = Array.isArray(alert.events) ? alert.events.join(', ') : 'Nenhum evento';
-        tableContent += `<tr><td>${label}</td><td>${alert.count}</td><td>${events}</td></tr>`;
+        tableContent += `<tr><td>${label}</td><td>${alert.count}</td></tr>`;
     });
-    tableContent += `</tbody></table>`;
-    document.getElementById('alertsTable').innerHTML = tableContent;
+
+    // Recarrega a tabela com os dados
+    const table = $('#alertsTable').DataTable();
+    table.clear();
+    table.rows.add($(tableContent));
+    table.draw();
+    
+    // Inicializa o DataTable
+    $('#alertsTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ]
+    });
 }
 
+// Inicializa eventos
+document.getElementById('filterForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const groupBy = document.getElementById('group_by').value;
+    fetchAccidentAlerts(startDate, endDate, groupBy);
+});
 
-    // Inicializa eventos
-    document.getElementById('filterForm').addEventListener('submit', event => {
-        event.preventDefault();
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
-        const groupBy = document.getElementById('group_by').value;
-        const idParceiro = "{{ session.usuario.id_parceiro }}";  // Pegando o valor do id_parceiro diretamente do Twig
-        fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
-    });
-
-    // Carrega gráfico inicial
-    document.addEventListener('DOMContentLoaded', () => {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
-        const groupBy = 'date';  // Padrão
-        const idParceiro = "{{ session.usuario.id_parceiro }}";  // Pegando o valor do id_parceiro diretamente do Twig
-        fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
-    });
+// Carrega gráfico inicial
+document.addEventListener('DOMContentLoaded', () => {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const groupBy = 'date';  // Padrão
+    fetchAccidentAlerts(startDate, endDate, groupBy);
+});
 </script>
