@@ -163,10 +163,18 @@ document.getElementById('filterForm').addEventListener('submit', event => {
     fetchAccidentAlerts(startDate, endDate, groupBy);
 });
 
-// Carrega gráfico inicial
+// Preenche automaticamente as datas no filtro (início do mês até hoje +1)
 document.addEventListener('DOMContentLoaded', () => {
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    const startDate = startOfMonth.toISOString().split('T')[0];
+    const endDate = endOfDay.toISOString().split('T')[0];
+
+    document.getElementById('start_date').value = startDate;
+    document.getElementById('end_date').value = endDate;
+
     const groupBy = 'date';  // Padrão
     fetchAccidentAlerts(startDate, endDate, groupBy);
 });
