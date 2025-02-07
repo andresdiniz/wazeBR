@@ -175,7 +175,7 @@ function processAlerts() {
 
         $jsonData = fetchAlertsFromApi($url);
 
-        if ($jsonData)) {
+        if ($jsonData) {
             echo "Processando dados de alerta para a URL: $url" . PHP_EOL;
             saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
         } else {
