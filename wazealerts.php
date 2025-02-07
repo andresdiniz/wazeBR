@@ -177,7 +177,7 @@ function processAlerts() {
 
         if ($jsonData) {
             echo "Processando dados de alerta para a URL: $url" . PHP_EOL;
-            saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+            saveAlertsToDb($pdo, $jsonData, $url, $id_parceiro);
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
         }
