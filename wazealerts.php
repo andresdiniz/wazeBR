@@ -214,7 +214,9 @@ function processAlerts(array $urls) {
 
         if ($jsonData && /*isset($jsonData['alerts']*/)) {
             echo "Processando dados de alerta para a URL: $url" . PHP_EOL;
+            //saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
             saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
         }
