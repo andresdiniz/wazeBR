@@ -5,7 +5,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
 
 // Verifica se o arquivo .env existe no caminho especificado
-$envPath = __DIR__ . '/.env';  
+$envPath = __DIR__ . '/.env';
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -40,17 +40,19 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
 // Função para buscar as URLs e os respectivos id_parceiro do banco de dados
-function getUrlsFromDb(PDO $pdo) {
+function getUrlsFromDb(PDO $pdo)
+{
     $stmt = $pdo->query("SELECT url, id_parceiro FROM urls");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Função para buscar dados da API usando cURL
-function fetchAlertsFromApi($url) {
+function fetchAlertsFromApi($url)
+{
     try {
         // Inicializa a sessão cURL
         $ch = curl_init($url);
-        
+
         // Configurações do cURL
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   // Retorna a resposta em vez de exibi-la
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);   // Segue redirecionamentos
@@ -78,7 +80,8 @@ function fetchAlertsFromApi($url) {
 
 
 // Função para salvar os alertas no banco de dados
-function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
+function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
+{
     $currentDateTime = date('Y-m-d H:i:s');
 
     $pdo->beginTransaction();
@@ -171,7 +174,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
 }
 
 // Função principal para processar os alertas
-function processAlerts() {
+function processAlerts()
+{
     $pdo = Database::getConnection();
     $urls = getUrlsFromDb($pdo);
 
