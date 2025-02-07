@@ -146,32 +146,42 @@
         }
     
         function updateTable(alerts, groupBy) {
-            let data = []; // Array para os dados da tabela
+            let data = [];
         
             alerts.forEach(alert => {
                 let label = groupBy === 'date' ? alert.alert_date :
                     groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                     alert.street || 'Rua não disponível';
-                data.push([label, alert.count]); // Adiciona os dados como um array
+                data.push([label, alert.count]);
             });
         
             let table = $('#alertsTable').DataTable();
         
-            if (!table) { // Verifica se a tabela já foi inicializada (mais simples)
-                table = $('#alertsTable').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: [
-                        'copy', 'csv', 'excel', 'pdf'
-                    ],
-                    data: data, // Inicializa o DataTable *diretamente* com os dados
-                    columns: [ // Define as colunas (importante!)
-                        { title: "Categoria" },
-                        { title: "Quantidade" }
-                    ]
-                });
+            if (!table) {
+                // Verifica se o nó da tabela existe antes de inicializar
+                if ($('#alertsTable').length && $('#alertsTable')[0].nodeName === 'TABLE') {
+                    table = $('#alertsTable').DataTable({
+                        dom: 'Bfrtip',
+                        buttons: [
+                            'copy', 'csv', 'excel', 'pdf'
+                        ],
+                        data: data,
+                        columns: [
+                            { title: "Categoria" },
+                            { title: "Quantidade" }
+                        ]
+                    });
+                } else {
+                    // Se a tabela não estiver pronta, tenta novamente após um pequeno atraso
+                    setTimeout(() => {
+                        updateTable(alerts, groupBy); // Chama a função novamente
+                    }, 50); // Atraso de 50 milissegundos
+                    return; // Sai da função para evitar execução desnecessária
+                }
+        
             } else {
                 table.clear();
-                table.rows.add(data); // Adiciona os dados formatados
+                table.rows.add(data);
                 table.draw();
             }
         }
