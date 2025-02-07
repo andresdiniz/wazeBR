@@ -2,7 +2,10 @@
 <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
 
+<!-- jQuery Primeiro -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Carregar DataTables e seus plugins -->
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
@@ -140,13 +143,15 @@ function updateTable(alerts, groupBy) {
     table.rows.add($(tableContent));
     table.draw();
     
-    // Inicializa o DataTable
-    $('#alertsTable').DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf'
-        ]
-    });
+    // Inicializa o DataTable se ainda não estiver inicializado
+    if (!$.fn.dataTable.isDataTable('#alertsTable')) {
+        $('#alertsTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf'
+            ]
+        });
+    }
 }
 
 // Inicializa eventos
