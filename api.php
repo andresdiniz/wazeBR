@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             try {
                 $pdo = Database::getConnection();
                 // Agora, você pode acessar $_SESSION para obter o 'id_parceiro'
-                $id_parceiro = $_GET['id_parceiro'] ?? 99;
+                $idParceiro = $_GET['id_parceiro'] ?? 99;
 
                 // Recupera as datas e o agrupamento do parâmetro GET
                 $startDate = $_GET['start_date'] ?? date('Y-m-01');
