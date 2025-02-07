@@ -83,8 +83,9 @@ function fetchAlertsFromApi($url) {
     }
 }
 
+
 // Função para salvar os alertas no banco de dados
-function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
+function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
     // Configuração do fuso horário (remova se global)
     date_default_timezone_set('America/Sao_Paulo');
 
@@ -165,6 +166,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
                 ':location_y' => $alert['location']['y'] ?? null,
                 ':pubMillis' => $alert['pubMillis'] ?? null,
                 ':status' => 1,
+                ':id_parceiro' => $id_parceiro,
                 ':source_url' => $url,
                 ':date_received' => $currentDateTime,
                 ':date_updated' => $currentDateTime,
@@ -197,32 +199,35 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
 
 
 // Função principal para processar os alertas
-function processAlerts(array $urls) {
+function processAlerts() {
     $pdo = Database::getConnection();
 
-    $teste = getUrlsFromDb($pdo);
-    var_dump($teste);
+    // Recupera todas as URLs e seus respectivos id_parceiro
+    $urls = getUrlsFromDb($pdo);
 
-    foreach ($urls as $url) {
+    foreach ($urls as $entry) {
+        $url = $entry['url'];
+        $id_parceiro = $entry['id_parceiro'];
+
         $jsonData = fetchAlertsFromApi($url);
 
         if ($jsonData && isset($jsonData['alerts'])) {
-            saveAlertsToDb($pdo, $jsonData['alerts'], $url);
+            saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
         }
     }
 }
-
-// Configurações iniciais
+// As urls sao recuperadas do banco de dados
+/* Configurações iniciais
 $urls = [
     "https://www.waze.com/row-partnerhub-api/partners/11682863520/waze-feeds/9bb3e551-76f2-4fc6-a32e-ad078a285f2e?format=1",
     "https://www.waze.com/row-partnerhub-api/partners/17547077845/waze-feeds/ab44a258-5e48-444c-9ca2-31cdccb3b5cb?format=1",
 ];
-
+*/
 // Executa o processamento
 echo "Iniciando o processo de atualização dos alertas..." . PHP_EOL;
-processAlerts($urls);
+processAlerts();
 echo "Processamento concluído!" . PHP_EOL;
 
 ?>
