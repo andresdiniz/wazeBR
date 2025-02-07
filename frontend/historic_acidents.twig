@@ -143,7 +143,7 @@ function updateTable(alerts, groupBy) {
     table.rows.add($(tableContent));
     table.draw();
     
-    // Inicializa o DataTable se ainda não estiver inicializado
+    // Verifica se o DataTable já foi inicializado e re-inicializa se necessário
     if (!$.fn.dataTable.isDataTable('#alertsTable')) {
         $('#alertsTable').DataTable({
             dom: 'Bfrtip',
