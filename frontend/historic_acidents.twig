@@ -86,21 +86,28 @@
 
     // Atualiza tabela
     function updateTable(alerts, groupBy) {
-        let tableContent = '';
+        let tableContent = `
+            <table id="alertsTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>${groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua'}</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
         alerts.forEach(alert => {
             let label = groupBy === 'date' ? alert.alert_date :
                         groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                         alert.street || 'Rua não disponível';
             tableContent += `<tr><td>${label}</td><td>${alert.count}</td></tr>`;
         });
+        tableContent += `</tbody></table>`;
 
-        // Recarrega a tabela com os dados
-        const table = jq('#alertsTable').DataTable();
-        table.clear();
-        table.rows.add(jq(tableContent));
-        table.draw();
+        // Preenche a tabela
+        document.getElementById('alertsTable').innerHTML = tableContent;
 
-        // Verifica se o DataTable já foi inicializado e re-inicializa se necessário
+        // Inicializa o DataTable se ainda não foi feito
         if (!jq.fn.dataTable.isDataTable('#alertsTable')) {
             jq('#alertsTable').DataTable({
                 dom: 'Bfrtip',
@@ -108,6 +115,11 @@
                     'copy', 'csv', 'excel', 'pdf'
                 ]
             });
+        } else {
+            // Caso já tenha sido inicializado, recarrega os dados
+            jq('#alertsTable').DataTable().clear();
+            jq('#alertsTable').DataTable().rows.add(alerts); 
+            jq('#alertsTable').DataTable().draw();
         }
     }
 
