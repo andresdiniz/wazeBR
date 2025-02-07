@@ -128,11 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'get_alerts':
             try {
                 $pdo = Database::getConnection();
-                session_start();
-
-                var_dump($_COOKIE); // Verifica se o cookie está sendo definido corretamente
                 // Agora, você pode acessar $_SESSION para obter o 'id_parceiro'
-                $id_parceiro = $_COOKIE['usuario_id_parceiro'] ?? 99;
+                $id_parceiro = $_GET['id_parceiro'] ?? 99;
 
                 // Recupera as datas e o agrupamento do parâmetro GET
                 $startDate = $_GET['start_date'] ?? date('Y-m-01');
