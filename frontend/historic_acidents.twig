@@ -43,7 +43,7 @@
     // Função para buscar e exibir dados
     async function fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro) {
         try {
-            const response = await fetch(`/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`);
+            const response = await fetch(`/wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`);
             const data = await response.json();
 
             if (data.error) {
