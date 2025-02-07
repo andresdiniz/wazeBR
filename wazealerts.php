@@ -47,12 +47,11 @@ function getUrlsFromDb(PDO $pdo)
 }
 
 // Função para buscar dados da API usando cURL
-function fetchAlertsFromApi($url)
-{
+function fetchAlertsFromApi($url) {
     try {
         // Inicializa a sessão cURL
         $ch = curl_init($url);
-
+        
         // Configurações do cURL
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   // Retorna a resposta em vez de exibi-la
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);   // Segue redirecionamentos
@@ -77,7 +76,6 @@ function fetchAlertsFromApi($url)
         return null;
     }
 }
-
 
 // Função para salvar os alertas no banco de dados
 function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
