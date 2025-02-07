@@ -199,7 +199,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
 
 
 // Função principal para processar os alertas
-function processAlerts(array $urls) {
+function processAlerts() {
     $pdo = Database::getConnection();
 
     // Recupera todas as URLs e seus respectivos id_parceiro
@@ -227,7 +227,7 @@ $urls = [
 */
 // Executa o processamento
 echo "Iniciando o processo de atualização dos alertas..." . PHP_EOL;
-processAlerts($urls);
+processAlerts();
 echo "Processamento concluído!" . PHP_EOL;
 
 ?>
