@@ -145,15 +145,6 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
     return $stmt->fetch(PDO::FETCH_ASSOC)['totalMonth'];
 }
 
-
-// Buscar os alertas de acidentes, buracos e congestionamentos
-$accidentAlerts = getAccidentAlerts($pdo, $id_parceiro);
-$hazardAlerts = getHazardAlerts($pdo, $id_parceiro);
-$jamAlerts = getJamAlerts($pdo, $id_parceiro);
-$otherAlerts = getOtherAlerts($pdo, $id_parceiro);
-$activeAlertsToday = getActiveAlertsToday($pdo, $id_parceiro);
-$totalAlertsThisMonth = getTotalAlertsThisMonth($pdo, $id_parceiro);
-
 // Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
