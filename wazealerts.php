@@ -69,8 +69,15 @@ function fetchAlertsFromApi($url) {
         // Fecha a sessão cURL
         curl_close($ch);
 
-        // Retorna os dados decodificados em formato de array associativo
-        return json_decode($response, true);
+        $jsonString = file_get_contents($url); // Obtém a resposta da API como string
+        $jsonData = json_decode($jsonString, true); // Decodifica JSON como array associativo
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            echo "Erro ao decodificar JSON: " . json_last_error_msg();
+            var_dump($jsonString); // Exibe a string bruta para análise
+            die();
+        }
+        return $jsonData;
     } catch (Exception $e) {
         echo "Erro ao buscar dados da API ($url): " . $e->getMessage() . PHP_EOL;
         return null;
