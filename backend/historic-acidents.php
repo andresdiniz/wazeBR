@@ -15,6 +15,12 @@ $pdo = Database::getConnection();
 $startDate = date('Y-m-01'); // Primeiro dia do mês atual
 $endDate = date('Y-m-d'); // Data de hoje
 
+session_start();
+$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Pega o valor ou usa um padrão
+
+// Você pode então gerar um script para passar a variável para o JS
+echo "<script>var idParceiro = " . json_encode($id_parceiro) . ";</script>";
+
 // Verifica se os filtros foram enviados
 if (!empty($_GET['start_date'])) {
     $startDate = $_GET['start_date'];

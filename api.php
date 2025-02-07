@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         session_start();
 
                         // Agora, você pode acessar $_SESSION para obter o 'id_parceiro'
-                        $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Caso não exista, atribui 99
+                        $id_parceiro = $_GET['id_parceiro'];
                 
                         // Recupera as datas e o agrupamento do parâmetro GET
                         $startDate = $_GET['start_date'] ?? date('Y-m-01');
