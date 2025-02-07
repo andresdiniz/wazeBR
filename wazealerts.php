@@ -44,33 +44,12 @@ set_time_limit(1200);
 
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ .'/functions/scripts.php';
+require_once __DIR__ . '/config/configs.php';
 
-// Função para criar a tabela alerts se não existir
-function createAlertsTable(PDO $pdo) {
-    $query = "
-        CREATE TABLE IF NOT EXISTS alerts (
-            uuid VARCHAR(255) PRIMARY KEY,
-            country VARCHAR(255),
-            city VARCHAR(255),
-            reportRating INT,
-            reportByMunicipalityUser VARCHAR(255),
-            confidence INT,
-            reliability INT,
-            type VARCHAR(255),
-            roadType INT,
-            magvar INT,
-            subtype VARCHAR(255),
-            street VARCHAR(255),
-            location_x DOUBLE,
-            location_y DOUBLE,
-            pubMillis BIGINT,
-            status INT DEFAULT 1,
-            source_url VARCHAR(255),
-            date_received DATETIME DEFAULT CURRENT_TIMESTAMP,
-            date_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ";
-    $pdo->exec($query);
+// Função para buscar as URLs e os respectivos id_parceiro do banco de dados
+function getUrlsFromDb(PDO $pdo) {
+    $stmt = $pdo->query("SELECT url, id_parceiro FROM urls");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Função para buscar dados da API usando cURL
@@ -103,7 +82,6 @@ function fetchAlertsFromApi($url) {
         return null;
     }
 }
-
 
 // Função para salvar os alertas no banco de dados
 function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
@@ -221,7 +199,9 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url) {
 // Função principal para processar os alertas
 function processAlerts(array $urls) {
     $pdo = Database::getConnection();
-    createAlertsTable($pdo);
+
+    $teste = getUrlsFromDb($pdo);
+    var_dump($teste);
 
     foreach ($urls as $url) {
         $jsonData = fetchAlertsFromApi($url);
