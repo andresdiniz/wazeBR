@@ -125,94 +125,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
                 break;
 
-            case 'get_alerts':
-                try {
-                    $pdo = Database::getConnection();
-                    
-                    // Recupera as datas e o agrupamento do parâmetro GET
-                    $startDate = $_GET['start_date'] ?? date('Y-m-01');
-                    $endDate = $_GET['end_date'] ?? date('Y-m-d');
-                    $groupBy = $_GET['group_by'] ?? 'date'; // Agrupamento pode ser 'date', 'hour' ou 'street'
-            
-                    // Verifica se as datas estão no formato correto
-                    if (!strtotime($startDate) || !strtotime($endDate)) {
-                        echo json_encode(['error' => 'Datas inválidas.']);
-                        exit;
-                    }
-            
-                    // Consulta SQL com base no agrupamento escolhido
-                    if ($groupBy == 'date') {
-                        $stmt = $pdo->prepare("SELECT 
-                            DATE(date_received) AS alert_date,
-                            COUNT(*) AS count
-                            FROM alerts 
-                            WHERE type = 'ACCIDENT'
-                            AND date_received BETWEEN :start_date AND :end_date
-                            GROUP BY alert_date
-                            ORDER BY alert_date DESC");
-                    } elseif ($groupBy == 'hour') {
-                        $stmt = $pdo->prepare("SELECT 
-                            HOUR(date_received) AS alert_hour,
-                            COUNT(*) AS count
-                            FROM alerts 
-                            WHERE type = 'ACCIDENT'
-                            AND date_received BETWEEN :start_date AND :end_date
-                            GROUP BY alert_hour
-                            ORDER BY alert_hour ASC"); // Ordena pela hora de forma ascendente                    
-                    } elseif ($groupBy == 'street') {
-                        $stmt = $pdo->prepare("SELECT 
-                            street, 
-                            COUNT(*) AS count
-                            FROM alerts 
-                            WHERE type = 'ACCIDENT' 
-                            AND date_received BETWEEN :start_date AND :end_date
-                            GROUP BY street
-                            ORDER BY count DESC");
-                    } else {
-                        http_response_code(400);
-                        echo json_encode(['error' => 'Parâmetro "group_by" inválido.']);
-                        exit;
-                    }
-            
-                    // Vincula os parâmetros de data
-                    $stmt->bindValue(':start_date', $startDate);
-                    $stmt->bindValue(':end_date', $endDate);
-                    $stmt->execute();
-            
-                    $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-                    if (!$alerts) {
-                        echo json_encode(['error' => 'Nenhum alerta encontrado para as datas selecionadas.']);
-                        exit;
-                    }
-            
-                    // Organiza os dados para o frontend
-                    $labels = [];
-                    $data_counts = [];
-            
-                    foreach ($alerts as $alert) {
-                        if ($groupBy == 'date') {
-                            $labels[] = $alert['alert_date']; // Data no formato 'YYYY-MM-DD'
-                        } elseif ($groupBy == 'hour') {
-                            // Formata a hora como 'YYYY-MM-DD HH:00'
-                            $labels[] = $startDate . ' ' . str_pad($alert['alert_hour'], 2, '0', STR_PAD_LEFT) . ':00';
-                        } elseif ($groupBy == 'street') {
-                            $labels[] = $alert['street']; // Nome da rua
+                case 'get_alerts':
+                    try {
+                        $pdo = Database::getConnection();
+                
+                        // Recupera o valor do 'id_parceiro' do cookie
+                        $idParceiro = isset($_COOKIE['id_parceiro']) ? $_COOKIE['id_parceiro'] : 99; // Default para 99 se não existir no cookie
+                
+                        // Recupera as datas e o agrupamento do parâmetro GET
+                        $startDate = $_GET['start_date'] ?? date('Y-m-01');
+                        $endDate = $_GET['end_date'] ?? date('Y-m-d');
+                        $groupBy = $_GET['group_by'] ?? 'date'; // Agrupamento pode ser 'date', 'hour' ou 'street'
+                
+                        // Verifica se as datas estão no formato correto
+                        if (!strtotime($startDate) || !strtotime($endDate)) {
+                            echo json_encode(['error' => 'Datas inválidas.']);
+                            exit;
                         }
-                        $data_counts[] = $alert['count'];
+                
+                        // Consulta SQL com base no agrupamento escolhido
+                        if ($groupBy == 'date') {
+                            // Ajuste na consulta para considerar o id_parceiro apenas se não for 99
+                            $sql = "SELECT 
+                                        DATE(date_received) AS alert_date,
+                                        COUNT(*) AS count
+                                    FROM alerts 
+                                    WHERE type = 'ACCIDENT'
+                                    AND date_received BETWEEN :start_date AND :end_date";
+                            
+                            if ($idParceiro != 99) {
+                                $sql .= " AND id_parceiro = :id_parceiro"; // Filtra pelo id_parceiro se não for 99
+                            }
+                            
+                            $sql .= " GROUP BY alert_date
+                                      ORDER BY alert_date DESC";
+                            
+                            $stmt = $pdo->prepare($sql);
+                        } elseif ($groupBy == 'hour') {
+                            $sql = "SELECT 
+                                        HOUR(date_received) AS alert_hour,
+                                        COUNT(*) AS count
+                                    FROM alerts 
+                                    WHERE type = 'ACCIDENT'
+                                    AND date_received BETWEEN :start_date AND :end_date";
+                            
+                            if ($idParceiro != 99) {
+                                $sql .= " AND id_parceiro = :id_parceiro";
+                            }
+                            
+                            $sql .= " GROUP BY alert_hour
+                                      ORDER BY alert_hour ASC"; // Ordena pela hora de forma ascendente                    
+                            
+                            $stmt = $pdo->prepare($sql);
+                        } elseif ($groupBy == 'street') {
+                            $sql = "SELECT 
+                                        street, 
+                                        COUNT(*) AS count
+                                    FROM alerts 
+                                    WHERE type = 'ACCIDENT' 
+                                    AND date_received BETWEEN :start_date AND :end_date";
+                            
+                            if ($idParceiro != 99) {
+                                $sql .= " AND id_parceiro = :id_parceiro";
+                            }
+                            
+                            $sql .= " GROUP BY street
+                                      ORDER BY count DESC";
+                            
+                            $stmt = $pdo->prepare($sql);
+                        } else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Parâmetro "group_by" inválido.']);
+                            exit;
+                        }
+                
+                        // Vincula os parâmetros de data
+                        $stmt->bindValue(':start_date', $startDate);
+                        $stmt->bindValue(':end_date', $endDate);
+                        
+                        if ($idParceiro != 99) {
+                            // Vincula o id_parceiro, se necessário
+                            $stmt->bindValue(':id_parceiro', $idParceiro, PDO::PARAM_INT);
+                        }
+                
+                        $stmt->execute();
+                
+                        $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                        if (!$alerts) {
+                            echo json_encode(['error' => 'Nenhum alerta encontrado para as datas selecionadas.']);
+                            exit;
+                        }
+                
+                        // Organiza os dados para o frontend
+                        $labels = [];
+                        $data_counts = [];
+                
+                        foreach ($alerts as $alert) {
+                            if ($groupBy == 'date') {
+                                $labels[] = $alert['alert_date']; // Data no formato 'YYYY-MM-DD'
+                            } elseif ($groupBy == 'hour') {
+                                // Formata a hora como 'YYYY-MM-DD HH:00'
+                                $labels[] = $startDate . ' ' . str_pad($alert['alert_hour'], 2, '0', STR_PAD_LEFT) . ':00';
+                            } elseif ($groupBy == 'street') {
+                                $labels[] = $alert['street']; // Nome da rua
+                            }
+                            $data_counts[] = $alert['count'];
+                        }
+                
+                        // Retorna os dados para o frontend
+                        echo json_encode(['alerts' => $alerts, 'labels' => $labels, 'data_counts' => $data_counts]);
+                
+                    } catch (PDOException $e) {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erro ao acessar o banco de dados.', 'details' => $e->getMessage()]);
+                    } catch (Exception $e) {
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Erro inesperado.', 'details' => $e->getMessage()]);
                     }
-            
-                    // Retorna os dados para o frontend
-                    echo json_encode(['alerts' => $alerts, 'labels' => $labels, 'data_counts' => $data_counts]);
-            
-                } catch (PDOException $e) {
-                    http_response_code(500);
-                    echo json_encode(['error' => 'Erro ao acessar o banco de dados.', 'details' => $e->getMessage()]);
-                } catch (Exception $e) {
-                    http_response_code(500);
-                    echo json_encode(['error' => 'Erro inesperado.', 'details' => $e->getMessage()]);
-                }
-                break;
+                    break;                
 
                 case 'get_subroutes':
                     // Verifica se o parâmetro 'route_id' foi fornecido
