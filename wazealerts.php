@@ -48,25 +48,34 @@ function getUrlsFromDb(PDO $pdo) {
 // Função para buscar dados da API usando cURL
 function fetchAlertsFromApi($url) {
     try {
+        // Inicializa a sessão cURL
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        
+        // Configurações do cURL
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   // Retorna a resposta em vez de exibi-la
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);   // Segue redirecionamentos
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);  // Desativa a verificação SSL (não recomendado em produção)
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);  // Desativa a verificação do host SSL (não recomendado em produção)
 
+        // Executa a requisição
         $response = curl_exec($ch);
 
+        // Verifica se houve erro na execução do cURL
         if ($response === false) {
             throw new Exception("Erro cURL: " . curl_error($ch));
         }
 
+        // Fecha a sessão cURL
         curl_close($ch);
+
+        // Retorna os dados decodificados em formato de array associativo
         return json_decode($response, true);
     } catch (Exception $e) {
         echo "Erro ao buscar dados da API ($url): " . $e->getMessage() . PHP_EOL;
         return null;
     }
 }
+
 
 // Função para salvar os alertas no banco de dados
 function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
@@ -175,9 +184,9 @@ function processAlerts() {
 
         $jsonData = fetchAlertsFromApi($url);
 
-        if ($jsonData) {
+        if ($jsonData && isset($jsonData['alerts'])) {
             echo "Processando dados de alerta para a URL: $url" . PHP_EOL;
-            saveAlertsToDb($pdo, $jsonData, $url, $id_parceiro);
+            saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
         }
