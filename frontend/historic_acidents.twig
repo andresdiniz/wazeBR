@@ -2,8 +2,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
-</head>
-<body>
 <div class="container my-5">
     <h1 class="text-center mb-4">Histórico de Acidentes</h1>
 
@@ -45,7 +43,7 @@
     // Função para buscar e exibir dados
     async function fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro) {
         try {
-            const response = await fetch(`../api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro={{ session.usuario.id_parceiro }}`);
+            const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro=${idParceiro}`);
             const data = await response.json();
 
             if (data.error) {
@@ -139,7 +137,7 @@
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         const groupBy = document.getElementById('group_by').value;
-        const idParceiro = 123;  // AQUI VOCÊ PODE PEGAR O ID DO PARCEIRO DE ALGUMA FORMA (ex: login, token)
+        const idParceiro = "{{ session.usuario.id_parceiro }}";  // Pegando o valor do id_parceiro diretamente do Twig
         fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
     });
 
@@ -148,9 +146,7 @@
         const startDate = document.getElementById('start_date').value;
         const endDate = document.getElementById('end_date').value;
         const groupBy = 'date';  // Padrão
-        const idParceiro = 123;  // AQUI VOCÊ PODE PEGAR O ID DO PARCEIRO DE ALGUMA FORMA
+        const idParceiro = "{{ session.usuario.id_parceiro }}";  // Pegando o valor do id_parceiro diretamente do Twig
         fetchAccidentAlerts(startDate, endDate, groupBy, idParceiro);
     });
 </script>
-</body>
-</html>
