@@ -185,8 +185,7 @@ function processAlerts()
         echo "Iniciando busca de dados da API para a URL: $url" . PHP_EOL;
 
         $jsonData = fetchAlertsFromApi($url);
-
-        var_dump($jsonData);
+        
         var_dump(isset($jsonData['alerts']));
 
         if ($jsonData && isset($jsonData['alerts'])) {
