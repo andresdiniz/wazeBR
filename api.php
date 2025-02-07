@@ -128,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'get_alerts':
             try {
                 $pdo = Database::getConnection();
+                session_start();
 
                 var_dump($_COOKIE); // Verifica se o cookie está sendo definido corretamente
                 // Agora, você pode acessar $_SESSION para obter o 'id_parceiro'
