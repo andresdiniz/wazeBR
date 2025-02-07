@@ -184,7 +184,7 @@ function processAlerts()
         echo "Iniciando processamento para o parceiro: $id_parceiro" . PHP_EOL;
         echo "Iniciando busca de dados da API para a URL: $url" . PHP_EOL;
 
-        $jsonData = fetchAlertsFromApi($url);
+        $jsonString = fetchAlertsFromApi($url);
         $jsonData = json_decode($jsonString, true); // Adicione "true" para forçar array associativo
 
 
