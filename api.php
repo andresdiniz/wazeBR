@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                         if (!$alerts) {
-                            echo json_encode(['error' => 'Nenhum alerta encontrado para as datas selecionadas.', 'details' => $stmt->errorInfo()]);
+                            echo json_encode(['error' => 'Nenhum alerta encontrado para as datas selecionadas.', 'details' => $stmt->errorInfo(), 'query' => $stmt->queryString]);
                             exit;
                         }
                 
