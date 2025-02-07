@@ -57,7 +57,6 @@ function fetchAlertsFromApi($url) {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);   // Segue redirecionamentos
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);  // Desativa a verificação SSL (não recomendado em produção)
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);  // Desativa a verificação do host SSL (não recomendado em produção)
-
         // Executa a requisição
         $response = curl_exec($ch);
 
