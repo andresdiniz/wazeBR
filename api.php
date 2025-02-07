@@ -208,6 +208,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             $stmt->bindValue(':id_parceiro', $idParceiro, PDO::PARAM_INT);
                         }
                 
+                        // Exibir a query final para debug
+                        echo "<pre>" . htmlspecialchars($sql) . "</pre>";
+
+                        // Verifique os parâmetros
+                        echo "<pre>";
+                        echo "start_date: " . $startDate . "\n";
+                        echo "end_date: " . $endDate . "\n";
+                        echo "id_parceiro: " . $idParceiro . "\n";
+                        echo "</pre>";
+
                         $stmt->execute();
                 
                         $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
