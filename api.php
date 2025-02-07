@@ -129,8 +129,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     try {
                         $pdo = Database::getConnection();
                 
-                        // Recupera o valor do 'id_parceiro' da session
-                        $id_parceiro = $_SESSION['usuario_id_parceiro']; // Default para 99 se não existir na session
+                        // No início do seu script PHP, antes de qualquer outra lógica
+                        session_start();
+
+                        // Agora, você pode acessar $_SESSION para obter o 'id_parceiro'
+                        $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Caso não exista, atribui 99
                 
                         // Recupera as datas e o agrupamento do parâmetro GET
                         $startDate = $_GET['start_date'] ?? date('Y-m-01');
