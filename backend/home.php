@@ -15,91 +15,144 @@ $pdo = Database::getConnection();
 
 session_start();
 
-echo "<pre>";
-var_dump($_SESSION); // Mostra os detalhes de cada variável
-echo "</pre>";
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+//if id parceiro for igual a 99 mostrar todos os alertas, se não mostrar apenas os alertas do parceiro
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getAccidentAlerts(PDO $pdo) {
-    $stmt = $pdo->prepare("
-        SELECT * 
-        FROM alerts 
-        WHERE type = 'ACCIDENT' AND status = 1
-        ORDER BY pubMillis DESC
-    ");
+ffunction getAccidentAlerts(PDO $pdo, $id_parceiro) {
+    $query = "SELECT * FROM alerts WHERE type = 'ACCIDENT' AND status = 1 ";
+    
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+    
+    $query .= "ORDER BY pubMillis DESC";
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função para buscar alertas de buracos (ordenados por confidence do maior para o menor)
-function getHazardAlerts(PDO $pdo) {
-    $stmt = $pdo->prepare("
+function getHazardAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
         SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
         FROM alerts 
-        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND status = 1
-        ORDER BY pubMillis DESC
-    ");
+        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND status = 1 ";
+    
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    $query .= "ORDER BY pubMillis DESC";
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função para buscar alertas de congestionamento (ordenados pela confiabilidade do maior para o menor)
-function getJamAlerts(PDO $pdo) {
-    $stmt = $pdo->prepare("
+function getJamAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
         SELECT uuid, country, city, reportRating, subtype, confidence, type, street, location_x, location_y, pubMillis, status, date_received
         FROM alerts 
-        WHERE type = 'JAM' AND status = 1
-        ORDER BY pubMillis DESC
-    ");
+        WHERE type = 'JAM' AND status = 1 ";
+
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    $query .= "ORDER BY pubMillis DESC";
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função para buscar os alertas "outros" (não classificados como ACCIDENT ou HAZARD com o subtipo HAZARD_ON_ROAD_POT_HOLE)
-function getOtherAlerts(PDO $pdo) {
-    $stmt = $pdo->prepare("
+function getOtherAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
         SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis
         FROM alerts
         WHERE (type != 'ACCIDENT' AND (type != 'HAZARD' OR subtype != 'HAZARD_ON_ROAD_POT_HOLE') AND type != 'JAM')
-        AND status = 1
-    ");
+        AND status = 1 ";
+
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função para obter a quantidade de alertas ativos no dia de hoje
-function getActiveAlertsToday(PDO $pdo) {
-    $stmt = $pdo->prepare("
+function getActiveAlertsToday(PDO $pdo, $id_parceiro) {
+    $query = "
         SELECT COUNT(*) AS activeToday 
         FROM alerts 
-        WHERE status = 1 AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = CURDATE()
-    ");
+        WHERE status = 1 
+        AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = CURDATE() ";
+
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC)['activeToday'];
 }
 
-// Função para obter a quantidade total de alertas no mês (independente do status)
-function getTotalAlertsThisMonth(PDO $pdo) {
-    $stmt = $pdo->prepare("
+function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
+    $query = "
         SELECT COUNT(*) AS totalMonth 
         FROM alerts 
         WHERE MONTH(FROM_UNIXTIME(pubMillis / 1000)) = MONTH(CURDATE()) 
-        AND YEAR(FROM_UNIXTIME(pubMillis / 1000)) = YEAR(CURDATE())
-    ");
+        AND YEAR(FROM_UNIXTIME(pubMillis / 1000)) = YEAR(CURDATE()) ";
+
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC)['totalMonth'];
 }
 
-// Buscar os alertas de acidentes, buracos e congestionamentos
-$accidentAlerts = getAccidentAlerts($pdo);
-$hazardAlerts = getHazardAlerts($pdo);
-$jamAlerts = getJamAlerts($pdo);
-// Buscar os alertas "outros"
-$otherAlerts = getOtherAlerts($pdo);
 
-// Buscar métricas adicionais
-$activeAlertsToday = getActiveAlertsToday($pdo);
-$totalAlertsThisMonth = getTotalAlertsThisMonth($pdo);
+// Buscar os alertas de acidentes, buracos e congestionamentos
+$accidentAlerts = getAccidentAlerts($pdo, $id_parceiro);
+$hazardAlerts = getHazardAlerts($pdo, $id_parceiro);
+$jamAlerts = getJamAlerts($pdo, $id_parceiro);
+$otherAlerts = getOtherAlerts($pdo, $id_parceiro);
+$activeAlertsToday = getActiveAlertsToday($pdo, $id_parceiro);
+$totalAlertsThisMonth = getTotalAlertsThisMonth($pdo, $id_parceiro);
 
 // Exemplo em backend/dashboard.php
 $data = [
