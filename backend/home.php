@@ -13,6 +13,12 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
+session_start();
+
+echo "<pre>";
+var_dump($_SESSION); // Mostra os detalhes de cada variável
+echo "</pre>";
+
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
 function getAccidentAlerts(PDO $pdo) {
     $stmt = $pdo->prepare("
