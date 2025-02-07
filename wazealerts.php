@@ -208,6 +208,8 @@ function processAlerts(array $urls) {
         $url = $entry['url'];
         $id_parceiro = $entry['id_parceiro'];
 
+        echo "Iniciando processamento para o parceiro: $id_parceiro" . PHP_EOL;
+
         $jsonData = fetchAlertsFromApi($url);
 
         if ($jsonData && isset($jsonData['alerts'])) {
