@@ -84,11 +84,11 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
             INSERT INTO alerts (
                 uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
                 reliability, type, roadType, magvar, subtype, street, location_x, location_y,
-                pubMillis, status, id_parceiro, source_url, date_received, date_updated, km
+                pubMillis, status, id_parceiro, source_url, date_received, date_updated, km, id_parceiro
             ) VALUES (
                 :uuid, :country, :city, :reportRating, :reportByMunicipalityUser, :confidence,
                 :reliability, :type, :roadType, :magvar, :subtype, :street, :location_x, :location_y,
-                :pubMillis, :status, :id_parceiro, :source_url, :date_received, :date_updated, :km
+                :pubMillis, :status, :id_parceiro, :source_url, :date_received, :date_updated, :km, :id_parceiro
             )
             ON DUPLICATE KEY UPDATE
                 country = VALUES(country),
@@ -107,7 +107,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
                 pubMillis = VALUES(pubMillis),
                 status = 1,
                 date_updated = NOW(),
-                km = VALUES(km)
+                km = VALUES(km),
+                id_parceiro = VALUES(id_parceiro)
         ");
 
         foreach ($alerts as $alert) {
