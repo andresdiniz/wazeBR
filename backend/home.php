@@ -156,11 +156,7 @@ $totalAlertsThisMonth = getTotalAlertsThisMonth($pdo, $id_parceiro);
 
 // Exemplo em backend/dashboard.php
 $data = [
-    'accidentAlerts' => getAccidentAlerts($pdo),
-    'hazardAlerts' => getHazardAlerts($pdo),
-    'jamAlerts' => getJamAlerts($pdo),
-    'otherAlerts' => getOtherAlerts($pdo),
-    'activeAlertsToday' => getActiveAlertsToday($pdo),
-    'totalAlertsThisMonth' => getTotalAlertsThisMonth($pdo)
+    'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
+    'jamAlerts' => getJamAlerts($pdo, $id_parceiro)
 ];
 
