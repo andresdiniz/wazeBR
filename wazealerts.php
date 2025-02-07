@@ -209,9 +209,9 @@ function processAlerts(array $urls) {
         $id_parceiro = $entry['id_parceiro'];
 
         $jsonData = fetchAlertsFromApi($url);
-        var_dump($jsonData);
 
         if ($jsonData && isset($jsonData['alerts'])) {
+            echo "Processando dados de alerta para a URL: $url" . PHP_EOL;
             saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
