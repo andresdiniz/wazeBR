@@ -63,15 +63,15 @@
 
         async function fetchAccidentAlerts(startDate, endDate, groupBy) {
             try {
-                const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=<span class="math-inline">\{startDate\}&end\_date\=</span>{endDate}&group_by=${groupBy}`);
+                const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}`);
                 const data = await response.json();
-
+    
                 if (data.error) {
                     console.error(data.error);
                     $('#alertsTable').html(`<p>${data.error}</p>`);
                     return;
                 }
-
+    
                 updateTable(data.alerts, groupBy);
                 if (data.alerts.length > 0) {
                     $('#alertsChartContainer').show();
@@ -84,13 +84,13 @@
                 $('#alertsTable').html(`<p>Erro ao carregar os dados.</p>`);
             }
         }
-
+    
         function updateChart(labels, dataCounts, groupBy) {
             const dataValues = dataCounts.map(count => parseInt(count, 10));
-
+    
             const ctx = document.getElementById('alertsChart').getContext('2d');
             if (window.alertsChartInstance) window.alertsChartInstance.destroy();
-
+    
             const chartType = groupBy === 'date' ? 'line' : groupBy === 'street' ? 'pie' : 'bar';
             const chartData = {
                 labels,
@@ -103,7 +103,7 @@
                     data: dataValues
                 }]
             };
-
+    
             const config = {
                 type: chartType,
                 data: chartData,
@@ -141,24 +141,20 @@
                     } : {}
                 }
             };
-
+    
             window.alertsChartInstance = new Chart(ctx, config);
         }
-
+    
         function updateTable(alerts, groupBy) {
             let tableContent = '';
             alerts.forEach(alert => {
                 let label = groupBy === 'date' ? alert.alert_date :
                     groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                     alert.street || 'Rua não disponível';
-                tableContent += `<tr><td><span class="math-inline">\{label\}</td\><td\></span>{alert.count}</td></tr>`;
+                tableContent += `<tr><td>${label}</td><td>${alert.count}</td></tr>`;
             });
-
-            const table = <span class="math-inline">\('\#alertsTable'\)\.DataTable\(\);
-table\.clear\(\);
-table\.rows\.add\(</span>(tableContent));
-            table.draw();
-
+    
+            // Verifica SE o DataTable já foi inicializado. Se não, inicializa.
             if (!$.fn.dataTable.isDataTable('#alertsTable')) {
                 $('#alertsTable').DataTable({
                     dom: 'Bfrtip',
@@ -167,8 +163,15 @@ table\.rows\.add\(</span>(tableContent));
                     ]
                 });
             }
+    
+            // Agora que o DataTable *definitivamente* existe, podemos usá-lo:
+            const table = $('#alertsTable').DataTable();  // Obtém a instância do DataTable
+    
+            table.clear();
+            table.rows.add($(tableContent));
+            table.draw();
         }
-
+    
         $('#filterForm').on('submit', function(event) {
             event.preventDefault();
             const startDate = $('#start_date').val();
@@ -176,17 +179,22 @@ table\.rows\.add\(</span>(tableContent));
             const groupBy = $('#group_by').val();
             fetchAccidentAlerts(startDate, endDate, groupBy);
         });
-
+    
         $(document).ready(function() {
             const now = new Date();
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-
+    
             const startDate = startOfMonth.toISOString().split('T')[0];
             const endDate = endOfDay.toISOString().split('T')[0];
-
+    
             $('#start_date').val(startDate);
             $('#end_date').val(endDate);
-
+    
             const groupBy = 'date';
             fetchAccidentAlerts(startDate, endDate, groupBy);
+        });
+    
+    })(jQuery);
+
+</script>
