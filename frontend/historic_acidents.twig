@@ -146,30 +146,34 @@
         }
     
         function updateTable(alerts, groupBy) {
-            let tableContent = '';
+            let data = []; // Array para os dados da tabela
+        
             alerts.forEach(alert => {
                 let label = groupBy === 'date' ? alert.alert_date :
                     groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                     alert.street || 'Rua não disponível';
-                tableContent += `<tr><td>${label}</td><td>${alert.count}</td></tr>`;
+                data.push([label, alert.count]); // Adiciona os dados como um array
             });
-    
-            // Verifica SE o DataTable já foi inicializado. Se não, inicializa.
-            if (!$.fn.dataTable.isDataTable('#alertsTable')) {
-                $('#alertsTable').DataTable({
+        
+            let table = $('#alertsTable').DataTable();
+        
+            if (!table) { // Verifica se a tabela já foi inicializada (mais simples)
+                table = $('#alertsTable').DataTable({
                     dom: 'Bfrtip',
                     buttons: [
                         'copy', 'csv', 'excel', 'pdf'
+                    ],
+                    data: data, // Inicializa o DataTable *diretamente* com os dados
+                    columns: [ // Define as colunas (importante!)
+                        { title: "Categoria" },
+                        { title: "Quantidade" }
                     ]
                 });
+            } else {
+                table.clear();
+                table.rows.add(data); // Adiciona os dados formatados
+                table.draw();
             }
-    
-            // Agora que o DataTable *definitivamente* existe, podemos usá-lo:
-            const table = $('#alertsTable').DataTable();  // Obtém a instância do DataTable
-    
-            table.clear();
-            table.rows.add($(tableContent));
-            table.draw();
         }
     
         $('#filterForm').on('submit', function(event) {
