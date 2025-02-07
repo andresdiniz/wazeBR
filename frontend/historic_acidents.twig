@@ -115,28 +115,30 @@ function updateChart(labels, dataCounts, groupBy) {
 
 
     // Atualiza tabela
-    function updateTable(alerts, groupBy) {
-        let tableContent = `
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>${groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua'}</th>
-                        <th>Quantidade</th>
-                        <th>Eventos</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        alerts.forEach(alert => {
-            let label = groupBy === 'date' ? alert.alert_date :
-                        groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
-                        alert.street || 'Rua não disponível';
-            let events = alert.events.join(', ');
-            tableContent += `<tr><td>${label}</td><td>${alert.count}</td><td>${events}</td></tr>`;
-        });
-        tableContent += `</tbody></table>`;
-        document.getElementById('alertsTable').innerHTML = tableContent;
-    }
+function updateTable(alerts, groupBy) {
+    let tableContent = `
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>${groupBy === 'date' ? 'Data' : groupBy === 'hour' ? 'Hora' : 'Rua'}</th>
+                    <th>Quantidade</th>
+                    <th>Eventos</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    alerts.forEach(alert => {
+        let label = groupBy === 'date' ? alert.alert_date :
+                    groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
+                    alert.street || 'Rua não disponível';
+        // Verifica se 'events' existe e é um array antes de tentar fazer join
+        let events = Array.isArray(alert.events) ? alert.events.join(', ') : 'Nenhum evento';
+        tableContent += `<tr><td>${label}</td><td>${alert.count}</td><td>${events}</td></tr>`;
+    });
+    tableContent += `</tbody></table>`;
+    document.getElementById('alertsTable').innerHTML = tableContent;
+}
+
 
     // Inicializa eventos
     document.getElementById('filterForm').addEventListener('submit', event => {
