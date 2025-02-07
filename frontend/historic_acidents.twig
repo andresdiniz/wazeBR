@@ -146,44 +146,33 @@
         }
     
         function updateTable(alerts, groupBy) {
-            let data = [];
-        
-            alerts.forEach(alert => {
+            let data = alerts.map(alert => {
                 let label = groupBy === 'date' ? alert.alert_date :
                     groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
                     alert.street || 'Rua não disponível';
-                data.push([label, alert.count]);
+                return [label, alert.count];
             });
         
-            let table = $('#alertsTable').DataTable();
-        
-            if (!table) {
-                // Verifica se o nó da tabela existe antes de inicializar
-                if ($('#alertsTable').length && $('#alertsTable')[0].nodeName === 'TABLE') {
-                    table = $('#alertsTable').DataTable({
-                        dom: 'Bfrtip',
-                        buttons: [
-                            'copy', 'csv', 'excel', 'pdf'
-                        ],
-                        data: data,
-                        columns: [
-                            { title: "Categoria" },
-                            { title: "Quantidade" }
-                        ]
-                    });
-                } else {
-                    // Se a tabela não estiver pronta, tenta novamente após um pequeno atraso
-                    setTimeout(() => {
-                        updateTable(alerts, groupBy); // Chama a função novamente
-                    }, 50); // Atraso de 50 milissegundos
-                    return; // Sai da função para evitar execução desnecessária
-                }
-        
-            } else {
-                table.clear();
-                table.rows.add(data);
-                table.draw();
+            // Destruir a DataTable existente se já foi inicializada
+            if ($.fn.DataTable.isDataTable('#alertsTable')) {
+                $('#alertsTable').DataTable().destroy();
             }
+        
+            // Limpar o corpo da tabela manualmente
+            $('#alertsTable tbody').empty();
+        
+            // Inicializar a DataTable com os novos dados
+            let table = $('#alertsTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: ['copy', 'csv', 'excel', 'pdf'],
+                data: data,
+                columns: [
+                    { title: "Categoria" },
+                    { title: "Quantidade" }
+                ],
+                autoWidth: false,
+                destroy: true // Garantir que qualquer instância anterior seja limpa
+            });
         }
     
         $('#filterForm').on('submit', function(event) {
