@@ -48,7 +48,7 @@ require_once __DIR__ . '/config/configs.php';
 
 // Função para buscar as URLs e os respectivos id_parceiro do banco de dados
 function getUrlsFromDb(PDO $pdo) {
-    $stmt = $pdo->query("SELECT url, id_parceiro FROM urls");
+    $stmt = $pdo->query("SELECT urls_alerts, id_parceiro FROM url");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
