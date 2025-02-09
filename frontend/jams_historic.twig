@@ -61,115 +61,147 @@
 </div>
 
 <script>
-// Dados brutos do servidor
-var rawData = {{ jams|json_encode|raw }};
-
-document.addEventListener("DOMContentLoaded", function () {
-    let chartInstance = null;
-    let dataTableInstance = null;
-
-    // Função de agrupamento
-    function groupData(field) {
-        const groups = {};
-        
-        rawData.forEach(item => {
-            let key;
-            switch(field) {
-                case 'date':
-                    key = new Date(item.date_received).toLocaleDateString();
-                    break;
-                case 'hour':
-                    key = new Date(item.date_received).getHours() + ':00';
-                    break;
-                default:
-                    key = item[field];
-            }
-            
-            groups[key] = (groups[key] || 0) + 1;
-        });
-        
-        return {
-            labels: Object.keys(groups),
-            data: Object.values(groups),
-            tableData: Object.entries(groups).map(([key, value]) => ({ key, value }))
-        };
-    }
-
-    // Atualizar visualizações
-    function updateViews() {
-        const groupBy = document.getElementById('groupBy').value;
-        const { labels, data, tableData } = groupData(groupBy);
-        
-        // Atualizar gráfico
-        if(chartInstance) chartInstance.destroy();
-        
-        const ctx = document.getElementById('alertsChart').getContext('2d');
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Congestionamentos',
-                    data: data,
-                    backgroundColor: '#4e73df',
-                    borderColor: '#2e59d9',
-                    borderWidth: 2,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false }
-                },
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } },
-                    x: { title: { display: true, text: 'Categoria' } }
-                }
-            }
-        });
-
-        // Atualizar tabela
-        const tableHead = document.querySelector('#jamsTable thead');
-        const tableBody = document.querySelector('#jamsTable tbody');
-        
-        tableHead.innerHTML = `
-            <tr>
-                <th>${groupBy === 'date' ? 'Data' : 
-                     groupBy === 'street' ? 'Rua' : 
-                     groupBy === 'hour' ? 'Hora' : 'Cidade'}</th>
-                <th>Ocorrências</th>
-            </tr>
-        `;
-        
-        tableBody.innerHTML = tableData.map(item => `
-            <tr>
-                <td>${item.key}</td>
-                <td>${item.value}</td>
-            </tr>
-        `).join('');
-
-        // Reinicializar DataTable
-        if(dataTableInstance) dataTableInstance.destroy();
-        
-        dataTableInstance = jq('#jamsTable').DataTable({
-            paging: true,
-            lengthMenu: [10, 25, 50],
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-            }
-        });
-    }
-
-    // Event Listeners
-    document.getElementById('groupBy').addEventListener('change', updateViews);
+    // Dados brutos do servidor
+    var rawData = {{ jams|json_encode|raw }};
     
-    // Inicialização
-    updateViews();
-});
-</script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let chartInstance = null;
+        let dataTableInstance = null;
+    
+        // Função de agrupamento
+        function groupData(field) {
+            const groups = {};
+            
+            rawData.forEach(item => {
+                let key;
+                switch(field) {
+                    case 'date':
+                        key = new Date(item.date_received).toLocaleDateString();
+                        break;
+                    case 'hour':
+                        key = new Date(item.date_received).getHours() + ':00';
+                        break;
+                    default:
+                        key = item[field];
+                }
+                
+                groups[key] = (groups[key] || 0) + 1;
+            });
+    
+            // Calcular o total de ocorrências
+            const total = Object.values(groups).reduce((sum, value) => sum + value, 0);
+    
+            // Calcular a porcentagem de cada valor em relação ao total
+            const tableData = Object.entries(groups).map(([key, value]) => ({
+                key,
+                value,
+                percentage: ((value / total) * 100).toFixed(2)
+            }));
+    
+            // Ordenação
+            if (field === 'hour' || field === 'date') {
+                // Ordenação crescente para hora e data
+                tableData.sort((a, b) => new Date(a.key) - new Date(b.key));
+            } else {
+                // Ordenação decrescente para os outros campos
+                tableData.sort((a, b) => b.value - a.value);
+            }
+    
+            return {
+                labels: Object.keys(groups),
+                data: Object.values(groups),
+                tableData,
+                total
+            };
+        }
+    
+        // Atualizar visualizações
+        function updateViews() {
+            const groupBy = document.getElementById('groupBy').value;
+            const { labels, data, tableData, total } = groupData(groupBy);
+            
+            // Atualizar gráfico
+            if(chartInstance) chartInstance.destroy();
+            
+            const ctx = document.getElementById('alertsChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Congestionamentos',
+                        data: data,
+                        backgroundColor: '#4e73df',
+                        borderColor: '#2e59d9',
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    const percentage = ((tooltipItem.raw / total) * 100).toFixed(2);
+                                    return `${tooltipItem.label}: ${tooltipItem.raw} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } },
+                        x: { title: { display: true, text: 'Categoria' } }
+                    }
+                }
+            });
+    
+            // Atualizar tabela
+            const tableHead = document.querySelector('#jamsTable thead');
+            const tableBody = document.querySelector('#jamsTable tbody');
+            
+            tableHead.innerHTML = `
+                <tr>
+                    <th>${groupBy === 'date' ? 'Data' : 
+                         groupBy === 'street' ? 'Rua' : 
+                         groupBy === 'hour' ? 'Hora' : 'Cidade'}</th>
+                    <th>Ocorrências</th>
+                    <th>% do Total</th>
+                </tr>
+            `;
+            
+            tableBody.innerHTML = tableData.map(item => `
+                <tr>
+                    <td>${item.key}</td>
+                    <td>${item.value}</td>
+                    <td>${item.percentage}%</td>
+                </tr>
+            `).join('');
+    
+            // Reinicializar DataTable
+            if(dataTableInstance) dataTableInstance.destroy();
+            
+            dataTableInstance = jq('#jamsTable').DataTable({
+                paging: true,
+                lengthMenu: [10, 25, 50],
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+                }
+            });
+        }
+    
+        // Event Listeners
+        document.getElementById('groupBy').addEventListener('change', updateViews);
+        
+        // Inicialização
+        updateViews();
+    });
+    </script>
+    
