@@ -12,6 +12,8 @@ $twig = new Environment($loader);
 
 $id_parceiro = $_SESSION['user.id_parceiro'];
 
+echo $id_parceiro;
+
 try {
     // Conexão com o banco de dados usando a classe Database
     $pdo = Database::getConnection();
