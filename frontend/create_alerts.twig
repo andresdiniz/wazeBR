@@ -21,7 +21,7 @@
                     </div>
 
                     <div>
-                        <input type="hidden" id="id_parceiro" name="id_parceiro" value="{{$_COOKIE['usuario_id_parceiro']}}">
+                        <input type="hidden" id="id_parceiro" name="id_parceiro" value="<?php echo $_SESSION['user.id_parceiro']; ?>">
                     </div>
 
                     <!-- Tipo e Subtipo -->
