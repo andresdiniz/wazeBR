@@ -42,5 +42,3 @@ $data = [
     'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
 ];
 
-// Renderiza o template com os dados
-echo $twig->render('urls_traffic.twig', $data);
