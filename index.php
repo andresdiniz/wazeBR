@@ -106,8 +106,8 @@ $templatePath = "{$page}.twig";
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
-        echo $controllerPath;
         require_once $controllerPath; // O controlador pode manipular $data
+        echo $templatePath;
     }
 echo $twig->render($templatePath, $data);
 } catch (\Twig\Error\LoaderError $e) {
