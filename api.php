@@ -910,8 +910,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $segmentDirection = $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
             $id_parceiro = $_SESSION['user.id_parceiro'];
 
-        echo(id_parceiro);
-
             // Validação dos campos obrigatórios (você pode incluir outros se necessário)
             if (!$description || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
                 http_response_code(400);
@@ -954,10 +952,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 // Inserção na tabela events (conforme o DESCRIBE fornecido)
                 $sqlEvent = "
                         INSERT INTO events (
-                            parent_event_id, creationtime, updatetime, description, type, subtype, street, polyline, direction, starttime, endtime, is_active
+                            parent_event_id, creationtime, updatetime, description, type, subtype, street, polyline, direction, starttime, endtime, is_active,id_parceiro
                         )
                         VALUES (
-                            NULL, NOW(), NOW(), :description, :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1'
+                            NULL, NOW(), NOW(), :description, :type, :subtype, :street, :polyline, :direction, :starttime, :endtime, '1', :id_parceiro
                         )
                     ";
                 $stmtEvent = $pdo->prepare($sqlEvent);
@@ -969,6 +967,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
                 $stmtEvent->bindParam(':direction', $directionValue, PDO::PARAM_STR);
                 $stmtEvent->bindParam(':description', $description, PDO::PARAM_STR);
+                $tsmtEvent->bindParam(':id_parceiro',id_parceiro,PDO::PARAM_STR);
 
                 if ($stmtEvent->execute()) {
                     $eventId = $pdo->lastInsertId();
