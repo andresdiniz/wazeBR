@@ -13,7 +13,9 @@
             <div class="card shadow-sm p-4">
                 <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">
 
-{{ user.photo }}
+                    <div>
+                        <input type="hidden" name="id_usuario"></input>,
+                    </div>
 
                    <!-- Nome e descrição do evento -->
                     <div class="mb-3">
