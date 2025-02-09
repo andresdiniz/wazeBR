@@ -14,7 +14,7 @@
                 <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">
 
                     <div>
-                            <input type="hidden" name="id_usuario" value="{{ session.usuario_id_parceiro }}">
+                            <input type="hidden" name="id_usuario" value="{{ session.user.id_parceiro }}">
                     </div>
 
                    <!-- Nome e descrição do evento -->
