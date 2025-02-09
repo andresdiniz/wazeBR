@@ -63,7 +63,7 @@
 <script>
     // Dados brutos do servidor
     var rawData = {{ jams|json_encode|raw }};
-    
+        
     document.addEventListener("DOMContentLoaded", function () {
         let chartInstance = null;
         let dataTableInstance = null;
@@ -71,7 +71,7 @@
         // Função de agrupamento
         function groupData(field) {
             const groups = {};
-            
+    
             rawData.forEach(item => {
                 let key;
                 switch(field) {
@@ -84,7 +84,7 @@
                     default:
                         key = item[field];
                 }
-                
+    
                 groups[key] = (groups[key] || 0) + 1;
             });
     
@@ -118,7 +118,7 @@
             };
         }
     
-        // Atualizar visualizações
+        // Atualizar visualizações (gráfico e tabela)
         function updateViews() {
             const groupBy = document.getElementById('groupBy').value;
             const { labels, data, tableData, total } = groupData(groupBy);
@@ -207,4 +207,5 @@
         updateViews();
     });
     </script>
+    
     
