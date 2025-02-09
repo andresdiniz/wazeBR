@@ -80,7 +80,7 @@ $pages = getSitepages($pdo, $uri);
 
 $pageData = $pages['pageData'] ?? '';  // Valor padrão caso 'title' não esteja presente
 
-$data = [
+$dados = [
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
     'settings' => $settings,  // Configurações do site
     'session' => $_SESSION,
@@ -88,8 +88,8 @@ $data = [
 ];
 
 // Renderiza os componentes fixos
-echo $twig->render('header.twig', $data);
-echo $twig->render('sidebar.twig', $data);
+echo $twig->render('header.twig', $dados);
+echo $twig->render('sidebar.twig', $dados);
 
 // Remove o basePath da URI, se necessário
 if (!empty($basePath) && strpos($uri, $basePath) === 0) {
@@ -113,14 +113,14 @@ echo $twig->render($templatePath, $data);
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
     http_response_code(404);
-    echo $twig->render('404.twig', $data);
+    echo $twig->render('404.twig', $dados);
 } catch (Exception $e) {
     // Lida com outros erros gerais e exibe página de erro
     http_response_code(500);
     $data['errorMessage'] = $e->getMessage();
-    echo $twig->render('error.twig', $data);
+    echo $twig->render('error.twig', $dados);
 }
 
 // Renderiza o footer
-echo $twig->render('footer.twig', $data);
+echo $twig->render('footer.twig', $dados);
 ?>
