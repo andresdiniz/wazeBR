@@ -110,7 +110,7 @@ try {
     if (file_exists($controllerPath)) {
         require_once $controllerPath; // O controlador pode manipular $data
     }
-echo $twig->render($templatePath, $dados);
+echo $twig->render($templatePath, $data);
 var_dump($combinedData);
 
 } catch (\Twig\Error\LoaderError $e) {
