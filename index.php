@@ -8,6 +8,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once './config/configbd.php';
 require_once './functions/scripts.php';
 
+
 use Dotenv\Dotenv;
 
 if (!file_exists($envPath)) {
@@ -106,7 +107,7 @@ $templatePath = "{$page}.twig";
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
-        $twig->render($templatePath, $data);
+        require_once $controllerPath; // O controlador pode manipular $data
     }
 
     // Renderiza o template da página solicitada
