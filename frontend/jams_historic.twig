@@ -1,16 +1,33 @@
-
 <div class="container my-5">
     <h1 class="text-center">Painel de Congestionamentos</h1>
 
     <form id="filterForm" class="my-4">
         <div class="row g-3">
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <label for="start_date" class="form-label">Data Inicial:</label>
                 <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
             </div>
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <label for="end_date" class="form-label">Data Final:</label>
                 <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-2">
+                <label for="city" class="form-label">Cidade:</label>
+                <select id="city" class="form-select">
+                    <option value="">Todas</option>
+                    {% for city in cities %}
+                        <option value="{{ city }}">{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="street" class="form-label">Rua:</label>
+                <select id="street" class="form-select">
+                    <option value="">Todas</option>
+                    {% for street in streets %}
+                        <option value="{{ street }}">{{ street }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Filtrar</button>
@@ -52,9 +69,10 @@
     document.addEventListener("DOMContentLoaded", function () {
         var labels = {{ labels|raw }};
         var dataCounts = {{ data_counts|raw }};
+        var totalJams = dataCounts.reduce((sum, value) => sum + value, 0);
 
         const ctx = document.getElementById('alertsChart').getContext('2d');
-        new Chart(ctx, {
+        var myChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -68,10 +86,47 @@
             },
             options: {
                 responsive: true,
+                plugins: {
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => {
+                            return `${value} (${((value / totalJams) * 100).toFixed(1)}%)`;
+                        }
+                    }
+                },
                 scales: {
                     y: { beginAtZero: true }
                 }
             }
+        });
+
+        document.getElementById('alertsChart').onclick = function (e) {
+            const points = myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+            if (points.length) {
+                const clickedLabel = myChart.data.labels[points[0].index];
+                filterTable(clickedLabel);
+            }
+        };
+
+        function filterTable(label) {
+            var table = $('#jamsTable').DataTable();
+            table.search(label).draw();
+        }
+
+        $('#jamsTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: 'Copiar' },
+                { extend: 'csv', text: 'Exportar CSV' },
+                { extend: 'excel', text: 'Exportar Excel' },
+                { extend: 'pdf', text: 'Exportar PDF' },
+                { extend: 'print', text: 'Imprimir' }
+            ]
         });
     });
 </script>
