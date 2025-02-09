@@ -104,7 +104,6 @@ $page = $uri ?: 'home'; // Define 'home' como padrão se vazio
 $controllerPath = "./backend/{$page}.php";
 $templatePath = "{$page}.twig";
 
-setcookie('id_parceiro', $templatePath, time() + (86400 * 30), "/");
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
