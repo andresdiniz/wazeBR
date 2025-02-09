@@ -13,6 +13,10 @@
             <div class="card shadow-sm p-4">
                 <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">
 
+                    <div>
+                        <input type="hidden" id="id_parceiro" value="{{user.id_parceiro}}">
+                    </div>
+
                     <!-- Nome e descrição do evento -->
                     <div class="mb-3">
                         <label for="nome" class="form-label">Descrição do Evento</label>
