@@ -6,11 +6,11 @@ require_once './vendor/autoload.php'; // Autoloader do Composer
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+
 // Configura o carregador do Twig para buscar templates na pasta "frontend"
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
 $twig = new Environment($loader);
-
-echo $id_parceiro;
 
 try {
     // Conexão com o banco de dados usando a classe Database
@@ -32,6 +32,7 @@ foreach ($subtipos as $subtipo) {
 $data = [
     'tipos' => $tipos,
     'subtiposPorTipo' => $subtiposPorTipo,
+    'id_parceiro' => $id_parceiro,
 ];
 
 
