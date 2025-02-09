@@ -15,19 +15,17 @@ $pdo = Database::getConnection();
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
-// Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function geturlstraficc(PDO $pdo, $id_parceiro) {
+// Função para buscar URLs de tráfego
+function getUrlsTraffic(PDO $pdo, $id_parceiro) {
     $query = "
         SELECT * 
         FROM urls 
-        WHERE 
     ";
     
     // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
     if ($id_parceiro != 99) {
-        $query .= " id_parceiro = :id_parceiro ";
+        $query .= "WHERE id_parceiro = :id_parceiro ";
     }
-
 
     $stmt = $pdo->prepare($query);
 
@@ -41,6 +39,8 @@ function geturlstraficc(PDO $pdo, $id_parceiro) {
 }
 
 $data = [
-    'urls_traficc' => geturlstraficc($pdo, $id_parceiro),
+    'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
 ];
 
+// Renderiza o template com os dados
+echo $twig->render('urls_traffic.twig', $data);
