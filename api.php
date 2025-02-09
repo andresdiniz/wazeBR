@@ -910,7 +910,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $segmentDirection = $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
             $id_parceiro = $_SESSION['user.id_parceiro'];
 
-        var_dump(id_parceiro);
+        echo(id_parceiro);
 
             // Validação dos campos obrigatórios (você pode incluir outros se necessário)
             if (!$description || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
