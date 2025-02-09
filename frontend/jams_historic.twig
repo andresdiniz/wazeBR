@@ -127,6 +127,21 @@
             if (chartInstance) chartInstance.destroy();
             
             const ctx = document.getElementById('alertsChart').getContext('2d');
+
+            const colors = data.map(value => {
+                return value > 50 ? '#FF4C4C' : value > 20 ? '#FF9E00' : '#50B947';  // Vermelho, laranja, verde
+            });
+            
+            datasets: [{
+                label: 'Congestionamentos',
+                data: data,
+                backgroundColor: colors,
+                borderColor: '#2e59d9',
+                borderWidth: 2,
+                borderRadius: 5
+            }]
+    
+            
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -142,6 +157,10 @@
                 },
                 options: {
                     responsive: true,
+                    animation: {
+                        duration: 1000,  // Anima a transição por 1 segundo
+                        easing: 'easeInOutQuad'  // Definindo a curva de animação
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -161,7 +180,7 @@
                     }
                 }
             });
-    
+
             // Atualizar tabela
             const tableHead = document.querySelector('#jamsTable thead');
             const tableBody = document.querySelector('#jamsTable tbody');
