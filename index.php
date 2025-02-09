@@ -8,7 +8,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once './config/configbd.php';
 require_once './functions/scripts.php';
 
-
 use Dotenv\Dotenv;
 
 if (!file_exists($envPath)) {
@@ -100,6 +99,7 @@ if (!empty($basePath) && strpos($uri, $basePath) === 0) {
 $uri = trim($uri, '/'); // Remove barras extras
 $page = $uri ?: 'home'; // Define 'home' como padrão se vazio
 
+echo $twig->render($templatePath, $data);
 // Caminhos do controlador e template
 $controllerPath = "./backend/{$page}.php";
 $templatePath = "{$page}.twig";
@@ -110,8 +110,6 @@ try {
         require_once $controllerPath; // O controlador pode manipular $data
     }
 
-    // Renderiza o template da página solicitada
-    echo $twig->render($templatePath, $data);
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
     http_response_code(404);
