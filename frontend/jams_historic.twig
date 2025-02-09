@@ -11,26 +11,17 @@
                 <label for="end_date" class="form-label">Data Final:</label>
                 <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
             </div>
-            <div class="col-md-2">
-                <label for="city" class="form-label">Cidade:</label>
-                <select id="city" class="form-select">
-                    <option value="">Todas</option>
-                    {% for city in cities %}
-                        <option value="{{ city }}">{{ city }}</option>
-                    {% endfor %}
+            <div class="col-md-3">
+                <label for="group_by" class="form-label">Agrupar Por:</label>
+                <select id="group_by" class="form-select">
+                    <option value="date">Data</option>
+                    <option value="street">Rua</option>
+                    <option value="hour">Hora</option>
+                    <option value="city">Cidade</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label for="street" class="form-label">Rua:</label>
-                <select id="street" class="form-select">
-                    <option value="">Todas</option>
-                    {% for street in streets %}
-                        <option value="{{ street }}">{{ street }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Aplicar</button>
             </div>
         </div>
     </form>
@@ -69,10 +60,10 @@
     document.addEventListener("DOMContentLoaded", function () {
         var labels = {{ labels|raw }};
         var dataCounts = {{ data_counts|raw }};
-        var totalJams = dataCounts.reduce((sum, value) => sum + value, 0);
-
+        var totalJams = dataCounts.reduce((a, b) => a + b, 0);
+        
         const ctx = document.getElementById('alertsChart').getContext('2d');
-        var myChart = new Chart(ctx, {
+        window.myChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -101,16 +92,16 @@
             }
         });
 
-        document.getElementById('alertsChart').onclick = function (e) {
-            const points = myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+        document.getElementById('alertsChart').onclick = function (evt) {
+            const points = window.myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
             if (points.length) {
-                const clickedLabel = myChart.data.labels[points[0].index];
+                const clickedLabel = window.myChart.data.labels[points[0].index];
                 filterTable(clickedLabel);
             }
         };
 
         function filterTable(label) {
-            var table = $('#jamsTable').DataTable();
+            const table = document.querySelector('#jamsTable').DataTable();
             table.search(label).draw();
         }
 
@@ -119,6 +110,7 @@
             searching: true,
             ordering: true,
             responsive: true,
+            pageLength: 15,
             dom: 'Bfrtip',
             buttons: [
                 { extend: 'copy', text: 'Copiar' },
