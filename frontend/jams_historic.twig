@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.css">
 
-<!-- Scripts (nova ordem correta) -->
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
@@ -11,40 +11,42 @@
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-<!-- NoConflict após carregar todos os plugins -->
 <script>
     var jq = $.noConflict(true);
 </script>
 
+<!-- HTML Atualizado -->
 <div class="container my-5">
     <h1 class="text-center">Painel de Congestionamentos</h1>
 
     <form id="filterForm" class="my-4">
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label for="start_date" class="form-label">Data Inicial:</label>
                 <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label for="end_date" class="form-label">Data Final:</label>
                 <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
             </div>
-            <div class="col-md-3">
-                <label for="group_by" class="form-label">Agrupar Por:</label>
-                <select id="group_by" class="form-select">
-                    <option value="date">Data</option>
-                    <option value="street">Rua</option>
-                    <option value="hour">Hora</option>
-                    <option value="city">Cidade</option>
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Aplicar</button>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
             </div>
         </div>
     </form>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <label for="groupBy" class="form-label">Agrupar por:</label>
+            <select class="form-select" id="groupBy">
+                <option value="date">Data</option>
+                <option value="street">Rua</option>
+                <option value="hour">Hora</option>
+                <option value="city">Cidade</option>
+            </select>
+        </div>
+    </div>
 
     <div class="chart-container my-5">
         <canvas id="alertsChart"></canvas>
@@ -52,122 +54,122 @@
 
     <div id="alertsTable">
         <table id="jamsTable" class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Cidade</th>
-                    <th>Rua</th>
-                    <th>Confiança</th>
-                    <th>Data Recebida</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for jam in jams %}
-                <tr>
-                    <td>{{ jam.city }}</td>
-                    <td>{{ jam.street }}</td>
-                    <td>{{ jam.confidence }}</td>
-                    <td>{{ jam.date_received }}</td>
-                    <td>{{ jam.status == 1 ? 'Ativo' : 'Inativo' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <thead></thead>
+            <tbody></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Dados do gráfico
-        const labels = {{ labels|raw }};
-        const dataCounts = {{ data_counts|raw }};
+// Dados brutos do servidor
+var rawData = {{ jams|json_encode|raw }};
+
+document.addEventListener("DOMContentLoaded", function () {
+    let chartInstance = null;
+    let dataTableInstance = null;
+
+    // Função de agrupamento
+    function groupData(field) {
+        const groups = {};
         
-        // Configuração do gráfico
+        rawData.forEach(item => {
+            let key;
+            switch(field) {
+                case 'date':
+                    key = new Date(item.date_received).toLocaleDateString();
+                    break;
+                case 'hour':
+                    key = new Date(item.date_received).getHours() + ':00';
+                    break;
+                default:
+                    key = item[field];
+            }
+            
+            groups[key] = (groups[key] || 0) + 1;
+        });
+        
+        return {
+            labels: Object.keys(groups),
+            data: Object.values(groups),
+            tableData: Object.entries(groups).map(([key, value]) => ({ key, value }))
+        };
+    }
+
+    // Atualizar visualizações
+    function updateViews() {
+        const groupBy = document.getElementById('groupBy').value;
+        const { labels, data, tableData } = groupData(groupBy);
+        
+        // Atualizar gráfico
+        if(chartInstance) chartInstance.destroy();
+        
         const ctx = document.getElementById('alertsChart').getContext('2d');
-        new Chart(ctx, {
+        chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Congestionamentos por Período',
-                    data: dataCounts,
+                    label: 'Congestionamentos',
+                    data: data,
                     backgroundColor: '#4e73df',
                     borderColor: '#2e59d9',
                     borderWidth: 2,
-                    borderRadius: 5,
-                    hoverBackgroundColor: '#2e59d9'
+                    borderRadius: 5
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Distribuição de Congestionamentos',
-                        font: { size: 18 }
-                    },
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Quantidade'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Período'
-                        }
-                    }
-                },
-                animation: {
-                    duration: 1500,
-                    easing: 'easeInOutQuart'
+                    y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } },
+                    x: { title: { display: true, text: 'Categoria' } }
                 }
             }
         });
-    
-        // DataTable
-        const table = jq('#jamsTable').DataTable({
+
+        // Atualizar tabela
+        const tableHead = document.querySelector('#jamsTable thead');
+        const tableBody = document.querySelector('#jamsTable tbody');
+        
+        tableHead.innerHTML = `
+            <tr>
+                <th>${groupBy === 'date' ? 'Data' : 
+                     groupBy === 'street' ? 'Rua' : 
+                     groupBy === 'hour' ? 'Hora' : 'Cidade'}</th>
+                <th>Ocorrências</th>
+            </tr>
+        `;
+        
+        tableBody.innerHTML = tableData.map(item => `
+            <tr>
+                <td>${item.key}</td>
+                <td>${item.value}</td>
+            </tr>
+        `).join('');
+
+        // Reinicializar DataTable
+        if(dataTableInstance) dataTableInstance.destroy();
+        
+        dataTableInstance = jq('#jamsTable').DataTable({
             paging: true,
-            pageLength: 15,
-            lengthMenu: [10, 15, 25, 50],
-            dom: '<"top"Blf>rt<"bottom"ip>',
+            lengthMenu: [10, 25, 50],
+            dom: 'Bfrtip',
             buttons: [
-                {
-                    extend: 'collection',
-                    text: 'Exportar',
-                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
-                }
+                'copy', 'csv', 'excel', 'pdf', 'print'
             ],
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-            },
-            columnDefs: [
-                { targets: 0, width: '20%' },
-                { targets: 1, width: '30%' },
-                { targets: 2, width: '15%' },
-                { targets: 3, width: '20%' },
-                { targets: 4, width: '15%' }
-            ]
-        });
-    
-        // Filtro pelo gráfico
-        document.getElementById('alertsChart').onclick = function(evt) {
-            const points = this.chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
-            if (points.length) {
-                const clickedLabel = this.chart.data.labels[points[0].index];
-                table.search(clickedLabel).draw();
             }
-        };
-    });
-    </script>
+        });
+    }
+
+    // Event Listeners
+    document.getElementById('groupBy').addEventListener('change', updateViews);
+    
+    // Inicialização
+    updateViews();
+});
+</script>
