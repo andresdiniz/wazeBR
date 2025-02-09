@@ -10,6 +10,8 @@ use Twig\Loader\FilesystemLoader;
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
 $twig = new Environment($loader);
 
+$id_parceiro = $_SESSION['user.id_parceiro'];
+
 try {
     // Conexão com o banco de dados usando a classe Database
     $pdo = Database::getConnection();
