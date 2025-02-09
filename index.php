@@ -80,7 +80,7 @@ $pages = getSitepages($pdo, $uri);
 
 $pageData = $pages['pageData'] ?? '';  // Valor padrão caso 'title' não esteja presente
 
-$dados = [
+$dados = [ //Manter como dados, devido interferencia com a variavel data passada
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
     'settings' => $settings,  // Configurações do site
     'session' => $_SESSION,
