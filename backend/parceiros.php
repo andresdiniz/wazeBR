@@ -86,5 +86,7 @@ $data = [
     'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
     'urls_alerts' => getUrlsEvents($pdo, $id_parceiro),
     'urls_events' => getUrlsAlerts($pdo, $id_parceiro),
+    'parceiros' => getUrlsAlerts($pdo, $id_parceiro),
+
 ];
 
