@@ -90,7 +90,7 @@ $dados = [ //Manter como dados, devido interferencia com a variavel data passada
 $combinedData = [
     'data' => $data,
     'dados' => daodos,
-    ]
+    ];
 
 
 // Renderiza os componentes fixos
