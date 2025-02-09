@@ -340,58 +340,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
-
-        case 'get_jams':
-            // Busca congestionamentos (type = 'Jam')
-            $startDate = $_GET['start_date'] ?? date('Y-m-01');
-            $endDate = $_GET['end_date'] ?? date('Y-m-d');
-
-            try {
-                $pdo = Database::getConnection();
-                $stmt = $pdo->prepare("
-                    SELECT * FROM alerts 
-                    WHERE type = 'Jam' 
-                    AND date_received BETWEEN :start_date AND :end_date
-                    ORDER BY pubMillis DESC
-                ");
-                $stmt->bindValue(':start_date', $startDate);
-                $stmt->bindValue(':end_date', $endDate);
-                $stmt->execute();
-
-                $jams = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                if (!$jams) {
-                    echo json_encode(['error' => 'Nenhum congestionamento encontrado para as datas selecionadas.']);
-                    exit;
-                }
-
-                $labels = [];
-                $data_counts = [];
-                foreach ($jams as $jam) {
-                    $date = substr($jam['date_received'], 0, 10);
-                    if (!in_array($date, $labels)) {
-                        $labels[] = $date;
-                        $data_counts[] = 1;
-                    } else {
-                        $index = array_search($date, $labels);
-                        $data_counts[$index]++;
-                    }
-                }
-
-                echo json_encode([
-                    'jams' => $jams,
-                    'labels' => $labels,
-                    'data_counts' => $data_counts,
-                ]);
-            } catch (PDOException $e) {
-                http_response_code(500);
-                echo json_encode(['error' => 'Erro ao acessar o banco de dados.', 'details' => $e->getMessage()]);
-            } catch (Exception $e) {
-                http_response_code(500);
-                echo json_encode(['error' => 'Erro inesperado.', 'details' => $e->getMessage()]);
-            }
-            break;
-
         case 'get_roles':
             // Busca alertas de buracos na estrada (tipo 'HAZARD_ON_ROAD_POT_HOLE')
             $startDate = $_GET['start_date'] ?? date('Y-m-01');
