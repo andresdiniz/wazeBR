@@ -57,8 +57,16 @@ foreach ($jams as $jam) {
     }
 }
 
-echo json_encode([
+
+// Converte para estrutura utilizável no gráfico
+$chart_labels = array_keys($data_counts);
+$chart_data = array_values($data_counts);
+
+$data = [
+    'start_date' => $startDate,
+    'end_date' => $endDate,
     'jams' => $jams,
-    'labels' => $labels,
-    'data_counts' => $data_counts,
-]);
+    'labels' => json_encode($chart_labels),
+    'data_counts' => json_encode($chart_data),
+    'id_parceiro' => $id_parceiro,
+];

@@ -1,14 +1,3 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
 <div class="container my-5">
     <h1 class="text-center">Painel de Congestionamentos</h1>
@@ -17,19 +6,11 @@
         <div class="row g-3">
             <div class="col-md-5">
                 <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date">
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
             </div>
             <div class="col-md-5">
                 <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date">
-            </div>
-            <div class="col-md-2">
-                <label for="group_by" class="form-label">Agrupar Por:</label>
-                <select id="group_by" class="form-select">
-                    <option value="date">Data</option>
-                    <option value="street">Rua</option>
-                    <option value="hour">Hora</option>
-                </select>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Filtrar</button>
@@ -41,183 +22,56 @@
         <canvas id="alertsChart"></canvas>
     </div>
 
-    <div id="alertsTable"></div>
+    <div id="alertsTable">
+        <table id="jamsTable" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Cidade</th>
+                    <th>Rua</th>
+                    <th>Confiança</th>
+                    <th>Data Recebida</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jam in jams %}
+                    <tr>
+                        <td>{{ jam.city }}</td>
+                        <td>{{ jam.street }}</td>
+                        <td>{{ jam.confidence }}</td>
+                        <td>{{ jam.date_received }}</td>
+                        <td>{{ jam.status == 1 ? 'Ativo' : 'Inativo' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-    var $j = jQuery.noConflict();
-
     document.addEventListener("DOMContentLoaded", function () {
-        initializeFilters();
-        fetchData();
-    });
+        var labels = {{ labels|raw }};
+        var dataCounts = {{ data_counts|raw }};
 
-    function initializeFilters() {
-        const today = new Date();
-        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        today.setDate(today.getDate() + 1);
-
-        document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
-        document.getElementById('end_date').value = today.toISOString().split('T')[0];
-
-        document.getElementById('filterForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            fetchData();
-        });
-    }
-
-    function fetchData() {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
-        const groupBy = document.getElementById('group_by').value;
-        document.getElementById('alertsTable').innerHTML = '<p class="text-center">🔄 Carregando dados...</p>';
-
-        fetch(`api.php?action=get_jams&start_date=${startDate}&end_date=${endDate}`)
-            .then(response => response.json())
-            .then(data => processChartData(data.jams, groupBy))
-            .catch(error => console.error('Erro ao buscar dados:', error));
-    }
-
-    function processChartData(jams, groupBy) {
-        if (!jams || jams.length === 0) {
-            console.warn("Nenhum dado encontrado.");
-            return;
-        }
-
-        let labels = [];
-        let dataCounts = [];
-
-        if (groupBy === 'date') {
-            jams.forEach(jam => addOrIncrement(labels, dataCounts, jam['date_received'].substring(0, 10)));
-        } else if (groupBy === 'street') {
-            jams.forEach(jam => addOrIncrement(labels, dataCounts, jam['street'] || 'Desconhecida'));
-        } else if (groupBy === 'hour') {
-            let hourCounts = Array(24).fill(0);
-            jams.forEach(jam => hourCounts[parseInt(jam['date_received'].substring(11, 13))]++);
-            labels = [...Array(24).keys()].map(i => i.toString().padStart(2, '0'));
-            dataCounts = hourCounts;
-        }
-
-        renderChart(labels, dataCounts, jams, groupBy);
-    }
-
-    function addOrIncrement(labels, dataCounts, key) {
-        let index = labels.indexOf(key);
-        if (index === -1) {
-            labels.push(key);
-            dataCounts.push(1);
-        } else {
-            dataCounts[index]++;
-        }
-    }
-
-    function renderChart(labels, dataCounts, jams, groupBy) {
         const ctx = document.getElementById('alertsChart').getContext('2d');
-        if (window.myChart) window.myChart.destroy();
-    
-        const totalJams = jams.length; // Calcula o total de congestionamentos
-    
-        window.myChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Número de Congestionamentos',
                     data: dataCounts,
-                    backgroundColor: dataCounts.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
-                animation: {
-                    duration: 1000,
-                    easing: 'easeInOutQuart'
-                },
-                plugins: {
-                    legend: {
-                        display: true
-                    },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => {
-                            const percentage = (value / totalJams) * 100; // Calcula a porcentagem
-                            return `${value} (${percentage.toFixed(1)}%)`; // Exibe o valor e a porcentagem
-                        }
-                    }
-                },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Grupo'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        },
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });
-    
-        const chartCanvas = document.getElementById('alertsChart');
-        chartCanvas.onclick = function (e) {
-            const points = window.myChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-            if (points.length) {
-                const clickedLabel = window.myChart.data.labels[points[0].index];
-                const filteredJams = currentJams.filter(jam => filterByGroup(jam, clickedLabel, groupBy));
-                updateTable(filteredJams);
-            } else {
-                updateTable(currentJams); // Exibe todos se clicar fora das barras
-            }
-        };
-    
-        updateTable(jams); // Exibe a tabela inicialmente
-    }
-
-    function filterByGroup(jam, selectedLabel, groupBy) {
-        if (groupBy === 'date') return jam['date_received'].substring(0, 10) === selectedLabel;
-        if (groupBy === 'street') return jam['street'] === selectedLabel;
-        if (groupBy === 'hour') return jam['date_received'].substring(11, 13) === selectedLabel;
-        return false;
-    }
-
-    function updateTable(jams) {
-        const tableContainer = document.getElementById('alertsTable');
-        tableContainer.innerHTML = jams.length ? generateTableHTML(jams) : '<p class="text-center text-muted">Nenhum congestionamento encontrado.</p>';
-
-        setTimeout(() => initializeDataTable('#jamsTable'), 100);
-    }
-
-    function generateTableHTML(jams) {
-        return `
-            <table id="jamsTable" class="table table-bordered table-striped">
-                <thead><tr><th>Cidade</th><th>Rua</th><th>Confiança</th><th>Data Recebida</th><th>Status</th></tr></thead>
-                <tbody>${jams.map(jam => `<tr><td>${jam.city}</td><td>${jam.street}</td><td>${jam.confidence}</td><td>${jam.date_received}</td><td>${jam.status == 1 ? "Ativo" : "Inativo"}</td></tr>`).join('')}</tbody>
-            </table>`;
-    }
-
-    function initializeDataTable(selector) {
-        $j(selector).DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            responsive: true,
-            dom: 'Bfrtip', // Adiciona a barra de botões
-            buttons: [
-                { extend: 'copy', text: 'Copiar' },
-                { extend: 'csv', text: 'Exportar CSV' },
-                { extend: 'excel', text: 'Exportar Excel' },
-                { extend: 'pdf', text: 'Exportar PDF' },
-                { extend: 'print', text: 'Imprimir' }
-            ]
-        });
-    }
-    
+    });
 </script>
