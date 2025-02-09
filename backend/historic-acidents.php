@@ -46,4 +46,5 @@ $data = [
     'start_date' => $startDate,
     'end_date' => $endDate,
     'accidentAlerts' => getFilteredAccidentAlerts($pdo, $startDate, $endDate),
+    'id_parceiro' => $id_parceiro,
 ];
