@@ -99,7 +99,6 @@ if (!empty($basePath) && strpos($uri, $basePath) === 0) {
 $uri = trim($uri, '/'); // Remove barras extras
 $page = $uri ?: 'home'; // Define 'home' como padrão se vazio
 
-echo $twig->render($templatePath, $data);
 // Caminhos do controlador e template
 $controllerPath = "./backend/{$page}.php";
 $templatePath = "{$page}.twig";
@@ -107,9 +106,10 @@ $templatePath = "{$page}.twig";
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
+        echo $controllerPath;
         require_once $controllerPath; // O controlador pode manipular $data
     }
-
+echo $twig->render($templatePath, $data);
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
     http_response_code(404);
