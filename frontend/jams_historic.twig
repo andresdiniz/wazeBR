@@ -1,39 +1,22 @@
-<!-- DataTables CSS -->
+<!-- CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.css">
 
-<!-- jQuery e DataTables JS -->
+<!-- Scripts (nova ordem correta) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    var jq = $.noConflict(true);
-</script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script>
-    jq(document).ready(function() {
-        jq('#jamsTable').DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            responsive: true,
-            pageLength: 15,
-            dom: 'Bfrtip',
-            buttons: [
-                { extend: 'copy', text: 'Copiar' },
-                { extend: 'csv', text: 'Exportar CSV' },
-                { extend: 'excel', text: 'Exportar Excel' },
-                { extend: 'pdf', text: 'Exportar PDF' },
-                { extend: 'print', text: 'Imprimir' }
-            ]
-        });
-    });
-</script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.flash.min.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.10.25/api/sum().js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<!-- NoConflict após carregar todos os plugins -->
+<script>
+    var jq = $.noConflict(true);
+</script>
 
 <div class="container my-5">
     <h1 class="text-center">Painel de Congestionamentos</h1>
@@ -95,51 +78,96 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var labels = {{ labels|raw }};
-        var dataCounts = {{ data_counts|raw }};
-        var totalJams = dataCounts.reduce((a, b) => a + b, 0);
-
+        // Dados do gráfico
+        const labels = {{ labels|raw }};
+        const dataCounts = {{ data_counts|raw }};
+        
+        // Configuração do gráfico
         const ctx = document.getElementById('alertsChart').getContext('2d');
-        window.myChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Número de Congestionamentos',
+                    label: 'Congestionamentos por Período',
                     data: dataCounts,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
+                    backgroundColor: '#4e73df',
+                    borderColor: '#2e59d9',
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    hoverBackgroundColor: '#2e59d9'
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => {
-                            return `${value} (${((value / totalJams) * 100).toFixed(1)}%)`;
-                        }
+                    title: {
+                        display: true,
+                        text: 'Distribuição de Congestionamentos',
+                        font: { size: 18 }
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantidade'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Período'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
-
-        document.getElementById('alertsChart').onclick = function (evt) {
-            const points = window.myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+    
+        // DataTable
+        const table = jq('#jamsTable').DataTable({
+            paging: true,
+            pageLength: 15,
+            lengthMenu: [10, 15, 25, 50],
+            dom: '<"top"Blf>rt<"bottom"ip>',
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Exportar',
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { targets: 0, width: '20%' },
+                { targets: 1, width: '30%' },
+                { targets: 2, width: '15%' },
+                { targets: 3, width: '20%' },
+                { targets: 4, width: '15%' }
+            ]
+        });
+    
+        // Filtro pelo gráfico
+        document.getElementById('alertsChart').onclick = function(evt) {
+            const points = this.chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
             if (points.length) {
-                const clickedLabel = window.myChart.data.labels[points[0].index];
-                filterTable(clickedLabel);
+                const clickedLabel = this.chart.data.labels[points[0].index];
+                table.search(clickedLabel).draw();
             }
         };
-
-        function filterTable(label) {
-            const table = jq('#jamsTable').DataTable();
-            table.search(label).draw();
-        }
     });
-</script>
+    </script>
