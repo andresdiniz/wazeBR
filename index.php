@@ -106,7 +106,7 @@ $templatePath = "{$page}.twig";
 try {
     // Carrega o controlador, se existir
     if (file_exists($controllerPath)) {
-        echo $twig->render($templatePath, $data);
+        $twig->render($templatePath, $data);
     }
 
     // Renderiza o template da página solicitada
