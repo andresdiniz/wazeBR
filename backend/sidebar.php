@@ -13,5 +13,3 @@ $globalUser = $data['user'];
 $globalSettings = $data['settings'];
 $globalSession = $data['session'];
 $globalPageData = $data['pagedata'];
-
-echo $globalUser;
