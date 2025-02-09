@@ -62,7 +62,7 @@ function getJamAlerts(PDO $pdo, $id_parceiro) {
 }
 
 // Exemplo em backend/dashboard.php
-$data = [
+$dados = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro)
 ];
