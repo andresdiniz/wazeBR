@@ -111,6 +111,7 @@ try {
         require_once $controllerPath; // O controlador pode manipular $data
     }
 echo $twig->render($templatePath, $combinedData);
+var_dump($combinedData);
 
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
