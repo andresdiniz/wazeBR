@@ -1,3 +1,4 @@
+<?php
 // Recupera o usuário logado e configurações globais
 $data = [
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
@@ -13,3 +14,5 @@ $globalUser = $data['user'];
 $globalSettings = $data['settings'];
 $globalSession = $data['session'];
 $globalPageData = $data['pagedata'];
+
+echo $$globalPageData;
