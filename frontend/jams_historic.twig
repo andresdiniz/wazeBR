@@ -8,6 +8,25 @@
     var jq = $.noConflict(true);
 </script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    jq(document).ready(function() {
+        jq('#jamsTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            responsive: true,
+            pageLength: 15,
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'copy', text: 'Copiar' },
+                { extend: 'csv', text: 'Exportar CSV' },
+                { extend: 'excel', text: 'Exportar Excel' },
+                { extend: 'pdf', text: 'Exportar PDF' },
+                { extend: 'print', text: 'Imprimir' }
+            ]
+        });
+    });
+</script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
@@ -76,68 +95,51 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var labels = {{ labels| raw
-    }};
-    var dataCounts = {{ data_counts| raw }};
-    var totalJams = dataCounts.reduce((a, b) => a + b, 0);
+        var labels = {{ labels|raw }};
+        var dataCounts = {{ data_counts|raw }};
+        var totalJams = dataCounts.reduce((a, b) => a + b, 0);
 
-    const ctx = document.getElementById('alertsChart').getContext('2d');
-    window.myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Número de Congestionamentos',
-                data: dataCounts,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                datalabels: {
-                    anchor: 'end',
-                    align: 'top',
-                    formatter: (value) => {
-                        return `${value} (${((value / totalJams) * 100).toFixed(1)}%)`;
-                    }
-                }
+        const ctx = document.getElementById('alertsChart').getContext('2d');
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Número de Congestionamentos',
+                    data: dataCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                y: { beginAtZero: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => {
+                            return `${value} (${((value / totalJams) * 100).toFixed(1)}%)`;
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
             }
+        });
+
+        document.getElementById('alertsChart').onclick = function (evt) {
+            const points = window.myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+            if (points.length) {
+                const clickedLabel = window.myChart.data.labels[points[0].index];
+                filterTable(clickedLabel);
+            }
+        };
+
+        function filterTable(label) {
+            const table = jq('#jamsTable').DataTable();
+            table.search(label).draw();
         }
-    });
-
-    document.getElementById('alertsChart').onclick = function (evt) {
-        const points = window.myChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
-        if (points.length) {
-            const clickedLabel = window.myChart.data.labels[points[0].index];
-            filterTable(clickedLabel);
-        }
-    };
-
-    function filterTable(label) {
-        const table = jq('#jamsTable').DataTable();
-        table.search(label).draw();
-    }
-
-    jq('#jamsTable').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: true,
-        pageLength: 15,
-        dom: 'Bfrtip',
-        buttons: [
-            { extend: 'copy', text: 'Copiar' },
-            { extend: 'csv', text: 'Exportar CSV' },
-            { extend: 'excel', text: 'Exportar Excel' },
-            { extend: 'pdf', text: 'Exportar PDF' },
-            { extend: 'print', text: 'Imprimir' }
-        ]
-    });
     });
 </script>
