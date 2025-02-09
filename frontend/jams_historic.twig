@@ -124,7 +124,7 @@
             const { labels, data, tableData, total } = groupData(groupBy);
             
             // Atualizar gráfico
-            if(chartInstance) chartInstance.destroy();
+            if (chartInstance) chartInstance.destroy();
             
             const ctx = document.getElementById('alertsChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -166,6 +166,7 @@
             const tableHead = document.querySelector('#jamsTable thead');
             const tableBody = document.querySelector('#jamsTable tbody');
             
+            // Títulos das colunas
             tableHead.innerHTML = `
                 <tr>
                     <th>${groupBy === 'date' ? 'Data' : 
@@ -176,6 +177,7 @@
                 </tr>
             `;
             
+            // Preenchendo as linhas da tabela com os dados agrupados
             tableBody.innerHTML = tableData.map(item => `
                 <tr>
                     <td>${item.key}</td>
@@ -185,7 +187,7 @@
             `).join('');
     
             // Reinicializar DataTable
-            if(dataTableInstance) dataTableInstance.destroy();
+            if (dataTableInstance) dataTableInstance.destroy();
             
             dataTableInstance = jq('#jamsTable').DataTable({
                 paging: true,
@@ -207,5 +209,4 @@
         updateViews();
     });
     </script>
-    
     
