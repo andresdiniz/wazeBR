@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de URLs</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+        .modal-footer {
+            justify-content: flex-start;
+        }
+        .btn-close {
+            background-color: transparent;
+            border: none;
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-4 mb-4">
@@ -119,9 +133,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="createModalLabel">Adicionar URL</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
                     </div>
                     <div class="modal-body">
                         <form id="createForm">
@@ -133,7 +145,10 @@
                                 <label for="createUrl">URL</label>
                                 <input type="text" class="form-control" id="createUrl" name="url" required>
                             </div>
-                            <button type="submit" class="btn btn-success">Salvar</button>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-success">Salvar</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -146,10 +161,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">Editar URL</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                   div>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                    </div>
                     <div class="modal-body">
                         <form id="editForm">
                             <input type="hidden" id="editId" name="id">
@@ -161,49 +174,55 @@
                                 <label for="editUrl">URL</label>
                                 <input type="text" class="form-control" id="editUrl" name="url" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar</button>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Preenche o modal de edição com os dados da URL selecionada
-        $('#editModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var id = button.data('id');
-            var id_parceiro = button.data('id_parceiro');
-            var url = button.data('url');
-            
-            var modal = $(this);
-            modal.find('#editId').val(id);
-            modal.find('#editIdParceiro').val(id_parceiro);
-            modal.find('#editUrl').val(url);
-        });
 
-        // Função para excluir URL
-        function deleteUrl(id) {
-            if (confirm('Tem certeza que deseja excluir esta URL?')) {
-                // Lógica para excluir a URL
-                console.log('URL excluída: ' + id);
-            }
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Preenche o modal de edição com os dados da URL selecionada
+    $('#editModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var id_parceiro = button.data('id_parceiro');
+        var url = button.data('url');
+        
+        var modal = $(this);
+        modal.find('#editId').val(id);
+        modal.find('#editIdParceiro').val(id_parceiro);
+        modal.find('#editUrl').val(url);
+    });
+
+    // Função para excluir URL
+    function deleteUrl(id) {
+        if (confirm('Tem certeza que deseja excluir esta URL?')) {
+            // Lógica para excluir a URL
+            console.log('URL excluída: ' + id);
+            // Aqui você pode adicionar a lógica para excluir a URL do banco de dados
         }
+    }
 
-        // Lógica para enviar os formulários de criação e edição
-        $('#createForm').on('submit', function (event) {
-            event.preventDefault();
-            // Lógica para criar nova URL
-            console.log('Nova URL criada');
-        });
+    // Lógica para enviar o formulário de criação
+    $('#createForm').on('submit', function (event) {
+        event.preventDefault();
+        // Lógica para criar nova URL
+        console.log('Nova URL criada');
+        // Aqui você pode adicionar a lógica para enviar os dados para o servidor e criar a nova URL
+    });
 
-        $('#editForm').on('submit', function (event) {
-            event.preventDefault();
-            // Lógica para editar URL existente
-            console.log('URL editada');
-        });
-    </script>
+    // Lógica para enviar o formulário de edição
+    $('#editForm').on('submit', function (event) {
+        event.preventDefault();
+        // Lógica para editar URL existente
+        console.log('URL editada');
+        // Aqui você pode adicionar a lógica para enviar os dados para o servidor e atualizar a URL existente
+    });
+</script>
