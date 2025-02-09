@@ -87,7 +87,11 @@ $dados = [ //Manter como dados, devido interferencia com a variavel data passada
     'pagedata' => $pageData,  // Passando o título para o template
 ];
 
-$combinedData = array_merge($dados, $data);
+$combinedData = [
+    'data' => $data,
+    'dados' => daodos,
+    ]
+
 
 // Renderiza os componentes fixos
 echo $twig->render('header.twig', $dados);
