@@ -110,7 +110,7 @@ try {
     if (file_exists($controllerPath)) {
         require_once $controllerPath; // O controlador pode manipular $data
     }
-echo $twig->render($templatePath, $combinedData);
+echo $twig->render($templatePath, $data);
     var_dump($dados);
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
