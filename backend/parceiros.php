@@ -82,11 +82,33 @@ function getUrlsAlerts(PDO $pdo, $id_parceiro) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getParceiros(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT * 
+        FROM parceiros 
+    ";
+    
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= "WHERE id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    // Se necessário, vincula o parâmetro do parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 $data = [
     'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
     'urls_alerts' => getUrlsEvents($pdo, $id_parceiro),
     'urls_events' => getUrlsAlerts($pdo, $id_parceiro),
-    'parceiros' => getUrlsAlerts($pdo, $id_parceiro),
+    'parceiros' => getParceiros($pdo, $id_parceiro),
 
 ];
 
