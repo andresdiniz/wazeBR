@@ -79,7 +79,7 @@
                         key = new Date(item.date_received).toLocaleDateString();
                         break;
                     case 'hour':
-                        key = new Date(item.date_received).getHours() + ':00';
+                        key = new Date(item.date_received).getHours();  // Usar valor numérico da hora (0-23)
                         break;
                     default:
                         key = item[field];
@@ -99,8 +99,11 @@
             }));
     
             // Ordenação
-            if (field === 'hour' || field === 'date') {
-                // Ordenação crescente para hora e data
+            if (field === 'hour') {
+                // Ordenação crescente para hora (de 0 a 23)
+                tableData.sort((a, b) => a.key - b.key);
+            } else if (field === 'date') {
+                // Ordenação crescente para data
                 tableData.sort((a, b) => new Date(a.key) - new Date(b.key));
             } else {
                 // Ordenação decrescente para os outros campos
