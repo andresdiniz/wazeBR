@@ -138,8 +138,20 @@
                     <div class="modal-body">
                         <form id="createForm">
                             <div class="form-group">
-                                <label for="createIdParceiro">ID Parceiro</label>
-                                <input type="text" class="form-control" id="createIdParceiro" name="id_parceiro" required>
+                                <label for="createIdParceiro">Parceiro</label>
+                                <select class="form-control" id="createIdParceiro" name="id_parceiro" required>
+                                    {% for parceiro in parceiros %}
+                                    <option value="{{ parceiro.id }}">{{ parceiro.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="createNomeTabela">Nome da Tabela</label>
+                                <select class="form-control" id="createNomeTabela" name="nome_tabela" required>
+                                    <option value="urls_traffic">URLs de Tráfego</option>
+                                    <option value="urls_alerts">URLs de Alertas</option>
+                                    <option value="urls_events">URLs de Eventos</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="createUrl">URL</label>
