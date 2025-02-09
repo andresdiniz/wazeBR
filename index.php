@@ -87,12 +87,6 @@ $dados = [ //Manter como dados, devido interferencia com a variavel data passada
     'pagedata' => $pageData,  // Passando o título para o template
 ];
 
-$combinedData = [
-    'data' => $data,
-    'dados' => $dados,
-    ];
-
-
 // Renderiza os componentes fixos
 echo $twig->render('header.twig', $dados);
 echo $twig->render('sidebar.twig', $dados);
@@ -115,7 +109,13 @@ try {
         require_once $controllerPath; // O controlador pode manipular $data
     }
 echo $twig->render($templatePath, $data);
-var_dump($combinedData);
+/* Tesye para tornar mais modular
+$combinedData = [
+    'data' => $data,
+    'dados' => $dados,
+    ];
+
+var_dump($combinedData);*/
 
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
