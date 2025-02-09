@@ -967,7 +967,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmtEvent->bindParam(':endtime', $endtime, PDO::PARAM_STR);
                 $stmtEvent->bindParam(':direction', $directionValue, PDO::PARAM_STR);
                 $stmtEvent->bindParam(':description', $description, PDO::PARAM_STR);
-                $tsmtEvent->bindParam(':id_parceiro',id_parceiro,PDO::PARAM_STR);
+                $stmtEvent->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_STR);
 
                 if ($stmtEvent->execute()) {
                     $eventId = $pdo->lastInsertId();
