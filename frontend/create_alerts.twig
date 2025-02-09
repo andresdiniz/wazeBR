@@ -14,7 +14,7 @@
                 <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">
 
                     <div>
-                        <input type="hidden" name="id_usuario"></input>,
+                        <input type="hidden" name="id_usuario" value="$_SESSION['usuario_id_parceiro']"></input>,
                     </div>
 
                    <!-- Nome e descrição do evento -->
