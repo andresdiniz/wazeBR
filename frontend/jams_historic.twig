@@ -122,11 +122,6 @@
         function updateViews() {
             const groupBy = document.getElementById('groupBy').value;
             const { labels, data, tableData, total } = groupData(groupBy);
-            
-            // Atualizar gráfico
-            if (chartInstance) chartInstance.destroy();
-            
-            const ctx = document.getElementById('alertsChart').getContext('2d');
 
             const colors = data.map(value => {
                 return value > 50 ? '#FF4C4C' : value > 20 ? '#FF9E00' : '#50B947';  // Vermelho, laranja, verde
@@ -142,6 +137,12 @@
             }]
     
             
+            // Atualizar gráfico
+            if (chartInstance) chartInstance.destroy();
+            
+            const ctx = document.getElementById('alertsChart').getContext('2d');
+    
+
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
