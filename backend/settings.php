@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('degugger.log',1);
+
 
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
@@ -123,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
         }
     
     // Outras ações de formulário aqui...
-    
+
     }
 }
 
