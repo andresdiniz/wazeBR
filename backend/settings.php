@@ -1,7 +1,7 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-ini_set('degugger.log',1);
+ini_set('error_log', 'php_error.log');  // Defina o caminho do arquivo de log
 
 
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
@@ -100,35 +100,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             $user_id = 1; // Definir um usuário padrão, se necessário
             $template = "default"; // Definir um template padrão
     
-            // Query de inserção com Prepared Statement
-            $sql = "INSERT INTO pages (title, url, description, featured_image, status, meta_title, meta_description, show_in_nav, user_id, template) 
-                    VALUES (:title, :url, :description, :image, :status, :meta_title, :meta_description, :show_in_nav, :user_id, :template)";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':title', $title);
-            $stmt->bindParam(':url', $url);
-            $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':image', $image);
-            $stmt->bindParam(':status', $status);
-            $stmt->bindParam(':meta_title', $meta_title);
-            $stmt->bindParam(':meta_description', $meta_description);
-            $stmt->bindParam(':show_in_nav', $show_in_nav, PDO::PARAM_INT);
-            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-            $stmt->bindParam(':template', $template);
+            try {
+                // Query de inserção com Prepared Statement
+                $sql = "INSERT INTO pages (title, url, description, featured_image, status, meta_title, meta_description, show_in_nav, user_id, template) 
+                        VALUES (:title, :url, :description, :image, :status, :meta_title, :meta_description, :show_in_nav, :user_id, :template)";
+                
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':title', $title);
+                $stmt->bindParam(':url', $url);
+                $stmt->bindParam(':description', $description);
+                $stmt->bindParam(':image', $image);
+                $stmt->bindParam(':status', $status);
+                $stmt->bindParam(':meta_title', $meta_title);
+                $stmt->bindParam(':meta_description', $meta_description);
+                $stmt->bindParam(':show_in_nav', $show_in_nav, PDO::PARAM_INT);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->bindParam(':template', $template);
     
-            // Executar o INSERT
-            if ($stmt->execute()) {
-                echo "Nova página adicionada com sucesso!";
-            } else {
-                echo "Erro ao adicionar a página.";
+                // Executar o INSERT
+                if ($stmt->execute()) {
+                    echo "Nova página adicionada com sucesso!";
+                } else {
+                    // Caso o execute falhe, mostre o erro
+                    echo "Erro ao adicionar a página: " . implode(", ", $stmt->errorInfo());
+                }
+            } catch (PDOException $e) {
+                // Caso ocorra um erro com o banco, captura e exibe
+                echo "Erro no banco de dados: " . $e->getMessage();
             }
         } else {
             echo "Campos obrigatórios não preenchidos.";
         }
-    
-    // Outras ações de formulário aqui...
-
     }
+
+    // Outros tipos de formulários podem ser adicionados aqui...
 }
 
 // Buscar dados para passar para o template
