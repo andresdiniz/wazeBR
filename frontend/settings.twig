@@ -476,6 +476,7 @@
 </div>
 
 <!-- Modal de Editar Parceiro -->
+<!-- Modal de Editar Parceiro -->
 <div class="modal fade" id="editPartnerModal" tabindex="-1" role="dialog" aria-labelledby="editPartnerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -484,7 +485,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <form id="editPartnerForm" method="post" action="update_partner">
+                <form id="editPartnerForm" method="post" action="">
+                    <input type="hidden" name="form_type" value="edit_partner">
                     <input type="hidden" id="editId" name="id">
                     <div class="mb-3">
                         <label for="editNome" class="form-label">Nome</label>
@@ -503,6 +505,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
 $(document).ready(function() {

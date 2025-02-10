@@ -46,73 +46,18 @@ function getSitepagesAll($pdo) {
 
 // Lidar com as ações
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $action = $_POST['action'] ?? ''; // Obter a ação enviada pelo JavaScript
+    if (isset($_POST['form_type'])) {
+        if ($_POST['form_type'] == "edit_partner") {
+            $id = $_POST['id'];
+            $nome = $_POST['Nome'];
+            $identificador = $_POST['name_partner'];
 
-    switch ($action) {
-        case 'delete_partner':
-            $id = $_POST['id'] ?? null;
-            if ($id) {
-                $stmt = $pdo->prepare("DELETE FROM parceiros WHERE id = ?");
-                $stmt->execute([$id]);
-
-                if ($stmt->rowCount() > 0) {
-                    echo json_encode(['success' => true]);
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'Erro ao excluir parceiro ou parceiro não encontrado.']);
-                }
-            } else {
-                echo json_encode(['success' => false, 'message' => 'ID do parceiro não fornecido.']);
-            }
-            break;
-
-        case 'create_partner':
-            // Coletar dados do formulário
-            $nome = $_POST['nome'] ?? '';
-            $identificador = $_POST['identificador'] ?? '';
-            
-            if ($nome && $identificador) {
-                $stmt = $pdo->prepare("INSERT INTO parceiros (nome, identificador) VALUES (?, ?)");
-                $stmt->execute([$nome, $identificador]);
-                
-                if ($stmt->rowCount() > 0) {
-                    echo json_encode(['success' => true]);
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'Erro ao criar parceiro.']);
-                }
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
-            }
-            break;
-
-        case 'update_partner':
-            // Coletar dados do formulário de edição
-            $id = $_POST['id'] ?? null;
-            $nome = $_POST['Nome'] ?? '';
-            $identificador = $_POST['name_partner'] ?? '';
-
-            logToFile('log.txt', $id);
-            logToFile('log.txt', $nome);    
-            
-            if ($id && $nome && $identificador) {
-                $stmt = $pdo->prepare("UPDATE parceiros SET nome = ?, identificador = ? WHERE id = ?");
-                $stmt->execute([$nome, $identificador, $id]);
-                
-                if ($stmt->rowCount() > 0) {
-                    echo json_encode(['success' => true]);
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar parceiro ou nenhum dado alterado.']);
-                }
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
-            }
-            break;
-
-        default:
-            echo json_encode(['success' => false, 'message' => 'Ação não reconhecida.']);
-            break;
+            // Processamento específico para editar o parceiro
+            echo "Editando parceiro: ID $id, Nome $nome, Identificador $identificador";
+        } elseif ($_POST['form_type'] == "outro_formulario") {
+            // Tratamento para outro formulário
+        }
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Método de requisição inválido.']);
 }
 
 // Buscar dados para passar para o template
