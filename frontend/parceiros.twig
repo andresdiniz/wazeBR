@@ -1,239 +1,233 @@
-    <style>
-        .modal-header {
-            background-color: #007bff;
-            color: white;
-        }
-        .modal-footer {
-            justify-content: flex-start;
-        }
-        .btn-close {
-            background-color: transparent;
-            border: none;
-            font-size: 1.5rem;
-        }
-    </style>
+<style>
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .modal-footer {
+        justify-content: flex-start;
+    }
+    .btn-close {
+        background-color: transparent;
+        border: none;
+        font-size: 1.5rem;
+    }
+</style>
 </head>
 <body>
-    <div class="container mt-4 mb-4">
-        <div class="row">
-            <div class="col-lg-6 mb-3">
-                <h3 class="text-primary">Gerenciamento de URLs</h3>
-            </div>
-            <div class="col-lg-6 mb-3 text-right">
-                <button class="btn btn-success" data-toggle="modal" data-target="#createModal">Adicionar URL</button>
-            </div>
+<div class="container mt-4 mb-4">
+    <div class="row">
+        <div class="col-lg-6 mb-3">
+            <h3 class="text-primary">Gerenciamento de URLs</h3>
         </div>
-        
-        <!-- Tabela de URLs de Tráfego -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Tráfego</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_traffic %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="col-lg-6 mb-3 text-right">
+            <button class="btn btn-success" data-toggle="modal" data-target="#createModal">Adicionar URL</button>
         </div>
-
-        <!-- Tabela de URLs de Alertas -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Alertas</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_alerts %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela de URLs de Eventos -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Eventos</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_events %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Modal de Criação -->
-<!-- Modal de Criação -->
-<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createModalLabel">Adicionar URL</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="createForm">
-                    <div class="mb-3">
-                        <label for="createIdParceiro" class="form-label">Parceiro</label>
-                        <select class="form-control" id="createIdParceiro" name="id_parceiro" required>
-                            {% for parceiro in parceiros %}
-                            <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="createNomeTabela" class="form-label">Nome da Tabela</label>
-                        <select class="form-control" id="createNomeTabela" name="nome_tabela" required>
-                            <option value="urls_traffic">URLs de Tráfego</option>
-                            <option value="urls_alerts">URLs de Alertas</option>
-                            <option value="urls_events">URLs de Eventos</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="createUrl" class="form-label">URL</label>
-                        <input type="url" class="form-control" id="createUrl" name="url" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-success" form="createForm">Salvar</button>
+    </div>
+    
+    <!-- Tabela de URLs de Tráfego -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm p-4">
+                <h4>URLs de Tráfego</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Parceiro</th>
+                            <th>URL</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for url in urls_traffic %}
+                        <tr>
+                            <td>{{ url.id }}</td>
+                            <td>{{ url.id_parceiro }}</td>
+                            <td>{{ url.url }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
+                                <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal de Edição -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Editar URL</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" id="editId" name="id">
-                    
-                    <div class="mb-3">
-                        <label for="editIdParceiro" class="form-label">ID Parceiro</label>
-                        <input type="text" class="form-control" id="editIdParceiro" name="id_parceiro" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="editUrl" class="form-label">URL</label>
-                        <input type="url" class="form-control" id="editUrl" name="url" required aria-describedby="urlHelp">
-                        <small id="urlHelp" class="form-text text-muted">Insira um URL válido.</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" form="editForm">Salvar</button>
+    <!-- Tabela de URLs de Alertas -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm p-4">
+                <h4>URLs de Alertas</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Parceiro</th>
+                            <th>URL</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for url in urls_alerts %}
+                        <tr>
+                            <td>{{ url.id }}</td>
+                            <td>{{ url.id_parceiro }}</td>
+                            <td>{{ url.url }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
+                                <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Bootstrap e JavaScript -->
+    <!-- Tabela de URLs de Eventos -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm p-4">
+                <h4>URLs de Eventos</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Parceiro</th>
+                            <th>URL</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for url in urls_events %}
+                        <tr>
+                            <td>{{ url.id }}</td>
+                            <td>{{ url.id_parceiro }}</td>
+                            <td>{{ url.url }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
+                                <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Criação -->
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createModalLabel">Adicionar URL</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="createForm">
+                        <div class="form-group">
+                            <label for="createIdParceiro">Parceiro</label>
+                            <select class="form-control" id="createIdParceiro" name="id_parceiro" required>
+                                {% for parceiro in parceiros %}
+                                <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="createNomeTabela">Nome da Tabela</label>
+                            <select class="form-control" id="createNomeTabela" name="nome_tabela" required>
+                                <option value="urls_traffic">URLs de Tráfego</option>
+                                <option value="urls_alerts">URLs de Alertas</option>
+                                <option value="urls_events">URLs de Eventos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="createUrl">URL</label>
+                            <input type="text" class="form-control" id="createUrl" name="url" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar URL</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId" name="id">
+                        <div class="form-group">
+                            <label for="editIdParceiro">ID Parceiro</label>
+                            <input type="text" class="form-control" id="editIdParceiro" name="id_parceiro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editUrl">URL</label>
+                            <input type="text" class="form-control" id="editUrl" name="url" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var editModal = document.getElementById("editModal");
+// Preenche o modal de edição com os dados da URL selecionada
+$('#editModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var id = button.data('id');
+    var id_parceiro = button.data('id_parceiro');
+    var url = button.data('url');
+    
+    var modal = $(this);
+    modal.find('#editId').val(id);
+    modal.find('#editIdParceiro').val(id_parceiro);
+    modal.find('#editUrl').val(url);
+});
 
-        editModal.addEventListener("show.bs.modal", function (event) {
-            var button = event.relatedTarget; // Botão que acionou o modal
-            if (!button) return; // Caso não tenha botão, evita erro
-            
-            var id = button.getAttribute("data-id");
-            var id_parceiro = button.getAttribute("data-id_parceiro");
-            var url = button.getAttribute("data-url");
+// Função para excluir URL
+function deleteUrl(id) {
+    if (confirm('Tem certeza que deseja excluir esta URL?')) {
+        // Lógica para excluir a URL
+        console.log('URL excluída: ' + id);
+        // Aqui você pode adicionar a lógica para excluir a URL do banco de dados
+    }
+}
 
-            document.getElementById("editId").value = id;
-            document.getElementById("editIdParceiro").value = id_parceiro;
-            document.getElementById("editUrl").value = url;
-        });
+// Lógica para enviar o formulário de criação
+$('#createForm').on('submit', function (event) {
+    event.preventDefault();
+    // Lógica para criar nova URL
+    console.log('Nova URL criada');
+    // Aqui você pode adicionar a lógica para enviar os dados para o servidor e criar a nova URL
+});
 
-        // Função para excluir URL
-        window.deleteUrl = function (id) {
-            if (confirm("Tem certeza que deseja excluir esta URL?")) {
-                console.log("URL excluída: " + id);
-            }
-        };
-
-        // Fechar modal ao salvar
-        document.getElementById("createForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            console.log("Nova URL criada");
-            var modal = bootstrap.Modal.getInstance(document.getElementById("createModal"));
-            modal.hide();
-        });
-
-        document.getElementById("editForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            console.log("URL editada");
-            var modal = bootstrap.Modal.getInstance(document.getElementById("editModal"));
-            modal.hide();
-        });
-    });
+// Lógica para enviar o formulário de edição
+$('#editForm').on('submit', function (event) {
+    event.preventDefault();
+    // Lógica para editar URL existente
+    console.log('URL editada');
+    // Aqui você pode adicionar a lógica para enviar os dados para o servidor e atualizar a URL existente
+});
 </script>
