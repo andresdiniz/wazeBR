@@ -563,7 +563,7 @@ $(document).ready(function() {
             console.log('Parceiro excluído: ' + id);
 
             // Enviar a requisição de exclusão para o PHP
-            fetch('/backend/settings.php', {
+            fetch('wazeportal/backend/settings.php', {
                 method: 'POST',
                 body: new URLSearchParams({
                     'action': 'delete_partner',
@@ -594,7 +594,7 @@ $(document).ready(function() {
         event.preventDefault();
         const formData = $(this).serialize(); // Coleta os dados do formulário
         
-        fetch('/backend/settings.php', {
+        fetch('wazeportal/backend/settings.php', {
             method: 'POST',
             body: new URLSearchParams(formData + '&action=create_partner'),
             headers: {
@@ -621,7 +621,7 @@ $(document).ready(function() {
         event.preventDefault();
         const formData = $(this).serialize(); // Coleta os dados do formulário
         
-        fetch('/backend/settings.php', {
+        fetch('wazeportal/backend/settings.php', {
             method: 'POST',
             body: new URLSearchParams(formData + '&action=edit_partner'),
             headers: {
