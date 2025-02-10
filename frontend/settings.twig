@@ -219,7 +219,6 @@
 </div>
 
 <!-- Modal Configurações - Versão Melhorada -->
-<!-- Modal Configurações - Versão Melhorada -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
@@ -231,7 +230,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form action="process_settings.php" method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-0">
                     <!-- Menu Lateral -->
                     <div class="d-flex flex-wrap flex-lg-nowrap">
@@ -254,6 +253,7 @@
                         <div class="tab-content flex-grow-1 p-4">
                             <!-- Aba Geral -->
                             <div class="tab-pane fade show active" id="tab-geral">
+                                <input type="hidden" name="form_type" value="update_general">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Informações Básicas</label>
                                     <input type="text" class="form-control mb-3" name="systemname" placeholder="Nome do Sistema" required>
@@ -279,6 +279,7 @@
 
                             <!-- Aba Aparência -->
                             <div class="tab-pane fade" id="tab-aparencia">
+                                <input type="hidden" name="form_type" value="update_appearance">
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <div class="card border-0 shadow-sm h-100">
@@ -328,6 +329,7 @@
 
                             <!-- Aba SEO -->
                             <div class="tab-pane fade" id="tab-seo">
+                                <input type="hidden" name="form_type" value="update_seo">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Configurações SEO</label>
                                     <input type="text" class="form-control mb-2" name="seo_keywords" placeholder="Palavras-chave (separadas por vírgula)">
@@ -337,6 +339,7 @@
 
                             <!-- Aba Segurança -->
                             <div class="tab-pane fade" id="tab-seguranca">
+                                <input type="hidden" name="form_type" value="update_security">
                                 <div class="alert alert-warning mb-3">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     Configurações sensíveis - modifique com cuidado

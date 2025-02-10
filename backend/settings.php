@@ -195,6 +195,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             }
             break;
 
+        // Geral
+        case 'update_general':
+            if (isset($_POST['systemname'])) {
+                $systemname = trim($_POST['systemname']);
+                $contact_email = trim($_POST['contact_email']);
+                $admin_email = trim($_POST['admin_email']);
+                $timezone = $_POST['timezone'];
+
+                $sql = "UPDATE system_settings SET system_name = :systemname, contact_email = :contact_email, admin_email = :admin_email, timezone = :timezone WHERE id = 1";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':systemname', $systemname);
+                $stmt->bindParam(':contact_email', $contact_email);
+                $stmt->bindParam(':admin_email', $admin_email);
+                $stmt->bindParam(':timezone', $timezone);
+                $stmt->execute();
+            }
+            break;
+
+        // Aparência
+        case 'update_appearance':
+            if (isset($_POST['theme_color']) || isset($_FILES['logo'])) {
+                $theme_color = $_POST['theme_color'] ?? null;
+                $logo = $_FILES['logo'] ?? null;
+
+                // Se houver logo, faça o upload e salve o caminho
+                if ($logo && $logo['error'] === UPLOAD_ERR_OK) {
+                    $logo_path = 'uploads/' . basename($logo['name']);
+                    move_uploaded_file($logo['tmp_name'], $logo_path);
+                }
+
+                $sql = "UPDATE appearance_settings SET theme_color = :theme_color, logo = :logo WHERE id = 1";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':theme_color', $theme_color);
+                $stmt->bindParam(':logo', $logo_path ?? null);
+                $stmt->execute();
+            }
+            break;
+
+        // SEO
+        case 'update_seo':
+            if (isset($_POST['seo_keywords']) || isset($_POST['google_analytics_id'])) {
+                $seo_keywords = $_POST['seo_keywords'] ?? null;
+                $google_analytics_id = $_POST['google_analytics_id'] ?? null;
+
+                $sql = "UPDATE seo_settings SET seo_keywords = :seo_keywords, google_analytics_id = :google_analytics_id WHERE id = 1";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':seo_keywords', $seo_keywords);
+                $stmt->bindParam(':google_analytics_id', $google_analytics_id);
+                $stmt->execute();
+            }
+            break;
+
+        // Segurança
+        case 'update_security':
+            if (isset($_POST['manutencao']) || isset($_POST['cookie_consent']) || isset($_POST['max_login_attempts'])) {
+                $manutencao = isset($_POST['manutencao']) ? 1 : 0;
+                $cookie_consent = isset($_POST['cookie_consent']) ? 1 : 0;
+                $max_login_attempts = $_POST['max_login_attempts'] ?? 5;
+
+                $sql = "UPDATE security_settings SET manutencao = :manutencao, cookie_consent = :cookie_consent, max_login_attempts = :max_login_attempts WHERE id = 1";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':manutencao', $manutencao);
+                $stmt->bindParam(':cookie_consent', $cookie_consent);
+                $stmt->bindParam(':max_login_attempts', $max_login_attempts);
+                $stmt->execute();
+            }
+            break;
+
         // Caso de ação não reconhecida
         default:
             echo json_encode(["success" => false, "message" => "Ação não reconhecida."]);
