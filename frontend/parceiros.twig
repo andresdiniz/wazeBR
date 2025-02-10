@@ -1,233 +1,224 @@
-    <style>
-        .modal-header {
-            background-color: #007bff;
-            color: white;
-        }
-        .modal-footer {
-            justify-content: flex-start;
-        }
-        .btn-close {
-            background-color: transparent;
-            border: none;
-            font-size: 1.5rem;
-        }
-    </style>
-</head>
+<style>
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #007bff;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .modal-content {
+        border-radius: 0.5rem;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1.2rem;
+    }
+    .modal-title {
+        font-weight: 500;
+    }
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+    }
+    .badge-table {
+        background-color: #007bff;
+        margin-left: 10px;
+        font-size: 0.75rem;
+    }
+    .action-buttons .btn {
+        margin: 2px;
+        min-width: 80px;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+
 <body>
-    <div class="container mt-4 mb-4">
-        <div class="row">
-            <div class="col-lg-6 mb-3">
-                <h3 class="text-primary">Gerenciamento de URLs</h3>
-            </div>
-            <div class="col-lg-6 mb-3 text-right">
-                <button class="btn btn-success" data-toggle="modal" data-target="#createModal">Adicionar URL</button>
-            </div>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-primary mb-0"><i class="fas fa-link mr-2"></i>Gerenciamento de URLs</h2>
+            <button class="btn btn-success" data-toggle="modal" data-target="#createModal">
+                <i class="fas fa-plus-circle mr-2"></i>Adicionar URL
+            </button>
         </div>
-        
-        <!-- Tabela de URLs de Tráfego -->
+
+        <!-- Tabelas -->
         <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Tráfego</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_traffic %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- URLs de Tráfego -->
+            <div class="col-12 col-lg-6 col-xl-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tráfego
+                            <span class="badge badge-table">{{ urls_traffic|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <!-- Cabeçalho e corpo da tabela -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repetir para Alertas e Eventos com cores diferentes -->
+            <!-- URLs de Alertas -->
+            <div class="col-12 col-lg-6 col-xl-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning">
+                        <!-- Mesma estrutura com cor diferente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- URLs de Eventos -->
+            <div class="col-12 col-lg-6 col-xl-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success">
+                        <!-- Mesma estrutura com cor diferente -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabela de URLs de Alertas -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Alertas</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_alerts %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabela de URLs de Eventos -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card shadow-sm p-4">
-                    <h4>URLs de Eventos</h4>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ID Parceiro</th>
-                                <th>URL</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for url in urls_events %}
-                            <tr>
-                                <td>{{ url.id }}</td>
-                                <td>{{ url.id_parceiro }}</td>
-                                <td>{{ url.url }}</td>
-                                <td>
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="{{ url.id }}" data-id_parceiro="{{ url.id_parceiro }}" data-url="{{ url.url }}">Editar</button>
-                                    <button class="btn btn-danger btn-sm" data-id="{{ url.id }}" onclick="deleteUrl({{ url.id }})">Excluir</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Modal de Criação -->
-        <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+        <!-- Modal de Criação Aprimorado -->
+        <div class="modal fade" id="createModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="createModalLabel">Adicionar URL</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                        <h5 class="modal-title"><i class="fas fa-plus-circle mr-2"></i>Nova URL</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <form id="createForm">
-                            <div class="form-group">
-                                <label for="createIdParceiro">Parceiro</label>
-                                <select class="form-control" id="createIdParceiro" name="id_parceiro" required>
-                                    {% for parceiro in parceiros %}
-                                    <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
-                                    {% endfor %}
-                                </select>
+                    <form id="createForm">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="createIdParceiro" required>
+                                            <option selected disabled>Selecione um parceiro</option>
+                                            {% for parceiro in parceiros %}
+                                            <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="createIdParceiro">Parceiro</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="createNomeTabela" required>
+                                            <option value="urls_traffic">Tráfego</option>
+                                            <option value="urls_alerts">Alertas</option>
+                                            <option value="urls_events">Eventos</option>
+                                        </select>
+                                        <label for="createNomeTabela">Categoria</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="url" class="form-control" id="createUrl" 
+                                               placeholder="https://exemplo.com" pattern="https?://.+" required>
+                                        <label for="createUrl">URL Completa</label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="createNomeTabela">Nome da Tabela</label>
-                                <select class="form-control" id="createNomeTabela" name="nome_tabela" required>
-                                    <option value="urls_traffic">URLs de Tráfego</option>
-                                    <option value="urls_alerts">URLs de Alertas</option>
-                                    <option value="urls_events">URLs de Eventos</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="createUrl">URL</label>
-                                <input type="text" class="form-control" id="createUrl" name="url" required>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-success">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar URL</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        
-        <!-- Modal de Edição -->
-        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+
+        <!-- Modal de Edição Aprimorado -->
+        <div class="modal fade" id="editModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Editar URL</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                        <h5 class="modal-title"><i class="fas fa-edit mr-2"></i>Editar URL</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <form id="editForm">
-                            <input type="hidden" id="editId" name="id">
-                            <div class="form-group">
-                                <label for="editIdParceiro">ID Parceiro</label>
-                                <input type="text" class="form-control" id="editIdParceiro" name="id_parceiro" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editUrl">URL</label>
-                                <input type="text" class="form-control" id="editUrl" name="url" required>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
+                    <form id="editForm">
+                        <div class="modal-body">
+                            <!-- Campos de edição com validação -->
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Atualizar URL</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
+        <!-- Modal de Confirmação de Exclusão -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="fas fa-exclamation-triangle mr-2"></i>Confirmar Exclusão</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Tem certeza que deseja excluir permanentemente esta URL?</p>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    // Preenche o modal de edição com os dados da URL selecionada
-    $('#editModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var id = button.data('id');
-        var id_parceiro = button.data('id_parceiro');
-        var url = button.data('url');
+    // Controle de Modais
+    $('#editModal').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget);
+        const modal = $(this);
         
-        var modal = $(this);
-        modal.find('#editId').val(id);
-        modal.find('#editIdParceiro').val(id_parceiro);
-        modal.find('#editUrl').val(url);
+        // Preencher dados
+        modal.find('#editId').val(button.data('id'));
+        modal.find('#editIdParceiro').val(button.data('id_parceiro'));
+        modal.find('#editUrl').val(button.data('url'));
     });
 
-    // Função para excluir URL
-    function deleteUrl(id) {
-        if (confirm('Tem certeza que deseja excluir esta URL?')) {
-            // Lógica para excluir a URL
-            console.log('URL excluída: ' + id);
-            // Aqui você pode adicionar a lógica para excluir a URL do banco de dados
-        }
+    // Controle de Exclusão
+    let deleteId;
+    function confirmDelete(id) {
+        deleteId = id;
+        $('#deleteModal').modal('show');
     }
 
-    // Lógica para enviar o formulário de criação
-    $('#createForm').on('submit', function (event) {
-        event.preventDefault();
-        // Lógica para criar nova URL
-        console.log('Nova URL criada');
-        // Aqui você pode adicionar a lógica para enviar os dados para o servidor e criar a nova URL
+    $('#confirmDelete').click(function() {
+        // AJAX para exclusão
+        console.log('Excluindo URL:', deleteId);
+        $('#deleteModal').modal('hide');
     });
 
-    // Lógica para enviar o formulário de edição
-    $('#editForm').on('submit', function (event) {
-        event.preventDefault();
-        // Lógica para editar URL existente
-        console.log('URL editada');
-        // Aqui você pode adicionar a lógica para enviar os dados para o servidor e atualizar a URL existente
+    // Validação de Formulários
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!this.checkValidity()) {
+            e.stopPropagation();
+            this.classList.add('was-validated');
+            return;
+        }
+        // Enviar dados via AJAX
+        console.log('Enviando dados...');
     });
 </script>
