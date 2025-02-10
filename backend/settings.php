@@ -74,30 +74,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
         }
     }
     if ($_POST['form_type'] === "new_page") {
+        // Verifica apenas os campos obrigatórios
         if (
             !empty($_POST['title']) &&
             !empty($_POST['url']) &&
-            !empty($_POST['description']) &&
-            !empty($_POST['featured_image']) &&
-            !empty($_POST['status']) &&
-            !empty($_POST['meta_title']) &&
-            !empty($_POST['meta_description']) &&
-            isset($_POST['show_in_nav'])
+            !empty($_POST['description'])
         ) {
             // Dados do formulário
             $title = $_POST['title'];
             $url = 'wazeportal/' . $_POST['url'];
-       $description = $_POST['description'];
-            $image = $_POST['featured_image'];
-            $status = $_POST['status'];
-            $meta_title = $_POST['meta_title'];
-            $meta_description = $_POST['meta_description'];
-            $show_in_nav = (int)$_POST['show_in_nav']; // Converter para inteiro (0 ou 1)
+            $description = $_POST['description'];
+            
+            // Atribuindo valores aos campos opcionais (caso não estejam vazios)
+            $image = !empty($_POST['featured_image']) ? $_POST['featured_image'] : null;
+            $status = !empty($_POST['status']) ? $_POST['status'] : null;
+            $meta_title = !empty($_POST['meta_title']) ? $_POST['meta_title'] : null;
+            $meta_description = !empty($_POST['meta_description']) ? $_POST['meta_description'] : null;
+            $show_in_nav = isset($_POST['show_in_nav']) ? (int)$_POST['show_in_nav'] : null;
+    
+            // Dados padrão caso algum campo opcional esteja vazio
             $user_id = 1; // Definir um usuário padrão, se necessário
             $template = "default"; // Definir um template padrão
-
+    
             // Query de inserção com Prepared Statement
-            $sql = "INSERT INTO pages (title, url, descripton, featured_image, status, meta_title, meta_description, show_in_nav, user_id, template) 
+            $sql = "INSERT INTO pages (title, url, description, featured_image, status, meta_title, meta_description, show_in_nav, user_id, template) 
                     VALUES (:title, :url, :description, :image, :status, :meta_title, :meta_description, :show_in_nav, :user_id, :template)";
             
             $stmt = $pdo->prepare($sql);
@@ -111,14 +111,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             $stmt->bindParam(':show_in_nav', $show_in_nav, PDO::PARAM_INT);
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->bindParam(':template', $template);
-
+    
             // Executar o INSERT
             if ($stmt->execute()) {
                 echo "Nova página adicionada com sucesso!";
             } else {
                 echo "Erro ao adicionar a página.";
-            }   
+            }
+        } else {
+            echo "Campos obrigatórios não preenchidos.";
         }
+    
+    // Outras ações de formulário aqui...
+    
     }
 }
 
