@@ -46,16 +46,18 @@ function getSitepagesAll($pdo) {
 
 // Lidar com as ações
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['form_type'])) {
-        if ($_POST['form_type'] == "edit_partner") {
-            $id = $_POST['id'];
-            $nome = $_POST['Nome'];
-            $identificador = $_POST['name_partner'];
+    if (isset($_POST['form_type']) && $_POST['form_type'] == "edit_partner") {
+        $id = intval($_POST['id']); // Garantir que o ID seja um número inteiro
+        $nome = $conn->real_escape_string($_POST['Nome']);
+        $identificador = $conn->real_escape_string($_POST['name_partner']);
 
-            // Processamento específico para editar o parceiro
-            echo "Editando parceiro: ID $id, Nome $nome, Identificador $identificador";
-        } elseif ($_POST['form_type'] == "outro_formulario") {
-            // Tratamento para outro formulário
+        // Query de atualização
+        $sql = "UPDATE parceiros SET Nome='$nome', name_partner='$identificador' WHERE id=$id";
+
+        if ($conn->query($sql) === TRUE) {
+            echo "Registro atualizado com sucesso!";
+        } else {
+            echo "Erro ao atualizar registro: " . $conn->error;
         }
     }
 }
