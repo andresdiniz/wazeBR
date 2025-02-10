@@ -89,6 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'] ?? null;
             $nome = $_POST['Nome'] ?? '';
             $identificador = $_POST['name_partner'] ?? '';
+
+            logToFile('log.txt', $id);
+            logToFile('log.txt', $nome);    
             
             if ($id && $nome && $identificador) {
                 $stmt = $pdo->prepare("UPDATE parceiros SET nome = ?, identificador = ? WHERE id = ?");
