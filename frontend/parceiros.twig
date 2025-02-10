@@ -121,6 +121,7 @@
         </div>
         
         <!-- Modal de Criação -->
+<!-- Modal de Criação -->
 <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -197,11 +198,13 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Preenche o modal de edição com os dados da URL selecionada
     document.addEventListener("DOMContentLoaded", function () {
         var editModal = document.getElementById("editModal");
+
         editModal.addEventListener("show.bs.modal", function (event) {
-            var button = event.relatedTarget;
+            var button = event.relatedTarget; // Botão que acionou o modal
+            if (!button) return; // Caso não tenha botão, evita erro
+            
             var id = button.getAttribute("data-id");
             var id_parceiro = button.getAttribute("data-id_parceiro");
             var url = button.getAttribute("data-url");
@@ -218,7 +221,7 @@
             }
         };
 
-        // Lógica para enviar os formulários corretamente
+        // Fechar modal ao salvar
         document.getElementById("createForm").addEventListener("submit", function (event) {
             event.preventDefault();
             console.log("Nova URL criada");
