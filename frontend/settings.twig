@@ -190,7 +190,11 @@
                             data-id="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
                             Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="deletePartner({{ parceiro.id }})">Remover</button>
+                        <form action="" method="POST">
+                            <input type="hidden" name="action" value="delete_partner">
+                            <input type="hidden" name="id" value="{{ parceiro.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -480,7 +484,7 @@
                 <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <form id="editPartnerForm">
+                <form id="editPartnerForm" method="post" action="">
                     <input type="hidden" id="editId" name="id">
                     <div class="form-group">
                         <label for="editNome">Nome</label>
