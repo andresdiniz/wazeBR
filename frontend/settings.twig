@@ -620,32 +620,6 @@ $(document).ready(function() {
         });
     });
 
-    // Função para enviar o formulário de edição de parceiro
-    $('#editPartnerForm').on('submit', function (event) {
-        event.preventDefault();
-        const formData = $(this).serialize(); // Coleta os dados do formulário
-        
-        fetch('wazeportal/backend/settings.php', {
-            method: 'POST',
-            body: new URLSearchParams(formData + '&action=edit_partner'),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Parceiro atualizado com sucesso!');
-                // Atualize a interface ou redirecione o usuário
-            } else {
-                alert('Erro ao atualizar parceiro.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao enviar a requisição.');
-        });
-    });
 });
 </script>
 
