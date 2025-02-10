@@ -369,8 +369,6 @@
     </div>
 </div>
 
-
-
 <!-- Modal Único para Páginas (Criação/Edição) -->
 <div class="modal fade" id="pageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -631,6 +629,11 @@ $(document).ready(function() {
     });
 
 });
+
+document.getElementById('pageForm').onsubmit = function() {
+    // Limpar os campos após o envio
+    document.getElementById('formulario').reset();
+};
 </script>
 
 <style>
