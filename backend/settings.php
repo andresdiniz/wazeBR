@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo "Erro ao atualizar registro.";
         }
     }
+}
 // Buscar dados para passar para o template
 $data = [
     'settingsdata' => getsettings($pdo),
