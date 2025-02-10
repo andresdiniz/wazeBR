@@ -200,9 +200,12 @@
 </div>
 
 
+<!-- Modal Configurações - Versão Melhorada -->
+<!-- Modal Configurações - Versão Melhorada -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
+            <!-- Header Estilizado -->
             <div class="modal-header bg-gradient-primary text-white">
                 <h5 class="modal-title">
                     <i class="fas fa-sliders-h me-2"></i>Configurações Avançadas
@@ -211,126 +214,151 @@
             </div>
 
             <form id="formSettings" method="POST" enctype="multipart/form-data">
-                <div class="modal-body p-4">
-                    <div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Informações Básicas</label>
-                            <input type="text" class="form-control mb-3" name="systemname" placeholder="Nome do Sistema" required>
+                <div class="modal-body p-0">
+                    <!-- Menu Lateral -->
+                    <div class="d-flex flex-wrap flex-lg-nowrap">
+                        <nav class="nav flex-column bg-light border-end p-3" style="min-width: 220px;">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#tab-geral">
+                                <i class="fas fa-cog me-2"></i>Geral
+                            </a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab-aparencia">
+                                <i class="fas fa-palette me-2"></i>Aparência
+                            </a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab-seo">
+                                <i class="fas fa-chart-line me-2"></i>SEO
+                            </a>
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab-seguranca">
+                                <i class="fas fa-shield-alt me-2"></i>Segurança
+                            </a>
+                        </nav>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <input type="email" class="form-control" name="contact_email" placeholder="E-mail de Contato">
+                        <!-- Conteúdo das Abas -->
+                        <div class="tab-content flex-grow-1 p-4">
+                            <!-- Aba Geral -->
+                            <div class="tab-pane fade show active" id="tab-geral">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Informações Básicas</label>
+                                    <input type="text" class="form-control mb-3" name="systemname" placeholder="Nome do Sistema" required>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <input type="email" class="form-control" name="contact_email" placeholder="E-mail de Contato">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="email" class="form-control" name="admin_email" placeholder="E-mail Administrativo">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <input type="email" class="form-control" name="admin_email" placeholder="E-mail Administrativo">
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Fuso Horário</label>
+                                    <select class="form-select" name="timezone">
+                                        <option value="America/Sao_Paulo">Brasília (UTC-3)</option>
+                                        <option value="UTC">UTC</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Fuso Horário</label>
-                            <select class="form-select" name="timezone">
-                                <option value="America/Sao_Paulo">Brasília (UTC-3)</option>
-                                <option value="UTC">UTC</option>
-                            </select>
-                        </div>
-                    </div>
+                            <!-- Aba Aparência -->
+                            <div class="tab-pane fade" id="tab-aparencia">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title mb-3">
+                                                    <i class="fas fa-paint-brush me-2"></i>Personalização
+                                                </h6>
 
-                    <div class="mt-4">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title mb-3">
-                                            <i class="fas fa-paint-brush me-2"></i>Personalização
-                                        </h6>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Cor Primária</label>
+                                                    <div class="input-group color-picker-group">
+                                                        <input type="color" class="form-control form-control-color" name="theme_color">
+                                                        <span class="input-group-text">Seletor</span>
+                                                    </div>
+                                                </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Cor Primária</label>
-                                            <div class="input-group color-picker-group">
-                                                <input type="color" class="form-control form-control-color" name="theme_color">
-                                                <span class="input-group-text">Seletor</span>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Logo do Sistema</label>
+                                                    <div class="file-upload-box border rounded p-3 text-center">
+                                                        <input type="file" class="d-none" name="logo" accept="image/*">
+                                                        <i class="fas fa-upload fa-2x text-muted mb-2"></i>
+                                                        <p class="mb-0 small">Arraste ou clique para enviar</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Logo do Sistema</label>
-                                            <div class="file-upload-box border rounded p-3 text-center">
-                                                <input type="file" class="d-none" name="logo" accept="image/*">
-                                                <i class="fas fa-upload fa-2x text-muted mb-2"></i>
-                                                <p class="mb-0 small">Arraste ou clique para enviar</p>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title mb-3">
+                                                    <i class="fas fa-share-alt me-2"></i>Redes Sociais
+                                                </h6>
+
+                                                <div class="mb-3">
+                                                    <input type="url" class="form-control" name="social_facebook" placeholder="URL do Facebook">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <input type="url" class="form-control" name="social_instagram" placeholder="URL do Instagram">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title mb-3">
-                                            <i class="fas fa-share-alt me-2"></i>Redes Sociais
-                                        </h6>
+                            <!-- Aba SEO -->
+                            <div class="tab-pane fade" id="tab-seo">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Configurações SEO</label>
+                                    <input type="text" class="form-control mb-2" name="seo_keywords" placeholder="Palavras-chave (separadas por vírgula)">
+                                    <input type="text" class="form-control" name="google_analytics_id" placeholder="ID do Google Analytics">
+                                </div>
+                            </div>
 
-                                        <div class="mb-3">
-                                            <input type="url" class="form-control" name="social_facebook" placeholder="URL do Facebook">
-                                        </div>
-                                        <div class="mb-3">
-                                            <input type="url" class="form-control" name="social_instagram" placeholder="URL do Instagram">
-                                        </div>
+                            <!-- Aba Segurança -->
+                            <div class="tab-pane fade" id="tab-seguranca">
+                                <div class="alert alert-warning mb-3">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Configurações sensíveis - modifique com cuidado
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="manutencao">
+                                        <label class="form-check-label">Modo Manutenção</label>
+                                    </div>
+
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="cookie_consent">
+                                        <label class="form-check-label">Consentimento de Cookies</label>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="mt-4">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Configurações SEO</label>
-                            <input type="text" class="form-control mb-2" name="seo_keywords" placeholder="Palavras-chave (separadas por vírgula)">
-                            <input type="text" class="form-control" name="google_analytics_id" placeholder="ID do Google Analytics">
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <div class="tab-pane fade" id="tab-seguranca">
-                            <div class="alert alert-warning mb-3">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                Configurações sensíveis - modifique com cuidado
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="manutencao">
-                                    <label class="form-check-label">Modo Manutenção</label>
-                                </div>
-
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="cookie_consent">
-                                    <label class="form-check-label">Consentimento de Cookies</label>
+                                <div class="mb-3">
+                                    <label class="form-label">Tentativas de Login</label>
+                                    <input type="number" class="form-control" name="max_login_attempts" min="1" max="10" style="max-width: 150px;">
                                 </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Tentativas de Login</label>
-                                <input type="number" class="form-control" name="max_login_attempts" min="1" max="10" style="max-width: 150px;">
-                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-dark">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Salvar Alterações
-                        </button>
-                    </div>
+                    <!-- Footer Fixo -->
+                <div class="modal-footer" style="background-color: lightcoral; border-top: 2px solid red;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
                 </div>
 
+                </div>
             </form>
         </div>
     </div>
 </div>
+
 
 <!-- Modal Único para Páginas (Criação/Edição) -->
 <div class="modal fade" id="pageModal" tabindex="-1" aria-hidden="true">
