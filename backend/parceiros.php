@@ -82,7 +82,7 @@ function getUrlsAlerts(PDO $pdo, $id_parceiro) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getParceiros(PDO $pdo, $id_parceiro) {
+function getParceiros(PDO $pdo) {
     $query = "
         SELECT * 
         FROM parceiros 
@@ -108,7 +108,7 @@ $data = [
     'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
     'urls_alerts' => getUrlsAlerts($pdo, $id_parceiro),
     'urls_events' => getUrlsEvents($pdo, $id_parceiro),
-    'parceiros' => getParceiros($pdo, $id_parceiro),
+    'parceiros' => getParceiros($pdo),
 
 ];
 
