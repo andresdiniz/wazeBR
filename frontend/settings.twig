@@ -557,28 +557,91 @@ $(document).ready(function() {
         modal.find('#editIdentificador').val(identificador);
     });
 
-    // Lógica para enviar o formulário de criação
-    $('#createPartnerForm').on('submit', function (event) {
-        event.preventDefault();
-        console.log('Novo parceiro criado');
-        // Adicione aqui a lógica para enviar os dados para o servidor
-    });
-
-    // Lógica para enviar o formulário de edição
-    $('#editPartnerForm').on('submit', function (event) {
-        event.preventDefault();
-        console.log('Parceiro atualizado');
-        // Adicione aqui a lógica para atualizar os dados no servidor
-    });
-
     // Função para excluir parceiro
     function deletePartner(id) {
         if (confirm('Tem certeza que deseja excluir este parceiro?')) {
             console.log('Parceiro excluído: ' + id);
-            // Aqui você pode adicionar a lógica para excluir o parceiro do banco de dados
+
+            // Enviar a requisição de exclusão para o PHP
+            fetch('action.php', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'action': 'delete_partner',
+                    'id': id
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Parceiro excluído com sucesso!');
+                    // Aqui você pode adicionar a lógica para remover o parceiro da tela (ex: atualizar a lista de parceiros)
+                } else {
+                    alert('Erro ao excluir parceiro.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar a requisição.');
+            });
         }
     }
 
+    // Função para enviar o formulário de criação de parceiro
+    $('#createPartnerForm').on('submit', function (event) {
+        event.preventDefault();
+        const formData = $(this).serialize(); // Coleta os dados do formulário
+        
+        fetch('action.php', {
+            method: 'POST',
+            body: new URLSearchParams(formData + '&action=create_partner'),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Novo parceiro criado com sucesso!');
+                // Atualize a interface ou redirecione o usuário
+            } else {
+                alert('Erro ao criar parceiro.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar a requisição.');
+        });
+    });
+
+    // Função para enviar o formulário de edição de parceiro
+    $('#editPartnerForm').on('submit', function (event) {
+        event.preventDefault();
+        const formData = $(this).serialize(); // Coleta os dados do formulário
+        
+        fetch('action.php', {
+            method: 'POST',
+            body: new URLSearchParams(formData + '&action=edit_partner'),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Parceiro atualizado com sucesso!');
+                // Atualize a interface ou redirecione o usuário
+            } else {
+                alert('Erro ao atualizar parceiro.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar a requisição.');
+        });
+    });
 });
 </script>
 
