@@ -48,20 +48,22 @@ function getSitepagesAll($pdo) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['form_type']) && $_POST['form_type'] == "edit_partner") {
         $id = intval($_POST['id']); // Garantir que o ID seja um número inteiro
-        $nome = $conn->real_escape_string($_POST['Nome']);
-        $identificador = $conn->real_escape_string($_POST['name_partner']);
+        $nome = $_POST['Nome'];
+        $identificador = $_POST['name_partner'];
 
-        // Query de atualização
-        $sql = "UPDATE parceiros SET Nome='$nome', name_partner='$identificador' WHERE id=$id";
+        // Query de atualização com Prepared Statement
+        $sql = "UPDATE parceiros SET Nome = :nome, name_partner = :identificador WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':nome', $nome);
+        $stmt->bindParam(':identificador', $identificador);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
-        if ($conn->query($sql) === TRUE) {
+        if ($stmt->execute()) {
             echo "Registro atualizado com sucesso!";
         } else {
-            echo "Erro ao atualizar registro: " . $conn->error;
+            echo "Erro ao atualizar registro.";
         }
     }
-}
-
 // Buscar dados para passar para o template
 $data = [
     'settingsdata' => getsettings($pdo),
