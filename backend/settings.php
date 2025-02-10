@@ -171,20 +171,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                 }
             break;
 
-        // Caso de exclusão de parceiro
-        case 'delete_partner':
+        // Caso de exclusão da pagina
+        case 'delete_page':
             $id = $_POST['id'];
             if (!empty($id)) {
                 try {
                     // Excluir o parceiro com o ID
-                    $sql = "DELETE FROM parceiros WHERE id = :id";
+                    $sql = "DELETE FROM pages WHERE id = :id";
                     $stmt = $pdo->prepare($sql);
                     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
                     if ($stmt->execute()) {
-                        echo json_encode(["success" => true, "message" => "Parceiro com ID {$id} removido."]);
+                        echo json_encode(["success" => true, "message" => "Pagina com ID {$id} removido."]);
                     } else {
-                        echo json_encode(["success" => false, "message" => "Erro ao remover o parceiro."]);
+                        echo json_encode(["success" => false, "message" => "Erro ao remover a pagina."]);
                     }
                 } catch (PDOException $e) {
                     error_log("Erro ao excluir parceiro: " . $e->getMessage());
