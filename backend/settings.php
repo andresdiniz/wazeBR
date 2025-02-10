@@ -3,6 +3,7 @@
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
+require_once './functions/scripts.php'; // Funções e scripts adicionais
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -62,5 +63,5 @@ function getSitepagesAll($pdo) {
 $data = [
     'settingsdata' => getsettings($pdo),
     'pagesdata'=>getSitepagesAll($pdo),
-    'parceirosdata'=>getParceiros($pdo)
+    'parceirosdata'=>getParceiros($pdo),
 ];

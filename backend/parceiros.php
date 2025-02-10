@@ -2,6 +2,7 @@
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
+require_once './functions/scripts.php'; // Funções e scripts adicionais
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -82,22 +83,11 @@ function getUrlsAlerts(PDO $pdo, $id_parceiro) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getParceiros(PDO $pdo) {
-    $query = "
-        SELECT * 
-        FROM parceiros 
-    ";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
 $data = [
     'urls_traffic' => getUrlsTraffic($pdo, $id_parceiro),
     'urls_alerts' => getUrlsAlerts($pdo, $id_parceiro),
     'urls_events' => getUrlsEvents($pdo, $id_parceiro),
-    'parceiros' => getParceiros($pdo),
+    'parceiros' => getParceiros($pdo, $id_parceiro),
 
 ];
 

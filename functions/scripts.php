@@ -519,3 +519,25 @@ function traduzirAlerta($tipo, $subtipo) {
         return ["tipo" => $tipo, "subtipo" => $subtipo];
     }
 }
+
+function getParceiros(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT * 
+        FROM parceiros 
+    ";
+    
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= "WHERE id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    // Se necessário, vincula o parâmetro do parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
