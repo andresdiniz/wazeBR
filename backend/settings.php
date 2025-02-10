@@ -25,15 +25,6 @@ function getsettings(PDO $pdo) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getParceiros(PDO $pdo) {
-    $stmt = $pdo->prepare("
-        SELECT * 
-        FROM parceiros
-    ");
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
 function getSitepagesAll($pdo) {
     $data = []; // Array para armazenar os dados das páginas
 
