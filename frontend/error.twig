@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro - {{ titulo }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 50px;
+        }
+        .error-container {
+            display: inline-block;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+        }
+        .error-container h1 {
+            font-size: 50px;
+        }
+        .error-container p {
+            font-size: 20px;
+        }
+        .error-container a {
+            color: #721c24;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .error-container a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="error-container">
+        <h1>{{ erro_codigo }}</h1>
+        <p>{{ mensagem }}</p>
+        <p><a href="{{ pagina_retorno }}">Voltar para a página inicial</a></p>
+    </div>
+
+</body>
+</html>
