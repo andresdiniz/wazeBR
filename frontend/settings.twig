@@ -192,7 +192,6 @@
                             data-id="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
                             Editar
                         </button>
-                        <button class="btn btn-warning btn-sm" onclick="copyPartner({{ parceiro.id }})">Copiar</button>
                         <button class="btn btn-danger btn-sm" onclick="deletePartner({{ parceiro.id }})">Remover</button>
                     </td>
                 </tr>
@@ -570,12 +569,6 @@ $(document).ready(function() {
         console.log('Parceiro atualizado');
         // Adicione aqui a lógica para atualizar os dados no servidor
     });
-
-    // Função para copiar parceiro (aqui pode ser aprimorada para duplicação real no banco)
-    function copyPartner(id) {
-        console.log('Copiando parceiro: ' + id);
-        // Aqui você pode adicionar a lógica de cópia para o backend
-    }
 
     // Função para excluir parceiro
     function deletePartner(id) {
