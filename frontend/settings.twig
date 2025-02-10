@@ -140,9 +140,18 @@
                                         data-all='{{ page|json_encode }}'>
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    <form action="" method="POST" class="d-inline">
+                                        <!-- Tipo do formulário: exclusão de parceiro -->
+                                        <input type="hidden" name="form_type" value="delete_partner">
+                                        <!-- ID do parceiro a ser excluído -->
+                                        <input type="hidden" name="id" value="{{ parceiro.id }}">
+                                    
+                                        <!-- Botão de exclusão -->
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    
                                 </div>
                             </td>
                         </tr>
@@ -188,18 +197,19 @@
                             <td>{{ parceiro.Nome }}</td>
                             <td>{{ parceiro.name_partner }}</td>
                             <td class="text-center">
-                                <button class="btn btn-outline-primary btn-sm rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#editPartnerModal"
-                                    data-id="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
+                                <button class=="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
                                     <i class="fas fa-edit"></i> Editar
-                                </button>
+                                </button>"btn btn-outline-primary btn-sm rounded-pill me-2" data-bs-toggle="modal" data-bs-target="#editPartnerModal"
+                                    data-id
     
                                 <form action="" method="POST" class="d-inline">
-                                    <input type="hidden" name="action" value="delete_partner">
+                                    <input type="hidden" name="form_type" value="delete_partner">
                                     <input type="hidden" name="id" value="{{ parceiro.id }}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
                                         <i class="fas fa-trash-alt"></i> Remover
                                     </button>
                                 </form>
+                                
                             </td>
                         </tr>
                         {% endfor %}
@@ -569,71 +579,7 @@ $(document).ready(function() {
         modal.find('#editIdentificador').val(identificador);
     });
 
-    // Função para excluir parceiro
-    function deletePartner(id) {
-        if (confirm('Tem certeza que deseja excluir este parceiro?')) {
-            console.log('Parceiro excluído: ' + id);
-
-            // Enviar a requisição de exclusão para o PHP
-            fetch('wazeportal/backend/settings.php', {
-                method: 'POST',
-                body: new URLSearchParams({
-                    'action': 'delete_partner',
-                    'id': id
-                }),
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Parceiro excluído com sucesso!');
-                    // Aqui você pode adicionar a lógica para remover o parceiro da tela (ex: atualizar a lista de parceiros)
-                } else {
-                    alert('Erro ao excluir parceiro.');
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao enviar a requisição.');
-            });
-        }
-    }
-
-    // Função para enviar o formulário de criação de parceiro
-    $('#createPartnerForm').on('submit', function (event) {
-        event.preventDefault();
-        const formData = $(this).serialize(); // Coleta os dados do formulário
-        
-        fetch('wazeportal/backend/settings.php', {
-            method: 'POST',
-            body: new URLSearchParams(formData + '&action=create_partner'),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Novo parceiro criado com sucesso!');
-                // Atualize a interface ou redirecione o usuário
-            } else {
-                alert('Erro ao criar parceiro.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao enviar a requisição.');
-        });
-    });
-
 });
-
-document.getElementById('pageForm').onsubmit = function() {
-    // Limpar os campos após o envio
-    document.getElementById('formulario').reset();
-};
 </script>
 
 <style>
