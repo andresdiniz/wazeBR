@@ -481,21 +481,21 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="editPartnerModalLabel">Editar Parceiro</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <form id="editPartnerForm" method="post" action="">
+                <form id="editPartnerForm" method="post" action="update_partner">
                     <input type="hidden" id="editId" name="id">
-                    <div class="form-group">
-                        <label for="editNome">Nome</label>
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Nome</label>
                         <input type="text" class="form-control" id="editNome" name="Nome" required>
                     </div>
-                    <div class="form-group">
-                        <label for="editIdentificador">Identificador</label>
+                    <div class="mb-3">
+                        <label for="editIdentificador" class="form-label">Identificador</label>
                         <input type="text" class="form-control" id="editIdentificador" name="name_partner" required>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                     </div>
                 </form>

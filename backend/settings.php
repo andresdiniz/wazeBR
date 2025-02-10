@@ -84,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             break;
 
-        case 'edit_partner':
+        case 'update_partner':
             // Coletar dados do formulário de edição
             $id = $_POST['id'] ?? null;
-            $nome = $_POST['nome'] ?? '';
-            $identificador = $_POST['identificador'] ?? '';
+            $nome = $_POST['Nome'] ?? '';
+            $identificador = $_POST['name_partner'] ?? '';
             
             if ($id && $nome && $identificador) {
                 $stmt = $pdo->prepare("UPDATE parceiros SET nome = ?, identificador = ? WHERE id = ?");
