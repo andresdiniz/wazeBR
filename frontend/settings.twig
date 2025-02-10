@@ -382,6 +382,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="pageForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="form_type" value="new_page">
                 <div class="modal-body">
                     <div class="row g-3">
                         <!-- Conteúdo Principal -->
@@ -459,7 +460,7 @@
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="createPartnerModalLabel">Adicionar Parceiro</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <form id="createPartnerForm">

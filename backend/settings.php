@@ -73,6 +73,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
         }
     }
+    if ($_POST['form_type'] === "new_page") {
+        if (
+            !empty($_POST['title']) &&
+            !empty($_POST['url']) &&
+            !empty($_POST['description']) &&
+            !empty($_POST['featured_image']) &&
+            !empty($_POST['status']) &&
+            !empty($_POST['meta_title']) &&
+            !empty($_POST['meta_description']) &&
+            isset($_POST['show_in_nav'])
+        ) {
+            // Dados do formulário
+            $title = $_POST['title'];
+            $url = $_POST['url'];
+       $description = $_POST['description'];
+            $image = $_POST['featured_image'];
+            $status = $_POST['status'];
+            $meta_title = $_POST['meta_title'];
+            $meta_description = $_POST['meta_description'];
+            $show_in_nav = (int)$_POST['show_in_nav']; // Converter para inteiro (0 ou 1)
+            $user_id = 1; // Definir um usuário padrão, se necessário
+            $template = "default"; // Definir um template padrão
+
+            // Query de inserção com Prepared Statement
+            $sql = "INSERT INTO pages (title, url, descripton, featured_image, status, meta_title, meta_description, show_in_nav, user_id, template) 
+                    VALUES (:title, :url, :description, :image, :status, :meta_title, :meta_description, :show_in_nav, :user_id, :template)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':title', $title);
+            $stmt->bindParam(':url', $url);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':image', $image);
+            $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':meta_title', $meta_title);
+            $stmt->bindParam(':meta_description', $meta_description);
+            $stmt->bindParam(':show_in_nav', $show_in_nav, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->bindParam(':template', $template);
+
+            // Executar o INSERT
+            if ($stmt->execute()) {
+                echo "Nova página adicionada com sucesso!";
+            } else {
+                echo "Erro ao adicionar a página.";
+            }   
+        }
+    }
 }
 
 // Buscar dados para passar para o template
