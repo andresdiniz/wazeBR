@@ -160,6 +160,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Seção de Listar parceiros e Criar novos parceiros -->
+    <div class="card shadow mb-4 border-success">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="m-0">
+                <i class="fas fa-file-alt me-2"></i> Gerenciamento de Parcerias
+            </h5>
+            <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#createPartnerModal">
+                <i class="fas fa-plus"></i> Adicionar Parceiro
+            </button>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Identificador</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parceiro in parceiros %}
+                    <tr>
+                        <td>{{ parceiro.id }}</td>
+                        <td>{{ parceiro.Nome }}</td>
+                        <td>{{ parceiro.name_partner }}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editPartnerModal"
+                                data-id="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
+                                Editar
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="copyPartner({{ parceiro.id }})">Copiar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePartner({{ parceiro.id }})">Remover</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Configurações - Versão Melhorada -->
@@ -398,6 +439,63 @@
                     <button type="submit" class="btn btn-success">Salvar Página</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Criar Parceiro -->
+<div class="modal fade" id="createPartnerModal" tabindex="-1" role="dialog" aria-labelledby="createPartnerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="createPartnerModalLabel">Adicionar Parceiro</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPartnerForm">
+                    <div class="form-group">
+                        <label for="createNome">Nome</label>
+                        <input type="text" class="form-control" id="createNome" name="Nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createIdentificador">Identificador</label>
+                        <input type="text" class="form-control" id="createIdentificador" name="name_partner" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Editar Parceiro -->
+<div class="modal fade" id="editPartnerModal" tabindex="-1" role="dialog" aria-labelledby="editPartnerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editPartnerModalLabel">Editar Parceiro</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPartnerForm">
+                    <input type="hidden" id="editId" name="id">
+                    <div class="form-group">
+                        <label for="editNome">Nome</label>
+                        <input type="text" class="form-control" id="editNome" name="Nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editIdentificador">Identificador</label>
+                        <input type="text" class="form-control" id="editIdentificador" name="name_partner" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
