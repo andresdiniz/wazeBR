@@ -544,6 +544,47 @@ $(document).ready(function() {
         const length = $(this).val().length;
         $('#metaCounter').text(`${length}/160`);
     });
+
+    $('#editPartnerModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var nome = button.data('nome');
+        var identificador = button.data('identificador');
+
+        var modal = $(this);
+        modal.find('#editId').val(id);
+        modal.find('#editNome').val(nome);
+        modal.find('#editIdentificador').val(identificador);
+    });
+
+    // Lógica para enviar o formulário de criação
+    $('#createPartnerForm').on('submit', function (event) {
+        event.preventDefault();
+        console.log('Novo parceiro criado');
+        // Adicione aqui a lógica para enviar os dados para o servidor
+    });
+
+    // Lógica para enviar o formulário de edição
+    $('#editPartnerForm').on('submit', function (event) {
+        event.preventDefault();
+        console.log('Parceiro atualizado');
+        // Adicione aqui a lógica para atualizar os dados no servidor
+    });
+
+    // Função para copiar parceiro (aqui pode ser aprimorada para duplicação real no banco)
+    function copyPartner(id) {
+        console.log('Copiando parceiro: ' + id);
+        // Aqui você pode adicionar a lógica de cópia para o backend
+    }
+
+    // Função para excluir parceiro
+    function deletePartner(id) {
+        if (confirm('Tem certeza que deseja excluir este parceiro?')) {
+            console.log('Parceiro excluído: ' + id);
+            // Aqui você pode adicionar a lógica para excluir o parceiro do banco de dados
+        }
+    }
+    
 });
 </script>
 
