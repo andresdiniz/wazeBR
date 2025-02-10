@@ -221,6 +221,7 @@
 </div>
 
 <!-- Modal Configurações - Versão Melhorada -->
+<!-- Modal Configurações - Versão Melhorada -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
@@ -232,7 +233,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form action="process_settings.php" method="POST" enctype="multipart/form-data">
+            <form id="formSettings" method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-0">
                     <!-- Menu Lateral -->
                     <div class="d-flex flex-wrap flex-lg-nowrap">
@@ -363,15 +364,16 @@
                         </div>
                     </div>
                     <!-- Footer Fixo -->
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>Cancelar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Salvar Alterações
-                        </button>
-                    </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
                 </div>
+                </div>
+
             </form>
         </div>
     </div>
