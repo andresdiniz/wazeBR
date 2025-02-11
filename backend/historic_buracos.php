@@ -20,24 +20,31 @@ $id_parceiro = $_SESSION['usuario_id_parceiro'];
 // Se id_parceiro for igual a 99, mostrar todos os alertas; caso contrário, mostrar apenas os alertas do parceiro
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getburacosAlerts(PDO $pdo, $id_parceiro) { // Removido "ffunction" (erro de digitação)
-    $query = "SELECT * FROM alerts WHERE type = 'ACCIDENT' AND status = 1 ";
-    
+function getburacosAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
+        FROM alerts 
+        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND status = 1
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
     if ($id_parceiro != 99) {
-        $query .= "AND id_parceiro = :id_parceiro ";
+        $query .= " AND id_parceiro = :id_parceiro ";
     }
-    
-    $query .= "ORDER BY pubMillis DESC";
+
+    $query .= " ORDER BY confidence DESC"; // Ordenação correta
 
     $stmt = $pdo->prepare($query);
-    
+
+    // Se necessário, vincula o parâmetro do parceiro
     if ($id_parceiro != 99) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
-    
+
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 // Exemplo em backend/dashboard.php
 $data = [

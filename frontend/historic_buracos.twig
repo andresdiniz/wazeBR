@@ -1,103 +1,35 @@
-<div class="container my-5">
-    <h1 class="text-center">Alertas de Buracos na Rua</h1>
-
-    <!-- Filtros -->
-    <form id="filterForm" class="my-4">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
-            </div>
-            <div class="col-md-5">
-                <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            </div>
-        </div>
-    </form>
-
-    <!-- Gráfico de alertas por rua -->
-    <div class="chart-container my-5">
-        <canvas id="rolesChart"></canvas>
-    </div>
-
-    <!-- Tabela de alertas -->
-    <div id="rolesTable">
-        <!-- Tabela será carregada via AJAX -->
-    </div>
-</div>
-
-<script>
-    // Função para atualizar gráfico e tabela com AJAX
-    function updateData(startDate, endDate) {
-        fetch(`api.php?action=get_roles&start_date=${startDate}&end_date=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-
-                const labels = [];
-                const dataCounts = [];
-                
-                data.roles.forEach(role => {
-                    labels.push(role.street);
-                    dataCounts.push(role.count);
-                });
-
-                // Atualizar gráfico
-                const ctx = document.getElementById('rolesChart').getContext('2d');
-                const config = {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Número de Alertas de Buracos',
-                            data: dataCounts,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: 'Alertas de Buracos Agrupados por Rua' }
-                        },
-                        scales: {
-                            x: { title: { display: true, text: 'Rua' } },
-                            y: { title: { display: true, text: 'Número de Alertas' }, beginAtZero: true }
-                        }
-                    }
-                };
-                new Chart(ctx, config);
-
-                // Atualizar tabela
-                const rolesTable = document.getElementById('rolesTable');
-                let tableContent = '<table class="table table-bordered table-striped"><thead><tr>';
-                tableContent += '<th>Rua</th><th>Quantidade de Alertas</th></tr></thead><tbody>';
-                
-                data.roles.forEach(role => {
-                    tableContent += `<tr><td>${role.street}</td><td>${role.count}</td></tr>`;
-                });
-
-                tableContent += '</tbody></table>';
-                rolesTable.innerHTML = tableContent;
-            })
-            .catch(error => console.error('Erro na requisição:', error));
-    }
-
-    // Filtro de formulário
-    document.getElementById('filterForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
-
-        // Chama a função AJAX para atualizar os dados
-        updateData(startDate, endDate);
-    });
-</script>
+{# Template Twig para exibir histórico de buracos #}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>País</th>
+            <th>Cidade</th>
+            <th>Rua</th>
+            <th>Confiança</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for buraco in bburacos %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ buraco.country }}</td>
+                <td>{{ buraco.city }}</td>
+                <td>{{ buraco.street }}</td>
+                <td>{{ buraco.confidence }}</td>
+                <td>
+                    <form method="POST" action="/atualizar_buraco.php" class="d-inline">
+                        <input type="hidden" name="uuid" value="{{ buraco.uuid }}">
+                        <button type="submit" name="status" value="resolvido" class="btn btn-success btn-sm">Resolvido</button>
+                        <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-sm">Não Existe</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum buraco encontrado.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
