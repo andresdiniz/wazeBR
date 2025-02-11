@@ -48,11 +48,12 @@ function customExceptionHandler(Throwable $e) {
 function shutdownHandler() {
     $error = error_get_last();
     if ($error !== null) {
-        logError($error['message'], [
-            'type' => $error['type'],
-            'file' => $error['file'],
-            'line' => $error['line']
-        ], 'SHUTDOWN');
+        $level = match($error['type']) {
+            E_ERROR, E_PARSE, E_CORE_ERROR => 'CRITICAL',
+            E_WARNING, E_CORE_WARNING => 'WARNING',
+            default => 'ERROR'
+        };
+        logError($error['message'], [...] , $level);
     }
 }
 
