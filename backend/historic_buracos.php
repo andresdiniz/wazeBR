@@ -1,4 +1,3 @@
-
 <?php
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
@@ -18,7 +17,8 @@ $id_parceiro = $_SESSION['usuario_id_parceiro'];
 // Se id_parceiro for igual a 99, mostrar todos os alertas; caso contrário, mostrar apenas os alertas do parceiro
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getburacosAlerts(PDO $pdo, $id_parceiro) {
+function getburacosAlerts(PDO $pdo, $id_parceiro)
+{
     $query = "
         SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
         FROM alerts 
