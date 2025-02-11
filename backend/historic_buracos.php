@@ -6,8 +6,6 @@ ini_set('error_reporting', E_ALL);
 error_reporting(E_ALL);
 session_start();
 
-// Configuração de logs
-define('LOG_FILE', __DIR__ . '/../logs/app.log');
 
 // Função de log centralizada
 function logError(string $message, array $context = [], string $level = 'ERROR') {
