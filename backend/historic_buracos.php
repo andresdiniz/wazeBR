@@ -8,9 +8,6 @@ session_start();
 
 // Configuração de logs
 define('LOG_FILE', __DIR__ . '/../logs/app.log');
-set_error_handler('customErrorHandler');
-set_exception_handler('customExceptionHandler');
-register_shutdown_function('shutdownHandler');
 
 // Função de log centralizada
 function logError(string $message, array $context = [], string $level = 'ERROR') {
