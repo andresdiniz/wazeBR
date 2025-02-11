@@ -26,37 +26,6 @@ function logError(string $message, array $context = [], string $level = 'ERROR')
     error_log($logMessage, 3, LOG_FILE);
 }
 
-// Handlers de erros
-function customErrorHandler($code, $message, $file, $line) {
-    logError($message, [
-        'code' => $code,
-        'file' => $file,
-        'line' => $line,
-        'stack' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-    ], 'ERROR');
-}
-
-function customExceptionHandler(Throwable $e) {
-    logError($e->getMessage(), [
-        'code' => $e->getCode(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'stack' => $e->getTrace()
-    ], 'EXCEPTION');
-}
-
-function shutdownHandler() {
-    $error = error_get_last();
-    if ($error !== null) {
-        $level = match($error['type']) {
-            E_ERROR, E_PARSE, E_CORE_ERROR => 'CRITICAL',
-            E_WARNING, E_CORE_WARNING => 'WARNING',
-            default => 'ERROR'
-        };
-        logError($error['message'], [...] , $level);
-    }
-}
-
 require_once './config/configbd.php';
 require_once './vendor/autoload.php';
 
