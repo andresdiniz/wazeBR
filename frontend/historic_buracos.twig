@@ -1,35 +1,124 @@
-{# Template Twig para exibir histórico de buracos #}
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>País</th>
-            <th>Cidade</th>
-            <th>Rua</th>
-            <th>Confiança</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for buraco in bburacos %}
+{# Template Twig para exibir histórico de buracos com filtros e DataTable #}
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label for="filter-date" class="form-label">Filtrar por Data</label>
+            <input type="date" id="filter-date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-city" class="form-label">Filtrar por Cidade</label>
+            <input type="text" id="filter-city" class="form-control" placeholder="Digite a cidade">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-street" class="form-label">Filtrar por Rua</label>
+            <input type="text" id="filter-street" class="form-control" placeholder="Digite a rua">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-period" class="form-label">Período</label>
+            <select id="filter-period" class="form-control">
+                <option value="">Todos</option>
+                <option value="7">Última semana</option>
+                <option value="15">Últimos 15 dias</option>
+                <option value="30">Último mês</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <strong>Total Ativos:</strong> <span id="count-active">0</span>
+        </div>
+        <div class="col-md-4">
+            <strong>Total Inativos:</strong> <span id="count-inactive">0</span>
+        </div>
+        <div class="col-md-4">
+            <strong>Total no Filtro:</strong> <span id="count-filtered">0</span>
+        </div>
+    </div>
+
+    <table id="buracos-table" class="table table-striped">
+        <thead>
             <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ buraco.country }}</td>
-                <td>{{ buraco.city }}</td>
-                <td>{{ buraco.street }}</td>
-                <td>{{ buraco.confidence }}</td>
-                <td>
-                    <form method="POST" action="/atualizar_buraco.php" class="d-inline">
-                        <input type="hidden" name="uuid" value="{{ buraco.uuid }}">
-                        <button type="submit" name="status" value="resolvido" class="btn btn-success btn-sm">Resolvido</button>
-                        <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-sm">Não Existe</button>
-                    </form>
-                </td>
+                <th>#</th>
+                <th>País</th>
+                <th>Cidade</th>
+                <th>Rua</th>
+                <th>Confiança</th>
+                <th>Data</th>
+                <th>Ações</th>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="6" class="text-center">Nenhum buraco encontrado.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for buraco in bburacos %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ buraco.country }}</td>
+                    <td>{{ buraco.city }}</td>
+                    <td>{{ buraco.street }}</td>
+                    <td>{{ buraco.confidence }}</td>
+                    <td data-date="{{ buraco.pubMillis }}">{{ buraco.pubMillis|date("d/m/Y") }}</td>
+                    <td>
+                        <form method="POST" action="/atualizar_buraco.php" class="d-inline">
+                            <input type="hidden" name="uuid" value="{{ buraco.uuid }}">
+                            <button type="submit" name="status" value="resolvido" class="btn btn-success btn-sm">Resolvido</button>
+                            <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-sm">Não Existe</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">Nenhum buraco encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var table = $('#buracos-table').DataTable();
+        
+        function updateCounters() {
+            let totalAtivos = $('#buracos-table tbody tr').length;
+            let totalFiltrados = table.rows({ search: 'applied' }).count();
+            let totalInativos = totalAtivos - totalFiltrados;
+            
+            $('#count-active').text(totalAtivos);
+            $('#count-filtered').text(totalFiltrados);
+            $('#count-inactive').text(totalInativos);
+        }
+        
+        $('#filter-date, #filter-city, #filter-street, #filter-period').on('input change', function() {
+            table.draw();
+            updateCounters();
+        });
+
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            let filterDate = $('#filter-date').val();
+            let filterCity = $('#filter-city').val().toLowerCase();
+            let filterStreet = $('#filter-street').val().toLowerCase();
+            let filterPeriod = $('#filter-period').val();
+            let rowDate = data[5]; // Data da publicação
+            let rowCity = data[2].toLowerCase();
+            let rowStreet = data[3].toLowerCase();
+            
+            if (filterCity && !rowCity.includes(filterCity)) return false;
+            if (filterStreet && !rowStreet.includes(filterStreet)) return false;
+            if (filterDate && rowDate !== filterDate) return false;
+            
+            if (filterPeriod) {
+                let daysAgo = parseInt(filterPeriod);
+                let rowTimestamp = new Date(rowDate.split('/').reverse().join('-')).getTime();
+                let cutoff = new Date().getTime() - (daysAgo * 86400000);
+                if (rowTimestamp < cutoff) return false;
+            }
+            
+            return true;
+        });
+        
+        updateCounters();
+    });
+</script>
