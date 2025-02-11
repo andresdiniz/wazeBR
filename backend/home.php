@@ -66,3 +66,4 @@ $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro)
 ];
+echo $data;
