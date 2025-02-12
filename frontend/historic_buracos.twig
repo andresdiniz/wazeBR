@@ -113,57 +113,72 @@
 
     <script>
         $(document).ready(function() {
-            $('#buracos-table').DataTable();
             var table = $('#buracos-table').DataTable({
                 dom: 'Bfrtip',
                 buttons: ['copy', 'excel', 'csv'],
                 paging: true,
-                searching: true
+                searching: false, // Desativa a busca padrão do DataTable
+                order: [[4, 'desc']], // Ordena por data decrescente
+                columnDefs: [
+                    { targets: [4], type: 'date' } // Define tipo date para a coluna de data
+                ],
+                createdRow: function(row, data, dataIndex) {
+                    $(row).attr('data-uuid', data.uuid); // Adiciona o UUID diretamente na linha
+                },
+                initComplete: function() {
+                    updateCounters();
+                }
             });
-
+    
             function updateCounters() {
-                let totalAtivos = $('#buracos-table tbody tr').length;
+                let totalAtivos = table.rows().count();
                 let totalFiltrados = table.rows({ search: 'applied' }).count();
                 let totalInativos = totalAtivos - totalFiltrados;
-
+    
                 $('#count-active').text(totalAtivos);
                 $('#count-filtered').text(totalFiltrados);
                 $('#count-inactive').text(totalInativos);
             }
-
-            $('#filter-date, #filter-city, #filter-street, #filter-period').on('input change', function() {
-                table.draw();
-                updateCounters();
+    
+            // Configuração dos filtros
+            $('#filter-date').on('change', function() {
+                table.column(4).search(this.value).draw();
             });
-
-            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                let filterDate = $('#filter-date').val();
-                let filterCity = $('#filter-city').val().toLowerCase();
-                let filterStreet = $('#filter-street').val().toLowerCase();
-                let filterPeriod = $('#filter-period').val();
-                let rowDate = data[4];
-
-                if (filterCity && !data[1].toLowerCase().includes(filterCity)) return false;
-                if (filterStreet && !data[2].toLowerCase().includes(filterStreet)) return false;
-                if (filterDate && rowDate !== filterDate) return false;
-
-                if (filterPeriod) {
-                    let daysAgo = parseInt(filterPeriod);
-                    let rowTimestamp = new Date(rowDate).getTime();
-                    let cutoff = new Date().getTime() - (daysAgo * 86400000);
-                    if (rowTimestamp < cutoff) return false;
+    
+            $('#filter-city').on('keyup', function() {
+                table.column(1).search(this.value).draw();
+            });
+    
+            $('#filter-street').on('keyup', function() {
+                table.column(2).search(this.value).draw();
+            });
+    
+            $('#filter-period').on('change', function() {
+                let days = parseInt(this.value);
+                if (days) {
+                    let cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - days);
+                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                        let rowDate = new Date(data[4]);
+                        return rowDate >= cutoffDate;
+                    });
+                } else {
+                    $.fn.dataTable.ext.search.pop();
                 }
-
-                return true;
+                table.draw();
             });
-
+    
+            // Modal handler
             $('#buracos-table').on('click', '.open-edit-modal', function() {
                 var uuid = $(this).closest('tr').data('uuid');
                 $('#modal-uuid').val(uuid);
                 $('#editModal').modal('show');
             });
-
-            updateCounters();
+    
+            // Atualiza contadores após cada draw
+            table.on('draw', function() {
+                updateCounters();
+            });
         });
     </script>
 
