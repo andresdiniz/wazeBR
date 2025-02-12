@@ -1,289 +1,149 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Buracos</title>
-    
-    <!-- CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{# Template Twig para exibir histórico de buracos com filtros e DataTable #}
 
-    <style>
-        .map-container {
-            height: 400px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-        .progress {
-            background-color: #e9ecef;
-        }
-        .dataTables_wrapper {
-            padding: 10px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container-fluid mt-4">
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Data Inicial</label>
-                    <input type="date" id="startDate" class="form-control">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Data Final</label>
-                    <input type="date" id="endDate" class="form-control">
-                </div>
-                <div class="col-md-4 d-grid gap-2 d-md-block">
-                    <button id="filterBtn" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Filtrar
-                    </button>
-                    <button id="resetBtn" class="btn btn-secondary">
-                        <i class="fas fa-sync"></i> Limpar
-                    </button>
-                </div>
-            </div>
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label for="filter-date" class="form-label">Filtrar por Data</label>
+            <input type="date" id="filter-date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-city" class="form-label">Filtrar por Cidade</label>
+            <input type="text" id="filter-city" class="form-control" placeholder="Digite a cidade">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-street" class="form-label">Filtrar por Rua</label>
+            <input type="text" id="filter-street" class="form-control" placeholder="Digite a rua">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-period" class="form-label">Período</label>
+            <select id="filter-period" class="form-control">
+                <option value="">Todos</option>
+                <option value="7">Última semana</option>
+                <option value="15">Últimos 15 dias</option>
+                <option value="30">Último mês</option>
+            </select>
         </div>
     </div>
 
-    <!-- Tabela -->
-    <div class="card shadow">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="buracosTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Cidade</th>
-                            <th>Rua</th>
-                            <th>Confiança</th>
-                            <th>Data</th>
-                            <th>Coordenadas</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for buraco in buracos %}
-                            <tr data-uuid="{{ buraco.uuid }}" 
-                                data-lat="{{ buraco.location_x }}" 
-                                data-lon="{{ buraco.location_y }}"
-                                data-date="{{ buraco.pubMillis }}">
-                                <td>{{ loop.index }}</td>
-                                <td>{{ buraco.city }}</td>
-                                <td>{{ buraco.street }}</td>
-                                <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar 
-                                            {% if buraco.confidence >= 4 %}bg-success
-                                            {% elseif buraco.confidence >= 2 %}bg-warning
-                                            {% else %}bg-danger{% endif %}" 
-                                            style="width: {{ (buraco.confidence * 20) }}%">
-                                            {{ (buraco.confidence * 20) }}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ (buraco.pubMillis / 1000)|date("d/m/Y") }}</td>
-                                <td>
-                                    <button class="btn btn-link btn-coords">
-                                        {{ buraco.location_x|number_format(6) }}, {{ buraco.location_y|number_format(6) }}
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-success btn-sm btn-resolve">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-danger btn-sm btn-delete">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                    <button class="btn btn-info btn-sm btn-detail">
-                                        <i class="fas fa-info"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center">Nenhum buraco encontrado.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <strong>Total Ativos:</strong> <span id="count-active">0</span>
+        </div>
+        <div class="col-md-4">
+            <strong>Total Inativos:</strong> <span id="count-inactive">0</span>
+        </div>
+        <div class="col-md-4">
+            <strong>Total no Filtro:</strong> <span id="count-filtered">0</span>
         </div>
     </div>
+
+    <table id="buracos-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cidade</th>
+                <th>Rua</th>
+                <th>Confiança</th>
+                <th>Data</th>
+                <th>Coordenadas</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for buraco in bburacos %}
+                <tr data-uuid="{{ buraco.uuid }}">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ buraco.city }}</td>
+                    <td>{{ buraco.street }}</td>
+                    <td>{{ buraco.confidence }}</td>
+                    <td data-date="{{ buraco.pubMillis }}">{{ buraco.pubMillis|date("d/m/Y") }}</td>
+                    <td>
+                        <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes" target="_blank">{{ buraco.location_x }}, {{ buraco.location_y }}</a>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary open-edit-modal">Editar</button>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">Nenhum buraco encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-map-marker-alt me-2"></i>Detalhes do Buraco
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Atualizar Buraco</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="map-container">
-                    <div id="map"></div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title"><i class="fas fa-info-circle me-2"></i>Detalhes</h6>
-                                <ul class="list-unstyled mb-0">
-                                    <li><strong>UUID:</strong> <span id="modalUuid"></span></li>
-                                    <li><strong>Coordenadas:</strong> <span id="modalCoords"></span></li>
-                                    <li><strong>Data:</strong> <span id="modalDate"></span></li>
-                                </ul>
-                            </div>
-                        </div>
+                <form id="updateForm" method="POST" action="/atualizar_buraco.php">
+                    <input type="hidden" name="uuid" id="modal-uuid">
+                    <div class="d-flex justify-content-around">
+                        <button type="submit" name="status" value="resolvido" class="btn btn-success">Resolvido</button>
+                        <button type="submit" name="status" value="nao_existe" class="btn btn-danger">Não Existe</button>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title"><i class="fas fa-tools me-2"></i>Ações</h6>
-                                <div class="d-grid gap-2">
-                                    <a id="btnWaze" class="btn btn-primary mb-2" target="_blank">
-                                        <i class="fab fa-waze me-2"></i>Abrir no Waze
-                                    </a>
-                                    <button type="button" class="btn btn-success btn-confirm">
-                                        <i class="fas fa-check-circle me-2"></i>Confirmar Existência
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
-(function($) {
-    'use strict';
-    
-    let map, marker;
-    let currentUUID = null;
+    $(document).ready(function() {
+        var table = $('#buracos-table').DataTable();
 
-    // Inicializar DataTable
-    const table = $('#buracosTable').DataTable({
-        dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
-             "<'row'<'col-sm-12'tr>>" +
-             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        buttons: [
-            {
-                extend: 'excelHtml5',
-                text: '<i class="fas fa-file-excel me-2"></i>Excel',
-                className: 'btn btn-success',
-                exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
-            },
-            {
-                extend: 'csvHtml5',
-                text: '<i class="fas fa-file-csv me-2"></i>CSV',
-                className: 'btn btn-primary',
-                exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
-            }
-        ],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-        },
-        columnDefs: [
-            {
-                targets: 4,
-                type: 'date',
-                render: function(data, type) {
-                    return type === 'sort' ? $(this).data('date') : data;
-                }
-            },
-            { orderable: false, targets: [5, 6] }
-        ]
-    });
+        function updateCounters() {
+            let totalAtivos = $('#buracos-table tbody tr').length;
+            let totalFiltrados = table.rows({ search: 'applied' }).count();
+            let totalInativos = totalAtivos - totalFiltrados;
 
-    // Filtro de datas
-    $('#filterBtn').click(function() {
-        table.draw();
-    });
-
-    $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-            const min = $('#startDate').val() ? new Date($('#startDate').val()) : null;
-            const max = $('#endDate').val() ? new Date($('#endDate').val()) : null;
-            const rowDate = new Date(table.row(dataIndex).data()[4]);
-
-            return (!min || rowDate >= min) && (!max || rowDate <= max);
+            $('#count-active').text(totalAtivos);
+            $('#count-filtered').text(totalFiltrados);
+            $('#count-inactive').text(totalInativos);
         }
-    );
 
-    $('#resetBtn').click(function() {
-        $('#startDate, #endDate').val('');
-        table.search('').draw();
+        $('#filter-date, #filter-city, #filter-street, #filter-period').on('input change', function() {
+            table.draw();
+            updateCounters();
+        });
+
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            let filterDate = $('#filter-date').val();
+            let filterCity = $('#filter-city').val().toLowerCase();
+            let filterStreet = $('#filter-street').val().toLowerCase();
+            let filterPeriod = $('#filter-period').val();
+            let rowDate = data[4];
+            let rowCity = data[1].toLowerCase();
+            let rowStreet = data[2].toLowerCase();
+
+            if (filterCity && !rowCity.includes(filterCity)) return false;
+            if (filterStreet && !rowStreet.includes(filterStreet)) return false;
+            if (filterDate && rowDate !== filterDate) return false;
+
+            if (filterPeriod) {
+                let daysAgo = parseInt(filterPeriod);
+                let rowTimestamp = new Date(rowDate.split('/').reverse().join('-')).getTime();
+                let cutoff = new Date().getTime() - (daysAgo * 86400000);
+                if (rowTimestamp < cutoff) return false;
+            }
+
+            return true;
+        });
+
+        $('#buracos-table').on('click', '.open-edit-modal', function() {
+            var uuid = $(this).closest('tr').data('uuid');
+            $('#modal-uuid').val(uuid);
+            $('#editModal').modal('show');
+        });
+
+        updateCounters();
     });
-
-    // Modal e Mapa
-    $('#buracosTable').on('click', '.btn-detail', function() {
-        const row = $(this).closest('tr');
-        const lat = parseFloat(row.data('lat'));
-        const lon = parseFloat(row.data('lon'));
-        
-        $('#modalUuid').text(row.data('uuid'));
-        $('#modalCoords').text(`${lat.toFixed(6)}, ${lon.toFixed(6)}`);
-        $('#modalDate').text(row.children('td:eq(4)').text());
-        
-        initMap(lat, lon);
-        $('#btnWaze').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}&navigate=yes`);
-        $('#detailModal').modal('show');
-    });
-
-    function initMap(lat, lon) {
-        if(map) map.remove();
-        
-        map = L.map('map').setView([lat, lon], 18);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        
-        if(marker) marker.remove();
-        marker = L.marker([lat, lon])
-            .bindPopup(`<b>Coordenadas:</b><br>${lat.toFixed(6)}, ${lon.toFixed(6)}`)
-            .addTo(map);
-    }
-
-    $('#detailModal').on('shown.bs.modal', function() {
-        map.invalidateSize();
-    });
-
-    // Ações dos botões
-    $('.btn-resolve').click(function() {
-        const uuid = $(this).closest('tr').data('uuid');
-        console.log('Marcar como resolvido:', uuid);
-    });
-
-    $('.btn-delete').click(function() {
-        const uuid = $(this).closest('tr').data('uuid');
-        console.log('Remover registro:', uuid);
-    });
-
-})(jQuery.noConflict(true));
 </script>
-
-</body>
-</html>
