@@ -53,7 +53,7 @@ try {
     logError('Conexão com o banco estabelecida', [], 'INFO');
 
     $data = [
-        'bburacos' => getBuracoAlerts($pdo, $id_parceiro)
+        'buracos' => getBuracoAlerts($pdo, $id_parceiro)
     ];
 
 } catch (Throwable $e) {
