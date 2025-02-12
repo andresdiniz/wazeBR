@@ -19,11 +19,7 @@ try {
     $pdo = Database::getConnection();
     
     // Query simplificada
-    $sql = "SELECT uuid, city, street, reportRating as confidence, pubMillis 
-            FROM alerts 
-            WHERE type = 'HAZARD' 
-            AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' 
-            AND status = 1";
+    $sql = "SELECT * FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
     
     if ($id_parceiro != 99) {
         $sql .= " AND id_parceiro = :id_parceiro";
