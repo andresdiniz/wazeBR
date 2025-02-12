@@ -41,7 +41,6 @@ try {
     $data = [
         'buracos' => $buracos
         ];
-    var_dump($data);
 
 } catch (Exception $e) {
     die("Erro: " . $e->getMessage());
