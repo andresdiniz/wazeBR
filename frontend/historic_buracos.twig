@@ -104,83 +104,87 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<!-- Adicione isso no head ANTES do jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            var table = $('#buracos-table').DataTable({
-                dom: 'Bfrtip',
-                buttons: ['copy', 'excel', 'csv'],
-                paging: true,
-                searching: false, // Desativa a busca padrão do DataTable
-                order: [[4, 'desc']], // Ordena por data decrescente
-                columnDefs: [
-                    { targets: [4], type: 'date' } // Define tipo date para a coluna de data
-                ],
-                createdRow: function(row, data, dataIndex) {
-                    $(row).attr('data-uuid', data.uuid); // Adiciona o UUID diretamente na linha
-                },
-                initComplete: function() {
-                    updateCounters();
+<!-- Modifique a ordem dos scripts no final do body para: -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+
+<script>
+    // Modifique o código JavaScript para:
+    $(document).ready(function() {
+        // Inicialize o DataTable primeiro
+        var table = $('#buracos-table').DataTable({
+            dom: 'Bfrtip',
+            buttons: ['copy', 'excel', 'csv'],
+            paging: true,
+            searching: true,
+            order: [[4, 'desc']],
+            columnDefs: [
+                { 
+                    targets: 4,
+                    type: 'date',
+                    render: function(data) {
+                        return moment(data).format('YYYY-MM-DD');
+                    }
                 }
-            });
-    
-            function updateCounters() {
-                let totalAtivos = table.rows().count();
-                let totalFiltrados = table.rows({ search: 'applied' }).count();
-                let totalInativos = totalAtivos - totalFiltrados;
-    
-                $('#count-active').text(totalAtivos);
-                $('#count-filtered').text(totalFiltrados);
-                $('#count-inactive').text(totalInativos);
-            }
-    
-            // Configuração dos filtros
-            $('#filter-date').on('change', function() {
-                table.column(4).search(this.value).draw();
-            });
-    
-            $('#filter-city').on('keyup', function() {
-                table.column(1).search(this.value).draw();
-            });
-    
-            $('#filter-street').on('keyup', function() {
-                table.column(2).search(this.value).draw();
-            });
-    
-            $('#filter-period').on('change', function() {
-                let days = parseInt(this.value);
-                if (days) {
-                    let cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - days);
-                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                        let rowDate = new Date(data[4]);
-                        return rowDate >= cutoffDate;
-                    });
-                } else {
-                    $.fn.dataTable.ext.search.pop();
-                }
-                table.draw();
-            });
-    
-            // Modal handler
-            $('#buracos-table').on('click', '.open-edit-modal', function() {
-                var uuid = $(this).closest('tr').data('uuid');
-                $('#modal-uuid').val(uuid);
-                $('#editModal').modal('show');
-            });
-    
-            // Atualiza contadores após cada draw
-            table.on('draw', function() {
+            ],
+            initComplete: function() {
                 updateCounters();
-            });
+            }
         });
-    </script>
+
+        // Função de atualização de contadores
+        function updateCounters() {
+            let totalAtivos = table.rows().count();
+            let totalFiltrados = table.rows({ search: 'applied' }).count();
+            
+            $('#count-active').text(totalAtivos);
+            $('#count-filtered').text(totalFiltrados);
+            $('#count-inactive').text(totalAtivos - totalFiltrados);
+        }
+
+        // Configuração dos filtros
+        $('#filter-date').on('change', function() {
+            table.column(4).search(this.value).draw();
+        });
+
+        $('#filter-city').on('keyup', function() {
+            table.column(1).search(this.value).draw();
+        });
+
+        $('#filter-street').on('keyup', function() {
+            table.column(2).search(this.value).draw();
+        });
+
+        $('#filter-period').on('change', function() {
+            const days = parseInt(this.value);
+            if (days) {
+                const cutoffDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
+                table.column(4).search(cutoffDate + '~').draw();
+            } else {
+                table.column(4).search('').draw();
+            }
+        });
+
+        // Evento de clique para o modal
+        $('#buracos-table').on('click', '.open-edit-modal', function() {
+            const uuid = $(this).closest('tr').data('uuid');
+            $('#modal-uuid').val(uuid);
+            $('#editModal').modal('show');
+        });
+
+        // Atualizar contadores após cada redesenho
+        table.on('draw', function() {
+            updateCounters();
+        });
+    });
+</script>
 
 </body>
 </html>
