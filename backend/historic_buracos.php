@@ -38,7 +38,9 @@ try {
     $stmt->execute();
     $buracos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo $twig->render('sua_template.html', ['buracos' => $buracos]);
+    $data = [
+        'buracos' => $buracos
+        ];
 
 } catch (Exception $e) {
     die("Erro: " . $e->getMessage());
