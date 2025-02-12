@@ -9,7 +9,8 @@
     <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css" rel="stylesheet">
 </head>
-<body
+<body>
+
     <div class="container mt-4">
         <div class="row mb-3">
             <div class="col-md-3">
@@ -66,7 +67,11 @@
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>{{ buraco.confidence }}</td>
-                        <td data-date="{{ buraco.pubMillis }}">{{ buraco.pubMillis|date("Y-m-d") }}</td>
+                        <td data-date="{{ buraco.pubMillis }}">
+                            {% if buraco.pubMillis %}
+                                {{ buraco.pubMillis|date("Y-m-d") }}
+                            {% endif %}
+                        </td>
                         <td>
                             <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes" target="_blank">{{ buraco.location_x }}, {{ buraco.location_y }}</a>
                         </td>
@@ -101,90 +106,84 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 
     <script>
-        // Libera o controle do $ e cria alias alternativo
-        var jq = jQuery.noConflict(true);
+        $(document).ready(function() {
+            // Initialize DataTable
+            var table = $('#buracos-table').DataTable({
+                dom: 'Bfrtip',
+                buttons: ['copy', 'excel', 'csv'],
+                paging: true,
+                searching: true,
+                order: [[4, 'desc']], // Ordenar por data decrescente
+                columnDefs: [
+                    {
+                        targets: 4, // Coluna de data
+                        render: function(data) {
+                            return moment(data).format('YYYY-MM-DD');
+                        }
+                    }
+                ],
+                initComplete: function() {
+                    updateCounters();
+                }
+            });
+
+            // Update Counters function
+            function updateCounters() {
+                let totalAtivos = table.rows().count();
+                let totalFiltrados = table.rows({ search: 'applied' }).count();
+
+                $('#count-active').text(totalAtivos);
+                $('#count-filtered').text(totalFiltrados);
+                $('#count-inactive').text(totalAtivos - totalFiltrados);
+            }
+
+            // Filters configuration
+            $('#filter-date').on('change', function() {
+                table.column(4).search(this.value).draw();
+            });
+
+            $('#filter-city').on('keyup', function() {
+                table.column(1).search(this.value).draw();
+            });
+
+            $('#filter-street').on('keyup', function() {
+                table.column(2).search(this.value).draw();
+            });
+
+            $('#filter-period').on('change', function() {
+                const days = parseInt(this.value);
+                if (days) {
+                    const cutoffDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
+                    table.column(4).search(cutoffDate + '~').draw();
+                } else {
+                    table.column(4).search('').draw();
+                }
+            });
+
+            // Modal click event
+            $('#buracos-table').on('click', '.open-edit-modal', function() {
+                const uuid = $(this).closest('tr').data('uuid');
+                $('#modal-uuid').val(uuid);
+                $('#editModal').modal('show');
+            });
+
+            // Update counters after each redraw
+            table.on('draw', function() {
+                updateCounters();
+            });
+        });
     </script>
 
-<!-- Adicione isso no head ANTES do jQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-
-<!-- Modifique a ordem dos scripts no final do body para: -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-
-<script>
-    // Modifique o código JavaScript para:
-    $(document).ready(function() {
-        // Inicialize o DataTable primeiro
-        var table = $('#buracos-table').DataTable({
-            dom: 'Bfrtip',
-            buttons: ['copy', 'excel', 'csv'],
-            paging: true,
-            searching: true,
-            order: [[4, 'desc']],
-            columnDefs: [
-                { 
-                    targets: 4,
-                    type: 'date',
-                    render: function(data) {
-                        return moment(data).format('YYYY-MM-DD');
-                    }
-                }
-            ],
-            initComplete: function() {
-                updateCounters();
-            }
-        });
-
-        // Função de atualização de contadores
-        function updateCounters() {
-            let totalAtivos = table.rows().count();
-            let totalFiltrados = table.rows({ search: 'applied' }).count();
-            
-            $('#count-active').text(totalAtivos);
-            $('#count-filtered').text(totalFiltrados);
-            $('#count-inactive').text(totalAtivos - totalFiltrados);
-        }
-
-        // Configuração dos filtros
-        $('#filter-date').on('change', function() {
-            table.column(4).search(this.value).draw();
-        });
-
-        $('#filter-city').on('keyup', function() {
-            table.column(1).search(this.value).draw();
-        });
-
-        $('#filter-street').on('keyup', function() {
-            table.column(2).search(this.value).draw();
-        });
-
-        $('#filter-period').on('change', function() {
-            const days = parseInt(this.value);
-            if (days) {
-                const cutoffDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
-                table.column(4).search(cutoffDate + '~').draw();
-            } else {
-                table.column(4).search('').draw();
-            }
-        });
-
-        // Evento de clique para o modal
-        $('#buracos-table').on('click', '.open-edit-modal', function() {
-            const uuid = $(this).closest('tr').data('uuid');
-            $('#modal-uuid').val(uuid);
-            $('#editModal').modal('show');
-        });
-
-        // Atualizar contadores após cada redesenho
-        table.on('draw', function() {
-            updateCounters();
-        });
-    });
-</script>
+</body>
+</html>
