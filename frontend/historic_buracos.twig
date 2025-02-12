@@ -1,4 +1,4 @@
-<!-- Tabela de Buracos -->
+<!-- Tabela de Buracos Corrigida -->
 <div class="card shadow">
     <div class="card-body">
         <div class="table-responsive">
@@ -13,25 +13,41 @@
                 </thead>
                 <tbody>
                     {% for buraco in buracos %}
-                    <tr data-lat="{{ buraco.lat }}" data-lon="{{ buraco.lon }}" data-uuid="{{ buraco.uuid }}">
-                        <td>{{ buraco.city }}, {{ buraco.street }}</td>
+                    <tr data-uuid="{{ buraco.uuid }}">
+                        <td>
+                            {% if buraco.street %}
+                                {{ buraco.city }}, {{ buraco.street }}
+                            {% else %}
+                                {{ buraco.city }} (Sem endereço)
+                            {% endif %}
+                        </td>
                         <td>
                             <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-{{ buraco.confidence|confidence_color }}" 
+                                <div class="progress-bar 
+                                    {% if buraco.confidence >= 50 %}bg-success
+                                    {% elseif buraco.confidence >= 20 %}bg-warning
+                                    {% else %}bg-danger{% endif %}" 
                                      style="width: {{ buraco.confidence }}%">
                                     {{ buraco.confidence }}%
                                 </div>
                             </div>
                         </td>
-                        <td>{{ buraco.pubMillis|date("d/m/Y H:i") }}</td>
+                        <td>{{ (buraco.pubMillis / 1000)|date("d/m/Y H:i") }}</td>
                         <td>
                             <button class="btn btn-sm btn-info btn-edit" 
                                     data-bs-toggle="modal" 
-                                    data-bs-target="#editModal">
+                                    data-bs-target="#editModal"
+                                    disabled title="Funcionalidade em desenvolvimento">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </td>
                     </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                Nenhum registro encontrado
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
