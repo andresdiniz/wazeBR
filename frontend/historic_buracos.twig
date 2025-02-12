@@ -51,10 +51,12 @@
     <div class="card shadow">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="buracosTable" class="table table-striped table-hover w-100">
+                <table id="buracos-table" class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Localização</th>
+                            <th>#</th>
+                            <th>Cidade</th>
+                            <th>Rua</th>
                             <th>Confiança</th>
                             <th>Data</th>
                             <th>Coordenadas</th>
@@ -62,37 +64,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for buraco in buracos %}
-                        <tr data-uuid="{{ buraco.uuid }}" 
-                            data-lat="{{ buraco.lat }}" 
-                            data-lon="{{ buraco.lon }}" 
-                            data-pubmillis="{{ buraco.pubMillis }}">
-                            <td>
-                                {% if buraco.street %}
-                                    {{ buraco.city }}, {{ buraco.street }}
-                                {% else %}
-                                    {{ buraco.city }} (Sem endereço)
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    {% set percent = (buraco.confidence * 20) %}
-                                    <div class="progress-bar 
-                                        {% if percent >= 80 %}bg-success
-                                        {% elseif percent >= 60 %}bg-warning
-                                        {% else %}bg-danger{% endif %}" 
-                                        style="width: {{ percent }}%">
-                                        {{ percent }}%
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ (buraco.pubMillis / 1000)|date("d/m/Y H:i") }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-info btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        {% for buraco in bburacos %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ buraco.city }}</td>
+                                <td>{{ buraco.street }}</td>
+                                <td>{{ buraco.confidence }}</td>
+                                <td data-date="{{ buraco.pubMillis }}">{{ buraco.pubMillis|date("d/m/Y") }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes" target="_blank">{{ buraco.location_x }}, {{ buraco.location_y }}</a>
+                                </td>
+                                <td>
+                                    <form method="POST" action="/atualizar_buraco.php" class="d-inline">
+                                        <input type="hidden" name="uuid" value="{{ buraco.uuid }}">
+                                        <button type="submit" name="status" value="resolvido" class="btn btn-success btn-sm">Resolvido</button>
+                                        <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-sm">Não Existe</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">Nenhum buraco encontrado.</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
