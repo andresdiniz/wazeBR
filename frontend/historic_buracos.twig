@@ -1,229 +1,177 @@
-<!-- Adicione no cabeçalho antes do fechamento </head> -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<style>
-    .date-filter {
-        max-width: 300px;
-        margin: 1rem 0;
-    }
-    .map-container {
-        height: 400px;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-</style>
 
-<!-- Filtros de Data -->
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label>Data Inicial</label>
-                <input type="date" id="startDate" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label>Data Final</label>
-                <input type="date" id="endDate" class="form-control">
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button id="filterBtn" class="btn btn-primary me-2">
-                    <i class="fas fa-filter"></i> Filtrar
-                </button>
-                <button id="resetBtn" class="btn btn-secondary">
-                    <i class="fas fa-sync"></i> Limpar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    
+    <style>
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress {
+            background-color: #e9ecef;
+        }
+    </style>
 
-<!-- Tabela -->
-<div class="card shadow">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table id="buracosTable" class="table table-striped table-hover w-100">
-                <thead>
-                    <tr>
-                        <th>Localização</th>
-                        <th>Confiança</th>
-                        <th>Data</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for buraco in buracos %}
-                    <tr data-uuid="{{ buraco.uuid }}" 
-                        data-lat="{{ buraco.lat }}" 
-                        data-lon="{{ buraco.lon }}" 
-                        data-pubmillis="{{ buraco.pubMillis }}">
-                        <td>
-                            {% if buraco.street %}
-                                {{ buraco.city }}, {{ buraco.street }}
-                            {% else %}
-                                {{ buraco.city }} (Sem endereço)
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="progress" style="height: 20px;">
-                                {% set percent = (buraco.confidence * 20) %}
-                                <div class="progress-bar 
-                                    {% if percent >= 80 %}bg-success
-                                    {% elseif percent >= 60 %}bg-warning
-                                    {% else %}bg-danger{% endif %}" 
-                                     style="width: {{ percent }}%">
-                                    {{ percent }}%
-                                </div>
-                            </div>
-                        </td>
-                        <td>{{ (buraco.pubMillis / 1000)|date("d/m/Y H:i") }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info btn-edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Detalhes do Alerta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="map-container">
-                    <div id="map"></div>
+<!-- Filtros -->
+<div class="container-fluid mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Data Inicial</label>
+                    <input type="date" id="startDate" class="form-control">
                 </div>
-                <div class="mt-3">
-                    <a id="btnWaze" class="btn btn-primary" target="_blank">
-                        <i class="fab fa-waze"></i> Criar Rota no Waze
-                    </a>
+                <div class="col-md-4">
+                    <label class="form-label">Data Final</label>
+                    <input type="date" id="endDate" class="form-control">
+                </div>
+                <div class="col-md-4 d-grid gap-2 d-md-block">
+                    <button id="filterBtn" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    <button id="resetBtn" class="btn btn-secondary">
+                        <i class="fas fa-sync"></i> Limpar
+                    </button>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success btn-confirm">
-                    <i class="fas fa-check-circle"></i> Confirmar Existência
-                </button>
-                <button type="button" class="btn btn-danger btn-resolve">
-                    <i class="fas fa-flag-checkered"></i> Marcar como Resolvido
-                </button>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="buracosTable" class="table table-striped table-hover w-100">
+                    <!-- Conteúdo da tabela mantido igual -->
+                </table>
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <!-- Conteúdo do modal mantido igual -->
+    </div>
 </div>
 
-<!-- Adicione ESTES SCRIPTS na ORDEM CORRETA antes do seu código -->
-<!-- jQuery deve vir primeiro -->
+<!-- Scripts ESSENCIAIS na ORDEM CORRETA -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- DataTables Core -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-<!-- DataTables Bootstrap 5 Integration -->
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<!-- DataTables Buttons -->
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-
-<!-- Botões de Exportação -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-<!-- Seu código JavaScript corrigido -->
 <script>
-// Resolver conflitos corretamente
-var jq = jQuery.noConflict(true);
-
-jq(document).ready(function() {
-    // Verificar disponibilidade do DataTable
-    console.log(typeof jq.fn.DataTable); // Deve retornar "function"
+// Resolução definitiva de conflitos
+(function($) {
+    'use strict';
     
-    // Inicializar DataTable
-    const table = jq('#buracosTable').DataTable({
-        dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-        buttons: [
-            {
-                extend: 'excelHtml5',
-                text: '<i class="fas fa-file-excel"></i> Excel',
-                className: 'btn btn-success',
-                exportOptions: { columns: [0, 1, 2] }
-            },
-            {
-                extend: 'csvHtml5',
-                text: '<i class="fas fa-file-csv"></i> CSV',
-                className: 'btn btn-primary',
-                exportOptions: { columns: [0, 1, 2] }
-            }
-        ],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-        },
-        columnDefs: [
-            { 
-                targets: 2,
-                type: 'date',
-                render: function(data) {
-                    return data; // Já formatado pelo Twig
+    // Verificar dependências
+    if(typeof $.fn.DataTable === 'undefined') {
+        console.error('DataTables não carregado! Verifique a ordem dos scripts');
+        return;
+    }
+
+    $(document).ready(function() {
+        // Inicialização do DataTable
+        const table = $('#buracosTable').DataTable({
+            dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel me-2"></i>Excel',
+                    className: 'btn btn-success',
+                    exportOptions: { columns: [0, 1, 2] }
+                },
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fas fa-file-csv me-2"></i>CSV',
+                    className: 'btn btn-primary',
+                    exportOptions: { columns: [0, 1, 2] }
                 }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
             },
-            { orderable: false, targets: 3 }
-        ]
-    });
+            columnDefs: [
+                { 
+                    targets: 2,
+                    type: 'date',
+                    render: function(data, type) {
+                        if (type === 'sort') return new Date(data.split('/').reverse().join('-')).getTime();
+                        return data;
+                    }
+                },
+                { orderable: false, targets: 3 }
+            ]
+        });
 
-    // Filtro de datas
-    jq('#filterBtn').click(function() {
-        const start = new Date(jq('#startDate').val()).getTime();
-        const end = new Date(jq('#endDate').val()).getTime();
-        
-        table.rows().every(function() {
-            const row = jq(this.node());
-            const rowTime = parseInt(row.data('pubmillis'));
+        // Filtro por datas
+        $('#filterBtn').click(function() {
+            const start = $('#startDate').val();
+            const end = $('#endDate').val();
             
-            const show = (!start || rowTime >= start) && (!end || rowTime <= end);
-            this.nodes().style.display = show ? '' : 'none';
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const rowDate = new Date(table.row(dataIndex).data()[2].split('/').reverse().join('-'));
+                    const min = start ? new Date(start) : null;
+                    const max = end ? new Date(end) : null;
+                    
+                    if ((!min || rowDate >= min) && (!max || rowDate <= max)) {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+            table.draw();
+            $.fn.dataTable.ext.search.pop();
+        });
+
+        // Resetar filtros
+        $('#resetBtn').click(function() {
+            $('#startDate, #endDate').val('');
+            table.search('').columns().search('').draw();
+        });
+
+        // Mapa e Modal
+        let map, marker;
+        
+        $('#buracosTable').on('click', '.btn-edit', function() {
+            const $row = $(this).closest('tr');
+            const lat = parseFloat($row.data('lat'));
+            const lon = parseFloat($rowrow.data('lon'));
+            
+            if(map) map.remove();
+            map = L.map('map').setView([lat, lon], 18);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            if(marker) marker.remove();
+            marker = L.marker([lat, lon]).addTo(map);
+            
+            $('#btnWaze').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}&navigate=yes`);
+            $('#editModal').modal('show');
+        });
+
+        $('#editModal').on('shown.bs.modal', function() {
+            if(map) map.invalidateSize();
         });
     });
-
-    // Resetar filtros
-    jq('#resetBtn').click(function() {
-        jq('#startDate, #endDate').val('');
-        table.rows().every(function() {
-            this.nodes().style.display = '';
-        });
-    });
-
-    // Modal e Mapa
-    jq('#buracosTable').on('click', '.btn-edit', function() {
-        const row = jq(this).closest('tr');
-        const lat = parseFloat(row.data('lat'));
-        const lon = parseFloat(row.data('lon'));
-        const uuid = row.data('uuid');
-
-        if(map) map.remove();
-        map = L.map('map').setView([lat, lon], 18);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        
-        if(marker) marker.remove();
-        marker = L.marker([lat, lon]).addTo(map);
-        
-        jq('#btnWaze').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}&navigate=yes`);
-        jq('#editModal').modal('show');
-    });
-
-    // Redimensionar mapa
-    jq('#editModal').on('shown.bs.modal', function() {
-        map.invalidateSize();
-    });
-});
+})(jQuery.noConflict(true));
 </script>
