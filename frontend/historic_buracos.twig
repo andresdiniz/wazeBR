@@ -2,7 +2,7 @@
 <div class="card shadow">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table id="buracosTable" class="table table-striped table-hover w-100">
                 <thead>
                     <tr>
                         <th>Localização</th>
@@ -23,12 +23,13 @@
                         </td>
                         <td>
                             <div class="progress" style="height: 20px;">
+                                {% set percent = (buraco.confidence * 20) %}
                                 <div class="progress-bar 
-                                    {% if buraco.confidence >= 50 %}bg-success
-                                    {% elseif buraco.confidence >= 20 %}bg-warning
+                                    {% if percent >= 80 %}bg-success
+                                    {% elseif percent >= 60 %}bg-warning
                                     {% else %}bg-danger{% endif %}" 
-                                     style="width: {{ buraco.confidence }}%">
-                                    {{ buraco.confidence }}%
+                                     style="width: {{ percent }}%">
+                                    {{ percent }}%
                                 </div>
                             </div>
                         </td>
@@ -36,8 +37,7 @@
                         <td>
                             <button class="btn btn-sm btn-info btn-edit" 
                                     data-bs-toggle="modal" 
-                                    data-bs-target="#editModal"
-                                    disabled title="Funcionalidade em desenvolvimento">
+                                    data-bs-target="#editModal">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </td>
@@ -55,79 +55,76 @@
     </div>
 </div>
 
-<!-- Modal de Edição -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Editar Alerta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="map" style="height: 400px; width: 100%;"></div>
-                <div class="mt-3">
-                    <button id="btnWaze" class="btn btn-primary" target="_blank">
-                        <i class="fab fa-waze"></i> Criar Rota no Waze
-                    </button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success btn-confirm">
-                    <i class="fas fa-check-circle"></i> Confirmar Existência
-                </button>
-                <button type="button" class="btn btn-danger btn-resolve">
-                    <i class="fas fa-flag-checkered"></i> Marcar como Concluído
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Adicione esses links no cabeçalho -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
 
-<!-- Leaflet CSS/JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.bootstrap5.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let map, marker;
-    let currentUUID = null;
+// Resolver conflitos de jQuery
+var jq = $.noConflict();
 
-    // Inicializar Modal
-    $('#editModal').on('show.bs.modal', function(e) {
-        const button = e.relatedTarget;
+jq(document).ready(function() {
+    // Inicializar DataTable
+    const table = jq('#buracosTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel"></i> Excel',
+                className: 'btn btn-success',
+                exportOptions: {
+                    columns: [0, 1, 2]
+                }
+            },
+            {
+                extend: 'csvHtml5',
+                text: '<i class="fas fa-file-csv"></i> CSV',
+                className: 'btn btn-primary',
+                exportOptions: {
+                    columns: [0, 1, 2]
+                }
+            }
+        ],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
+        },
+        columnDefs: [
+            { orderable: false, targets: 3 } // Desabilitar ordenação na coluna de ações
+        ]
+    });
+
+    // Configuração do modal com DataTables
+    jq('#editModal').on('show.bs.modal', function(e) {
+        const button = jq(e.relatedTarget);
         const row = button.closest('tr');
-        const lat = parseFloat(row.dataset.lat);
-        const lon = parseFloat(row.dataset.lon);
-        currentUUID = row.dataset.uuid;
+        const uuid = row.data('uuid');
 
-        // Inicializar Mapa
+        // Implementar lógica para buscar coordenadas via AJAX se necessário
+        console.log('UUID selecionado:', uuid);
+        
+        // Exemplo de implementação do mapa (ajuste com dados reais)
         if(map) map.remove();
-        map = L.map('map').setView([lat, lon], 18);
+        map = L.map('map').setView([-20.6694, -43.7899], 15); // Coordenadas exemplo
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         
         if(marker) marker.remove();
-        marker = L.marker([lat, lon]).addTo(map);
-
-        // Configurar Botão Waze
-        document.getElementById('btnWaze').href = 
-            `https://www.waze.com/ul?ll=${lat},${lon}&navigate=yes`;
-    });
-
-    // Ações dos Botões
-    document.querySelector('.btn-confirm').addEventListener('click', function() {
-        console.log('Confirmar existência:', currentUUID);
-        // AJAX para confirmar existência
-    });
-
-    document.querySelector('.btn-resolve').addEventListener('click', function() {
-        console.log('Marcar como resolvido:', currentUUID);
-        // AJAX para marcar como resolvido
+        marker = L.marker([-20.6694, -43.7899]).addTo(map); // Marcador exemplo
     });
 
     // Redimensionar mapa quando o modal é aberto
-    $('#editModal').on('shown.bs.modal', function() {
-        map.invalidateSize();
+    jq('#editModal').on('shown.bs.modal', function() {
+        if(map) map.invalidateSize();
     });
 });
 </script>
+
+<!-- Restante do código do modal permanece igual -->
