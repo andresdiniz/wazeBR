@@ -169,84 +169,94 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const convertConfidence = (value) => (value * 20) + '%';
-    
-        const table = new DataTable('#buracos-table', {
-            dom: '<"row mb-3"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
-            buttons: [
-                {
-                    extend: 'copy',
-                    text: '<i class="bi bi-files me-2"></i>Copiar',
-                    className: 'btn btn-sm btn-outline-secondary mb-2 mb-md-0'
+        document.addEventListener('DOMContentLoaded', function () {
+            // Função de conversão de confiança
+            const convertConfidence = (value) => (value * 20) + '%';
+        
+            // Configuração do DataTable
+            const table = new DataTable('#buracos-table', {
+                dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: '<i class="bi bi-files"></i> Copiar',
+                        className: 'btn-sm'
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                        className: 'btn-sm'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                        className: 'btn-sm'
+                    }
+                ],
+                order: [[4, 'desc']],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
                 },
-                {
-                    extend: 'excel',
-                    text: '<i class="bi bi-file-earmark-excel me-2"></i>Excel',
-                    className: 'btn btn-sm btn-outline-success mb-2 mb-md-0'
-                },
-                {
-                    extend: 'pdf',
-                    text: '<i class="bi bi-file-earmark-pdf me-2"></i>PDF',
-                    className: 'btn btn-sm btn-outline-danger'
-                }
-            ],
-            order: [[4, 'desc']],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
-            },
-            columnDefs: [
-                { 
-                    orderable: false, 
-                    targets: [6] 
-                },
-                {
-                    targets: 3,
-                    render: (data, type) => {
-                        const value = parseInt(data);
-                        if (type === 'display') {
-                            const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
-                            return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
+                columnDefs: [
+                    { 
+                        orderable: false, 
+                        targets: [6],
+                        className: 'no-export' 
+                    },
+                    {
+                        targets: 3,
+                        render: (data, type) => {
+                            const value = parseInt(data);
+                            if (type === 'display') {
+                                const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
+                                return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
+                            }
+                            return value;
                         }
-                        return value;
                     }
-                }
-            ],
-            initComplete: function() {
-                document.querySelector('.dataTables_filter input').classList.add('form-control', 'form-control-sm');
-                document.querySelectorAll('.dt-buttons button').forEach(btn => {
-                    btn.classList.add('me-2');
-                });
-            }
-        });
-    
-        function updateCounters() {
-            const totalRows = table.data().count();
-            const filteredRows = table.rows({ search: 'applied' }).count();
-            
-            document.getElementById('count-active').textContent = totalRows;
-            document.getElementById('count-filtered').textContent = filteredRows;
-            document.getElementById('count-inactive').textContent = totalRows - filteredRows;
-        }
-    
-        table.on('draw', updateCounters);
-        updateCounters();
-    
-        // Configuração do Modal
-        const editModalEl = document.getElementById('editModal');
-        if (editModalEl) {
-            const editModal = new bootstrap.Modal(editModalEl);
-            
-            document.querySelector('#buracos-table').addEventListener('click', (e) => {
-                const btn = e.target.closest('.open-edit-modal');
-                if (btn) {
-                    const row = btn.closest('tr');
-                    if (row && row.dataset.uuid) {
-                        document.getElementById('modal-uuid').value = row.dataset.uuid;
-                        editModal.show();
-                    }
+                ],
+                initComplete: function() {
+                    // Ajustar elementos de controle
+                    $('.dt-buttons').removeClass('btn-group');
+                    $('.dataTables_filter input').addClass('form-control form-control-sm');
                 }
             });
-        }
-    });
+        
+            // Atualizar contadores
+            const updateCounters = () => {
+                const total = table.data().count();
+                const filtered = table.rows({ search: 'applied' }).count();
+                
+                document.getElementById('count-active').textContent = total;
+                document.getElementById('count-filtered').textContent = filtered;
+                document.getElementById('count-inactive').textContent = total - filtered;
+            };
+        
+            table.on('draw', updateCounters);
+            updateCounters();
+        
+            // Configuração do Modal - CORREÇÃO CRÍTICA
+            const initModal = () => {
+                const modalElement = document.getElementById('editModal');
+                if (!modalElement) return;
+        
+                const modal = new bootstrap.Modal(modalElement);
+                
+                document.querySelector('#buracos-table').addEventListener('click', (e) => {
+                    const button = e.target.closest('button.open-edit-modal');
+                    if (!button) return;
+        
+                    const row = button.closest('tr');
+                    if (!row) return;
+        
+                    const uuid = row.dataset.uuid;
+                    if (!uuid) return;
+        
+                    document.getElementById('modal-uuid').value = uuid;
+                    modal.show();
+                });
+            };
+        
+            initModal();
+        });
 </script>
