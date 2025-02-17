@@ -63,7 +63,6 @@ try {
         'buracos' => $buracos,
         'filters' => $_GET,
     ];
-);
 } catch (Exception $e) {
     die("Erro: " . $e->getMessage());
 }
