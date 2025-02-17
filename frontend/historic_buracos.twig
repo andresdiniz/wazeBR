@@ -1,27 +1,30 @@
 <div class="container mt-4">
-    <div class="row mb-3">
+    <form method="GET" action="/historico_buracos.php" class="row mb-3">
         <div class="col-md-3">
             <label for="filter-date" class="form-label">Filtrar por Data</label>
-            <input type="date" id="filter-date" class="form-control">
+            <input type="date" id="filter-date" name="date" class="form-control" value="<?php echo $_GET['date'] ?? ''; ?>">
         </div>
         <div class="col-md-3">
             <label for="filter-city" class="form-label">Filtrar por Cidade</label>
-            <input type="text" id="filter-city" class="form-control" placeholder="Digite a cidade">
+            <input type="text" id="filter-city" name="city" class="form-control" placeholder="Digite a cidade" value="<?php echo $_GET['city'] ?? ''; ?>">
         </div>
         <div class="col-md-3">
             <label for="filter-street" class="form-label">Filtrar por Rua</label>
-            <input type="text" id="filter-street" class="form-control" placeholder="Digite a rua">
+            <input type="text" id="filter-street" name="street" class="form-control" placeholder="Digite a rua" value="<?php echo $_GET['street'] ?? ''; ?>">
         </div>
         <div class="col-md-3">
             <label for="filter-period" class="form-label">Período</label>
-            <select id="filter-period" class="form-select">
+            <select id="filter-period" name="period" class="form-select">
                 <option value="">Todos</option>
-                <option value="7">Última semana</option>
-                <option value="15">Últimos 15 dias</option>
-                <option value="30">Último mês</option>
+                <option value="7" <?php if ($_GET['period'] ?? '' == '7') echo 'selected'; ?>>Última semana</option>
+                <option value="15" <?php if ($_GET['period'] ?? '' == '15') echo 'selected'; ?>>Últimos 15 dias</option>
+                <option value="30" <?php if ($_GET['period'] ?? '' == '30') echo 'selected'; ?>>Último mês</option>
             </select>
         </div>
-    </div>
+        <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </div>
+    </form>
 
     <div class="row mb-3">
         <div class="col-md-4">
@@ -113,30 +116,6 @@
 
         table.on('draw', updateCounters);
         updateCounters();
-
-        document.getElementById('filter-date').addEventListener('change', function() {
-            table.column(4).search(this.value).draw();
-        });
-
-        document.getElementById('filter-city').addEventListener('input', function() {
-            table.column(1).search(this.value).draw();
-        });
-
-        document.getElementById('filter-street').addEventListener('input', function() {
-            table.column(2).search(this.value).draw();
-        });
-
-        document.getElementById('filter-period').addEventListener('change', function() {
-            const days = parseInt(this.value);
-            if (!isNaN(days)) {
-                const cutoffDate = new Date();
-                cutoffDate.setDate(cutoffDate.getDate() - days);
-                const formattedDate = cutoffDate.toISOString().split('T')[0];
-                table.column(4).search(formattedDate + '~', true, false).draw();
-            } else {
-                table.column(4).search('').draw();
-            }
-        });
 
         const editModal = new bootstrap.Modal(document.getElementById('editModal'));
         document.querySelector('#buracos-table').addEventListener('click', function(e) {
