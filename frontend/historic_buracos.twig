@@ -64,8 +64,8 @@
                     <td>{{ buraco.street }}</td>
                     <td>{{ buraco.confidence }}</td>
                     <td data-date="{{ buraco.pubMillis }}">
-                        {{ buraco.pubMillis | date('d/m/Y H:i:s') }}
-                    </td>
+                        {{ (buraco.pubMillis / 1000) | date('d/m/Y H:i:s') }}
+                    </td>                 
                     <td>
                         <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes"
                             target="_blank" class="text-decoration-none">
@@ -90,7 +90,9 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Atualizar Buraco</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i> <!-- Ícone de "times" -->
+                    </button>                    
                 </div>
                 <div class="modal-body">
                     <form id="updateForm" method="POST" action="">
