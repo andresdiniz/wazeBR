@@ -100,8 +100,9 @@
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>
-                            <span class="badge bg-{{ buraco.confidence > 70 ? 'success' : 'warning' }}">
-                                {{ buraco.confidence }}%
+                            {% set confidenceValue = buraco.confidence %} {# Valor original 0-5 #}
+                            <span class="badge">
+                                {{ confidenceValue }} ({{ confidenceValue * 20 }}%)
                             </span>
                         </td>
                         <td data-order="{{ buraco.pubMillis }}">
