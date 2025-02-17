@@ -99,7 +99,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const table = new DataTable('#buracos-table', {
             dom: 'Bfrtip',
-            buttons: ['copy', 'excel', 'csv'],
+            buttons: ['copy', 'excel', 'csv', 'pdf'],
             order: [[4, 'desc']],
         });
 
@@ -145,10 +145,6 @@
                 document.getElementById('modal-uuid').value = uuid;
                 editModal.show();
             }
-        });
-
-        document.getElementById('updateForm').addEventListener('submit', function() {
-            editModal.hide();
         });
     });
 </script>
