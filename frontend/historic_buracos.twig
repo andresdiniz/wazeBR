@@ -168,88 +168,84 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Função para converter confiança (0-5 para 0-100%)
-    const convertConfidence = (value) => (value * 20) + '%';
-
-    // Inicialização do DataTable
-    const table = new DataTable('#buracos-table', {
-        dom: '<"row mb-3"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
-        buttons: [
-            {
-                extend: 'copy',
-                text: '<i class="bi bi-files me-2"></i>Copiar',
-                className: 'btn btn-sm btn-outline-secondary mb-2 mb-md-0'
-            },
-            {
-                extend: 'excel',
-                text: '<i class="bi bi-file-earmark-excel me-2"></i>Excel',
-                className: 'btn btn-sm btn-outline-success mb-2 mb-md-0'
-            },
-            {
-                extend: 'pdf',
-                text: '<i class="bi bi-file-earmark-pdf me-2"></i>PDF',
-                className: 'btn btn-sm btn-outline-danger'
-            }
-        ],
-        order: [[4, 'desc']],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
-        },
-        columnDefs: [
-            { 
-                orderable: false, 
-                targets: [6] 
-            },
-            {
-                targets: 3, // Coluna de Confiança
-                render: (data, type) => {
-                    const value = parseInt(data);
-                    if (type === 'display') {
-                        const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
-                        return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
-                    }
-                    return value; // Valor original para ordenação
+    document.addEventListener('DOMContentLoaded', function () {
+        const convertConfidence = (value) => (value * 20) + '%';
+    
+        const table = new DataTable('#buracos-table', {
+            dom: '<"row mb-3"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="bi bi-files me-2"></i>Copiar',
+                    className: 'btn btn-sm btn-outline-secondary mb-2 mb-md-0'
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="bi bi-file-earmark-excel me-2"></i>Excel',
+                    className: 'btn btn-sm btn-outline-success mb-2 mb-md-0'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="bi bi-file-earmark-pdf me-2"></i>PDF',
+                    className: 'btn btn-sm btn-outline-danger'
                 }
+            ],
+            order: [[4, 'desc']],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { 
+                    orderable: false, 
+                    targets: [6] 
+                },
+                {
+                    targets: 3,
+                    render: (data, type) => {
+                        const value = parseInt(data);
+                        if (type === 'display') {
+                            const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
+                            return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
+                        }
+                        return value;
+                    }
+                }
+            ],
+            initComplete: function() {
+                document.querySelector('.dataTables_filter input').classList.add('form-control', 'form-control-sm');
+                document.querySelectorAll('.dt-buttons button').forEach(btn => {
+                    btn.classList.add('me-2');
+                });
             }
-        ],
-        initComplete: function() {
-            // Ajustar estilo dos elementos
-            document.querySelector('.dataTables_filter input').classList.add('form-control', 'form-control-sm');
-            document.querySelectorAll('.dt-buttons button').forEach(btn => {
-                btn.classList.add('me-2');
+        });
+    
+        function updateCounters() {
+            const totalRows = table.data().count();
+            const filteredRows = table.rows({ search: 'applied' }).count();
+            
+            document.getElementById('count-active').textContent = totalRows;
+            document.getElementById('count-filtered').textContent = filteredRows;
+            document.getElementById('count-inactive').textContent = totalRows - filteredRows;
+        }
+    
+        table.on('draw', updateCounters);
+        updateCounters();
+    
+        // Configuração do Modal
+        const editModalEl = document.getElementById('editModal');
+        if (editModalEl) {
+            const editModal = new bootstrap.Modal(editModalEl);
+            
+            document.querySelector('#buracos-table').addEventListener('click', (e) => {
+                const btn = e.target.closest('.open-edit-modal');
+                if (btn) {
+                    const row = btn.closest('tr');
+                    if (row && row.dataset.uuid) {
+                        document.getElementById('modal-uuid').value = row.dataset.uuid;
+                        editModal.show();
+                    }
+                }
             });
         }
     });
-
-    // Atualizar contadores
-    function updateCounters() {
-        const totalRows = table.data().count();
-        const filteredRows = table.rows({ search: 'applied' }).count();
-        
-        document.getElementById('count-active').textContent = totalRows;
-        document.getElementById('count-filtered').textContent = filteredRows;
-        document.getElementById('count-inactive').textContent = totalRows - filteredRows;
-    }
-
-    table.on('draw', updateCounters);
-    updateCounters();
-
-    // Configuração do Modal
-    const editModalEl = document.getElementById('editModal');
-    if (editModalEl) {
-        const editModal = new bootstrap.Modal(editModalEl);
-        
-        document.querySelector('#buracos-table').addEventListener('click', (e) => {
-            const btn = e.target.closest('.open-edit-modal');
-            if (btn) {
-                const uuid = btn.closest('tr').dataset.uuid;
-                document.getElementById('modal-uuid').value = uuid;
-                editModal.show();
-            }
-        });
-    } else {
-        console.error('Elemento do modal não encontrado!');
-    }
-});
 </script>
