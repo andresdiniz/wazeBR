@@ -59,7 +59,7 @@
                     <td>{{ buraco.street }}</td>
                     <td>{{ buraco.confidence }}</td>
                     <td data-date="{{ buraco.pubMillis }}">
-                        {{ buraco.pubMillis | date('Y-m-d') }}
+                        {{ buraco.pubMillis | date('d/m/Y H:i:s') }}
                     </td>
                     <td>
                         <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes" target="_blank" class="text-decoration-none">
@@ -87,7 +87,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="updateForm" method="POST" action="/atualizar_buraco.php">
+                <form id="updateForm" method="POST" action="">
                     <input type="hidden" name="uuid" id="modal-uuid">
                     <div class="d-grid gap-2">
                         <button type="submit" name="status" value="resolvido" class="btn btn-success">Resolvido</button>
