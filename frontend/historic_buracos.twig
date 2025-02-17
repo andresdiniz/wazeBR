@@ -84,7 +84,7 @@
                             {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
                         </td>
                         <td>
-                            <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}" 
+                            <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}" 
                                target="_blank" class="btn btn-link btn-sm py-0">
                                 <i class="bi bi-geo-alt"></i> Ver mapa
                             </a>
@@ -111,9 +111,9 @@
             <div class="modal-content">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title">Atualizar Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="updateForm" method="POST" action="/sua-action-aqui">
+                <form id="updateForm" method="POST" action="/sua-action">
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
                         <div class="d-grid gap-2">
@@ -135,10 +135,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Inicialização do DataTable
     const table = new DataTable('#buracos-table', {
-        dom: 'Bfrtip',
+        dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
         buttons: [
-            'copy', 
+            {
+                extend: 'copy',
+                text: '<i class="bi bi-files"></i> Copiar'
+            },
             {
                 extend: 'excel',
                 text: '<i class="bi bi-file-earmark-excel"></i> Excel'
@@ -154,12 +158,10 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         columnDefs: [
             { orderable: false, targets: [6] }
-        ],
-        initComplete: function() {
-            updateCounters();
-        }
+        ]
     });
 
+    // Atualizar contadores
     function updateCounters() {
         const totalRows = table.data().count();
         const filteredRows = table.rows({ search: 'applied' }).count();
@@ -170,5 +172,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     table.on('draw', updateCounters);
+    updateCounters();
+
+    // Configuração do Modal
+    const editModal = new bootstrap.Modal('#editModal');
+    
+    document.querySelector('#buracos-table').addEventListener('click', (e) => {
+        if (e.target.closest('.open-edit-modal')) {
+            const uuid = e.target.closest('tr').dataset.uuid;
+            document.getElementById('modal-uuid').value = uuid;
+            editModal.show();
+        }
+    });
 });
 </script>
