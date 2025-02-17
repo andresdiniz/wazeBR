@@ -236,15 +236,20 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCounters();
 
     // Configuração do Modal
-    const editModal = new bootstrap.Modal('#editModal');
-    
-    document.querySelector('#buracos-table').addEventListener('click', (e) => {
-        const btn = e.target.closest('.open-edit-modal');
-        if (btn) {
-            const uuid = btn.closest('tr').dataset.uuid;
-            document.getElementById('modal-uuid').value = uuid;
-            editModal.show();
-        }
-    });
+    const editModalEl = document.getElementById('editModal');
+    if (editModalEl) {
+        const editModal = new bootstrap.Modal(editModalEl);
+        
+        document.querySelector('#buracos-table').addEventListener('click', (e) => {
+            const btn = e.target.closest('.open-edit-modal');
+            if (btn) {
+                const uuid = btn.closest('tr').dataset.uuid;
+                document.getElementById('modal-uuid').value = uuid;
+                editModal.show();
+            }
+        });
+    } else {
+        console.error('Elemento do modal não encontrado!');
+    }
 });
 </script>
