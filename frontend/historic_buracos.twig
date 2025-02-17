@@ -7,52 +7,57 @@
             </div>
             <div class="col-md-3">
                 <label for="filter-city" class="form-label">Filtrar por Cidade</label>
-                <input type="text" id="filter-city" name="city" class="form-control" placeholder="Digite a cidade" value="{{ filters.city ?? '' }}">
+                <input type="text" id="filter-city" name="city" class="form-control" placeholder="Digite a cidade"
+                    value="{{ filters.city ?? '' }}">
             </div>
             <div class="col-md-3">
                 <label for="filter-street" class="form-label">Filtrar por Rua</label>
-                <input type="text" id="filter-street" name="street" class="form-control" placeholder="Digite a rua" value="{{ filters.street ?? '' }}">
+                <input type="text" id="filter-street" name="street" class="form-control" placeholder="Digite a rua"
+                    value="{{ filters.street ?? '' }}">
             </div>
             <div class="col-md-3">
                 <label for="filter-period" class="form-label">Período</label>
                 <select id="filter-period" name="period" class="form-select">
                     <option value="">Todos</option>
-                    <option value="7" {{ filters.period is defined and filters.period == '7' ? 'selected' : '' }}>Última semana</option>
-                    <option value="15" {{ filters.period is defined and filters.period == '15' ? 'selected' : '' }}>Últimos 15 dias</option>
-                    <option value="30" {{ filters.period is defined and filters.period == '30' ? 'selected' : '' }}>Último mês</option>
+                    <option value="7" {{ filters.period is defined and filters.period=='7' ? 'selected' : '' }}>Última
+                        semana</option>
+                    <option value="15" {{ filters.period is defined and filters.period=='15' ? 'selected' : '' }}>
+                        Últimos 15 dias</option>
+                    <option value="30" {{ filters.period is defined and filters.period=='30' ? 'selected' : '' }}>Último
+                        mês</option>
                 </select>
             </div>
             <div class="col-12 mt-3">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
             </div>
-        </form>    
+        </form>
 
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <strong>Total Ativos:</strong> <span id="count-active">0</span>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong>Total Ativos:</strong> <span id="count-active">0</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Total Inativos:</strong> <span id="count-inactive">0</span>
+            </div>
+            <div class="col-md-4">
+                <strong>Total no Filtro:</strong> <span id="count-filtered">0</span>
+            </div>
         </div>
-        <div class="col-md-4">
-            <strong>Total Inativos:</strong> <span id="count-inactive">0</span>
-        </div>
-        <div class="col-md-4">
-            <strong>Total no Filtro:</strong> <span id="count-filtered">0</span>
-        </div>
-    </div>
 
-    <table id="buracos-table" class="table table-striped table-hover table-bordered text-center align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Cidade</th>
-                <th>Rua</th>
-                <th>Confiança</th>
-                <th>Data</th>
-                <th>Coordenadas</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for buraco in buracos %}
+        <table id="buracos-table" class="table table-striped table-hover table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Cidade</th>
+                    <th>Rua</th>
+                    <th>Confiança</th>
+                    <th>Data</th>
+                    <th>Coordenadas</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for buraco in buracos %}
                 <tr data-uuid="{{ buraco.uuid }}">
                     <td>{{ loop.index }}</td>
                     <td>{{ buraco.city }}</td>
@@ -62,7 +67,8 @@
                         {{ buraco.pubMillis | date('d/m/Y H:i:s') }}
                     </td>
                     <td>
-                        <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes" target="_blank" class="text-decoration-none">
+                        <a href="https://www.waze.com/ul?ll={{ buraco.location_x }},{{ buraco.location_y }}&navigate=yes"
+                            target="_blank" class="text-decoration-none">
                             {{ buraco.location_x }}, {{ buraco.location_y }}
                         </a>
                     </td>
@@ -70,61 +76,63 @@
                         <button type="button" class="btn btn-primary btn-sm open-edit-modal">Editar</button>
                     </td>
                 </tr>
-            {% else %}
+                {% else %}
                 <tr>
                     <td colspan="7" class="text-center">Nenhum buraco encontrado.</td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Atualizar Buraco</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateForm" method="POST" action="">
-                    <input type="hidden" name="uuid" id="modal-uuid">
-                    <div class="d-grid gap-2">
-                        <button type="submit" name="status" value="resolvido" class="btn btn-success">Resolvido</button>
-                        <button type="submit" name="status" value="nao_existe" class="btn btn-danger">Não Existe</button>
-                    </div>
-                </form>
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Atualizar Buraco</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateForm" method="POST" action="">
+                        <input type="hidden" name="uuid" id="modal-uuid">
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="status" value="resolvido"
+                                class="btn btn-success">Resolvido</button>
+                            <button type="submit" name="status" value="nao_existe" class="btn btn-danger">Não
+                                Existe</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const table = new DataTable('#buracos-table', {
-            dom: 'Bfrtip',
-            buttons: ['copy', 'excel', 'csv', 'pdf'],
-            order: [[4, 'desc']],
-        });
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = new DataTable('#buracos-table', {
+                dom: 'Bfrtip',
+                buttons: ['copy', 'excel', 'csv', 'pdf'],
+                order: [[4, 'desc']],
+            });
 
-        function updateCounters() {
-            const totalAtivos = table.data().count();
-            const totalFiltrados = table.rows({ search: 'applied' }).data().count();
-            document.getElementById('count-active').textContent = totalAtivos;
-            document.getElementById('count-filtered').textContent = totalFiltrados;
-            document.getElementById('count-inactive').textContent = totalAtivos - totalFiltrados;
-        }
-
-        table.on('draw', updateCounters);
-        updateCounters();
-
-        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-        document.querySelector('#buracos-table').addEventListener('click', function(e) {
-            if (e.target.classList.contains('open-edit-modal')) {
-                const uuid = e.target.closest('tr').dataset.uuid;
-                document.getElementById('modal-uuid').value = uuid;
-                editModal.show();
+            function updateCounters() {
+                const totalAtivos = table.data().count();
+                const totalFiltrados = table.rows({ search: 'applied' }).data().count();
+                document.getElementById('count-active').textContent = totalAtivos;
+                document.getElementById('count-filtered').textContent = totalFiltrados;
+                document.getElementById('count-inactive').textContent = totalAtivos - totalFiltrados;
             }
+
+            table.on('draw', updateCounters);
+            updateCounters();
+
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            document.querySelector('#buracos-table').addEventListener('click', function (e) {
+                if (e.target.classList.contains('open-edit-modal')) {
+                    const uuid = e.target.closest('tr').dataset.uuid;
+                    document.getElementById('modal-uuid').value = uuid;
+                    editModal.show();
+                }
+            });
         });
-    });
-</script>
+    </script>
