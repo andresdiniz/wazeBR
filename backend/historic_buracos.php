@@ -9,6 +9,9 @@ if (!isset($_SESSION['usuario_id_parceiro'])) {
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
+// Marcar o tempo de início
+$startTime = microtime(true);
+
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new \Twig\Environment($loader);
 
@@ -79,3 +82,12 @@ try {
 } catch (Exception $e) {
     die("Erro: " . $e->getMessage());
 }
+
+// Marcar o tempo de fim
+$endTime = microtime(true);
+
+// Calcular o tempo de execução
+$executionTime = $endTime - $startTime;
+
+logToFile('info', "Consulta de buracos realizada em $executionTime segundos");
+?>
