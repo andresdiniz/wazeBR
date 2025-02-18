@@ -1,4 +1,3 @@
-
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -29,16 +28,16 @@
             <form method="GET" action="" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="filter-date" class="form-label small text-muted mb-1">Data específica</label>
-                    <input type="date" id="filter-date" name="date" class="form-control form-control-sm" 
-                           value="{{ filters.date ?? '' }}">
+                    <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
+                        value="{{ filters.date ?? '' }}">
                 </div>
                 <div class="col-md-3">
                     <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
                     <select id="filter-period" name="period" class="form-select form-select-sm">
                         <option value="">Todos</option>
-                        <option value="7" {{ filters.period == '7' ? 'selected' : '' }}>Última semana</option>
-                        <option value="15" {{ filters.period == '15' ? 'selected' : '' }}>Últimos 15 dias</option>
-                        <option value="30" {{ filters.period == '30' ? 'selected' : '' }}>Último mês</option>
+                        <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
+                        <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
+                        <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-grid">
@@ -109,8 +108,8 @@
                             {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
                         </td>
                         <td>
-                            <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}" 
-                               target="_blank" class="btn btn-link btn-sm py-0">
+                            <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}"
+                                target="_blank" class="btn btn-link btn-sm py-0">
                                 <i class="bi bi-geo-alt"></i> Ver mapa
                             </a>
                         </td>
@@ -142,12 +141,10 @@
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
                         <div class="d-grid gap-2">
-                            <button type="submit" name="status" value="resolvido" 
-                                    class="btn btn-success btn-lg">
+                            <button type="submit" name="status" value="resolvido" class="btn btn-success btn-lg">
                                 <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
                             </button>
-                            <button type="submit" name="status" value="nao_existe" 
-                                    class="btn btn-danger btn-lg">
+                            <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-lg">
                                 <i class="bi bi-x-circle me-2"></i>Não Existe
                             </button>
                         </div>
@@ -172,7 +169,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Função de conversão de confiança
         const convertConfidence = (value) => (value * 20) + '%';
-    
+
         // Configuração do DataTable
         const table = new DataTable('#buracos-table', {
             dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
@@ -184,10 +181,10 @@
                 url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
             },
             columnDefs: [
-                { 
-                    orderable: false, 
+                {
+                    orderable: false,
                     targets: [6],
-                    className: 'no-export' 
+                    className: 'no-export'
                 },
                 {
                     targets: 3,
@@ -207,46 +204,46 @@
                     }
                 }
             ],
-            initComplete: function() {
+            initComplete: function () {
                 $('.dt-buttons').removeClass('btn-group');
                 $('.dataTables_filter input').addClass('form-control form-control-sm');
             }
         });
-    
+
         // Atualizar contadores
         const updateCounters = () => {
             const total = table.data().count();
             const filtered = table.rows({ search: 'applied' }).count();
-            
+
             document.getElementById('count-active').textContent = total;
             document.getElementById('count-filtered').textContent = filtered;
             document.getElementById('count-inactive').textContent = total - filtered;
         };
-    
+
         table.on('draw', updateCounters);
         updateCounters();
-    
+
         // Configuração do Modal - CORREÇÃO CRÍTICA
         const initModal = () => {
             const modalElement = document.getElementById('editModal');
             if (!modalElement) return;
-    
+
             const modal = new bootstrap.Modal(modalElement);
-            
+
             document.querySelector('#buracos-table').addEventListener('click', (e) => {
                 const button = e.target.closest('button.open-edit-modal');
                 if (!button) return;
-    
+
                 const row = button.closest('tr');
                 if (!row) return;
-    
+
                 const uuid = row.dataset.uuid;
                 if (!uuid) return;
-    
+
                 document.getElementById('modal-uuid').value = uuid;
                 modal.show();
             });
-    
+
             // Fix for modal close button
             const closeButton = modalElement.querySelector('.btn-close');
             if (closeButton) {
@@ -255,7 +252,7 @@
                 });
             }
         };
-    
+
         initModal();
     });
 </script>
