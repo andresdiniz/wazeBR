@@ -169,94 +169,93 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Função de conversão de confiança
-            const convertConfidence = (value) => (value * 20) + '%';
-        
-            // Configuração do DataTable
-            const table = new DataTable('#buracos-table', {
-                dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-                buttons: [
-                    {
-                        extend: 'copy',
-                        text: '<i class="bi bi-files"></i> Copiar',
-                        className: 'btn-sm'
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<i class="bi bi-file-earmark-excel"></i> Excel',
-                        className: 'btn-sm'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
-                        className: 'btn-sm'
-                    }
-                ],
-                order: [[4, 'desc']],
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
+    document.addEventListener('DOMContentLoaded', function () {
+        // Função de conversão de confiança
+        const convertConfidence = (value) => (value * 20) + '%';
+    
+        // Configuração do DataTable
+        const table = new DataTable('#buracos-table', {
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+            buttons: [
+                'copy', 'excel', 'pdf'
+            ],
+            order: [[4, 'desc']],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { 
+                    orderable: false, 
+                    targets: [6],
+                    className: 'no-export' 
                 },
-                columnDefs: [
-                    { 
-                        orderable: false, 
-                        targets: [6],
-                        className: 'no-export' 
-                    },
-                    {
-                        targets: 3,
-                        render: (data, type) => {
-                            const value = parseInt(data);
-                            if (type === 'display') {
-                                const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
-                                return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
+                {
+                    targets: 3,
+                    render: (data, type) => {
+                        let value = parseFloat(data);
+                        if (isNaN(value)) {
+                            value = parseInt(data);
+                            if (isNaN(value)) {
+                                value = 0;
                             }
-                            return value;
                         }
+                        if (type === 'display') {
+                            const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
+                            return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
+                        }
+                        return value;
                     }
-                ],
-                initComplete: function() {
-                    // Ajustar elementos de controle
-                    $('.dt-buttons').removeClass('btn-group');
-                    $('.dataTables_filter input').addClass('form-control form-control-sm');
                 }
-            });
-        
-            // Atualizar contadores
-            const updateCounters = () => {
-                const total = table.data().count();
-                const filtered = table.rows({ search: 'applied' }).count();
-                
-                document.getElementById('count-active').textContent = total;
-                document.getElementById('count-filtered').textContent = filtered;
-                document.getElementById('count-inactive').textContent = total - filtered;
-            };
-        
-            table.on('draw', updateCounters);
-            updateCounters();
-        
-            // Configuração do Modal - CORREÇÃO CRÍTICA
-            const initModal = () => {
-                const modalElement = document.getElementById('editModal');
-                if (!modalElement) return;
-        
-                const modal = new bootstrap.Modal(modalElement);
-                
-                document.querySelector('#buracos-table').addEventListener('click', (e) => {
-                    const button = e.target.closest('button.open-edit-modal');
-                    if (!button) return;
-        
-                    const row = button.closest('tr');
-                    if (!row) return;
-        
-                    const uuid = row.dataset.uuid;
-                    if (!uuid) return;
-        
-                    document.getElementById('modal-uuid').value = uuid;
-                    modal.show();
-                });
-            };
-        
-            initModal();
+            ],
+            initComplete: function() {
+                $('.dt-buttons').removeClass('btn-group');
+                $('.dataTables_filter input').addClass('form-control form-control-sm');
+            }
         });
+    
+        // Atualizar contadores
+        const updateCounters = () => {
+            const total = table.data().count();
+            const filtered = table.rows({ search: 'applied' }).count();
+            
+            document.getElementById('count-active').textContent = total;
+            document.getElementById('count-filtered').textContent = filtered;
+            document.getElementById('count-inactive').textContent = total - filtered;
+        };
+    
+        table.on('draw', updateCounters);
+        updateCounters();
+    
+        // Configuração do Modal - CORREÇÃO CRÍTICA
+        const initModal = () => {
+            const modalElement = document.getElementById('editModal');
+            if (!modalElement) return;
+    
+            const modal = new bootstrap.Modal(modalElement);
+            
+            document.querySelector('#buracos-table').addEventListener('click', (e) => {
+                const button = e.target.closest('button.open-edit-modal');
+                if (!button) return;
+    
+                const row = button.closest('tr');
+                if (!row) return;
+    
+                const uuid = row.dataset.uuid;
+                if (!uuid) return;
+    
+                document.getElementById('modal-uuid').value = uuid;
+                modal.show();
+            });
+    
+            // Fix for modal close button
+            const closeButton = modalElement.querySelector('.btn-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', () => {
+                    modal.hide();
+                });
+            }
+        };
+    
+        initModal();
+    });
 </script>
