@@ -481,7 +481,7 @@ function logToFile($level, $message, $context = []) {
     }
 
     // Exibe o nível do log e a mensagem para depuração
-    echo $level . ' ' . $message . PHP_EOL;
+    //echo $level . ' ' . $message . PHP_EOL;
     
     // Define o caminho completo do arquivo de log
     $logFile = $logDirectory . 'logs.log'; 
