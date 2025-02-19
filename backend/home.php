@@ -13,8 +13,6 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
-session_start();
-
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 // Se id_parceiro for igual a 99, mostrar todos os alertas; caso contrário, mostrar apenas os alertas do parceiro
 
