@@ -1,22 +1,29 @@
+{% set show_origin = irregularities|reduce((carry, irr) => carry or (irr.from_name is defined and irr.from_name is not empty), false) %}
+{% set show_destination = irregularities|reduce((carry, irr) => carry or (irr.to_name is defined and irr.to_name is not empty), false) %}
+{% set show_avg_speed = irregularities|reduce((carry, irr) => carry or (irr.avg_speed is defined and irr.avg_speed is not empty), false) %}
+{% set show_avg_time = irregularities|reduce((carry, irr) => carry or (irr.avg_time is defined and irr.avg_time is not empty), false) %}
+{% set show_historic_speed = irregularities|reduce((carry, irr) => carry or (irr.historic_speed is defined and irr.historic_speed is not empty), false) %}
+{% set show_historic_time = irregularities|reduce((carry, irr) => carry or (irr.historic_time is defined and irr.historic_time is not empty), false) %}
+{% set show_jam_level = irregularities|reduce((carry, irr) => carry or (irr.jam_level is defined and irr.jam_level is not empty), false) %}
+
 <div class="container">
     <h2>Irregularidades</h2>
     {% if irregularities is not empty %}
-        <!-- Tabela para telas grandes -->
         <div class="d-none d-lg-block">
             <div class="table-responsive">
                 <table id="irregularitiesTable" class="table table-striped table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th class="col-id">ID</th>
-                            <th class="col-name">Nome</th>
-                            {% if irregularities[0].from_name %}<th class="col-origin">Origem</th>{% endif %}
-                            {% if irregularities[0].to_name %}<th class="col-destination">Destino</th>{% endif %}
-                            {% if irregularities[0].avg_speed %}<th class="col-avg-speed">Velocidade Média</th>{% endif %}
-                            {% if irregularities[0].avg_time %}<th class="col-avg-time">Tempo Médio</th>{% endif %}
-                            {% if irregularities[0].historic_speed %}<th class="col-historic-speed">Velocidade Histórica</th>{% endif %}
-                            {% if irregularities[0].historic_time %}<th class="col-historic-time">Tempo Histórico</th>{% endif %}
-                            {% if irregularities[0].jam_level %}<th class="col-jam-level">Nível de Congestionamento</th>{% endif %}
-                            <th class="col-actions">Ações</th>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            {% if show_origin %}<th>Origem</th>{% endif %}
+                            {% if show_destination %}<th>Destino</th>{% endif %}
+                            {% if show_avg_speed %}<th>Velocidade Média</th>{% endif %}
+                            {% if show_avg_time %}<th>Tempo Médio</th>{% endif %}
+                            {% if show_historic_speed %}<th>Velocidade Histórica</th>{% endif %}
+                            {% if show_historic_time %}<th>Tempo Histórico</th>{% endif %}
+                            {% if show_jam_level %}<th>Nível de Congestionamento</th>{% endif %}
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,20 +31,15 @@
                             <tr>
                                 <td>{{ irregularity.id }}</td>
                                 <td>{{ irregularity.name }}</td>
-                                <td>{{ irregularity.from_name|default('') }}</td>
-                                <td>{{ irregularity.to_name|default('') }}</td>
-                                <td>{{ irregularity.avg_speed|default('')|number_format(2, '.', ',') }} Km/h</td>
-                                <td>{{ (irregularity.avg_time / 60)|default('')|number_format(2, '.', ',') }} min</td>
-                                <td>{{ irregularity.historic_speed|default('')|number_format(2, '.', ',') }} Km/h</td>
-                                <td>{{ (irregularity.historic_time / 60)|default('')|number_format(2, '.', ',') }} min</td>
-                                <td>{{ irregularity.jam_level|default('') }}</td>
+                                {% if show_origin %}<td>{{ irregularity.from_name|default('') }}</td>{% endif %}
+                                {% if show_destination %}<td>{{ irregularity.to_name|default('') }}</td>{% endif %}
+                                {% if show_avg_speed %}<td>{{ irregularity.avg_speed|default(0)|number_format(2, '.', ',') }} Km/h</td>{% endif %}
+                                {% if show_avg_time %}<td>{{ (irregularity.avg_time|default(0) / 60)|number_format(2, '.', ',') }} min</td>{% endif %}
+                                {% if show_historic_speed %}<td>{{ irregularity.historic_speed|default(0)|number_format(2, '.', ',') }} Km/h</td>{% endif %}
+                                {% if show_historic_time %}<td>{{ (irregularity.historic_time|default(0) / 60)|number_format(2, '.', ',') }} min</td>{% endif %}
+                                {% if show_jam_level %}<td>{{ irregularity.jam_level|default('') }}</td>{% endif %}
                                 <td>
-                                    <button class="btn btn-primary btn-sm view-map" 
-                                            data-route-id="{{ irregularity.id }}" 
-                                            data-bs-toggle="modal" data-bs-target="#mapModal"
-                                            aria-label="Ver irregularidade no mapa">
-                                        Ver no Mapa
-                                    </button>
+                                    <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -46,27 +48,21 @@
             </div>
         </div>
 
-        <!-- Cartões para telas pequenas -->
         <div class="d-lg-none">
             {% for irregularity in irregularities %}
                 <div class="card mb-3 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ irregularity.name }}</h5>
                         <p class="card-text">
-                            <strong>Origem:</strong> {{ irregularity.from_name|default('') }}<br>
-                            <strong>Destino:</strong> {{ irregularity.to_name|default('') }}<br>
-                            <strong>Velocidade Média:</strong> {{ irregularity.avg_speed|default('')|number_format(2) }} km/h<br>
-                            <strong>Tempo Médio:</strong> {{ (irregularity.avg_time / 60)|default('')|number_format(2) }} min<br>
-                            <strong>Velocidade Histórica:</strong> {{ irregularity.historic_speed|default('')|number_format(2) }} km/h<br>
-                            <strong>Tempo Histórico:</strong> {{ (irregularity.historic_time / 60)|default('')|number_format(2) }} min<br>
-                            <strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}
+                            {% if show_origin %}<strong>Origem:</strong> {{ irregularity.from_name|default('') }}<br>{% endif %}
+                            {% if show_destination %}<strong>Destino:</strong> {{ irregularity.to_name|default('') }}<br>{% endif %}
+                            {% if show_avg_speed %}<strong>Velocidade Média:</strong> {{ irregularity.avg_speed|default(0)|number_format(2) }} km/h<br>{% endif %}
+                            {% if show_avg_time %}<strong>Tempo Médio:</strong> {{ (irregularity.avg_time|default(0) / 60)|number_format(2) }} min<br>{% endif %}
+                            {% if show_historic_speed %}<strong>Velocidade Histórica:</strong> {{ irregularity.historic_speed|default(0)|number_format(2) }} km/h<br>{% endif %}
+                            {% if show_historic_time %}<strong>Tempo Histórico:</strong> {{ (irregularity.historic_time|default(0) / 60)|number_format(2) }} min<br>{% endif %}
+                            {% if show_jam_level %}<strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}{% endif %}
                         </p>
-                        <button class="btn btn-primary btn-sm view-map" 
-                                data-route-id="{{ irregularity.id }}" 
-                                data-bs-toggle="modal" data-bs-target="#mapModal"
-                                aria-label="Ver irregularidade no mapa">
-                            Ver no Mapa
-                        </button>
+                        <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
                     </div>
                 </div>
             {% endfor %}
@@ -75,6 +71,7 @@
         <p>Não há irregularidades registradas no momento.</p>
     {% endif %}
 </div>
+
 
 <!-- Modal para o Mapa -->
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
