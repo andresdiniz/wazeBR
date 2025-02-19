@@ -54,7 +54,7 @@
                     <iframe
                         id="map-{{ alert.uuid }}"
                         class="rounded shadow-sm border"
-                        src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.latitude }}&lon={{ alert.longitude }}&pin=1&campaign=alerts_{{ alert.type }}&vehicle=car&hidegeopins=false&timestamp={{ alert.timestamp }}"
+                        src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1&campaign=alerts_{{ alert.uuid }}&vehicle=car&hidegeopins=false&timestamp={{ alert.pubMillis }}"
                         style="width: 100%; height: 400px; min-height: 300px; border-color: #e0e0e0;"
                         allow="geolocation *; fullscreen"
                         title="Localização exata do alerta {{ alert.code }} no mapa"
