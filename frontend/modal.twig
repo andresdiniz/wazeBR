@@ -23,28 +23,50 @@
                     </div>
 
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm p-3 mb-3">
-                            <p><strong>📅 Data:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                        <div class="alert-details">
+                            <!-- Data -->
+                            <p><strong>📅 Data:</strong> 
+                                {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }} 
+                                <small class="text-muted">(UTC)</small>
+                            </p>
+                        
+                            <!-- KM Estimado -->
                             <p><strong>🛣️ KM Estimado:</strong> 
-                                <span id="km-value-{{ alert.uuid }}" class="badge badge-info">Buscando...</span>
-                            </p>
-                            <p>
-                                <strong>🔍 Confiança:</strong> 
-                                <span class="badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}">
-                                    {{ alert.confidence }}
+                                <span id="km-value-{{ alert.uuid }}" class="badge bg-info">
+                                    {% if alert.estimated_km %}
+                                        KM {{ alert.estimated_km|number_format(2, ',') }}
+                                    {% else %}
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Calculando...
+                                    {% endif %}
                                 </span>
                             </p>
-                            <p>
-                                <strong>⚠️ Status:</strong> 
-                                <span class="badge badge-{{ alert.status == '1' ? 'success' : 'danger' }}">
-                                    {{ alert.status == "1" ? "Ativo" : "Inativo" }}
+                        
+                            <!-- Confiança -->
+                            <p><strong>🔍 Confiança:</strong> 
+                                <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
+                                      data-bs-toggle="tooltip" 
+                                      title="Nível de confiança na precisão do alerta">
+                                    {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
                                 </span>
                             </p>
-                            <p>
-                                <strong>Link:</strong>
-                                <span <span id="km-value-{{ alert.uuid }}" class="badge badge-info">
-                                    <a href="http://https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }"></a>
+                        
+                            <!-- Status -->
+                            <p><strong>⚠️ Status:</strong> 
+                                <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }}">
+                                    {{ alert.status == 1 ? "Ativo" : "Inativo" }}
+                                    <span class="visually-hidden">Status do alerta</span>
                                 </span>
+                            </p>
+                        
+                            <!-- Link -->
+                            <p><strong>🔗 Link Relacionado:</strong>
+                                <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
+                                   class="badge bg-primary text-decoration-none"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   aria-label="Abrir alerta no Waze">
+                                    Ver no Waze ↗
+                                </a>
                             </p>
                         </div>
                     </div>
