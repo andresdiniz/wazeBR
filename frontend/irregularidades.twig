@@ -95,8 +95,19 @@
         button.addEventListener('click', function() {
             const routeId = this.dataset.routeId;
             const routeName = this.dataset.routeName;
+    
+            // Aqui você precisaria ter as coordenadas armazenadas junto das irregularidades
+            const lat = this.dataset.routeLat; // precisa vir do backend
+            const lon = this.dataset.routeLon; // precisa vir do backend
+    
             const iframe = document.getElementById('wazeMapIframe');
-            iframe.src = `https://www.waze.com/ul?ll=-23.55052,-46.633308&navigate=yes&zoom=15&name=${encodeURIComponent(routeName)}`;
+            iframe.src = `https://embed.waze.com/iframe?zoom=15&lat=${lat}&lon=${lon}&pin=1`;
         });
+    });
+
+    // Adiciona o evento de fechar o modal para limpar o iframe quando o modal é fechado    
+    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function() {
+        const iframe = document.getElementById('wazeMapIframe');
+        iframe.src = '';
     });
 </script>
