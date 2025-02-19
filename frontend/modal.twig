@@ -1,4 +1,4 @@
-<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
+8<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
      data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-3 shadow-lg rounded">
@@ -54,7 +54,7 @@
                     <iframe
                         id="map-{{ alert.uuid }}"
                         class="rounded shadow-sm border"
-                        src="https://embed.waze.com/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&&pin=1&locale=pt_BR"
+                        src="https://embed.waze.com/pt_BR/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&&pin=1"
                         height="400"
                         width="100%"
                         allowfullscreen
