@@ -40,6 +40,12 @@
                                     {{ alert.status == "1" ? "Ativo" : "Inativo" }}
                                 </span>
                             </p>
+                            <p>
+                                <strong>Link:</strong>
+                                <span <span id="km-value-{{ alert.uuid }}" class="badge badge-info">
+                                    <a href="http://https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }"></a>
+                                </span>
+                            </p>
                         </div>
                     </div>
                 </div>
