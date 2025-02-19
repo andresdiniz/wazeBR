@@ -2,7 +2,6 @@
      data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-3 shadow-lg rounded">
-            <!-- Cabeçalho -->
             <div class="modal-header bg-primary text-white rounded-top">
                 <h5 class="modal-title">
                     <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
@@ -12,9 +11,7 @@
                 </button>
             </div>
 
-            <!-- Corpo (Com rolagem interna) -->
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <!-- Grid de Informações -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm p-3 mb-3">
@@ -47,59 +44,44 @@
                     </div>
                 </div>
 
-                <!-- Tipo/Subtipo -->
                 <div class="card border-0 shadow-sm p-3 mb-3">
                     <p id = "tipo-alerta-{{ alert.uuid }}"><strong>🚨 Tipo:</strong> {{ alert.type }}</p>
                     <p id="subtipo-alerta-{{ alert.uuid }}"><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
                 </div>
 
-                <!-- Mapa Responsivo -->
                 <div class="card border-0 shadow-sm p-3">
-                    <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
-                    <div id="map-{{ alert.uuid }}" class="rounded shadow-sm border" style="height: 400px; width: 100%;"></div>
+                    <h6 class="text-center text-muted">📍 Localização no Mapa (Waze)</h6>
+                    <iframe
+                        id="map-{{ alert.uuid }}"
+                        class="rounded shadow-sm border"
+                        src="https://embed.waze.com/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1"
+                        height="400"
+                        width="100%"
+                        allowfullscreen
+                    ></iframe>
                 </div>
             </div>
 
-            <!-- Rodapé -->
             <div class="modal-footer d-flex justify-content-between">
                 <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
                    class="btn btn-outline-primary" target="_blank">
                     <i class="fab fa-waze"></i> Ver no Waze
                 </a>
-            
+                
                 <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
                     <i class="fas fa-check"></i> Confirmar Alerta
                 </button>
-            
+                
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Fechar
                 </button>
-            </div>            
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
-    function inicializarMapa(uuid, latitude, longitude) {
-        const map = L.map(`map-${uuid}`).setView([latitude, longitude], 14);
-
-        // Configuração do mapa com OpenStreetMap
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Marca o local no mapa
-        L.marker([latitude, longitude]).addTo(map)
-            .bindPopup("Localização do Evento")
-            .openPopup();
-
-        // Centraliza o mapa no ponto
-        map.setView([latitude, longitude], 14);
-    }
-
-    // Evento para abrir o modal
     document.querySelectorAll("[id^=alertModal]").forEach(modal => {
         modal.addEventListener("show.bs.modal", async function () {
             const uuid = modal.id.replace("alertModal", "");
@@ -107,13 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const longitude = parseFloat(modal.getAttribute("data-lon"));
 
             if (!isNaN(latitude) && !isNaN(longitude)) {
-                // Chama a função para buscar o KM do DNIT
                 const km = buscarKmDnit(longitude, latitude);
-                console.log(km);
                 document.getElementById(`km-value-${uuid}`).textContent = km;
-                
-                // Inicializa o mapa
-                inicializarMapa(uuid, latitude, longitude);
             }
         });
     });
