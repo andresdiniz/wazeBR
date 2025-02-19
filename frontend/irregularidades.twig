@@ -39,7 +39,7 @@
                                 {% if show_historic_time %}<td>{{ (irregularity.historic_time|default(0) / 60)|number_format(2, '.', ',') }} min</td>{% endif %}
                                 {% if show_jam_level %}<td>{{ irregularity.jam_level|default('') }}</td>{% endif %}
                                 <td>
-                                    <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-route-name="{{ irregularity.name }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
+                                    <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -62,7 +62,7 @@
                             {% if show_historic_time %}<strong>Tempo Histórico:</strong> {{ (irregularity.historic_time|default(0) / 60)|number_format(2) }} min<br>{% endif %}
                             {% if show_jam_level %}<strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}{% endif %}
                         </p>
-                        <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-route-name="{{ irregularity.name }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
+                        <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
                     </div>
                 </div>
             {% endfor %}
@@ -71,6 +71,7 @@
         <p>Não há irregularidades registradas no momento.</p>
     {% endif %}
 </div>
+
 
 <!-- Modal para o Mapa -->
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
@@ -81,7 +82,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <iframe id="wazeMapIframe" src="" width="100%" height="500" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                <!-- Placeholder para spinner -->
+                <div id="mapLoader" class="text-center my-3" style="display: none;">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+                <div id="mapContainer" style="width: 100%; height: 500px;"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -91,23 +98,70 @@
 </div>
 
 <script>
-    document.querySelectorAll('.view-map').forEach(button => {
-        button.addEventListener('click', function() {
+// Use a notação moderna para evitar conflitos com jQuery
+(function($){
+    let map = null; // Escopo local para o mapa
+
+    $(document).ready(function() {
+        // Função para inicializar e exibir o mapa
+        async function loadMap(routeId) {
+            const baseUrl = '../wazeportal/api.php';
+            const action = 'get_route_lines_irre';
+            const $mapContainer = $('#mapContainer');
+            const $mapLoader = $('#mapLoader');
+
+            // Exibe o spinner enquanto carrega
+            $mapLoader.show();
+            $mapContainer.empty();
+
+            // Remove instância anterior do mapa, se existir
+            if (map) {
+                map.remove();
+                map = null;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}?action=${action}&route_id_irre=${routeId}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao obter coordenadas.');
+                }
+
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    const coordinates = data.map(coord => [parseFloat(coord.y), parseFloat(coord.x)]);
+                    map = L.map('mapContainer').setView(coordinates[0], 13);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
+
+                    L.polyline(coordinates, { color: 'red' }).addTo(map);
+                } else {
+                    $mapContainer.html('<p>Não foi possível carregar as coordenadas.</p>');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar coordenadas:', error);
+                $mapContainer.html('<p>Erro ao buscar as coordenadas. Tente novamente mais tarde.</p>');
+            } finally {
+                // Oculta o spinner quando finalizado
+                $mapLoader.hide();
+            }
+        }
+
+        // Evento para abrir o mapa ao clicar no botão "Ver no Mapa"
+        $('.view-map').on('click', function () {
             const routeId = this.dataset.routeId;
-            const routeName = this.dataset.routeName;
-    
-            // Aqui você precisaria ter as coordenadas armazenadas junto das irregularidades
-            const lat = this.dataset.routeLat; // precisa vir do backend
-            const lon = this.dataset.routeLon; // precisa vir do backend
-    
-            const iframe = document.getElementById('wazeMapIframe');
-            iframe.src = `https://embed.waze.com/iframe?zoom=15&lat=${lat}&lon=${lon}&pin=1`;
+            loadMap(routeId);
+        });
+
+        // Limpa o mapa ao fechar o modal
+        $('#mapModal').on('hidden.bs.modal', function () {
+            if (map) {
+                map.remove();
+                map = null;
+            }
         });
     });
-
-    // Adiciona o evento de fechar o modal para limpar o iframe quando o modal é fechado    
-    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function() {
-        const iframe = document.getElementById('wazeMapIframe');
-        iframe.src = '';
-    });
+})(jQuery);
 </script>
