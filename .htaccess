@@ -10,7 +10,8 @@ RewriteBase /wazeportal
     Deny from all
 </Files>
 
-# Redireciona tudo para o index.php
+# Exceção para arquivos XML
+RewriteCond %{REQUEST_URI} !\.xml$ [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
