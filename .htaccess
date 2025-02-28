@@ -10,11 +10,7 @@ RewriteBase /wazeportal
     Deny from all
 </Files>
 
-# Permite o acesso direto aos arquivos dentro da pasta /parceiros
-RewriteCond %{REQUEST_URI} ^/wazeportal/parceiros/
-RewriteRule ^(.*)$ - [L]
-
-# Redireciona tudo para o index.php, exceto arquivos e pastas existentes
+# Redireciona tudo para o index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
