@@ -18,7 +18,6 @@ try {
 
 // Obter a data e hora atual
 $currentDateTime = date('Y-m-d H:i:s');
-$TIMEZONE;
 
 // Atualizar eventos cujo endtime já passou para is_active = 2
 $updateQuery = "
@@ -30,12 +29,12 @@ $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
 
-// Consulta para eventos ativos (is_active = 1) e dados relacionados, incluindo agendamentos
+// Consulta para eventos ativos com id_parceiro
 $query = "
     SELECT 
         e.id AS event_id, e.parent_event_id, e.creationtime, e.updatetime,
         e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
-        e.starttime, e.endtime,
+        e.starttime, e.endtime, e.id_parceiro, 
         s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
         l.id AS lane_impact_id, l.total_closed_lanes, l.roadside,
         sc.day_of_week, sc.start_time AS schedule_start_time, sc.end_time AS schedule_end_time
@@ -48,9 +47,9 @@ $query = "
     LEFT JOIN 
         schedules sc ON e.id = sc.event_id
     WHERE 
-        e.is_active = 1 AND e.endtime >= :currentDateTime -- Filtra eventos ativos cujo endtime ainda não passou
+        e.is_active = 1 AND e.endtime >= :currentDateTime
     ORDER BY 
-        e.id, s.id, l.id, sc.id
+        e.id_parceiro, e.id, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
@@ -58,20 +57,26 @@ $statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $statement->execute();
 $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-// Organizar dados em estrutura hierárquica
-$events = [];
+// Organizar eventos por parceiro
+$eventosPorParceiro = [];
 foreach ($rows as $row) {
+    $idParceiro = $row['id_parceiro'];
+
+    if (!isset($eventosPorParceiro[$idParceiro])) {
+        $eventosPorParceiro[$idParceiro] = [];
+    }
+
     $eventId = $row['event_id'];
 
-    if (!isset($events[$eventId])) {
-        $events[$eventId] = [
-            'id' => $row['event_id'],
+    if (!isset($eventosPorParceiro[$idParceiro][$eventId])) {
+        $eventosPorParceiro[$idParceiro][$eventId] = [
+            'id' => $eventId,
             'parent_event_id' => $row['parent_event_id'],
             'creationtime' => $row['creationtime'],
             'updatetime' => $row['updatetime'],
             'type' => $row['type'],
             'subtype' => $row['subtype'],
-            'description' => mb_substr($row['description'], 0, 40), // Limita a descrição a 40 caracteres
+            'description' => mb_substr($row['description'], 0, 40),
             'street' => $row['street'],
             'polyline' => $row['polyline'],
             'direction' => $row['direction'],
@@ -79,12 +84,12 @@ foreach ($rows as $row) {
             'endtime' => $row['endtime'],
             'sources' => [],
             'lane_impacts' => [],
-            'schedules' => [], // Adicionando o campo para armazenar agendamentos
+            'schedules' => [],
         ];
     }
 
     if ($row['source_id']) {
-        $events[$eventId]['sources'][] = [
+        $eventosPorParceiro[$idParceiro][$eventId]['sources'][] = [
             'reference' => $row['reference'],
             'name' => $row['source_name'],
             'url' => $row['source_url'],
@@ -92,15 +97,14 @@ foreach ($rows as $row) {
     }
 
     if ($row['lane_impact_id']) {
-        $events[$eventId]['lane_impacts'][] = [
+        $eventosPorParceiro[$idParceiro][$eventId]['lane_impacts'][] = [
             'total_closed_lanes' => $row['total_closed_lanes'],
             'roadside' => $row['roadside'],
         ];
     }
 
-    // Adicionando agendamento se existir
     if ($row['day_of_week']) {
-        $events[$eventId]['schedules'][] = [
+        $eventosPorParceiro[$idParceiro][$eventId]['schedules'][] = [
             'day_of_week' => $row['day_of_week'],
             'start_time' => $row['schedule_start_time'],
             'end_time' => $row['schedule_end_time'],
@@ -108,90 +112,66 @@ foreach ($rows as $row) {
     }
 }
 
-// Criar XML com formatação
-$xml = new DOMDocument('1.0', 'UTF-8');
-$xml->formatOutput = true;
+// Criar XMLs para cada parceiro
+foreach ($eventosPorParceiro as $idParceiro => $eventos) {
+    // Criar objeto XML
+    $xml = new DOMDocument('1.0', 'UTF-8');
+    $xml->formatOutput = true;
 
-// Criar o elemento raiz "incidents"
-$root = $xml->createElement('incidents');
+    // Criar o elemento raiz "incidents"
+    $root = $xml->createElement('incidents');
+    $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+    $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
+    $xml->appendChild($root);
 
-// Adicionar os atributos de namespace e esquema
-$root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
-$root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
-
-// Adicionar o elemento raiz ao XML
-$xml->appendChild($root);
-
-// Adicionar eventos ao XML
-foreach ($events as $event) {
-    $eventNode = $xml->createElement('incident');
-    $eventNode->setAttribute('id', $event['id']);
-    if ($event['parent_event_id']) {
-        $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
-    }
-
-    // Adicionar elementos obrigatórios
-    foreach (['type', 'street', 'polyline', 'starttime'] as $key) {
-        if (!empty($event[$key])) {
-            $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
+    // Adicionar eventos ao XML
+    foreach ($eventos as $event) {
+        $eventNode = $xml->createElement('incident');
+        $eventNode->setAttribute('id', $event['id']);
+        if ($event['parent_event_id']) {
+            $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
         }
-    }
 
-    // Adicionar elementos opcionais
-    foreach (['direction', 'endtime', 'description', 'subtype'] as $key) {
-        if (!empty($event[$key])) {
-            $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
-        }
-    }
-
-    // Adicionar fontes
-    if (!empty($event['sources'])) {
-        $sourcesNode = $xml->createElement('sources');
-        foreach ($event['sources'] as $source) {
-            $sourceNode = $xml->createElement('source');
-            $sourceNode->appendChild($xml->createElement('reference', htmlspecialchars($source['reference'])));
-            $sourceNode->appendChild($xml->createElement('name', htmlspecialchars($source['name'])));
-            if (!empty($source['url'])) {
-                $sourceNode->appendChild($xml->createElement('url', htmlspecialchars($source['url'])));
+        foreach (['type', 'street', 'polyline', 'starttime'] as $key) {
+            if (!empty($event[$key])) {
+                $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
             }
-            $sourcesNode->appendChild($sourceNode);
         }
-        $eventNode->appendChild($sourcesNode);
-    }
 
-    // Adicionar impactos nas faixas
-    if (!empty($event['lane_impacts'])) {
-        $laneImpactsNode = $xml->createElement('lane_impacts');
-        foreach ($event['lane_impacts'] as $impact) {
-            $impactNode = $xml->createElement('lane_impact');
-            $impactNode->appendChild($xml->createElement('total_closed_lanes', htmlspecialchars($impact['total_closed_lanes'])));
-            if (!empty($impact['roadside'])) {
-                $impactNode->appendChild($xml->createElement('roadside', htmlspecialchars($impact['roadside'])));
+        foreach (['direction', 'endtime', 'description', 'subtype'] as $key) {
+            if (!empty($event[$key])) {
+                $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
             }
-            $laneImpactsNode->appendChild($impactNode);
         }
-        $eventNode->appendChild($laneImpactsNode);
+
+        if (!empty($event['sources'])) {
+            $sourcesNode = $xml->createElement('sources');
+            foreach ($event['sources'] as $source) {
+                $sourceNode = $xml->createElement('source');
+                $sourceNode->appendChild($xml->createElement('reference', htmlspecialchars($source['reference'])));
+                $sourceNode->appendChild($xml->createElement('name', htmlspecialchars($source['name'])));
+                if (!empty($source['url'])) {
+                    $sourceNode->appendChild($xml->createElement('url', htmlspecialchars($source['url'])));
+                }
+                $sourcesNode->appendChild($sourceNode);
+            }
+            $eventNode->appendChild($sourcesNode);
+        }
+
+        $root->appendChild($eventNode);
     }
 
-    // Adicionar agendamentos
-    if (!empty($event['schedules'])) {
-        $schedulesNode = $xml->createElement('schedules');
-        foreach ($event['schedules'] as $schedule) {
-            $scheduleNode = $xml->createElement('schedule');
-            $scheduleNode->appendChild($xml->createElement('day_of_week', htmlspecialchars($schedule['day_of_week'])));
-            $scheduleNode->appendChild($xml->createElement('start_time', htmlspecialchars($schedule['start_time'])));
-            $scheduleNode->appendChild($xml->createElement('end_time', htmlspecialchars($schedule['end_time'])));
-            $schedulesNode->appendChild($scheduleNode);
-        }
-        $eventNode->appendChild($schedulesNode);
+    // Criar diretório do parceiro se não existir
+    $dirPath = __DIR__ . "/parceiros/{$idParceiro}/";
+    if (!is_dir($dirPath)) {
+        mkdir($dirPath, 0777, true);
     }
 
-    $root->appendChild($eventNode);
+    // Salvar XML na pasta do parceiro
+    $xmlPath = $dirPath . 'events.xml';
+    $xml->save($xmlPath);
+
+    echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
-
-// Exibir ou salvar o XML
-header('Content-Type: application/xml; charset=utf-8');
-$xml->save('events.xml');
-echo $xml->saveXML();
 
 ?>
