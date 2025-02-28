@@ -278,20 +278,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                         if ($stmt->execute()) {
                             $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
             
-                            // Criar a pasta com o ID do parceiro (ex: /parceiros/99/)
-                            $partnerFolder = __DIR__ . "/../parceiros/" . $id_parceiro;
-                            if (!is_dir($partnerFolder)) {
-                                mkdir($partnerFolder, 0777, true);
-                            }
-            
-                            // Criar a URL completa e salvar na tabela `urls_events`
-                            $url = "parceiros/{$id_parceiro}/events.xml";
-                            $sqlUrl = "INSERT INTO urls_events (id_parceiro, url) VALUES (:id_parceiro, :url)";
-                            $stmtUrl = $pdo->prepare($sqlUrl);
-                            $stmtUrl->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-                            $stmtUrl->bindValue(':url', $url, PDO::PARAM_STR);
-                            $stmtUrl->execute();
-            
                             echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
                         } else {
                             echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
