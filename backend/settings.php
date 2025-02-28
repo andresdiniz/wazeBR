@@ -266,10 +266,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             case 'create_partner':
                 $nome = trim($_POST['Nome']);
                 $identificador = trim($_POST['name_partner']);
-            
+                
                 if (!empty($nome) && !empty($identificador)) {
                     try {
-                        echo "Eu estou aqui";
                         // Inserir o novo parceiro na tabela `parceiros`
                         $sql = "INSERT INTO parceiros (Nome, name_partner) VALUES (:nome, :identificador)";
                         $stmt = $pdo->prepare($sql);
@@ -279,7 +278,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                         if ($stmt->execute()) {
                             $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
             
-                            echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
+                            // Construir o URL dinâmico
+                            $url = 'https://fenixsmm.store/wazeportal/parceiros/' . $id_parceiro . '/events.xml';
+            
+                            // Inserir a URL na tabela `urls_events`
+                            $sql = "INSERT INTO `urls_events` (`id_parceiro`, `url`) VALUES (:id_parceiro, :url)";
+                            $stmt = $pdo->prepare($sql);
+                            $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+                            $stmt->bindValue(':url', $url, PDO::PARAM_STR);
+            
+                            if ($stmt->execute()) {
+                                echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
+                            } else {
+                                echo json_encode(["success" => false, "message" => "Erro ao salvar a URL do evento."]);
+                                http_response_code(501);    // Código de erro 501 - Não implementado corretamente
+                            }
                         } else {
                             echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
                             http_response_code(501);    // Código de erro 501 - Não implementado corretamente
@@ -292,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                 } else {
                     echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
                 }
-                break;            
+                break;                        
 
         // Caso de ação não reconhecida
         default:
