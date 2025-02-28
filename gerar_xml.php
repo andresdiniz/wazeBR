@@ -76,7 +76,7 @@ foreach ($rows as $row) {
             'updatetime' => $row['updatetime'],
             'type' => $row['type'],
             'subtype' => $row['subtype'],
-            'description' => mb_substr($row['description'], 0, 40),
+            'description' => mb_substr($row['description'], 0, 250),
             'street' => $row['street'],
             'polyline' => $row['polyline'],
             'direction' => $row['direction'],
