@@ -1,7 +1,4 @@
 <?php
-
-
-<?php
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
