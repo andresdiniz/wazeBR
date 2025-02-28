@@ -281,10 +281,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                             echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
                         } else {
                             echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
+                            http_response_code(501);    // Código de erro 501 - Não implementado corretamente
                         }
                     } catch (PDOException $e) {
                         error_log("Erro ao criar parceiro: " . $e->getMessage());
                         echo json_encode(["success" => false, "message" => "Erro ao processar a criação."]);
+                        http_response_code(500);  // Código de erro 500 - Erro interno do servidor
                     }
                 } else {
                     echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
