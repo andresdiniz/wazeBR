@@ -33,6 +33,7 @@ $data = [
     'tipos' => $tipos,
     'subtiposPorTipo' => $subtiposPorTipo,
     'id_parceiro' => $id_parceiro,
+    'parceiros' => getParceiros($pdo, $id_parceiro),
 ];
 
 
