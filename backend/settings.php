@@ -279,7 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                             $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
             
                             // Construir o URL dinâmico
-                            $url = 'https://fenixsmm.store/wazeportal/parceiros/' . $id_parceiro . '/events.xml';
+                            $url = 'https://fenixsmm.store/wazeportal/events' . $id_parceiro . '.xml';
             
                             // Inserir a URL na tabela `urls_events`
                             $sql = "INSERT INTO `urls_events` (`id_parceiro`, `url`) VALUES (:id_parceiro, :url)";
