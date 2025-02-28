@@ -168,7 +168,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     }
 
     // Salvar XML na pasta do parceiro
-    $xmlPath = $dirPath . 'events.xml';
+    $xmlPath = 'events{$idParceiro}.xml';
     $xml->save($xmlPath);
 
     echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
