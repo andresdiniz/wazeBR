@@ -97,7 +97,7 @@
                     </div>
 
                 <!-- Novo campo para parceiros -->
-                {% if app.session.get('usuario_id_parceiro') == 0 %}
+                {% if session.id_parceiro == 0 %}
                 <div class="mb-3">
                     <label for="parceiro" class="form-label">Selecione um Parceiro</label>
                     <select class="form-select" id="parceiro" name="parceiro" required>
