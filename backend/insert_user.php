@@ -17,5 +17,6 @@ $pdo = Database::getConnection();
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
 $data = [
-    'users' => getSiteUsers($pdo, $_SESSION['usuario_id'])
+    'users' => getSiteUsers($pdo, $_SESSION['usuario_id']), // Função para obter os usuários do site
+    'parceiros' => getParceiros($pdo, $id_parceiro), // Parceiros
 ];
