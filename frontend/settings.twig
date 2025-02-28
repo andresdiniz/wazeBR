@@ -471,7 +471,8 @@
                 <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <form id="createPartnerForm">
+                <form id="createPartnerForm" action="create_partner" method="post">
+                    <input type="hidden" name="form_type" value="create_partner">
                     <div class="form-group">
                         <label for="createNome">Nome</label>
                         <input type="text" class="form-control" id="createNome" name="Nome" required>

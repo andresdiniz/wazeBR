@@ -263,6 +263,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             }
             break;
 
+            case 'create_partner':
+                $nome = trim($_POST['Nome']);
+                $identificador = trim($_POST['name_partner']);
+            
+                if (!empty($nome) && !empty($identificador)) {
+                    try {
+                        // Inserir o novo parceiro na tabela `parceiros`
+                        $sql = "INSERT INTO parceiros (Nome, name_partner) VALUES (:nome, :identificador)";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->bindValue(':nome', $nome, PDO::PARAM_STR);
+                        $stmt->bindValue(':identificador', $identificador, PDO::PARAM_STR);
+            
+                        if ($stmt->execute()) {
+                            $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
+            
+                            // Criar a pasta com o ID do parceiro (ex: /parceiros/99/)
+                            $partnerFolder = __DIR__ . "/../parceiros/" . $id_parceiro;
+                            if (!is_dir($partnerFolder)) {
+                                mkdir($partnerFolder, 0777, true);
+                            }
+            
+                            // Criar a URL completa e salvar na tabela `urls_events`
+                            $url = "parceiros/{$id_parceiro}/events.xml";
+                            $sqlUrl = "INSERT INTO urls_events (id_parceiro, url) VALUES (:id_parceiro, :url)";
+                            $stmtUrl = $pdo->prepare($sqlUrl);
+                            $stmtUrl->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+                            $stmtUrl->bindValue(':url', $url, PDO::PARAM_STR);
+                            $stmtUrl->execute();
+            
+                            echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
+                        } else {
+                            echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
+                        }
+                    } catch (PDOException $e) {
+                        error_log("Erro ao criar parceiro: " . $e->getMessage());
+                        echo json_encode(["success" => false, "message" => "Erro ao processar a criação."]);
+                    }
+                } else {
+                    echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
+                }
+                break;            
+
         // Caso de ação não reconhecida
         default:
             echo json_encode(["success" => false, "message" => "Ação não reconhecida."]);
