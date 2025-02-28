@@ -269,6 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             
                 if (!empty($nome) && !empty($identificador)) {
                     try {
+                        echo "Eu estou aqui";
                         // Inserir o novo parceiro na tabela `parceiros`
                         $sql = "INSERT INTO parceiros (Nome, name_partner) VALUES (:nome, :identificador)";
                         $stmt = $pdo->prepare($sql);
