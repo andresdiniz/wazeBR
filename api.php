@@ -856,7 +856,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $rua = $_POST['rua'] ?? null;
             $streetSegment = $_POST['streetSegment'] ?? null; // JSON com array de coordenadas
             $segmentDirection = $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
-            $id_parceiro =  $_POST['id_parceiro'] ?? 99;
+            $id_parceiro =  $_POST['parceiro'] ?? null;
+
+            if($id_parceiro == null){
+                echo json_encode(['error' => 'Um parceiro deve ser escolhido.']);
+                die();
+            }
 
             // Validação dos campos obrigatórios (você pode incluir outros se necessário)
             if (!$description || !$tipo || !$subtipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {

@@ -100,7 +100,7 @@
                 {% if id_parceiro == 99 %}
                 <div class="mb-3">
                     <label for="parceiro" class="form-label">Selecione um Parceiro</label>
-                    <select class="form-select" id="parceiro" name="parceiro" required>
+                    <select class="form-select" id="parceiro" name="id_parceiro_alert" required>
                         <option value="">Selecione um Parceiro</option>
                         {% for parceiro in parceiros %}
                             <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
