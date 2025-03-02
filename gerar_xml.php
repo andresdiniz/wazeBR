@@ -32,7 +32,7 @@ $updateStmt->execute();
 // Consulta para eventos ativos com id_parceiro e uuid
 $query = "
     SELECT 
-        e.uuid AS event_uuid, e.parent_event_id, e.creationtime, e.updatetime,
+        COALESCE(e.uuid, UUID()) AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
         e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
         e.starttime, e.endtime, e.id_parceiro, 
         s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
@@ -49,7 +49,7 @@ $query = "
     WHERE 
         e.is_active = 1 AND e.endtime >= :currentDateTime
     ORDER BY 
-        e.id_parceiro, e.uuid, s.id, l.id, sc.id
+        e.id_parceiro, event_uuid, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
