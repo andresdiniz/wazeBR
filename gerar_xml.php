@@ -162,7 +162,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     }
 
     // Criar diretório do parceiro se não existir
-    $dirPath = __DIR__ . "/parceiros/{$idParceiro}/";
+    $dirPath = __DIR__ ;
     if (!is_dir($dirPath)) {
         mkdir($dirPath, 0777, true);
     }
