@@ -29,10 +29,10 @@ $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
 
-// Consulta para eventos ativos com id_parceiro
+// Consulta para eventos ativos com id_parceiro e uuid
 $query = "
     SELECT 
-        e.id AS event_id, e.parent_event_id, e.creationtime, e.updatetime,
+        e.uuid AS event_uuid, e.parent_event_id, e.creationtime, e.updatetime,
         e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
         e.starttime, e.endtime, e.id_parceiro, 
         s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
@@ -41,15 +41,15 @@ $query = "
     FROM 
         events e
     LEFT JOIN 
-        sources s ON e.id = s.event_id
+        sources s ON e.event_id = e.id
     LEFT JOIN 
-        lane_impacts l ON e.id = l.event_id
+        lane_impacts l ON e.event_id = e.id
     LEFT JOIN 
-        schedules sc ON e.id = sc.event_id
+        schedules sc ON e.event_id = e.id
     WHERE 
         e.is_active = 1 AND e.endtime >= :currentDateTime
     ORDER BY 
-        e.id_parceiro, e.id, s.id, l.id, sc.id
+        e.id_parceiro, e.uuid, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
@@ -66,11 +66,11 @@ foreach ($rows as $row) {
         $eventosPorParceiro[$idParceiro] = [];
     }
 
-    $eventId = $row['event_id'];
+    $eventUuid = $row['event_uuid'];
 
-    if (!isset($eventosPorParceiro[$idParceiro][$eventId])) {
-        $eventosPorParceiro[$idParceiro][$eventId] = [
-            'id' => $eventId,
+    if (!isset($eventosPorParceiro[$idParceiro][$eventUuid])) {
+        $eventosPorParceiro[$idParceiro][$eventUuid] = [
+            'uuid' => $eventUuid,
             'parent_event_id' => $row['parent_event_id'],
             'creationtime' => $row['creationtime'],
             'updatetime' => $row['updatetime'],
@@ -89,7 +89,7 @@ foreach ($rows as $row) {
     }
 
     if ($row['source_id']) {
-        $eventosPorParceiro[$idParceiro][$eventId]['sources'][] = [
+        $eventosPorParceiro[$idParceiro][$eventUuid]['sources'][] = [
             'reference' => $row['reference'],
             'name' => $row['source_name'],
             'url' => $row['source_url'],
@@ -97,14 +97,14 @@ foreach ($rows as $row) {
     }
 
     if ($row['lane_impact_id']) {
-        $eventosPorParceiro[$idParceiro][$eventId]['lane_impacts'][] = [
+        $eventosPorParceiro[$idParceiro][$eventUuid]['lane_impacts'][] = [
             'total_closed_lanes' => $row['total_closed_lanes'],
             'roadside' => $row['roadside'],
         ];
     }
 
     if ($row['day_of_week']) {
-        $eventosPorParceiro[$idParceiro][$eventId]['schedules'][] = [
+        $eventosPorParceiro[$idParceiro][$eventUuid]['schedules'][] = [
             'day_of_week' => $row['day_of_week'],
             'start_time' => $row['schedule_start_time'],
             'end_time' => $row['schedule_end_time'],
@@ -127,7 +127,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     // Adicionar eventos ao XML
     foreach ($eventos as $event) {
         $eventNode = $xml->createElement('incident');
-        $eventNode->setAttribute('id', $event['id']);
+        $eventNode->setAttribute('id', $event['uuid']);
         if ($event['parent_event_id']) {
             $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
         }
@@ -168,10 +168,24 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     }
 
     // Salvar XML na pasta do parceiro
-    $xmlPath = 'events'.$idParceiro.'.xml';
+    $xmlPath = $dirPath . 'events' . $idParceiro . '.xml';
     $xml->save($xmlPath);
 
     echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
+}
+
+// Atualizar UUID a cada 5 minutos
+if (time() % (5 * 60) == 0) {
+    $updateUuidQuery = "
+        UPDATE events
+        SET uuid = UUID()
+        WHERE is_active = 1 AND endtime >= :currentDateTime
+    ";
+    $updateUuidStmt = $pdo->prepare($updateUuidQuery);
+    $updateUuidStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+    $updateUuidStmt->execute();
+
+    echo "UUIDs atualizados.\n";
 }
 
 ?>
