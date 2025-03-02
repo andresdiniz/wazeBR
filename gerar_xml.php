@@ -41,11 +41,11 @@ $query = "
     FROM 
         events e
     LEFT JOIN 
-        sources s ON e.event_id = e.id
+        sources s ON e.id = s.event_id
     LEFT JOIN 
-        lane_impacts l ON e.event_id = e.id
+        lane_impacts l ON e.id = l.event_id
     LEFT JOIN 
-        schedules sc ON e.event_id = e.id
+        schedules sc ON e.id = sc.event_id
     WHERE 
         e.is_active = 1 AND e.endtime >= :currentDateTime
     ORDER BY 
