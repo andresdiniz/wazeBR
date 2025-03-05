@@ -175,7 +175,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
 }
 
 // Atualizar UUID a cada 5 minutos
-if (time() % (5 * 60) == 0) {
+if (time() % (10 * 60) == 0) {
     $updateUuidQuery = "
         UPDATE events
         SET uuid = UUID()
