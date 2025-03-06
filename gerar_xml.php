@@ -16,6 +16,8 @@ try {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
 
+echo "Data atual considerada: $currentDateTime\n";
+
 // Obter a data e hora atual
 $currentDateTime = date('Y-m-d H:i:s');
 
@@ -28,6 +30,8 @@ $updateQuery = "
 $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
+$rowsAffected = $updateStmt->rowCount();
+echo "Eventos expirados atualizados: $rowsAffected\n";
 
 // Consulta para eventos ativos com id_parceiro e uuid
 $query = "
@@ -184,6 +188,7 @@ if (time() % (10 * 60) == 0) {
     $updateUuidStmt = $pdo->prepare($updateUuidQuery);
     $updateUuidStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
     $updateUuidStmt->execute();
+
 
     echo "UUIDs atualizados.\n";
 }
