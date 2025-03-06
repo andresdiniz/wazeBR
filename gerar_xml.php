@@ -2,7 +2,6 @@
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
 ini_set('log_errors', 1);
 ini_set('error_log', 'error_log.log');
 
@@ -10,17 +9,14 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/config/configs.php';
 
 try {
-    // Conectar ao banco de dados
     $pdo = Database::getConnection();
 } catch (PDOException $e) {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
-// Obter a data e hora atual
+
 $currentDateTime = date('Y-m-d H:i:s');
 
-echo "Data atual considerada: $currentDateTime\n";
-
-// Atualizar eventos cujo endtime já passou para is_active = 2
+// 🔴 Atualizar eventos expirados para is_active = 2
 $updateQuery = "
     UPDATE events 
     SET is_active = 2 
@@ -29,10 +25,8 @@ $updateQuery = "
 $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
-$rowsAffected = $updateStmt->rowCount();
-echo "Eventos expirados atualizados: $rowsAffected\n";
 
-// Consulta para eventos ativos com id_parceiro e uuid
+// 🔴 Buscar apenas eventos ativos
 $query = "
     SELECT 
         COALESCE(e.uuid, UUID()) AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
@@ -50,7 +44,8 @@ $query = "
     LEFT JOIN 
         schedules sc ON e.id = sc.event_id
     WHERE 
-        e.is_active = 1 AND e.endtime >= :currentDateTime
+        e.is_active = 1 
+        AND e.endtime >= :currentDateTime
     ORDER BY 
         e.id_parceiro, event_uuid, s.id, l.id, sc.id
 ";
@@ -60,7 +55,6 @@ $statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $statement->execute();
 $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-// Organizar eventos por parceiro
 $eventosPorParceiro = [];
 foreach ($rows as $row) {
     $idParceiro = $row['id_parceiro'];
@@ -115,19 +109,16 @@ foreach ($rows as $row) {
     }
 }
 
-// Criar XMLs para cada parceiro
+// 🔴 Gerar XMLs
 foreach ($eventosPorParceiro as $idParceiro => $eventos) {
-    // Criar objeto XML
     $xml = new DOMDocument('1.0', 'UTF-8');
     $xml->formatOutput = true;
 
-    // Criar o elemento raiz "incidents"
     $root = $xml->createElement('incidents');
     $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
     $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
     $xml->appendChild($root);
 
-    // Adicionar eventos ao XML
     foreach ($eventos as $event) {
         $eventNode = $xml->createElement('incident');
         $eventNode->setAttribute('id', $event['uuid']);
@@ -135,13 +126,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
             $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
         }
 
-        foreach (['type', 'street', 'polyline', 'starttime'] as $key) {
-            if (!empty($event[$key])) {
-                $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
-            }
-        }
-
-        foreach (['direction', 'endtime', 'description', 'subtype'] as $key) {
+        foreach (['type', 'street', 'polyline', 'starttime', 'direction', 'endtime', 'description', 'subtype'] as $key) {
             if (!empty($event[$key])) {
                 $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
             }
@@ -164,21 +149,25 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
         $root->appendChild($eventNode);
     }
 
-    // Criar diretório do parceiro se não existir
-    $dirPath = __DIR__."/";
+    $dirPath = __DIR__ . "/";
     if (!is_dir($dirPath)) {
         mkdir($dirPath, 0777, true);
     }
 
-    // Salvar XML na pasta do parceiro
     $xmlPath = $dirPath . 'events' . $idParceiro . '.xml';
-    $xml->save($xmlPath);
 
-    echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
+    // 🔴 Se não houver eventos, gerar um XML vazio
+    if (empty($eventos)) {
+        $xml->save($xmlPath);
+        echo "XML gerado para parceiro {$idParceiro}, mas sem eventos.\n";
+    } else {
+        $xml->save($xmlPath);
+        echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
+    }
 }
 
-// Atualizar UUID a cada 5 minutos
-if (time() % (10 * 60) == 0) {
+// 🔴 Atualizar UUIDs a cada 5 minutos
+if (time() % (5 * 60) == 0) {
     $updateUuidQuery = "
         UPDATE events
         SET uuid = UUID()
@@ -187,7 +176,6 @@ if (time() % (10 * 60) == 0) {
     $updateUuidStmt = $pdo->prepare($updateUuidQuery);
     $updateUuidStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
     $updateUuidStmt->execute();
-
 
     echo "UUIDs atualizados.\n";
 }
