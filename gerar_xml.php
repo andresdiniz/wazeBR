@@ -15,11 +15,10 @@ try {
 } catch (PDOException $e) {
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
-
-echo "Data atual considerada: $currentDateTime\n";
-
 // Obter a data e hora atual
 $currentDateTime = date('Y-m-d H:i:s');
+
+echo "Data atual considerada: $currentDateTime\n";
 
 // Atualizar eventos cujo endtime já passou para is_active = 2
 $updateQuery = "
