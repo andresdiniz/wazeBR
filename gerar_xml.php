@@ -44,7 +44,7 @@ $query = "
     LEFT JOIN 
         schedules sc ON e.id = sc.event_id
     WHERE 
-        e.is_active = 1 
+        e.is_active = 1  -- Certifique-se de pegar apenas eventos ativos
         AND e.endtime >= :currentDateTime
     ORDER BY 
         e.id_parceiro, e.uuid, s.id, l.id, sc.id
@@ -119,59 +119,60 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
     $xml->appendChild($root);
 
-    foreach ($eventos as $event) {
-        // Gerar novo UUID para o evento
-        $newUuid = uniqid('event-', true);
-
-        // Atualizar o evento no banco de dados com o novo UUID
-        $updateUuidQuery = "
-            UPDATE events
-            SET uuid = :newUuid
-            WHERE uuid = :oldUuid
-        ";
-        $updateUuidStmt = $pdo->prepare($updateUuidQuery);
-        $updateUuidStmt->bindParam(':newUuid', $newUuid, PDO::PARAM_STR);
-        $updateUuidStmt->bindParam(':oldUuid', $event['uuid'], PDO::PARAM_STR);
-        $updateUuidStmt->execute();
-
-        // Criar o nó no XML com o novo UUID
-        $eventNode = $xml->createElement('incident');
-        $eventNode->setAttribute('id', $newUuid);  // Usando o novo UUID
-
-        if ($event['parent_event_id']) {
-            $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
-        }
-
-        foreach (['type', 'street', 'polyline', 'starttime', 'direction', 'endtime', 'description', 'subtype'] as $key) {
-            if (!empty($event[$key])) {
-                $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
-            }
-        }
-
-        if (!empty($event['sources'])) {
-            $sourcesNode = $xml->createElement('sources');
-            foreach ($event['sources'] as $source) {
-                $sourceNode = $xml->createElement('source');
-                $sourceNode->appendChild($xml->createElement('reference', htmlspecialchars($source['reference'])));
-                $sourceNode->appendChild($xml->createElement('name', htmlspecialchars($source['name'])));
-                if (!empty($source['url'])) {
-                    $sourceNode->appendChild($xml->createElement('url', htmlspecialchars($source['url'])));
-                }
-                $sourcesNode->appendChild($sourceNode);
-            }
-            $eventNode->appendChild($sourcesNode);
-        }
-
-        $root->appendChild($eventNode);
-    }
-
-    $xmlPath = __DIR__ . "/events" . $idParceiro . ".xml";
-
-    // 🔴 Se não houver eventos, gerar um XML vazio
+    // Se não houver eventos, criar XML vazio
     if (empty($eventos)) {
-        file_put_contents($xmlPath, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<incidents xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"https://www.gstatic.com/road-incidents/cifsv2.xsd\"></incidents>");
+        file_put_contents(__DIR__ . "/events{$idParceiro}.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<incidents xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"https://www.gstatic.com/road-incidents/cifsv2.xsd\"></incidents>");
         echo "Arquivo XML atualizado para parceiro {$idParceiro}, agora vazio.\n";
     } else {
+        // Adicionar cada evento ativo ao XML
+        foreach ($eventos as $event) {
+            // Gerar novo UUID para o evento
+            $newUuid = uniqid('event-', true);
+
+            // Atualizar o evento no banco de dados com o novo UUID
+            $updateUuidQuery = "
+                UPDATE events
+                SET uuid = :newUuid
+                WHERE uuid = :oldUuid
+            ";
+            $updateUuidStmt = $pdo->prepare($updateUuidQuery);
+            $updateUuidStmt->bindParam(':newUuid', $newUuid, PDO::PARAM_STR);
+            $updateUuidStmt->bindParam(':oldUuid', $event['uuid'], PDO::PARAM_STR);
+            $updateUuidStmt->execute();
+
+            // Criar o nó no XML com o novo UUID
+            $eventNode = $xml->createElement('incident');
+            $eventNode->setAttribute('id', $newUuid);  // Usando o novo UUID
+
+            if ($event['parent_event_id']) {
+                $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
+            }
+
+            foreach (['type', 'street', 'polyline', 'starttime', 'direction', 'endtime', 'description', 'subtype'] as $key) {
+                if (!empty($event[$key])) {
+                    $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
+                }
+            }
+
+            if (!empty($event['sources'])) {
+                $sourcesNode = $xml->createElement('sources');
+                foreach ($event['sources'] as $source) {
+                    $sourceNode = $xml->createElement('source');
+                    $sourceNode->appendChild($xml->createElement('reference', htmlspecialchars($source['reference'])));
+                    $sourceNode->appendChild($xml->createElement('name', htmlspecialchars($source['name'])));
+                    if (!empty($source['url'])) {
+                        $sourceNode->appendChild($xml->createElement('url', htmlspecialchars($source['url'])));
+                    }
+                    $sourcesNode->appendChild($sourceNode);
+                }
+                $eventNode->appendChild($sourcesNode);
+            }
+
+            $root->appendChild($eventNode);
+        }
+
+        // Salvar o XML no arquivo
+        $xmlPath = __DIR__ . "/events{$idParceiro}.xml";
         $xml->save($xmlPath);
         echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
     }
