@@ -85,7 +85,6 @@ foreach ($rows as $row) {
         ];
     }
 
-    // Processar sources
     if ($row['source_id']) {
         $eventosPorParceiro[$idParceiro][$eventUuid]['sources'][] = [
             'reference' => $row['reference'],
@@ -94,7 +93,6 @@ foreach ($rows as $row) {
         ];
     }
 
-    // Processar lane_impacts
     if ($row['lane_impact_id']) {
         $eventosPorParceiro[$idParceiro][$eventUuid]['lane_impacts'][] = [
             'total_closed_lanes' => $row['total_closed_lanes'],
@@ -102,7 +100,6 @@ foreach ($rows as $row) {
         ];
     }
 
-    // Processar schedules
     if ($row['day_of_week']) {
         $eventosPorParceiro[$idParceiro][$eventUuid]['schedules'][] = [
             'day_of_week' => $row['day_of_week'],
@@ -125,20 +122,18 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     if (!empty($eventos)) {
         foreach ($eventos as $event) {
             $eventNode = $xml->createElement('incident');
-            $eventNode->setAttribute('id', $event['uuid']); // Usar UUID original
+            $eventNode->setAttribute('id', $event['uuid']);
 
             if ($event['parent_event_id']) {
                 $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
             }
 
-            // Adicionar elementos básicos
             foreach (['type', 'street', 'polyline', 'starttime', 'direction', 'endtime', 'description', 'subtype'] as $key) {
                 if (!empty($event[$key])) {
                     $eventNode->appendChild($xml->createElement($key, htmlspecialchars($event[$key])));
                 }
             }
 
-            // Adicionar sources
             if (!empty($event['sources'])) {
                 $sourcesNode = $xml->createElement('sources');
                 foreach ($event['sources'] as $source) {
@@ -157,10 +152,20 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
         }
     }
 
-    // Salvar arquivo XML
-    $xmlPath = __DIR__ . "/events{$idParceiro}.xml";
+    // 🔴 Nome do arquivo corrigido: events.IdParceiro.xml
+    $xmlPath = __DIR__ . "/events." . $idParceiro . ".xml";
     $xml->save($xmlPath);
     echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
+
+// 🔴 Limpar arquivos XML de parceiros que não existem mais (opcional)
+// $existingFiles = glob(__DIR__ . '/events.*.xml');
+// foreach ($existingFiles as $file) {
+//     $idFromFile = str_replace(['events.', '.xml'], '', basename($file));
+//     if (!array_key_exists($idFromFile, $eventosPorParceiro)) {
+//         unlink($file);
+//         echo "Arquivo removido: {$file}\n";
+//     }
+// }
 
 ?>
