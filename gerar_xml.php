@@ -120,8 +120,24 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     $xml->appendChild($root);
 
     foreach ($eventos as $event) {
+        // Gerar novo UUID para o evento
+        $newUuid = uniqid('event-', true);
+
+        // Atualizar o evento no banco de dados com o novo UUID
+        $updateUuidQuery = "
+            UPDATE events
+            SET uuid = :newUuid
+            WHERE uuid = :oldUuid
+        ";
+        $updateUuidStmt = $pdo->prepare($updateUuidQuery);
+        $updateUuidStmt->bindParam(':newUuid', $newUuid, PDO::PARAM_STR);
+        $updateUuidStmt->bindParam(':oldUuid', $event['uuid'], PDO::PARAM_STR);
+        $updateUuidStmt->execute();
+
+        // Criar o nó no XML com o novo UUID
         $eventNode = $xml->createElement('incident');
-        $eventNode->setAttribute('id', $event['uuid']);
+        $eventNode->setAttribute('id', $newUuid);  // Usando o novo UUID
+
         if ($event['parent_event_id']) {
             $eventNode->setAttribute('parent_event_id', $event['parent_event_id']);
         }
@@ -160,24 +176,5 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
         echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
     }
 }
-
-// 🔴 Atualizar UUIDs a cada 5 minutos
-// Atualizar UUIDs a cada 5 minutos
-if (time() % (5 * 60) == 0) {
-    $updateUuidQuery = "
-        UPDATE events
-        SET uuid = UUID()
-        WHERE is_active = 1 AND endtime >= :currentDateTime
-    ";
-    $updateUuidStmt = $pdo->prepare($updateUuidQuery);
-    $updateUuidStmt->bindParam(':currentDateTime', $eventUuid, PDO::PARAM_STR);
-
-    if ($updateUuidStmt->execute()) {
-        echo "UUIDs atualizados com sucesso.\n";
-    } else {
-        echo "Erro ao atualizar UUIDs.\n";
-    }
-}
-
 
 ?>
