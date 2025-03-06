@@ -29,7 +29,7 @@ $updateStmt->execute();
 // 🔴 Buscar apenas eventos ativos
 $query = "
     SELECT 
-        COALESCE(e.uuid, UUID()) AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
+        e.uuid AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
         e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
         e.starttime, e.endtime, e.id_parceiro, 
         s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
@@ -47,7 +47,7 @@ $query = "
         e.is_active = 1 
         AND e.endtime >= :currentDateTime
     ORDER BY 
-        e.id_parceiro, event_uuid, s.id, l.id, sc.id
+        e.id_parceiro, e.uuid, s.id, l.id, sc.id
 ";
 
 $statement = $pdo->prepare($query);
@@ -109,7 +109,7 @@ foreach ($rows as $row) {
     }
 }
 
-// 🔴 Gerar XMLs
+// 🔴 Gerar XMLs e garantir remoção de eventos inativos
 foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     $xml = new DOMDocument('1.0', 'UTF-8');
     $xml->formatOutput = true;
@@ -149,20 +149,15 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
         $root->appendChild($eventNode);
     }
 
-    $dirPath = __DIR__ . "/";
-    if (!is_dir($dirPath)) {
-        mkdir($dirPath, 0777, true);
-    }
-
-    $xmlPath = $dirPath . 'events' . $idParceiro . '.xml';
+    $xmlPath = __DIR__ . "/events" . $idParceiro . ".xml";
 
     // 🔴 Se não houver eventos, gerar um XML vazio
     if (empty($eventos)) {
-        $xml->save($xmlPath);
-        echo "XML gerado para parceiro {$idParceiro}, mas sem eventos.\n";
+        file_put_contents($xmlPath, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<incidents xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"https://www.gstatic.com/road-incidents/cifsv2.xsd\"></incidents>");
+        echo "Arquivo XML atualizado para parceiro {$idParceiro}, agora vazio.\n";
     } else {
         $xml->save($xmlPath);
-        echo "Arquivo XML gerado para parceiro {$idParceiro}: {$xmlPath}\n";
+        echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
     }
 }
 
