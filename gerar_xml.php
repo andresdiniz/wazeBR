@@ -162,6 +162,7 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
 }
 
 // 🔴 Atualizar UUIDs a cada 5 minutos
+// Atualizar UUIDs a cada 5 minutos
 if (time() % (5 * 60) == 0) {
     $updateUuidQuery = "
         UPDATE events
@@ -170,9 +171,13 @@ if (time() % (5 * 60) == 0) {
     ";
     $updateUuidStmt = $pdo->prepare($updateUuidQuery);
     $updateUuidStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
-    $updateUuidStmt->execute();
 
-    echo "UUIDs atualizados.\n";
+    if ($updateUuidStmt->execute()) {
+        echo "UUIDs atualizados com sucesso.\n";
+    } else {
+        echo "Erro ao atualizar UUIDs.\n";
+    }
 }
+
 
 ?>
