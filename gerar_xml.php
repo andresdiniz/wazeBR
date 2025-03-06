@@ -170,7 +170,7 @@ if (time() % (5 * 60) == 0) {
         WHERE is_active = 1 AND endtime >= :currentDateTime
     ";
     $updateUuidStmt = $pdo->prepare($updateUuidQuery);
-    $updateUuidStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+    $updateUuidStmt->bindParam(':currentDateTime', $eventUuid, PDO::PARAM_STR);
 
     if ($updateUuidStmt->execute()) {
         echo "UUIDs atualizados com sucesso.\n";
