@@ -19,27 +19,35 @@ $currentDateTime = date('Y-m-d H:i:s');
 /**
  * Função para atualizar o UUID de eventos ativos a cada 5 minutos
  */
+$currentDateTime = date('Y-m-d H:i:s');
+
+/**
+ * Atualiza os UUIDs apenas se passaram 10 minutos desde a última atualização
+ */
 function atualizarUUIDsSeNecessario($pdo) {
     // Buscar a última atualização do banco de dados (UTC)
     $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
     $stmt = $pdo->query($checkQuery);
     $ultimaAtualizacaoUTC = $stmt->fetch(PDO::FETCH_ASSOC)['ultima'];
 
-    // Se nunca foi atualizado, atualiza agora
     if (!$ultimaAtualizacaoUTC) {
+        // Se não houver última atualização, força uma atualização agora
         atualizarUUIDs($pdo);
         return;
     }
 
-    // Converter UTC para o fuso horário do PHP (UTC-3)
+    // Converter UTC para UTC-3 (São Paulo)
     $ultimaAtualizacao = new DateTime($ultimaAtualizacaoUTC, new DateTimeZone('UTC'));
     $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
-    // Calcular o tempo atual no PHP
+    // Tempo atual em UTC-3
     $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
 
-    // Verifica se já passaram 10 minutos
-    if ($ultimaAtualizacao->getTimestamp() <= $agora->getTimestamp() - 600) {
+    // Diferença entre o tempo atual e a última atualização
+    $diferencaMinutos = ($agora->getTimestamp() - $ultimaAtualizacao->getTimestamp()) / 60;
+
+    // Só atualiza se passaram pelo menos 10 minutos
+    if ($diferencaMinutos >= 10) {
         atualizarUUIDs($pdo);
     }
 }
