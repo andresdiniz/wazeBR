@@ -19,27 +19,50 @@ $currentDateTime = date('Y-m-d H:i:s');
 /**
  * Função para atualizar o UUID de eventos ativos a cada 5 minutos
  */
-// 🔴 Função para atualizar UUIDs apenas se passaram 10 minutos desde a última atualização
 function atualizarUUIDsSeNecessario($pdo) {
-    // Verificar a última atualização
+    // Buscar a última atualização do banco de dados (UTC)
     $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
     $stmt = $pdo->query($checkQuery);
-    $ultimaAtualizacao = $stmt->fetch(PDO::FETCH_ASSOC)['ultima'];
+    $ultimaAtualizacaoUTC = $stmt->fetch(PDO::FETCH_ASSOC)['ultima'];
 
-    // Se nunca foi atualizado, ou passaram mais de 10 minutos, faz a atualização
-    if (!$ultimaAtualizacao || strtotime($ultimaAtualizacao) <= time() - 600) {
-        $updateUUIDQuery = "
-            UPDATE events 
-            SET uuid = UUID(), ultima_atualizacao = NOW()
-            WHERE is_active = 1
-              AND endtime >= NOW()
-        ";
-
-        $stmt = $pdo->prepare($updateUUIDQuery);
-        $stmt->execute();
-
-        echo "UUIDs atualizados em " . date('Y-m-d H:i:s') . "\n";
+    // Se nunca foi atualizado, atualiza agora
+    if (!$ultimaAtualizacaoUTC) {
+        atualizarUUIDs($pdo);
+        return;
     }
+
+    // Converter UTC para o fuso horário do PHP (UTC-3)
+    $ultimaAtualizacao = new DateTime($ultimaAtualizacaoUTC, new DateTimeZone('UTC'));
+    $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+
+    // Calcular o tempo atual no PHP
+    $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+
+    // Verifica se já passaram 10 minutos
+    if ($ultimaAtualizacao->getTimestamp() <= $agora->getTimestamp() - 600) {
+        atualizarUUIDs($pdo);
+    }
+}
+
+/**
+ * Atualiza os UUIDs no banco de dados
+ */
+function atualizarUUIDs($pdo) {
+    $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+    $agoraFormatado = $agora->format('Y-m-d H:i:s');
+
+    $updateUUIDQuery = "
+        UPDATE events 
+        SET uuid = UUID(), ultima_atualizacao = :agora
+        WHERE is_active = 1
+          AND endtime >= :agora
+    ";
+
+    $stmt = $pdo->prepare($updateUUIDQuery);
+    $stmt->bindParam(':agora', $agoraFormatado, PDO::PARAM_STR);
+    $stmt->execute();
+
+    echo "UUIDs atualizados em " . $agoraFormatado . " (UTC-3)\n";
 }
 
 // 🔴 Chamar a função no início do script
