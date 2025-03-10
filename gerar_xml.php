@@ -17,6 +17,11 @@ try {
 $currentDateTime = date('Y-m-d H:i:s');
 
 /**
+ * Função para atualizar o UUID de eventos ativos a cada 5 minutos
+ */
+$currentDateTime = date('Y-m-d H:i:s');
+
+/**
  * Atualiza os UUIDs apenas se passaram 10 minutos desde a última atualização
  */
 function atualizarUUIDsSeNecessario($pdo) {
@@ -32,7 +37,8 @@ function atualizarUUIDsSeNecessario($pdo) {
     }
 
     // Converter UTC para UTC-3 (São Paulo)
-    $ultimaAtualizacao = new DateTime();
+    $ultimaAtualizacao = new DateTime($ultimaAtualizacaoUTC, new DateTimeZone('UTC'));
+    $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
     // Tempo atual em UTC-3
     $agora = new DateTime();
@@ -44,7 +50,7 @@ function atualizarUUIDsSeNecessario($pdo) {
     if ($diferencaMinutos >= 10) {
         atualizarUUIDs($pdo);
     }
-    echo number_format($diferencaMinutos, 2) . " minutos desde a última atualização\n";
+    echo $diferencaMinutos . " minutos desde a última atualização\n";
 }
 
 /**
