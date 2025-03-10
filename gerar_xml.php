@@ -16,6 +16,24 @@ try {
 
 $currentDateTime = date('Y-m-d H:i:s');
 
+/**
+ * Função para atualizar o UUID de eventos ativos a cada 5 minutos
+ */
+function atualizarUUIDs($pdo) {
+    $updateUUIDQuery = "
+        UPDATE events 
+        SET uuid = UUID(), ultima_atualizaçao = NOW()
+        WHERE is_active = 1
+          AND endtime >= NOW()
+    ";
+
+    $stmt = $pdo->prepare($updateUUIDQuery);
+    $stmt->execute();
+}
+
+// 🔴 Atualizar UUIDs antes de buscar os eventos
+atualizarUUIDs($pdo);
+
 // 🔴 Atualizar eventos expirados para is_active = 2
 $updateQuery = "
     UPDATE events 
