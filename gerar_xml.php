@@ -41,7 +41,7 @@ function atualizarUUIDsSeNecessario($pdo) {
     $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
 
     // Tempo atual em UTC-3
-    $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+    $agora = new DateTime();
 
     // Diferença entre o tempo atual e a última atualização
     $diferencaMinutos = ($agora->getTimestamp() - $ultimaAtualizacao->getTimestamp()) / 60;
@@ -56,7 +56,7 @@ function atualizarUUIDsSeNecessario($pdo) {
  * Atualiza os UUIDs no banco de dados
  */
 function atualizarUUIDs($pdo) {
-    $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+    $agora = new DateTime();
     $agoraFormatado = $agora->format('Y-m-d H:i:s');
 
     $updateUUIDQuery = "
