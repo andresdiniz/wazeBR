@@ -50,7 +50,7 @@ function atualizarUUIDsSeNecessario($pdo) {
     if ($diferencaMinutos >= 10) {
         atualizarUUIDs($pdo);
     }
-    echo $diferencaMinutos . " minutos desde a última atualização\n";
+    echo number_format($diferencaMinutos, 2) . " minutos desde a última atualização\n";
 }
 
 /**
