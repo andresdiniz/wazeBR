@@ -37,8 +37,8 @@ function atualizarUUIDsSeNecessario($pdo) {
     }
 
     // Converter UTC para UTC-3 (São Paulo)
-    $ultimaAtualizacao = new DateTime($ultimaAtualizacaoUTC, new DateTimeZone('UTC'));
-    $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+    $ultimaAtualizacao = new DateTime();
+    $ultimaAtualizacao->setTimezone();
 
     // Tempo atual em UTC-3
     $agora = new DateTime();
