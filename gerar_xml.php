@@ -26,7 +26,13 @@ $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
 
-// 🔴 Buscar apenas eventos ativos e não expirados
+// 🔴 Buscar parceiros distintos
+$parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
+$parceiroStmt = $pdo->prepare($parceiroQuery);
+$parceiroStmt->execute();
+$parceiros = $parceiroStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// 🔴 Buscar eventos ativos e não expirados
 $query = "
     SELECT 
         e.uuid AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
@@ -55,6 +61,7 @@ $statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $statement->execute();
 $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
+// 🔴 Organizar eventos por parceiro
 $eventosPorParceiro = [];
 foreach ($rows as $row) {
     $idParceiro = $row['id_parceiro'];
@@ -109,8 +116,8 @@ foreach ($rows as $row) {
     }
 }
 
-// 🔴 Gerar XMLs atualizados
-foreach ($eventosPorParceiro as $idParceiro => $eventos) {
+// 🔴 Garantir que todos os parceiros tenham arquivos, mesmo sem eventos
+foreach ($parceiros as $idParceiro) {
     $xml = new DOMDocument('1.0', 'UTF-8');
     $xml->formatOutput = true;
 
@@ -119,8 +126,8 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
     $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
     $xml->appendChild($root);
 
-    if (!empty($eventos)) {
-        foreach ($eventos as $event) {
+    if (!empty($eventosPorParceiro[$idParceiro])) {
+        foreach ($eventosPorParceiro[$idParceiro] as $event) {
             $eventNode = $xml->createElement('incident');
             $eventNode->setAttribute('id', $event['uuid']);
 
@@ -152,20 +159,9 @@ foreach ($eventosPorParceiro as $idParceiro => $eventos) {
         }
     }
 
-    // 🔴 Nome do arquivo corrigido: events.IdParceiro.xml
     $xmlPath = __DIR__ . "/events." . $idParceiro . ".xml";
     $xml->save($xmlPath);
     echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
-
-// 🔴 Limpar arquivos XML de parceiros que não existem mais (opcional)
-// $existingFiles = glob(__DIR__ . '/events.*.xml');
-// foreach ($existingFiles as $file) {
-//     $idFromFile = str_replace(['events.', '.xml'], '', basename($file));
-//     if (!array_key_exists($idFromFile, $eventosPorParceiro)) {
-//         unlink($file);
-//         echo "Arquivo removido: {$file}\n";
-//     }
-// }
 
 ?>
