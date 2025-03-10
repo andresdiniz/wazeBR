@@ -159,7 +159,7 @@ foreach ($parceiros as $idParceiro) {
         }
     }
 
-    $xmlPath = __DIR__ . "/events." . $idParceiro . ".xml";
+    $xmlPath = __DIR__ . "/events" . $idParceiro . ".xml";
     $xml->save($xmlPath);
     echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
