@@ -19,20 +19,31 @@ $currentDateTime = date('Y-m-d H:i:s');
 /**
  * Função para atualizar o UUID de eventos ativos a cada 5 minutos
  */
-function atualizarUUIDs($pdo) {
-    $updateUUIDQuery = "
-        UPDATE events 
-        SET uuid = UUID(), ultima_atualizaçao = NOW()
-        WHERE is_active = 1
-          AND endtime >= NOW()
-    ";
+// 🔴 Função para atualizar UUIDs apenas se passaram 10 minutos desde a última atualização
+function atualizarUUIDsSeNecessario($pdo) {
+    // Verificar a última atualização
+    $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
+    $stmt = $pdo->query($checkQuery);
+    $ultimaAtualizacao = $stmt->fetch(PDO::FETCH_ASSOC)['ultima'];
 
-    $stmt = $pdo->prepare($updateUUIDQuery);
-    $stmt->execute();
+    // Se nunca foi atualizado, ou passaram mais de 10 minutos, faz a atualização
+    if (!$ultimaAtualizacao || strtotime($ultimaAtualizacao) <= time() - 600) {
+        $updateUUIDQuery = "
+            UPDATE events 
+            SET uuid = UUID(), ultima_atualizacao = NOW()
+            WHERE is_active = 1
+              AND endtime >= NOW()
+        ";
+
+        $stmt = $pdo->prepare($updateUUIDQuery);
+        $stmt->execute();
+
+        echo "UUIDs atualizados em " . date('Y-m-d H:i:s') . "\n";
+    }
 }
 
-// 🔴 Atualizar UUIDs antes de buscar os eventos
-atualizarUUIDs($pdo);
+// 🔴 Chamar a função no início do script
+atualizarUUIDsSeNecessario($pdo);
 
 // 🔴 Atualizar eventos expirados para is_active = 2
 $updateQuery = "
