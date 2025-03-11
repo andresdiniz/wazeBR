@@ -198,9 +198,6 @@ foreach ($jsonUrls as $jsonUrl) {
                     echo "Erro ao processar coordenadas: " . $e->getMessage();
                 }
             }
-
-            // Salvar os tempos das rotas durante os dias
-            saveHistoricRoutesData($pdo);
             
             // Verifica se existem sub-rotas e se são um array
             try {
@@ -619,3 +616,4 @@ foreach ($jsonUrls as $jsonUrl) {
         echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n"; 
     }
 }
+saveHistoricRoutesData($pdo);
