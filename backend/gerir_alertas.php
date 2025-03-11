@@ -15,7 +15,6 @@ $pdo = Database::getConnection();
 session_start();
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
-$is_active_filter = $_GET['is_active']; // Filtro opcional de status
 
 // Se for uma atualização (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
@@ -39,12 +38,6 @@ if ($id_parceiro == 99) {
 } else {
     $sql = "SELECT * FROM events WHERE id_parceiro = ?";
     $params = [$id_parceiro];
-}
-
-// Aplicar filtro de status se houver
-if ($is_active_filter) {
-    $sql .= " AND is_active = ?";
-    $params[] = $is_active_filter;
 }
 
 $stmt = $pdo->prepare($sql);
