@@ -18,6 +18,20 @@ $jsonUrls = [
 
 $irregularitiesFound = false; // Variável para monitorar se irregularidades foram encontradas
 
+function saveHistoricRoutesData($pdo) {
+    $sql = "INSERT INTO historic_routes (route_id, data, velocidade, tempo)
+            SELECT id, NOW(), avg_speed, avg_time FROM routes
+            WHERE avg_speed IS NOT NULL AND avg_time IS NOT NULL";
+    
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        echo "✅ Dados históricos salvos para " . $stmt->rowCount() . " rotas.\n";
+    } catch (PDOException $e) {
+        echo "❌ Erro ao salvar histórico: " . $e->getMessage() . "\n";
+    }
+}
+
 foreach ($jsonUrls as $jsonUrl) {
     echo "Carregando dados da URL: $jsonUrl\n";
 
@@ -185,8 +199,9 @@ foreach ($jsonUrls as $jsonUrl) {
                 }
             }
 
+            // Salvar os tempos das rotas durante os dias
+            saveHistoricRoutesData($pdo);
             
-
             // Verifica se existem sub-rotas e se são um array
             try {
                 if (isset($route['subRoutes']) && is_array($route['subRoutes'])) {
