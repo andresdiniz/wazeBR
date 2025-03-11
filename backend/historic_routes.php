@@ -32,6 +32,7 @@ try {
 $startDate = date('Y-m-01');
 $endDate = date('Y-m-d', strtotime('+1 day'));
 
+
 // Buscar dados históricos (SEM id_parceiro)
 $sql = "SELECT data, velocidade, tempo 
         FROM historic_routes
@@ -59,12 +60,6 @@ try {
     die("Erro ao recuperar dados históricos.");
 }
 
-$data = [
-    'routes' => $routes,
-    'dados' => ['historic_routes' => $data],
-    'selected_route' => $routeId,
-    'start_date' => $startDate,
-    'end_date' => $endDate
-];
-
 var_dump($data);
+// Renderizar o template com os dados
+echo $twig->render('historic_routes.twig', ['dados' => ['historic_routes' => $data]]);
