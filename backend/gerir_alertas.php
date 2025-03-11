@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endtime = $_POST['endtime'];
 
     echo json_encode($_POST);
+    exit;
 
     switch ($id) {
         case $id:
