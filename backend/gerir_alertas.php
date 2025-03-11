@@ -6,6 +6,9 @@ require_once './vendor/autoload.php'; // Autoloader do Composer
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
+date('Y-m-d H:i:s');
+date_default_timezone_set('America/Sao_Paulo');
+
 // Configura o Twig
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para templates
 $twig = new Environment($loader);
@@ -29,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$description, $is_active, $endtime, $id]);
-            echo json_encode(['status' => 'success', 'message' => 'Evento atualizado com sucesso']);
             header('Location: gerir_alertas.php');
             break;
         
