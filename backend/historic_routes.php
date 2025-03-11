@@ -6,7 +6,8 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 // Configurar o Twig
-$loader = new FilesystemLoader('./templates'); // Ajuste para o diretório correto dos templates
+// Configura o carregador do Twig para buscar templates na pasta "frontend"
+$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
 $twig = new Environment($loader);
 
 // Conexão com o banco de dados
