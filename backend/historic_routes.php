@@ -43,4 +43,4 @@ foreach ($data as &$item) {
 }
 
 // Passa os dados para o Twig
-echo $twig->render('historic_routes.twig', ['data' => ['historic_routes' => $data]]);
+echo $twig->render('historic_routes.twig', ['dados' => ['historic_routes' => $data]]);
