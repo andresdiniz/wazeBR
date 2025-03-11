@@ -3,72 +3,73 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <div class="container mt-4">
-    <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
-    <form method="GET" class="row g-3">
-        <div class="col-md-4">
-            <label for="route_id" class="form-label">Rota:</label>
-            <select name="route_id" id="route_id" class="form-select" required>
-                <option value="">Selecione uma rota</option>
-                {% for route in routes %}
-                    <option value="{{ route.id }}" {% if route.id == selected_route %}selected{% endif %}>
-                        {{ route.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="col-md-3">
-            <label for="start_date" class="form-label">Início:</label>
-            <input type="text" name="start_date" id="start_date" value="{{ start_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
-        </div>
-
-        <div class="col-md-3">
-            <label for="end_date" class="form-label">Fim:</label>
-            <input type="text" name="end_date" id="end_date" value="{{ end_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
-        </div>
-
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Buscar</button>
-        </div>
-    </form>
-
-    {% if dados.historic_routes %}
-        <div class="mt-4">
-            <h3 class="text-center">Gráficos de Velocidade e Tempo</h3>
-            <canvas id="chartVelocidade"></canvas>
-            <canvas id="chartTempo" class="mt-4"></canvas>
-        </div>
-
-        <div class="mt-4 d-flex justify-content-center gap-3">
-            <button class="btn btn-success" onclick="exportTableToCSV()">Exportar CSV</button>
-            <button class="btn btn-warning" onclick="exportTableToExcel()">Exportar Excel</button>
-            <button class="btn btn-info" onclick="downloadChart()">Baixar Gráfico</button>
-        </div>
-
-        <h3 class="mt-4 text-center">Tabela de Dados</h3>
-        <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
-            <thead class="table-dark">
-                <tr>
-                    <th>Data</th>
-                    <th>Velocidade (km/h)</th>
-                    <th>Tempo (s)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in dados.historic_routes %}
+        <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="route_id" class="form-label">Rota:</label>
+                <select name="route_id" id="route_id" class="form-select" required>
+                    <option value="">Selecione uma rota</option>
+                    {% for route in routes %}
+                        <option value="{{ route.id }}" {% if route.id == selected_route %}selected{% endif %}>
+                            {{ route.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Início:</label>
+                <input type="text" name="start_date" id="start_date" value="{{ start_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
+            </div>
+    
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">Fim:</label>
+                <input type="text" name="end_date" id="end_date" value="{{ end_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
+            </div>
+    
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
+    
+        {% if dados.historic_routes %}
+            <div class="mt-4">
+                <h3 class="text-center">Gráficos de Velocidade e Tempo</h3>
+                <canvas id="chartVelocidade"></canvas>
+                <canvas id="chartTempo" class="mt-4"></canvas>
+            </div>
+    
+            <div class="mt-4 d-flex justify-content-center gap-3">
+                <button class="btn btn-success" onclick="exportTableToCSV()">Exportar CSV</button>
+                <button class="btn btn-warning" onclick="exportTableToExcel()">Exportar Excel</button>
+                <button class="btn btn-info" onclick="downloadChart('chartVelocidade')">Baixar Gráfico de Velocidade</button>
+                <button class="btn btn-info" onclick="downloadChart('chartTempo')">Baixar Gráfico de Tempo</button>
+            </div>
+    
+            <h3 class="mt-4 text-center">Tabela de Dados</h3>
+            <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
+                <thead class="table-dark">
                     <tr>
-                        <td>{{ item.data }}</td>
-                        <td>{{ item.velocidade }}</td>
-                        <td>{{ item.tempo }}</td>
+                        <th>Data</th>
+                        <th>Velocidade (km/h)</th>
+                        <th>Tempo (s)</th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="3">Nenhum dado encontrado.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+                </thead>
+                <tbody>
+                    {% for item in dados.historic_routes %}
+                        <tr>
+                            <td>{{ item.data }}</td>
+                            <td>{{ item.velocidade }}</td>
+                            <td>{{ item.tempo }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Nenhum dado encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     </div>
 
     <script>
@@ -108,7 +109,7 @@
             });
         });
 
-        // Exportação para CSV
+        // Função para exportar tabela para CSV
         function exportTableToCSV() {
             let csv = "Data,Velocidade (km/h),Tempo (s)\n";
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
@@ -121,7 +122,7 @@
             link.click();
         }
 
-        // Exportação para Excel
+        // Função para exportar tabela para Excel
         function exportTableToExcel() {
             let wb = XLSX.utils.book_new();
             let ws = XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
@@ -129,12 +130,12 @@
             XLSX.writeFile(wb, "dados_historicos.xlsx");
         }
 
-        // Baixar gráfico como imagem
-        function downloadChart() {
-            const canvas = document.getElementById("chartVelocidade");
+        // Função para baixar o gráfico como imagem PNG
+        function downloadChart(chartId) {
+            const canvas = document.getElementById(chartId);
             const link = document.createElement("a");
             link.href = canvas.toDataURL("image/png");
-            link.download = "grafico_velocidade.png";
+            link.download = chartId + ".png"; // Nome do arquivo com o id do gráfico
             link.click();
         }
     </script>
