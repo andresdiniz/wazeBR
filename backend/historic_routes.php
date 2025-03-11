@@ -1,8 +1,7 @@
 <?php
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/logs/php_errors.log');
 
 require_once './config/configbd.php';
 require_once './vendor/autoload.php';
@@ -10,55 +9,60 @@ require_once './vendor/autoload.php';
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
-// Iniciar sessão
-session_start();
-
 // Configurar o Twig
-$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho correto da pasta frontend
-$twig = new Environment($loader, [
-    'cache' => false, // Desativar cache para desenvolvimento
-    'debug' => true
-]);
+$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
+$twig = new Environment($loader);
 
 // Conexão com o banco de dados
-try {
-    $pdo = Database::getConnection();
-} catch (Exception $e) {
-    error_log("Erro ao conectar ao banco de dados: " . $e->getMessage());
-    die("Erro de conexão com o banco de dados.");
-}
+$pdo = Database::getConnection();
 
-// Definir período de consulta
-$startDate = date('Y-m-01');
-$endDate = date('Y-m-d', strtotime('+1 day'));
+// Buscar todas as rotas disponíveis
+$sqlRoutes = "SELECT id, name FROM routes ORDER BY name";
+$stmtRoutes = $pdo->prepare($sqlRoutes);
+$stmtRoutes->execute();
+$routes = $stmtRoutes->fetchAll(PDO::FETCH_ASSOC);
 
-// Buscar dados históricos (SEM id_parceiro)
-$sql = "SELECT data, velocidade, tempo 
-        FROM historic_routes
-        WHERE data BETWEEN :start_date AND :end_date
-        ORDER BY data";
+// Inicializar variáveis para busca
+$routeId = $_GET['route_id'] ?? null;
+$startDate = $_GET['start_date'] ?? date('d/m/Y', strtotime('-7 days')); // Padrão: últimos 7 dias
+$endDate = $_GET['end_date'] ?? date('d/m/Y'); // Padrão: hoje
 
-try {
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':start_date' => $startDate,
-        ':end_date' => $endDate
+$data = [];
+
+if ($routeId) {
+    // Converter datas para o formato do banco (YYYY-MM-DD)
+    $startDateFormatted = DateTime::createFromFormat('d/m/Y', $startDate)->format('Y-m-d');
+    $endDateFormatted = DateTime::createFromFormat('d/m/Y', $endDate)->format('Y-m-d');
+
+    // Buscar dados históricos filtrando por route_id e data
+    $sqlHistoric = "SELECT data, velocidade, tempo 
+                    FROM historic_routes 
+                    WHERE route_id = :route_id
+                    AND data BETWEEN :start_date AND :end_date
+                    ORDER BY data";
+
+    $stmtHistoric = $pdo->prepare($sqlHistoric);
+    $stmtHistoric->execute([
+        ':route_id' => $routeId,
+        ':start_date' => $startDateFormatted,
+        ':end_date' => $endDateFormatted
     ]);
 
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $data = $stmtHistoric->fetchAll(PDO::FETCH_ASSOC);
 
-    // Formatar dados numéricos
+    // Formatar os dados corretamente
     foreach ($data as &$item) {
         $item['velocidade'] = (float)$item['velocidade'];
         $item['tempo'] = (float)$item['tempo'];
-        $item['data'] = date('Y-m-d H:i:s', strtotime($item['data'])); // Ajusta formato de data
+        $item['data'] = date('Y-m-d H:i:s', strtotime($item['data']));
     }
-
-} catch (Exception $e) {
-    error_log("Erro ao buscar dados: " . $e->getMessage());
-    die("Erro ao recuperar dados históricos.");
 }
 
-var_dump($data);
-// Renderizar o template com os dados
-echo $twig->render('historic_routes.twig', ['dados' => ['historic_routes' => $data]]);
+// Passa os dados para o Twig
+echo $twig->render('historic_routes.twig', [
+    'routes' => $routes,
+    'dados' => ['historic_routes' => $data],
+    'selected_route' => $routeId,
+    'start_date' => $startDate,
+    'end_date' => $endDate
+]);

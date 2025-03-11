@@ -6,8 +6,28 @@
     <title>Dados Históricos</title>
 </head>
 <body>
-    <h2>Dados Históricos</h2>
+    <h2>Selecionar Rota e Período</h2>
+    <form method="GET">
+        <label for="route_id">Rota:</label>
+        <select name="route_id" id="route_id" required>
+            <option value="">Selecione uma rota</option>
+            {% for route in routes %}
+                <option value="{{ route.id }}" {% if route.id == selected_route %}selected{% endif %}>
+                    {{ route.name }}
+                </option>
+            {% endfor %}
+        </select>
 
+        <label for="start_date">Início:</label>
+        <input type="text" name="start_date" id="start_date" value="{{ start_date }}" placeholder="dd/mm/aaaa" required>
+
+        <label for="end_date">Fim:</label>
+        <input type="text" name="end_date" id="end_date" value="{{ end_date }}" placeholder="dd/mm/aaaa" required>
+
+        <button type="submit">Buscar</button>
+    </form>
+
+    <h2>Dados Históricos</h2>
     <table border="1">
         <thead>
             <tr>
@@ -17,19 +37,17 @@
             </tr>
         </thead>
         <tbody>
-            {% if dados.historic_routes is not empty %}
-                {% for item in dados.historic_routes %}
-                    <tr>
-                        <td>{{ item.data }}</td>
-                        <td>{{ item.velocidade }}</td>
-                        <td>{{ item.tempo }}</td>
-                    </tr>
-                {% endfor %}
+            {% for item in dados.historic_routes %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td>{{ item.velocidade }}</td>
+                    <td>{{ item.tempo }}</td>
+                </tr>
             {% else %}
                 <tr>
                     <td colspan="3">Nenhum dado encontrado.</td>
                 </tr>
-            {% endif %}
+            {% endfor %}
         </tbody>
     </table>
 </body>
