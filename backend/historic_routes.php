@@ -36,5 +36,6 @@ foreach ($data as &$item) {
     $item['data'] = date('Y-m-d H:i:s', strtotime($item['data'])); // Formatação opcional da data
 }
 
+var_dump($data); // Exemplo de uso dos dados
 // Agora a variável $data está disponível com todos os resultados
 // Você pode usar $data para outras operações conforme necessário
