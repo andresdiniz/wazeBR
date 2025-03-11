@@ -43,7 +43,8 @@ $routes = $stmtRoutes->fetchAll(PDO::FETCH_ASSOC);
 // Inicializar variáveis para busca
 $routeId = $_GET['route_id'] ?? null;
 $startDate = $_GET['start_date'] ?? date('d/m/Y', strtotime('-7 days')); // Padrão: últimos 7 dias
-$endDate = $_GET['end_date'] ?? date('d/m/Y'); // Padrão: hoje
+$endDate = $_GET['end_date'] ?? date('d/m/Y', strtotime('+1 day')); // Padrão: amanhã
+
 
 $data = [];
 
