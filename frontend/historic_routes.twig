@@ -7,5 +7,28 @@
 </head>
 <body>
     <h2>Dados Históricos</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Velocidade (km/h)</th>
+                <th>Tempo (s)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data.historic_routes %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td>{{ item.velocidade }}</td>
+                    <td>{{ item.tempo }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">Nenhum dado encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

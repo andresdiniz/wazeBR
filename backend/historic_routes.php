@@ -6,7 +6,6 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 // Configurar o Twig
-// Configura o carregador do Twig para buscar templates na pasta "frontend"
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
 $twig = new Environment($loader);
 
@@ -43,7 +42,5 @@ foreach ($data as &$item) {
     $item['data'] = date('Y-m-d H:i:s', strtotime($item['data'])); // Formatação opcional da data
 }
 
-$data = [
-    'historic_routes' => $data,
-];
-
+// Passa os dados para o Twig
+echo $twig->render('historic_routes.twig', ['data' => ['historic_routes' => $data]]);
