@@ -29,7 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$description, $is_active, $endtime, $id]);
-            echo json_encode(['status' => 'success']);
+            echo json_encode(['status' => 'success', 'message' => 'Evento atualizado com sucesso']);
+            header('Location: gerir_alertas.php');
             break;
         
         default:
