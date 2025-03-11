@@ -16,10 +16,28 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
-// Buscar todas as rotas disponíveis
-$sqlRoutes = "SELECT id, name FROM routes ORDER BY name";
+session_start();
+
+$id_parceiro = $_SESSION['usuario_id_parceiro']; // Pega o valor do id_parceiro do usuario
+
+// Modificar a consulta dependendo do id_parceiro
+if ($id_parceiro == 99) {
+    // Se o id_parceiro for 99, retorna todas as rotas
+    $sqlRoutes = "SELECT id, name FROM routes ORDER BY name";
+} else {
+    // Se o id_parceiro não for 99, retorna apenas as rotas do id_parceiro
+    $sqlRoutes = "SELECT id, name FROM routes WHERE id_parceiro = :id_parceiro ORDER BY name";
+}
+
 $stmtRoutes = $pdo->prepare($sqlRoutes);
-$stmtRoutes->execute();
+
+// Se não for o id_parceiro 99, precisamos passar o id_parceiro na execução
+if ($id_parceiro != 99) {
+    $stmtRoutes->execute([':id_parceiro' => $id_parceiro]);
+} else {
+    $stmtRoutes->execute();
+}
+
 $routes = $stmtRoutes->fetchAll(PDO::FETCH_ASSOC);
 
 // Inicializar variáveis para busca
@@ -65,6 +83,7 @@ $data = [
     'start_date' => $startDate,
     'end_date' => $endDate
 ];
+
 /*
 // Passa os dados para o Twig
 echo $twig->render('historic_routes.twig', [
@@ -75,3 +94,4 @@ echo $twig->render('historic_routes.twig', [
     'end_date' => $endDate
 ]);*/
 
+?>
