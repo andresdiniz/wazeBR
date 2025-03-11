@@ -20,8 +20,6 @@ $twig = new Environment($loader, [
     'debug' => true
 ]);
 
-$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99;
-
 // Conexão com o banco de dados
 try {
     $pdo = Database::getConnection();
@@ -34,17 +32,15 @@ try {
 $startDate = date('Y-m-01');
 $endDate = date('Y-m-d');
 
-// Buscar dados históricos
+// Buscar dados históricos (SEM id_parceiro)
 $sql = "SELECT data, velocidade, tempo 
-        FROM historic_routes 
-        WHERE id_parceiro = :id_parceiro
-        AND data BETWEEN :start_date AND :end_date
+        FROM historic_routes
+        WHERE data BETWEEN :start_date AND :end_date
         ORDER BY data";
 
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':id_parceiro' => $id_parceiro,
         ':start_date' => $startDate,
         ':end_date' => $endDate
     ]);
@@ -60,7 +56,6 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro ao buscar dados: " . $e->getMessage());
-    var_dump($e->getMessage());
     die("Erro ao recuperar dados históricos.");
 }
 
