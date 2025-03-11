@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endtime = $_POST['endtime'];
 
     echo json_encode($_POST);
-    exit;
 
     switch ($id) {
         case $id:
@@ -38,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['status' => 'error', 'message' => 'Evento não encontrado']);
             break;
     }
-
     exit;
 }
 
