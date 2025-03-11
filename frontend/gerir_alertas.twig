@@ -131,12 +131,21 @@
 
             // Converte a data para o formato correto do input datetime-local
             if (endtime) {
-                const formattedDate = new Date(endtime).toISOString().slice(0, 16);
-                document.getElementById("editEndtime").value = formattedDate;
+                document.getElementById("editEndtime").value = convertUTCToLocal(endtime);
             }
 
             new bootstrap.Modal(document.getElementById("editEventModal")).show();
         }        
+
+        function convertUTCToLocal(utcDateString) {
+            if (!utcDateString) return "";
+            
+            const date = new Date(utcDateString);
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset()); // Ajusta para o fuso local
+        
+            return date.toISOString().slice(0, 16); // Retorna no formato YYYY-MM-DDTHH:mm
+        }
+
     </script>
 </body>
 
