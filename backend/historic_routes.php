@@ -30,7 +30,7 @@ try {
 
 // Definir período de consulta
 $startDate = date('Y-m-01');
-$endDate = date('Y-m-d');
+$endDate = date('Y-m-d', strtotime('+1 day'));
 
 // Buscar dados históricos (SEM id_parceiro)
 $sql = "SELECT data, velocidade, tempo 
