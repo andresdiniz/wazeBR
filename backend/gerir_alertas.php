@@ -24,8 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $is_active = $_POST['is_active'];
     $endtime = $_POST['endtime'];
 
-    echo json_encode($_POST);
-
     switch ($id) {
         case $id:
             $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
