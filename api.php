@@ -998,7 +998,119 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
+        // Após definir o tipo de conteúdo, envie o JSON de resposta
+        case 'recuperar_senha':
+            // Antes de qualquer saída, defina o tipo de conteúdo
+            header('Content-Type: application/json');
+            // Recebe os dados do alerta
+            $email = $_POST['email'];  // Data e hora atual para a confirmação
+            $pdo = Database::getConnection();
 
+            if (!empty($email)) {
+                // Conectar ao banco de dados
+                $pdo = Database::getConnection();
+        
+                try {
+                    // Gerar um token único para o usuário
+                    $token = bin2hex(random_bytes(16)); // Gerar um token de 32 caracteres
+        
+                    // Inserir o token e o email na tabela de recuperação de senha
+                    $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, NOW())");
+                    $stmt->execute([
+                        ':email' => $email,
+                        ':token' => $token
+                    ]);
+        
+                    // Preparar a URL de recuperação de senha com o token
+                    $recoveryUrl = "https://fenixsmm.store/wazeportal/redefinir_senha/token=" . $token;
+        
+                    // Mensagem do e-mail
+                    $message = "
+                        <html>
+                            <head>
+                                <title>Recuperação de Senha</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f9;
+                                        color: #333;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    .container {
+                                        width: 100%;
+                                        max-width: 600px;
+                                        margin: 0 auto;
+                                        background-color: #ffffff;
+                                        padding: 20px;
+                                        border-radius: 8px;
+                                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                                    }
+                                    h2 {
+                                        color: #007bff;
+                                        font-size: 24px;
+                                        margin-bottom: 20px;
+                                    }
+                                    p {
+                                        font-size: 16px;
+                                        line-height: 1.6;
+                                        color: #555;
+                                    }
+                                    .button {
+                                        display: inline-block;
+                                        padding: 12px 25px;
+                                        font-size: 16px;
+                                        color: #fff;
+                                        background-color: #007bff;
+                                        text-decoration: none;
+                                        border-radius: 4px;
+                                        margin-top: 20px;
+                                    }
+                                    .footer {
+                                        margin-top: 30px;
+                                        font-size: 14px;
+                                        color: #888;
+                                        text-align: center;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class='container'>
+                                    <h2>Recuperação de Senha</h2>
+                                    <p>Olá,</p>
+                                    <p>Recebemos uma solicitação para a recuperação de sua senha. Para continuar, basta clicar no link abaixo:</p>
+                                    <p style='text-align: center;'>
+                                        <a href='" . $recoveryUrl . "' class='button'>Recuperar Senha</a>
+                                    </p>
+                                    <p>Se você não solicitou a recuperação de senha, por favor, ignore este e-mail.</p>
+                                    <p>Este link de recuperação de senha expirará em 24 horas.</p>
+                                    <div class='footer'>
+                                        <p>Se você tiver alguma dúvida ou precisar de ajuda, entre em contato com o nosso suporte.</p>
+                                        <p>Atenciosamente, <br>Equipe de Suporte</p>
+                                    </div>
+                                </div>
+                            </body>
+                        </html>
+                        ";
+
+        
+                    // Assunto do e-mail
+                    $subject = "Recuperação de Senha";
+        
+                    // Enviar o e-mail
+                    sendEmail($email, $message, $subject);
+        
+                    // Retornar uma resposta de sucesso
+                    echo json_encode(['status' => 'success', 'message' => 'Instruções para recuperação de senha foram enviadas por e-mail.']);
+                } catch (Exception $e) {
+                    // Em caso de erro
+                    echo json_encode(['status' => 'error', 'message' => 'Ocorreu um erro ao processar sua solicitação.']);
+                }
+            } else {
+                // Caso o e-mail não seja informado
+                echo json_encode(['status' => 'error', 'message' => 'Por favor, forneça um e-mail válido.']);
+            }
+            break;
 
         default:
             http_response_code(401);
