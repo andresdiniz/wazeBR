@@ -58,6 +58,14 @@ if ($routeId) {
     }
 }
 
+$data = [
+    'routes' => $routes,
+    'dados' => ['historic_routes' => $data],
+    'selected_route' => $routeId,
+    'start_date' => $startDate,
+    'end_date' => $endDate
+];
+/*
 // Passa os dados para o Twig
 echo $twig->render('historic_routes.twig', [
     'routes' => $routes,
@@ -65,4 +73,5 @@ echo $twig->render('historic_routes.twig', [
     'selected_route' => $routeId,
     'start_date' => $startDate,
     'end_date' => $endDate
-]);
+]);*/
+
