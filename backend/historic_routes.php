@@ -31,11 +31,11 @@ $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Formatar dados numéricos
 foreach ($data as &$item) {
-    $item['velocidade'] = (float)$item['velocidade'];
-    $item['tempo'] = (float)$item['tempo'];
-    $item['data'] = date('Y-m-d H:i:s', strtotime($item['data'])); // Formatação opcional da data
+    'velocidade' = (float)$item['velocidade'];
+    'tempo' = (float)$item['tempo'];
+    'data' = date('Y-m-d H:i:s', strtotime($item['data'])); // Formatação opcional da data
 }
 
-var_dump($data); // Exemplo de uso dos dados
+//var_dump($data); // Exemplo de uso dos dados
 // Agora a variável $data está disponível com todos os resultados
 // Você pode usar $data para outras operações conforme necessário
