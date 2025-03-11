@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$description, $is_active, $endtime, $id]);
-            header('Location: gerir_alertas.php');
+            header('Location: gerir_alertas');
             break;
         
         default:
