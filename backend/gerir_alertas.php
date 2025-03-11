@@ -14,8 +14,8 @@ $twig = new Environment($loader);
 $pdo = Database::getConnection();
 session_start();
 
-$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? null;
-$is_active_filter = $_GET['is_active'] ?? null; // Filtro opcional de status
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+$is_active_filter = $_GET['is_active']; // Filtro opcional de status
 
 // Se for uma atualização (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
