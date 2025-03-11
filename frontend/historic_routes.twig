@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados Históricos</title>
+</head>
+<body>
+    <h2>Dados Históricos</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Velocidade</th>
+                <th>Tempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in dados %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td>{{ item.velocidade }}</td>
+                    <td>{{ item.tempo }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">Nenhum dado encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
