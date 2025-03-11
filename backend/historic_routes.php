@@ -44,9 +44,6 @@ foreach ($data as &$item) {
 }
 
 $data = [
-    'start_date' => $startDate,
-    'end_date' => $endDate,
     'historic_routes' => $data,
-    'id_parceiro' => $id_parceiro,
 ];
 

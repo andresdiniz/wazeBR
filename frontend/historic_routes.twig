@@ -17,11 +17,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in dados %}
+            {% for item in data %}
                 <tr>
-                    <td>{{ item.data }}</td>
-                    <td>{{ item.velocidade }}</td>
-                    <td>{{ item.tempo }}</td>
+                    <td>{{ item.historic_routes.data }}</td>
+                    <td>{{ item.historic_routes.velocidade }}</td>
+                    <td>{{ item.historic_routes.tempo }}</td>
                 </tr>
             {% else %}
                 <tr>
