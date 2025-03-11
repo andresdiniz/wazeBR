@@ -76,16 +76,6 @@ function atualizarUUIDs($pdo) {
 // 🔴 Chamar a função no início do script
 atualizarUUIDsSeNecessario($pdo);
 
-// 🔴 Atualizar eventos expirados para is_active = 2
-$updateQuery = "
-    UPDATE events 
-    SET is_active = 2 
-    WHERE endtime < :currentDateTime AND is_active = 1
-";
-$updateStmt = $pdo->prepare($updateQuery);
-$updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
-$updateStmt->execute();
-
 // 🔴 Buscar parceiros distintos
 $parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
 $parceiroStmt = $pdo->prepare($parceiroQuery);
@@ -223,5 +213,13 @@ foreach ($parceiros as $idParceiro) {
     $xml->save($xmlPath);
     echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
-
+// 🔴 Atualizar eventos expirados para is_active = 2
+$updateQuery = "
+    UPDATE events 
+    SET is_active = 2 
+    WHERE endtime < :currentDateTime AND is_active = 1
+";
+$updateStmt = $pdo->prepare($updateQuery);
+$updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+$updateStmt->execute();
 ?>
