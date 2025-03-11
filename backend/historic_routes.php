@@ -20,7 +20,6 @@ $pdo = Database::getConnection();
 $startDate = date('Y-m-01');
 $endDate = date('Y-m-d');
 
-session_start();
 $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99;
 
 // Buscar dados históricos
