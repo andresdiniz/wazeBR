@@ -25,7 +25,7 @@ try {
         FROM recuperar_senha 
         WHERE token = :token 
         AND valid >= NOW() 
-        AND used = 1
+        AND used != 2
     ");
     $stmt->bindParam(':token', $token, PDO::PARAM_STR);
     $stmt->execute();
