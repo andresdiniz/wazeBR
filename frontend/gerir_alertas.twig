@@ -75,21 +75,21 @@
                 </div>
                 <div class="modal-body">
                     <form id="editEventForm" method="post">
-                        <input type="hidden" id="editEventId">
+                        <input type="hidden" id="editEventId" name="id">
 
                         <div class="mb-3">
                             <label for="editDescription" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="editDescription"></textarea>
+                            <textarea class="form-control" id="editDescription" name="description"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label for="editEndtime" class="form-label">Data Final</label>
-                            <input type="datetime-local" class="form-control" id="editEndtime">
+                            <input type="datetime-local" class="form-control" id="editEndtime" name="endtime">
                         </div>
 
                         <div class="mb-3">
                             <label for="editStatus" class="form-label">Status</label>
-                            <select class="form-select" id="editStatus">
+                            <select class="form-select" id="editStatus" name="is_active">
                                 <option value="1">Ativo</option>
                                 <option value="2">Inativo</option>
                             </select>
