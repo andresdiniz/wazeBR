@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gráficos de Rotas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0"></script>
+</head>
+<body>
+    <div style="width: 80%; margin: 0 auto;">
+        <h2>Velocidade Média (km/h)</h2>
+        <canvas id="speedChart"></canvas>
+    </div>
+    
+    <div style="width: 80%; margin: 0 auto;">
+        <h2>Tempo de Viagem (segundos)</h2>
+        <canvas id="timeChart"></canvas>
+    </div>
+
+    <script>
+        const data = {{ dados|json_encode|raw }};
+
+        // Configurar dados para os gráficos
+        const chartData = {
+            datasets: [
+                {
+                    label: 'Velocidade Média',
+                    data: data.map(item => ({
+                        x: item.data,
+                        y: item.velocidade
+                    })),
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }
+            ]
+        };
+
+        const timeData = {
+            datasets: [
+                {
+                    label: 'Tempo de Viagem',
+                    data: data.map(item => ({
+                        x: item.data,
+                        y: item.tempo
+                    })),
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                }
+            ]
+        };
+
+        // Configuração comum
+        const config = {
+            type: 'line',
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'hour'
+                        }
+                    }
+                }
+            }
+        };
+
+        // Gráfico de Velocidade
+        new Chart(
+            document.getElementById('speedChart'),
+            {
+                ...config,
+                data: chartData,
+                options: {
+                    ...config.options,
+                    scales: {
+                        ...config.options.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'km/h'
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        // Gráfico de Tempo
+        new Chart(
+            document.getElementById('timeChart'),
+            {
+                ...config,
+                data: timeData,
+                options: {
+                    ...config.options,
+                    scales: {
+                        ...config.options.scales,
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'segundos'
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    </script>
+</body>
+</html>
