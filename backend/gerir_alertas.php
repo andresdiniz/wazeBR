@@ -17,11 +17,13 @@ session_start();
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
 // Se for uma atualização (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $description = $_POST['description'];
     $is_active = $_POST['is_active'];
     $endtime = $_POST['endtime'];
+
+    echo json_encode($_POST);
 
     switch ($id) {
         case $id:
