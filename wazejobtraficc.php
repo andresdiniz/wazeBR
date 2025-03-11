@@ -10,12 +10,29 @@ require_once __DIR__ . '/functions/scripts.php';
 
 $pdo = Database::getConnection();
 
-// URLs para o JSON
+$sql = "SELECT url, id_parceiro FROM urls";
+
+// Preparar a declaração SQL
+$stmt = $pdo->prepare($sql);
+
+// Executar a consulta
+$stmt->execute();
+
+// Buscar os resultados
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Criar o array de URLs para o JSON
+$jsonUrls = array_map(function($row) {
+    return $row['url'];
+}, $results);
+
+
+/* URLs para o JSON
 $jsonUrls = [
     "https://www.waze.com/row-partnerhub-api/feeds-tvt/?id=1725279881116",
     "https://www.waze.com/row-partnerhub-api/feeds-tvt/?id=12699055487",
 ];
-
+*/
 $irregularitiesFound = false; // Variável para monitorar se irregularidades foram encontradas
 
 function saveHistoricRoutesData($pdo, $routeId, $avgSpeed, $avgTime) {
