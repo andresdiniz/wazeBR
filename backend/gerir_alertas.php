@@ -23,11 +23,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $is_active = $_POST['is_active'];
     $endtime = $_POST['endtime'];
 
-    $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$description, $is_active, $endtime, $id]);
+    switch ($id) {
+        case $id:
+            $sql = "UPDATE events SET description = ?, is_active = ?, endtime = ? WHERE id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$description, $is_active, $endtime, $id]);
+            echo json_encode(['status' => 'success']);
+            break;
+        
+        default:
+            echo json_encode(['status' => 'error', 'message' => 'Evento não encontrado']);
+            break;
+    }
 
-    echo json_encode(['status' => 'success']);
     exit;
 }
 
@@ -48,6 +56,4 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $data = [
     'events' => $events
 ];
-
-
 ?>
