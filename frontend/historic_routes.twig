@@ -17,17 +17,18 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in data %}
+            {% for item in data.historic_routes %}
                 <tr>
-                    <td>{{ item.historic_routes.data }}</td>
-                    <td>{{ item.historic_routes.velocidade }}</td>
-                    <td>{{ item.historic_routes.tempo }}</td>
+                    <td>{{ item.data }}</td>
+                    <td>{{ item.velocidade }}</td>
+                    <td>{{ item.tempo }}</td>
                 </tr>
             {% else %}
                 <tr>
                     <td colspan="3">Nenhum dado encontrado.</td>
                 </tr>
             {% endfor %}
+
         </tbody>
     </table>
 </body>
