@@ -60,6 +60,7 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro ao buscar dados: " . $e->getMessage());
+    var_dump($e->getMessage());
     die("Erro ao recuperar dados históricos.");
 }
 
