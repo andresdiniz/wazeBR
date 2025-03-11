@@ -70,11 +70,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editEventLabel">Editar Evento</h5>
-                    <button type="button" class="times" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editEventForm">
                         <input type="hidden" id="editEventId">
+                        
                         <div class="mb-3">
                             <label for="editDescription" class="form-label">Descrição</label>
                             <textarea class="form-control" id="editDescription"></textarea>
@@ -82,7 +83,7 @@
 
                         <div class="mb-3">
                             <label for="editEndtime" class="form-label">Data Final</label>
-                            <textarea class="form-control" id="editEndtime"></textarea>
+                            <input type="datetime-local" class="form-control" id="editEndtime">
                         </div>
 
                         <div class="mb-3">
@@ -92,12 +93,14 @@
                                 <option value="2">Inativo</option>
                             </select>
                         </div>
+
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -120,12 +123,19 @@
         // Aciona o filtro na primeira carga da página
         document.getElementById("statusFilter").dispatchEvent(new Event("change"));
         
-        function editEvent(id, description, is_active) {
+        function editEvent(id, description, is_active, endtime) {
             document.getElementById("editEventId").value = id;
             document.getElementById("editDescription").value = description;
             document.getElementById("editStatus").value = is_active;
+        
+            // Converte a data para o formato correto do input datetime-local
+            if (endtime) {
+                const formattedDate = new Date(endtime).toISOString().slice(0, 16);
+                document.getElementById("editEndtime").value = formattedDate;
+            }
+        
             new bootstrap.Modal(document.getElementById("editEventModal")).show();
-        }
+        }        
     </script>
 </body>
 </html>
