@@ -18,15 +18,28 @@ $jsonUrls = [
 
 $irregularitiesFound = false; // Variável para monitorar se irregularidades foram encontradas
 
-function saveHistoricRoutesData($pdo) {
-    $sql = "INSERT INTO historic_routes (route_id, data, velocidade, tempo)
-            SELECT id, NOW(), avg_speed, avg_time FROM routes
-            WHERE avg_speed IS NOT NULL AND avg_time IS NOT NULL";
+function saveHistoricRoutesData($pdo, $routeId, $avgSpeed, $avgTime) {
+    // Obtém a data e hora atual no formato Y-m-d H:i:s
+    $currentDateTime = date('Y-m-d H:i:s');
+
+    // SQL para inserir os dados na tabela historic_routes
+    $sql = "INSERT INTO historic_routes (route_id, data, velocidade, tempo) 
+            VALUES (:route_id, :data, :velocidade, :tempo)";
     
     try {
+        // Preparando a consulta
         $stmt = $pdo->prepare($sql);
+        
+        // Bind dos parâmetros para prevenir injeção de SQL
+        $stmt->bindParam(':route_id', $routeId);
+        $stmt->bindParam(':data', $currentDateTime);  // Passando o valor de data gerado no PHP
+        $stmt->bindParam(':velocidade', $avgSpeed);
+        $stmt->bindParam(':tempo', $avgTime);
+        
+        // Executando a consulta
         $stmt->execute();
-        echo "✅ Dados históricos salvos para " . $stmt->rowCount() . " rotas.\n";
+        
+        echo "✅ Dados históricos salvos para a rota ID: $routeId.\n";
     } catch (PDOException $e) {
         echo "❌ Erro ao salvar histórico: " . $e->getMessage() . "\n";
     }
@@ -142,6 +155,8 @@ foreach ($jsonUrls as $jsonUrl) {
                 ':historic_speed' => $historicSpeed,
                 ':historic_time' => $historicTime,
             ]);
+
+            saveHistoricRoutesData($pdo, $route['id'], $avgSpeed, $avgTime);
 
             // Codigo para inserir as coordenadas
 
@@ -616,4 +631,3 @@ foreach ($jsonUrls as $jsonUrl) {
         echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n"; 
     }
 }
-saveHistoricRoutesData($pdo);
