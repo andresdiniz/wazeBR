@@ -55,7 +55,8 @@
                         <button class="btn btn-warning btn-sm" 
                                 onclick="editEvent('{{ event.id }}', 
                                                   '{{ event.description|e }}', 
-                                                  '{{ event.is_active }}')">Editar</button>
+                                                  '{{ event.is_active }}',
+                                                  '{{ event.endtime }}')">Editar</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -69,7 +70,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editEventLabel">Editar Evento</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="times" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editEventForm">
@@ -78,6 +79,12 @@
                             <label for="editDescription" class="form-label">Descrição</label>
                             <textarea class="form-control" id="editDescription"></textarea>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Data Final</label>
+                            <textarea class="form-control" id="editDescription"></textarea>
+                        </div>
+
                         <div class="mb-3">
                             <label for="editStatus" class="form-label">Status</label>
                             <select class="form-select" id="editStatus">
@@ -119,23 +126,6 @@
             document.getElementById("editStatus").value = is_active;
             new bootstrap.Modal(document.getElementById("editEventModal")).show();
         }
-
-        document.getElementById("editEventForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-            const id = document.getElementById("editEventId").value;
-            const description = document.getElementById("editDescription").value;
-            const is_active = document.getElementById("editStatus").value;
-
-            fetch("update_event.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `id=${id}&description=${encodeURIComponent(description)}&is_active=${is_active}`
-            })
-            .then(response => response.json())
-            .then(() => {
-                location.reload(); // Recarrega a página para atualizar os dados
-            });
-        });
     </script>
 </body>
 </html>
