@@ -1015,7 +1015,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $token = bin2hex(random_bytes(16)); // Gerar um token de 32 caracteres
         
                     // Inserir o token e o email na tabela de recuperação de senha
-                    $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, NOW())");
+                    $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, DATE_ADD(NOW(), INTERVAL 24 HOUR))");
                     $stmt->execute([
                         ':email' => $email,
                         ':token' => $token
