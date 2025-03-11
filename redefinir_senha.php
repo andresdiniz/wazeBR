@@ -3,9 +3,10 @@
 require_once __DIR__ . '/config/configbd.php';
 
 // Verifica se o parâmetro 'token' foi enviado na URL
-if (!isset($_GET['token'])) {
+if (!isset($_GET['token']) || empty($_GET['token'])) {
+    echo "token nao lido";
     echo "<script>
-        alert('Token não fornecido na URL. Você será redirecionado para a página de login.');
+        alert('Token não fornecido ou inválido. Você será redirecionado para a página de login.');
         window.location.href = 'login.html';
     </script>";
     exit;
