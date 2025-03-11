@@ -59,5 +59,6 @@ try {
     die("Erro ao recuperar dados históricos.");
 }
 
+var_dump($data);
 // Renderizar o template com os dados
 echo $twig->render('historic_routes.twig', ['dados' => ['historic_routes' => $data]]);
