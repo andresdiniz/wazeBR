@@ -1022,7 +1022,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     ]);
         
                     // Preparar a URL de recuperação de senha com o token
-                    $recoveryUrl = "https://fenixsmm.store/wazeportal/redefinir_senha/token=" . $token;
+                    $recoveryUrl = "https://fenixsmm.store/wazeportal/redefinir_senha?token=" . $token;
         
                     // Mensagem do e-mail
                     $message = "
