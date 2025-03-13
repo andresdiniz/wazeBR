@@ -16,28 +16,20 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
+// Iniciar sessão
 session_start();
 
 $id_parceiro = $_SESSION['usuario_id_parceiro']; // Pega o valor do id_parceiro do usuario
 
-// Modificar a consulta dependendo do id_parceiro
-if ($id_parceiro == 99) {
-    // Se o id_parceiro for 99, retorna todas as rotas
-    $sqlRoutes = "SELECT id, name FROM routes ORDER BY name";
-} else {
-    // Se o id_parceiro não for 99, retorna apenas as rotas do id_parceiro
-    $sqlRoutes = "SELECT id, name FROM routes WHERE id_parceiro = :id_parceiro ORDER BY name";
-}
+// Definir SQL para pegar as rotas, dependendo do id_parceiro
+$sqlRoutes = ($id_parceiro == 99)
+    ? "SELECT id, name FROM routes ORDER BY name"
+    : "SELECT id, name FROM routes WHERE id_parceiro = :id_parceiro ORDER BY name";
 
 $stmtRoutes = $pdo->prepare($sqlRoutes);
 
-// Se não for o id_parceiro 99, precisamos passar o id_parceiro na execução
-if ($id_parceiro != 99) {
-    $stmtRoutes->execute([':id_parceiro' => $id_parceiro]);
-} else {
-    $stmtRoutes->execute();
-}
-
+// Executar a consulta de rotas
+$stmtRoutes->execute($id_parceiro != 99 ? [':id_parceiro' => $id_parceiro] : []);
 $routes = $stmtRoutes->fetchAll(PDO::FETCH_ASSOC);
 
 // Inicializar variáveis para busca
@@ -47,13 +39,12 @@ $endDate = $_GET['end_date'] ?? date('Y-m-d', strtotime('+1 day')); // Padrão: 
 
 $data = [];
 
-// Verificar se a data está sendo fornecida
 if ($routeId) {
-    // Garantir que as datas passadas estão no formato correto (Y-m-d)
-    $startDateFormatted = $startDate;  // Já está no formato correto
-    $endDateFormatted = $endDate;      // Já está no formato correto
+    // Garantir que as datas estão no formato correto (Y-m-d)
+    $startDateFormatted = $startDate; // Já está no formato correto
+    $endDateFormatted = $endDate; // Já está no formato correto
 
-    // Buscar dados históricos filtrando por route_id e data
+    // Consulta histórica com as datas no formato correto
     $sqlHistoric = "SELECT data, velocidade, tempo 
                     FROM historic_routes 
                     WHERE route_id = :route_id
@@ -67,9 +58,10 @@ if ($routeId) {
         ':end_date' => $endDateFormatted
     ]);
 
+    // Armazenar os resultados da consulta
     $data = $stmtHistoric->fetchAll(PDO::FETCH_ASSOC);
 
-    // Formatar os dados corretamente
+    // Formatar dados corretamente
     foreach ($data as &$item) {
         $item['velocidade'] = (float)$item['velocidade'];
         $item['tempo'] = (float)$item['tempo'];
