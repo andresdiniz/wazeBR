@@ -38,6 +38,8 @@ $startDate = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days')); // Padr
 $endDate = $_GET['end_date'] ?? date('Y-m-d', strtotime('+1 day')); // Padrão: amanhã (formato Y-m-d)
 
 $data = [];
+$insights = '';
+$expectedSpeed = null;
 
 if ($routeId) {
     // Garantir que as datas estão no formato correto (Y-m-d)
