@@ -338,6 +338,7 @@ foreach ($results as $row) {
                 $subType = $leadAlert ? $leadAlert['subType'] : 'NO_SUBTYPE';
                 $position = $leadAlert ? $leadAlert['position'] : '';
                 $numNotThereReports = $leadAlert ? $leadAlert['numNotThereReports'] : 0;
+                $irregularityId = uuid();
 
                 $stmtIrregularities->execute([
                     ':id' => $irregularityId,
