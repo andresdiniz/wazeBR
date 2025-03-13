@@ -45,7 +45,6 @@ $routeId = $_GET['route_id'] ?? null;
 $startDate = $_GET['start_date'] ?? date('d/m/Y', strtotime('-7 days')); // Padrão: últimos 7 dias
 $endDate = $_GET['end_date'] ?? date('d/m/Y', strtotime('+1 day')); // Padrão: amanhã
 
-var_dump($routeId, $startDate, $endDate);
 $data = [];
 
 if ($routeId) {
@@ -69,6 +68,7 @@ if ($routeId) {
 
     $data = $stmtHistoric->fetchAll(PDO::FETCH_ASSOC);
 
+    var_dump($data);
     // Formatar os dados corretamente
     foreach ($data as &$item) {
         $item['velocidade'] = (float)$item['velocidade'];
