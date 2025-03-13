@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
@@ -69,6 +70,10 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="mt-4 text-center" id="sentimentMessage">
+            <!-- Frase de sentimento será exibida aqui -->
+        </div>
     {% endif %}
 </div>
 
@@ -129,6 +134,21 @@
                                 stepSize: 10,
                             }
                         }
+                    },
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 10,
+                                threshold: 10
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.1
+                            }
+                        }
                     }
                 }
             });
@@ -168,9 +188,36 @@
                                 stepSize: 10,
                             }
                         }
+                    },
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 10,
+                                threshold: 10
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'xy',
+                                speed: 0.1
+                            }
+                        }
                     }
                 }
             });
+
+            // Sentimento baseado na média de velocidade
+            const averageSpeed = velocidades.reduce((a, b) => a + b, 0) / velocidades.length;
+            const sentimentMessage = document.getElementById("sentimentMessage");
+
+            if (averageSpeed > 80) {
+                sentimentMessage.innerHTML = "<p><strong>Excelente!</strong> A velocidade média está ótima!</p>";
+            } else if (averageSpeed < 40) {
+                sentimentMessage.innerHTML = "<p><strong>Atenção!</strong> A velocidade média está abaixo do esperado. Verifique a rota.</p>";
+            } else {
+                sentimentMessage.innerHTML = "<p>A velocidade está dentro do esperado. Continue monitorando.</p>";
+            }
         {% endif %}
     });
 
