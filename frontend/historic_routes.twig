@@ -1,206 +1,201 @@
-<!-- Adicionei o lang e corrigi a estrutura básica do HTML -->
-    <!-- Movi os links de CSS e scripts para o head -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <div class="container mt-4">
-        <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <label for="route_id" class="form-label">Rota:</label>
-                <select name="route_id" id="route_id" class="form-select" required>
-                    <option value="">Selecione uma rota</option>
-                    {% for route in routes %}
-                        <option value="{{ route.id }}" {% if route.id == selected_route_id %}selected{% endif %}>
-                            {{ route.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> <!-- Biblioteca para o calendário -->
 
-            <!-- Corrigi o nome dos campos para date_format -->
-            <div class="col-md-3">
-                <label for="start_date" class="form-label">Início:</label>
-                <input type="text" name="start_date" id="start_date" 
-                       value="{{ start_date|default('', true) }}" 
-                       class="form-control" 
-                       placeholder="dd/mm/aaaa" 
-                       required>
-            </div>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
+    <form method="GET" class="row g-3">
+        <div class="col-md-4">
+            <label for="route_id" class="form-label">Rota:</label>
+            <select name="route_id" id="route_id" class="form-select" required>
+                <option value="">Selecione uma rota</option>
+                {% for route in routes %}
+                    <option value="{{ route.id }}" {% if route.id == selected_route %}selected{% endif %}>
+                        {{ route.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="col-md-3">
-                <label for="end_date" class="form-label">Fim:</label>
-                <input type="text" name="end_date" id="end_date" 
-                       value="{{ end_date|default('', true) }}" 
-                       class="form-control" 
-                       placeholder="dd/mm/aaaa" 
-                       required>
-            </div>
+        <div class="col-md-3">
+            <label for="start_date" class="form-label">Início:</label>
+            <input type="text" name="start_date" id="start_date" value="{{ start_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
+        </div>
 
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Buscar</button>
-            </div>
-        </form>
+        <div class="col-md-3">
+            <label for="end_date" class="form-label">Fim:</label>
+            <input type="text" name="end_date" id="end_date" value="{{ end_date }}" class="form-control" placeholder="dd/mm/aaaa" required>
+        </div>
 
-        {% if dados and dados.historic_routes %}
-            <div class="mt-4">
-                <h3 class="text-center">Gráficos de Velocidade e Tempo</h3>
-                <canvas id="chartVelocidade"></canvas>
-                <canvas id="chartTempo" class="mt-4"></canvas>
-            </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Buscar</button>
+        </div>
+    </form>
 
-            <!-- Adicionei verificação para habilitar/desabilitar botões -->
-            <div class="mt-4 d-flex justify-content-center gap-3">
-                <button class="btn btn-success" onclick="exportTableToCSV()" {% if not dados.historic_routes %}disabled{% endif %}>
-                    Exportar CSV
-                </button>
-                <button class="btn btn-warning" onclick="exportTableToExcel()" {% if not dados.historic_routes %}disabled{% endif %}>
-                    Exportar Excel
-                </button>
-                <button class="btn btn-info" onclick="downloadChart('chartVelocidade')" {% if not dados.historic_routes %}disabled{% endif %}>
-                    Baixar Gráfico de Velocidade
-                </button>
-                <button class="btn btn-info" onclick="downloadChart('chartTempo')" {% if not dados.historic_routes %}disabled{% endif %}>
-                    Baixar Gráfico de Tempo
-                </button>
-            </div>
+    {% if dados.historic_routes %}
+        <div class="mt-4">
+            <h3 class="text-center">Gráficos de Velocidade e Tempo</h3>
+            <canvas id="chartVelocidade"></canvas>
+            <canvas id="chartTempo" class="mt-4"></canvas>
+        </div>
 
-            <h3 class="mt-4 text-center">Tabela de Dados</h3>
-            <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
-                <thead class="table-dark">
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <button class="btn btn-success" onclick="exportTableToCSV()">Exportar CSV</button>
+            <button class="btn btn-warning" onclick="exportTableToExcel()">Exportar Excel</button>
+            <button class="btn btn-info" onclick="downloadChart('chartVelocidade')">Baixar Gráfico de Velocidade</button>
+            <button class="btn btn-info" onclick="downloadChart('chartTempo')">Baixar Gráfico de Tempo</button>
+        </div>
+
+        <h3 class="mt-4 text-center">Tabela de Dados</h3>
+        <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Data</th>
+                    <th>Velocidade (km/h)</th>
+                    <th>Tempo (s)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in dados.historic_routes %}
                     <tr>
-                        <th>Data</th>
-                        <th>Velocidade (km/h)</th>
-                        <th>Tempo (s)</th>
+                        <td>{{ item.data }}</td>
+                        <td>{{ item.velocidade }}</td>
+                        <td>{{ item.tempo }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for item in dados.historic_routes %}
-                        <tr>
-                            <!-- Formatei as datas e números -->
-                            <td>{{ item.data|date('d/m/Y') }}</td>
-                            <td>{{ item.velocidade|number_format(2) }}</td>
-                            <td>{{ item.tempo|number_format(2) }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3">Nenhum dado encontrado.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-    </div>
+                {% else %}
+                    <tr>
+                        <td colspan="3">Nenhum dado encontrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
 
-    <!-- Movi os scripts para o final do body -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Configuração do Flatpickr com localização
-            flatpickr("#start_date", {
-                dateFormat: "d/m/Y",
-                locale: "pt",
-                allowInput: true
-            });
-            
-            flatpickr("#end_date", {
-                dateFormat: "d/m/Y",
-                locale: "pt",
-                allowInput: true
-            });
-
-            {% if dados and dados.historic_routes %}
-                // Verificação de dados antes de criar gráficos
-                const labels = {{ dados.historic_routes|map(attribute='data')|json_encode|raw }};
-                const velocidades = {{ dados.historic_routes|map(attribute='velocidade')|json_encode|raw }};
-                const tempos = {{ dados.historic_routes|map(attribute='tempo')|json_encode|raw }};
-
-                // Função de criação de gráficos
-                function createChart(id, label, data, color) {
-                    return new Chart(document.getElementById(id), {
-                        type: "line",
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: label,
-                                data: data,
-                                borderColor: color,
-                                backgroundColor: color + '33',
-                                fill: false,
-                                tension: 0.3,
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: { beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
-                // Cria os gráficos
-                if(labels.length > 0) {
-                    createChart('chartVelocidade', 'Velocidade (km/h)', velocidades, '#4e73df');
-                    createChart('chartTempo', 'Tempo (s)', tempos, '#e74a3b');
-                }
-            {% endif %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Configuração do Flatpickr para o calendário
+        flatpickr("#start_date", {
+            dateFormat: "d/m/Y",
+            locale: "pt",
+        });
+        flatpickr("#end_date", {
+            dateFormat: "d/m/Y",
+            locale: "pt",
         });
 
-        // Funções de exportação com tratamento de erro
-        function exportTableToCSV() {
-            try {
-                let csv = "Data,Velocidade (km/h),Tempo (s)\n";
-                document.querySelectorAll("#dataTable tbody tr").forEach(row => {
-                    csv += Array.from(row.children).map(td => td.innerText).join(",") + "\n";
-                });
-                const blob = new Blob(["\uFEFF"+csv], { type: "text/csv;charset=utf-8;" });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "dados_historicos.csv";
-                link.click();
-            } catch (error) {
-                alert("Erro ao exportar CSV: " + error.message);
-            }
-        }
+        // Definindo as variáveis de dados para os gráficos
+        const labels = {% for item in dados.historic_routes %}"{{ item.data }}",{% endfor %};
+        const velocidades = {% for item in dados.historic_routes %}{{ item.velocidade }},{% endfor %};
+        const tempos = {% for item in dados.historic_routes %}{{ item.tempo }},{% endfor %};
 
-        function exportTableToExcel() {
-            try {
-                const table = document.getElementById("dataTable");
-                const ws = XLSX.utils.table_to_sheet(table);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Dados");
-                XLSX.writeFile(wb, "dados_historicos.xlsx");
-            } catch (error) {
-                alert("Erro ao exportar Excel: " + error.message);
+        // Gráfico de Velocidade
+        new Chart(document.getElementById("chartVelocidade"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Velocidade (km/h)",
+                    data: velocidades,
+                    borderColor: "blue",
+                    fill: false,
+                    tension: 0.3,
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ": " + tooltipItem.raw + " km/h";
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10,
+                        }
+                    }
+                }
             }
-        }
+        });
 
-        function downloadChart(chartId) {
-            try {
-                const canvas = document.getElementById(chartId);
-                const link = document.createElement("a");
-                link.download = `${chartId}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            } catch (error) {
-                alert("Erro ao baixar gráfico: " + error.message);
+        // Gráfico de Tempo
+        new Chart(document.getElementById("chartTempo"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Tempo (s)",
+                    data: tempos,
+                    borderColor: "red",
+                    fill: false,
+                    tension: 0.3,
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ": " + tooltipItem.raw + " s";
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10,
+                        }
+                    }
+                }
             }
-        }
-    </script>
+        });
+    });
+
+    // Função para exportar tabela para CSV
+    function exportTableToCSV() {
+        let csv = "Data,Velocidade (km/h),Tempo (s)\n";
+        document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+            csv += Array.from(row.children).map(td => td.innerText).join(",") + "\n";
+        });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "dados_historicos.csv";
+        link.click();
+    }
+
+    // Função para exportar tabela para Excel
+    function exportTableToExcel() {
+        let wb = XLSX.utils.book_new();
+        let ws = XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
+        XLSX.utils.book_append_sheet(wb, ws, "Dados");
+        XLSX.writeFile(wb, "dados_historicos.xlsx");
+    }
+
+    // Função para baixar o gráfico como imagem PNG
+    function downloadChart(chartId) {
+        const canvas = document.getElementById(chartId);
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = chartId + ".png"; // Nome do arquivo com o id do gráfico
+        link.click();
+    }
+</script>
