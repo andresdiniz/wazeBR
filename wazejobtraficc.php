@@ -321,6 +321,7 @@ foreach ($results as $row) {
             $stmtDeactivateAll->execute([':url_id' => $urlId]);
 
             foreach ($data['irregularities'] as $irregularity) {
+                $irregularityId = uuid();
                 $avgSpeed = ($irregularity['time'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['time'] / 3600) : 0;
                 $historicSpeed = ($irregularity['historicTime'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['historicTime'] / 3600) : 0;
 
@@ -338,7 +339,6 @@ foreach ($results as $row) {
                 $subType = $leadAlert ? $leadAlert['subType'] : 'NO_SUBTYPE';
                 $position = $leadAlert ? $leadAlert['position'] : '';
                 $numNotThereReports = $leadAlert ? $leadAlert['numNotThereReports'] : 0;
-                $irregularityId = uuid();
 
                 $stmtIrregularities->execute([
                     ':id' => $irregularityId,
