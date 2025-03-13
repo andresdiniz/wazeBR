@@ -85,88 +85,104 @@
             locale: "pt",
         });
 
-        // Definindo as variáveis de dados para os gráficos
-        const labels = {% for item in dados.historic_routes %}"{{ item.data }}",{% endfor %};
-        const velocidades = {% for item in dados.historic_routes %}{{ item.velocidade }},{% endfor %};
-        const tempos = {% for item in dados.historic_routes %}{{ item.tempo }},{% endfor %};
+        // Verificando se existem dados antes de criar os gráficos
+        {% if dados.historic_routes %}
+            const labels = [
+                {% for item in dados.historic_routes %}
+                    "{{ item.data }}",
+                {% endfor %}
+            ];
 
-        // Gráfico de Velocidade
-        new Chart(document.getElementById("chartVelocidade"), {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Velocidade (km/h)",
-                    data: velocidades,
-                    borderColor: "blue",
-                    fill: false,
-                    tension: 0.3,
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
+            const velocidades = [
+                {% for item in dados.historic_routes %}
+                    {{ item.velocidade }},
+                {% endfor %}
+            ];
+
+            const tempos = [
+                {% for item in dados.historic_routes %}
+                    {{ item.tempo }},
+                {% endfor %}
+            ];
+
+            // Gráfico de Velocidade
+            new Chart(document.getElementById("chartVelocidade"), {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Velocidade (km/h)",
+                        data: velocidades,
+                        borderColor: "blue",
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.dataset.label + ": " + tooltipItem.raw + " km/h";
+                                }
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return tooltipItem.dataset.label + ": " + tooltipItem.raw + " km/h";
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 10,
                             }
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 10,
-                        }
-                    }
                 }
-            }
-        });
+            });
 
-        // Gráfico de Tempo
-        new Chart(document.getElementById("chartTempo"), {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Tempo (s)",
-                    data: tempos,
-                    borderColor: "red",
-                    fill: false,
-                    tension: 0.3,
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
+            // Gráfico de Tempo
+            new Chart(document.getElementById("chartTempo"), {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Tempo (s)",
+                        data: tempos,
+                        borderColor: "red",
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.dataset.label + ": " + tooltipItem.raw + " s";
+                                }
+                            }
+                        }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return tooltipItem.dataset.label + ": " + tooltipItem.raw + " s";
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 10,
                             }
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 10,
-                        }
-                    }
                 }
-            }
-        });
+            });
+        {% endif %}
     });
 
     // Função para exportar tabela para CSV
