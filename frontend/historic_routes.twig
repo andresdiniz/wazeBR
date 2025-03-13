@@ -125,6 +125,20 @@
                                     return tooltipItem.dataset.label + ": " + tooltipItem.raw + " km/h";
                                 }
                             }
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true, // Ativa o zoom com a roda do mouse
+                                speed: 0.1,
+                            },
+                            pinch: {
+                                enabled: true, // Ativa o zoom por pinça em telas sensíveis ao toque
+                                threshold: 10,
+                            },
+                            drag: {
+                                enabled: true, // Ativa o arraste (pan)
+                                mode: 'xy', // Permite arraste em ambos os eixos (X e Y)
+                            }
                         }
                     },
                     scales: {
@@ -132,21 +146,6 @@
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 10,
-                            }
-                        }
-                    },
-                    plugins: {
-                        zoom: {
-                            pan: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 10,
-                                threshold: 10
-                            },
-                            zoom: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 0.1
                             }
                         }
                     }
@@ -179,6 +178,20 @@
                                     return tooltipItem.dataset.label + ": " + tooltipItem.raw + " s";
                                 }
                             }
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true, // Ativa o zoom com a roda do mouse
+                                speed: 0.1,
+                            },
+                            pinch: {
+                                enabled: true, // Ativa o zoom por pinça em telas sensíveis ao toque
+                                threshold: 10,
+                            },
+                            drag: {
+                                enabled: true, // Ativa o arraste (pan)
+                                mode: 'xy', // Permite arraste em ambos os eixos (X e Y)
+                            }
                         }
                     },
                     scales: {
@@ -186,21 +199,6 @@
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 10,
-                            }
-                        }
-                    },
-                    plugins: {
-                        zoom: {
-                            pan: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 10,
-                                threshold: 10
-                            },
-                            zoom: {
-                                enabled: true,
-                                mode: 'xy',
-                                speed: 0.1
                             }
                         }
                     }
