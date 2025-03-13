@@ -320,8 +320,8 @@ foreach ($results as $row) {
             $stmtDeactivateAll = $pdo->prepare("UPDATE irregularities SET is_active = 0 WHERE url_id = :url_id");
             $stmtDeactivateAll->execute([':url_id' => $urlId]);
 
-            foreach ($data['irregularities'] as $irregularity) {
-                $irregularityId = uuid();
+            foreach ($data['irregularities'] as $irregularity) {                
+                $irregularityId = generateUuid();
                 $avgSpeed = ($irregularity['time'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['time'] / 3600) : 0;
                 $historicSpeed = ($irregularity['historicTime'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['historicTime'] / 3600) : 0;
 
