@@ -47,33 +47,43 @@ $endDate = $_GET['end_date'] ?? date('d/m/Y', strtotime('+1 day')); // Padrão: 
 
 $data = [];
 
+// Verificar se a data está sendo fornecida
 if ($routeId) {
     // Converter datas para o formato do banco (YYYY-MM-DD)
-    $startDateFormatted = DateTime::createFromFormat('d/m/Y', $startDate)->format('Y-m-d');
-    $endDateFormatted = DateTime::createFromFormat('d/m/Y', $endDate)->format('Y-m-d');
+    $startDateFormatted = DateTime::createFromFormat('d/m/Y', $startDate);
+    $endDateFormatted = DateTime::createFromFormat('d/m/Y', $endDate);
 
-    // Buscar dados históricos filtrando por route_id e data
-    $sqlHistoric = "SELECT data, velocidade, tempo 
-                    FROM historic_routes 
-                    WHERE route_id = :route_id
-                    AND data BETWEEN :start_date AND :end_date
-                    ORDER BY data";
+    // Verifique se o DateTime foi criado corretamente
+    if ($startDateFormatted && $endDateFormatted) {
+        $startDateFormatted = $startDateFormatted->format('Y-m-d');
+        $endDateFormatted = $endDateFormatted->format('Y-m-d');
 
-    $stmtHistoric = $pdo->prepare($sqlHistoric);
-    $stmtHistoric->execute([
-        ':route_id' => $routeId,
-        ':start_date' => $startDateFormatted,
-        ':end_date' => $endDateFormatted
-    ]);
+        // Buscar dados históricos filtrando por route_id e data
+        $sqlHistoric = "SELECT data, velocidade, tempo 
+                        FROM historic_routes 
+                        WHERE route_id = :route_id
+                        AND data BETWEEN :start_date AND :end_date
+                        ORDER BY data";
 
-    $data = $stmtHistoric->fetchAll(PDO::FETCH_ASSOC);
+        $stmtHistoric = $pdo->prepare($sqlHistoric);
+        $stmtHistoric->execute([
+            ':route_id' => $routeId,
+            ':start_date' => $startDateFormatted,
+            ':end_date' => $endDateFormatted
+        ]);
 
-    var_dump($data);
-    // Formatar os dados corretamente
-    foreach ($data as &$item) {
-        $item['velocidade'] = (float)$item['velocidade'];
-        $item['tempo'] = (float)$item['tempo'];
-        $item['data'] = date('Y-m-d H:i:s', strtotime($item['data']));
+        $data = $stmtHistoric->fetchAll(PDO::FETCH_ASSOC);
+
+        // Formatar os dados corretamente
+        foreach ($data as &$item) {
+            $item['velocidade'] = (float)$item['velocidade'];
+            $item['tempo'] = (float)$item['tempo'];
+            $item['data'] = date('Y-m-d H:i:s', strtotime($item['data']));
+        }
+    } else {
+        // Caso a data seja inválida, trate o erro de forma apropriada
+        echo "Formato de data inválido!";
+        exit;
     }
 }
 
@@ -84,15 +94,5 @@ $data = [
     'start_date' => $startDate,
     'end_date' => $endDate
 ];
-
-/*
-// Passa os dados para o Twig
-echo $twig->render('historic_routes.twig', [
-    'routes' => $routes,
-    'dados' => ['historic_routes' => $data],
-    'selected_route' => $routeId,
-    'start_date' => $startDate,
-    'end_date' => $endDate
-]);*/
 
 ?>
