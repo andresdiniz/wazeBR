@@ -291,27 +291,52 @@
                 
                 // Uso no HTML (adicionando o ícone)
                 analysisHTML += `
-                    <div class="card-body text-center">
-                        <h5>${period.label} ${classificacao.icone}</h5>
-                        ...
-                    </div>`;
-            });
+                    <div class="col-md-3 mb-4">
+                        <div class="card border-5 border-top-${status} shadow-sm h-100 hover-effect">
+                            <div class="card-header bg-${status}-subtle">
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    ${period.label}
+                                    <span class="badge bg-${status} float-end">${period.speeds.length} registros</span>
+                                </h5>
+                            </div>
+                            <div class="card-body py-4 text-center d-flex flex-column">
+                                <div class="mb-3">
+                                    <span class="display-3 text-${status}">
+                                        ${this.getStatusIcon(status)} <!-- Adicione ícones correspondentes -->
+                                    </span>
+                                </div>
+                                
+                                <div class="mt-auto">
+                                    <h2 class="text-${status} mb-3 fw-bold">${statusText}</h2>
+                                    
+                                    <div class="progress mb-3" style="height: 8px">
+                                        <div class="progress-bar bg-${status}" 
+                                            role="progressbar" 
+                                            style="width: ${Math.abs(deviation)}%"
+                                            aria-valuenow="${Math.abs(deviation)}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                        </div>
+                                    </div>
 
-            analysisHTML += `
-                <div class="col-md-3 mb-3">
-                    <div class="card border-${status} h-100">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">${period.label}</h5>
-                            <div class="display-4 text-${status}">${statusText}</div>
-                            <p class="card-text mt-2">
-                                Média: <strong>${avg.toFixed(1)} km/h</strong><br>
-                                Desvio: ${deviation}%<br>
-                                Registros: ${period.speeds.length}<br>
-                                <small>${statusDescription}</small>
-                            </p>
+                                    <dl class="row text-start small">
+                                        <dt class="col-6">Média:</dt>
+                                        <dd class="col-6 text-end fw-bold">${avg.toFixed(1)} km/h</dd>
+                                        
+                                        <dt class="col-6">Desvio:</dt>
+                                        <dd class="col-6 text-end">
+                                            <span class="badge ${deviation >= 0 ? 'bg-success' : 'bg-danger'}">
+                                                ${deviation}%
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent small border-top-0">
+                                <i class="bi bi-info-circle"></i> ${statusDescription}
+                            </div>
                         </div>
-                    </div>
-                </div>`;
+                    </div>`;
             });
 
             analysisHTML += '</div>';
