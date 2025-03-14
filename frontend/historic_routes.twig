@@ -454,13 +454,6 @@
 
             csvContent += linhaFormatada + "\n";
 
-            // Adicionar previsões
-            if(previsaoVelocidade) {
-                csvContent += "\nPrevisões Futuras\n";
-                previsaoVelocidade.previsoes.forEach((v, i) => {
-                    csvContent += `Próxima ${i + 1} hora,${v.toFixed(1)},N/A\n`;
-                });
-            }
         });
 
         const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
