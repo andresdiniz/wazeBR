@@ -86,59 +86,6 @@
     var jq = jQuery.noConflict(true);
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Geração da análise dinâmica
-        let analysisHTML = `
-        <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
-        <div class="alert alert-info">
-            Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
-            Classificação baseada no desempenho relativo ao período
-        </div>
-        <div class="row mt-3">`;
-
-    Object.values(timeAnalysis).forEach(period => {
-        if (period.speeds.length === 0) return;
-        
-        const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
-        const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
-        
-        let status = 'secondary';
-        let statusText = 'Sem dados suficientes';
-        let statusDescription = '';
-
-        // Classificação dinâmica baseada no desvio percentual
-        if (avg >= overallAvg * 1.10) {
-            status = 'success';
-            statusText = 'Ótimo';
-            statusDescription = 'Acima da média do período';
-        } else if (avg >= overallAvg * 0.90) {
-            status = 'warning';
-            statusText = 'Atenção';
-            statusDescription = 'Próximo da média do período';
-        } else {
-            status = 'danger';
-            statusText = 'Crítico';
-            statusDescription = 'Abaixo da média do período';
-        }
-
-        analysisHTML += `
-            <div class="col-md-3 mb-3">
-                <div class="card border-${status} h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">${period.label}</h5>
-                        <div class="display-4 text-${status}">${statusText}</div>
-                        <p class="card-text mt-2">
-                            Média: <strong>${avg.toFixed(1)} km/h</strong><br>
-                            Desvio: ${deviation}%<br>
-                            Registros: ${period.speeds.length}<br>
-                            <small>${statusDescription}</small>
-                        </p>
-                    </div>
-                </div>
-            </div>`;
-    });
-
-    analysisHTML += '</div>';
-    document.getElementById("sentimentMessage").innerHTML = analysisHTML;
         {% if dados.historic_routes %}
             // Inicialização do DataTables com jq
             jq('#dataTable').DataTable({
@@ -270,6 +217,59 @@
                 }
             });
 
+            // Geração da análise dinâmica
+            let analysisHTML = `
+                <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
+                <div class="alert alert-info">
+                    Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
+                    Classificação baseada no desempenho relativo ao período
+                </div>
+                <div class="row mt-3">`;
+
+            Object.values(timeAnalysis).forEach(period => {
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
+                
+                let status = 'secondary';
+                let statusText = 'Sem dados suficientes';
+                let statusDescription = '';
+
+                // Classificação dinâmica baseada no desvio percentual
+                if (avg >= overallAvg * 1.10) {
+                    status = 'success';
+                    statusText = 'Ótimo';
+                    statusDescription = 'Acima da média do período';
+                } else if (avg >= overallAvg * 0.90) {
+                    status = 'warning';
+                    statusText = 'Atenção';
+                    statusDescription = 'Próximo da média do período';
+                } else {
+                    status = 'danger';
+                    statusText = 'Crítico';
+                    statusDescription = 'Abaixo da média do período';
+                }
+
+                analysisHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-${status} h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${period.label}</h5>
+                                <div class="display-4 text-${status}">${statusText}</div>
+                                <p class="card-text mt-2">
+                                    Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                    Desvio: ${deviation}%<br>
+                                    Registros: ${period.speeds.length}<br>
+                                    <small>${statusDescription}</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            analysisHTML += '</div>';
+            document.getElementById("sentimentMessage").innerHTML = analysisHTML;
         {% endif %}
     });
 
