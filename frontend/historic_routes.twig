@@ -35,7 +35,7 @@
 
     {% if dados.historic_routes %}
         <div class="mt-4">
-            <h3 class="text-center">Gráficos de Velocidade e Tempo</h3>
+            <h3 class="text-center">Análise de Desempenho</h3>
             <canvas id="chartVelocidade"></canvas>
             <canvas id="chartTempo" class="mt-4"></canvas>
         </div>
@@ -51,7 +51,7 @@
         <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
             <thead class="table-dark">
                 <tr>
-                    <th>Data</th>
+                    <th>Data/Hora</th>
                     <th>Velocidade (km/h)</th>
                     <th>Tempo (s)</th>
                 </tr>
@@ -71,16 +71,16 @@
             </tbody>
         </table>
 
-        <div class="mt-4 text-center" id="sentimentMessage">
-            <!-- Frase de sentimento será exibida aqui -->
+        <div class="mt-4" id="sentimentMessage">
+            <!-- Análise por período será exibida aqui -->
         </div>
     {% endif %}
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Verificando se existem dados antes de criar os gráficos
         {% if dados.historic_routes %}
+            const routeName = document.getElementById('route_id').selectedOptions[0].text;
             const labels = [
                 {% for item in dados.historic_routes %}
                     "{{ item.data }}",
@@ -99,13 +99,34 @@
                 {% endfor %}
             ];
 
+            // Configuração comum para os gráficos
+            const chartOptions = {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.dataset.label}: ${tooltipItem.raw} ${tooltipItem.dataset.label.includes('Velocidade') ? 'km/h' : 's'}`;
+                            }
+                        }
+                    },
+                    zoom: {
+                        wheel: { enabled: true, speed: 0.1 },
+                        pinch: { enabled: true },
+                        drag: { enabled: true, mode: 'xy' }
+                    }
+                },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 10 } } }
+            };
+
             // Gráfico de Velocidade
             new Chart(document.getElementById("chartVelocidade"), {
                 type: "line",
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: "Velocidade (km/h)",
+                        label: `Velocidade na Rota: ${routeName}`,
                         data: velocidades,
                         borderColor: "blue",
                         fill: false,
@@ -114,39 +135,13 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    ...chartOptions,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(tooltipItem) {
-                                    return tooltipItem.dataset.label + ": " + tooltipItem.raw + " km/h";
-                                }
-                            }
-                        },
-                        zoom: {
-                            wheel: {
-                                enabled: true, // Ativa o zoom com a roda do mouse
-                                speed: 0.1,
-                            },
-                            pinch: {
-                                enabled: true, // Ativa o zoom por pinça em telas sensíveis ao toque
-                                threshold: 10,
-                            },
-                            drag: {
-                                enabled: true, // Ativa o arraste (pan)
-                                mode: 'xy', // Permite arraste em ambos os eixos (X e Y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 10,
-                            }
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: `Velocidade na Rota: ${routeName}`,
+                            font: { size: 18 }
                         }
                     }
                 }
@@ -158,7 +153,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: "Tempo (s)",
+                        label: `Tempo na Rota: ${routeName}`,
                         data: tempos,
                         borderColor: "red",
                         fill: false,
@@ -167,85 +162,102 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    ...chartOptions,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(tooltipItem) {
-                                    return tooltipItem.dataset.label + ": " + tooltipItem.raw + " s";
-                                }
-                            }
-                        },
-                        zoom: {
-                            wheel: {
-                                enabled: true, // Ativa o zoom com a roda do mouse
-                                speed: 0.1,
-                            },
-                            pinch: {
-                                enabled: true, // Ativa o zoom por pinça em telas sensíveis ao toque
-                                threshold: 10,
-                            },
-                            drag: {
-                                enabled: true, // Ativa o arraste (pan)
-                                mode: 'xy', // Permite arraste em ambos os eixos (X e Y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 10,
-                            }
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: `Tempo de Percurso na Rota: ${routeName}`,
+                            font: { size: 18 }
                         }
                     }
                 }
             });
 
-            // Sentimento baseado na média de velocidade
-            const averageSpeed = velocidades.reduce((a, b) => a + b, 0) / velocidades.length;
-            const sentimentMessage = document.getElementById("sentimentMessage");
+            // Análise por período do dia
+            const timeAnalysis = {
+                manha: { start: 6, end: 12, speeds: [], label: 'Manhã (06:00 - 12:00)' },
+                tarde: { start: 12, end: 18, speeds: [], label: 'Tarde (12:00 - 18:00)' },
+                noite: { start: 18, end: 24, speeds: [], label: 'Noite (18:00 - 00:00)' },
+                madrugada: { start: 0, end: 6, speeds: [], label: 'Madrugada (00:00 - 06:00)' }
+            };
 
-            if (averageSpeed > 80) {
-                sentimentMessage.innerHTML = "<p><strong>Excelente!</strong> A velocidade média está ótima!</p>";
-            } else if (averageSpeed < 40) {
-                sentimentMessage.innerHTML = "<p><strong>Atenção!</strong> A velocidade média está abaixo do esperado. Verifique a rota.</p>";
-            } else {
-                sentimentMessage.innerHTML = "<p>A velocidade está dentro do esperado. Continue monitorando.</p>";
-            }
+            labels.forEach((label, index) => {
+                const [date, time] = label.split(' ');
+                const hour = parseInt(time.split(':')[0], 10);
+                
+                for (const period of Object.values(timeAnalysis)) {
+                    if (hour >= period.start && hour < period.end) {
+                        period.speeds.push(velocidades[index]);
+                        break;
+                    }
+                }
+            });
+
+            let analysisHTML = '<h4 class="mt-4 text-center">Análise de Velocidade por Período do Dia</h4><div class="row mt-3">';
+            
+            Object.values(timeAnalysis).forEach(period => {
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                let status = 'secondary';
+                let statusText = 'Sem dados suficientes';
+                
+                if (avg > 80) {
+                    status = 'success';
+                    statusText = 'Ótimo';
+                } else if (avg >= 60) {
+                    status = 'warning';
+                    statusText = 'Atenção';
+                } else if (avg > 0) {
+                    status = 'danger';
+                    statusText = 'Crítico';
+                }
+
+                analysisHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-${status} h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${period.label}</h5>
+                                <div class="display-4 text-${status}">${statusText}</div>
+                                <p class="card-text mt-2">
+                                    Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                    Registros: ${period.speeds.length}
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            analysisHTML += '</div>';
+            document.getElementById("sentimentMessage").innerHTML = analysisHTML;
         {% endif %}
     });
 
-    // Função para exportar tabela para CSV
     function exportTableToCSV() {
-        let csv = "Data,Velocidade (km/h),Tempo (s)\n";
+        let csv = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
         document.querySelectorAll("#dataTable tbody tr").forEach(row => {
             csv += Array.from(row.children).map(td => td.innerText).join(",") + "\n";
         });
         const blob = new Blob([csv], { type: "text/csv" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "dados_historicos.csv";
+        link.download = "dados_rota.csv";
         link.click();
     }
 
-    // Função para exportar tabela para Excel
     function exportTableToExcel() {
         let wb = XLSX.utils.book_new();
         let ws = XLSX.utils.table_to_sheet(document.getElementById("dataTable"));
-        XLSX.utils.book_append_sheet(wb, ws, "Dados");
-        XLSX.writeFile(wb, "dados_historicos.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Dados Rota");
+        XLSX.writeFile(wb, "dados_rota.xlsx");
     }
 
-    // Função para baixar o gráfico como imagem PNG
     function downloadChart(chartId) {
         const canvas = document.getElementById(chartId);
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
-        link.download = chartId + ".png"; // Nome do arquivo com o id do gráfico
+        link.download = `${chartId}_${document.getElementById('route_id').value}.png`;
         link.click();
     }
 </script>
