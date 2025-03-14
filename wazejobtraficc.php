@@ -384,9 +384,186 @@ foreach ($results as $row) {
                 }
 
                 if ($isIrregularityNew && $irregularity['jamLevel'] >= 3) {
-                    // ... (código de envio de email permanece igual)
+                    $to = "andresoaresdiniz201218@gmail.com";
+                    $subject = "🚨 Alerta de Congestionamento - {$irregularity['name']}";
+
+                    // Coordenadas para o mapa
+                    $centerX = ($irregularity['bbox']['minX'] + $irregularity['bbox']['maxX']) / 2;
+                    $centerY = ($irregularity['bbox']['minY'] + $irregularity['bbox']['maxY']) / 2;
+
+                    // Supondo que a variável $centerX e $centerY contenham as coordenadas de latitude e longitude
+                    $wazeUrl = "https://waze.com/ul?ll=$centerY,$centerX&z=12"; // Link do Waze
+                    $mapEmbedUrl = "https://embed.waze.com/pt-BR/iframe?zoom=12&lat=$centerY&lon=$centerX"; // iframe do Waze
+
+                    $message = '
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <style>
+                            * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+                            .container { max-width: 680px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                            .header { background: #005792; padding: 32px; text-align: center; }
+                            .map-img { width: 100%; height: 240px; object-fit: cover; border-bottom: 4px solid #005792; }
+                            .content { padding: 32px; color: #444444; }
+                            .alert-badge { background: #dc3545; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: 600; margin-bottom: 16px; }
+                            .title { font-size: 24px; font-weight: 700; color: #005792; margin: 16px 0; }
+                            .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0; }
+                            .info-card { background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #005792; }
+                            .stat-number { font-size: 24px; font-weight: 700; color: #005792; }
+                            .footer { background: #f8f9fa; padding: 24px; text-align: center; font-size: 12px; color: #666666; }
+                            a { color: #005792; text-decoration: none; }
+                            .map-container { width: 100%; text-align: center; margin: 24px 0; }
+                            iframe { width: 100%; height: 240px; border: none; border-radius: 8px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <img src="https://exemplo.com/logo.png" alt="Logo" style="height: 40px;">
+                            </div>
+                            
+                            <!-- Mapa Embutido (Iframe) do Waze -->
+                            <div class="map-container">
+                                <iframe src="'.$mapEmbedUrl.'" title="Mapa do Waze"></iframe>
+                            </div>
+
+                            <div class="content">
+                                <div class="alert-badge">ALERTA DE TRÁFEGO • NÍVEL '.$irregularity['jamLevel'].'/5</div>
+                                <h1 class="title">'.$irregularity['name'].'</h1>
+                                
+                                <div class="info-grid">
+                                    <div class="info-card">
+                                        <div class="stat-number">'.number_format($irregularity['length']/1000, 2).' km</div>
+                                        <div>Extensão do congestionamento</div>
+                                    </div>
+                                    
+                                    <div class="info-card">
+                                        <div class="stat-number">'.number_format($avgSpeed, 1).' km/h</div>
+                                        <div>Velocidade atual</div>
+                                    </div>
+                                </div>
+
+                                <h3 style="margin: 24px 0 16px; color: #005792;">📌 Detalhes</h3>
+                                <div style="line-height: 1.6;">
+                                    <p><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</p>
+                                    <p><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</p>
+                                    <p><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</p>
+                                </div>
+
+                                <h3 style="margin: 24px 0 16px; color: #005792;">📊 Engajamento</h3>
+                                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numThumbsUp.'</div>
+                                        <div>Confirmações</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numComments.'</div>
+                                        <div>Comentários</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div class="stat-number">'.$numNotThereReports.'</div>
+                                        <div>Relatos</div>
+                                    </div>
+                                </div>
+
+                                <div style="text-align: center; margin: 32px 0;">
+                                    <a href="'.$wazeUrl.'" style="background: #005792; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block;">
+                                        🗺️ Abrir no Waze
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="footer">
+                                <div style="margin-bottom: 12px;">
+                                    <a href="[UNSUBSCRIBE_URL]" style="color: #666; margin: 0 8px;">Cancelar inscrição</a>
+                                    <a href="[VIEW_IN_BROWSER_URL]" style="color: #666; margin: 0 8px;">Ver no navegador</a>
+                                </div>
+                                <div style="font-size: 10px; color: #999;">
+                                    Dados de mapa © <a href="https://www.mapbox.com/" style="color: #999;">Mapbox</a>, © <a href="https://www.openstreetmap.org/" style="color: #999;">OpenStreetMap</a>
+                                </div>
+                            </div>
+                        </div>
+                    </body>
+                    </html>';
+
+                    // Gerar hash único estável baseado na localização e características
+                    $alertHash = sha1(json_encode([
+                        round($irregularity['bbox']['minX'], 4),
+                        round($irregularity['bbox']['minY'], 4),
+                        round($irregularity['bbox']['maxX'], 4),
+                        round($irregularity['bbox']['maxY'], 4),
+                        $irregularity['type'],
+                        $subType,
+                        date('Y-m-d H') // Agrupar por hora
+                    ]));
+
+                    // Verificar cooldown
+                    $stmtCooldown = $pdo->prepare("
+                        SELECT cooldown_until, send_count 
+                        FROM alert_cooldown 
+                        WHERE alert_hash = ?
+                    ");
+                    $stmtCooldown->execute([$alertHash]);
+                    $cooldownData = $stmtCooldown->fetch();
+
+                    $shouldSend = true;
+                    $now = new DateTime();
+
+                    if ($cooldownData) {
+                        $cooldownUntil = new DateTime($cooldownData['cooldown_until']);
+                        $sendCount = $cooldownData['send_count'];
+
+                        // Regras de cooldown progressivo
+                        if ($now < $cooldownUntil) {
+                            $shouldSend = false;
+                        } else {
+                            // Aumentar o cooldown baseado no número de envios anteriores
+                            if ($sendCount >= 5) {
+                                $newCooldown = '30 MINUTE';
+                            } elseif ($sendCount >= 3) {
+                                $newCooldown = '15 MINUTE';
+                            } else {
+                                $newCooldown = '1 MINUTE';
+                            }
+                        }
+                    } else {
+                        $newCooldown = '30 MINUTE'; // Primeiro alerta tem cooldown curto
+                    }
+
+                    if ($shouldSend) {
+                        if (sendEmail($to, $message, $subject)) {
+                            echo "Alerta de e-mail enviado para $to.\n";
+
+                            // Atualizar registro de cooldown
+                            $sendCount = $cooldownData['send_count'] ?? 0;
+                            $sendCount++;
+
+                            $stmtUpsert = $pdo->prepare("
+                                INSERT INTO alert_cooldown 
+                                (alert_hash, last_sent, cooldown_until, send_count)
+                                VALUES (?, ?, ?, ?)
+                                ON DUPLICATE KEY UPDATE
+                                    last_sent = VALUES(last_sent),
+                                    cooldown_until = VALUES(cooldown_until),
+                                    send_count = VALUES(send_count)
+                            ");
+
+                            $cooldownUntil = $now->modify("+$newCooldown")->format('Y-m-d H:i:s');
+                            $stmtUpsert->execute([
+                                $alertHash,
+                                date('Y-m-d H:i:s'),
+                                $cooldownUntil,
+                                $sendCount
+                            ]);
+                        }
+                    } else {
+                        echo "Alerta em cooldown até {$cooldownData['cooldown_until']}. Não enviando.\n";
+                    }
                 }
-            }
+
+            } 
         }
 
         if (!$irregularitiesFound) {

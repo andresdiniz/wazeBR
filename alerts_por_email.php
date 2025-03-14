@@ -92,5 +92,4 @@ foreach ($routes as $route) {
     }
 }
 
-// Incluir aqui a função sendEmail fornecida
 ?>
