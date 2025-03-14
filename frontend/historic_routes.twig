@@ -1,7 +1,5 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,12 +9,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
 <style>
+    /* Esconder gráficos em mobile */
     @media (max-width: 767px) {
-        #chartVelocidade, #chartTempo { display: none !important; }
-        .mt-4.d-flex { margin-top: 1rem !important; }
+        #chartVelocidade, 
+        #chartTempo {
+            display: none !important;
+        }
+        
+        /* Opcional: Ajustar margens */
+        .mt-4.d-flex {
+            margin-top: 1rem !important;
+        }
     }
-    .progress-bar { transition: width 0.5s ease; }
-    .card-status { min-height: 200px; }
 </style>
 
 <div class="container mt-4">
@@ -50,15 +54,16 @@
     </form>
 
     {% if dados.historic_routes %}
-        <div class="mt-4" id="sentimentMessage"></div>
-        
+        <div class="mt-4" id="sentimentMessage">
+            <!-- Análise por período será exibida aqui -->
+        </div>
         <div class="mt-4">
             <h3 class="text-center">Análise de Desempenho com Gráficos</h3>
             <canvas id="chartVelocidade"></canvas>
             <canvas id="chartTempo" class="mt-4"></canvas>
         </div>
 
-        <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+        <div class="mt-4 d-flex justify-content-center gap-3">
             <button class="btn btn-success" onclick="exportTableToCSV()">Exportar CSV</button>
             <button class="btn btn-warning" onclick="exportTableToExcel()">Exportar Excel</button>
             <button class="btn btn-info" onclick="downloadChart('chartVelocidade')">Baixar Gráfico de Velocidade</button>
@@ -88,15 +93,17 @@
                 {% endfor %}
             </tbody>
         </table>
+
     {% endif %}
 </div>
 
 <script>
-    const jq = jQuery.noConflict(true);
+    // Definir alias jq para jQuery com noConflict
+    var jq = jQuery.noConflict(true);
 
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados.historic_routes %}
-            // Inicialização do DataTables
+            // Inicialização do DataTables com jq (não alterado)
             jq('#dataTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
@@ -108,13 +115,44 @@
                 order: [[0, 'desc']]
             });
 
-            // Obter dados
             const routeName = document.getElementById('route_id').selectedOptions[0].text;
-            const labels = [{% for item in dados.historic_routes %}"{{ item.data }}",{% endfor %}];
-            const velocidades = [{% for item in dados.historic_routes %}{{ item.velocidade }},{% endfor %}];
-            const tempos = [{% for item in dados.historic_routes %}{{ item.tempo }},{% endfor %}];
+            const labels = [
+                {% for item in dados.historic_routes %}
+                    "{{ item.data }}",
+                {% endfor %}
+            ];
 
-            // Configuração comum dos gráficos
+            const velocidades = [
+                {% for item in dados.historic_routes %}
+                    {{ item.velocidade }},
+                {% endfor %}
+            ];
+
+            const tempos = [
+                {% for item in dados.historic_routes %}
+                    {{ item.tempo }},
+                {% endfor %}
+            ];
+
+            // NOVO: Funções auxiliares para marcações
+            function getMinMaxIndices(arr) {
+                const max = Math.max(...arr);
+                const min = Math.min(...arr);
+                return {
+                    maxIndex: arr.indexOf(max),
+                    minIndex: arr.indexOf(min)
+                };
+            }
+
+            function getCurrentStatus(speed, avg) {
+                if (speed >= avg * 1.20) return ['success', 'Excelente'];
+                if (speed >= avg * 1.10) return ['info', 'Bom'];
+                if (speed >= avg * 0.95) return ['primary', 'Normal'];
+                if (speed >= avg * 0.85) return ['warning', 'Atenção'];
+                return ['danger', 'Crítico'];
+            }
+
+            // Configuração comum para os gráficos (modificado)
             const chartOptions = {
                 responsive: true,
                 plugins: {
@@ -131,6 +169,7 @@
                         pinch: { enabled: true },
                         drag: { enabled: true, mode: 'xy' }
                     },
+                    // NOVO: Plugin de anotações
                     annotation: {
                         annotations: {}
                     }
@@ -138,13 +177,7 @@
                 scales: { y: { beginAtZero: true, ticks: { stepSize: 10 } } }
             };
 
-            // Funções auxiliares
-            const getMinMaxIndices = arr => ({
-                maxIndex: arr.indexOf(Math.max(...arr)),
-                minIndex: arr.indexOf(Math.min(...arr))
-            });
-
-            // Configurar gráfico de velocidade
+            // Gráfico de Velocidade (modificado)
             const velAnnotations = getMinMaxIndices(velocidades);
             new Chart(document.getElementById("chartVelocidade"), {
                 type: "line",
@@ -153,10 +186,11 @@
                     datasets: [{
                         label: `Velocidade na Rota: ${routeName}`,
                         data: velocidades,
-                        borderColor: "rgba(0, 123, 255, 0.8)",
+                        borderColor: "blue",
                         fill: false,
                         tension: 0.3,
                         borderWidth: 2,
+                        // NOVO: Pontos destacados
                         pointBackgroundColor: velocidades.map((v, i) => 
                             i === velAnnotations.maxIndex ? 'rgba(255,0,0,0.8)' :
                             i === velAnnotations.minIndex ? 'rgba(0,0,255,0.8)' : 'rgba(0,0,0,0.2)'
@@ -166,10 +200,47 @@
                         )
                     }]
                 },
-                options: chartOptions
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: `Velocidade na Rota: ${routeName}`,
+                            font: { size: 18 }
+                        },
+                        // NOVO: Anotações
+                        annotation: {
+                            annotations: {
+                                maxLine: {
+                                    type: 'line',
+                                    yMin: velocidades[velAnnotations.maxIndex],
+                                    yMax: velocidades[velAnnotations.maxIndex],
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Máximo: ${velocidades[velAnnotations.maxIndex].toFixed(1)} km/h`,
+                                        position: 'end'
+                                    }
+                                },
+                                minLine: {
+                                    type: 'line',
+                                    yMin: velocidades[velAnnotations.minIndex],
+                                    yMax: velocidades[velAnnotations.minIndex],
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Mínimo: ${velocidades[velAnnotations.minIndex].toFixed(1)} km/h`,
+                                        position: 'end'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
-            // Configurar gráfico de tempo
+            // Gráfico de Tempo (modificado)
             const tempoAnnotations = getMinMaxIndices(tempos);
             new Chart(document.getElementById("chartTempo"), {
                 type: "line",
@@ -178,10 +249,11 @@
                     datasets: [{
                         label: `Tempo na Rota: ${routeName}`,
                         data: tempos,
-                        borderColor: "rgba(220, 53, 69, 0.8)",
+                        borderColor: "red",
                         fill: false,
                         tension: 0.3,
                         borderWidth: 2,
+                        // NOVO: Pontos destacados
                         pointBackgroundColor: tempos.map((t, i) => 
                             i === tempoAnnotations.maxIndex ? 'rgba(255,0,0,0.8)' :
                             i === tempoAnnotations.minIndex ? 'rgba(0,0,255,0.8)' : 'rgba(0,0,0,0.2)'
@@ -191,24 +263,103 @@
                         )
                     }]
                 },
-                options: chartOptions
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        ...chartOptions.plugins,
+                        title: {
+                            display: true,
+                            text: `Tempo de Percurso na Rota: ${routeName}`,
+                            font: { size: 18 }
+                        },
+                        // NOVO: Anotações
+                        annotation: {
+                            annotations: {
+                                maxLine: {
+                                    type: 'line',
+                                    yMin: tempos[tempoAnnotations.maxIndex],
+                                    yMax: tempos[tempoAnnotations.maxIndex],
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Máximo: ${tempos[tempoAnnotations.maxIndex].toFixed(1)} s`,
+                                        position: 'end'
+                                    }
+                                },
+                                minLine: {
+                                    type: 'line',
+                                    yMin: tempos[tempoAnnotations.minIndex],
+                                    yMax: tempos[tempoAnnotations.minIndex],
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Mínimo: ${tempos[tempoAnnotations.minIndex].toFixed(1)} s`,
+                                        position: 'end'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
-            // Análise de desempenho
+            // Cálculo da média geral (não alterado)
+            const overallAvg = velocidades.reduce((a, b) => a + b, 0) / velocidades.length;
+            
+            // NOVO: Status do momento atual
+            const currentSpeed = velocidades[velocidades.length - 1];
+            const currentTime = labels[labels.length - 1];
+            const [currentStatus, currentStatusText] = getCurrentStatus(currentSpeed, overallAvg);
+            
+            const statusHTML = `
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-${currentStatus} shadow">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <div class="display-4 text-${currentStatus}">${currentStatusText}</div>
+                                    <small class="text-muted">${currentTime}</small>
+                                </div>
+                                <div class="col-md-8">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">Velocidade Atual</dt>
+                                        <dd class="col-sm-8">${currentSpeed.toFixed(1)} km/h</dd>
+                                        
+                                        <dt class="col-sm-4">Média Periódica</dt>
+                                        <dd class="col-sm-8">${overallAvg.toFixed(1)} km/h</dd>
+                                        
+                                        <dt class="col-sm-4">Desvio</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="badge bg-${currentStatus}">
+                                                ${((currentSpeed - overallAvg)/overallAvg * 100).toFixed(1)}%
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+            // Análise por período (não alterado)
             const timeAnalysis = {
-                madrugada1: { key: 'madrugada1', start: 0, end: 3, speeds: [], label: 'Madrugada (00:00 - 03:00)' },
-                madrugada2: { key: 'madrugada2', start: 3, end: 6, speeds: [], label: 'Madrugada (03:00 - 06:00)' },
-                manha1: { key: 'manha1', start: 6, end: 9, speeds: [], label: 'Manhã (06:00 - 09:00)' },
-                manha2: { key: 'manha2', start: 9, end: 12, speeds: [], label: 'Manhã (09:00 - 12:00)' },
-                tarde1: { key: 'tarde1', start: 12, end: 15, speeds: [], label: 'Tarde (12:00 - 15:00)' },
-                tarde2: { key: 'tarde2', start: 15, end: 18, speeds: [], label: 'Tarde (15:00 - 18:00)' },
-                noite1: { key: 'noite1', start: 18, end: 21, speeds: [], label: 'Noite (18:00 - 21:00)' },
-                noite2: { key: 'noite2', start: 21, end: 24, speeds: [], label: 'Noite (21:00 - 00:00)' }
+                madrugada1: { start: 0, end: 3, speeds: [], label: 'Madrugada (00:00 - 03:00)' },
+                madrugada2: { start: 3, end: 6, speeds: [], label: 'Madrugada (03:00 - 06:00)' },
+                manha1: { start: 6, end: 9, speeds: [], label: 'Manhã (06:00 - 09:00)' },
+                manha2: { start: 9, end: 12, speeds: [], label: 'Manhã (09:00 - 12:00)' },
+                tarde1: { start: 12, end: 15, speeds: [], label: 'Tarde (12:00 - 15:00)' },
+                tarde2: { start: 15, end: 18, speeds: [], label: 'Tarde (15:00 - 18:00)' },
+                noite1: { start: 18, end: 21, speeds: [], label: 'Noite (18:00 - 21:00)' },
+                noite2: { start: 21, end: 24, speeds: [], label: 'Noite (21:00 - 00:00)' }
             };
 
-            // Classificar dados por período
+            // Coleta de dados por período (não alterado)
             labels.forEach((label, index) => {
-                const hour = parseInt(label.split(' ')[1].split(':')[0], 10);
+                const [date, time] = label.split(' ');
+                const hour = parseInt(time.split(':')[0], 10);
+                
                 for (const period of Object.values(timeAnalysis)) {
                     if (hour >= period.start && hour < period.end) {
                         period.speeds.push(velocidades[index]);
@@ -217,118 +368,136 @@
                 }
             });
 
-            // Calcular médias históricas
-            const calcularMediaHistorica = (start, end) => {
-                const dados = [];
-                labels.forEach((label, i) => {
-                    const hora = parseInt(label.split(' ')[1].split(':')[0], 10);
-                    if(hora >= start && hora < end) dados.push(velocidades[i]);
-                });
-                return dados.length ? dados.reduce((a,b) => a + b, 0) / dados.length : 0;
-            };
-
-            const referenceAverages = Object.fromEntries(
-                Object.values(timeAnalysis).map(p => [
-                    p.key, 
-                    calcularMediaHistorica(p.start, p.end)
-                ])
-            );
-
-            // Gerar cards de análise
-            const gerarCardsAnalise = () => {
-                let html = '<div class="row mt-4">';
-                
-                Object.values(timeAnalysis).forEach(period => {
-                    if(period.speeds.length === 0) return;
-                    
-                    const avg = period.speeds.reduce((a,b) => a + b, 0) / period.speeds.length;
-                    const ref = referenceAverages[period.key];
-                    const deviation = ref ? ((avg - ref)/ref * 100).toFixed(1) : 'N/A';
-
-                    let status = 'secondary', statusText = 'Sem dados', icon = 'bi-question-circle';
-                    if(ref > 0) {
-                        if(avg >= ref * 1.2) {
-                            status = 'success'; statusText = 'Excelente'; icon = 'bi-rocket';
-                        } else if(avg >= ref * 1.1) {
-                            status = 'info'; statusText = 'Bom'; icon = 'bi-arrow-up';
-                        } else if(avg >= ref * 0.95) {
-                            status = 'primary'; statusText = 'Normal'; icon = 'bi-dash';
-                        } else if(avg >= ref * 0.85) {
-                            status = 'warning'; statusText = 'Atenção'; icon = 'bi-exclamation';
-                        } else {
-                            status = 'danger'; statusText = 'Crítico'; icon = 'bi-arrow-down';
-                        }
-                    }
-
-                    html += `
-                        <div class="col-md-3 mb-3">
-                            <div class="card h-100 border-${status}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h5 class="card-title mb-0">${period.label}</h5>
-                                        <i class="bi ${icon} text-${status} fs-4"></i>
-                                    </div>
-                                    <hr>
-                                    <div class="text-center my-3">
-                                        <span class="display-4 text-${status}">${statusText}</span>
-                                    </div>
-                                    <dl class="row small">
-                                        <dt class="col-6">Média Atual</dt>
-                                        <dd class="col-6 text-end">${avg.toFixed(1)} km/h</dd>
-                                        
-                                        <dt class="col-6">Média Histórica</dt>
-                                        <dd class="col-6 text-end">${ref.toFixed(1)} km/h</dd>
-                                        
-                                        <dt class="col-6">Desvio</dt>
-                                        <dd class="col-6 text-end">
-                                            <span class="badge bg-${status}">${deviation}%</span>
-                                        </dd>
-                                    </dl>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                
-                return html + '</div>';
-            };
-
-            // Montar interface
-            document.getElementById("sentimentMessage").innerHTML = `
-                <div class="alert alert-info mt-4">
-                    <h4 class="text-center">Análise Consolidada</h4>
-                    <div class="row">
-                        <div class="col-md-6">Média Geral: ${(velocidades.reduce((a,b) => a + b, 0)/velocidades.length).toFixed(1)} km/h</div>
-                        <div class="col-md-6">Total de Registros: ${velocidades.length}</div>
-                    </div>
+            // Geração da análise dinâmica (não alterado)
+            let analysisHTML = `
+                <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
+                <div class="alert alert-info">
+                    Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
+                    Classificação baseada no desempenho relativo ao período
                 </div>
-                ${gerarCardsAnalise()}`;
+                <div class="row mt-3">`;
 
+            Object.values(timeAnalysis).forEach(period => {
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
+                
+                let status = 'secondary';
+                let statusText = 'Sem dados suficientes';
+                let statusDescription = '';
+
+                // Classificação dinâmica (alterado para 5 níveis)
+                if (avg >= overallAvg * 1.20) {
+                    status = 'success';
+                    statusText = 'Excelente';
+                    statusDescription = 'Muito acima da média';
+                } else if (avg >= overallAvg * 1.10) {
+                    status = 'info';
+                    statusText = 'Bom';
+                    statusDescription = 'Acima da média';
+                } else if (avg >= overallAvg * 0.95) {
+                    status = 'primary';
+                    statusText = 'Normal';
+                    statusDescription = 'Dentro da média';
+                } else if (avg >= overallAvg * 0.85) {
+                    status = 'warning';
+                    statusText = 'Atenção';
+                    statusDescription = 'Abaixo da média';
+                } else {
+                    status = 'danger';
+                    statusText = 'Crítico';
+                    statusDescription = 'Muito abaixo da média';
+                }
+
+                analysisHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-${status} h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${period.label}</h5>
+                                <div class="display-4 text-${status}">${statusText}</div>
+                                <p class="card-text mt-2">
+                                    Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                    Desvio: ${deviation}%<br>
+                                    Registros: ${period.speeds.length}<br>
+                                    <small>${statusDescription}</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            analysisHTML += '</div>';
+            
+            // Inserir elementos na página (modificado)
+            document.getElementById("sentimentMessage").innerHTML = statusHTML + analysisHTML;
         {% endif %}
     });
 
-    // Funções de exportação
+    // Função de exportação para CSV com ordenação crescente por Data/Hora
     function exportTableToCSV() {
-        const data = jq('#dataTable').DataTable().rows().data().toArray();
-        let csv = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
-        data.forEach(row => csv += `"${row[0]}",${row[1]},${row[2]}\n`);
-        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const dt = jq('#dataTable').DataTable();
+        let data = dt.rows().data().toArray();
+
+        // Ordenar os dados pela primeira coluna (Data/Hora)
+        data.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+        let csvContent = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
+
+        data.forEach(row => {
+            const linhaFormatada = row.map((cell, index) => {
+                if (index === 1 || index === 2) {
+                    return parseFloat(cell).toFixed(2); // Formatar números com 2 casas decimais
+                }
+                return `"${cell}"`; // Aspas para proteger campos textuais
+            }).join(",");
+
+            csvContent += linhaFormatada + "\n";
+        });
+
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `dados_rota_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `dados_completos_${new Date().toISOString().slice(0, 10)}.csv`;
         link.click();
     }
 
+    // Função de exportação para Excel com ordenação crescente por Data/Hora
     function exportTableToExcel() {
-        const data = jq('#dataTable').DataTable().rows().data().toArray();
-        const wsData = [
-            ["Data/Hora", "Velocidade (km/h)", "Tempo (s)"],
-            ...data
-        ];
+        const dt = jq('#dataTable').DataTable();
+        let data = dt.rows().data().toArray();
+
+        // Ordenar os dados pela primeira coluna (Data/Hora)
+        data.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+        // Criar array com cabeçalhos
+        const header = ["Data/Hora", "Velocidade (km/h)", "Tempo (s)"];
+        const wsData = [header];
+
+        // Adicionar dados formatados
+        data.forEach(row => {
+            wsData.push([
+                row[0], // Data/Hora
+                parseFloat(row[1]).toFixed(2), // Velocidade
+                parseFloat(row[2]).toFixed(2)  // Tempo
+            ]);
+        });
+
         const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        // Formatar colunas numéricas
+        ws['!cols'] = [
+            { wch: 20 }, // Data/Hora
+            { wch: 15 }, // Velocidade
+            { wch: 10 }  // Tempo
+        ];
+
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Dados");
-        XLSX.writeFile(wb, `dados_rota_${new Date().toISOString().slice(0,10)}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Dados Completos");
+
+        XLSX.writeFile(wb, `dados_completos_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
+
 
     function downloadChart(chartId) {
         const canvas = document.getElementById(chartId);
