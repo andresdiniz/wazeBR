@@ -395,94 +395,50 @@ foreach ($results as $row) {
                     $wazeUrl = "https://waze.com/ul?ll=$centerY,$centerX&z=12"; // Link do Waze
                     $mapEmbedUrl = "https://embed.waze.com/pt-BR/iframe?zoom=12&lat=$centerY&lon=$centerX"; // iframe do Waze
 
-                    $message = '
-                    <!DOCTYPE html>
+                    $message = '<!DOCTYPE html>
                     <html>
                     <head>
                         <meta charset="utf-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1">
                         <style>
-                            * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-                            .container { max-width: 680px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-                            .header { background: #005792; padding: 32px; text-align: center; }
-                            .map-img { width: 100%; height: 240px; object-fit: cover; border-bottom: 4px solid #005792; }
-                            .content { padding: 32px; color: #444444; }
-                            .alert-badge { background: #dc3545; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: 600; margin-bottom: 16px; }
-                            .title { font-size: 24px; font-weight: 700; color: #005792; margin: 16px 0; }
-                            .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0; }
-                            .info-card { background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #005792; }
-                            .stat-number { font-size: 24px; font-weight: 700; color: #005792; }
-                            .footer { background: #f8f9fa; padding: 24px; text-align: center; font-size: 12px; color: #666666; }
-                            a { color: #005792; text-decoration: none; }
-                            .map-container { width: 100%; text-align: center; margin: 24px 0; }
-                            iframe { width: 100%; height: 240px; border: none; border-radius: 8px; }
+                            body { margin: 0; padding: 0; background: #f4f4f4; font-family: Arial, sans-serif; }
+                            .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                            .header { background: #d9534f; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
+                            .content { padding: 20px; color: #333333; }
+                            .alert-badge { background: #dc3545; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: bold; margin-bottom: 16px; }
+                            .info-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #d9534f; }
+                            .map-container { text-align: center; margin: 20px 0; }
+                            iframe { width: 100%; height: 250px; border: none; border-radius: 8px; }
+                            .button { display: inline-block; padding: 12px 20px; background: #d9534f; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; }
+                            .footer { background: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }
                         </style>
                     </head>
                     <body>
                         <div class="container">
-                            <div class="header">
-                                <img src="https://exemplo.com/logo.png" alt="Logo" style="height: 40px;">
-                            </div>
-                            
-                            <!-- Mapa Embutido (Iframe) do Waze -->
-                            <div class="map-container">
-                                <iframe src="'.$mapEmbedUrl.'" title="Mapa do Waze"></iframe>
-                            </div>
+                            <div class="header">🚨 Alerta de Tráfego</div>
 
                             <div class="content">
-                                <div class="alert-badge">ALERTA DE TRÁFEGO • NÍVEL '.$irregularity['jamLevel'].'/5</div>
-                                <h1 class="title">'.$irregularity['name'].'</h1>
-                                
-                                <div class="info-grid">
-                                    <div class="info-card">
-                                        <div class="stat-number">'.number_format($irregularity['length']/1000, 2).' km</div>
-                                        <div>Extensão do congestionamento</div>
-                                    </div>
-                                    
-                                    <div class="info-card">
-                                        <div class="stat-number">'.number_format($avgSpeed, 1).' km/h</div>
-                                        <div>Velocidade atual</div>
-                                    </div>
+                                <div class="alert-badge">Congestionamento nível '.$irregularity['jamLevel'].'/5</div>
+                                <h2>'.$irregularity['name'].'</h2>
+
+                                <div class="info-box"><strong>Extensão:</strong> '.number_format($irregularity['length']/1000, 2).' km</div>
+                                <div class="info-box"><strong>Velocidade:</strong> '.number_format($avgSpeed, 1).' km/h</div>
+                                <div class="info-box"><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</div>
+                                <div class="info-box"><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</div>
+                                <div class="info-box"><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</div>
+
+                                <div class="map-container">
+                                    <iframe src="'.$mapEmbedUrl.'" title="Mapa do Waze"></iframe>
                                 </div>
 
-                                <h3 style="margin: 24px 0 16px; color: #005792;">📌 Detalhes</h3>
-                                <div style="line-height: 1.6;">
-                                    <p><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</p>
-                                    <p><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</p>
-                                    <p><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</p>
-                                </div>
-
-                                <h3 style="margin: 24px 0 16px; color: #005792;">📊 Engajamento</h3>
-                                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                                    <div style="text-align: center;">
-                                        <div class="stat-number">'.$numThumbsUp.'</div>
-                                        <div>Confirmações</div>
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <div class="stat-number">'.$numComments.'</div>
-                                        <div>Comentários</div>
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <div class="stat-number">'.$numNotThereReports.'</div>
-                                        <div>Relatos</div>
-                                    </div>
-                                </div>
-
-                                <div style="text-align: center; margin: 32px 0;">
-                                    <a href="'.$wazeUrl.'" style="background: #005792; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block;">
-                                        🗺️ Abrir no Waze
-                                    </a>
+                                <div style="text-align: center;">
+                                    <a href="'.$wazeUrl.'" class="button">🗺️ Abrir no Waze</a>
                                 </div>
                             </div>
 
                             <div class="footer">
-                                <div style="margin-bottom: 12px;">
-                                    <a href="[UNSUBSCRIBE_URL]" style="color: #666; margin: 0 8px;">Cancelar inscrição</a>
-                                    <a href="[VIEW_IN_BROWSER_URL]" style="color: #666; margin: 0 8px;">Ver no navegador</a>
-                                </div>
-                                <div style="font-size: 10px; color: #999;">
-                                    Dados de mapa © <a href="https://www.mapbox.com/" style="color: #999;">Mapbox</a>, © <a href="https://www.openstreetmap.org/" style="color: #999;">OpenStreetMap</a>
-                                </div>
+                                <p><a href="[UNSUBSCRIBE_URL]">Cancelar inscrição</a> | <a href="[VIEW_IN_BROWSER_URL]">Ver no navegador</a></p>
+                                <p>Dados de mapa © <a href="https://www.mapbox.com/">Mapbox</a>, © <a href="https://www.openstreetmap.org/">OpenStreetMap</a></p>
                             </div>
                         </div>
                     </body>
