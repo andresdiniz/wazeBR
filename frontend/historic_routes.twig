@@ -6,6 +6,7 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Selecionar Rota e Período</h2>
@@ -87,7 +88,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados.historic_routes %}
-            // Inicialização do DataTables com jq
+            // Inicialização do DataTables com jq (não alterado)
             jq('#dataTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
@@ -118,7 +119,25 @@
                 {% endfor %}
             ];
 
-            // Configuração comum para os gráficos
+            // NOVO: Funções auxiliares para marcações
+            function getMinMaxIndices(arr) {
+                const max = Math.max(...arr);
+                const min = Math.min(...arr);
+                return {
+                    maxIndex: arr.indexOf(max),
+                    minIndex: arr.indexOf(min)
+                };
+            }
+
+            function getCurrentStatus(speed, avg) {
+                if (speed >= avg * 1.20) return ['success', 'Excelente'];
+                if (speed >= avg * 1.10) return ['info', 'Bom'];
+                if (speed >= avg * 0.95) return ['primary', 'Normal'];
+                if (speed >= avg * 0.85) return ['warning', 'Atenção'];
+                return ['danger', 'Crítico'];
+            }
+
+            // Configuração comum para os gráficos (modificado)
             const chartOptions = {
                 responsive: true,
                 plugins: {
@@ -134,12 +153,17 @@
                         wheel: { enabled: true, speed: 0.1 },
                         pinch: { enabled: true },
                         drag: { enabled: true, mode: 'xy' }
+                    },
+                    // NOVO: Plugin de anotações
+                    annotation: {
+                        annotations: {}
                     }
                 },
                 scales: { y: { beginAtZero: true, ticks: { stepSize: 10 } } }
             };
 
-            // Gráfico de Velocidade
+            // Gráfico de Velocidade (modificado)
+            const velAnnotations = getMinMaxIndices(velocidades);
             new Chart(document.getElementById("chartVelocidade"), {
                 type: "line",
                 data: {
@@ -151,6 +175,14 @@
                         fill: false,
                         tension: 0.3,
                         borderWidth: 2,
+                        // NOVO: Pontos destacados
+                        pointBackgroundColor: velocidades.map((v, i) => 
+                            i === velAnnotations.maxIndex ? 'rgba(255,0,0,0.8)' :
+                            i === velAnnotations.minIndex ? 'rgba(0,0,255,0.8)' : 'rgba(0,0,0,0.2)'
+                        ),
+                        pointRadius: velocidades.map((v, i) => 
+                            (i === velAnnotations.maxIndex || i === velAnnotations.minIndex) ? 6 : 3
+                        )
                     }]
                 },
                 options: {
@@ -161,12 +193,40 @@
                             display: true,
                             text: `Velocidade na Rota: ${routeName}`,
                             font: { size: 18 }
+                        },
+                        // NOVO: Anotações
+                        annotation: {
+                            annotations: {
+                                maxLine: {
+                                    type: 'line',
+                                    yMin: velocidades[velAnnotations.maxIndex],
+                                    yMax: velocidades[velAnnotations.maxIndex],
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Máximo: ${velocidades[velAnnotations.maxIndex].toFixed(1)} km/h`,
+                                        position: 'end'
+                                    }
+                                },
+                                minLine: {
+                                    type: 'line',
+                                    yMin: velocidades[velAnnotations.minIndex],
+                                    yMax: velocidades[velAnnotations.minIndex],
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Mínimo: ${velocidades[velAnnotations.minIndex].toFixed(1)} km/h`,
+                                        position: 'end'
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             });
 
-            // Gráfico de Tempo
+            // Gráfico de Tempo (modificado)
+            const tempoAnnotations = getMinMaxIndices(tempos);
             new Chart(document.getElementById("chartTempo"), {
                 type: "line",
                 data: {
@@ -178,6 +238,14 @@
                         fill: false,
                         tension: 0.3,
                         borderWidth: 2,
+                        // NOVO: Pontos destacados
+                        pointBackgroundColor: tempos.map((t, i) => 
+                            i === tempoAnnotations.maxIndex ? 'rgba(255,0,0,0.8)' :
+                            i === tempoAnnotations.minIndex ? 'rgba(0,0,255,0.8)' : 'rgba(0,0,0,0.2)'
+                        ),
+                        pointRadius: tempos.map((t, i) => 
+                            (i === tempoAnnotations.maxIndex || i === tempoAnnotations.minIndex) ? 6 : 3
+                        )
                     }]
                 },
                 options: {
@@ -188,15 +256,79 @@
                             display: true,
                             text: `Tempo de Percurso na Rota: ${routeName}`,
                             font: { size: 18 }
+                        },
+                        // NOVO: Anotações
+                        annotation: {
+                            annotations: {
+                                maxLine: {
+                                    type: 'line',
+                                    yMin: tempos[tempoAnnotations.maxIndex],
+                                    yMax: tempos[tempoAnnotations.maxIndex],
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Máximo: ${tempos[tempoAnnotations.maxIndex].toFixed(1)} s`,
+                                        position: 'end'
+                                    }
+                                },
+                                minLine: {
+                                    type: 'line',
+                                    yMin: tempos[tempoAnnotations.minIndex],
+                                    yMax: tempos[tempoAnnotations.minIndex],
+                                    borderColor: 'blue',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: `Mínimo: ${tempos[tempoAnnotations.minIndex].toFixed(1)} s`,
+                                        position: 'end'
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             });
 
-            // Cálculo da média geral do período selecionado
+            // Cálculo da média geral (não alterado)
             const overallAvg = velocidades.reduce((a, b) => a + b, 0) / velocidades.length;
             
-            // Análise por período do dia com base na média do período
+            // NOVO: Status do momento atual
+            const currentSpeed = velocidades[velocidades.length - 1];
+            const currentTime = labels[labels.length - 1];
+            const [currentStatus, currentStatusText] = getCurrentStatus(currentSpeed, overallAvg);
+            
+            const statusHTML = `
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-${currentStatus} shadow">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <div class="display-4 text-${currentStatus}">${currentStatusText}</div>
+                                    <small class="text-muted">${currentTime}</small>
+                                </div>
+                                <div class="col-md-8">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">Velocidade Atual</dt>
+                                        <dd class="col-sm-8">${currentSpeed.toFixed(1)} km/h</dd>
+                                        
+                                        <dt class="col-sm-4">Média Periódica</dt>
+                                        <dd class="col-sm-8">${overallAvg.toFixed(1)} km/h</dd>
+                                        
+                                        <dt class="col-sm-4">Desvio</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="badge bg-${currentStatus}">
+                                                ${((currentSpeed - overallAvg)/overallAvg * 100).toFixed(1)}%
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+            // Análise por período (não alterado)
             const timeAnalysis = {
                 madrugada1: { start: 0, end: 3, speeds: [], label: 'Madrugada (00:00 - 03:00)' },
                 madrugada2: { start: 3, end: 6, speeds: [], label: 'Madrugada (03:00 - 06:00)' },
@@ -208,7 +340,7 @@
                 noite2: { start: 21, end: 24, speeds: [], label: 'Noite (21:00 - 00:00)' }
             };
 
-            // Coleta de dados por período
+            // Coleta de dados por período (não alterado)
             labels.forEach((label, index) => {
                 const [date, time] = label.split(' ');
                 const hour = parseInt(time.split(':')[0], 10);
@@ -221,71 +353,73 @@
                 }
             });
 
-            // Geração da análise dinâmica
-            // Geração da análise dinâmica
+            // Geração da análise dinâmica (não alterado)
             let analysisHTML = `
-            <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
-            <div class="alert alert-info">
-                Média geral do período selecionado: <strong>${overallAvg.toFixed(2)} km/h</strong><br>
-                Classificação baseada no desempenho relativo ao período
-            </div>
-            <div class="row mt-3">`;
+                <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
+                <div class="alert alert-info">
+                    Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
+                    Classificação baseada no desempenho relativo ao período
+                </div>
+                <div class="row mt-3">`;
 
             Object.values(timeAnalysis).forEach(period => {
-            if (period.speeds.length === 0) return;
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
+                
+                let status = 'secondary';
+                let statusText = 'Sem dados suficientes';
+                let statusDescription = '';
 
-            const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
-            const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(2);
+                // Classificação dinâmica (alterado para 5 níveis)
+                if (avg >= overallAvg * 1.20) {
+                    status = 'success';
+                    statusText = 'Excelente';
+                    statusDescription = 'Muito acima da média';
+                } else if (avg >= overallAvg * 1.10) {
+                    status = 'info';
+                    statusText = 'Bom';
+                    statusDescription = 'Acima da média';
+                } else if (avg >= overallAvg * 0.95) {
+                    status = 'primary';
+                    statusText = 'Normal';
+                    statusDescription = 'Dentro da média';
+                } else if (avg >= overallAvg * 0.85) {
+                    status = 'warning';
+                    statusText = 'Atenção';
+                    statusDescription = 'Abaixo da média';
+                } else {
+                    status = 'danger';
+                    statusText = 'Crítico';
+                    statusDescription = 'Muito abaixo da média';
+                }
 
-            let status = 'secondary';
-            let statusText = 'Sem dados suficientes';
-            let statusDescription = '';
-
-            // Classificação dinâmica baseada no desvio percentual
-            if (avg >= overallAvg * 1.20) {
-                status = 'success';
-                statusText = 'Excelente';
-                statusDescription = 'Muito acima da média';
-            } else if (avg >= overallAvg * 1.10) {
-                status = 'info';
-                statusText = 'Bom';
-                statusDescription = 'Acima da média';
-            } else if (avg >= overallAvg * 0.95) {
-                status = 'primary';
-                statusText = 'Normal';
-                statusDescription = 'Dentro da média';
-            } else if (avg >= overallAvg * 0.85) {
-                status = 'warning';
-                statusText = 'Atenção';
-                statusDescription = 'Abaixo da média';
-            } else {
-                status = 'danger';
-                statusText = 'Crítico';
-                statusDescription = 'Muito abaixo da média';
-            }
-
-            analysisHTML += `
-                <div class="col-md-3 mb-3">
-                    <div class="card border-${status} h-100">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">${period.label}</h5>
-                            <div class="display-4 text-${status}">${statusText}</div>
-                            <p class="card-text mt-2">
-                                Média: <strong>${avg.toFixed(2)} km/h</strong><br>
-                                Desvio: ${deviation}%<br>
-                                Registros: ${period.speeds.length}<br>
-                                <small>${statusDescription}</small>
-                            </p>
+                analysisHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-${status} h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${period.label}</h5>
+                                <div class="display-4 text-${status}">${statusText}</div>
+                                <p class="card-text mt-2">
+                                    Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                    Desvio: ${deviation}%<br>
+                                    Registros: ${period.speeds.length}<br>
+                                    <small>${statusDescription}</small>
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </div>`;
+                    </div>`;
             });
 
             analysisHTML += '</div>';
-            document.getElementById("sentimentMessage").innerHTML = analysisHTML;
+            
+            // Inserir elementos na página (modificado)
+            document.getElementById("sentimentMessage").innerHTML = statusHTML + analysisHTML;
         {% endif %}
     });
 
+    // Funções de exportação (não alteradas)
     function exportTableToCSV() {
         let csv = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
         document.querySelectorAll("#dataTable tbody tr").forEach(row => {
