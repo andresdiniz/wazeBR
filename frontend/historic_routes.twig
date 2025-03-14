@@ -84,25 +84,23 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados.historic_routes %}
+            // Inicialização do DataTables
+            $('#dataTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                },
+                dom: 'Bfrtip',
+                buttons: [],
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [[0, 'desc']]
+            });
+
             const routeName = document.getElementById('route_id').selectedOptions[0].text;
             const labels = [
-                $('#dataTable').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-                    },
-                    dom: 'Bfrtip',
-                    buttons: [],
-                    pageLength: 10,
-                    lengthMenu: [5, 10, 25, 50],
-                    order: [[0, 'desc']]
-                });
-    
-                const routeName = document.getElementById('route_id').selectedOptions[0].text;
-                const labels = [
-                    {% for item in dados.historic_routes %}
-                        "{{ item.data }}",
-                    {% endfor %}
-                ];
+                {% for item in dados.historic_routes %}
+                    "{{ item.data }}",
+                {% endfor %}
             ];
 
             const velocidades = [
