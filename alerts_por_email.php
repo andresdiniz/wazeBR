@@ -68,6 +68,7 @@ foreach ($routes as $route) {
         }
     }
 
+    echo("Classificação PHP - Velocidade: $velocidade, Média: $overallAvg, Status: $status");
     // Se houver alertas críticos
     if ($currentStatus === 'danger' || !empty($alertas)) {
         $usersStmt = $pdo->prepare("
