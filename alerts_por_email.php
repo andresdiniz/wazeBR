@@ -19,23 +19,15 @@ function getStatus($value, $overallAvg) {
     return ['danger', 'Crítico'];
 }
 
-// Buscar todas as rotas ativas
-// Supondo que $userParceiroId contém o id_parceiro do usuário atual
-$userParceiroId = $_SESSION['user_parceiro_id'] ?? 0; // Adapte conforme sua implementação
-
-$sql = "SELECT id, id_parceiro, name 
-        FROM routes 
-        WHERE is_active = 1 
-        AND (id_parceiro = :id_parceiro OR :id_parceiro = 99)";
-
+// Buscar todas as rotas ativas sem filtrar pelo id_parceiro
+$sql = "SELECT * FROM routes WHERE is_active = 1";
 $stmt = $pdo->prepare($sql);
-$stmt->bindParam(':id_parceiro', $userParceiroId, PDO::PARAM_INT);
 $stmt->execute();
-
 $routes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Iniciando análise de rotas...<br>";
 var_dump($routes);
+
 foreach ($routes as $route) {
     $historicDataStmt = $pdo->prepare("SELECT velocidade, data FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
     $historicDataStmt->execute([$route['id']]);
@@ -82,9 +74,11 @@ foreach ($routes as $route) {
         }
     }
 
-    echo "Classificação PHP - Velocidade: $velocidade, Média: $overallAvg, Status: $status";
+    echo "Classificação PHP - Velocidade: $currentSpeed, Média: $overallAvg, Status: $currentStatusText<br>";
+
     // Se houver alertas críticos
     if ($currentStatus === 'danger' || !empty($alertas)) {
+        // Buscar usuários que devem receber o alerta
         $usersStmt = $pdo->prepare("
             SELECT email FROM users 
             WHERE receber_email = '1' 
