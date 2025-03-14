@@ -20,7 +20,19 @@ function getStatus($value, $overallAvg) {
 }
 
 // Buscar todas as rotas ativas
-$routes = $pdo->query("SELECT id, id_parceiro, name FROM routes WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
+// Supondo que $userParceiroId contém o id_parceiro do usuário atual
+$userParceiroId = $_SESSION['user_parceiro_id'] ?? 0; // Adapte conforme sua implementação
+
+$sql = "SELECT id, id_parceiro, name 
+        FROM routes 
+        WHERE is_active = 1 
+        AND (id_parceiro = :id_parceiro OR :id_parceiro = 99)";
+
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':id_parceiro', $userParceiroId, PDO::PARAM_INT);
+$stmt->execute();
+
+$routes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Iniciando análise de rotas...<br>";
 var_dump($routes);
