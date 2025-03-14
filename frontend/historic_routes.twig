@@ -48,7 +48,7 @@
         </div>
 
         <h3 class="mt-4 text-center">Tabela de Dados</h3>
-        <table class="table table-bordered table-striped text-center mt-3" id="dataTable">
+        <table class="table table-bordered table-striped text-center mt-3" id="dataTable" style="width:100%">
             <thead class="table-dark">
                 <tr>
                     <th>Data/Hora</th>
@@ -76,6 +76,13 @@
         </div>
     {% endif %}
 </div>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
+<!-- Adicione estas linhas antes do fechamento do body -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -251,6 +258,24 @@
 
             analysisHTML += '</div>';
             document.getElementById("sentimentMessage").innerHTML = analysisHTML;
+        {% endif %}
+
+         // Adicione esta inicialização no final do DOMContentLoaded
+        {% if dados.historic_routes %}
+            // ... (código existente)
+
+            // Inicialize o DataTables
+            $('#dataTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                },
+                dom: 'Bfrtip',
+                buttons: [],
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                order: [[0, 'desc']]
+            });
+
         {% endif %}
     });
 
