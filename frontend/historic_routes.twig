@@ -90,6 +90,16 @@
             const routeName = document.getElementById('route_id').selectedOptions[0].text;
             const labels = [
                 {% for item in dados.historic_routes %}
+                    $('#dataTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                        },
+                        dom: 'Bfrtip',
+                        buttons: [],
+                        pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50],
+                        order: [[0, 'desc']]
+                    });
                     "{{ item.data }}",
                 {% endfor %}
             ];
@@ -258,24 +268,6 @@
 
             analysisHTML += '</div>';
             document.getElementById("sentimentMessage").innerHTML = analysisHTML;
-        {% endif %}
-
-         // Adicione esta inicialização no final do DOMContentLoaded
-        {% if dados.historic_routes %}
-            // ... (código existente)
-
-            // Inicialize o DataTables
-            $('#dataTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-                },
-                dom: 'Bfrtip',
-                buttons: [],
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50],
-                order: [[0, 'desc']]
-            });
-
         {% endif %}
     });
 
