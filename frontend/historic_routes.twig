@@ -241,20 +241,61 @@
             let statusText = 'Sem dados suficientes';
             let statusDescription = '';
 
-            // Classificação dinâmica baseada no desvio percentual
-            if (avg >= overallAvg * 1.10) {
-                status = 'success';
-                statusText = 'Ótimo';
-                statusDescription = 'Acima da média do período';
-            } else if (avg >= overallAvg * 0.90) {
-                status = 'warning';
-                statusText = 'Atenção';
-                statusDescription = 'Próximo da média do período';
-            } else {
-                status = 'danger';
-                statusText = 'Crítico';
-                statusDescription = 'Abaixo da média do período';
+            function classificarDesempenhoDetalhado(mediaPeriodo, mediaGeral) {
+                const percentual = (mediaPeriodo / mediaGeral) * 100;
+                
+                if (percentual >= 115) {
+                    return {
+                        status: 'success',
+                        texto: 'Excelente',
+                        descricao: 'Significativamente acima da média',
+                        icone: '🚀'
+                    };
+                } else if (percentual >= 105) {
+                    return {
+                        status: 'info',
+                        texto: 'Bom',
+                        descricao: 'Acima da média esperada',
+                        icone: '👍'
+                    };
+                } else if (percentual >= 95) {
+                    return {
+                        status: 'primary',
+                        texto: 'Normal',
+                        descricao: 'Dentro da média esperada',
+                        icone: '⏱️'
+                    };
+                } else if (percentual >= 85) {
+                    return {
+                        status: 'warning',
+                        texto: 'Atenção',
+                        descricao: 'Abaixo da média esperada',
+                        icone: '⚠️'
+                    };
+                } else {
+                    return {
+                        status: 'danger',
+                        texto: 'Crítico',
+                        descricao: 'Significativamente abaixo da média',
+                        icone: '🚨'
+                    };
+                }
             }
+            
+            // Na implementação:
+            Object.values(timeAnalysis).forEach(period => {
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                const classificacao = classificarDesempenhoDetalhado(avg, overallAvg);
+                
+                // Uso no HTML (adicionando o ícone)
+                analysisHTML += `
+                    <div class="card-body text-center">
+                        <h5>${period.label} ${classificacao.icone}</h5>
+                        ...
+                    </div>`;
+            });
 
             analysisHTML += `
                 <div class="col-md-3 mb-3">
