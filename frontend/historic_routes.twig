@@ -428,9 +428,72 @@
             });
 
             analysisHTML += '</div>';
+
+            // Na seção de análise por período, modifique para:
+            let analysisHTMLperiod = `
+            <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
+            <div class="alert alert-info">
+                Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
+                Classificação baseada no desempenho relativo à média geral
+            </div>
+            <div class="row mt-3">`;
+
+            Object.values(timeAnalysis).forEach(period => {
+            if (period.speeds.length === 0) return;
+
+            const periodAvg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+            const deviation = ((periodAvg - overallAvg) / overallAvg * 100).toFixed(1);
+
+            let status = 'secondary';
+            let statusText = 'Sem dados suficientes';
+            let statusDescription = '';
+
+            // Classificação mantida pela média geral
+            if (periodAvg >= overallAvg * 1.20) {
+                status = 'success';
+                statusText = 'Excelente';
+                statusDescription = 'Muito acima da média geral';
+            } else if (periodAvg >= overallAvg * 1.10) {
+                status = 'info';
+                statusText = 'Bom';
+                statusDescription = 'Acima da média geral';
+            } else if (periodAvg >= overallAvg * 0.95) {
+                status = 'primary';
+                statusText = 'Normal';
+                statusDescription = 'Dentro da média geral';
+            } else if (periodAvg >= overallAvg * 0.85) {
+                status = 'warning';
+                statusText = 'Atenção';
+                statusDescription = 'Abaixo da média geral';
+            } else {
+                status = 'danger';
+                statusText = 'Crítico';
+                statusDescription = 'Muito abaixo da média geral';
+            }
+
+            analysisHTML += `
+                <div class="col-md-3 mb-3">
+                    <div class="card border-${status} h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${period.label}</h5>
+                            <div class="display-4 text-${status}">${statusText}</div>
+                            <p class="card-text mt-2">
+                                Média do período: <strong>${periodAvg.toFixed(1)} km/h</strong><br>
+                                Média geral: ${overallAvg.toFixed(1)} km/h<br>
+                                Desvio: ${deviation}%<br>
+                                Registros: ${period.speeds.length}<br>
+                                <small>${statusDescription}</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+
+            analysisHTMLperiod += '</div>';
             
             // Inserir elementos na página (modificado)
-            document.getElementById("sentimentMessage").innerHTML = statusHTML + analysisHTML;
+            document.getElementById("sentimentMessage").innerHTML = statusHTML + analysisHTML + analysisHTMLperiod;
         {% endif %}
     });
 
