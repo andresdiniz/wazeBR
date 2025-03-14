@@ -82,10 +82,13 @@
 </div>
 
 <script>
+    // Definir alias jq para jQuery com noConflict
+    var jq = jQuery.noConflict(true);
+
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados.historic_routes %}
-            // Inicialização do DataTables
-            $('#dataTable').DataTable({
+            // Inicialização do DataTables com jq
+            jq('#dataTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
                 },
