@@ -534,5 +534,4 @@ foreach ($results as $row) {
         echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n";
     }
 }
-require __DIR__ . '/alerts_por_email.php';
 ?>
