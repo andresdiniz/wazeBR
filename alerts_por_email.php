@@ -19,6 +19,13 @@ function getStatus($value, $overallAvg) {
     return ['danger', 'Crítico', '#ff4d4d']; // Vermelho forte
 }
 
+// Função para formatar tempo (segundos para "X min Y seg")
+function formatarTempo($segundos) {
+    $minutos = floor($segundos / 60);
+    $segundos = $segundos % 60;
+    return "{$minutos} min {$segundos} seg";
+}
+
 // Buscar todas as rotas ativas
 $sql = "SELECT * FROM routes";
 $stmt = $pdo->prepare($sql);
@@ -41,9 +48,9 @@ foreach ($routes as $route) {
     $velocidades = array_column($historicData, 'velocidade');
     $tempos = array_column($historicData, 'tempo');
 
-    // Calcular médias
-    $overallAvgSpeed = array_sum($velocidades) / count($velocidades);
-    $overallAvgTime = array_sum($tempos) / count($tempos);
+    // Calcular médias (evitando divisão por zero)
+    $overallAvgSpeed = count($velocidades) > 0 ? array_sum($velocidades) / count($velocidades) : 0;
+    $overallAvgTime = count($tempos) > 0 ? array_sum($tempos) / count($tempos) : 0;
 
     // Pegar valores atuais
     $currentSpeed = end($velocidades);
@@ -69,8 +76,8 @@ foreach ($routes as $route) {
                 'nome_rota' => $route['name'],
                 'velocidade_atual' => number_format($currentSpeed, 1),
                 'media_geral' => number_format($overallAvgSpeed, 1),
-                'tempo_atual' => number_format($currentTime, 1),
-                'media_tempo' => number_format($overallAvgTime, 1),
+                'tempo_atual' => formatarTempo($currentTime),
+                'media_tempo' => formatarTempo($overallAvgTime),
                 'status' => $currentStatusText,
                 'cor_status' => $statusColor
             ];
@@ -84,13 +91,13 @@ foreach ($alertasPorUsuario as $email => $rotas) {
     $corpoEmail .= "<p>As seguintes rotas apresentam status crítico:</p>";
 
     foreach ($rotas as $rota) {
-        $corpoEmail .= "<div style='border: 2px solid {$rota['cor_status']}; padding: 15px; margin-bottom: 15px; border-radius: 5px;'>";
+        $corpoEmail .= "<div style='background-color: #f8d7da; border-left: 5px solid {$rota['cor_status']}; padding: 15px; margin-bottom: 15px; border-radius: 5px;'>";
         $corpoEmail .= "<h3 style='color: {$rota['cor_status']}'>🚨 Rota: {$rota['nome_rota']}</h3>";
         $corpoEmail .= "<p><strong>Status:</strong> <span style='color: {$rota['cor_status']};'>{$rota['status']}</span></p>";
         $corpoEmail .= "<p><strong>Velocidade Atual:</strong> {$rota['velocidade_atual']} km/h</p>";
         $corpoEmail .= "<p><strong>Média de Velocidade:</strong> {$rota['media_geral']} km/h</p>";
-        $corpoEmail .= "<p><strong>Tempo Atual:</strong> {$rota['tempo_atual']} min</p>";
-        $corpoEmail .= "<p><strong>Média de Tempo:</strong> {$rota['media_tempo']} min</p>";
+        $corpoEmail .= "<p><strong>Tempo Atual:</strong> {$rota['tempo_atual']}</p>";
+        $corpoEmail .= "<p><strong>Média de Tempo:</strong> {$rota['media_tempo']}</p>";
         $corpoEmail .= "</div>";
     }
 
