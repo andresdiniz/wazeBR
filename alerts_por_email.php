@@ -22,6 +22,7 @@ function getStatus($value, $overallAvg) {
 // Buscar todas as rotas ativas
 $routes = $pdo->query("SELECT id, id_parceiro, name FROM routes WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
 
+echo "Iniciando análise de rotas...<br>";
 foreach ($routes as $route) {
     $historicDataStmt = $pdo->prepare("SELECT velocidade, data FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
     $historicDataStmt->execute([$route['id']]);
@@ -68,7 +69,7 @@ foreach ($routes as $route) {
         }
     }
 
-    echo("Classificação PHP - Velocidade: $velocidade, Média: $overallAvg, Status: $status");
+    echo "Classificação PHP - Velocidade: $velocidade, Média: $overallAvg, Status: $status";
     // Se houver alertas críticos
     if ($currentStatus === 'danger' || !empty($alertas)) {
         $usersStmt = $pdo->prepare("
