@@ -434,52 +434,57 @@
         {% endif %}
     });
 
-    // Funções de exportação 
+    // Função de exportação para CSV com ordenação crescente por Data/Hora
     function exportTableToCSV() {
         const dt = jq('#dataTable').DataTable();
-        const data = dt.rows().data().toArray();
-        
+        let data = dt.rows().data().toArray();
+
+        // Ordenar os dados pela primeira coluna (Data/Hora)
+        data.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
         let csvContent = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
-        
+
         data.forEach(row => {
             const linhaFormatada = row.map((cell, index) => {
-                // Formatar números com duas casas decimais
                 if (index === 1 || index === 2) {
-                    return parseFloat(cell).toFixed(2);
+                    return parseFloat(cell).toFixed(2); // Formatar números com 2 casas decimais
                 }
-                return `"${cell}"`; // Proteger campos textuais com aspas
+                return `"${cell}"`; // Aspas para proteger campos textuais
             }).join(",");
-            
+
             csvContent += linhaFormatada + "\n";
         });
 
         const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `dados_completos_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `dados_completos_${new Date().toISOString().slice(0, 10)}.csv`;
         link.click();
     }
 
-    // Função de exportação Excel corrigida
+    // Função de exportação para Excel com ordenação crescente por Data/Hora
     function exportTableToExcel() {
         const dt = jq('#dataTable').DataTable();
-        const data = dt.rows().data().toArray();
-        
+        let data = dt.rows().data().toArray();
+
+        // Ordenar os dados pela primeira coluna (Data/Hora)
+        data.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
         // Criar array com cabeçalhos
         const header = ["Data/Hora", "Velocidade (km/h)", "Tempo (s)"];
         const wsData = [header];
-        
+
         // Adicionar dados formatados
         data.forEach(row => {
             wsData.push([
                 row[0], // Data/Hora
                 parseFloat(row[1]).toFixed(2), // Velocidade
-                parseFloat(row[2]).toFixed(2) // Tempo
+                parseFloat(row[2]).toFixed(2)  // Tempo
             ]);
         });
 
         const ws = XLSX.utils.aoa_to_sheet(wsData);
-        
+
         // Formatar colunas numéricas
         ws['!cols'] = [
             { wch: 20 }, // Data/Hora
@@ -489,8 +494,8 @@
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Dados Completos");
-        
-        XLSX.writeFile(wb, `dados_completos_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+        XLSX.writeFile(wb, `dados_completos_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
     function downloadChart(chartId) {
