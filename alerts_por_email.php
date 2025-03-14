@@ -19,13 +19,16 @@ function getStatus($value, $overallAvg) {
     return ['danger', 'Crítico'];
 }
 
-// Buscar todas as rotas ativas sem filtrar pelo id_parceiro
+// Buscar todas as rotas ativas
 $sql = "SELECT * FROM routes";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $routes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Iniciando análise de rotas...<br>";
+
+// Array para armazenar as rotas críticas por usuário
+$alertasPorUsuario = [];
 
 foreach ($routes as $route) {
     $historicDataStmt = $pdo->prepare("SELECT velocidade FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
@@ -42,10 +45,10 @@ foreach ($routes as $route) {
 
     echo "Rota: {$route['name']} - Velocidade Atual: $currentSpeed, Média: $overallAvg, Status: $currentStatusText<br>";
 
-    // Se a velocidade atual for crítica, enviar e-mail
+    // Se a velocidade atual for crítica, armazenar a rota no array para envio de e-mail
     if ($currentStatus === 'danger') {
         $usersStmt = $pdo->prepare("
-            SELECT email FROM users 
+            SELECT id, email FROM users 
             WHERE receber_email = '1' 
             AND (id_parceiro = ? OR id_parceiro = 99)
         ");
@@ -53,19 +56,36 @@ foreach ($routes as $route) {
         $users = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($users as $user) {
-            $corpoEmail = "<h2>⚠️ Alerta Crítico na Rota {$route['name']}</h2>";
-            $corpoEmail .= "<p>Status Atual: <strong>$currentStatusText</strong></p>";
-            $corpoEmail .= "<p>Velocidade Atual: <strong>" . number_format($currentSpeed, 1) . " km/h</strong></p>";
-            $corpoEmail .= "<p>Média Geral: " . number_format($overallAvg, 1) . " km/h</p>";
-
-            if (function_exists('sendEmail')) {
-                sendEmail($user['email'], $corpoEmail, "🚨 Alerta Crítico - {$route['name']}");
-            } else {
-                error_log("Erro: Função sendEmail() não está definida.");
-            }
+            $alertasPorUsuario[$user['email']][] = [
+                'nome_rota' => $route['name'],
+                'velocidade_atual' => number_format($currentSpeed, 1),
+                'media_geral' => number_format($overallAvg, 1),
+                'status' => $currentStatusText
+            ];
         }
-    } else {
-        echo "Nenhum alerta enviado para a rota {$route['name']}<br>";
     }
 }
+
+// Enviar e-mails agrupados por usuário
+foreach ($alertasPorUsuario as $email => $rotas) {
+    $corpoEmail = "<h2>⚠️ Alerta Crítico de Rotas</h2>";
+    $corpoEmail .= "<p>As seguintes rotas apresentam status crítico:</p>";
+
+    foreach ($rotas as $rota) {
+        $corpoEmail .= "<div style='border: 1px solid red; padding: 10px; margin-bottom: 10px;'>";
+        $corpoEmail .= "<h3>🚨 Rota: {$rota['nome_rota']}</h3>";
+        $corpoEmail .= "<p><strong>Status:</strong> {$rota['status']}</p>";
+        $corpoEmail .= "<p><strong>Velocidade Atual:</strong> {$rota['velocidade_atual']} km/h</p>";
+        $corpoEmail .= "<p><strong>Média Geral:</strong> {$rota['media_geral']} km/h</p>";
+        $corpoEmail .= "</div>";
+    }
+
+    if (function_exists('sendEmail')) {
+        sendEmail($email, $corpoEmail, "🚨 Alerta Crítico - Rotas Monitoradas");
+    } else {
+        error_log("Erro: Função sendEmail() não está definida.");
+    }
+}
+
+echo "Processo concluído!";
 ?>
