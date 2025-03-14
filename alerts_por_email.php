@@ -11,6 +11,7 @@ $pdo = Database::getConnection();
 
 // Função para analisar o status
 function getStatus($value, $overallAvg) {
+    if ($overallAvg == 0) return ['danger', 'Crítico']; // Evita divisão por zero
     if ($value >= $overallAvg * 1.20) return ['success', 'Excelente'];
     if ($value >= $overallAvg * 1.10) return ['info', 'Bom'];
     if ($value >= $overallAvg * 0.95) return ['primary', 'Normal'];
@@ -18,24 +19,24 @@ function getStatus($value, $overallAvg) {
     return ['danger', 'Crítico'];
 }
 
-// Processar cada rota
-$routes = $pdo->query("SELECT id, id_parceiro, name FROM routes WHERE is_active = 1")->fetchAll();
+// Buscar todas as rotas ativas
+$routes = $pdo->query("SELECT id, id_parceiro, name FROM routes WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($routes as $route) {
-    $historicData = $pdo->prepare("SELECT velocidade, data FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
-    $historicData->execute([$route['id']]);
-    $historicData = $historicData->fetchAll();
+    $historicDataStmt = $pdo->prepare("SELECT velocidade, data FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
+    $historicDataStmt->execute([$route['id']]);
+    $historicData = $historicDataStmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (count($historicData) === 0) continue;
 
     $velocidades = array_column($historicData, 'velocidade');
-    $overallAvg = array_sum($velocidades) / count($velocidades);
+    $overallAvg = count($velocidades) > 0 ? array_sum($velocidades) / count($velocidades) : 0;
     $currentSpeed = end($velocidades);
-    
-    // Verificar status atual
+
+    // Determinar status atual
     [$currentStatus, $currentStatusText] = getStatus($currentSpeed, $overallAvg);
-    
-    // Analisar períodos
+
+    // Análise por períodos do dia
     $timeAnalysis = [
         ['start' => 0, 'end' => 3, 'speeds' => [], 'label' => 'Madrugada (00:00 - 03:00)'],
         ['start' => 3, 'end' => 6, 'speeds' => [], 'label' => 'Madrugada (03:00 - 06:00)'],
@@ -69,29 +70,39 @@ foreach ($routes as $route) {
 
     // Se houver alertas críticos
     if ($currentStatus === 'danger' || !empty($alertas)) {
-        $users = $pdo->prepare("
+        $usersStmt = $pdo->prepare("
             SELECT email FROM users 
             WHERE receber_email = '1' 
             AND (id_parceiro = ? OR id_parceiro = 99)
-        ")->execute([$route['id_parceiro']])->fetchAll();
+        ");
+        $usersStmt->execute([$route['id_parceiro']]);
+        $users = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($users as $user) {
-            $corpoEmail = "<h2>Alerta na Rota {$route['name']}</h2>";
-            $corpoEmail .= "<p>Status Atual: $currentStatusText</p>";
-            $corpoEmail .= "<p>Velocidade Atual: ".number_format($currentSpeed,1)." km/h</p>";
-            $corpoEmail .= "<p>Média Geral: ".number_format($overallAvg,1)." km/h</p>";
-            
-            if (!empty($alertas)) {
-                $corpoEmail .= "<p>Períodos com problemas:</p><ul>";
-                foreach ($alertas as $alerta) $corpoEmail .= "<li>$alerta</li>";
-                $corpoEmail .= "</ul>";
+        if (!empty($users)) {
+            foreach ($users as $user) {
+                $corpoEmail = "<h2>Alerta na Rota {$route['name']}</h2>";
+                $corpoEmail .= "<p>Status Atual: $currentStatusText</p>";
+                $corpoEmail .= "<p>Velocidade Atual: " . number_format($currentSpeed, 1) . " km/h</p>";
+                $corpoEmail .= "<p>Média Geral: " . number_format($overallAvg, 1) . " km/h</p>";
+
+                if (!empty($alertas)) {
+                    $corpoEmail .= "<p>Períodos com problemas:</p><ul>";
+                    foreach ($alertas as $alerta) {
+                        $corpoEmail .= "<li>$alerta</li>";
+                    }
+                    $corpoEmail .= "</ul>";
+                }
+
+                // Verifica se a função sendEmail() está definida antes de chamar
+                if (function_exists('sendEmail')) {
+                    sendEmail($user['email'], $corpoEmail, "Alerta de Tráfego - {$route['name']}");
+                } else {
+                    error_log("Erro: Função sendEmail() não está definida.");
+                }
             }
-
-            sendEmail($user['email'], $corpoEmail, "Alerta de Tráfego - {$route['name']}");
         }
-    }else{
-        echo "Nenhum alerta para a rota {$route['name']}";
+    } else {
+        echo "Nenhum alerta para a rota {$route['name']}<br>";
     }
 }
-
 ?>
