@@ -20,7 +20,7 @@ function getStatus($value, $overallAvg) {
 }
 
 // Buscar todas as rotas ativas sem filtrar pelo id_parceiro
-$sql = "SELECT * FROM routes WHERE is_active = 1";
+$sql = "SELECT * FROM routes";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $routes = $stmt->fetchAll(PDO::FETCH_ASSOC);
