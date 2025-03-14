@@ -23,6 +23,7 @@ function getStatus($value, $overallAvg) {
 $routes = $pdo->query("SELECT id, id_parceiro, name FROM routes WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Iniciando análise de rotas...<br>";
+vardump($routes);
 foreach ($routes as $route) {
     $historicDataStmt = $pdo->prepare("SELECT velocidade, data FROM historic_routes WHERE route_id = ? ORDER BY data ASC");
     $historicDataStmt->execute([$route['id']]);
