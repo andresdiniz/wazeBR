@@ -453,7 +453,6 @@
             }).join(",");
 
             csvContent += linhaFormatada + "\n";
-
         });
 
         const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
@@ -499,104 +498,12 @@
         XLSX.writeFile(wb, `dados_completos_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
+
     function downloadChart(chartId) {
         const canvas = document.getElementById(chartId);
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
         link.download = `${chartId}_${document.getElementById('route_id').value}.png`;
         link.click();
-
-        // Adicione esta função no início do script
-        function preverVelocidades(dados, passosFuturos = 5) {
-            const n = dados.length;
-            const sumX = dados.reduce((acc, _, i) => acc + i, 0);
-            const sumY = dados.reduce((acc, val) => acc + val, 0);
-            const sumXY = dados.reduce((acc, val, i) => acc + (i * val), 0);
-            const sumXX = dados.reduce((acc, _, i) => acc + (i * i), 0);
-            
-            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-            const intercept = (sumY - slope * sumX) / n;
-            
-            // Prever próximos valores
-            const previsoes = [];
-            for(let i = n; i < n + passosFuturos; i++) {
-                previsoes.push(intercept + slope * i);
-            }
-            
-            return {
-                slope,
-                intercept,
-                previsoes
-            };
-        }
-
-        // Modifique a seção de análise dinâmica para incluir as previsões
-        let analysisHTML = `
-            <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
-            <div class="alert alert-info">
-                Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
-                Classificação baseada no desempenho relativo ao período
-            </div>`;
-
-        // Adicione esta seção antes da análise por período
-        if(velocidades.length > 10) { // Só mostra previsão se tiver dados suficientes
-            const previsao = preverVelocidades(velocidades);
-            const ultimaData = new Date(labels[labels.length - 1]);
-            
-            analysisHTML += `
-            <div class="alert alert-warning mt-3">
-                <h5>Previsão para as próximas horas:</h5>
-                <div class="row">`;
-            
-            previsao.previsoes.forEach((v, i) => {
-                const novaData = new Date(ultimaData);
-                novaData.setHours(novaData.getHours() + (i + 1));
-                
-                analysisHTML += `
-                    <div class="col-md-2 mb-2">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <small>${novaData.toLocaleTimeString('pt-BR')}</small>
-                                <div class="h5">${v.toFixed(1)} km/h</div>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            
-            analysisHTML += `</div></div>`;
-        }
-
-        // Adicione esta função para mostrar a linha de tendência nos gráficos
-        function adicionarLinhaTendencia(chart, previsao, cor) {
-            const dadosCompleto = [...velocidades, ...previsao.previsoes];
-            
-            chart.data.datasets.push({
-                label: 'Tendência Prevista',
-                data: dadosCompleto,
-                borderColor: cor,
-                borderWidth: 2,
-                borderDash: [5, 5],
-                fill: false,
-                pointRadius: 0
-            });
-            
-            chart.update();
-        }
-
-        // Modifique a criação dos gráficos para incluir a tendência
-        const previsaoVelocidade = preverVelocidades(velocidades);
-        const chartVelocidade = new Chart(...); // Mantenha o código existente
-        adicionarLinhaTendencia(chartVelocidade, previsaoVelocidade, '#FFA500');
-
-        // Adicione esta verificação na análise de status
-        if(previsaoVelocidade.slope < -2) {
-            statusHTML = `
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i> 
-                Tendência de redução de velocidade detectada: 
-                ${Math.abs(previsaoVelocidade.slope.toFixed(2))} km/h por hora
-            </div>` + statusHTML;
-        }
-
     }
 </script>
