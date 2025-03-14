@@ -38,6 +38,9 @@
     </form>
 
     {% if dados.historic_routes %}
+        <div class="mt-4" id="sentimentMessage">
+            <!-- Análise por período será exibida aqui -->
+        </div>
         <div class="mt-4">
             <h3 class="text-center">Análise de Desempenho</h3>
             <canvas id="chartVelocidade"></canvas>
@@ -75,9 +78,6 @@
             </tbody>
         </table>
 
-        <div class="mt-4" id="sentimentMessage">
-            <!-- Análise por período será exibida aqui -->
-        </div>
     {% endif %}
 </div>
 
