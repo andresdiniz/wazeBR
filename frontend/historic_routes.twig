@@ -226,7 +226,7 @@
             let analysisHTML = `
             <h4 class="mt-4 text-center">Análise de Desempenho por Período</h4>
             <div class="alert alert-info">
-                Média geral do período selecionado: <strong>${overallAvg.toFixed(1)} km/h</strong><br>
+                Média geral do período selecionado: <strong>${overallAvg.toFixed(2)} km/h</strong><br>
                 Classificação baseada no desempenho relativo ao período
             </div>
             <div class="row mt-3">`;
@@ -235,7 +235,7 @@
             if (period.speeds.length === 0) return;
 
             const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
-            const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
+            const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(2);
 
             let status = 'secondary';
             let statusText = 'Sem dados suficientes';
@@ -271,7 +271,7 @@
                             <h5 class="card-title">${period.label}</h5>
                             <div class="display-4 text-${status}">${statusText}</div>
                             <p class="card-text mt-2">
-                                Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                Média: <strong>${avg.toFixed(2)} km/h</strong><br>
                                 Desvio: ${deviation}%<br>
                                 Registros: ${period.speeds.length}<br>
                                 <small>${statusDescription}</small>
