@@ -64,7 +64,8 @@ $scripts = [
     'wazejobtraficc.php'    => '/wazejobtraficc.php',
     'dadoscemadem.php'      => '/dadoscemadem.php',
     'hidrologicocemadem.php'=> '/hidrologicocemadem.php',
-    'gerar_xml.php'         => '/gerar_xml.php'
+    'gerar_xml.php'         => '/gerar_xml.php',
+    'alerts_por_email.php'  => '/alerts_por_email.php'
 ];
 
 // Executa cada script da lista
