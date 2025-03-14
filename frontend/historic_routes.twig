@@ -506,4 +506,64 @@
         link.download = `${chartId}_${document.getElementById('route_id').value}.png`;
         link.click();
     }
+
+    // Função para calcular estatísticas de desvio padrão e variabilidade
+    function calcularEstatisticas(tempos) {
+        let media = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+        let variancia = tempos.reduce((sum, t) => sum + Math.pow(t - media, 2), 0) / tempos.length;
+        let desvioPadrao = Math.sqrt(variancia);
+        return { media, desvioPadrao, variancia };
+    }
+
+    // Função para previsão de tempo de percurso baseada em média móvel simples
+    function preverTempoPercurso(tempos) {
+        let tamanhoJanela = Math.min(5, tempos.length);
+        let mediaMovel = tempos.slice(-tamanhoJanela).reduce((a, b) => a + b, 0) / tamanhoJanela;
+        return mediaMovel;
+    }
+
+    // Função para atualizar gráficos em tempo real
+    function atualizarGraficos(dados) {
+        let tempos = dados.map(d => d.tempo);
+        let estatisticas = calcularEstatisticas(tempos);
+        let previsao = preverTempoPercurso(tempos);
+
+        // Atualiza gráficos existentes
+        meuGrafico.data.datasets[0].data = tempos;
+        meuGrafico.update();
+
+        // Exibir estatísticas
+        document.getElementById('estatisticas').innerHTML = `
+            <p>Média: ${estatisticas.media.toFixed(2)} min</p>
+            <p>Desvio Padrão: ${estatisticas.desvioPadrao.toFixed(2)} min</p>
+            <p>Previsão Próxima Rota: ${previsao.toFixed(2)} min</p>
+        `;
+    }
+
+    // Simulação de novos dados chegando em tempo real
+    setInterval(() => {
+        let novoTempo = Math.random() * 20 + 40; // Simulação de tempo entre 40-60 min
+        dadosRotas.push({ tempo: novoTempo });
+        atualizarGraficos(dadosRotas);
+    }, 5000);
+
+    // Dados iniciais
+    let dadosRotas = [
+        { tempo: 45 }, { tempo: 50 }, { tempo: 48 }, { tempo: 52 }, { tempo: 49 }
+    ];
+
+    // Criar gráfico inicial
+    let ctx = document.getElementById('grafico').getContext('2d');
+    let meuGrafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dadosRotas.map((_, i) => `Rota ${i + 1}`),
+            datasets: [{ label: 'Tempo de Percurso (min)', data: dadosRotas.map(d => d.tempo), borderColor: 'blue', fill: false }]
+        },
+        options: { responsive: true }
+    });
+
+    // Chamada inicial para exibir estatísticas
+    atualizarGraficos(dadosRotas);
+
 </script>
