@@ -21,6 +21,7 @@ function getStatus($value, $overallAvg) {
 
 // Função para formatar tempo (segundos para "X min Y seg")
 function formatarTempo($segundos) {
+    if ($segundos <= 0) return "0 min 0 seg";
     $minutos = floor($segundos / 60);
     $segundos = $segundos % 60;
     return "{$minutos} min {$segundos} seg";
@@ -56,10 +57,14 @@ foreach ($routes as $route) {
     $currentSpeed = end($velocidades);
     $currentTime = end($tempos);
 
+    // Converter os tempos para o formato "X min Y seg"
+    $tempoAtualFormatado = formatarTempo($currentTime);
+    $tempoMedioFormatado = formatarTempo($overallAvgTime);
+
     // Determinar status atual
     [$currentStatus, $currentStatusText, $statusColor] = getStatus($currentSpeed, $overallAvgSpeed);
 
-    echo "Rota: {$route['name']} - Velocidade Atual: $currentSpeed, Média: $overallAvgSpeed, Tempo Atual: $currentTime, Média de Tempo: $overallAvgTime, Status: $currentStatusText<br>";
+    echo "Rota: {$route['name']} - Velocidade Atual: $currentSpeed, Média: $overallAvgSpeed, Tempo Atual: $tempoAtualFormatado, Média de Tempo: $tempoMedioFormatado, Status: $currentStatusText<br>";
 
     // Se a velocidade for crítica, armazenar a rota no array para envio de e-mail
     if ($currentStatus === 'danger') {
@@ -76,8 +81,8 @@ foreach ($routes as $route) {
                 'nome_rota' => $route['name'],
                 'velocidade_atual' => number_format($currentSpeed, 1),
                 'media_geral' => number_format($overallAvgSpeed, 1),
-                'tempo_atual' => formatarTempo($currentTime),
-                'media_tempo' => formatarTempo($overallAvgTime),
+                'tempo_atual' => $tempoAtualFormatado,
+                'media_tempo' => $tempoMedioFormatado,
                 'status' => $currentStatusText,
                 'cor_status' => $statusColor
             ];
