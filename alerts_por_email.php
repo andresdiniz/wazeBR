@@ -89,6 +89,8 @@ foreach ($routes as $route) {
 
             sendEmail($user['email'], $corpoEmail, "Alerta de Tráfego - {$route['name']}");
         }
+    }else{
+        echo "Nenhum alerta para a rota {$route['name']}";
     }
 }
 
