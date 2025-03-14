@@ -434,58 +434,63 @@
         {% endif %}
     });
 
-    // Funções de exportação (não alteradas)
+    // Funções de exportação 
     function exportTableToCSV() {
-        const rows = document.querySelectorAll("#dataTable tbody tr");
+        const dt = jq('#dataTable').DataTable();
+        const data = dt.rows().data().toArray();
+        
         let csvContent = "Data/Hora,Velocidade (km/h),Tempo (s)\n";
         
-        rows.forEach(row => {
-            const cols = Array.from(row.children);
-            const line = cols.map(col => {
-                // Sanitizar dados removendo vírgulas e quebras de linha
-                let text = col.innerText.replace(/,/g, ';').replace(/\n/g, ' ');
-                // Converter números com decimais consistentes
-                if (!isNaN(col.innerText)) {
-                    return parseFloat(col.innerText).toFixed(2);
+        data.forEach(row => {
+            const linhaFormatada = row.map((cell, index) => {
+                // Formatar números com duas casas decimais
+                if (index === 1 || index === 2) {
+                    return parseFloat(cell).toFixed(2);
                 }
-                return `"${text}"`;
+                return `"${cell}"`; // Proteger campos textuais com aspas
             }).join(",");
             
-            csvContent += line + "\n";
+            csvContent += linhaFormatada + "\n";
         });
-    
+
         const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `dados_rota_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `dados_completos_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
     }
 
+    // Função de exportação Excel corrigida
     function exportTableToExcel() {
-        // Obter todos os dados (incluindo paginação)
-        const table = document.getElementById("dataTable");
-        const ws = XLSX.utils.table_to_sheet(table, {
-            raw: true,
-            dateNF: "dd/mm/yyyy hh:mm",
-            cellDates: true
-        });
-    
-        // Converter números
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let C = 1; C <= range.e.c; ++C) {
-            for (let R = range.s.r; R <= range.e.r; ++R) {
-                const cell = XLSX.utils.encode_cell({c: C, r: R});
-                if (ws[cell] && !isNaN(ws[cell].v)) {
-                    ws[cell].t = 'n';
-                    ws[cell].z = '0.00';
-                }
-            }
-        }
-    
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Dados");
+        const dt = jq('#dataTable').DataTable();
+        const data = dt.rows().data().toArray();
         
-        XLSX.writeFile(wb, `dados_rota_${new Date().toISOString().slice(0,10)}.xlsx`);
+        // Criar array com cabeçalhos
+        const header = ["Data/Hora", "Velocidade (km/h)", "Tempo (s)"];
+        const wsData = [header];
+        
+        // Adicionar dados formatados
+        data.forEach(row => {
+            wsData.push([
+                row[0], // Data/Hora
+                parseFloat(row[1]).toFixed(2), // Velocidade
+                parseFloat(row[2]).toFixed(2) // Tempo
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Formatar colunas numéricas
+        ws['!cols'] = [
+            { wch: 20 }, // Data/Hora
+            { wch: 15 }, // Velocidade
+            { wch: 10 }  // Tempo
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Dados Completos");
+        
+        XLSX.writeFile(wb, `dados_completos_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
     function downloadChart(chartId) {
