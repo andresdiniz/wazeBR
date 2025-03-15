@@ -236,26 +236,11 @@
             try {
                 // Verificação corrigida dos campos obrigatórios
             console.log('Dados para gráficos:', {
-                labels: {{ dados.labels|json_encode|raw }},
-                rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
-                rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }}
+                dadoss: {{ dados|json_encode|raw }},
+                //rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
+                //rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }},
+
             });
-
-            const requiredData = [
-                'rota1_values', 
-                'rota2_values', 
-                'media1', 
-                'media2', 
-                'labels', 
-                'merged_data'
-            ];
-                
-                requiredData.forEach(field => {
-                    if(!window.dados || !dados[field]) {
-                        throw new Error(`Campo obrigatório ausente: ${field}`);
-                    }
-                });
-
                 // Configuração avançada dos gráficos
                 const chartCommonConfig = {
                     responsive: true,
