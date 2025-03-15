@@ -231,6 +231,65 @@
     // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
 
+    // Configuração avançada dos gráficos (escopo global)
+    const chartCommonConfig = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    padding: 20,
+                    font: { size: 14 }
+                }
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0,0,0,0.85)',
+                titleFont: { size: 16 },
+                bodyFont: { size: 14 },
+                padding: 12
+            }
+        },
+        scales: {
+            x: {
+                type: 'time',
+                time: {
+                    unit: 'day',
+                    tooltipFormat: 'DD/MM/YYYY HH:mm'
+                },
+                title: {
+                    display: true,
+                    text: 'Data/Hora',
+                    font: { size: 14 }
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Valores',
+                    font: { size: 14 }
+                },
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                }
+            }
+        },
+        elements: {
+            line: {
+                tension: 0.3,
+                borderWidth: 2
+            },
+            point: {
+                radius: 4,
+                hoverRadius: 6,
+                backgroundColor: '#ffffff'
+            }
+        }
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
             try {
@@ -240,65 +299,6 @@
                     //rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
                     //rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }},
                 });
-
-                // Configuração avançada dos gráficos
-                const chartCommonConfig = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                padding: 20,
-                                font: { size: 14 }
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(0,0,0,0.85)',
-                            titleFont: { size: 16 },
-                            bodyFont: { size: 14 },
-                            padding: 12
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                tooltipFormat: 'DD/MM/YYYY HH:mm'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Data/Hora',
-                                font: { size: 14 }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Valores',
-                                font: { size: 14 }
-                            },
-                            grid: {
-                                color: 'rgba(0,0,0,0.1)'
-                            }
-                        }
-                    },
-                    elements: {
-                        line: {
-                            tension: 0.3,
-                            borderWidth: 2
-                        },
-                        point: {
-                            radius: 4,
-                            hoverRadius: 6,
-                            backgroundColor: '#ffffff'
-                        }
-                    }
-                };
 
                 // Processamento seguro dos dados
                 const processData = (data) => {
