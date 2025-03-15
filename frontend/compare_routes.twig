@@ -227,6 +227,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
 <script>
     // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
@@ -254,10 +257,13 @@
         },
         scales: {
             x: {
-                type: 'time',
+                type: 'time', // Eixo X do tipo tempo
                 time: {
-                    unit: 'day',
-                    tooltipFormat: 'DD/MM/YYYY HH:mm'
+                    unit: 'minute', // Unidade de tempo (pode ser 'day', 'hour', 'minute', etc.)
+                    tooltipFormat: 'dd/MM/yyyy HH:mm', // Formato da tooltip
+                    displayFormats: {
+                        minute: 'dd/MM HH:mm' // Formato de exibição no eixo
+                    }
                 },
                 title: {
                     display: true,
@@ -296,8 +302,6 @@
                 // Verificação corrigida dos campos obrigatórios
                 console.log('Dados para gráficos:', {
                     dados: {{ dados|json_encode|raw }},
-                    //rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
-                    //rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }},
                 });
 
                 // Processamento seguro dos dados
