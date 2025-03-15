@@ -289,6 +289,7 @@
 
                 const processData = (data) => data ? data.map(v => v ?? null) : [];
                 const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
+                console.log('Labels:', labels);
                 
                 initComparativeChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels,
                     processData({{ dados.rota1_values.velocidade|json_encode|raw }}),
