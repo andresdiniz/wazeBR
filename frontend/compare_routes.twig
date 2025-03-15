@@ -374,8 +374,8 @@
                 {
                     targets: 0,
                     type: 'date',
-                    render: function(data) {
-                        return data ? new Date(data).toLocaleString('pt-BR') : '';
+                    render: function(dados.labels) {
+                        return dados.labels ? new Date(dados.labels).toLocaleString('pt-BR') : '';
                     }
                 },
                 { targets: [1, 2], className: 'dt-body-right' }
