@@ -34,6 +34,17 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+        .chart-container {
+            position: relative;
+            height: 400px; /* Altura fixa para desktop */
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 767px) {
+            .chart-container {
+                height: 300px; /* Altura menor para mobile */
+            }
+        }
     </style>
 </head>
 <body>
@@ -41,14 +52,17 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">Comparação de Rotas</h2>
 
-    <!-- Formulário -->
+    <!-- Formulário Completo -->
     <form method="GET" class="row g-3 mb-4">
         <div class="col-md-4">
             <label class="form-label">Rota 1:</label>
             <select name="route1_id" class="form-select" required>
                 <option value="">Selecione a primeira rota</option>
                 {% for route in routes %}
-                    <option value="{{ route.id }}" {% if route.id == route1 %}selected{% endif %}>{{ route.name }}</option>
+                    <option value="{{ route.id }}"
+                            {% if route.id == route1 %}selected{% endif %}>
+                            {{ route.name }}
+                    </option>
                 {% endfor %}
             </select>
         </div>
@@ -58,19 +72,29 @@
             <select name="route2_id" class="form-select" required>
                 <option value="">Selecione a segunda rota</option>
                 {% for route in routes %}
-                    <option value="{{ route.id }}" {% if route.id == route2 %}selected{% endif %}>{{ route.name }}</option>
+                    <option value="{{ route.id }}"
+                            {% if route.id == route2 %}selected{% endif %}>
+                            {{ route.name }}
+                    </option>
                 {% endfor %}
             </select>
         </div>
 
         <div class="col-md-2">
             <label class="form-label">Data Inicial:</label>
-            <input type="date" name="start_date" class="form-control" value="{{ start_date }}" required>
+            <input type="date" name="start_date"
+                   class="form-control"
+                   value="{{ start_date }}"
+                   max="{{ "now"|date("Y-m-d") }}"
+                   required>
         </div>
 
         <div class="col-md-2">
             <label class="form-label">Data Final:</label>
-            <input type="date" name="end_date" class="form-control" value="{{ end_date }}" required>
+            <input type="date" name="end_date"
+                   class="form-control"
+                   value="{{ end_date }}"
+                   required>
         </div>
 
         <div class="col-md-12 text-center mt-3">
@@ -81,13 +105,111 @@
     </form>
 
     {% if dados %}
+        <!-- Seção de Cards -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="card comparison-card route1-color shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-signpost"></i> {{ route1_name }}
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-primary mb-2">
+                                    {{ dados.media1.velocidade|round(1) }}<small class="text-muted fs-6">km/h</small>
+                                </div>
+                                <span class="badge bg-primary">Velocidade Média</span>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-secondary mb-2">
+                                    {{ dados.media1.tempo|round(1) }}<small class="text-muted fs-6">s</small>
+                                </div>
+                                <span class="badge bg-secondary">Tempo Médio</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card comparison-card route2-color shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-signpost"></i> {{ route2_name }}
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-primary mb-2">
+                                    {{ dados.media2.velocidade|round(1) }}<small class="text-muted fs-6">km/h</small>
+                                </div>
+                                <span class="badge bg-primary">Velocidade Média</span>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-secondary mb-2">
+                                    {{ dados.media2.tempo|round(1) }}<small class="text-muted fs-6">s</small>
+                                </div>
+                                <span class="badge bg-secondary">Tempo Médio</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Gráficos -->
         <div class="chart-container">
             <h4 class="chart-title">Comparação de Velocidades</h4>
-            <canvas id="comparisonChartVelocidade"></canvas>
+            <canvas id="comparisonChartVelocidade" class="mt-4"></canvas>
 
             <h4 class="chart-title mt-5">Comparação de Tempos</h4>
-            <canvas id="comparisonChartTempo"></canvas>
+            <canvas id="comparisonChartTempo" class="mt-4"></canvas>
+        </div>
+
+        <!-- Tabelas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4 class="text-center mb-3">{{ route1_name }}</h4>
+                <table class="table table-striped table-hover" id="tabelaRota1">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade (km/h)</th>
+                            <th>Tempo (s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota1 %}
+                            <tr>
+                                <td>{{ item.data|date('d/m/Y H:i') }}</td>
+                                <td>{{ item.velocidade|number_format(1) }}</td>
+                                <td>{{ item.tempo|number_format(1) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <h4 class="text-center mb-3">{{ route2_name }}</h4>
+                <table class="table table-striped table-hover" id="tabelaRota2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade (km/h)</th>
+                            <th>Tempo (s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota2 %}
+                            <tr>
+                                <td>{{ item.data|date('d/m/Y H:i') }}</td>
+                                <td>{{ item.velocidade|number_format(1) }}</td>
+                                <td>{{ item.tempo|number_format(1) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Botões de Exportação -->
@@ -105,33 +227,110 @@
     {% endif %}
 </div>
 
-<!-- Scripts -->
+<!-- Scripts na ordem CORRETA -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script>
+    var jq = jQuery.noConflict(true);
+
+    const chartCommonConfig = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    padding: 20,
+                    font: { size: 14 }
+                }
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0,0,0,0.85)',
+                titleFont: { size: 16 },
+                bodyFont: { size: 14 },
+                padding: 12
+            }
+        },
+        scales: {
+            x: {
+                type: 'time',
+                time: {
+                    tooltipFormat: 'dd/MM HH:mm',
+                    displayFormats: {
+                        hour: 'dd/MM HH:mm',
+                        day: 'dd/MM',
+                    }
+                }
+            },
+            y: { // ✅ Agora "y" está dentro de "scales"
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Valores',
+                    font: { size: 14 }
+                },
+                grid: {
+                    color: 'rgba(0,0,0,0.1)'
+                }
+            }
+        },
+        elements: {
+            line: {
+                tension: 0.3,
+                borderWidth: 2
+            },
+            point: {
+                radius: 4,
+                hoverRadius: 6,
+                backgroundColor: '#ffffff'
+            }
+        }
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
-            const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
-            renderCharts(labels);
+            try {
+                console.log('Dados para gráficos:', { dados: {{ dados|json_encode|raw }} });
+
+                const processData = (data) => data ? data.map(v => v ?? null) : [];
+                const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
+
+                initComparativeChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels,
+                    processData({{ dados.rota1_values.velocidade|json_encode|raw }}),
+                    processData({{ dados.rota2_values.velocidade|json_encode|raw }}),
+                    ['#3c8dbc', '#d33724']
+                );
+
+                initComparativeChart('comparisonChartTempo', 'Tempo (segundos)', labels,
+                    processData({{ dados.rota1_values.tempo|json_encode|raw }}),
+                    processData({{ dados.rota2_values.tempo|json_encode|raw }}),
+                    ['#3c8dbc', '#d33724']
+                );
+
+                initDataTables();
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
+            }
         {% endif %}
     });
 
-    function renderCharts(labels) {
-        const velocidadeRota1 = {{ dados.rota1_values.velocidade|json_encode|raw }};
-        const velocidadeRota2 = {{ dados.rota2_values.velocidade|json_encode|raw }};
-        const tempoRota1 = {{ dados.rota1_values.tempo|json_encode|raw }};
-        const tempoRota2 = {{ dados.rota2_values.tempo|json_encode|raw }};
-
-        createChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels, velocidadeRota1, velocidadeRota2, ['#3c8dbc', '#d33724']);
-        createChart('comparisonChartTempo', 'Tempo (segundos)', labels, tempoRota1, tempoRota2, ['#3c8dbc', '#d33724']);
-    }
-
-    function createChart(canvasId, title, labels, data1, data2, colors) {
+    function initComparativeChart(canvasId, title, labels, data1, data2, colors) {
         const ctx = document.getElementById(canvasId);
         if (!ctx) return;
-
-        new Chart(ctx, {
+    
+        // Destruir gráfico existente se houver
+        if (ctx.chart) {
+            ctx.chart.destroy();
+        }
+    
+        ctx.chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels,
@@ -141,47 +340,131 @@
                         data: data1,
                         borderColor: colors[0],
                         backgroundColor: `${colors[0]}20`,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        tension: 0.3,
+                        spanGaps: true
                     },
                     {
                         label: `Rota 2 - ${title}`,
                         data: data2,
                         borderColor: colors[1],
                         backgroundColor: `${colors[1]}20`,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        tension: 0.3,
+                        spanGaps: true
                     }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                ...chartCommonConfig,
+                plugins: {
+                    ...chartCommonConfig.plugins,
+                    title: {
+                        display: true,
+                        text: title,
+                        font: { size: 18 }
+                    }
+                }
+            }
         });
     }
 
-    function exportData() {
-        const headers = ['Data', 'Velocidade Rota 1', 'Tempo Rota 1', 'Velocidade Rota 2', 'Tempo Rota 2'];
-        const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
-            new Date(row.data).toLocaleString('pt-BR'),
-            row.velocidade1?.toFixed(1) ?? 'N/A',
-            row.tempo1?.toFixed(1) ?? 'N/A',
-            row.velocidade2?.toFixed(1) ?? 'N/A',
-            row.tempo2?.toFixed(1) ?? 'N/A'
-        ]);
+    function initDataTables() {
+        if (typeof jq.fn.DataTable !== 'function') return;
+    
+        const tableConfig = {
+            paging: true,
+            pageLength: 10,
+            searching: false,
+            info: true,
+            order: [[0, 'desc']],
+            language: { 
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' 
+            },
+            columns: [
+                { type: 'date' }, 
+                { type: 'number' },
+                { type: 'number' }
+            ],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: 'Exportar para Excel',
+                    exportOptions: { 
+                        modifier: { page: 'all' } 
+                    }
+                }
+            ]
+        };
+    
+        jq('#tabelaRota1').DataTable(tableConfig);
+        jq('#tabelaRota2').DataTable(tableConfig);
+    }
 
-        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Comparação");
-        XLSX.writeFile(wb, `Comparacao_Rotas.xlsx`);
+    function exportData() {
+        {% if dados and dados.merged_data %}
+            try {
+                const headers = ['Data', 'Rota 1 Velocidade (km/h)', 'Rota 1 Tempo (s)', 'Rota 2 Velocidade (km/h)', 'Rota 2 Tempo (s)'];
+                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
+                    row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
+                    row.velocidade1?.toFixed(1) ?? 'N/A',
+                    row.tempo1?.toFixed(1) ?? 'N/A',
+                    row.velocidade2?.toFixed(1) ?? 'N/A',
+                    row.tempo2?.toFixed(1) ?? 'N/A'
+                ]);
+
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Comparação");
+                XLSX.writeFile(wb, `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`);
+            } catch (error) {
+                console.error('Erro na exportação:', error);
+                alert('Falha na exportação: ' + error.message);
+            }
+        {% else %}
+            alert('Selecione ambas as rotas e um período válido antes de exportar.');
+        {% endif %}
     }
 
     function exportChart(chartId) {
         const canvas = document.getElementById(chartId);
-        if (canvas) {
-            const link = document.createElement('a');
-            link.download = `${chartId}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
+        if (!canvas) {
+            alert('Elemento do gráfico não encontrado!');
+            return;
+        }
+
+        try {
+            const tempLink = document.createElement('a');
+            tempLink.download = `${chartId}_${new Date().toISOString().slice(0,10)}.png`;
+            tempLink.href = canvas.toDataURL('image/png', 1.0);
+            tempLink.click();
+        } catch (error) {
+            console.error('Erro na exportação do gráfico:', error);
+            alert('Falha ao exportar gráfico: ' + error.message);
         }
     }
-</script>
 
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if dados %}
+            try {
+                console.log('Dados para gráficos:', { dados: {{ dados|json_encode|raw }} });
+    
+                const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
+    
+                if (labels.length > 0) {
+                    initDataTables();
+                }
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
+            }
+        {% endif %}
+    });
+    
+    let comparisonChartVelocidade = null;
+    let comparisonChartTempo = null;
+    
+</script>
 </body>
 </html>
