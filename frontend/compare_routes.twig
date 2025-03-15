@@ -294,7 +294,7 @@
             try {
                 // Verificação corrigida dos campos obrigatórios
                 console.log('Dados para gráficos:', {
-                    dados: {{ dados|json_encode|raw }},
+                    dados: {{ dados|json_encode|raw }}
                 });
 
                 // Processamento seguro dos dados
@@ -432,6 +432,10 @@
                 }
             ]
         };
+
+        jq('#tabelaRota1').DataTable(tableConfig);
+        jq('#tabelaRota2').DataTable(tableConfig);
+    }
 
     function exportData() {
         {% if dados and dados.merged_data %}
