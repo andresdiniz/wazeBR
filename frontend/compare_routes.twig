@@ -302,7 +302,7 @@
                     ['#3c8dbc', '#d33724']
                 );
 
-                //initDataTables();
+                initDataTables();
             } catch (error) {
                 console.error('Erro na inicialização:', error);
                 alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
@@ -370,8 +370,8 @@
                     targets: 0,
                     type: 'date',
                     render: function(dados) {
-                        return dados.merged_data.data ? new Date(dados.merged_data.data).toLocaleString('pt-BR') : '';
-                    }
+                        return dados?.merged_data?.data ? new Date(dados.merged_data.data).toLocaleString('pt-BR') : '';
+                    }                    
                 },
                 { targets: [1, 2], className: 'dt-body-right' }
             ],
