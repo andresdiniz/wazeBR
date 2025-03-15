@@ -86,7 +86,55 @@
 
     {% if dados %}
         <!-- Seção de Cards -->
-        <!-- ... -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="card comparison-card route1-color shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-signpost"></i> {{ route1_name }}
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-primary mb-2">
+                                    {{ dados.media1.velocidade|round(1) }}<small class="text-muted fs-6">km/h</small>
+                                </div>
+                                <span class="badge bg-primary">Velocidade Média</span>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-secondary mb-2">
+                                    {{ dados.media1.tempo|round(1) }}<small class="text-muted fs-6">s</small>
+                                </div>
+                                <span class="badge bg-secondary">Tempo Médio</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card comparison-card route2-color shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-signpost"></i> {{ route2_name }}
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-primary mb-2">
+                                    {{ dados.media2.velocidade|round(1) }}<small class="text-muted fs-6">km/h</small>
+                                </div>
+                                <span class="badge bg-primary">Velocidade Média</span>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="display-5 text-secondary mb-2">
+                                    {{ dados.media2.tempo|round(1) }}<small class="text-muted fs-6">s</small>
+                                </div>
+                                <span class="badge bg-secondary">Tempo Médio</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Gráficos -->
         <div class="chart-container">
