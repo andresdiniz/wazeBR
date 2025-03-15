@@ -346,44 +346,47 @@
             return;
         }
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: `Rota 1 - ${title}`,
-                        data: data1,
-                        borderColor: colors[0],
-                        backgroundColor: `${colors[0]}20`,
-                        borderWidth: 2,
-                        tension: 0.3,
-                        spanGaps: true
-                    },
-                    {
-                        label: `Rota 2 - ${title}`,
-                        data: data2,
-                        borderColor: colors[1],
-                        backgroundColor: `${colors[1]}20`,
-                        borderWidth: 2,
-                        tension: 0.3,
-                        spanGaps: true
-                    }
-                ]
-            },
-            options: {
-                ...chartCommonConfig,
-                plugins: {
-                    ...chartCommonConfig.plugins,
-                    title: {
-                        display: true,
-                        text: title,
-                        font: {
-                            size: 18
+        // Renderização assíncrona do gráfico
+        requestAnimationFrame(() => {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Rota 1 - ${title}`,
+                            data: data1,
+                            borderColor: colors[0],
+                            backgroundColor: `${colors[0]}20`,
+                            borderWidth: 2,
+                            tension: 0.3,
+                            spanGaps: true
+                        },
+                        {
+                            label: `Rota 2 - ${title}`,
+                            data: data2,
+                            borderColor: colors[1],
+                            backgroundColor: `${colors[1]}20`,
+                            borderWidth: 2,
+                            tension: 0.3,
+                            spanGaps: true
+                        }
+                    ]
+                },
+                options: {
+                    ...chartCommonConfig,
+                    plugins: {
+                        ...chartCommonConfig.plugins,
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 18
+                            }
                         }
                     }
                 }
-            }
+            });
         });
     }
 
