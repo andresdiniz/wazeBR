@@ -217,19 +217,12 @@
 </div>
 
 <!-- Scripts na ordem CORRETA -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script>
     // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
@@ -257,12 +250,12 @@
         },
         scales: {
             x: {
-                type: 'time', // Eixo X do tipo tempo
+                type: 'time',
                 time: {
-                    unit: 'minute', // Unidade de tempo (pode ser 'day', 'hour', 'minute', etc.)
-                    tooltipFormat: 'dd/MM/yyyy HH:mm', // Formato da tooltip
+                    unit: 'minute',
+                    tooltipFormat: 'dd/MM/yyyy HH:mm',
                     displayFormats: {
-                        minute: 'dd/MM HH:mm' // Formato de exibição no eixo
+                        minute: 'dd/MM HH:mm'
                     }
                 },
                 title: {
@@ -336,7 +329,7 @@
                     ['#3c8dbc', '#d33724']
                 );
 
-                // Inicialização das tabelas
+                // Inicialização das tabelas com paginação
                 initDataTables();
 
             } catch (error) {
@@ -399,11 +392,12 @@
             console.warn('DataTables não está disponível');
             return;
         }
-    
+
         const tableConfig = {
-            paging: false,
+            paging: true, // Ativa a paginação
+            pageLength: 10, // Define 10 itens por página
             searching: false,
-            info: false,
+            info: true,
             order: [[0, 'desc']],
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
@@ -421,9 +415,21 @@
                 },
                 { targets: 1, className: 'dt-body-right' },
                 { targets: 2, className: 'dt-body-right' }
+            ],
+            dom: 'Bfrtip', // Adiciona botões de exportação
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: 'Exportar para Excel',
+                    exportOptions: {
+                        modifier: {
+                            page: 'all' // Exporta todos os dados, não apenas a página atual
+                        }
+                    }
+                }
             ]
         };
-    
+
         jq('#tabelaRota1').DataTable(tableConfig);
         jq('#tabelaRota2').DataTable(tableConfig);
     }
@@ -476,6 +482,3 @@
         }
     }
 </script>
-
-</body>
-</html>
