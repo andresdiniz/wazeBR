@@ -228,12 +228,15 @@
 </div>
 
 <!-- Scripts na ordem CORRETA -->
+<!-- Adicionar após o jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
 <script>
     var jq = jQuery.noConflict(true);
 
@@ -371,18 +374,31 @@
 
     function initDataTables() {
         if (typeof jq.fn.DataTable !== 'function') return;
-    
+
+        // Destruir tabelas existentes antes de recriar
+        if (jq.fn.DataTable.isDataTable('#tabelaRota1')) {
+            jq('#tabelaRota1').DataTable().destroy();
+        }
+        if (jq.fn.DataTable.isDataTable('#tabelaRota2')) {
+            jq('#tabelaRota2').DataTable().destroy();
+        }
+
         const tableConfig = {
             paging: true,
             pageLength: 10,
             searching: false,
             info: true,
-            order: [[0, 'desc']],
+            order: [[0, 'desc'],
             language: { 
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' 
             },
             columns: [
-                { type: 'date' }, 
+                { 
+                    type: 'date',
+                    render: function(data) {
+                        return moment(data, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                    }
+                },
                 { type: 'number' },
                 { type: 'number' }
             ],
@@ -397,7 +413,7 @@
                 }
             ]
         };
-    
+
         jq('#tabelaRota1').DataTable(tableConfig);
         jq('#tabelaRota2').DataTable(tableConfig);
     }
@@ -445,23 +461,6 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        {% if dados %}
-            try {
-                console.log('Dados para gráficos:', { dados: {{ dados|json_encode|raw }} });
-    
-                const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
-    
-                if (labels.length > 0) {
-                    initDataTables();
-                }
-            } catch (error) {
-                console.error('Erro na inicialização:', error);
-                alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
-            }
-        {% endif %}
-    });
-    
     let comparisonChartVelocidade = null;
     let comparisonChartTempo = null;
     
