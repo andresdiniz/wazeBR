@@ -250,18 +250,14 @@
             x: {
                 type: 'time',
                 time: {
-                    unit: 'minute',
-                    tooltipFormat: 'DD/MM/YYYY HH:mm',
+                    tooltipFormat: 'dd/MM HH:mm',
                     displayFormats: {
-                        minute: 'DD/MM HH:mm'
+                        hour: 'dd/MM HH:mm',
+                        day: 'dd/MM',
                     }
-                },
-                title: {
-                    display: true,
-                    text: 'Data/Hora',
-                    font: { size: 14 }
                 }
-            },
+            }
+        },
             y: {
                 beginAtZero: true,
                 title: {
