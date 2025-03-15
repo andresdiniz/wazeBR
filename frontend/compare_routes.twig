@@ -401,23 +401,23 @@
             pageLength: 10, // Define 10 itens por página
             searching: false,
             info: true,
-            order: [[0, 'desc']],
+            order: [[0, 'desc']], // Ordena pela primeira coluna (data) em ordem decrescente
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' // Idioma em português
             },
             columnDefs: [
                 {
-                    targets: 0,
-                    type: 'date',
-                    render: function(dados) {
-                        if (!dados) return ''; // Retorna vazio se a data for nula ou indefinida
-                        const date = new Date(dados.labels); // Tenta criar um objeto Date
+                    targets: 0, // Aplica a primeira coluna (data)
+                    type: 'date', // Define o tipo da coluna como data
+                    render: function(data) {
+                        if (!data) return ''; // Retorna vazio se a data for nula ou indefinida
+                        const date = new Date(data); // Tenta criar um objeto Date
                         if (isNaN(date)) return ''; // Retorna vazio se a data for inválida
                         return jq.fn.dataTable.render.datetime('DD/MM/YYYY HH:mm')(date); // Formata a data válida
                     }
                 },
-                { targets: 1, className: 'dt-body-right' },
-                { targets: 2, className: 'dt-body-right' }
+                { targets: 1, className: 'dt-body-right' }, // Alinha a segunda coluna à direita
+                { targets: 2, className: 'dt-body-right' } // Alinha a terceira coluna à direita
             ],
             dom: 'Bfrtip', // Adiciona botões de exportação
             buttons: [
@@ -432,10 +432,6 @@
                 }
             ]
         };
-
-        jq('#tabelaRota1').DataTable(tableConfig);
-        jq('#tabelaRota2').DataTable(tableConfig);
-    }
 
     function exportData() {
         {% if dados and dados.merged_data %}
