@@ -236,7 +236,12 @@
         {% if dados %}
             try {
                 // Verificação corrigida dos campos obrigatórios
-               // VERIFICAÇÃO CORRIGIDA AQUI (linha 855)
+            console.log('Dados para gráficos:', {
+                labels: {{ dados.labels|json_encode|raw }},
+                rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
+                rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }}
+            });
+
             const requiredData = [
                 'rota1_values', 
                 'rota2_values', 
@@ -323,12 +328,6 @@
                 const rota2Velocidade = {{ dados.rota2_values.velocidade|json_encode|raw }}.map(v => v ?? 0);
                 const rota1Tempo = {{ dados.rota1_values.tempo|json_encode|raw }}.map(v => v ?? 0);
                 const rota2Tempo = {{ dados.rota2_values.tempo|json_encode|raw }}.map(v => v ?? 0);
-
-                console.log('Dados para gráficos:', {
-                    labels: {{ dados.labels|json_encode|raw }},
-                    rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
-                    rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }}
-                });
 
                 // Inicialização dos gráficos
                 initComparativeChart(
