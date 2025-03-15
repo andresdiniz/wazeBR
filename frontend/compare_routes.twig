@@ -283,7 +283,7 @@
     };    
 
     document.addEventListener("DOMContentLoaded", function() {
-        {% if data %}
+        {% if dados %}
             try {
                 console.log('Dados para gráficos:', { dados: {{ dados|json_encode|raw }} });
 
