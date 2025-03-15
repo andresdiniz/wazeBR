@@ -370,8 +370,9 @@
                     targets: 0,
                     type: 'date',
                     render: function(dados) {
-                        return dados?.merged_data?.data ? new Date(dados.merged_data.data).toLocaleString('pt-BR') : '';
-                    }                    
+                        const dataItem = dados?.merged_data?.[0]?.data; // Pega o primeiro item do array
+                        return dataItem ? new Date(dataItem).toLocaleString('pt-BR') : '';
+                    }                                       
                 },
                 { targets: [1, 2], className: 'dt-body-right' }
             ],
