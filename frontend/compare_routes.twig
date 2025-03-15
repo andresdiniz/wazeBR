@@ -410,7 +410,7 @@
                     targets: 0,
                     type: 'date',
                     render: function(dados) {
-                        if (!dados.labels) return ''; // Retorna vazio se a data for nula ou indefinida
+                        if (!dados) return ''; // Retorna vazio se a data for nula ou indefinida
                         const date = new Date(dados.labels); // Tenta criar um objeto Date
                         if (isNaN(date)) return ''; // Retorna vazio se a data for inválida
                         return jq.fn.dataTable.render.datetime('DD/MM/YYYY HH:mm')(date); // Formata a data válida
