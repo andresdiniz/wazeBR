@@ -224,10 +224,8 @@
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <script>
-    // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
 
-    // Configuração avançada dos gráficos (escopo global)
     const chartCommonConfig = {
         responsive: true,
         maintainAspectRatio: false,
@@ -253,9 +251,9 @@
                 type: 'time',
                 time: {
                     unit: 'minute',
-                    tooltipFormat: 'dd/MM/yyyy HH:mm',
+                    tooltipFormat: 'DD/MM/YYYY HH:mm',
                     displayFormats: {
-                        minute: 'dd/MM HH:mm'
+                        minute: 'DD/MM HH:mm'
                     }
                 },
                 title: {
@@ -292,46 +290,24 @@
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
             try {
-                // Verificação corrigida dos campos obrigatórios
-                console.log('Dados para gráficos:', {
-                    dados: {{ dados|json_encode|raw }}
-                });
+                console.log('Dados para gráficos:', { dados: {{ dados|json_encode|raw }} });
 
-                // Processamento seguro dos dados
-                const processData = (data) => {
-                    if (!data) return [];
-                    return data.map(v => v ?? null);
-                };
-
-                // Dados dinâmicos
-                const labels = {{ dados.labels|json_encode|raw }};
-                const rota1Velocidade = processData({{ dados.rota1_values.velocidade|json_encode|raw }});
-                const rota2Velocidade = processData({{ dados.rota2_values.velocidade|json_encode|raw }});
-                const rota1Tempo = processData({{ dados.rota1_values.tempo|json_encode|raw }});
-                const rota2Tempo = processData({{ dados.rota2_values.tempo|json_encode|raw }});
-
-                // Inicialização dos gráficos
-                initComparativeChart(
-                    'comparisonChartVelocidade',
-                    'Velocidade (km/h)',
-                    labels,
-                    rota1Velocidade,
-                    rota2Velocidade,
+                const processData = (data) => data ? data.map(v => v ?? null) : [];
+                const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
+                
+                initComparativeChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels,
+                    processData({{ dados.rota1_values.velocidade|json_encode|raw }}),
+                    processData({{ dados.rota2_values.velocidade|json_encode|raw }}),
                     ['#3c8dbc', '#d33724']
                 );
 
-                initComparativeChart(
-                    'comparisonChartTempo',
-                    'Tempo (segundos)',
-                    labels,
-                    rota1Tempo,
-                    rota2Tempo,
+                initComparativeChart('comparisonChartTempo', 'Tempo (segundos)', labels,
+                    processData({{ dados.rota1_values.tempo|json_encode|raw }}),
+                    processData({{ dados.rota2_values.tempo|json_encode|raw }}),
                     ['#3c8dbc', '#d33724']
                 );
 
-                // Inicialização das tabelas com paginação
                 initDataTables();
-
             } catch (error) {
                 console.error('Erro na inicialização:', error);
                 alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
@@ -341,17 +317,13 @@
 
     function initComparativeChart(canvasId, title, labels, data1, data2, colors) {
         const ctx = document.getElementById(canvasId);
-        if (!ctx) {
-            console.warn(`Elemento #${canvasId} não encontrado`);
-            return;
-        }
+        if (!ctx) return;
 
-        // Renderização assíncrona do gráfico
         requestAnimationFrame(() => {
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels,
                     datasets: [
                         {
                             label: `Rota 1 - ${title}`,
@@ -380,9 +352,7 @@
                         title: {
                             display: true,
                             text: title,
-                            font: {
-                                size: 18
-                            }
+                            font: { size: 18 }
                         }
                     }
                 }
@@ -391,73 +361,54 @@
     }
 
     function initDataTables() {
-        if (typeof jq.fn.DataTable !== 'function') {
-            console.warn('DataTables não está disponível');
-            return;
-        }
+        if (typeof jq.fn.DataTable !== 'function') return;
 
         const tableConfig = {
-            paging: true, // Ativa a paginação
-            pageLength: 10, // Define 10 itens por página
+            paging: true,
+            pageLength: 10,
             searching: false,
             info: true,
-            order: [[0, 'desc']], // Ordena pela primeira coluna (data) em ordem decrescente
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' // Idioma em português
-            },
+            order: [[0, 'desc']],
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' },
             columnDefs: [
                 {
-                    targets: 0, // Aplica a primeira coluna (data)
-                    type: 'date', // Define o tipo da coluna como data
-                    render: function(dados) {
-                        if (!dados) return ''; // Retorna vazio se a data for nula ou indefinida
-                        const date = new Date(dados.labels); // Tenta criar um objeto Date
-                        if (isNaN(date)) return ''; // Retorna vazio se a data for inválida
-                        return jq.fn.dataTable.render.datetime('DD/MM/YYYY HH:mm')(date); // Formata a data válida
+                    targets: 0,
+                    type: 'date',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleString('pt-BR') : '';
                     }
                 },
-                { targets: 1, className: 'dt-body-right' }, // Alinha a segunda coluna à direita
-                { targets: 2, className: 'dt-body-right' } // Alinha a terceira coluna à direita
+                { targets: [1, 2], className: 'dt-body-right' }
             ],
-            dom: 'Bfrtip', // Adiciona botões de exportação
+            dom: 'Bfrtip',
             buttons: [
                 {
                     extend: 'excel',
                     text: 'Exportar para Excel',
-                    exportOptions: {
-                        modifier: {
-                            page: 'all' // Exporta todos os dados, não apenas a página atual
-                        }
-                    }
+                    exportOptions: { modifier: { page: 'all' } }
                 }
             ]
         };
-
-        jq('#tabelaRota1').DataTable(tableConfig);
-        jq('#tabelaRota2').DataTable(tableConfig);
+        
+        jq('#tabelaRota1, #tabelaRota2').DataTable(tableConfig);
     }
 
     function exportData() {
         {% if dados and dados.merged_data %}
             try {
                 const headers = ['Data', 'Rota 1 Velocidade (km/h)', 'Rota 1 Tempo (s)', 'Rota 2 Velocidade (km/h)', 'Rota 2 Tempo (s)'];
-                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => {
-                    return [
-                        row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
-                        row.velocidade1?.toFixed(1) ?? 'N/A',
-                        row.tempo1?.toFixed(1) ?? 'N/A',
-                        row.velocidade2?.toFixed(1) ?? 'N/A',
-                        row.tempo2?.toFixed(1) ?? 'N/A'
-                    ];
-                });
+                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
+                    row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
+                    row.velocidade1?.toFixed(1) ?? 'N/A',
+                    row.tempo1?.toFixed(1) ?? 'N/A',
+                    row.velocidade2?.toFixed(1) ?? 'N/A',
+                    row.tempo2?.toFixed(1) ?? 'N/A'
+                ]);
 
                 const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Comparação");
-
-                const fileName = `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`;
-                XLSX.writeFile(wb, fileName);
-
+                XLSX.writeFile(wb, `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`);
             } catch (error) {
                 console.error('Erro na exportação:', error);
                 alert('Falha na exportação: ' + error.message);
