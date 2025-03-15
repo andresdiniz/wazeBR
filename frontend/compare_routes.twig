@@ -228,8 +228,9 @@
 </div>
 
 <!-- Scripts na ordem CORRETA -->
-<!-- Adicionar após o jQuery -->
+<!-- Adicione após o jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.7/sorting/datetime-moment.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -374,33 +375,35 @@
 
     function initDataTables() {
         if (typeof jq.fn.DataTable !== 'function') return;
-
-        // Destruir tabelas existentes antes de recriar
-        if (jq.fn.DataTable.isDataTable('#tabelaRota1')) {
-            jq('#tabelaRota1').DataTable().destroy();
-        }
-        if (jq.fn.DataTable.isDataTable('#tabelaRota2')) {
-            jq('#tabelaRota2').DataTable().destroy();
-        }
-
+    
+        // Destruir tabelas existentes
+        [jq('#tabelaRota1'), jq('#tabelaRota2')].forEach(table => {
+            if (jq.fn.DataTable.isDataTable(table)) {
+                table.DataTable().destroy();
+            }
+        });
+    
+        // Configuração de datas com moment.js
+        jq.fn.dataTable.moment('DD/MM/YYYY HH:mm'); // ✅ Plugin de ordenação
+    
         const tableConfig = {
             paging: true,
             pageLength: 10,
             searching: false,
             info: true,
-            order: [[0, 'desc'],
+            order: [[0, 'desc']], // ✅ Sintaxe correta
             language: { 
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json' 
             },
             columns: [
                 { 
-                    type: 'date',
+                    type: 'datetime-moment', // ✅ Tipo especializado
                     render: function(data) {
-                        return moment(data, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                        return data; // Mantém o formato original
                     }
                 },
-                { type: 'number' },
-                { type: 'number' }
+                { type: 'num' },
+                { type: 'num' }
             ],
             dom: 'Bfrtip',
             buttons: [
@@ -413,7 +416,7 @@
                 }
             ]
         };
-
+    
         jq('#tabelaRota1').DataTable(tableConfig);
         jq('#tabelaRota2').DataTable(tableConfig);
     }
