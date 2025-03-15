@@ -409,7 +409,7 @@
                 {
                     targets: 0,
                     type: 'date',
-                    render: function(dados.labels) {
+                    render: function(dados) {
                         if (!dados.labels) return ''; // Retorna vazio se a data for nula ou indefinida
                         const date = new Date(dados.labels); // Tenta criar um objeto Date
                         if (isNaN(date)) return ''; // Retorna vazio se a data for inválida
