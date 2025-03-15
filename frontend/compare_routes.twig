@@ -411,7 +411,7 @@
                     type: 'date', // Define o tipo da coluna como data
                     render: function(data) {
                         if (!data) return ''; // Retorna vazio se a data for nula ou indefinida
-                        const date = new Date(data); // Tenta criar um objeto Date
+                        const date = new Date(data.labels); // Tenta criar um objeto Date
                         if (isNaN(date)) return ''; // Retorna vazio se a data for inválida
                         return jq.fn.dataTable.render.datetime('DD/MM/YYYY HH:mm')(date); // Formata a data válida
                     }
