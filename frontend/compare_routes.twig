@@ -63,3 +63,105 @@
             <button class="btn btn-primary w-100">Comparar</button>
         </div>
     </form>
+
+    {% if dados %}
+        <div class="row mt-4">
+            <!-- Cards de Resumo -->
+            <div class="col-md-6 mb-3">
+                <div class="card comparison-card route1-color">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ route1_name }}</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="h4 text-primary">{{ dados.media1.velocidade|round(1) }} km/h</div>
+                                <small>Velocidade Média</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-secondary">{{ dados.media1.tempo|round(1) }} s</div>
+                                <small>Tempo Médio</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card comparison-card route2-color">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ route2_name }}</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="h4 text-primary">{{ dados.media2.velocidade|round(1) }} km/h</div>
+                                <small>Velocidade Média</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-secondary">{{ dados.media2.tempo|round(1) }} s</div>
+                                <small>Tempo Médio</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos Comparativos -->
+        <div class="chart-container">
+            <canvas id="comparisonChartVelocidade" class="mt-4"></canvas>
+            <canvas id="comparisonChartTempo" class="mt-4"></canvas>
+        </div>
+
+        <!-- Tabelas Comparativas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4 class="text-center">{{ route1_name }}</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade</th>
+                            <th>Tempo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota1 %}
+                            <tr>
+                                <td>{{ item.data }}</td>
+                                <td>{{ item.velocidade }}</td>
+                                <td>{{ item.tempo }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <h4 class="text-center">{{ route2_name }}</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade</th>
+                            <th>Tempo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota2 %}
+                            <tr>
+                                <td>{{ item.data }}</td>
+                                <td>{{ item.velocidade }}</td>
+                                <td>{{ item.tempo }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botões de Exportação -->
+        <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+            <button class="btn btn-success" onclick="exportData()">Exportar Dados</button>
+            <button class="btn btn-info" onclick="exportChart('comparisonChartVelocidade')">Exportar Gráfico Velocidade</button>
+            <button class="btn btn-info" onclick="exportChart('comparisonChartTempo')">Exportar Gráfico Tempo</button>
+        </div>
+    {% endif %}
+</div>
