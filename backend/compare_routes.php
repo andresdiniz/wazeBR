@@ -100,6 +100,8 @@ if ($route1 && $route2) {
         ];
     };
 
+    // Substituir a parte de rota1_values e rota2_values por:
+
     $dados = [
         'rota1' => $rota1,
         'rota2' => $rota2,
@@ -108,25 +110,39 @@ if ($route1 && $route2) {
         'labels' => $labels,
         'merged_data' => $mergedData,
         'rota1_values' => [
-            'velocidade' => array_column($mergedData, 'velocidade1'),
-            'tempo' => array_column($mergedData, 'tempo1')
+            'velocidade' => array_map(function($item) {
+                return $item['velocidade1'] ?? 0;
+            }, $mergedData),
+            'tempo' => array_map(function($item) {
+                return $item['tempo1'] ?? 0;
+            }, $mergedData)
         ],
         'rota2_values' => [
-            'velocidade' => array_column($mergedData, 'velocidade2'),
-            'tempo' => array_column($mergedData, 'tempo2')
+            'velocidade' => array_map(function($item) {
+                return $item['velocidade2'] ?? 0;
+            }, $mergedData),
+            'tempo' => array_map(function($item) {
+                return $item['tempo2'] ?? 0;
+            }, $mergedData)
         ]
     ];
 }
 
-$data = [
+// Garantir que todos os valores numéricos sejam floats
+array_walk_recursive($dados, function(&$value) {
+    if (is_numeric($value)) {
+        $value = (float)$value;
+    }
+});
+
+echo $twig->render('comparacao_rotas.html', [
     'routes' => $routes,
-    'dados' => $dados,
+    'dados' => $dados ?: new stdClass(), // Evita array vazio
     'route1' => $route1,
     'route2' => $route2,
     'route1_name' => $route1_name,
     'route2_name' => $route2_name,
     'start_date' => $startDate,
     'end_date' => $endDate
-
-];
+]);
 ?>
