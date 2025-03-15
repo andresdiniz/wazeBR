@@ -31,10 +31,58 @@
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Comparação de Rotas</h2>
-    <form method="GET" class="row g-3">
-        <!-- Formulário mantido igual -->
-        <!-- ... -->
-    </form>
+        <!-- Formulário Completo -->
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Rota 1:</label>
+                <select name="route1_id" class="form-select" required>
+                    <option value="">Selecione a primeira rota</option>
+                    {% for route in routes %}
+                        <option value="{{ route.id }}" 
+                            {% if route.id == route1 %}selected{% endif %}>
+                            {{ route.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-md-4">
+                <label class="form-label">Rota 2:</label>
+                <select name="route2_id" class="form-select" required>
+                    <option value="">Selecione a segunda rota</option>
+                    {% for route in routes %}
+                        <option value="{{ route.id }}" 
+                            {% if route.id == route2 %}selected{% endif %}>
+                            {{ route.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-md-2">
+                <label class="form-label">Data Inicial:</label>
+                <input type="date" name="start_date" 
+                    class="form-control" 
+                    value="{{ start_date }}" 
+                    max="{{ "now"|date("Y-m-d") }}" 
+                    required>
+            </div>
+    
+            <div class="col-md-2">
+                <label class="form-label">Data Final:</label>
+                <input type="date" name="end_date" 
+                    class="form-control" 
+                    value="{{ end_date }}" 
+                    max="{{ "now"|date("Y-m-d") }}" 
+                    required>
+            </div>
+    
+            <div class="col-md-12 text-center mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-repeat"></i> Comparar Rotas
+                </button>
+            </div>
+        </form>
 
     {% if dados %}
         <!-- Seção de Cards -->
