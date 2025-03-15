@@ -166,8 +166,141 @@
     {% endif %}
 </div>
 
-<pre id="debug"></pre>
 <script>
-    document.getElementById('debug').innerText = JSON.stringify({{ dados|json_encode|raw }}, null, 2);
-</script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if dados %}
+            // Verificar se existem dados válidos
+            const isValidComparison = {{ dados.rota1_values is defined and dados.rota2_values is defined ? 'true' : 'false' }};
+            
+            if(isValidComparison) {
+                // Configuração comum dos gráficos
+                const chartConfig = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            bodySpacing: 5
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            display: true, 
+                            title: { 
+                                display: true, 
+                                text: 'Data',
+                                color: '#666',
+                                font: { weight: 'bold' }
+                            } 
+                        },
+                        y: { 
+                            display: true, 
+                            title: { 
+                                display: true, 
+                                text: 'Valor',
+                                color: '#666',
+                                font: { weight: 'bold' }
+                            },
+                            grid: { color: '#f3f3f3' }
+                        }
+                    },
+                    elements: { 
+                        line: { 
+                            tension: 0.4,
+                            borderWidth: 2 
+                        },
+                        point: {
+                            radius: 4,
+                            hoverRadius: 6
+                        }
+                    }
+                };
 
+                try {
+                    // Dados para os gráficos
+                    const labels = {{ dados.labels|json_encode|default([])|raw }};
+                    const data1 = {{ dados.rota1_values|json_encode|default({})|raw }};
+                    const data2 = {{ dados.rota2_values|json_encode|default({})|raw }};
+
+                    // Verificar dados mínimos
+                    if(labels.length && data1.velocidade && data2.velocidade) {
+                        // Gráfico de Velocidade
+                        new Chart(document.getElementById('comparisonChartVelocidade'), {
+                            // ... mantido igual ...
+                        });
+
+                        // Gráfico de Tempo
+                        new Chart(document.getElementById('comparisonChartTempo'), {
+                            // ... mantido igual ...
+                        });
+                    }
+
+                    // Inicializar DataTables apenas se existirem tabelas
+                    const tables = document.querySelectorAll('table');
+                    if(tables.length > 0) {
+                        $('table').DataTable({
+                            paging: false,
+                            searching: false,
+                            info: false,
+                            order: [[0, 'desc']],
+                            language: {
+                                emptyTable: "Nenhum dado disponível para comparação"
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro na inicialização:', error);
+                    alert('Ocorreu um erro ao carregar os gráficos. Verifique os dados.');
+                }
+            }
+        {% endif %}
+    });
+
+    function exportData() {
+        {% if dados and dados.merged_data %}
+            try {
+                const data = [
+                    ['Data', 'Rota 1 Velocidade', 'Rota 1 Tempo', 'Rota 2 Velocidade', 'Rota 2 Tempo'],
+                    ...{{ dados.merged_data|json_encode|default([])|raw }}.map(row => [
+                        row.data,
+                        row.velocidade1 ?? 'N/A',
+                        row.tempo1 ?? 'N/A',
+                        row.velocidade2 ?? 'N/A',
+                        row.tempo2 ?? 'N/A'
+                    ])
+                ];
+
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Comparação");
+                XLSX.writeFile(wb, 'comparacao_rotas.xlsx');
+            } catch (error) {
+                console.error('Erro na exportação:', error);
+                alert('Erro ao exportar dados. Tente novamente.');
+            }
+        {% else %}
+            alert('Selecione ambas as rotas e período antes de exportar.');
+        {% endif %}
+    }
+
+    function exportChart(chartId) {
+        const canvas = document.getElementById(chartId);
+        if(canvas) {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `${chartId}_${new Date().toISOString().slice(0,10)}.png`;
+            link.click();
+        } else {
+            alert('Gere os gráficos primeiro selecionando as rotas.');
+        }
+    }
+</script>
