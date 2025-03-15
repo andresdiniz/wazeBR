@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         .comparison-card {
             border-left: 4px solid;
             transition: transform 0.3s;
+            min-height: 180px;
         }
         .comparison-card:hover {
             transform: translateY(-5px);
@@ -24,6 +26,13 @@
             .chart-container { padding: 0 5px; }
             canvas { max-height: 300px; }
             .dataTables_wrapper { overflow-x: auto; }
+            .comparison-card { margin-bottom: 1rem; }
+        }
+        .chart-title {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -31,58 +40,59 @@
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Comparação de Rotas</h2>
-        <!-- Formulário Completo -->
-        <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-4">
-                <label class="form-label">Rota 1:</label>
-                <select name="route1_id" class="form-select" required>
-                    <option value="">Selecione a primeira rota</option>
-                    {% for route in routes %}
-                        <option value="{{ route.id }}" 
-                            {% if route.id == route1 %}selected{% endif %}>
-                            {{ route.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
     
-            <div class="col-md-4">
-                <label class="form-label">Rota 2:</label>
-                <select name="route2_id" class="form-select" required>
-                    <option value="">Selecione a segunda rota</option>
-                    {% for route in routes %}
-                        <option value="{{ route.id }}" 
-                            {% if route.id == route2 %}selected{% endif %}>
-                            {{ route.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-    
-            <div class="col-md-2">
-                <label class="form-label">Data Inicial:</label>
-                <input type="date" name="start_date" 
-                    class="form-control" 
-                    value="{{ start_date }}" 
-                    max="{{ "now"|date("Y-m-d") }}" 
-                    required>
-            </div>
-    
-            <div class="col-md-2">
-                <label class="form-label">Data Final:</label>
-                <input type="date" name="end_date" 
-                    class="form-control" 
-                    value="{{ end_date }}" 
-                    max="{{ "now"|date("Y-m-d") }}" 
-                    required>
-            </div>
-    
-            <div class="col-md-12 text-center mt-3">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="bi bi-arrow-repeat"></i> Comparar Rotas
-                </button>
-            </div>
-        </form>
+    <!-- Formulário Completo -->
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label">Rota 1:</label>
+            <select name="route1_id" class="form-select" required>
+                <option value="">Selecione a primeira rota</option>
+                {% for route in routes %}
+                    <option value="{{ route.id }}" 
+                        {% if route.id == route1 %}selected{% endif %}>
+                        {{ route.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Rota 2:</label>
+            <select name="route2_id" class="form-select" required>
+                <option value="">Selecione a segunda rota</option>
+                {% for route in routes %}
+                    <option value="{{ route.id }}" 
+                        {% if route.id == route2 %}selected{% endif %}>
+                        {{ route.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Data Inicial:</label>
+            <input type="date" name="start_date" 
+                class="form-control" 
+                value="{{ start_date }}" 
+                max="{{ "now"|date("Y-m-d") }}" 
+                required>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Data Final:</label>
+            <input type="date" name="end_date" 
+                class="form-control" 
+                value="{{ end_date }}" 
+                max="{{ "now"|date("Y-m-d") }}" 
+                required>
+        </div>
+
+        <div class="col-md-12 text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-repeat"></i> Comparar Rotas
+            </button>
+        </div>
+    </form>
 
     {% if dados %}
         <!-- Seção de Cards -->
@@ -138,29 +148,71 @@
 
         <!-- Gráficos -->
         <div class="chart-container">
+            <h4 class="chart-title">Comparação de Velocidades</h4>
             <canvas id="comparisonChartVelocidade" class="mt-4"></canvas>
+            
+            <h4 class="chart-title mt-5">Comparação de Tempos</h4>
             <canvas id="comparisonChartTempo" class="mt-4"></canvas>
         </div>
 
         <!-- Tabelas -->
         <div class="row mt-4">
             <div class="col-md-6">
-                <h4 class="text-center">{{ route1_name }}</h4>
-                <table class="table table-striped" id="tabelaRota1">
-                    <!-- ... -->
+                <h4 class="text-center mb-3">{{ route1_name }}</h4>
+                <table class="table table-striped table-hover" id="tabelaRota1">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade (km/h)</th>
+                            <th>Tempo (s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota1 %}
+                            <tr>
+                                <td>{{ item.data|date('d/m/Y H:i') }}</td>
+                                <td>{{ item.velocidade|number_format(1) }}</td>
+                                <td>{{ item.tempo|number_format(1) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
+
             <div class="col-md-6">
-                <h4 class="text-center">{{ route2_name }}</h4>
-                <table class="table table-striped" id="tabelaRota2">
-                    <!-- ... -->
+                <h4 class="text-center mb-3">{{ route2_name }}</h4>
+                <table class="table table-striped table-hover" id="tabelaRota2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Velocidade (km/h)</th>
+                            <th>Tempo (s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados.rota2 %}
+                            <tr>
+                                <td>{{ item.data|date('d/m/Y H:i') }}</td>
+                                <td>{{ item.velocidade|number_format(1) }}</td>
+                                <td>{{ item.tempo|number_format(1) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Botões de Exportação -->
         <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
-            <!-- ... -->
+            <button class="btn btn-success px-4" onclick="exportData()">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Exportar Dados
+            </button>
+            <button class="btn btn-info px-4" onclick="exportChart('comparisonChartVelocidade')">
+                <i class="bi bi-image"></i> Exportar Gráfico Velocidade
+            </button>
+            <button class="btn btn-info px-4" onclick="exportChart('comparisonChartTempo')">
+                <i class="bi bi-image"></i> Exportar Gráfico Tempo
+            </button>
         </div>
     {% endif %}
 </div>
@@ -177,132 +229,241 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
 <script>
-    // Resolver conflitos de jQuery
+    // Resolver conflitos de jQuery de forma definitiva
     var jq = jQuery.noConflict(true);
     
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
-            // Verificação de segurança
-            const hasValidData = {{ dados.rota1 is defined and dados.rota2 is defined ? 'true' : 'false' }};
-            
-            if(hasValidData) {
-                try {
-                    // Configuração dos gráficos
-                    const chartConfig = {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            tooltip: { mode: 'index' }
+            try {
+                // Verificação rigorosa de dados
+                const requiredData = [
+                    'rota1', 'rota2', 'media1', 'media2', 
+                    'labels', 'merged_data', 'rota1_values', 'rota2_values'
+                ];
+                
+                requiredData.forEach(field => {
+                    if(!window.dados || !dados[field]) {
+                        throw new Error(`Campo obrigatório ausente: ${field}`);
+                    }
+                });
+
+                // Configuração avançada dos gráficos
+                const chartCommonConfig = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 },
+                            padding: 12
                         }
-                    };
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'DD/MM/YYYY HH:mm'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Data/Hora',
+                                font: { size: 14 }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Valores',
+                                font: { size: 14 }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        point: {
+                            radius: 4,
+                            hoverRadius: 6,
+                            backgroundColor: '#ffffff'
+                        }
+                    }
+                };
 
-                    // Dados dinâmicos
-                    const labels = {{ dados.labels|json_encode|raw }};
-                    const dataRota1 = {{ dados.rota1_values|json_encode|raw }};
-                    const dataRota2 = {{ dados.rota2_values|json_encode|raw }};
+                // Processamento de dados
+                const labels = {{ dados.labels|json_encode|raw }};
+                const processData = (data) => data.map(v => v ?? null);
 
-                    // Inicializar gráficos
-                    initChart('comparisonChartVelocidade', 'Velocidade', labels, dataRota1.velocidade, dataRota2.velocidade);
-                    initChart('comparisonChartTempo', 'Tempo', labels, dataRota1.tempo, dataRota2.tempo);
+                // Inicialização dos gráficos
+                initComparativeChart(
+                    'comparisonChartVelocidade',
+                    'Velocidade (km/h)',
+                    labels,
+                    processData({{ dados.rota1_values.velocidade|json_encode|raw }}),
+                    processData({{ dados.rota2_values.velocidade|json_encode|raw }}),
+                    ['#3c8dbc', '#d33724']
+                );
 
-                    // Inicializar DataTables
-                    initDataTables();
-                } catch(error) {
-                    console.error('Erro na inicialização:', error);
-                    alert('Erro ao processar dados. Verifique o console.');
-                }
+                initComparativeChart(
+                    'comparisonChartTempo',
+                    'Tempo (segundos)',
+                    labels,
+                    processData({{ dados.rota1_values.tempo|json_encode|raw }}),
+                    processData({{ dados.rota2_values.tempo|json_encode|raw }}),
+                    ['#3c8dbc', '#d33724']
+                );
+
+                // Inicialização das tabelas
+                initDataTables();
+
+            } catch(error) {
+                console.error('Erro crítico:', error);
+                alert(`Falha na inicialização: ${error.message}`);
             }
         {% endif %}
     });
 
-    function initChart(canvasId, metric, labels, data1, data2) {
-        new Chart(document.getElementById(canvasId), {
+    function initComparativeChart(canvasId, title, labels, data1, data2, colors) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) {
+            console.error(`Canvas não encontrado: #${canvasId}`);
+            return;
+        }
+
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    createDataset('Rota 1', data1, '#3c8dbc'),
-                    createDataset('Rota 2', data2, '#d33724')
+                    {
+                        label: `Rota 1 - ${title}`,
+                        data: data1,
+                        borderColor: colors[0],
+                        backgroundColor: `${colors[0]}20`,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        spanGaps: true
+                    },
+                    {
+                        label: `Rota 2 - ${title}`,
+                        data: data2,
+                        borderColor: colors[1],
+                        backgroundColor: `${colors[1]}20`,
+                        borderWidth: 2,
+                        tension: 0.3,
+                        spanGaps: true
+                    }
                 ]
             },
             options: {
-                responsive: true,
-                scales: { y: { beginAtZero: true } },
+                ...chartCommonConfig,
                 plugins: {
-                    title: { 
+                    ...chartCommonConfig.plugins,
+                    title: {
                         display: true,
-                        text: `Comparação de ${metric}`
+                        text: title,
+                        font: {
+                            size: 18
+                        }
                     }
                 }
             }
         });
     }
 
-    function createDataset(label, data, color) {
-        return {
-            label: label,
-            data: data,
-            borderColor: color,
-            backgroundColor: color + '20',
-            borderWidth: 2,
-            tension: 0.3
-        };
-    }
-
     function initDataTables() {
-        if(typeof jq.fn.DataTable === 'function') {
-            jq('#tabelaRota1, #tabelaRota2').DataTable({
-                paging: false,
-                searching: false,
-                info: false,
-                ordering: true,
-                order: [[0, 'desc']],
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
-                },
-                dom: 'Bfrtip',
-                buttons: [
-                    { extend: 'copy', text: 'Copiar' },
-                    { extend: 'csv', text: 'CSV' },
-                    { extend: 'excel', text: 'Excel' }
-                ]
-            });
+        if (typeof jq.fn.DataTable !== 'function') {
+            console.error('DataTables não está disponível');
+            return;
         }
+
+        const tableConfig = {
+            paging: false,
+            searching: false,
+            info: false,
+            order: [[0, 'desc']],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { 
+                    targets: 0,
+                    type: 'date',
+                    render: function(data) {
+                        return data ? jq.fn.dataTable.render.datetime('DD/MM/YYYY HH:mm')(data) : '';
+                    }
+                },
+                { targets: 1, className: 'dt-body-right' },
+                { targets: 2, className: 'dt-body-right' }
+            ]
+        };
+
+        jq('#tabelaRota1').DataTable(tableConfig);
+        jq('#tabelaRota2').DataTable(tableConfig);
     }
 
     function exportData() {
         {% if dados and dados.merged_data %}
             try {
-                const wsData = [
-                    ['Data', 'Rota 1 Velocidade', 'Rota 1 Tempo', 'Rota 2 Velocidade', 'Rota 2 Tempo'],
-                    ...{{ dados.merged_data|json_encode|raw }}.map(row => [
-                        row.data,
-                        row.velocidade1 ?? 'N/A',
-                        row.tempo1 ?? 'N/A',
-                        row.velocidade2 ?? 'N/A',
-                        row.tempo2 ?? 'N/A'
-                    ])
-                ];
+                const headers = ['Data', 'Rota 1 Velocidade (km/h)', 'Rota 1 Tempo (s)', 'Rota 2 Velocidade (km/h)', 'Rota 2 Tempo (s)'];
                 
+                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
+                    row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
+                    row.velocidade1?.toFixed(1) ?? 'N/A',
+                    row.tempo1?.toFixed(1) ?? 'N/A',
+                    row.velocidade2?.toFixed(1) ?? 'N/A',
+                    row.tempo2?.toFixed(1) ?? 'N/A'
+                ]);
+
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.aoa_to_sheet(wsData);
                 XLSX.utils.book_append_sheet(wb, ws, "Comparação");
-                XLSX.writeFile(wb, `comparacao_rotas_${Date.now()}.xlsx`);
+                
+                const fileName = `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+
             } catch(error) {
-                alert('Erro na exportação: ' + error.message);
+                console.error('Erro na exportação:', error);
+                alert('Falha na exportação: ' + error.message);
             }
         {% else %}
-            alert('Selecione ambas as rotas e período antes de exportar.');
+            alert('Selecione ambas as rotas e um período válido antes de exportar.');
         {% endif %}
     }
 
     function exportChart(chartId) {
         const canvas = document.getElementById(chartId);
-        if(canvas) {
+        if (!canvas) {
+            alert('Gráfico não encontrado!');
+            return;
+        }
+
+        try {
             const tempLink = document.createElement('a');
             tempLink.download = `${chartId}_${new Date().toISOString().slice(0,10)}.png`;
-            tempLink.href = canvas.toDataURL('image/png');
+            tempLink.href = canvas.toDataURL('image/png', 1.0);
             tempLink.click();
+        } catch(error) {
+            console.error('Erro ao exportar gráfico:', error);
+            alert('Falha na exportação do gráfico');
         }
     }
 </script>
