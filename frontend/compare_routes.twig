@@ -230,17 +230,17 @@
 <script>
     // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
-    
+
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
             try {
                 // Verificação corrigida dos campos obrigatórios
-            console.log('Dados para gráficos:', {
-                dadoss: {{ dados|json_encode|raw }},
-                //rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
-                //rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }},
+                console.log('Dados para gráficos:', {
+                    dados: {{ dados|json_encode|raw }},
+                    //rota1Velocidade: {{ dados.rota1_values.velocidade|json_encode|raw }},
+                    //rota2Velocidade: {{ dados.rota2_values.velocidade|json_encode|raw }},
+                });
 
-            });
                 // Configuração avançada dos gráficos
                 const chartCommonConfig = {
                     responsive: true,
@@ -302,16 +302,16 @@
 
                 // Processamento seguro dos dados
                 const processData = (data) => {
-                    if(!data) return [];
+                    if (!data) return [];
                     return data.map(v => v ?? null);
                 };
 
                 // Dados dinâmicos
                 const labels = {{ dados.labels|json_encode|raw }};
-                const rota1Velocidade = {{ dados.rota1_values.velocidade|json_encode|raw }}.map(v => v ?? 0);
-                const rota2Velocidade = {{ dados.rota2_values.velocidade|json_encode|raw }}.map(v => v ?? 0);
-                const rota1Tempo = {{ dados.rota1_values.tempo|json_encode|raw }}.map(v => v ?? 0);
-                const rota2Tempo = {{ dados.rota2_values.tempo|json_encode|raw }}.map(v => v ?? 0);
+                const rota1Velocidade = processData({{ dados.rota1_values.velocidade|json_encode|raw }});
+                const rota2Velocidade = processData({{ dados.rota2_values.velocidade|json_encode|raw }});
+                const rota1Tempo = processData({{ dados.rota1_values.tempo|json_encode|raw }});
+                const rota2Tempo = processData({{ dados.rota2_values.tempo|json_encode|raw }});
 
                 // Inicialização dos gráficos
                 initComparativeChart(
@@ -335,7 +335,7 @@
                 // Inicialização das tabelas
                 initDataTables();
 
-            } catch(error) {
+            } catch (error) {
                 console.error('Erro na inicialização:', error);
                 alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
             }
@@ -405,7 +405,7 @@
                 url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
             },
             columnDefs: [
-                { 
+                {
                     targets: 0,
                     type: 'date',
                     render: function(data) {
@@ -438,11 +438,11 @@
                 const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Comparação");
-                
+
                 const fileName = `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`;
                 XLSX.writeFile(wb, fileName);
 
-            } catch(error) {
+            } catch (error) {
                 console.error('Erro na exportação:', error);
                 alert('Falha na exportação: ' + error.message);
             }
@@ -463,7 +463,7 @@
             tempLink.download = `${chartId}_${new Date().toISOString().slice(0,10)}.png`;
             tempLink.href = canvas.toDataURL('image/png', 1.0);
             tempLink.click();
-        } catch(error) {
+        } catch (error) {
             console.error('Erro na exportação do gráfico:', error);
             alert('Falha ao exportar gráfico: ' + error.message);
         }
