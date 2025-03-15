@@ -135,7 +135,7 @@ array_walk_recursive($dados, function(&$value) {
     }
 });
 
-echo $twig->render('comparacao_rotas.html', [
+$data = [
     'routes' => $routes,
     'dados' => $dados ?: new stdClass(), // Evita array vazio
     'route1' => $route1,
@@ -144,5 +144,5 @@ echo $twig->render('comparacao_rotas.html', [
     'route2_name' => $route2_name,
     'start_date' => $startDate,
     'end_date' => $endDate
-]);
+];
 ?>
