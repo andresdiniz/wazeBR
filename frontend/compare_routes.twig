@@ -256,9 +256,8 @@
                         day: 'dd/MM',
                     }
                 }
-            }
-        },
-            y: {
+            },
+            y: { // ✅ Agora "y" está dentro de "scales"
                 beginAtZero: true,
                 title: {
                     display: true,
@@ -281,7 +280,7 @@
                 backgroundColor: '#ffffff'
             }
         }
-    };
+    };    
 
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
