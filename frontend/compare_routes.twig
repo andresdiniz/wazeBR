@@ -229,16 +229,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
 <script>
-    // Resolver conflitos de jQuery de forma definitiva
+    // Resolver conflitos de jQuery
     var jq = jQuery.noConflict(true);
     
     document.addEventListener("DOMContentLoaded", function() {
         {% if dados %}
             try {
-                // Verificação rigorosa de dados
+                // Verificação corrigida dos campos obrigatórios
                 const requiredData = [
-                    'rota1', 'rota2', 'media1', 'media2', 
-                    'labels', 'merged_data', 'rota1_values', 'rota2_values'
+                    'rota1_values', 'rota2_values', 'media1', 'media2', 
+                    'labels', 'merged_data'
                 ];
                 
                 requiredData.forEach(field => {
@@ -256,9 +256,7 @@
                             position: 'top',
                             labels: {
                                 padding: 20,
-                                font: {
-                                    size: 14
-                                }
+                                font: { size: 14 }
                             }
                         },
                         tooltip: {
@@ -308,17 +306,26 @@
                     }
                 };
 
-                // Processamento de dados
+                // Processamento seguro dos dados
+                const processData = (data) => {
+                    if(!data) return [];
+                    return data.map(v => v ?? null);
+                };
+
+                // Dados dinâmicos
                 const labels = {{ dados.labels|json_encode|raw }};
-                const processData = (data) => data.map(v => v ?? null);
+                const rota1Velocidade = processData({{ dados.rota1_values.velocidade|json_encode|raw }});
+                const rota2Velocidade = processData({{ dados.rota2_values.velocidade|json_encode|raw }});
+                const rota1Tempo = processData({{ dados.rota1_values.tempo|json_encode|raw }});
+                const rota2Tempo = processData({{ dados.rota2_values.tempo|json_encode|raw }});
 
                 // Inicialização dos gráficos
                 initComparativeChart(
                     'comparisonChartVelocidade',
                     'Velocidade (km/h)',
                     labels,
-                    processData({{ dados.rota1_values.velocidade|json_encode|raw }}),
-                    processData({{ dados.rota2_values.velocidade|json_encode|raw }}),
+                    rota1Velocidade,
+                    rota2Velocidade,
                     ['#3c8dbc', '#d33724']
                 );
 
@@ -326,8 +333,8 @@
                     'comparisonChartTempo',
                     'Tempo (segundos)',
                     labels,
-                    processData({{ dados.rota1_values.tempo|json_encode|raw }}),
-                    processData({{ dados.rota2_values.tempo|json_encode|raw }}),
+                    rota1Tempo,
+                    rota2Tempo,
                     ['#3c8dbc', '#d33724']
                 );
 
@@ -335,8 +342,8 @@
                 initDataTables();
 
             } catch(error) {
-                console.error('Erro crítico:', error);
-                alert(`Falha na inicialização: ${error.message}`);
+                console.error('Erro na inicialização:', error);
+                alert(`Erro: ${error.message}\n\nOs gráficos não serão renderizados.`);
             }
         {% endif %}
     });
@@ -344,7 +351,7 @@
     function initComparativeChart(canvasId, title, labels, data1, data2, colors) {
         const ctx = document.getElementById(canvasId);
         if (!ctx) {
-            console.error(`Canvas não encontrado: #${canvasId}`);
+            console.warn(`Elemento #${canvasId} não encontrado`);
             return;
         }
 
@@ -391,7 +398,7 @@
 
     function initDataTables() {
         if (typeof jq.fn.DataTable !== 'function') {
-            console.error('DataTables não está disponível');
+            console.warn('DataTables não está disponível');
             return;
         }
 
@@ -424,14 +431,15 @@
         {% if dados and dados.merged_data %}
             try {
                 const headers = ['Data', 'Rota 1 Velocidade (km/h)', 'Rota 1 Tempo (s)', 'Rota 2 Velocidade (km/h)', 'Rota 2 Tempo (s)'];
-                
-                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
-                    row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
-                    row.velocidade1?.toFixed(1) ?? 'N/A',
-                    row.tempo1?.toFixed(1) ?? 'N/A',
-                    row.velocidade2?.toFixed(1) ?? 'N/A',
-                    row.tempo2?.toFixed(1) ?? 'N/A'
-                ]);
+                const rows = {{ dados.merged_data|json_encode|raw }}.map(row => {
+                    return [
+                        row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
+                        row.velocidade1?.toFixed(1) ?? 'N/A',
+                        row.tempo1?.toFixed(1) ?? 'N/A',
+                        row.velocidade2?.toFixed(1) ?? 'N/A',
+                        row.tempo2?.toFixed(1) ?? 'N/A'
+                    ];
+                });
 
                 const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
                 const wb = XLSX.utils.book_new();
@@ -452,7 +460,7 @@
     function exportChart(chartId) {
         const canvas = document.getElementById(chartId);
         if (!canvas) {
-            alert('Gráfico não encontrado!');
+            alert('Elemento do gráfico não encontrado!');
             return;
         }
 
@@ -462,8 +470,8 @@
             tempLink.href = canvas.toDataURL('image/png', 1.0);
             tempLink.click();
         } catch(error) {
-            console.error('Erro ao exportar gráfico:', error);
-            alert('Falha na exportação do gráfico');
+            console.error('Erro na exportação do gráfico:', error);
+            alert('Falha ao exportar gráfico: ' + error.message);
         }
     }
 </script>
