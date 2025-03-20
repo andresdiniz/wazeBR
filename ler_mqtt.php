@@ -1,4 +1,9 @@
 <?php
+ini_set('display_errors', 1);  // Exibe os erros diretamente no navegador
+ini_set('display_startup_errors', 1);  // Exibe erros de inicialização
+
+// Define o nível de erro a ser relatado
+error_reporting(E_ALL);  // Reporta todos os tipos de erros, warnings e notices
 // Inicia o servidor PHP
 // Defina o cabeçalho de conteúdo como JSON
 header('Content-Type: application/json');
