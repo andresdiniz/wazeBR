@@ -59,19 +59,32 @@ function atualizarUUIDs($pdo) {
     $agora = new DateTime();
     $agoraFormatado = $agora->format('Y-m-d H:i:s');
 
-    $updateUUIDQuery = "
-        UPDATE events 
-        SET uuid = UUID(), ultima_atualizacao = :agora
-        WHERE is_active = 1
-          AND endtime >= :agora
-    ";
-
-    $stmt = $pdo->prepare($updateUUIDQuery);
+    // Buscar todos os eventos ativos que precisam de um novo UUID
+    $query = "SELECT id FROM events WHERE is_active = 1 AND endtime >= :agora";
+    $stmt = $pdo->prepare($query);
     $stmt->bindParam(':agora', $agoraFormatado, PDO::PARAM_STR);
     $stmt->execute();
+    $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "UUIDs atualizados em " . $agoraFormatado . " (UTC-3)\n";
+    if ($eventos) {
+        foreach ($eventos as $evento) {
+            // Gerar um UUID único no PHP
+            $novoUUID = bin2hex(random_bytes(16));
+
+            // Atualizar cada evento com um UUID único
+            $updateQuery = "UPDATE events SET uuid = :uuid, ultima_atualizacao = :agora WHERE id = :id";
+            $updateStmt = $pdo->prepare($updateQuery);
+            $updateStmt->bindParam(':uuid', $novoUUID, PDO::PARAM_STR);
+            $updateStmt->bindParam(':agora', $agoraFormatado, PDO::PARAM_STR);
+            $updateStmt->bindParam(':id', $evento['id'], PDO::PARAM_INT);
+            $updateStmt->execute();
+        }
+        echo "UUIDs atualizados em " . $agoraFormatado . " (UTC-3)\n";
+    } else {
+        echo "Nenhum evento para atualizar.\n";
+    }
 }
+
 
 // 🔴 Chamar a função no início do script
 atualizarUUIDsSeNecessario($pdo);
