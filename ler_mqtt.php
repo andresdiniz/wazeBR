@@ -9,7 +9,8 @@ error_reporting(E_ALL);  // Reporta todos os tipos de erros, warnings e notices
 header('Content-Type: application/json');
 
 // Carregar o autoloader do Composer (se você usar o Composer)
-require 'vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
 
 // Usando a biblioteca phpMQTT para conectar ao HiveMQ
 use Bluerhinos\phpMQTT;
