@@ -181,9 +181,11 @@ foreach ($rows as $row) {
 // 🔴 Garantir que todos os parceiros tenham arquivos, mesmo sem eventos
 foreach ($parceiros as $idParceiro) {
     $xml = new DOMDocument('1.0', 'UTF-8');
+    $root = $xml->createElement('incidents');
     $xml->formatOutput = true;
 
-    $root = $xml->createElement('incidents');
+    $root = $xml->createElement('<?xml version="1.0" ?>');
+    $root->setAttribute('xmlns', 'https://www.gstatic.com/road-incidents/cifsv2');
     $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
     $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
     $xml->appendChild($root);
