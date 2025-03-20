@@ -85,7 +85,6 @@ function atualizarUUIDs($pdo) {
     }
 }
 
-
 // 🔴 Chamar a função no início do script
 atualizarUUIDsSeNecessario($pdo);
 
@@ -153,7 +152,7 @@ foreach ($rows as $row) {
             'lane_impacts' => [],
             'schedules' => [],
         ];
-    }
+    }    
 
     if ($row['source_id']) {
         $eventosPorParceiro[$idParceiro][$eventUuid]['sources'][] = [
