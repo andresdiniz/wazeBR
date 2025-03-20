@@ -19,11 +19,6 @@ $currentDateTime = date('Y-m-d H:i:s');
 /**
  * Função para atualizar o UUID de eventos ativos a cada 5 minutos
  */
-$currentDateTime = date('Y-m-d H:i:s');
-
-/**
- * Atualiza os UUIDs apenas se passaram 10 minutos desde a última atualização
- */
 function atualizarUUIDsSeNecessario($pdo) {
     // Buscar a última atualização do banco de dados (UTC)
     $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
@@ -50,7 +45,8 @@ function atualizarUUIDsSeNecessario($pdo) {
     if ($diferencaMinutos >= 10) {
         atualizarUUIDs($pdo);
     }
-    echo number_format($diferencaMinutos, 2) . " minutos desde a última atualização\n";}
+    echo number_format($diferencaMinutos, 2) . " minutos desde a última atualização\n";
+}
 
 /**
  * Atualiza os UUIDs no banco de dados
@@ -85,16 +81,16 @@ function atualizarUUIDs($pdo) {
     }
 }
 
-// 🔴 Chamar a função no início do script
+// Chamar a função no início do script
 atualizarUUIDsSeNecessario($pdo);
 
-// 🔴 Buscar parceiros distintos
+// Buscar parceiros distintos
 $parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
 $parceiroStmt = $pdo->prepare($parceiroQuery);
 $parceiroStmt->execute();
 $parceiros = $parceiroStmt->fetchAll(PDO::FETCH_COLUMN);
 
-// 🔴 Buscar eventos ativos e não expirados
+// Buscar eventos ativos e não expirados
 $query = "
     SELECT 
         e.uuid AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
@@ -123,7 +119,7 @@ $statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $statement->execute();
 $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-// 🔴 Organizar eventos por parceiro
+// Organizar eventos por parceiro
 $eventosPorParceiro = [];
 foreach ($rows as $row) {
     $idParceiro = $row['id_parceiro'];
@@ -178,13 +174,12 @@ foreach ($rows as $row) {
     }
 }
 
-// 🔴 Garantir que todos os parceiros tenham arquivos, mesmo sem eventos
+// Garantir que todos os parceiros tenham arquivos XML, mesmo sem eventos
 foreach ($parceiros as $idParceiro) {
     $xml = new DOMDocument('1.0', 'UTF-8');
     $root = $xml->createElement('incidents');
     $xml->formatOutput = true;
 
-    $root = $xml->createElement('<?xml version="1.0" ?>');
     $root->setAttribute('xmlns', 'https://www.gstatic.com/road-incidents/cifsv2');
     $root->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
     $root->setAttribute('xsi:noNamespaceSchemaLocation', 'https://www.gstatic.com/road-incidents/cifsv2.xsd');
@@ -227,7 +222,8 @@ foreach ($parceiros as $idParceiro) {
     $xml->save($xmlPath);
     echo "Arquivo XML atualizado para parceiro {$idParceiro}: {$xmlPath}\n";
 }
-// 🔴 Atualizar eventos expirados para is_active = 2
+
+// Atualizar eventos expirados para is_active = 2
 $updateQuery = "
     UPDATE events 
     SET is_active = 2 
@@ -236,4 +232,5 @@ $updateQuery = "
 $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
+
 ?>
