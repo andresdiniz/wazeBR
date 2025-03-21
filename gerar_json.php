@@ -19,6 +19,7 @@ $currentDateTime = date('Y-m-d H:i:s');
 /**
  * Função para atualizar o UUID de eventos ativos a cada 5 minutos
  */
+/*
 function atualizarUUIDsSeNecessario($pdo) {
     // Buscar a última atualização do banco de dados (UTC)
     $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
@@ -51,6 +52,7 @@ function atualizarUUIDsSeNecessario($pdo) {
 /**
  * Atualiza os UUIDs no banco de dados
  */
+/*
 function atualizarUUIDs($pdo) {
     $agora = new DateTime();
     $agoraFormatado = $agora->format('Y-m-d H:i:s');
@@ -83,7 +85,7 @@ function atualizarUUIDs($pdo) {
 
 // 🔴 Chamar a função no início do script
 atualizarUUIDsSeNecessario($pdo);
-
+*/
 // 🔴 Buscar parceiros distintos
 $parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
 $parceiroStmt = $pdo->prepare($parceiroQuery);
