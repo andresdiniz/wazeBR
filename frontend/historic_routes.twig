@@ -376,73 +376,58 @@
                     Classificação baseada no desempenho relativo ao período
                 </div>
                 <div class="row mt-3">`;
-// Determinar status baseado no período horário atual
-const currentLabel = labels[labels.length - 1];
-const [currentDate, currentTime] = currentLabel.split(' ');
-const currentHour = parseInt(currentTime.split(':')[0], 10);
 
-// Encontrar o período atual
-let currentPeriod;
-for (const period of Object.values(timeAnalysis)) {
-    if (currentHour >= period.start && currentHour < period.end) {
-        currentPeriod = period;
-        break;
-    }
-}
+            Object.values(timeAnalysis).forEach(period => {
+                if (period.speeds.length === 0) return;
+                
+                const avg = period.speeds.reduce((a, b) => a + b, 0) / period.speeds.length;
+                const deviation = ((avg - overallAvg) / overallAvg * 100).toFixed(1);
+                
+                let status = 'secondary';
+                let statusText = 'Sem dados suficientes';
+                let statusDescription = '';
 
-// Calcular média do período
-const periodAvg = currentPeriod.speeds.length > 0 
-    ? currentPeriod.speeds.reduce((a, b) => a + b, 0) / currentPeriod.speeds.length
-    : 0;
+                // Classificação dinâmica (alterado para 5 níveis)
+                if (avg >= overallAvg * 1.20) {
+                    status = 'success';
+                    statusText = 'Excelente';
+                    statusDescription = 'Muito acima da média';
+                } else if (avg >= overallAvg * 1.10) {
+                    status = 'info';
+                    statusText = 'Bom';
+                    statusDescription = 'Acima da média';
+                } else if (avg >= overallAvg * 0.95) {
+                    status = 'primary';
+                    statusText = 'Normal';
+                    statusDescription = 'Dentro da média';
+                } else if (avg >= overallAvg * 0.85) {
+                    status = 'warning';
+                    statusText = 'Atenção';
+                    statusDescription = 'Abaixo da média';
+                } else {
+                    status = 'danger';
+                    statusText = 'Crítico';
+                    statusDescription = 'Muito abaixo da média';
+                }
 
-// Função de classificação atualizada
-function getCurrentStatus(speed, avg) {
-    if (avg === 0) return ['secondary', 'Sem dados'];
-    if (speed >= avg * 1.20) return ['success', 'Excelente'];
-    if (speed >= avg * 1.10) return ['info', 'Bom'];
-    if (speed >= avg * 0.95) return ['primary', 'Normal'];
-    if (speed >= avg * 0.85) return ['warning', 'Atenção'];
-    return ['danger', 'Crítico'];
-}
+                analysisHTML += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-${status} h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${period.label}</h5>
+                                <div class="display-4 text-${status}">${statusText}</div>
+                                <p class="card-text mt-2">
+                                    Média: <strong>${avg.toFixed(1)} km/h</strong><br>
+                                    Desvio: ${deviation}%<br>
+                                    Registros: ${period.speeds.length}<br>
+                                    <small>${statusDescription}</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
 
-// Aplicar classificação
-const [currentStatus, currentStatusText] = getCurrentStatus(currentSpeed, periodAvg);
-
-// Atualizar a exibição do status
-const statusHTML = `
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card border-${currentStatus} shadow">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-4 text-center">
-                        <div class="display-4 text-${currentStatus}">${currentStatusText}</div>
-                        <small class="text-muted">${currentTime}</small>
-                    </div>
-                    <div class="col-md-8">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-4">Velocidade Atual</dt>
-                            <dd class="col-sm-8">${currentSpeed.toFixed(1)} km/h</dd>
-                            
-                            <dt class="col-sm-4">Período Atual</dt>
-                            <dd class="col-sm-8">${currentPeriod?.label || 'N/A'}</dd>
-                            
-                            <dt class="col-sm-4">Média do Período</dt>
-                            <dd class="col-sm-8">${periodAvg.toFixed(1)} km/h</dd>
-                            
-                            <dt class="col-sm-4">Desvio</dt>
-                            <dd class="col-sm-8">
-                                <span class="badge bg-${currentStatus}">
-                                    ${((currentSpeed - periodAvg)/periodAvg * 100).toFixed(1)}%
-                                </span>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>`;
+            analysisHTML += '</div>';
             
             // Inserir elementos na página (modificado)
             document.getElementById("sentimentMessage").innerHTML = statusHTML + analysisHTML;
