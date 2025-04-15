@@ -235,10 +235,8 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
             'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
             'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
         ];
-    
-        $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-    
-        return $json;
+        
+        return $result;
     }
     
 
