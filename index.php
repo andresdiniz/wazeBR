@@ -108,6 +108,7 @@ try {
     if (file_exists($controllerPath)) {
         require_once $controllerPath; // O controlador pode manipular $data
     }
+    $data = $data ?? [];
 echo $twig->render($templatePath, $data);
 /* Tesye para tornar mais modular
 $combinedData = [
