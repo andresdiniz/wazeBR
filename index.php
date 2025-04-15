@@ -72,13 +72,16 @@ if ($settings['manutencao'] ?? false) {
     exit();
 }
 
-// Determina a página solicitada
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$basePath = ''; // Subpasta onde o site está hospedado
+$page = $uri ?: 'home'; // Se vazio, vai para home
 
-$pages = getSitepages($pdo, $uri);
+$pages = getSitepages($pdo, $page);
+$pageData = $pages['pageData'] ?? '';
+$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$page = $uri ?: 'home'; // Se vazio, vai para home
 
-$pageData = $pages['pageData'] ?? '';  // Valor padrão caso 'title' não esteja presente
+$pages = getSitepages($pdo, $page);
+$pageData = $pages['pageData'] ?? '';
 
 $dados = [ //Manter como dados, devido interferencia com a variavel data passada
     'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),  // Usuário logado
