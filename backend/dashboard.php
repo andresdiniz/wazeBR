@@ -192,27 +192,24 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
         $params[':id_parceiro'] = $id_parceiro;
     }
 
-    // Função auxiliar para executar a query e retornar a soma
+    // Função auxiliar para executar query e retornar soma
     $getSum = function($table, $column, $extraCondition = '') use ($pdo, $filterParceiro, $params) {
-        $sql = "SELECT SUM($column) AS total FROM $table WHERE is_active = 1 $extraCondition $filterParceiro";
+        $sql = "SELECT COALESCE(SUM($column), 0) AS total FROM $table WHERE is_active = 1 $extraCondition $filterParceiro";
         $stmt = $pdo->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value, PDO::PARAM_INT);
         }
         $stmt->execute();
-        return $stmt->fetchColumn() ?: 0;
+        return (float)$stmt->fetchColumn();
     };
 
-    // Trânsito lento
     $kmsLentoIrregularities = $getSum('irregularities', 'length', 'AND jam_level > 1');
     $kmsLentoSubroutes = $getSum('subroutes', 'length', 'AND jam_level > 1');
 
-    // Atrasos
     $atrasoIrregularities = $getSum('irregularities', 'time - historic_time', 'AND time > historic_time');
     $atrasoRoutes = $getSum('routes', 'time - historic_time', 'AND time > historic_time');
     $atrasoSubroutes = $getSum('subroutes', 'time - historic_time', 'AND time > historic_time');
 
-    // Totais
     $totalKmsLento = $kmsLentoIrregularities + $kmsLentoSubroutes;
     $totalAtrasoSegundos = $atrasoIrregularities + $atrasoRoutes + $atrasoSubroutes;
 
