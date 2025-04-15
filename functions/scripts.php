@@ -524,30 +524,23 @@ function traduzirAlerta($tipo, $subtipo) {
 }
 
 function getParceiros(PDO $pdo, $id_parceiro = null) {
-    // Inicia a consulta SQL base
     $query = "SELECT * FROM parceiros";
     
-    // Verifica se o id_parceiro é fornecido e não é o valor reservado para administrador (99)
+    // Se o ID do parceiro for passado e não for o administrador (99), aplica o filtro
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
-        // Aplica o filtro para buscar pelo id_parceiro
-        $query .= " WHERE id = :id_parceiro";
+        $query .= " WHERE id_parceiro = :id_parceiro";
     }
 
-    // Prepara a consulta
     $stmt = $pdo->prepare($query);
 
-    // Se necessário, vincula o parâmetro para o id_parceiro
+    // Se necessário, vincula o parâmetro do parceiro
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
 
-    // Executa a consulta
     $stmt->execute();
-
-    // Retorna os resultados como um array associativo
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
 function generateUuid() {
     $data = random_bytes(16);
     // Ajustando os bits de versão para que seja um UUID v4 (aleatório)
