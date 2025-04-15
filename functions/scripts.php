@@ -552,11 +552,47 @@ function generateUuid() {
 function measurePerformance(callable $function, &$metric) {
     $start = microtime(true);
     $memoryStart = memory_get_usage();
-    $result = $function();
     
+    // Inicia a captura de tráfego de rede
+    $networkStart = [
+        'bytes_sent' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2')),
+        'bytes_recv' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2 | tail -1'))
+    ];
+
+    // Inicia as estatísticas do banco de dados
+    $dbStart = [
+        'queries' => 0,
+        'time' => 0,
+        'connection_time' => microtime(true)
+    ];
+
+    $result = $function();
+
+    // Captura métricas finais
+    $networkEnd = [
+        'bytes_sent' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2')),
+        'bytes_recv' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2 | tail -1'))
+    ];
+
+    // Calcula métricas de rede
+    $networkMetrics = [
+        'bytes_sent' => $networkEnd['bytes_sent'] - $networkStart['bytes_sent'],
+        'bytes_recv' => $networkEnd['bytes_recv'] - $networkStart['bytes_recv'],
+        'http_response_size' => ob_get_length() // Tamanho da resposta HTTP
+    ];
+
+    // Calcula métricas do banco de dados
+    $dbMetrics = [
+        'connection_time' => round((microtime(true) - $dbStart['connection_time']) * 1000, 2) . ' ms',
+        'total_queries' => $GLOBALS['query_count'] ?? 0,
+        'query_time' => round(($GLOBALS['query_time'] ?? 0) * 1000, 2) . ' ms'
+    ];
+
     $metric = [
         'time' => round((microtime(true) - $start) * 1000, 2) . ' ms',
-        'memory' => round((memory_get_peak_usage() - $memoryStart) / 1024 / 1024, 2) . ' MB'
+        'memory' => round((memory_get_peak_usage() - $memoryStart) / 1024 / 1024, 2) . ' MB',
+        'network' => $networkMetrics,
+        'database' => $dbMetrics
     ];
     
     return $result;
@@ -566,7 +602,11 @@ function savePerformanceMetrics($metrics, $startTime) {
     $logData = [
         'timestamp' => date('c'),
         'total_time' => round((microtime(true) - $startTime) * 1000, 2) . ' ms',
-        'metrics' => $metrics
+        'system_metrics' => [
+            'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB',
+            'cpu_usage' => round(sys_getloadavg()[0], 2) . '%'
+        ],
+        'detailed_metrics' => $metrics
     ];
     
     file_put_contents(
