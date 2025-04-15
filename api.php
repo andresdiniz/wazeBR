@@ -743,7 +743,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $userEmail = $email; // E-mail do usuário
                     $userName = $nome;
                     $userPassword = $password;
-                    $loginLink = "https://fenixsmm.store/wazeportal/";
+                    $loginLink = "https://wazeportal.com.br/";
 
                     $message = "
                         <html>

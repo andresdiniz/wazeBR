@@ -74,7 +74,7 @@ if ($settings['manutencao'] ?? false) {
 
 // Determina a página solicitada
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$basePath = 'wazeportal'; // Subpasta onde o site está hospedado
+$basePath = ''; // Subpasta onde o site está hospedado
 
 $pages = getSitepages($pdo, $uri);
 
