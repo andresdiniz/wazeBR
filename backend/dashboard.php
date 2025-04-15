@@ -113,4 +113,3 @@ savePerformanceMetrics($metrics, $start);
 
 // Limpa buffer e envia resposta
 ob_end_clean();
-echo $twig->render('dashboard.twig', $data);    
