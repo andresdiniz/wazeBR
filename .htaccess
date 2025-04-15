@@ -1,8 +1,8 @@
 # Habilita RewriteEngine
 RewriteEngine On
 
-# Define o diretório base (ajuste caso o site não esteja na raiz)
-RewriteBase /wazeportal
+# Não precisa de RewriteBase /wazeportal, já que o site não está mais em uma subpasta
+# RewriteBase /wazeportal
 
 # Bloqueia o acesso ao arquivo .env
 <Files ".env">
@@ -11,9 +11,9 @@ RewriteBase /wazeportal
 </Files>
 
 # Permite o acesso direto à pasta /parceiros
-RewriteCond %{REQUEST_URI} !^/wazeportal/parceiros/
+RewriteCond %{REQUEST_URI} !^/parceiros/
 
 # Redireciona tudo para o index.php, exceto a pasta /parceiros
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^ index.php [QSA,L]

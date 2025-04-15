@@ -94,11 +94,6 @@ $dados = [ //Manter como dados, devido interferencia com a variavel data passada
 echo $twig->render('header.twig', $dados);
 echo $twig->render('sidebar.twig', $dados);
 
-// Remove o basePath da URI, se necessário
-if (!empty($basePath) && strpos($uri, $basePath) === 0) {
-    $uri = substr($uri, strlen($basePath));
-}
-
 $uri = trim($uri, '/'); // Remove barras extras
 $page = $uri ?: 'home'; // Define 'home' como padrão se vazio
 
