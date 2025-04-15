@@ -530,7 +530,7 @@ function getParceiros(PDO $pdo, $id_parceiro = null) {
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
         $query .= " WHERE id = :id_parceiro";
     }
-
+    echo $query; // Adicionado para depuração
     $stmt = $pdo->prepare($query);
 
     // Se necessário, vincula o parâmetro do parceiro
