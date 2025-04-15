@@ -7,6 +7,7 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
+echo $id_parceiro;
 
 // Configura o carregador do Twig para buscar templates na pasta "frontend"
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
