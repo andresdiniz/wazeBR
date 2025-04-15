@@ -237,7 +237,6 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
     ];
 
     $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-    file_put_contents($cacheFile, $json);
 
     return $json;
 }
