@@ -57,10 +57,9 @@ try {
 
     // Em produção, grava o erro em um arquivo de log
 
-    error_log("Erro de Banco de Dados: " . $e->getMessage() . "\n" .
-              "Arquivo: " . $e->getFile() . " - Linha: " . $e->getLine()); // Certifique-se de que o caminho está correto
+    error_log("Erro de Banco de Dados: " . $e->getMessage() . "\n" .); // Certifique-se de que o caminho está correto
     
     // Exibindo uma mensagem amigável ao usuário
-    die("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde." . $e->getMessage() );
+    die("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde." . "\n" . "Arquivo: " . $e->getFile() . " - Linha: " . $e->getLine() );
 }
 ?>
