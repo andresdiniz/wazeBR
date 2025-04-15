@@ -13,30 +13,40 @@ class MonitoredPDO extends PDO {
     private $queryCount = 0;
     private $totalQueryTime = 0;
 
-    public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array()) {
+    // Correção da assinatura do método query
+    public function query(
+        string $query, 
+        ?int $fetchMode = null, 
+        mixed ...$fetchModeArgs
+    ): PDOStatement|false {
         $start = microtime(true);
-        $result = parent::query($statement, $mode, $arg3, $ctorargs);
+        $stmt = parent::query($query, $fetchMode, ...$fetchModeArgs);
         $this->updateStats($start);
-        return $result;
+        return $stmt;
     }
 
-    public function exec($statement) {
+    // Método exec corrigido
+    public function exec(string $statement): int|false {
         $start = microtime(true);
         $result = parent::exec($statement);
         $this->updateStats($start);
         return $result;
     }
 
-    public function prepare($statement, $options = array()) {
+    // Método prepare corrigido
+    public function prepare(
+        string $query, 
+        array $options = []
+    ): PDOStatement|false {
         $start = microtime(true);
-        $stmt = parent::prepare($statement, $options);
+        $stmt = parent::prepare($query, $options);
         $this->updateStats($start);
         return $stmt;
     }
 
-    private function updateStats($start) {
+    private function updateStats(float $startTime): void {
         $this->queryCount++;
-        $this->totalQueryTime += microtime(true) - $start;
+        $this->totalQueryTime += microtime(true) - $startTime;
         $GLOBALS['query_count'] = $this->queryCount;
         $GLOBALS['query_time'] = $this->totalQueryTime;
     }
