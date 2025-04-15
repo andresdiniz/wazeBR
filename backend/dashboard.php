@@ -1,4 +1,5 @@
 <?php
+$start = microtime(true);
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
@@ -14,6 +15,7 @@ $twig = new Environment($loader);
 $pdo = Database::getConnection();
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
+session_write_close(); // Libera o lock da sessão
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
 function getAccidentAlerts(PDO $pdo, $id_parceiro) {
@@ -184,41 +186,65 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
 
 //Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceiro
 function getTrafficData(PDO $pdo, $id_parceiro = null) {
-    $params = [];
-    $filterParceiro = "";
+    $cacheDir = __DIR__ . '/cache';
+    if (!file_exists($cacheDir)) {
+        mkdir($cacheDir, 0777, true);
+    }
 
+    $cacheKey = 'traficdata_' . ($id_parceiro ?? 'all') . '.json';
+    $cacheFile = $cacheDir . '/' . $cacheKey;
+
+    // Se existir cache válido (até 4 minutos)
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 240)) {
+        return json_decode(file_get_contents($cacheFile), true);
+    }
+
+    $params = [];
+    $filter = '';
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
-        $filterParceiro = " AND id_parceiro = :id_parceiro";
+        $filter = ' AND id_parceiro = :id_parceiro';
         $params[':id_parceiro'] = $id_parceiro;
     }
 
-    // Função auxiliar para executar query e retornar soma
-    $getSum = function($table, $column, $extraCondition = '') use ($pdo, $filterParceiro, $params) {
-        $sql = "SELECT COALESCE(SUM($column), 0) AS total FROM $table WHERE is_active = 1 $extraCondition $filterParceiro";
+    // Função auxiliar
+    $getData = function($table) use ($pdo, $filter, $params) {
+        $sql = "
+            SELECT 
+                SUM(CASE WHEN jam_level > 1 THEN length ELSE 0 END) AS lento,
+                SUM(CASE WHEN time > historic_time THEN time - historic_time ELSE 0 END) AS atraso
+            FROM $table
+            WHERE is_active = 1 $filter
+        ";
         $stmt = $pdo->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value, PDO::PARAM_INT);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val, PDO::PARAM_INT);
         }
         $stmt->execute();
-        return (float)$stmt->fetchColumn();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     };
 
-    $kmsLentoIrregularities = $getSum('irregularities', 'length', 'AND jam_level > 1');
-    $kmsLentoSubroutes = $getSum('subroutes', 'length', 'AND jam_level > 1');
+    // Dados de cada tabela
+    $irregularities = $getData('irregularities');
+    $subroutes = $getData('subroutes');
+    $routes = $getData('routes');
 
-    $atrasoIrregularities = $getSum('irregularities', 'time - historic_time', 'AND time > historic_time');
-    $atrasoRoutes = $getSum('routes', 'time - historic_time', 'AND time > historic_time');
-    $atrasoSubroutes = $getSum('subroutes', 'time - historic_time', 'AND time > historic_time');
+    // Totais
+    $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
+    $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
 
-    $totalKmsLento = $kmsLentoIrregularities + $kmsLentoSubroutes;
-    $totalAtrasoSegundos = $atrasoIrregularities + $atrasoRoutes + $atrasoSubroutes;
-
-    return [
+    // Resultado formatado
+    $result = [
         'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
-        'total_atraso_minutos' => number_format($totalAtrasoSegundos / 60, 2),
-        'total_atraso_horas' => number_format($totalAtrasoSegundos / 3600, 2)
+        'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
+        'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
     ];
+
+    // Salva no cache
+    file_put_contents($cacheFile, json_encode($result));
+
+    return $result;
 }
+
 
 $traficdata = getTrafficData($pdo, $id_parceiro); // Pode adicionar lógica condicional aqui, se necessário
 
@@ -232,3 +258,5 @@ $data = [
     'traficdata' => $traficdata,
 ];
 
+
+error_log("Tempo de carregamento: " . (microtime(true) - $start));
