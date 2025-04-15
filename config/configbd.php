@@ -74,7 +74,8 @@ class Database {
                     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NET_READ_TIMEOUT=5, NET_WRITE_TIMEOUT=10",
                     PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::ATTR_STRINGIFY_FETCHES => false,   
+                    PDO::ATTR_STRINGIFY_FETCHES => false, 
+                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,  
                 ];                
 
                 // Usando nossa classe monitorada
