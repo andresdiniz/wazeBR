@@ -56,10 +56,12 @@ try {
     }
 
     // Em produção, grava o erro em um arquivo de log
+    error_log("Erro de Banco de Dados: " . $e->getMessage() . "\n" .
+              "Arquivo: " . $e->getFile() . " - Linha: " . $e->getLine() . "\n" .
+              "Stack Trace:\n" . $e->getTraceAsString()); // Grava a stack trace também no log
 
-    error_log("Erro de Banco de Dados: " . $e->getMessage() . "\n" .); // Certifique-se de que o caminho está correto
-    
     // Exibindo uma mensagem amigável ao usuário
-    die("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde." . "\n" . "Arquivo: " . $e->getFile() . " - Linha: " . $e->getLine() );
+    die("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde. \n" . 
+        "Erro detalhado: Arquivo: " . $e->getFile() . " - Linha: " . $e->getLine());
 }
 ?>
