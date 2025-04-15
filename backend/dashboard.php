@@ -183,13 +183,22 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
 }
 
 //Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceiro
-function getTrafficData(PDO $pdo) {
+function getTrafficData(PDO $pdo, $id_parceiro = null) {
+    // Condicional para filtrar pelo parceiro, caso necessário
+    $idParceiroCondition = "";
+    if (!is_null($id_parceiro)) {
+        $idParceiroCondition = " AND id_parceiro = :id_parceiro";
+    }
+
     // Trânsito lento em irregularities
     $stmt1 = $pdo->prepare("
         SELECT SUM(length) AS total_kms_lento
         FROM irregularities
-        WHERE jam_level > 1 AND is_active = 1
-    ");
+        WHERE jam_level > 1 AND is_active = 1" . $idParceiroCondition
+    );
+    if (!is_null($id_parceiro)) {
+        $stmt1->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
     $stmt1->execute();
     $kmsLentoIrregularities = $stmt1->fetch(PDO::FETCH_ASSOC)['total_kms_lento'];
 
@@ -197,8 +206,11 @@ function getTrafficData(PDO $pdo) {
     $stmt2 = $pdo->prepare("
         SELECT SUM(length) AS total_kms_lento_subroutes
         FROM subroutes
-        WHERE jam_level > 1 AND is_active = 1
-    ");
+        WHERE jam_level > 1 AND is_active = 1" . $idParceiroCondition
+    );
+    if (!is_null($id_parceiro)) {
+        $stmt2->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
     $stmt2->execute();
     $kmsLentoSubroutes = $stmt2->fetch(PDO::FETCH_ASSOC)['total_kms_lento_subroutes'];
 
@@ -206,8 +218,11 @@ function getTrafficData(PDO $pdo) {
     $stmt3 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_irregularities
         FROM irregularities
-        WHERE time > historic_time AND is_active = 1
-    ");
+        WHERE time > historic_time AND is_active = 1" . $idParceiroCondition
+    );
+    if (!is_null($id_parceiro)) {
+        $stmt3->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
     $stmt3->execute();
     $atrasoIrregularities = $stmt3->fetch(PDO::FETCH_ASSOC)['total_atraso_irregularities'];
 
@@ -215,8 +230,11 @@ function getTrafficData(PDO $pdo) {
     $stmt4 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_routes
         FROM routes
-        WHERE time > historic_time AND is_active = 1
-    ");
+        WHERE time > historic_time AND is_active = 1" . $idParceiroCondition
+    );
+    if (!is_null($id_parceiro)) {
+        $stmt4->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
     $stmt4->execute();
     $atrasoRoutes = $stmt4->fetch(PDO::FETCH_ASSOC)['total_atraso_routes'];
 
@@ -224,8 +242,11 @@ function getTrafficData(PDO $pdo) {
     $stmt5 = $pdo->prepare("
         SELECT SUM(time - historic_time) AS total_atraso_subroutes
         FROM subroutes
-        WHERE time > historic_time AND is_active = 1
-    ");
+        WHERE time > historic_time AND is_active = 1" . $idParceiroCondition
+    );
+    if (!is_null($id_parceiro)) {
+        $stmt5->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
     $stmt5->execute();
     $atrasoSubroutes = $stmt5->fetch(PDO::FETCH_ASSOC)['total_atraso_subroutes'];
 
@@ -243,6 +264,7 @@ function getTrafficData(PDO $pdo) {
     ];
 }
 
+
 // Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
@@ -251,6 +273,6 @@ $data = [
     'otherAlerts' => getOtherAlerts($pdo, $id_parceiro),
     'activeAlertsToday' => getActiveAlertsToday($pdo, $id_parceiro),
     'totalAlertsThisMonth' => getTotalAlertsThisMonth($pdo, $id_parceiro),
-    'traficdata'=> getTrafficData($pdo)
+    'traficdata'=> getTrafficData($pdo, $id_parceiro)
 ];
 
