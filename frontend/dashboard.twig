@@ -1,609 +1,129 @@
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+<!-- Begin Page Content -->
+<div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                class="fas fa-download fa-sm text-white-50"></i> Exportar Dados</a>
-                    </div>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-download fa-sm text-white-50"></i> Exportar Dados
+        </a>
+    </div>
 
-                    <!-- Content Row -->
-                    <div class="row">
-
-                        <!-- Alertas Ativos -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Alertas Ativos</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{activeAlertsToday}}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
+    <!-- Metrics Row -->
+    <div class="row">
+        {% set metrics = [
+            {title: 'Alertas Ativos', value: activeAlertsToday, color: 'primary', icon: 'calendar'},
+            {title: 'Alertas Totais (Mês)', value: totalAlertsThisMonth, color: 'success', icon: 'dollar-sign'},
+            {title: 'Alertas Confirmados', value: '50.00%', color: 'info', icon: 'clipboard-list', progress: 50},
+            {title: 'Alertas Não Confirmados', value: '18.00', color: 'warning', icon: 'comments'},
+            {title: 'KMs de congestionamento', value: traficdata.total_kms_lento, color: 'primary', icon: 'calendar'},
+            {title: 'Tempos de Atraso', value: traficdata.total_atraso_minutos ~ ' min', color: 'primary', icon: 'calendar'}
+        ] %}
+        
+        {% for metric in metrics %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-left-{{ metric.color }} shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-{{ metric.color }} text-uppercase mb-1">
+                                {{ metric.title }}
+                            </div>
+                            {% if metric.progress is defined %}
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ metric.value }}</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-{{ metric.color }}" role="progressbar" 
+                                             style="width: {{ metric.progress }}%" 
+                                             aria-valuenow="{{ metric.progress }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
+                            {% else %}
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ metric.value }}</div>
+                            {% endif %}
                         </div>
-
-                        <!-- Alertas Totais (Mês) -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-success shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Alertas Totais (Mês)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{totalAlertsThisMonth}}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-auto">
+                            <i class="fas fa-{{ metric.icon }} fa-2x text-gray-300"></i>
                         </div>
-
-                        <!-- Alertas Confirmados -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-info shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Alertas Confirmados</div>
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col-auto">
-                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50.00%</div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="progress progress-sm mr-2">
-                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%" 
-                                                            aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Alertas Não Confirmados -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Alertas Não Confirmados</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">18.00</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- KMs de congestionamento -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                KMs de congestionamento</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{traficdata.total_kms_lento}}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tempos de Atraso -->
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Tempos de Atraso</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                {{traficdata.total_atraso_minutos}} min</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="row">
-
-    <!-- Area Chart -->
-    <div class="col-xl-6 col-lg-6">
-        <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Acidentes</h6>
-                <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                        aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Dropdown Header:</div>
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
                     </div>
                 </div>
             </div>
-            <!-- Card Body -->
-            <div class="card-body">
-                {% if accidentAlerts is not empty %}
-                <table id="accidentsTable" class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Cidade</th>
-                            <th>Rua</th>
-                            <th>Localização</th>
-                            <th>Data Evento</th>
-                            <th>Nota</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for alert in accidentAlerts %}
-                        <tr data-uuid="{{ alert.uuid }}">
-                            <td>{{ alert.city }}</td>
-                            <td>{{ alert.street }}</td>
-                            <td>
-                                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                    {{ alert.location_x }}, {{ alert.location_y }}
-                                </a>
-                            </td>
-                            <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                            <td>{{ alert.confidence }}</td>
-                            <td>
-                                <button class="btn btn-info btn-sm open-modal" 
-                                        data-toggle="modal" 
-                                        data-target="#alertModal"
-                                        data-lat="{{ alert.location_y }}"
-                                        data-lon="{{ alert.location_x }}"
-                                        data-type="{{ alert.type }}"
-                                        data-subtype="{{ alert.subtype }}"
-                                        data-date="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}"
-                                        data-confidence="{{ alert.confidence }}">
-                                    Detalhes
-                                </button>
-                            </td>
-                        </tr>
-                        {# Inclui modal individual para cada alerta #}
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>Não há eventos de acidentes registrados no momento.</p>
-                {% endif %}
-            </div>
         </div>
+        {% endfor %}
     </div>
 
-    <!-- Pie Chart -->
-    <div class="col-xl-6 col-lg-6">
-        <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Buracos</h6>
-                <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                        aria-labelledby="dropdownMenuLink">
-                        <div class="dropdown-header">Dropdown Header:</div>
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
+    <!-- Charts Row -->
+    <div class="row">
+        {% set charts = [
+            {type: 'Acidentes', data: accidentAlerts, color: 'primary'},
+            {type: 'Buracos', data: hazardAlerts, color: 'primary'}
+        ] %}
+        
+        {% for chart in charts %}
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-{{ chart.color }}">{{ chart.type }}</h6>
+                    {% include 'components/dropdown_menu.html.twig' %}
+                </div>
+                <div class="card-body">
+                    {% if chart.data is not empty %}
+                        {% include 'components/alerts_table.html.twig' with {alerts: chart.data} %}
+                    {% else %}
+                        <p>Não há eventos de {{ chart.type|lower }} registrados no momento.</p>
+                    {% endif %}
                 </div>
             </div>
-            <!-- Card Body -->
-            <div class="card-body">
-                {% if hazardAlerts is not empty %}
-                    <table id="hazardsTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data Evento</th>
-                                <th>Nota</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in hazardAlerts %}
-                            <tr>
-                                <td>{{ alert.city }}</td>
-                                <td>{{ alert.street }}</td>
-                                <td>
-                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                        {{ alert.location_x }}, {{ alert.location_y }}
-                                    </a>
-                                </td>
-                                <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                <td>{{ alert.reportRating }}</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal"
-                                            data-lat="{{ alert.location_y }}"
-                                            data-lon="{{ alert.location_x }}"
-                                            data-type="{{ alert.type }}"
-                                            data-subtype="{{ alert.subtype }}"
-                                            data-date="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}"
-                                            data-confidence="{{ alert.confidence }}">
-                                        Detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                            {# Inclui modal individual para cada alerta #}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>Não há alertas de buracos registrados no momento.</p>
-                {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Additional Content Row -->
+    <div class="row">
+        {% set additionalCards = [
+            {type: 'Congestionamentos', data: jamAlerts, color: 'primary'},
+            {type: 'Outros Alertas', data: otherAlerts, color: 'primary', columns: 6}
+        ] %}
+        
+        {% for card in additionalCards %}
+        <div class="col-lg-{{ card.columns|default(6) }} mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-{{ card.color }}">{{ card.type }}</h6>
+                </div>
+                <div class="card-body">
+                    {% if card.data is not empty %}
+                        {% include 'components/alerts_table.html.twig' with {
+                            alerts: card.data,
+                            extraColumns: card.type == 'Outros Alertas' ? ['Tipo', 'Subtipo'] : []
+                        } %}
+                    {% else %}
+                        <p>Não há alertas de {{ card.type|lower }} registrados no momento.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
+
 </div>
+<!-- /.container-fluid -->
 
-<!-- Content Row -->
-<div class="row">
+{% include 'components/alert_modal.html.twig' %}
 
-    <!-- Content Column -->
-    <div class="col-lg-6 mb-4">
-
-        <!-- Project Card Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Congestionamentos</h6>
-            </div>
-            <div class="card-body">
-                {% if jamAlerts is not empty %}
-                    <table id="jamAlertsTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data do Evento</th>
-                                <th>Nota</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in jamAlerts %}
-                            <tr>
-                                <td>{{ alert.city }}</td>
-                                <td>{{ alert.street }}</td>
-                                <td><a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a></td>
-                                <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                <td>{{ alert.confidence }}</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal"
-                                            data-lat="{{ alert.location_y }}"
-                                            data-lon="{{ alert.location_x }}"
-                                            data-type="{{ alert.type }}"
-                                            data-subtype="{{ alert.subtype }}"
-                                            data-date="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}"
-                                            data-confidence="{{ alert.confidence }}">
-                                        Detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                            {# Inclui modal individual para cada alerta #}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>Não há alertas de congestionamento registrados no momento.</p>
-                {% endif %}
-            </div>
-        </div>
-
-    </div>
-
-    <div class="col-lg-6 mb-4">
-
-        <!-- Other Alerts -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Outros Alertas</h6>
-            </div>
-            <div class="card-body">
-                {% if otherAlerts is not empty %}
-                    <table id="otherAlertsTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data de Publicação</th>
-                                <th>Tipo</th>
-                                <th>Subtipo</th>
-                                <th>Nota</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in otherAlerts %}
-                            <tr>
-                                <td>{{ alert.city }}</td>
-                                <td>{{ alert.street }}</td>
-                                <td>
-                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                        {{ alert.location_x }}, {{ alert.location_y }}
-                                    </a>
-                                </td>
-                                <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                <td>{{ alertTypeTranslations[alert.type] | default(alert.type) }}</td>
-                                <td>{{ alertTypeTranslations[alert.subtype] | default(alert.subtype) }}</td>
-                                <td>{{ alert.confidence }}</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal"
-                                            data-lat="{{ alert.location_y }}"
-                                            data-lon="{{ alert.location_x }}"
-                                            data-type="{{ alert.type }}"
-                                            data-subtype="{{ alert.subtype }}"
-                                            data-date="{{ (alert.pubMillis / 1000) | date('d/m/Y H:i:s') }}"
-                                            data-confidence="{{ alert.confidence }}">
-                                        Detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                            {# Inclui modal individual para cada alerta #}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>Não há outros alertas ativos no momento.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-
-                </div>
-                <!-- /.container-fluid -->
-
-                {# Adicione este modal único no final do template #}
-                <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
-                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
-               <div class="modal-dialog modal-lg">
-                   <div class="modal-content p-3 shadow-lg rounded">
-                       <div class="modal-header bg-primary text-white rounded-top">
-                           <h5 class="modal-title">
-                               <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
-                           </h5>
-                           <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                               <span aria-hidden="true">&times;</span>
-                           </button>
-                       </div>
-           
-                       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                           <div class="row">
-                               <div class="col-md-6">
-                                   <div class="card border-0 shadow-sm p-3 mb-3">
-                                       <p><strong>📌 UUID:</strong> {{ alert.uuid }}</p>
-                                       <p><strong>🏙️ Cidade:</strong> {{ alert.city }}</p>
-                                       <p><strong>📍 Rua:</strong> {{ alert.street }}</p>
-                                       <p><strong>📡 Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
-                                   </div>
-                               </div>
-           
-                               <div class="col-md-6">
-                                   <div class="alert-details">
-                                       <!-- Data -->
-                                       <p><strong>📅 Data:</strong> 
-                                           {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }} 
-                                           <small class="text-muted">(UTC)</small>
-                                       </p>
-                                   
-                                       <!-- KM Estimado -->
-                                       <p><strong>🛣️ KM Estimado:</strong> 
-                                           <span id="km-value-{{ alert.uuid }}" class="badge bg-info">
-                                               {% if alert.estimated_km %}
-                                                   KM {{ alert.estimated_km|number_format(2, ',') }}
-                                               {% else %}
-                                                   <span class="spinner-border spinner-border-sm" role="status"></span> Calculando...
-                                               {% endif %}
-                                           </span>
-                                       </p>
-                                   
-                                       <!-- Confiança -->
-                                       <p><strong>🔍 Confiança:</strong> 
-                                           <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
-                                                 data-bs-toggle="tooltip" 
-                                                 title="Nível de confiança na precisão do alerta">
-                                               {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
-                                           </span>
-                                       </p>
-                                   
-                                       <!-- Status -->
-                                       <p><strong>⚠️ Status:</strong> 
-                                           <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }}">
-                                               {{ alert.status == 1 ? "Ativo" : "Inativo" }}
-                                               <span class="visually-hidden">Status do alerta</span>
-                                           </span>
-                                       </p>
-                                   
-                                       <!-- Link -->
-                                       <p><strong>🔗 Link Relacionado:</strong>
-                                           <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
-                                              class="badge bg-primary text-decoration-none"
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              aria-label="Abrir alerta no Waze">
-                                               Ver no Waze Partner Hub ↗
-                                           </a>
-                                       </p>
-                                   </div>
-                               </div>
-                           </div>
-           
-                           <div class="card border-0 shadow-sm p-3 mb-3">
-                               <p id = "tipo-alerta-{{ alert.uuid }}"><strong>🚨 Tipo:</strong> {{ alert.type }}</p>
-                               <p id="subtipo-alerta-{{ alert.uuid }}"><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
-                           </div>
-           
-                           <div class="card border-0 shadow-sm p-3">
-                               <h6 class="text-center text-muted">📍 Localização no Mapa (Waze)</h6>
-                               <iframe
-                                   id="map-{{ alert.uuid }}"
-                                   class="rounded shadow-sm border"
-                                   src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1&campaign=alerts_{{ alert.uuid }}&vehicle=car&hidegeopins=false&timestamp={{ alert.pubMillis }}"
-                                   style="width: 100%; height: 400px; min-height: 300px; border-color: #e0e0e0;"
-                                   allow="geolocation *; fullscreen"
-                                   title="Localização exata do alerta {{ alert.code }} no mapa"
-                                   loading="lazy"
-                                   referrerpolicy="strict-origin-when-cross-origin"
-                                   aria-describedby="map-description-{{ alert.uuid }}"
-                               ></iframe>
-                               <small id="map-description-{{ alert.uuid }}" class="text-muted">
-                                   Mapa interativo mostrando a localização precisa do alerta {{ alert.uuid }}. Clique no botão abaixo para abrir no Waze.
-               
-                               </small>
-                           </div>
-                       </div>
-           
-                       <div class="modal-footer d-flex justify-content-between">
-                           <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
-                              class="btn btn-outline-primary" target="_blank">
-                               <i class="fab fa-waze"></i> Ver no Waze
-                           </a>
-                           
-                           <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
-                               <i class="fas fa-check"></i> Confirmar Alerta
-                           </button>
-                           
-                           <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                               <i class="fas fa-times"></i> Fechar
-                           </button>
-                       </div>
-                   </div>
-               </div>
-           </div>
-           
-           <script src="./js/scripts.js"></script>
-
-
-
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        let map = null;
-                        let currentMarker = null;
-                    
-                        $(".open-modal").on("click", async function () {
-                            // Obter dados do alerta
-                            const lat = $(this).data("lat");
-                            const lon = $(this).data("lon");
-                            const alertData = {
-                                type: $(this).data("type"),
-                                subtype: $(this).data("subtype"),
-                                date: $(this).data("date"),
-                                confidence: $(this).data("confidence")
-                            };
-                    
-                            // Atualizar conteúdo do modal
-                            $('#alert-type').text(`${alertData.type} - ${alertData.subtype}`);
-                            $('#alert-date').text(alertData.date);
-                            $('#alert-confidence').text(alertData.confidence);
-                    
-                            // Gerenciar o mapa
-                            if (map) {
-                                map.remove();
-                            }
-                            
-                            // Criar novo mapa
-                            map = L.map('map-container').setView([lat, lon], 15);
-                            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                                attribution: "&copy; OpenStreetMap contributors"
-                            }).addTo(map);
-                    
-                            if (currentMarker) {
-                                map.removeLayer(currentMarker);
-                            }
-                            currentMarker = L.marker([lat, lon]).addTo(map)
-                                .bindPopup("Localização do Alerta")
-                                .openPopup();
-                    
-                            // Buscar KM assincronamente
-                            try {
-                                const km = await buscarKmDnit(lat, lon, 150);
-                                $('#km-value').text(km || "Não encontrado");
-                            } catch (error) {
-                                console.error('Erro ao buscar KM:', error);
-                                $('#km-value').text("Erro ao buscar");
-                            }
-                        });
-                    
-                        // Limpar mapa quando o modal for fechado
-                        $('#alertModal').on('hidden.bs.modal', function () {
-                            if (map) {
-                                map.remove();
-                                map = null;
-                                currentMarker = null;
-                            }
-                        });
-                    });
-                </script>
-                
-
-<!-- CSS do DataTables (Se necessário) -->
+<!-- External Resources -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-
-<!-- CSS dos Botões do DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
 
-
-<!-- JS do DataTables -->
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-
-<!-- JS dos Botões do DataTables -->
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-
-<!-- JS para exportação para CSV, Excel, PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
 <script src="./js/scripts.js"></script>
