@@ -417,7 +417,10 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
 
 /**
  * Função para registrar logs de e-mail
+ * @param string $type Tipo de log (error ou email)
+ * @param string $message Mensagem a ser registrada
  */
+    
 function logEmail($type, $message)
 {
     $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
