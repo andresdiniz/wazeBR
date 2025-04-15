@@ -264,8 +264,8 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
     ];
 }
 
+$traficdata = getTrafficData($pdo, $id_parceiro); // Pode adicionar lógica condicional aqui, se necessário
 
-// Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'hazardAlerts' => getHazardAlerts($pdo, $id_parceiro),
@@ -273,6 +273,6 @@ $data = [
     'otherAlerts' => getOtherAlerts($pdo, $id_parceiro),
     'activeAlertsToday' => getActiveAlertsToday($pdo, $id_parceiro),
     'totalAlertsThisMonth' => getTotalAlertsThisMonth($pdo, $id_parceiro),
-    'traficdata'=> getTrafficData($pdo, $id_parceiro)
+    'traficdata' => $traficdata,
 ];
 
