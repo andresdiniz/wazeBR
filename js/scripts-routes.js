@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showLoadingIndicator(); // Mostrar indicador de carregamento
 
         // Carregar as linhas da rota principal
-        fetch(`../wazeportal/api.php?action=get_route_lines&route_id=${routeId}`)
+        fetch(`../api.php?action=get_route_lines&route_id=${routeId}`)
             .then(response => response.json())
             .then(routeData => {
                 console.log("Dados da rota:", routeData);
@@ -317,7 +317,7 @@ function calculateDistance(coords) {
     function loadSubroutes(routeId, routeCoordinates) {
         showLoadingIndicator();
 
-        fetch(`../wazeportal/api.php?action=get_subroutes&route_id=${routeId}&is_active=1`)
+        fetch(`../wazeportapi.php?action=get_subroutes&route_id=${routeId}&is_active=1`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Erro ao carregar as subrotas");

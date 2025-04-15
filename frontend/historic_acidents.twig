@@ -67,7 +67,7 @@
         async function fetchAccidentAlerts(startDate, endDate, groupBy) {
             try {
                 let id_parceiro = $('#id_parceiro').val();
-                const response = await fetch(`../wazeportal/api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro=${id_parceiro}`);
+                const response = await fetch(`../api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro=${id_parceiro}`);
                 const data = await response.json();
     
                 if (data.error) {
