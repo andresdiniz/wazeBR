@@ -22,8 +22,8 @@ function getStatus($value, $overallAvg) {
 // Função para formatar tempo (segundos para "X min Y seg")
 function formatarTempo($segundos) {
     if ($segundos <= 0) return "0 min 0 seg";
-    $minutos = floor($segundos / 60);
-    $segundos = $segundos % 60;
+    $minutos = (int) floor($segundos / 60);
+    $segundos = (int) ($segundos % 60);
     return "{$minutos} min {$segundos} seg";
 }
 
