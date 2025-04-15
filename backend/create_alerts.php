@@ -7,7 +7,6 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
-echo $id_parceiro;
 
 // Configura o carregador do Twig para buscar templates na pasta "frontend"
 $loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
@@ -19,6 +18,8 @@ try {
 // Consultas para tipos e subtipos
 $sqlTipos = "SELECT id, name, value FROM alert_type";
 $sqlSubtipos = "SELECT id, alert_type_id, subtype_value, name FROM alert_subtype";
+
+echo $id_parceiro;
 
 $tipos = $pdo->query($sqlTipos)->fetchAll(PDO::FETCH_ASSOC);
 $subtipos = $pdo->query($sqlSubtipos)->fetchAll(PDO::FETCH_ASSOC);
