@@ -128,10 +128,43 @@ $data['activeAlertsToday'] = measurePerformance('getActiveAlertsToday', $pdo, $i
 $data['totalAlertsThisMonth'] = measurePerformance('getTotalAlertsThisMonth', $pdo, $id_parceiro);
 
 // Geração de relatório
-error_log(json_encode([
-    'total_execution_time' => round((microtime(true) - $start) * 1000, 2) . 'ms',
-    'memory_peak' => round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB',
-    'metrics' => $metrics
-]));
+// Adicione este código ANTES de qualquer output
+function savePerformanceMetrics($metrics, $startTime) {
+    try {
+        // 1. Configuração do diretório
+        $logDir = $_SERVER['DOCUMENT_ROOT'] . '/desempenho/';
+        
+        // 2. Criar diretório se não existir (com permissões seguras)
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+            // Adicionar proteção contra acesso direto
+            file_put_contents($logDir . '.htaccess', "Deny from all");
+        }
+
+        // 3. Nome do arquivo com data
+        $filename = $logDir . 'metrics-' . date('Y-m-d') . '.log';
+
+        // 4. Construir dados formatados
+        $logData = [
+            'timestamp' => date('c'),
+            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
+            'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'MB',
+            'details' => $metrics
+        ];
+
+        // 5. Escrever no arquivo com formatação JSON
+        file_put_contents(
+            $filename,
+            json_encode($logData, JSON_PRETTY_PRINT) . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+
+    } catch (Exception $e) {
+        error_log("Erro ao salvar métricas: " . $e->getMessage());
+    }
+}
+
+// Uso no final do script (antes de qualquer output)
+savePerformanceMetrics($metrics, $start);
 
 ob_end_flush();
