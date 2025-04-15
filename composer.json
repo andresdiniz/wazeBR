@@ -1,4 +1,5 @@
 {
+    "name": "glaycon/wazebr",
     "require": {
         "twig/twig": "3.3.0",
         "predis/predis": "^2.3.0",
