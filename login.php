@@ -72,7 +72,7 @@ try {
             }
 
             // Redireciona para a página inicial
-            header("Location: /wazeportal");
+            header("Location: /index.php");
             exit();
         } else {
             // Caso a senha esteja incorreta
