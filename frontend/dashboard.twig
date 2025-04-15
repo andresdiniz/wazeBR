@@ -400,7 +400,7 @@
                             let kmId = modalId.replace("#alertModal", "km-value-");
                 
                             // Inicialização do mapa
-                            /*setTimeout(() => {
+                            setTimeout(() => {
                                 let map = L.map(mapId).setView([lat, lon], 13);
                 
                                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -410,7 +410,7 @@
                                 L.marker([lat, lon]).addTo(map)
                                     .bindPopup("Localização do Alerta")
                                     .openPopup();
-                            }, 500);*/
+                            }, 1500);
                 
                             // Chama a função assíncrona para buscar o KM
                             const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
