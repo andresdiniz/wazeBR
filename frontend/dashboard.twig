@@ -133,82 +133,261 @@
         </div>
     </div>
 
-    <!-- Tabelas de Alertas -->
-    <div class="row">
-        <!-- Tabela de Acidentes -->
-        <div class="col-xl-6 col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Acidentes</h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                            aria-labelledby="dropdownMenuLink">
-                            <div class="dropdown-header">Dropdown Header:</div>
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
+    <!-- Content Row -->
+<div class="row">
+    <!-- Últimos Acidentes -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    <i class="fas fa-car-crash mr-2"></i>Últimos Acidentes
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for acidente in ultimosAcidentes %}
+                    <div class="event-item" 
+                         data-toggle="modal" 
+                         data-target="#alertModal"
+                         data-alert="{{ acidente|json_encode|e('html_attr') }}">
+                        <div class="event-time text-xs">
+                            {{ acidente.data|date('H:i') }}
+                        </div>
+                        <div class="event-title">
+                            {{ acidente.localizacao }}
+                        </div>
+                        <div class="event-status badge badge-{{ acidente.gravidade == 'grave' ? 'danger' : 'warning' }}">
+                            {{ acidente.gravidade|capitalize }}
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if accidentAlerts is not empty %}
-                    <table id="accidentsTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Cidade</th>
-                                <th>Rua</th>
-                                <th>Localização</th>
-                                <th>Data Evento</th>
-                                <th>Nota</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alert in accidentAlerts %}
-                            <tr>
-                                <td>{{ alert.city }}</td>
-                                <td>{{ alert.street }}</td>
-                                <td>
-                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                        {{ alert.location_x }}, {{ alert.location_y }}
-                                    </a>
-                                </td>
-                                <td>{{ (alert.pubMillis / 1000)|date("d/m/Y H:i:s") }}</td>
-                                <td>{{ alert.confidence }}</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                            data-toggle="modal" 
-                                            data-target="#alertModal"
-                                            data-alert="{{ {
-                                                'uuid': alert.uuid,
-                                                'city': alert.city,
-                                                'street': alert.street,
-                                                'location_x': alert.location_x,
-                                                'location_y': alert.location_y,
-                                                'pubMillis': alert.pubMillis,
-                                                'type': alert.type,
-                                                'subtype': alert.subtype,
-                                                'confidence': alert.confidence,
-                                                'status': alert.status|default(1)
-                                            }|json_encode|e('html_attr') }}">
-                                        Detalhes
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p>Não há eventos de acidentes registrados no momento.</p>
-                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Eventos Recentes de Tráfego -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-traffic-light mr-2"></i>Congestionamentos Ativos
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for congestionamento in congestionamentosAtivos %}
+                    <div class="event-item"
+                         data-toggle="modal"
+                         data-target="#alertModal"
+                         data-alert="{{ congestionamento|json_encode|e('html_attr') }}">
+                        <div class="event-time text-xs">
+                            {{ congestionamento.inicio|date('H:i') }}
+                        </div>
+                        <div class="event-title">
+                            {{ congestionamento.trecho }} ({{ congestionamento.extensao }} km)
+                        </div>
+                        <div class="event-duration">
+                            <i class="fas fa-clock mr-1"></i>{{ congestionamento.duracao }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de Obras -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-cone-striped mr-2"></i>Obras na Via
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for obra in obrasRecentes %}
+                    <div class="event-item"
+                         data-toggle="modal"
+                         data-target="#alertModal"
+                         data-alert="{{ obra|json_encode|e('html_attr') }}">
+                        <div class="event-location">
+                            <i class="fas fa-map-marker-alt mr-1"></i>{{ obra.local }}
+                        </div>
+                        <div class="event-period">
+                            {{ obra.inicio|date('d/m') }} - {{ obra.previsao_termino|date('d/m') }}
+                        </div>
+                        <div class="event-impact badge badge-{{ obra.impacto == 'alto' ? 'danger' : 'warning' }}">
+                            Impacto {{ obra.impacto }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incidentes Reportados -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Incidentes Recentes
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for incidente in incidentesRecentes %}
+                    <div class="event-item"
+                         data-toggle="modal"
+                         data-target="#alertModal"
+                         data-alert="{{ incidente|json_encode|e('html_attr') }}">
+                        <div class="event-type">
+                            <i class="fas fa-{{ incidente.tipo_icone }} mr-2"></i>{{ incidente.tipo }}
+                        </div>
+                        <div class="event-details">
+                            <span class="mr-2">{{ incidente.local }}</span>
+                            <small class="text-muted">{{ incidente.horario|date('H:i') }}</small>
+                        </div>
+                        <div class="event-status">
+                            {% if incidente.resolvido %}
+                            <i class="fas fa-check-circle text-success"></i>
+                            {% else %}
+                            <i class="fas fa-exclamation-circle text-danger"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atividades de Patrulha -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-car-side mr-2"></i>Atividades de Patrulha
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for patrulha in atividadesPatrulha %}
+                    <div class="event-item"
+                         data-toggle="modal"
+                         data-target="#alertModal"
+                         data-alert="{{ patrulha|json_encode|e('html_attr') }}">
+                        <div class="event-vehicle">
+                            {{ patrulha.veiculo }}
+                        </div>
+                        <div class="event-activity">
+                            {{ patrulha.atividade }}
+                            <small class="text-muted ml-2">{{ patrulha.regiao }}</small>
+                        </div>
+                        <div class="event-duration">
+                            {{ patrulha.duracao }} minutos
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas Meteorológicos -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-left-purple shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-purple">
+                    <i class="fas fa-cloud-showers-heavy mr-2"></i>Alerta Climático
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="event-list">
+                    {% for alerta in alertasMeteorologicos %}
+                    <div class="event-item weather-alert"
+                         data-toggle="modal"
+                         data-target="#alertModal"
+                         data-alert="{{ alerta|json_encode|e('html_attr') }}">
+                        <div class="alert-icon">
+                            <i class="fas fa-{{ alerta.icone }} fa-2x text-{{ alerta.nivel }}"></i>
+                        </div>
+                        <div class="alert-info">
+                            <div class="alert-title">{{ alerta.tipo }}</div>
+                            <div class="alert-region">{{ alerta.regiao }}</div>
+                            <div class="alert-period">{{ alerta.inicio|date('H:i') }} - {{ alerta.fim|date('H:i') }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.event-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.event-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.event-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.event-time, .event-period {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.event-title, .event-activity {
+    font-weight: 500;
+    margin: 0.25rem 0;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.4em;
+}
+
+.weather-alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-icon {
+    flex-shrink: 0;
+}
+
+.alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.alert-region {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.text-purple {
+    color: #6f42c1;
+}
+
+.border-left-purple {
+    border-left: 0.25rem solid #6f42c1!important;
+}
+</style>
 
         <!-- Repetir estrutura similar para outras tabelas (Buracos, Congestionamentos, Outros Alertas) -->
         <!-- ... conteúdo das outras tabelas mantido igual, apenas atualizando os botões ... -->
