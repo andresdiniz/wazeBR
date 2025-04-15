@@ -2,9 +2,9 @@
 
 // Configurações do Banco de Dados
 define('DB_HOST', '82.197.82.45');
-define('DB_NAME', 'u509716858_wazeportal');
-define('DB_USER', 'u509716858_wazeportal');
-define('DB_PASS', '@Ndre2024.');
+define('DB_NAME', 'u335174317_wazeportal');
+define('DB_USER', 'u335174317_wazeportal');
+define('DB_PASS', '@Ndre2025.');
 
 // Definir o caminho do arquivo de log
 define('LOG_FILE', __DIR__ . '/error_log.txt');
