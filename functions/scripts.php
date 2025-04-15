@@ -525,6 +525,8 @@ function traduzirAlerta($tipo, $subtipo) {
 
 function getParceiros(PDO $pdo, $id_parceiro = null) {
     $query = "SELECT * FROM parceiros";
+
+    echo "ID do parceiro: " . $id_parceiro . PHP_EOL;
     
     // Se o ID do parceiro for passado e não for o administrador (99), aplica o filtro
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
