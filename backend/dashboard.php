@@ -186,62 +186,61 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
     return $stmt->fetch(PDO::FETCH_ASSOC)['totalMonth'];
 }
 
-//Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceiro
-function getTrafficData(PDO $pdo, $id_parceiro = null) {
-    $cacheDir = __DIR__ . '/cache';
-    if (!file_exists($cacheDir)) {
-        mkdir($cacheDir, 0777, true);
-    }
-
-    $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
-    $cacheFile = $cacheDir . '/' . $cacheKey;
-
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 240) {
-        return json_decode(file_get_contents($cacheFile), true);
-    }
-
-    $params = [];
-    $filter = '';
-    if (!is_null($id_parceiro) && $id_parceiro != 99) {
-        $filter = ' AND id_parceiro = :id_parceiro';
-        $params[':id_parceiro'] = $id_parceiro;
-    }
-
-    $getData = function($table) use ($pdo, $filter, $params) {
-        $sql = "
-            SELECT 
-                SUM(CASE WHEN jam_level > 1 THEN length ELSE 0 END) AS lento,
-                SUM(CASE WHEN time > historic_time THEN time - historic_time ELSE 0 END) AS atraso
-            FROM $table
-            WHERE is_active = 1 $filter
-        ";
-        $stmt = $pdo->prepare($sql);
-        foreach ($params as $key => $val) {
-            $stmt->bindValue($key, $val, PDO::PARAM_INT);
+//Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceirofunction getTrafficData(PDO $pdo, $id_parceiro = null) {
+    function getTrafficData(PDO $pdo, $id_parceiro = null) {
+        $cacheDir = __DIR__ . '/cache';
+        if (!file_exists($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
         }
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    };
-
-    $irregularities = $getData('irregularities');
-    $subroutes = $getData('subroutes');
-    $routes = $getData('routes');
-
-    $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
-    $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
-
-    $result = [
-        'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
-        'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
-        'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
-    ];
-
-    $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-
-    return $json;
-}
-
-
+    
+        $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
+        $cacheFile = $cacheDir . '/' . $cacheKey;
+    
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 240) {
+            return json_decode(file_get_contents($cacheFile), true);
+        }
+    
+        $params = [];
+        $filter = '';
+        if (!is_null($id_parceiro) && $id_parceiro != 99) {
+            $filter = ' AND id_parceiro = :id_parceiro';
+            $params[':id_parceiro'] = $id_parceiro;
+        }
+    
+        $getData = function($table) use ($pdo, $filter, $params) {
+            $sql = "
+                SELECT 
+                    SUM(CASE WHEN jam_level > 1 THEN length ELSE 0 END) AS lento,
+                    SUM(CASE WHEN time > historic_time THEN time - historic_time ELSE 0 END) AS atraso
+                FROM $table
+                WHERE is_active = 1 $filter
+            ";
+            $stmt = $pdo->prepare($sql);
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        };
+    
+        $irregularities = $getData('irregularities');
+        $subroutes = $getData('subroutes');
+        $routes = $getData('routes');
+    
+        $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
+        $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
+    
+        $result = [
+            'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
+            'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
+            'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
+        ];
+    
+        $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+    
+        return $json;
+    }
+    
 
 $traficdata = getTrafficData($pdo, $id_parceiro); // Pode adicionar lógica condicional aqui, se necessário
 
