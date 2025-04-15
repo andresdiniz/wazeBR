@@ -184,20 +184,16 @@
                             <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                             <td>{{ alert.confidence }}</td>
                             <td>
-                                <button class="btn btn-info btn-sm open-modal" 
-                                    data-toggle="modal" 
-                                    data-target="#alertModal"
-                                    data-lat="{{ alert.location_y }}"
-                                    data-lon="{{ alert.location_x }}"
-                                    data-type="{{ alert.type }}"
-                                    data-subtype="{{ alert.subtype }}"
-                                    data-date="{{ (alert.pubMillis / 1000)|date('d/m/Y H:i:s') }}"
-                                    data-confidence="{{ alert.confidence }}">
-                                Detalhes
-                            </button>
+                                <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                        data-target="#alertModal{{ alert.uuid }}" 
+                                        data-lat="{{ alert.location_y }}" 
+                                        data-lon="{{ alert.location_x }}">
+                                    Detalhes
+                                </button>
                             </td>
                         </tr>
                         {# Inclui modal individual para cada alerta #}
+                        {% include 'modal.twig' with {'alert': alert} %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -256,20 +252,16 @@
                                 <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                 <td>{{ alert.reportRating }}</td>
                                 <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                        data-toggle="modal" 
-                                        data-target="#alertModal"
-                                        data-lat="{{ alert.location_y }}"
-                                        data-lon="{{ alert.location_x }}"
-                                        data-type="{{ alert.type }}"
-                                        data-subtype="{{ alert.subtype }}"
-                                        data-date="{{ (alert.pubMillis / 1000)|date('d/m/Y H:i:s') }}"
-                                        data-confidence="{{ alert.confidence }}">
-                                    Detalhes
-                                </button>
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -314,20 +306,16 @@
                                 <td class="alert-date" data-pubmillis="{{alert.pubMillis}}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                 <td>{{ alert.confidence }}</td>
                                 <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                        data-toggle="modal" 
-                                        data-target="#alertModal"
-                                        data-lat="{{ alert.location_y }}"
-                                        data-lon="{{ alert.location_x }}"
-                                        data-type="{{ alert.type }}"
-                                        data-subtype="{{ alert.subtype }}"
-                                        data-date="{{ (alert.pubMillis / 1000)|date('d/m/Y H:i:s') }}"
-                                        data-confidence="{{ alert.confidence }}">
-                                    Detalhes
-                                </button>
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -376,20 +364,16 @@
                                 <td>{{ alertTypeTranslations[alert.subtype] | default(alert.subtype) }}</td>
                                 <td>{{ alert.confidence }}</td>
                                 <td>
-                                    <button class="btn btn-info btn-sm open-modal" 
-                                        data-toggle="modal" 
-                                        data-target="#alertModal"
-                                        data-lat="{{ alert.location_y }}"
-                                        data-lon="{{ alert.location_x }}"
-                                        data-type="{{ alert.type }}"
-                                        data-subtype="{{ alert.subtype }}"
-                                        data-date="{{ (alert.pubMillis / 1000)|date('d/m/Y H:i:s') }}"
-                                        data-confidence="{{ alert.confidence }}">
-                                    Detalhes
-                                </button>
+                                    <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                            data-target="#alertModal{{ alert.uuid }}" 
+                                            data-lat="{{ alert.location_y }}" 
+                                            data-lon="{{ alert.location_x }}">
+                                        Detalhes
+                                    </button>
                                 </td>
                             </tr>
                             {# Inclui modal individual para cada alerta #}
+                            {% include 'modal.twig' with {'alert': alert} %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -405,168 +389,55 @@
                 </div>
                 <!-- /.container-fluid -->
 
-                {# Adicione este modal único no final do template #}
 
-                <!-- Modal Único -->
-<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content p-3 shadow-lg rounded">
-            <div class="modal-header bg-primary text-white rounded-top">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm p-3 mb-3">
-                            <p><strong>📌 UUID:</strong> <span id="modal-uuid">-</span></p>
-                            <p><strong>🏙️ Cidade:</strong> <span id="modal-city">-</span></p>
-                            <p><strong>📍 Rua:</strong> <span id="modal-street">-</span></p>
-                            <p><strong>📡 Localização:</strong> <span id="modal-location">-</span></p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="alert-details">
-                            <p><strong>📅 Data:</strong> 
-                                <span id="modal-date">-</span>
-                                <small class="text-muted">(UTC)</small>
-                            </p>
-                        
-                            <p><strong>🛣️ KM Estimado:</strong> 
-                                <span id="modal-km" class="badge bg-info">-</span>
-                            </p>
-                        
-                            <p><strong>🔍 Confiança:</strong> 
-                                <span id="modal-confidence" class="badge">-</span>
-                            </p>
-                        
-                            <p><strong>⚠️ Status:</strong> 
-                                <span id="modal-status" class="badge">-</span>
-                            </p>
-                        
-                            <p><strong>🔗 Link Relacionado:</strong>
-                                <a id="modal-link" href="#" class="badge bg-primary" target="_blank">
-                                    Ver no Waze Partner Hub ↗
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm p-3 mb-3">
-                    <p><strong>🚨 Tipo:</strong> <span id="modal-type">-</span></p>
-                    <p><strong>📌 Subtipo:</strong> <span id="modal-subtype">-</span></p>
-                </div>
-
-                <div class="card border-0 shadow-sm p-3">
-                    <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
-                    <div id="map-container" style="height: 400px; width: 100%;"></div>
-                    <small class="text-muted">
-                        Mapa interativo mostrando a localização precisa do alerta.
-                    </small>
-                </div>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-between">
-                <a id="modal-waze-link" href="#" 
-                   class="btn btn-outline-primary" target="_blank">
-                    <i class="fab fa-waze"></i> Ver no Waze
-                </a>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        $(".open-modal").on("click", async function () {
+                            let lat = $(this).data("lat");
+                            let lon = $(this).data("lon");
+                            let modalId = $(this).attr("data-target");
+                            let mapId = modalId.replace("#alertModal", "map-");
+                            let kmId = modalId.replace("#alertModal", "km-value-");
                 
-                <button type="button" class="btn btn-success" onclick="confirmarAlerta()">
-                    <i class="fas fa-check"></i> Confirmar Alerta
-                </button>
+                            // Inicialização do mapa
+                            setTimeout(() => {
+                                let map = L.map(mapId).setView([lat, lon], 13);
                 
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times"></i> Fechar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+                                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                                    attribution: "&copy; OpenStreetMap contributors"
+                                }).addTo(map);
+                
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup("Localização do Alerta")
+                                    .openPopup();
+                            }, 500);
+                
+                            // Chama a função assíncrona para buscar o KM
+                            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
+                            $(`#${kmId}`).text(km || "Não encontrado");
+                        });
+                    });
+                </script>
+                
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let map = null;
-    let currentMarker = null;
+<!-- CSS do DataTables (Se necessário) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
-    $(".open-modal").on("click", async function() {
-        const button = $(this);
-        const alertData = {
-            uuid: button.closest('tr').data('uuid'),
-            city: button.closest('tr').find('td:eq(0)').text(),
-            street: button.closest('tr').find('td:eq(1)').text(),
-            lat: button.data('lat'),
-            lon: button.data('lon'),
-            type: button.data('type'),
-            subtype: button.data('subtype'),
-            date: button.data('date'),
-            confidence: button.data('confidence'),
-            status: button.data('status') || 1 // Default para ativo
-        };
+<!-- CSS dos Botões do DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
 
-        // Preencher dados do modal
-        $('#modal-uuid').text(alertData.uuid);
-        $('#modal-city').text(alertData.city);
-        $('#modal-street').text(alertData.street);
-        $('#modal-location').text(`Lat: ${alertData.lat}, Lon: ${alertData.lon}`);
-        $('#modal-date').text(alertData.date);
-        $('#modal-type').text(alertData.type);
-        $('#modal-subtype').text(alertData.subtype);
-        
-        // Atualizar confiança
-        const confidenceBadge = $('#modal-confidence');
-        confidenceBadge.text(alertData.confidence);
-        confidenceBadge.removeClass().addClass(`badge bg-${
-            alertData.confidence > 4 ? 'success' : 
-            alertData.confidence >= 3 ? 'warning' : 'danger'
-        }`);
 
-        // Atualizar status
-        const statusBadge = $('#modal-status');
-        statusBadge.text(alertData.status === 1 ? "Ativo" : "Inativo");
-        statusBadge.removeClass().addClass('badge bg-' + (alertData.status === 1 ? 'success' : 'danger'));
+<!-- JS do DataTables -->
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 
-        // Links
-        $('#modal-link').attr('href', 
-            `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
-        $('#modal-waze-link').attr('href', 
-            `https://www.waze.com/ul?ll=${alertData.lat},${alertData.lon}`);
+<!-- JS dos Botões do DataTables -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
 
-        // Inicializar mapa
-        if (map) map.remove();
-        map = L.map('map-container').setView([alertData.lat, alertData.lon], 15);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-        
-        if (currentMarker) map.removeLayer(currentMarker);
-        currentMarker = L.marker([alertData.lat, alertData.lon])
-            .addTo(map)
-            .bindPopup("Localização do Alerta")
-            .openPopup();
+<!-- JS para exportação para CSV, Excel, PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
-        // Buscar KM
-        $('#modal-km').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
-        try {
-            const km = await buscarKmDnit(alertData.lon, alertData.lat);
-            $('#modal-km').text(km || "Não encontrado");
-        } catch (error) {
-            console.error('Erro ao buscar KM:', error);
-            $('#modal-km').text("Erro ao buscar");
-        }
-    });
-
-    $('#alertModal').on('hidden.bs.modal', function() {
-        if (map) {
-            map.remove();
-            map = null;
-            currentMarker = null;
-        }
-    });
-});
-</script>
+<script src="./js/scripts.js"></script>
