@@ -406,30 +406,124 @@
                 <!-- /.container-fluid -->
 
                 {# Adicione este modal único no final do template #}
-<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="alertModalLabel">Detalhes do Alerta</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="map-container" style="height: 400px;"></div>
-                <div class="mt-3">
-                    <p>KM mais próximo: <span id="km-value"></span></p>
-                    <p>Tipo: <span id="alert-type"></span></p>
-                    <p>Data: <span id="alert-date"></span></p>
-                    <p>Confiança: <span id="alert-confidence"></span></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
+                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
+               <div class="modal-dialog modal-lg">
+                   <div class="modal-content p-3 shadow-lg rounded">
+                       <div class="modal-header bg-primary text-white rounded-top">
+                           <h5 class="modal-title">
+                               <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                           </h5>
+                           <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                               <span aria-hidden="true">&times;</span>
+                           </button>
+                       </div>
+           
+                       <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                           <div class="row">
+                               <div class="col-md-6">
+                                   <div class="card border-0 shadow-sm p-3 mb-3">
+                                       <p><strong>📌 UUID:</strong> {{ alert.uuid }}</p>
+                                       <p><strong>🏙️ Cidade:</strong> {{ alert.city }}</p>
+                                       <p><strong>📍 Rua:</strong> {{ alert.street }}</p>
+                                       <p><strong>📡 Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
+                                   </div>
+                               </div>
+           
+                               <div class="col-md-6">
+                                   <div class="alert-details">
+                                       <!-- Data -->
+                                       <p><strong>📅 Data:</strong> 
+                                           {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }} 
+                                           <small class="text-muted">(UTC)</small>
+                                       </p>
+                                   
+                                       <!-- KM Estimado -->
+                                       <p><strong>🛣️ KM Estimado:</strong> 
+                                           <span id="km-value-{{ alert.uuid }}" class="badge bg-info">
+                                               {% if alert.estimated_km %}
+                                                   KM {{ alert.estimated_km|number_format(2, ',') }}
+                                               {% else %}
+                                                   <span class="spinner-border spinner-border-sm" role="status"></span> Calculando...
+                                               {% endif %}
+                                           </span>
+                                       </p>
+                                   
+                                       <!-- Confiança -->
+                                       <p><strong>🔍 Confiança:</strong> 
+                                           <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
+                                                 data-bs-toggle="tooltip" 
+                                                 title="Nível de confiança na precisão do alerta">
+                                               {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
+                                           </span>
+                                       </p>
+                                   
+                                       <!-- Status -->
+                                       <p><strong>⚠️ Status:</strong> 
+                                           <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }}">
+                                               {{ alert.status == 1 ? "Ativo" : "Inativo" }}
+                                               <span class="visually-hidden">Status do alerta</span>
+                                           </span>
+                                       </p>
+                                   
+                                       <!-- Link -->
+                                       <p><strong>🔗 Link Relacionado:</strong>
+                                           <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
+                                              class="badge bg-primary text-decoration-none"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              aria-label="Abrir alerta no Waze">
+                                               Ver no Waze Partner Hub ↗
+                                           </a>
+                                       </p>
+                                   </div>
+                               </div>
+                           </div>
+           
+                           <div class="card border-0 shadow-sm p-3 mb-3">
+                               <p id = "tipo-alerta-{{ alert.uuid }}"><strong>🚨 Tipo:</strong> {{ alert.type }}</p>
+                               <p id="subtipo-alerta-{{ alert.uuid }}"><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
+                           </div>
+           
+                           <div class="card border-0 shadow-sm p-3">
+                               <h6 class="text-center text-muted">📍 Localização no Mapa (Waze)</h6>
+                               <iframe
+                                   id="map-{{ alert.uuid }}"
+                                   class="rounded shadow-sm border"
+                                   src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1&campaign=alerts_{{ alert.uuid }}&vehicle=car&hidegeopins=false&timestamp={{ alert.pubMillis }}"
+                                   style="width: 100%; height: 400px; min-height: 300px; border-color: #e0e0e0;"
+                                   allow="geolocation *; fullscreen"
+                                   title="Localização exata do alerta {{ alert.code }} no mapa"
+                                   loading="lazy"
+                                   referrerpolicy="strict-origin-when-cross-origin"
+                                   aria-describedby="map-description-{{ alert.uuid }}"
+                               ></iframe>
+                               <small id="map-description-{{ alert.uuid }}" class="text-muted">
+                                   Mapa interativo mostrando a localização precisa do alerta {{ alert.uuid }}. Clique no botão abaixo para abrir no Waze.
+               
+                               </small>
+                           </div>
+                       </div>
+           
+                       <div class="modal-footer d-flex justify-content-between">
+                           <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                              class="btn btn-outline-primary" target="_blank">
+                               <i class="fab fa-waze"></i> Ver no Waze
+                           </a>
+                           
+                           <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
+                               <i class="fas fa-check"></i> Confirmar Alerta
+                           </button>
+                           
+                           <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                               <i class="fas fa-times"></i> Fechar
+                           </button>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           
+           <script src="./js/scripts.js"></script>
 
 
 
