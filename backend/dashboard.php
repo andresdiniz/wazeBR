@@ -1,5 +1,7 @@
 <?php
 $start = microtime(true);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: public, max-age=240'); // Cache por 4 minutos
 // Inclui o arquivo de configuração do banco de dados e autoload do Composer
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
@@ -191,11 +193,10 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
         mkdir($cacheDir, 0777, true);
     }
 
-    $cacheKey = 'traficdata_' . ($id_parceiro ?? 'all') . '.json';
+    $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
     $cacheFile = $cacheDir . '/' . $cacheKey;
 
-    // Se existir cache válido (até 4 minutos)
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 240)) {
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 240) {
         return json_decode(file_get_contents($cacheFile), true);
     }
 
@@ -206,7 +207,6 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
         $params[':id_parceiro'] = $id_parceiro;
     }
 
-    // Função auxiliar
     $getData = function($table) use ($pdo, $filter, $params) {
         $sql = "
             SELECT 
@@ -223,27 +223,25 @@ function getTrafficData(PDO $pdo, $id_parceiro = null) {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     };
 
-    // Dados de cada tabela
     $irregularities = $getData('irregularities');
     $subroutes = $getData('subroutes');
     $routes = $getData('routes');
 
-    // Totais
     $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
     $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
 
-    // Resultado formatado
     $result = [
         'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
         'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
         'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
     ];
 
-    // Salva no cache
-    file_put_contents($cacheFile, json_encode($result));
+    $json = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+    file_put_contents($cacheFile, $json);
 
-    return $result;
+    return $json;
 }
+
 
 
 $traficdata = getTrafficData($pdo, $id_parceiro); // Pode adicionar lógica condicional aqui, se necessário
