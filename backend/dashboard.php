@@ -1,115 +1,301 @@
 <?php
-// Inicia buffer de saída imediatamente
-ob_start();
 $start = microtime(true);
-
-// Configura headers após iniciar o buffer
 header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: public, max-age=240');
-
-require_once './config/configbd.php';
-require_once './vendor/autoload.php';
+header('Cache-Control: public, max-age=240'); // Cache por 4 minutos
+// Inclui o arquivo de configuração do banco de dados e autoload do Composer
+require_once './config/configbd.php'; // Conexão ao banco de dados
+require_once './vendor/autoload.php'; // Autoloader do Composer
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
-// Função para salvar métricas (movida para cima)
-function savePerformanceMetrics($metrics, $startTime) {
-    try {
-        $logDir = $_SERVER['DOCUMENT_ROOT'] . '/desempenho/';
-        
-        if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
-            file_put_contents($logDir . '.htaccess', "Deny from all");
-        }
+// Configura o carregador do Twig para buscar templates na pasta "frontend"
+$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
+$twig = new Environment($loader);
 
-        $filename = $logDir . 'metrics-' . date('Y-m-d') . '.log';
-
-        $logData = [
-            'timestamp' => date('c'),
-            'execution_time' => round((microtime(true) - $startTime) * 1000, 2) . 'ms',
-            'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'MB',
-            'details' => $metrics
-        ];
-
-        file_put_contents(
-            $filename,
-            json_encode($logData, JSON_PRETTY_PRINT) . PHP_EOL,
-            FILE_APPEND | LOCK_EX
-        );
-
-    } catch (Exception $e) {
-        error_log("Erro ao salvar métricas: " . $e->getMessage());
-    }
-}
-
-// 1. Configuração do Twig
-$loader = new FilesystemLoader(__DIR__ . '/../frontend');
-$twig = new Environment($loader, [
-    'cache' => __DIR__ . '/../tmp/twig_cache',
-    'auto_reload' => true
-]);
-
+// Conexão com o banco de dados
 $pdo = Database::getConnection();
-$id_parceiro = $_SESSION['usuario_id_parceiro'];
-session_write_close();
 
-// 2. Função de medição corrigida
-function measurePerformance(callable $function, &$metrics = null) {
-    $start = microtime(true);
-    $result = $function();
-    $time = round((microtime(true) - $start) * 1000, 2);
-    $memory = memory_get_peak_usage(true);
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+session_write_close(); // Libera o lock da sessão
+
+// Função para buscar alertas de acidentes (ordenados pelos mais recentes)
+function getAccidentAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT * 
+        FROM alerts 
+        WHERE type = 'ACCIDENT' AND status = 1 
+    ";
     
-    if ($metrics !== null) {
-        $metrics = [
-            'time' => $time . ' ms',
-            'memory' => round($memory / 1024 / 1024, 2) . ' MB'
-        ];
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= "AND id_parceiro = :id_parceiro ";
     }
-    
-    return $result;
+
+    $query .= "ORDER BY pubMillis DESC"; // Ordenação dos alertas
+
+    $stmt = $pdo->prepare($query);
+
+    // Se necessário, vincula o parâmetro do parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// 3. Chamadas corrigidas para measurePerformance
+
+// Função para buscar alertas de buracos (ordenados por confidence do maior para o menor)
+function getHazardAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
+        FROM alerts 
+        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND status = 1
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro ";
+    }
+
+    $query .= " ORDER BY confidence DESC"; // Ordenação correta
+
+    $stmt = $pdo->prepare($query);
+
+    // Se necessário, vincula o parâmetro do parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+// Função para buscar alertas de congestionamento (ordenados pela confiabilidade do maior para o menor)
+function getJamAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT uuid, country, city, reportRating, confidence, type, street, location_x, location_y, pubMillis 
+        FROM alerts 
+        WHERE type = 'JAM' AND status = 1
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro ";
+    }
+
+    $query .= " ORDER BY confidence DESC, pubMillis DESC"; // Ordenação correta
+
+    $stmt = $pdo->prepare($query);
+
+    // Se necessário, vincula o parâmetro do parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+// Função para buscar os alertas "outros" (não classificados como ACCIDENT ou HAZARD com o subtipo HAZARD_ON_ROAD_POT_HOLE)
+function getOtherAlerts(PDO $pdo, $id_parceiro) {
+    $query = "
+        SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis
+        FROM alerts
+        WHERE (type != 'ACCIDENT' AND (type != 'HAZARD' OR subtype != 'HAZARD_ON_ROAD_POT_HOLE') AND type != 'JAM')
+        AND status = 1
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro ";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    // Se não for o parceiro administrador, vincula o id_parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+// Função para obter a quantidade de alertas ativos no dia de hoje
+function getActiveAlertsToday(PDO $pdo, $id_parceiro) {
+    // Inicia a query base
+    $query = "
+        SELECT COUNT(*) AS activeToday 
+        FROM alerts 
+        WHERE status = 1 AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = CURDATE()
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro ";
+    }
+
+    // Prepara a consulta
+    $stmt = $pdo->prepare($query);
+
+    // Se não for o parceiro administrador, vincula o id_parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    // Executa a consulta
+    $stmt->execute();
+
+    // Retorna a quantidade de alertas ativos
+    return $stmt->fetch(PDO::FETCH_ASSOC)['activeToday'];
+}
+
+
+// Função para obter a quantidade total de alertas no mês (independente do status)
+function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro) {
+    // Inicia a query base
+    $query = "
+        SELECT COUNT(*) AS totalMonth 
+        FROM alerts 
+        WHERE MONTH(FROM_UNIXTIME(pubMillis / 1000)) = MONTH(CURDATE()) 
+        AND YEAR(FROM_UNIXTIME(pubMillis / 1000)) = YEAR(CURDATE())
+    ";
+
+    // Se não for o parceiro administrador (99), adiciona o filtro de parceiro
+    if ($id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro ";
+    }
+
+    // Prepara a consulta
+    $stmt = $pdo->prepare($query);
+
+    // Se não for o parceiro administrador, vincula o id_parceiro
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    // Executa a consulta
+    $stmt->execute();
+
+    // Retorna o total de alertas no mês
+    return $stmt->fetch(PDO::FETCH_ASSOC)['totalMonth'];
+}
+
+//Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceirofunction getTrafficData(PDO $pdo, $id_parceiro = null) {
+    function getTrafficData(PDO $pdo, $id_parceiro = null) {
+        $cacheDir = __DIR__ . '/cache';
+        if (!file_exists($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
+    
+        $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
+        $cacheFile = $cacheDir . '/' . $cacheKey;
+    
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 240) {
+            return json_decode(file_get_contents($cacheFile), true);
+        }
+    
+        $params = [];
+        $filter = '';
+        if (!is_null($id_parceiro) && $id_parceiro != 99) {
+            $filter = ' AND id_parceiro = :id_parceiro';
+            $params[':id_parceiro'] = $id_parceiro;
+        }
+    
+        $getData = function($table) use ($pdo, $filter, $params) {
+            $sql = "
+                SELECT 
+                    SUM(CASE WHEN jam_level > 1 THEN length ELSE 0 END) AS lento,
+                    SUM(CASE WHEN time > historic_time THEN time - historic_time ELSE 0 END) AS atraso
+                FROM $table
+                WHERE is_active = 1 $filter
+            ";
+            $stmt = $pdo->prepare($sql);
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        };
+    
+        $irregularities = $getData('irregularities');
+        $subroutes = $getData('subroutes');
+        $routes = $getData('routes');
+    
+        $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
+        $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
+    
+        $result = [
+            'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
+            'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
+            'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
+        ];
+        
+        return $result;
+    }
+
+// Coleta de métricas
 $metrics = [];
 
-// Coleta de dados com métricas
-$combinedAlerts = measurePerformance(
-    function() use ($pdo, $id_parceiro) {
-        $query = "SELECT type, subtype, uuid, city, street, 
-                 location_x, location_y, pubMillis, confidence, reportRating
-                 FROM alerts
-                 WHERE status = 1 AND (
-                     type = 'ACCIDENT' OR
-                     (type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE') OR
-                     type = 'JAM'
-                 )".($id_parceiro != 99 ? " AND id_parceiro = :id_parceiro" : "");
+// Coleta de dados com medição de performance
+$data = [
+    'accidentAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getAccidentAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['accidentAlerts']
+    ),
+    
+    'hazardAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getHazardAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['hazardAlerts']
+    ),
+    
+    'jamAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getJamAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['jamAlerts']
+    ),
+    
+    'otherAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getOtherAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['otherAlerts']
+    ),
+    
+    'activeAlertsToday' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getActiveAlertsToday($pdo, $id_parceiro);
+        }, 
+        $metrics['activeAlertsToday']
+    ),
+    
+    'totalAlertsThisMonth' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getTotalAlertsThisMonth($pdo, $id_parceiro);
+        }, 
+        $metrics['totalAlertsThisMonth']
+    ),
+    
+    'traficdata' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return getTrafficData($pdo, $id_parceiro);
+        }, 
+        $metrics['traficdata']
+    ),
+];
 
-        $stmt = $pdo->prepare($query);
-        if ($id_parceiro != 99) {
-            $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-        }
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    },
-    $metrics['combinedAlerts']
-);
-
-$processedAlerts = measurePerformance(
-    function() use ($combinedAlerts) {
-        $result = ['accident' => [], 'hazard' => [], 'jam' => [], 'other' => []];
-        foreach ($combinedAlerts as $alert) {
-            // ... (processamento igual ao original)
-        }
-        return $result;
-    },
-    $metrics['processedAlerts']
-);
-
-// 4. Geração do relatório final
-$data = $processedAlerts;
+// Salvando métricas
 savePerformanceMetrics($metrics, $start);
 
-// Limpa buffer e envia resposta
+// Libera buffer e renderiza template
 ob_end_clean();

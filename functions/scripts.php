@@ -548,3 +548,30 @@ function generateUuid() {
     $data[8] = chr(ord($data[8]) & 0x3f | 0x80);  // Variante DCE
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
+
+function measurePerformance(callable $function, &$metric) {
+    $start = microtime(true);
+    $memoryStart = memory_get_usage();
+    $result = $function();
+    
+    $metric = [
+        'time' => round((microtime(true) - $start) * 1000, 2) . ' ms',
+        'memory' => round((memory_get_peak_usage() - $memoryStart) / 1024 / 1024, 2) . ' MB'
+    ];
+    
+    return $result;
+}
+
+function savePerformanceMetrics($metrics, $startTime) {
+    $logData = [
+        'timestamp' => date('c'),
+        'total_time' => round((microtime(true) - $startTime) * 1000, 2) . ' ms',
+        'metrics' => $metrics
+    ];
+    
+    file_put_contents(
+        $_SERVER['DOCUMENT_ROOT'] . '/desempenho/metrics-' . date('Y-m-d') . '.log',
+        json_encode($logData, JSON_PRETTY_PRINT) . PHP_EOL,
+        FILE_APPEND | LOCK_EX
+    );
+}
