@@ -159,50 +159,30 @@
             </div>
             <!-- Card Body -->
             <div class="card-body">
-                {% if accidentAlerts is not empty %}
-                <table id="accidentsTable" class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Cidade</th>
-                            <th>Rua</th>
-                            <th>Localização</th>
-                            <th>Data Evento</th>
-                            <th>Nota</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for alert in accidentAlerts %}
-                        <tr data-uuid="{{ alert.uuid }}">
-                            <td>{{ alert.city }}</td>
-                            <td>{{ alert.street }}</td>
-                            <td>
-                                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">
-                                    {{ alert.location_x }}, {{ alert.location_y }}
-                                </a>
-                            </td>
-                            <td class="alert-date" data-pubmillis="{{ alert.pubMillis }}">{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                            <td>{{ alert.confidence }}</td>
-                            <td>
-                                <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                        data-target="#alertModal{{ alert.uuid }}" 
-                                        data-lat="{{ alert.location_y }}" 
-                                        data-lon="{{ alert.location_x }}">
-                                    Detalhes
-                                </button>
-                            </td>
-                        </tr>
-                        {# Inclui modal individual para cada alerta #}
-                        {% include 'modal.twig' with {'alert': alert} %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>Não há eventos de acidentes registrados no momento.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+                {% for alert in accidentAlerts %}
+                    <tr data-uuid="{{ alert.uuid }}">
+                        <!-- ... outras células ... -->
+                        <td>
+                            <button class="btn btn-info btn-sm open-modal" 
+                                    data-toggle="modal" 
+                                    data-target="#alertModal"
+                                    data-alert="{{ {
+                                        'uuid': alert.uuid,
+                                        'city': alert.city,
+                                        'street': alert.street,
+                                        'location_x': alert.location_x,
+                                        'location_y': alert.location_y,
+                                        'pubMillis': alert.pubMillis,
+                                        'type': alert.type,
+                                        'subtype': alert.subtype,
+                                        'confidence': alert.confidence,
+                                        'status': alert.status|default(1)
+                                    }|json_encode|e('html_attr') }}">
+                                Detalhes
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
 
     <!-- Pie Chart -->
     <div class="col-xl-6 col-lg-6">
@@ -389,55 +369,52 @@
                 </div>
                 <!-- /.container-fluid -->
 
-
+                # Inclui o modal uma única vez no final #}
+                {% include 'modal.twig' with {'alert': alert} %}
+                
                 <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        $(".open-modal").on("click", async function () {
-                            let lat = $(this).data("lat");
-                            let lon = $(this).data("lon");
-                            let modalId = $(this).attr("data-target");
-                            let mapId = modalId.replace("#alertModal", "map-");
-                            let kmId = modalId.replace("#alertModal", "km-value-");
+                document.addEventListener("DOMContentLoaded", function() {
+                    let map = null;
+                    let currentMarker = null;
                 
-                            // Inicialização do mapa
-                            setTimeout(() => {
-                                let map = L.map(mapId).setView([lat, lon], 13);
+                    $('.open-modal').click(async function() {
+                        const alertData = JSON.parse($(this).data('alert'));
+                        
+                        // Preencher dados do modal
+                        $('#modal-uuid').text(alertData.uuid);
+                        $('#modal-city').text(alertData.city);
+                        $('#modal-street').text(alertData.street);
+                        $('#modal-location').text(`${alertData.location_x}, ${alertData.location_y}`);
+                        $('#modal-date').text(new Date(alertData.pubMillis).toLocaleString());
+                        $('#modal-type').text(alertData.type);
+                        $('#modal-subtype').text(alertData.subtype);
+                        
+                        // Atualizar mapa
+                        if (map) map.remove();
+                        map = L.map('map-container').setView([alertData.location_y, alertData.location_x], 15);
+                        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+                        
+                        if (currentMarker) map.removeLayer(currentMarker);
+                        currentMarker = L.marker([alertData.location_y, alertData.location_x])
+                            .addTo(map)
+                            .bindPopup("Local do Alerta");
                 
-                                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                                    attribution: "&copy; OpenStreetMap contributors"
-                                }).addTo(map);
-                
-                                L.marker([lat, lon]).addTo(map)
-                                    .bindPopup("Localização do Alerta")
-                                    .openPopup();
-                            }, 500);
-                
-                            // Chama a função assíncrona para buscar o KM
-                            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
-                            $(`#${kmId}`).text(km || "Não encontrado");
-                        });
+                        // Buscar KM
+                        $('#modal-km').html('<div class="spinner-border spinner-border-sm"></div> Calculando...');
+                        try {
+                            const km = await buscarKmDnit(alertData.location_x, alertData.location_y);
+                            $('#modal-km').text(km || "Não encontrado");
+                        } catch (error) {
+                            $('#modal-km').text("Erro na busca");
+                        }
                     });
-                </script>
                 
-
-<!-- CSS do DataTables (Se necessário) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-
-<!-- CSS dos Botões do DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
-
-
-<!-- JS do DataTables -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-
-<!-- JS dos Botões do DataTables -->
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-
-<!-- JS para exportação para CSV, Excel, PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-
-<script src="./js/scripts.js"></script>
+                    $('#alertModal').on('hidden.bs.modal', function() {
+                        if (map) {
+                            map.remove();
+                            map = null;
+                            currentMarker = null;
+                        }
+                    });
+                });
+                </script>
