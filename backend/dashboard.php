@@ -1,4 +1,5 @@
 <?php
+ob_start();
 $start = microtime(true);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=240');
@@ -21,19 +22,18 @@ $id_parceiro = $_SESSION['usuario_id_parceiro'];
 session_write_close();
 
 // Função genérica para medição de performance
-function measurePerformance(callable $function, ...$args) {
+function measurePerformance(callable $function, &$metrics = []) {
     $start = microtime(true);
-    $result = $function(...$args);
-    $time = round((microtime(true) - $start) * 1000, 2); // ms
-    $memory = round(memory_get_peak_usage() / 1024, 2); // KB
-    return [
-        'result' => $result,
-        'metrics' => [
-            'execution_time' => $time,
-            'memory_usage' => $memory,
-            'query_details' => $args[1] ?? null
-        ]
+    $result = $function();
+    $time = round((microtime(true) - $start) * 1000, 2);
+    $memory = memory_get_peak_usage(true);
+    
+    $metrics = [
+        'time' => $time . ' ms',
+        'memory' => round($memory / 1024 / 1024, 2) . ' MB'
     ];
+    
+    return $result;
 }
 
 // 2. Query Unificada para Alertas
@@ -110,7 +110,12 @@ function processAlerts($alerts) {
 $metrics = [];
 
 // Execução otimizada
-$combinedAlerts = measurePerformance('getCombinedAlerts', $pdo, $id_parceiro);
+// Correção na chamada da função (linha 121)
+$combinedAlerts = measurePerformance(
+    function() use ($pdo, $id_parceiro) {
+        return getCombinedAlerts($pdo, $id_parceiro);
+    }
+);
 $metrics['combinedAlerts'] = $combinedAlerts['metrics'];
 
 $processedAlerts = measurePerformance('processAlerts', $combinedAlerts['result']);
@@ -128,3 +133,5 @@ error_log(json_encode([
     'memory_peak' => round(memory_get_peak_usage() / 1024 / 1024, 2) . 'MB',
     'metrics' => $metrics
 ]));
+
+ob_end_flush();
