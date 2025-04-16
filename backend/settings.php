@@ -24,14 +24,16 @@ $twig = new Environment($loader);
 $pdo = Database::getConnection();
 
 // Função para buscar configurações do site
-function getsettings(PDO $pdo) {
+function getsettings(PDO $pdo)
+{
     $stmt = $pdo->prepare("SELECT * FROM settings");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Função para buscar todas as páginas do site
-function getSitepagesAll($pdo) {
+function getSitepagesAll($pdo)
+{
     $data = []; // Array para armazenar os dados das páginas
 
     try {
@@ -56,7 +58,7 @@ function getSitepagesAll($pdo) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
     // Processa as ações com base no valor de 'form_type'
     switch ($_POST['form_type']) {
-        
+
         // Caso de edição de parceiro
         case 'edit_partner':
             $id = intval($_POST['id']); // Garantir que o ID seja um número inteiro
@@ -104,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                 $status = !empty($_POST['status']) ? $_POST['status'] : null;
                 $meta_title = !empty($_POST['meta_title']) ? $_POST['meta_title'] : null;
                 $meta_description = !empty($_POST['meta_description']) ? $_POST['meta_description'] : null;
-                $show_in_nav = isset($_POST['show_in_nav']) ? (int)$_POST['show_in_nav'] : null;
+                $show_in_nav = isset($_POST['show_in_nav']) ? (int) $_POST['show_in_nav'] : null;
 
                 // A data e hora atual que será salva no banco
                 $created_at = date('Y-m-d H:i:s');  // Data e hora no formato 'Y-m-d H:i:s'
@@ -145,30 +147,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
                 echo "Campos obrigatórios não preenchidos.";
             }
             break;
-        
-            case 'delete_partner':
-                // Lógica para deletar parceiro
-                $id = $_POST['id'];
-    
-                if (!empty($id)) {
-                    try {
-                        // Excluir o parceiro com o ID
-                        $sql = "DELETE FROM parceiros WHERE id = :id";
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-    
-                        if ($stmt->execute()) {
-                            echo json_encode(["success" => true, "message" => "Parceiro com ID {$id} removido."]);
-                        } else {
-                            echo json_encode(["success" => false, "message" => "Erro ao remover o parceiro."]);
-                        }
-                    } catch (PDOException $e) {
-                        error_log("Erro ao excluir parceiro: " . $e->getMessage());
-                        echo json_encode(["success" => false, "message" => "Erro ao processar a exclusão."]);
+
+        case 'delete_partner':
+            // Lógica para deletar parceiro
+            $id = $_POST['id'];
+
+            if (!empty($id)) {
+                try {
+                    // Excluir o parceiro com o ID
+                    $sql = "DELETE FROM parceiros WHERE id = :id";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+                    if ($stmt->execute()) {
+                        echo json_encode(["success" => true, "message" => "Parceiro com ID {$id} removido."]);
+                    } else {
+                        echo json_encode(["success" => false, "message" => "Erro ao remover o parceiro."]);
                     }
-                } else {
-                    echo json_encode(["success" => false, "message" => "ID inválido."]);
+                } catch (PDOException $e) {
+                    error_log("Erro ao excluir parceiro: " . $e->getMessage());
+                    echo json_encode(["success" => false, "message" => "Erro ao processar a exclusão."]);
                 }
+            } else {
+                echo json_encode(["success" => false, "message" => "ID inválido."]);
+            }
             break;
 
         // Caso de exclusão da pagina
@@ -263,49 +265,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             }
             break;
 
-            case 'create_partner':
-                $nome = trim($_POST['Nome']);
-                $identificador = trim($_POST['name_partner']);
-                
-                if (!empty($nome) && !empty($identificador)) {
-                    try {
-                        // Inserir o novo parceiro na tabela `parceiros`
-                        $sql = "INSERT INTO parceiros (Nome, name_partner) VALUES (:nome, :identificador)";
+        case 'create_partner':
+            $nome = trim($_POST['Nome']);
+            $identificador = trim($_POST['name_partner']);
+
+            if (!empty($nome) && !empty($identificador)) {
+                try {
+                    // Inserir o novo parceiro na tabela `parceiros`
+                    $sql = "INSERT INTO parceiros (Nome, name_partner) VALUES (:nome, :identificador)";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindValue(':nome', $nome, PDO::PARAM_STR);
+                    $stmt->bindValue(':identificador', $identificador, PDO::PARAM_STR);
+
+                    if ($stmt->execute()) {
+                        $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
+
+                        // Construir o URL dinâmico
+                        $url = 'https://wfcbrasil.com.br/events' . $id_parceiro . '.xml';
+
+                        // Inserir a URL na tabela `urls_events`
+                        $sql = "INSERT INTO `urls_events` (`id_parceiro`, `url`) VALUES (:id_parceiro, :url)";
                         $stmt = $pdo->prepare($sql);
-                        $stmt->bindValue(':nome', $nome, PDO::PARAM_STR);
-                        $stmt->bindValue(':identificador', $identificador, PDO::PARAM_STR);
-            
+                        $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+                        $stmt->bindValue(':url', $url, PDO::PARAM_STR);
+
                         if ($stmt->execute()) {
-                            $id_parceiro = $pdo->lastInsertId(); // Obtém o ID do parceiro criado
-            
-                            // Construir o URL dinâmico
-                            $url = 'https://wazeportal.com.br/events' . $id_parceiro . '.xml';
-            
-                            // Inserir a URL na tabela `urls_events`
-                            $sql = "INSERT INTO `urls_events` (`id_parceiro`, `url`) VALUES (:id_parceiro, :url)";
-                            $stmt = $pdo->prepare($sql);
-                            $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-                            $stmt->bindValue(':url', $url, PDO::PARAM_STR);
-            
-                            if ($stmt->execute()) {
-                                echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
-                            } else {
-                                echo json_encode(["success" => false, "message" => "Erro ao salvar a URL do evento."]);
-                                http_response_code(501);    // Código de erro 501 - Não implementado corretamente
-                            }
+                            echo json_encode(["success" => true, "message" => "Parceiro criado com sucesso!", "id" => $id_parceiro]);
                         } else {
-                            echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
+                            echo json_encode(["success" => false, "message" => "Erro ao salvar a URL do evento."]);
                             http_response_code(501);    // Código de erro 501 - Não implementado corretamente
                         }
-                    } catch (PDOException $e) {
-                        error_log("Erro ao criar parceiro: " . $e->getMessage());
-                        echo json_encode(["success" => false, "message" => "Erro ao processar a criação."]);
-                        http_response_code(500);  // Código de erro 500 - Erro interno do servidor
+                    } else {
+                        echo json_encode(["success" => false, "message" => "Erro ao criar parceiro."]);
+                        http_response_code(501);    // Código de erro 501 - Não implementado corretamente
                     }
-                } else {
-                    echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
+                } catch (PDOException $e) {
+                    error_log("Erro ao criar parceiro: " . $e->getMessage());
+                    echo json_encode(["success" => false, "message" => "Erro ao processar a criação."]);
+                    http_response_code(500);  // Código de erro 500 - Erro interno do servidor
                 }
-                break;                        
+            } else {
+                echo json_encode(["success" => false, "message" => "Dados inválidos fornecidos."]);
+            }
+            break;
 
         // Caso de ação não reconhecida
         default:

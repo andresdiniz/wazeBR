@@ -743,7 +743,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $userEmail = $email; // E-mail do usuário
                     $userName = $nome;
                     $userPassword = $password;
-                    $loginLink = "https://wazeportal.com.br/";
+                    $loginLink = "https://wfcbrasil.com.br/";
 
                     $message = "
                         <html>
@@ -856,9 +856,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $rua = $_POST['rua'] ?? null;
             $streetSegment = $_POST['streetSegment'] ?? null; // JSON com array de coordenadas
             $segmentDirection = $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
-            $id_parceiro =  $_POST['id_parceiro_alert'] ?? null;
+            $id_parceiro = $_POST['id_parceiro_alert'] ?? null;
 
-            if($id_parceiro == null){
+            if ($id_parceiro == null) {
                 echo json_encode(['error' => 'Um parceiro deve ser escolhido.']);
                 die();
             }
@@ -1009,21 +1009,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (!empty($email)) {
                 // Conectar ao banco de dados
                 $pdo = Database::getConnection();
-        
+
                 try {
                     // Gerar um token único para o usuário
                     $token = bin2hex(random_bytes(16)); // Gerar um token de 32 caracteres
-        
+
                     // Inserir o token e o email na tabela de recuperação de senha
                     $stmt = $pdo->prepare("INSERT INTO recuperar_senha (email, token, valid) VALUES (:email, :token, DATE_ADD(NOW(), INTERVAL 24 HOUR))");
                     $stmt->execute([
                         ':email' => $email,
                         ':token' => $token
                     ]);
-        
+
                     // Preparar a URL de recuperação de senha com o token
-                    $recoveryUrl = "https://wazeportal.com.br/redefinir_senha.php?token=" . $token;
-        
+                    $recoveryUrl = "https://wfcbrasil.com.br/redefinir_senha.php?token=" . $token;
+
                     // Mensagem do e-mail
                     $message = "
                         <html>
@@ -1093,13 +1093,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         </html>
                         ";
 
-        
+
                     // Assunto do e-mail
                     $subject = "Recuperação de Senha";
-        
+
                     // Enviar o e-mail
                     sendEmail($email, $message, $subject);
-        
+
                     // Retornar uma resposta de sucesso
                     echo json_encode(['status' => 'success', 'message' => 'Instruções para recuperação de senha foram enviadas por e-mail.']);
                 } catch (Exception $e) {
