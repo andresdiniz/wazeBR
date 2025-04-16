@@ -461,9 +461,8 @@
     document.addEventListener("DOMContentLoaded", function() {    
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
-            console.log('Botão clicado!');
             const alertData = JSON.parse($(this).data('alert'));
-            const locale = 'pt'; // Altere conforme necessário (pt-BR, en-US, etc)
+            //const locale = 'pt'; // Altere conforme necessário (pt-BR, en-US, etc)
             console.log(alertData);
             
             // Atualizar iframe do Waze
