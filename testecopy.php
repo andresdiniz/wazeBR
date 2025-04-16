@@ -13,13 +13,13 @@ try {
     $mail->isSMTP();                                            // Enviar via SMTP
     $mail->Host       = 'smtp.hostinger.com';                        // Defina o servidor SMTP (Gmail usado como exemplo)
     $mail->SMTPAuth   = true;                                     // Habilitar autenticação SMTP
-    $mail->Username   = 'wazebrasil@fenixsmm.store';                    // Seu endereço de e-mail
+    $mail->Username   = 'sac@wazeportal.com.br';                    // Seu endereço de e-mail
     $mail->Password   = '@Ndre2025';                               // Sua senha de e-mail (use senhas de app se necessário)
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;           // Habilitar criptografia TLS
     $mail->Port       = 587;                                      // Porta SMTP (587 para TLS)
 
     // Remetente e destinatário
-    $mail->setFrom('wazebrasil@fenixsmm.store', 'Seu Nome');
+    $mail->setFrom('sac@wazeportal.com.br', 'Waze Portal BR');
     $mail->addAddress('andresoaresdiniz201218@gmail.com', 'Destinatário'); // Substitua pelo destinatário
 
     // Assunto e corpo do e-mail
