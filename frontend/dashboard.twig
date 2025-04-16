@@ -527,13 +527,17 @@
                     .catch(() => $('#modalKm').html('<span class="text-danger">Erro na busca</span>'));
             }
 
-            // Evento disparado quando o modal é completamente exibido
-            $('#alertModal').one('shown.bs.modal', function () {
-                const wazeFrame = document.getElementById('mapContainer');
-                const src = `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location_y}&lon=${alertData.location_x}&pin=1`;
-                console.log('Waze Frame Source (shown):', src);
-                wazeFrame.src = src;
-            });
+            const mapContainer = document.getElementById('mapContainer');
+            mapContainer.innerHTML = ''; // Limpa conteúdo anterior
+            
+            // Cria novo iframe
+            const iframe = document.createElement('iframe');
+            iframe.setAttribute('src', src);
+            iframe.style.width = '100%';
+            iframe.style.height = '400px';
+            iframe.style.border = '0';
+            iframe.loading = 'lazy';
+            mapContainer.appendChild(iframe);
         });
     
         // Resetar ao fechar modal
