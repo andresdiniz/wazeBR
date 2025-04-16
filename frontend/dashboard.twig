@@ -35,7 +35,7 @@
         background-color: #f8f9fa;
         cursor: pointer;
     }
-    
+
 </style>
 {% endblock %}
 
@@ -473,6 +473,11 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {    
+        // Tooltips
+    $('[data-toggle="tooltip"]').tooltip({
+        trigger: 'hover',
+        placement: 'top'
+    });
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
             raw = document.querySelector('.open-modal').getAttribute('data-alert')
