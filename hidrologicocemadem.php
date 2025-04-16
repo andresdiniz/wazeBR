@@ -4,16 +4,15 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/cron_error.log'); // Caminho corrigido
+ini_set('error_log', __DIR__ . '/cron_error.log');
 
-// URLs das estações
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
 $urls = [
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/96",
-    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/96",
-    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=96"
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/8",
+    "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/8",
+    "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=8"
 ];
 
 date_default_timezone_set('America/Sao_Paulo');
@@ -29,7 +28,7 @@ try {
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 30, // Timeout adicionado
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_CONNECTTIMEOUT => 10
         ]);
 
@@ -50,42 +49,20 @@ try {
 
         // Primeiro formato de JSON
         if (isset($data['estacao'])) {
-            $station = $data['estacao'];
-            $stationId = $station['idEstacao'];
-            
-            // Atualiza informações da estação
-            $stmt = $pdo->prepare("INSERT INTO estacoes (id_estacao, nome, cidade, uf, latitude, longitude, tipo) 
-                                  VALUES (?, ?, ?, ?, ?, ?, ?) 
-                                  ON DUPLICATE KEY UPDATE 
-                                    nome = VALUES(nome), 
-                                    cidade = VALUES(cidade), 
-                                    uf = VALUES(uf), 
-                                    latitude = VALUES(latitude), 
-                                    longitude = VALUES(longitude), 
-                                    tipo = VALUES(tipo)");
-            $stmt->execute([
-                $stationId,
-                $station['nome'],
-                $station['idMunicipio']['cidade'],
-                $station['idMunicipio']['uf'],
-                $station['latitude'],
-                $station['longitude'],
-                $station['idTipoestacao']['descricao']
-            ]);
+            $estacao = $data['estacao'];
+            $codigoEstacao = $estacao['idEstacao'];
 
-            // Processa dados hidrológicos
             foreach ($data['datas'] as $dataIndex => $dataItem) {
                 foreach ($data['horarios'] as $horaIndex => $horario) {
                     $valor = $data['acumulados'][$dataIndex][$horaIndex] ?? null;
                     
                     if ($valor === null) continue;
 
-                    $horario = str_replace('h', ':00', $horario);
-                    
-                    // Assume que a data/hora original está no timezone local
+                    // Formata data e hora
+                    $horarioFormatado = str_replace('h', ':00', $horario);
                     $datetime = DateTime::createFromFormat(
                         'd/m/Y H:i', 
-                        "$dataItem $horario", 
+                        "$dataItem $horarioFormatado", 
                         $timezone
                     );
 
@@ -94,28 +71,51 @@ try {
                         continue;
                     }
 
-                    $dataInsert = $datetime->format('Y-m-d');
-                    $horaInsert = $datetime->format('H:i');
+                    // Prepara dados para inserção
+                    $dados = [
+                        'data_leitura' => $datetime->format('Y-m-d'),
+                        'hora_leitura' => $datetime->format('H:i'),
+                        'valor' => $valor,
+                        'codigo_estacao' => $codigoEstacao,
+                        'estacao_nome' => $estacao['nome'],
+                        'cidade_nome' => $estacao['idMunicipio']['cidade'],
+                        'uf_estado' => $estacao['idMunicipio']['uf'],
+                        
+                        // Valores padrão para campos obrigatórios
+                        'offset' => 0,
+                        'cota_atencao' => 50,
+                        'cota_alerta' => 70,
+                        'cota_transbordamento' => 100,
+                        'nivel_atual' => $valor
+                    ];
 
-                    // Verifica duplicatas
-                    $stmtCheck = $pdo->prepare("SELECT 1 FROM acumulados 
-                                               WHERE id_estacao = ? 
-                                                 AND data = ? 
-                                                 AND horario = ?");
-                    $stmtCheck->execute([$stationId, $dataInsert, $horaInsert]);
-                    
+                    // Verifica duplicidade
+                    $stmtCheck = $pdo->prepare("SELECT 1 FROM sua_tabela 
+                                                WHERE codigo_estacao = ? 
+                                                AND data_leitura = ? 
+                                                AND hora_leitura = ?");
+                    $stmtCheck->execute([
+                        $codigoEstacao,
+                        $dados['data_leitura'],
+                        $dados['hora_leitura']
+                    ]);
+
                     if (!$stmtCheck->fetchColumn()) {
-                        $pdo->prepare("INSERT INTO acumulados (id_estacao, data, horario, valor)
-                                      VALUES (?, ?, ?, ?)")
-                            ->execute([$stationId, $dataInsert, $horaInsert, $valor]);
+                        $stmt = $pdo->prepare("INSERT INTO sua_tabela (
+                            data_leitura, hora_leitura, valor, offset, 
+                            cota_atencao, cota_alerta, cota_transbordamento,
+                            nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
+                        ) VALUES (
+                            :data_leitura, :hora_leitura, :valor, :offset,
+                            :cota_atencao, :cota_alerta, :cota_transbordamento,
+                            :nivel_atual, :estacao_nome, :cidade_nome, :uf_estado, :codigo_estacao
+                        )");
+
+                        $stmt->execute($dados);
                         
                         // Verifica alertas
-                        $stmtCota = $pdo->prepare("SELECT cota_maxima FROM estacoes WHERE id_estacao = ?");
-                        $stmtCota->execute([$stationId]);
-                        $cotaMaxima = $stmtCota->fetchColumn();
-
-                        if ($cotaMaxima !== null && $valor > $cotaMaxima) {
-                            enviarAlerta($station, $valor, $cotaMaxima);
+                        if ($valor > $dados['cota_transbordamento']) {
+                            enviarAlertaTransbordamento($dados);
                         }
                     }
                 }
@@ -127,38 +127,47 @@ try {
                 $datetime = new DateTime($registro['datahora'], new DateTimeZone('UTC'));
                 $datetime->setTimezone($timezone);
 
-                $stmt = $pdo->prepare("INSERT INTO estacoes (id_estacao, nome, cidade, uf) 
-                                      VALUES (?, ?, ?, ?) 
-                                      ON DUPLICATE KEY UPDATE 
-                                        nome = VALUES(nome), 
-                                        cidade = VALUES(cidade), 
-                                        uf = VALUES(uf)");
-                $stmt->execute([
-                    $registro['codigo'],
-                    $registro['estacao'],
-                    $registro['cidade'],
-                    $registro['uf']
+                $dados = [
+                    'data_leitura' => $datetime->format('Y-m-d'),
+                    'hora_leitura' => $datetime->format('H:i'),
+                    'valor' => (float)$registro['valor'],
+                    'codigo_estacao' => $registro['codigo'],
+                    'estacao_nome' => $registro['estacao'],
+                    'cidade_nome' => $registro['cidade'],
+                    'uf_estado' => $registro['uf'],
+                    
+                    // Valores padrão
+                    'offset' => 0,
+                    'cota_atencao' => 50,
+                    'cota_alerta' => 70,
+                    'cota_transbordamento' => 100,
+                    'nivel_atual' => (float)$registro['valor']
+                ];
+
+                $stmtCheck = $pdo->prepare("SELECT 1 FROM sua_tabela 
+                                            WHERE codigo_estacao = ? 
+                                            AND data_leitura = ? 
+                                            AND hora_leitura = ?");
+                $stmtCheck->execute([
+                    $dados['codigo_estacao'],
+                    $dados['data_leitura'],
+                    $dados['hora_leitura']
                 ]);
 
-                // Insere dados hidrológicos
-                $dataInsert = $datetime->format('Y-m-d');
-                $horaInsert = $datetime->format('H:i');
-                $valor = (float)$registro['valor'];
-
-                $stmtCheck = $pdo->prepare("SELECT 1 FROM acumulados 
-                                           WHERE id_estacao = ? 
-                                             AND data = ? 
-                                             AND horario = ?");
-                $stmtCheck->execute([$registro['codigo'], $dataInsert, $horaInsert]);
-                
                 if (!$stmtCheck->fetchColumn()) {
-                    $pdo->prepare("INSERT INTO acumulados (id_estacao, data, horario, valor)
-                                  VALUES (?, ?, ?, ?)")
-                        ->execute([$registro['codigo'], $dataInsert, $horaInsert, $valor]);
+                    $stmt = $pdo->prepare("INSERT INTO sua_tabela (
+                        data_leitura, hora_leitura, valor, offset, 
+                        cota_atencao, cota_alerta, cota_transbordamento,
+                        nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
+                    ) VALUES (
+                        :data_leitura, :hora_leitura, :valor, :offset,
+                        :cota_atencao, :cota_alerta, :cota_transbordamento,
+                        :nivel_atual, :estacao_nome, :cidade_nome, :uf_estado, :codigo_estacao
+                    )");
+
+                    $stmt->execute($dados);
                 }
             }
-        } else {
-            error_log("Formato desconhecido: $url");
         }
     }
     error_log("Processamento concluído");
@@ -169,19 +178,19 @@ try {
     error_log("Erro geral: " . $e->getMessage());
 }
 
-function enviarAlerta($estacao, $valor, $cotaMaxima) {
+function enviarAlertaTransbordamento($dados) {
     $mensagem = "
-        Alerta: Estação {$estacao['nome']} ({$estacao['idEstacao']})
-        Valor atual: $valor mm
-        Cota máxima: $cotaMaxima mm
-        Local: {$estacao['idMunicipio']['cidade']}/{$estacao['idMunicipio']['uf']}
+        ALERTA DE TRANSBORDAMENTO
+        Estação: {$dados['estacao_nome']} ({$dados['codigo_estacao']})
+        Data: {$dados['data_leitura']} {$dados['hora_leitura']}
+        Valor atual: {$dados['valor']}mm
+        Cota de transbordamento: {$dados['cota_transbordamento']}mm
+        Local: {$dados['cidade_nome']}/{$dados['uf_estado']}
     ";
     
-    // Adapte a função de envio de email conforme sua implementação
     sendEmail(
         "alerta@example.com", 
-        "Alerta Hidrológico - {$estacao['nome']}", 
+        "Alerta de Transbordamento - {$dados['estacao_nome']}", 
         $mensagem
     );
 }
-?>
