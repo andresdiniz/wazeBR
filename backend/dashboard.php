@@ -273,6 +273,7 @@ $data = [
     ),
 ];
 
+echo $data;
 // Salvando métricas
 savePerformanceMetrics($metrics, $start);
 
