@@ -475,7 +475,7 @@
             
             console.log(document.getElementById('modalUuid')); // Deve retornar um elemento, não null
             // Atualizar iframe do Waze
-            const wazeFrame = document.getElementById('wazeMapIframe');
+            const wazeFrame = document.getElementById('mapContainer');
             const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
                         `&lat=${alertData.location_x}` +
                         `&lon=${alertData.location_y}` +
