@@ -238,33 +238,7 @@ foreach ($results as $row) {
                         $subRoute['id'] = uniqid();
                         $leadAlert = $subRoute['leadAlert'] ?? null;
 
-                        $paramsInsert = [
-                            ':id' => $subRoute['id'],
-                            ':route_id' => $route['id'],
-                            ':to_name' => $subRoute['toName'] ?? 'Indefinido',
-                            ':historic_time' => $historicTime,
-                            ':length' => $length,
-                            ':jam_level' => $subRoute['jamLevel'] ?? 0,
-                            ':time' => $time,
-                            ':type' => $subRoute['type'] ?? null,
-                            ':avg_speed' => $avgSpeedSubRoute,
-                            ':historic_speed' => $historicSpeedSubRoute,
-                            ':bbox_min_x' => $subRoute['bbox']['minX'] ?? 0,
-                            ':bbox_min_y' => $subRoute['bbox']['minY'] ?? 0,
-                            ':bbox_max_x' => $subRoute['bbox']['maxX'] ?? 0,
-                            ':bbox_max_y' => $subRoute['bbox']['maxY'] ?? 0,
-                            ':lead_alert_id' => $leadAlert['id'] ?? null,
-                            ':lead_alert_type' => $leadAlert['type'] ?? null,
-                            ':lead_alert_sub_type' => $leadAlert['subType'] ?? null,
-                            ':lead_alert_position' => $leadAlert['position'] ?? null,
-                            ':lead_alert_num_comments' => $leadAlert['numComments'] ?? null,
-                            ':lead_alert_num_thumbs_up' => $leadAlert['numThumbsUp'] ?? null,
-                            ':lead_alert_num_not_there_reports' => $leadAlert['numNotThereReports'] ?? null,
-                            ':lead_alert_street' => $leadAlert['street'] ?? null,
-                            ':id_parceiro' => $id_parceiro
-                        ];
-
-                        $stmtSubRoutes->execute($paramsInsert);
+                        error_log("Parâmetros da subrota: " . print_r($paramsInsert, true));
                     }
                 }
             } catch (Exception $e) {
