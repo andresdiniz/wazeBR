@@ -503,9 +503,14 @@ foreach ($results as $row) {
 
         $pdo->commit();
     } catch (Exception $e) {
-        $pdo->rollBack();
-        echo "Erro ao processar os dados na consulta: " . $e->getMessage() . "\n";
-        echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n";
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+            echo "Erro ao processar os dados na consulta: " . $e->getMessage() . "\n";
+            echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n";
+        } else {
+            echo "Erro ao processar os dados (transação não iniciada): " . $e->getMessage() . "\n";
+            echo "Detalhes da consulta: " . $e->getTraceAsString() . "\n";
+        }
     }
 }
 ?>
