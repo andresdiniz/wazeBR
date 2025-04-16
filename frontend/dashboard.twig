@@ -1,471 +1,328 @@
-<!-- Begin Page Content -->
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
+<style>
+    .card-header {
+        background-color: #f8f9fa;
+    }
+    .dataTables_wrapper {
+        padding: 20px 0;
+    }
+    .alert-date {
+        min-width: 120px;
+    }
+    .map-container {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    .badge-status {
+        font-size: 0.9em;
+        padding: 0.5em 0.75em;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
 <div class="container-fluid">
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <h1 class="h3 mb-0 text-gray-800">Dashboard de Alertas</h1>
         <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
             <i class="fas fa-download fa-sm text-white-50"></i> Exportar Dados
         </a>
     </div>
 
-    <!-- Content Row -->
+    <!-- Metrics Row -->
     <div class="row">
-        <!-- Alertas Ativos -->
-        <div class="col-lg-4 col-md-6 mb-4">
+        <!-- Cards de Métricas -->
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Alertas Ativos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{activeAlertsToday}}</div>
+                                Alertas Ativos (Hoje)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ activeAlertsToday }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            <i class="fas fa-bell fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alertas Totais (Mês) -->
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Alertas Totais (Mês)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{totalAlertsThisMonth}}</div>
+                                Alertas Este Mês
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalAlertsThisMonth }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alertas Confirmados -->
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Alertas Confirmados</div>
-                            <div class="row no-gutters align-items-center">
-                                <div class="col-auto">
-                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50.00%</div>
-                                </div>
-                                <div class="col">
-                                    <div class="progress progress-sm mr-2">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%" 
-                                            aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                KM Congestionados
                             </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_kms_lento }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                            <i class="fas fa-road fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alertas Não Confirmados -->
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Alertas Não Confirmados</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">18.00</div>
+                                Atraso Total
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_atraso_minutos }} min</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- KMs de congestionamento -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+    <!-- Tabelas de Alertas -->
+    <div class="row">
+        <!-- Tabela de Acidentes -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Acidentes Recentes</h6>
+                </div>
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                KMs de congestionamento</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{traficdata.total_kms_lento}}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+                    {% if accidentAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="accidentsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in accidentAlerts %}
+                            <tr>
+                                <td>{{ alert.city }}</td>
+                                <td>{{ alert.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                       target="_blank" 
+                                       class="text-primary">
+                                        {{ alert.location_x|number_format(5) }}, {{ alert.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ alert.confidence > 7 ? 'success' : alert.confidence > 4 ? 'warning' : 'danger' }}">
+                                        {{ alert.confidence }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal"
+                                            data-alert="{{ {
+                                                'uuid': alert.uuid,
+                                                'city': alert.city,
+                                                'street': alert.street,
+                                                'location_x': alert.location_x,
+                                                'location_y': alert.location_y,
+                                                'pubMillis': alert.pubMillis,
+                                                'type': alert.type,
+                                                'subtype': alert.subtype,
+                                                'confidence': alert.confidence,
+                                                'status': alert.status
+                                            }|json_encode|e('html_attr') }}">
+                                        <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum acidente registrado recentemente</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Tempos de Atraso -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Tempos de Atraso</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{traficdata.total_atraso_minutos}} min</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <!-- Repetir estrutura para outras tabelas (Buracos, Congestionamentos, Outros Alertas) -->
+        <!-- ... -->
 
-    <!-- Content Row -->
-<div class="row">
-    <!-- Últimos Acidentes -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-danger">
-                    <i class="fas fa-car-crash mr-2"></i>Últimos Acidentes
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for acidente in ultimosAcidentes %}
-                    <div class="event-item" 
-                         data-toggle="modal" 
-                         data-target="#alertModal"
-                         data-alert="{{ acidente|json_encode|e('html_attr') }}">
-                        <div class="event-time text-xs">
-                            {{ acidente.data|date('H:i') }}
-                        </div>
-                        <div class="event-title">
-                            {{ acidente.localizacao }}
-                        </div>
-                        <div class="event-status badge badge-{{ acidente.gravidade == 'grave' ? 'danger' : 'warning' }}">
-                            {{ acidente.gravidade|capitalize }}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Eventos Recentes de Tráfego -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-warning">
-                    <i class="fas fa-traffic-light mr-2"></i>Congestionamentos Ativos
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for congestionamento in congestionamentosAtivos %}
-                    <div class="event-item"
-                         data-toggle="modal"
-                         data-target="#alertModal"
-                         data-alert="{{ congestionamento|json_encode|e('html_attr') }}">
-                        <div class="event-time text-xs">
-                            {{ congestionamento.inicio|date('H:i') }}
-                        </div>
-                        <div class="event-title">
-                            {{ congestionamento.trecho }} ({{ congestionamento.extensao }} km)
-                        </div>
-                        <div class="event-duration">
-                            <i class="fas fa-clock mr-1"></i>{{ congestionamento.duracao }}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alertas de Obras -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-info">
-                    <i class="fas fa-cone-striped mr-2"></i>Obras na Via
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for obra in obrasRecentes %}
-                    <div class="event-item"
-                         data-toggle="modal"
-                         data-target="#alertModal"
-                         data-alert="{{ obra|json_encode|e('html_attr') }}">
-                        <div class="event-location">
-                            <i class="fas fa-map-marker-alt mr-1"></i>{{ obra.local }}
-                        </div>
-                        <div class="event-period">
-                            {{ obra.inicio|date('d/m') }} - {{ obra.previsao_termino|date('d/m') }}
-                        </div>
-                        <div class="event-impact badge badge-{{ obra.impacto == 'alto' ? 'danger' : 'warning' }}">
-                            Impacto {{ obra.impacto }}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Incidentes Reportados -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>Incidentes Recentes
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for incidente in incidentesRecentes %}
-                    <div class="event-item"
-                         data-toggle="modal"
-                         data-target="#alertModal"
-                         data-alert="{{ incidente|json_encode|e('html_attr') }}">
-                        <div class="event-type">
-                            <i class="fas fa-{{ incidente.tipo_icone }} mr-2"></i>{{ incidente.tipo }}
-                        </div>
-                        <div class="event-details">
-                            <span class="mr-2">{{ incidente.local }}</span>
-                            <small class="text-muted">{{ incidente.horario|date('H:i') }}</small>
-                        </div>
-                        <div class="event-status">
-                            {% if incidente.resolvido %}
-                            <i class="fas fa-check-circle text-success"></i>
-                            {% else %}
-                            <i class="fas fa-exclamation-circle text-danger"></i>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Atividades de Patrulha -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-success">
-                    <i class="fas fa-car-side mr-2"></i>Atividades de Patrulha
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for patrulha in atividadesPatrulha %}
-                    <div class="event-item"
-                         data-toggle="modal"
-                         data-target="#alertModal"
-                         data-alert="{{ patrulha|json_encode|e('html_attr') }}">
-                        <div class="event-vehicle">
-                            {{ patrulha.veiculo }}
-                        </div>
-                        <div class="event-activity">
-                            {{ patrulha.atividade }}
-                            <small class="text-muted ml-2">{{ patrulha.regiao }}</small>
-                        </div>
-                        <div class="event-duration">
-                            {{ patrulha.duracao }} minutos
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alertas Meteorológicos -->
-    <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-left-purple shadow h-100">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-purple">
-                    <i class="fas fa-cloud-showers-heavy mr-2"></i>Alerta Climático
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="event-list">
-                    {% for alerta in alertasMeteorologicos %}
-                    <div class="event-item weather-alert"
-                         data-toggle="modal"
-                         data-target="#alertModal"
-                         data-alert="{{ alerta|json_encode|e('html_attr') }}">
-                        <div class="alert-icon">
-                            <i class="fas fa-{{ alerta.icone }} fa-2x text-{{ alerta.nivel }}"></i>
-                        </div>
-                        <div class="alert-info">
-                            <div class="alert-title">{{ alerta.tipo }}</div>
-                            <div class="alert-region">{{ alerta.regiao }}</div>
-                            <div class="alert-period">{{ alerta.inicio|date('H:i') }} - {{ alerta.fim|date('H:i') }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
     </div>
 </div>
-
-<style>
-.event-list {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.event-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.event-item:hover {
-    background-color: #f8f9fa;
-    transform: translateX(5px);
-}
-
-.event-time, .event-period {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.event-title, .event-activity {
-    font-weight: 500;
-    margin: 0.25rem 0;
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.25em 0.4em;
-}
-
-.weather-alert {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.alert-icon {
-    flex-shrink: 0;
-}
-
-.alert-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.alert-region {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.text-purple {
-    color: #6f42c1;
-}
-
-.border-left-purple {
-    border-left: 0.25rem solid #6f42c1!important;
-}
-</style>
-
-        <!-- Repetir estrutura similar para outras tabelas (Buracos, Congestionamentos, Outros Alertas) -->
-        <!-- ... conteúdo das outras tabelas mantido igual, apenas atualizando os botões ... -->
-
-    </div>
-
-</div>
-<!-- /.container-fluid -->
 
 <!-- Modal Único -->
-{% include 'modal.twig' %}
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3 shadow-lg rounded">
+            <div class="modal-header bg-primary text-white rounded-top">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 mb-3">
+                            <p><strong>📌 UUID:</strong> <span id="modalUuid"></span></p>
+                            <p><strong>🏙️ Cidade:</strong> <span id="modalCity"></span></p>
+                            <p><strong>📍 Rua:</strong> <span id="modalStreet"></span></p>
+                            <p><strong>📡 Localização:</strong> <span id="modalLocation"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="alert-details">
+                            <p><strong>📅 Data:</strong> <span id="modalDate"></span></p>
+                            <p><strong>🛣️ KM Estimado:</strong> <span id="modalKm" class="badge bg-info"></span></p>
+                            <p><strong>🔍 Confiança:</strong> <span id="modalConfidence" class="badge"></span></p>
+                            <p><strong>⚠️ Status:</strong> <span id="modalStatus" class="badge"></span></p>
+                            <p><strong>🔗 Link:</strong> <a id="modalPartnerLink" class="badge bg-primary" target="_blank">Partner Hub</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm p-3 mb-3">
+                    <p><strong>🚨 Tipo:</strong> <span id="modalType"></span></p>
+                    <p><strong>📌 Subtipo:</strong> <span id="modalSubtype"></span></p>
+                </div>
+
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
+                    <div id="mapContainer" class="map-container"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <a id="modalWazeLink" class="btn btn-outline-primary" target="_blank">
+                    <i class="fab fa-waze"></i> Ver no Waze
+                </a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let map = null;
     let currentMarker = null;
 
-    // Manipulador de clique para todos os botões de detalhes
-    $(document).on('click', '.open-modal', async function() {
-        const alertData = JSON.parse($(this).data('alert'));
-        
-        // Preencher dados básicos
-        $('#modal-uuid').text(alertData.uuid);
-        $('#modal-city').text(alertData.city);
-        $('#modal-street').text(alertData.street);
-        $('#modal-location').text(`${alertData.location_x}, ${alertData.location_y}`);
-        $('#modal-date').text(new Date(alertData.pubMillis).toLocaleString());
-        $('#modal-type').text(alertData.type);
-        $('#modal-subtype').text(alertData.subtype);
-
-        // Configurar status e confiança
-        const confidence = alertData.confidence || 0;
-        $('#modal-confidence').text(confidence)
-            .removeClass().addClass('badge bg-' + (
-                confidence > 4 ? 'success' : 
-                confidence >= 3 ? 'warning' : 'danger'
-            ));
-
-        const status = alertData.status || 0;
-        $('#modal-status').text(status === 1 ? "Ativo" : "Inativo")
-            .removeClass().addClass('badge bg-' + (status === 1 ? 'success' : 'danger'));
-
-        // Configurar links
-        $('#modal-link').attr('href', 
-            `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
-        $('#modal-waze-link').attr('href', 
-            `https://www.waze.com/ul?ll=${alertData.location_y},${alertData.location_x}`);
-
-        // Inicializar/Atualizar mapa
-        initMap(alertData.location_y, alertData.location_x);
-
-        // Buscar KM
-        fetchKM(alertData.location_x, alertData.location_y);
+    // Configuração inicial do DataTable
+    $('#accidentsTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel'],
+        order: [[3, 'desc']],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/pt-BR.json'
+        }
     });
 
-    function initMap(lat, lon) {
+    // Manipulador do Modal
+    $('.open-modal').click(async function() {
+        const alertData = JSON.parse($(this).data('alert'));
+        
+        // Preencher dados estáticos
+        $('#modalUuid').text(alertData.uuid);
+        $('#modalCity').text(alertData.city);
+        $('#modalStreet').text(alertData.street);
+        $('#modalLocation').text(`${alertData.location_x}, ${alertData.location_y}`);
+        $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString());
+        $('#modalType').text(alertData.type);
+        $('#modalSubtype').text(alertData.subtype || 'N/A');
+
+        // Configurar links
+        $('#modalPartnerLink').attr('href', 
+            `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
+        $('#modalWazeLink').attr('href', 
+            `https://www.waze.com/ul?ll=${alertData.location_y},${alertData.location_x}`);
+
+        // Atualizar status e confiança
+        $('#modalConfidence').text(`${alertData.confidence}%`)
+            .removeClass().addClass('badge bg-' + (
+                alertData.confidence > 7 ? 'success' : 
+                alertData.confidence > 4 ? 'warning' : 'danger'
+            ));
+
+        $('#modalStatus').text(alertData.status === 1 ? "Ativo" : "Inativo")
+            .removeClass().addClass('badge bg-' + (alertData.status === 1 ? 'success' : 'danger'));
+
+        // Inicializar/Atualizar mapa
         if (map) map.remove();
-        map = L.map('map-container').setView([lat, lon], 15);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+        map = L.map('mapContainer').setView([alertData.location_y, alertData.location_x], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         
         if (currentMarker) map.removeLayer(currentMarker);
-        currentMarker = L.marker([lat, lon])
+        currentMarker = L.marker([alertData.location_y, alertData.location_x])
             .addTo(map)
-            .bindPopup("Local do Alerta")
-            .openPopup();
-    }
+            .bindPopup("Localização do Alerta");
 
-    async function fetchKM(lon, lat) {
-        $('#modal-km').html('<div class="spinner-border spinner-border-sm"></div> Calculando...');
+        // Buscar KM
+        $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
         try {
-            const km = await buscarKmDnit(lon, lat);
-            $('#modal-km').text(km || "Não encontrado");
+            const km = await buscarKmDnit(alertData.location_x, alertData.location_y);
+            $('#modalKm').text(km || "Não encontrado");
         } catch (error) {
-            $('#modal-km').text("Erro na busca");
+            $('#modalKm').text("Erro na busca");
             console.error('Erro ao buscar KM:', error);
         }
-    }
+    });
 
+    // Limpar mapa ao fechar modal
     $('#alertModal').on('hidden.bs.modal', function() {
         if (map) {
             map.remove();
@@ -476,14 +333,5 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<!-- Scripts de terceiros mantidos iguais -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 <script src="./js/scripts.js"></script>
+{% endblock %}
