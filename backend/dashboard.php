@@ -110,11 +110,10 @@ function getOtherAlerts(PDO $pdo, $id_parceiro = null) {
 }
 
 // Função para alertas ativos hoje
-function getActiveAlertsToday(PDO $pdo, $id_parceiro = null) {
-    $query = "SELECT COUNT(*) AS activeToday 
-              FROM alerts 
-              WHERE status = 1 
-              AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = CURDATE()";
+function getActiveAlertsAnyPeriod(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT COUNT(*) AS activeTotal
+              FROM alerts
+              WHERE status = 1";
 
     if ($id_parceiro !== null && $id_parceiro != 99) {
         $query .= " AND id_parceiro = :id_parceiro";
@@ -127,7 +126,7 @@ function getActiveAlertsToday(PDO $pdo, $id_parceiro = null) {
     }
 
     $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC)['activeToday'];
+    return $stmt->fetch(PDO::FETCH_ASSOC)['activeTotal'];
 }
 
 // Função para total de alertas no mês
