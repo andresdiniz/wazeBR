@@ -281,7 +281,7 @@
                                 <td class="alert-date">{{ (pothole_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ pothole_alerts.confidence > 7 ? 'success' : pothole_alerts.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ jampothole_alerts_alert.confidence }}%
+                                        {{ pothole_alerts.confidence }}%
                                     </span>
                                 </td>
                                 <td>
@@ -298,6 +298,72 @@
                                                 'type': pothole_alerts.type,
                                                 'confidence': pothole_alerts.confidence,
                                                 'status': pothole_alerts.status
+                                            }|json_encode|e('html_attr') }}">
+                                        <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum buraco registrado</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Outros Alertas -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Outros Alertas Recentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if otherAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="jamsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for orther_alerts in otherAlerts %}
+                            <tr>
+                                <td>{{ orther_alerts.city }}</td>
+                                <td>{{ orther_alerts.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ orther_alerts.location_y }},{{ orther_alerts.location_x }}" 
+                                    target="_blank" 
+                                    class="text-primary">
+                                        {{ orther_alerts.location_x|number_format(5) }}, {{ orther_alerts.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (orther_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ orther_alerts.confidence > 7 ? 'success' : orther_alerts.confidence > 4 ? 'warning' : 'danger' }}">
+                                        {{ orther_alerts.confidence }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal"
+                                            data-alert="{{ {
+                                                'uuid': orther_alerts.uuid,
+                                                'city': orther_alerts.city,
+                                                'street': orther_alerts.street,
+                                                'location_x': orther_alerts.location_x,
+                                                'location_y': orther_alerts.location_y,
+                                                'pubMillis': orther_alerts.pubMillis,
+                                                'type': orther_alerts.type,
+                                                'confidence': orther_alerts.confidence,
+                                                'status': orther_alerts.status
                                             }|json_encode|e('html_attr') }}">
                                         <i class="fas fa-info-circle"></i> Detalhes
                                     </button>
