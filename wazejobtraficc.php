@@ -75,7 +75,7 @@ foreach ($results as $row) {
             INSERT INTO users_on_jams (jam_level, wazers_count, url_id) 
             VALUES (:jam_level, :wazers_count, :url_id)
             ON DUPLICATE KEY UPDATE 
-                wazers_count = :wazers_count
+                wazers_count = VALUES(wazers_count)
         ");
 
         foreach ($data['usersOnJams'] as $userJam) {
