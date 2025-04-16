@@ -461,7 +461,7 @@
     document.addEventListener("DOMContentLoaded", function() {    
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
-            const raw = this.getAttribute('data-alert');
+            raw = document.querySelector('.open-modal').getAttribute('data-alert')
             console.log('Raw:', raw); // Verifique se parece um JSON aqui
             let alertData;
             try {
