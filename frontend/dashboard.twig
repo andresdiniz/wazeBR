@@ -479,10 +479,10 @@
     });
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
-            raw = document.querySelector('.open-modal').getAttribute('data-alert')
-            console.log('Raw:', raw); // Verifique se parece um JSON aqui
+            const raw = $(this).attr('data-alert'); // Use $(this) para referenciar o botão clicado
+            console.log('Raw:', raw);
             let alertData;
-            locale = "PT-BR"; // Defina o locale aqui ou obtenha de outra forma
+            locale = "PT-BR";
             try {
                 alertData = JSON.parse(raw);
                 console.log('Parsed alertData:', alertData);
