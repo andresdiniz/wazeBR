@@ -185,7 +185,7 @@
         <div class="col-xl-6 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Acidentes Recentes</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Ongestinamento Recentes</h6>
                 </div>
                 <div class="card-body">
                     {% if jamAlerts is not empty %}
@@ -201,7 +201,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for AlertsJam in jamAlerts %}
+                            {% for jamAlerts in AlertsJam %}
                             <tr>
                                 <td>{{ AlertsJam.city }}</td>
                                 <td>{{ AlertsJam.street }}</td>
