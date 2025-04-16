@@ -247,8 +247,8 @@ $data = [
     'activeAlertsToday' => measurePerformance(
         function() use ($pdo, $id_parceiro) {
             return $id_parceiro == 99 
-                ? getActiveAlertsToday($pdo) 
-                : getActiveAlertsToday($pdo, $id_parceiro);
+                ? getActiveAlertsAnyPeriod($pdo) 
+                : getActiveAlertsAnyPeriod($pdo, $id_parceiro);
         }, 
         $metrics['activeAlertsToday']
     ),
