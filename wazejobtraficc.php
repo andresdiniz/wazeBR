@@ -238,7 +238,7 @@ foreach ($results as $row) {
                         $subRoute['id'] = uniqid();
                         $leadAlert = $subRoute['leadAlert'] ?? null;
 
-                        error_log("Parâmetros da subrota: " . print_r($paramsInsert, true));
+                        error_log("Parâmetros da subrota: " . print_r($stmtSubRoutes, true));
                     }
                 }
             } catch (Exception $e) {
