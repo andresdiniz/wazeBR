@@ -456,17 +456,7 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Configuração do DataTable
-        $('#accidentsTable').DataTable({
-            dom: 'Bfrtip',
-            buttons: ['copy', 'csv', 'excel'],
-            order: [[3, 'desc']],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/pt-BR.json'
-            }
-        });
-    
+    document.addEventListener("DOMContentLoaded", function() {    
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
             const alertData = JSON.parse($(this).data('alert'));
