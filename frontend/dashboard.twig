@@ -487,6 +487,7 @@
     
             // Preencher dados básicos
             $('#modalUuid').text(alertData.uuid);
+            console.log('UUID inserido no modal:', $('#modalUuid').text());
             $('#modalCity').text(alertData.city || 'Não informada');
             $('#modalStreet').text(alertData.street || 'Não informada');
             $('#modalLocation').text(`${alertData.location_x}, ${alertData.location_y}`);
