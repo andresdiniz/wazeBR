@@ -162,7 +162,7 @@
                                 <td class="alert-date">{{ (alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ alert.confidence > 7 ? 'success' : alert.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ alert.confidence }}%
+                                        {{ alert.confidence }}
                                     </span>
                                 </td>
                                 <td>
@@ -229,7 +229,7 @@
                                 <td class="alert-date">{{ (jam_alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ jam_alert.confidence > 7 ? 'success' : jam_alert.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ jam_alert.confidence }}%
+                                        {{ jam_alert.confidence }}
                                     </span>
                                 </td>
                                 <td>
@@ -295,7 +295,7 @@
                                 <td class="alert-date">{{ (pothole_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ pothole_alerts.confidence > 7 ? 'success' : pothole_alerts.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ pothole_alerts.confidence }}%
+                                        {{ pothole_alerts.confidence }}
                                     </span>
                                 </td>
                                 <td>
@@ -361,7 +361,7 @@
                                 <td class="alert-date">{{ (orther_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ orther_alerts.confidence > 7 ? 'success' : orther_alerts.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ orther_alerts.confidence }}%
+                                        {{ orther_alerts.confidence }}
                                     </span>
                                 </td>
                                 <td>
