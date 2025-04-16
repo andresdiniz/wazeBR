@@ -251,7 +251,7 @@
         <div class="col-xl-6 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Congestionamentos Recentes</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Buracos Recentes</h6>
                 </div>
                 <div class="card-body">
                     {% if hazardAlerts is not empty %}
@@ -278,7 +278,7 @@
                                         {{ pothole_alerts.location_x|number_format(5) }}, {{ pothole_alerts.location_y|number_format(5) }}
                                     </a>
                                 </td>
-                                <td class="alert-date">{{ (jam_alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td class="alert-date">{{ (pothole_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
                                     <span class="badge badge-{{ pothole_alerts.confidence > 7 ? 'success' : pothole_alerts.confidence > 4 ? 'warning' : 'danger' }}">
                                         {{ jampothole_alerts_alert.confidence }}%
