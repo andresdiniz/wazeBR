@@ -185,11 +185,11 @@
         <div class="col-xl-6 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Ongestinamento Recentes</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Congestionamentos Recentes</h6>
                 </div>
                 <div class="card-body">
                     {% if jamAlerts is not empty %}
-                    <table class="table table-bordered table-hover" id="accidentsTable">
+                    <table class="table table-bordered table-hover" id="jamsTable">
                         <thead>
                             <tr>
                                 <th>Cidade</th>
@@ -201,21 +201,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for AlertsJam in jamAlerts %}
+                            {% for jam_alert in jamAlerts %}
                             <tr>
-                                <td>{{ AlertsJam.city }}</td>
-                                <td>{{ AlertsJam.street }}</td>
+                                <td>{{ jam_alert.city }}</td>
+                                <td>{{ jam_alert.street }}</td>
                                 <td>
-                                    <a href="https://www.waze.com/ul?ll={{ AlertsJam.location_y }},{{ AlertsJam.location_x }}" 
-                                       target="_blank" 
-                                       class="text-primary">
-                                        {{ AlertsJam.location_x|number_format(5) }}, {{ AlertsJam.location_y|number_format(5) }}
+                                    <a href="https://www.waze.com/ul?ll={{ jam_alert.location_y }},{{ jam_alert.location_x }}" 
+                                    target="_blank" 
+                                    class="text-primary">
+                                        {{ jam_alert.location_x|number_format(5) }}, {{ jam_alert.location_y|number_format(5) }}
                                     </a>
                                 </td>
-                                <td class="alert-date">{{ (AlertsJam.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td class="alert-date">{{ (jam_alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge badge-{{ AlertsJam.confidence > 7 ? 'success' : AlertsJam.confidence > 4 ? 'warning' : 'danger' }}">
-                                        {{ AlertsJam.confidence }}%
+                                    <span class="badge badge-{{ jam_alert.confidence > 7 ? 'success' : jam_alert.confidence > 4 ? 'warning' : 'danger' }}">
+                                        {{ jam_alert.confidence }}%
                                     </span>
                                 </td>
                                 <td>
@@ -223,16 +223,15 @@
                                             data-toggle="modal" 
                                             data-target="#alertModal"
                                             data-alert="{{ {
-                                                'uuid': AlertsJam.uuid,
-                                                'city': AlertsJam.city,
-                                                'street': AlertsJam.street,
-                                                'location_x': AlertsJam.location_x,
-                                                'location_y': AlertsJam.location_y,
-                                                'pubMillis': AlertsJam.pubMillis,
-                                                'type': AlertsJam.type,
-                                                'subtype': AlertsJam.subtype,
-                                                'confidence': AlertsJam.confidence,
-                                                'status': AlertsJam.status
+                                                'uuid': jam_alert.uuid,
+                                                'city': jam_alert.city,
+                                                'street': jam_alert.street,
+                                                'location_x': jam_alert.location_x,
+                                                'location_y': jam_alert.location_y,
+                                                'pubMillis': jam_alert.pubMillis,
+                                                'type': jam_alert.type,
+                                                'confidence': jam_alert.confidence,
+                                                'status': jam_alert.status
                                             }|json_encode|e('html_attr') }}">
                                         <i class="fas fa-info-circle"></i> Detalhes
                                     </button>
