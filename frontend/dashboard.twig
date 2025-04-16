@@ -517,7 +517,7 @@
             });
             
             $('#modalWazeLink').attr({
-                href: `https://www.waze.com/ul?ll=${alertData.location_x},${alertData.location_y}`,
+                href: `https://www.waze.com/ul?ll=${alertData.location_y},${alertData.location_x}`,
                 title: "Abrir no Waze"
             });
     
@@ -540,7 +540,7 @@
             // Buscar KM (mantido se necessário para outros elementos)
             $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
             if(typeof buscarKmDnit === 'function') {
-                buscarKmDnit(alertData.location_x, alertData.location_y)
+                buscarKmDnit(alertData.location_y, alertData.location_x)
                     .then(km => $('#modalKm').text(km ? `KM ${km}` : "Não encontrado"))
                     .catch(() => $('#modalKm').html('<span class="text-danger">Erro na busca</span>'));
             }
