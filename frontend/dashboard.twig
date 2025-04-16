@@ -458,73 +458,84 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
-    $(document).on('click', '.open-modal', function() {
-        const raw = $(this).data('alert'); // Correctly get the data-alert of the clicked button
-        console.log('Raw:', raw);
-        let alertData;
-        locale = "PT-BR";
-        try {
-            alertData = JSON.parse(raw);
-            console.log('Parsed alertData:', alertData);
-        } catch (e) {
-            console.error("Erro ao parsear alertData:", e);
-            return;
-        }
+    document.addEventListener("DOMContentLoaded", function() {    
+        // Delegar evento para elementos dinâmicos
+        $(document).on('click', '.open-modal', function() {
+            raw = document.querySelector('.open-modal').getAttribute('data-alert')
+            console.log('Raw:', raw); // Verifique se parece um JSON aqui
+            let alertData;
+            locale = "PT-BR"; // Defina o locale aqui ou obtenha de outra forma
+            try {
+                alertData = JSON.parse(raw);
+                console.log('Parsed alertData:', alertData);
+            } catch (e) {
+                console.error("Erro ao parsear alertData:", e);
+                return;
+            }
+            
+            console.log(document.getElementById('modalUuid')); // Deve retornar um elemento, não null
+            // Atualizar iframe do Waze
+            const wazeFrame = document.getElementById('mapContainer');
+            const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
+                        `&lat=${alertData.location_x}` +
+                        `&lon=${alertData.location_y}` +
+                        `&pin=1`;
+            
+            console.log('Waze Frame Source:', src); // Verifique se o src está correto
+            wazeFrame.innerHTML = ''; // Limpar conteúdo anterior
+            wazeFrame.src = src;
     
-        // Update iframe do Waze
-        const wazeFrame = document.getElementById('mapContainer');
-        const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
-                      `&lat=${alertData.location_x}` +
-                      `&lon=${alertData.location_y}` +
-                      `&pin=1`;
-        wazeFrame.src = src;
+            // Preencher dados básicos
+            $('#modalUuid').text(alertData.uuid);
+            console.log('UUID inserido no modal:', $('#modalUuid').text());
+            $('#modalCity').text(alertData.city || 'Não informada');
+            $('#modalStreet').text(alertData.street || 'Não informada');
+            $('#modalLocation').text(`${alertData.location_x}, ${alertData.location_y}`);
+            $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR'));
+            $('#modalType').text(alertData.type);
+            $('#modalSubtype').text(alertData.subtype || 'N/A');
     
-        // Preencher dados básicos
-        $('#modalUuid').text(alertData.uuid);
-        $('#modalCity').text(alertData.city || 'Não informada');
-        $('#modalStreet').text(alertData.street || 'Não informada');
-        $('#modalLocation').text(`${alertData.location_x}, ${alertData.location_y}`);
-        $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR'));
-        $('#modalType').text(alertData.type);
-        $('#modalSubtype').text(alertData.subtype || 'N/A');
+            // Configurar links
+            $('#modalPartnerLink').attr({
+                href: `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`,
+                title: "Abrir no Partner Hub"
+            });
+            
+            $('#modalWazeLink').attr({
+                href: `https://www.waze.com/ul?ll=${alertData.location_x},${alertData.location_y}`,
+                title: "Abrir no Waze"
+            });
     
-        // Configurar links
-        $('#modalPartnerLink').attr({
-            href: `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`,
-            title: "Abrir no Partner Hub"
+            // Status e Confiança
+            const status = alertData.status !== null ? alertData.status : 0;
+            $('#modalStatus')
+                .text(status === 1 ? "Ativo" : "Inativo")
+                .removeClass()
+                .addClass(`badge bg-${status === 1 ? 'success' : 'danger'}`);
+    
+            const confidence = alertData.confidence || 0;
+            $('#modalConfidence')
+                .text(`${confidence}%`)
+                .removeClass()
+                .addClass(`badge bg-${
+                    confidence > 7 ? 'success' : 
+                    confidence > 4 ? 'warning' : 'danger'
+                }`);
+    
+            // Buscar KM (mantido se necessário para outros elementos)
+            $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
+            if(typeof buscarKmDnit === 'function') {
+                buscarKmDnit(alertData.location_x, alertData.location_y)
+                    .then(km => $('#modalKm').text(km ? `KM ${km}` : "Não encontrado"))
+                    .catch(() => $('#modalKm').html('<span class="text-danger">Erro na busca</span>'));
+            }
         });
     
-        $('#modalWazeLink').attr({
-            href: `https://www.waze.com/ul?ll=${alertData.location_x},${alertData.location_y}`,
-            title: "Abrir no Waze"
+        // Resetar ao fechar modal
+        $('#alertModal').on('hidden.bs.modal', function() {
+            $('#modalKm').text('');
+            $('#modalConfidence, #modalStatus').removeClass();
         });
-    
-        // Status e Confiança
-        const status = alertData.status !== null ? alertData.status : 0;
-        $('#modalStatus')
-            .text(status === 1 ? "Ativo" : "Inativo")
-            .removeClass()
-            .addClass(`badge bg-${status === 1 ? 'success' : 'danger'}`);
-    
-        const confidence = alertData.confidence || 0;
-        $('#modalConfidence')
-            .text(`${confidence}%`)
-            .removeClass()
-            .addClass(`badge bg-${
-                confidence > 7 ? 'success' :
-                confidence > 4 ? 'warning' : 'danger'
-            }`);
-    
-        // Buscar KM (mantido se necessário)
-        $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
-        if(typeof buscarKmDnit === 'function') {
-            buscarKmDnit(alertData.location_x, alertData.location_y)
-                .then(km => $('#modalKm').text(km ? `KM ${km}` : "Não encontrado"))
-                .catch(() => $('#modalKm').html('<span class="text-danger">Erro na busca</span>'));
-        }
-    
-        // Show the modal (ensure this is here if you are not already showing it)
-        $('#alertModal').modal('show');
     });
 </script>
 
