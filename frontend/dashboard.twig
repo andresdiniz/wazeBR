@@ -472,7 +472,7 @@
                 return;
             }
             
-            console.log('AlertData:', alertData); // Verifique se os dados estão corretos aqui
+            console.log(document.getElementById('modalUuid')); // Deve retornar um elemento, não null
             // Atualizar iframe do Waze
             const wazeFrame = document.getElementById('wazeMapIframe');
             const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
