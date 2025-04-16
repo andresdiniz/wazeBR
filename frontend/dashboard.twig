@@ -161,7 +161,7 @@
                                 </td>
                                 <td class="alert-date">{{ (alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge badge-{{ alert.confidence > 7 ? 'success' : alert.confidence > 4 ? 'warning' : 'danger' }}">
+                                    <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
                                         {{ alert.confidence }}
                                     </span>
                                 </td>
@@ -228,7 +228,7 @@
                                 </td>
                                 <td class="alert-date">{{ (jam_alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge badge-{{ jam_alert.confidence > 7 ? 'success' : jam_alert.confidence > 4 ? 'warning' : 'danger' }}">
+                                    <span class="badge badge-{{ jam_alert.confidence > 4 ? 'success' : jam_alert.confidence > 2 ? 'warning' : 'danger' }}">
                                         {{ jam_alert.confidence }}
                                     </span>
                                 </td>
@@ -294,7 +294,7 @@
                                 </td>
                                 <td class="alert-date">{{ (pothole_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge badge-{{ pothole_alerts.confidence > 7 ? 'success' : pothole_alerts.confidence > 4 ? 'warning' : 'danger' }}">
+                                    <span class="badge badge-{{ pothole_alerts.confidence > 4 ? 'success' : pothole_alerts.confidence > 2 ? 'warning' : 'danger' }}">
                                         {{ pothole_alerts.confidence }}
                                     </span>
                                 </td>
@@ -360,7 +360,7 @@
                                 </td>
                                 <td class="alert-date">{{ (orther_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge badge-{{ orther_alerts.confidence > 7 ? 'success' : orther_alerts.confidence > 4 ? 'warning' : 'danger' }}">
+                                    <span class="badge badge-{{ orther_alerts.confidence > 4 ? 'success' : orther_alerts.confidence > 2 ? 'warning' : 'danger' }}">
                                         {{ orther_alerts.confidence }}
                                     </span>
                                 </td>
@@ -533,8 +533,8 @@
                 .text(`${confidence}%`)
                 .removeClass()
                 .addClass(`badge bg-${
-                    confidence > 7 ? 'success' : 
-                    confidence > 4 ? 'warning' : 'danger'
+                    confidence > 4 ? 'success' : 
+                    confidence > 2 ? 'warning' : 'danger'
                 }`);
     
             // Buscar KM (mantido se necessário para outros elementos)
@@ -559,10 +559,24 @@
         });
     
         // Resetar ao fechar modal
-        $('#alertModal').on('hidden.bs.modal', function() {
-            $('#modalKm').text('');
-            $('#modalConfidence, #modalStatus').removeClass();
-        });
+    $('#alertModal').on('hidden.bs.modal', function() {
+        $('#modalUuid').text('');
+        $('#modalCity').text('');
+        $('#modalStreet').text('');
+        $('#modalLocation').text('');
+        $('#modalDate').text('');
+        $('#modalType').text('');
+        $('#modalSubtype').text('N/A'); // Ou o valor padrão que você deseja
+        $('#modalConfidence').text('').removeClass();
+        $('#modalStatus').text('').removeClass();
+        $('#modalKm').text('');
+        $('#modalPartnerLink').attr('href', '#').removeAttr('title'); // Resetar link
+        $('#modalWazeLink').attr('href', '#').removeAttr('title');     // Resetar link
+
+        // Limpar o iframe do mapa também (opcional, mas pode ser útil)
+        const mapContainer = document.getElementById('mapContainer');
+        mapContainer.innerHTML = '';
+    });
     });
 </script>
 
