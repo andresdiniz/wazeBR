@@ -479,11 +479,7 @@
             const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
                         `&lat=${alertData.location_x}` +
                         `&lon=${alertData.location_y}` +
-                        `&pin=1` +
-                        `&campaign=alerts_${alertData.uuid}` +
-                        `&vehicle=car` +
-                        `&hidegeopins=false` +
-                        `&timestamp=${alertData.pubMillis}`;
+                        `&pin=1`;
             
             wazeFrame.src = src;
     
