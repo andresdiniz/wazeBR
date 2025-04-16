@@ -273,7 +273,7 @@ $data = [
     ),
 ];
 
-echo $data;
+var_dump($data); // Debug: Exibe os dados coletados
 // Salvando métricas
 savePerformanceMetrics($metrics, $start);
 
