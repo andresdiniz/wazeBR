@@ -472,6 +472,7 @@
                 return;
             }
             
+            console.log('AlertData:', alertData); // Verifique se os dados estão corretos aqui
             // Atualizar iframe do Waze
             const wazeFrame = document.getElementById('wazeMapIframe');
             const src = `https://embed.waze.com/${locale}/iframe?zoom=16` +
