@@ -460,6 +460,7 @@
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
             const alertData = JSON.parse($(this).data('alert'));
+            console.log(alertData);
             const locale = 'pt'; // Altere conforme necessário (pt-BR, en-US, etc)
             
             // Atualizar iframe do Waze
