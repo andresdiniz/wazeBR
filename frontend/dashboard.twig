@@ -464,6 +464,7 @@
             raw = document.querySelector('.open-modal').getAttribute('data-alert')
             console.log('Raw:', raw); // Verifique se parece um JSON aqui
             let alertData;
+            locale = "PT-BR"; // Defina o locale aqui ou obtenha de outra forma
             try {
                 alertData = JSON.parse(raw);
                 console.log('Parsed alertData:', alertData);
