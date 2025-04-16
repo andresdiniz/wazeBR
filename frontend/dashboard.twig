@@ -461,9 +461,16 @@
     document.addEventListener("DOMContentLoaded", function() {    
         // Delegar evento para elementos dinâmicos
         $(document).on('click', '.open-modal', function() {
-            const alertData = JSON.parse($(this).data('alert'));
-            //const locale = 'pt'; // Altere conforme necessário (pt-BR, en-US, etc)
-            console.log(alertData);
+            const raw = this.getAttribute('data-alert');
+            console.log('Raw:', raw); // Verifique se parece um JSON aqui
+            let alertData;
+            try {
+                alertData = JSON.parse(raw);
+                console.log('Parsed alertData:', alertData);
+            } catch (e) {
+                console.error("Erro ao parsear alertData:", e);
+                return;
+            }
             
             // Atualizar iframe do Waze
             const wazeFrame = document.getElementById('wazeMapIframe');
