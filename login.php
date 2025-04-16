@@ -72,7 +72,7 @@ try {
             }
 
             // Redireciona para a página inicial
-            header("Location: /index.php");
+            header("Location: /");
             exit();
         } else {
             // Caso a senha esteja incorreta
