@@ -615,3 +615,26 @@ function savePerformanceMetrics($metrics, $startTime) {
         FILE_APPEND | LOCK_EX
     );
 }
+
+function getPublicPosts($pdo) {
+    $stmt = $pdo->prepare("
+        SELECT * FROM posts 
+        WHERE publicado = 1 
+        AND data_publicacao <= NOW() 
+        ORDER BY data_publicacao DESC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getFeaturedPosts($pdo, $limit = 3) {
+    $stmt = $pdo->prepare("
+        SELECT * FROM posts 
+        WHERE destaque = 1 
+        AND publicado = 1 
+        ORDER BY data_publicacao DESC 
+        LIMIT ?
+    ");
+    $stmt->execute([$limit]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}

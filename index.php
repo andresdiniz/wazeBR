@@ -45,9 +45,11 @@ use Twig\Loader\FilesystemLoader;
 // Configurações básicas
 session_start();
 
+$publicRoutes = ['blog', 'login', 'recuperar-senha'];
+
 // Verifica se o usuário está logado
-if (empty($_SESSION['usuario_id'])) {
-    header("Location: login.html");
+if (!in_array($uri, $publicRoutes) && empty($_SESSION['usuario_id'])) {
+    header("Location: /login");
     exit();
 }
 

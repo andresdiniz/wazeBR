@@ -1,0 +1,23 @@
+{% extends 'base.twig' %}
+
+{% block content %}
+    <h1>{{ page_title }}</h1>
+    
+    {% for post in posts %}
+        <article class="post">
+            <h2>{{ post.titulo }}</h2>
+            <div class="post-content">
+                {{ post.conteudo|raw }}
+            </div>
+            <div class="post-meta">
+                Publicado em: {{ post.data_publicacao|date('d/m/Y H:i') }}
+            </div>
+        </article>
+    {% endfor %}
+
+    {% if not session.usuario_id %}
+        <div class="auth-links">
+            <a href="/login">Login para ver conteúdo exclusivo</a>
+        </div>
+    {% endif %}
+{% endblock %}
