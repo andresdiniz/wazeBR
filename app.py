@@ -9,6 +9,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
+import time
 
 # Compatibilidade com NumPy 2.x
 if np.__version__.startswith('2.'):
@@ -21,39 +22,60 @@ st.set_page_config(page_title="Análise de Rotas", layout="wide")
 st.title("📊 Previsão de Velocidade e Análise de Anomalias")
 
 # === CONEXÃO COM O BANCO DE DADOS ===
-def get_data():
+def get_data(start_date=None, end_date=None, route_id=None):
     try:
-        engine = create_engine('mysql+mysqlconnector://u335174317_wazeportal:%40Ndre2025.@185.213.81.52/u335174317_wazeportal')
+        mydb = mysql.connector.connect(
+            host="185.213.81.52",
+            user="u335174317_wazeportal",
+            password="@Ndre2025.",
+            database="u335174317_wazeportal"
+        )
+        mycursor = mydb.cursor()
         query = """
-            SELECT 
+            SELECT
                 hr.route_id,
                 r.name AS route_name,
                 hr.data,
                 hr.velocidade
             FROM historic_routes hr
             JOIN routes r ON hr.route_id = r.id
-            ORDER BY hr.data ASC
         """
-        return pd.read_sql(query, engine)
-    except Exception as e:
-        st.error(f"Falha na conexão com o banco: {str(e)}")
-        st.stop()
+        conditions = []
+        if start_date:
+            conditions.append(f"hr.data >= '{start_date}'")
+        if end_date:
+            conditions.append(f"hr.data <= '{end_date}'")
+        if route_id:
+            conditions.append(f"hr.route_id = {route_id}")
 
-# === LIMPEZA E FEATURE ENGINEERING ===
-def clean_data(df, route):
-    df = df[df['route_name'] == route].copy()
-    df['data'] = pd.to_datetime(df['data']).dt.tz_localize(None)
-    df = df.sort_values('data')
-    df['velocidade'] = (
-        df['velocidade']
-        .clip(upper=150)
-        .interpolate(method='linear')
-        .ffill()
-        .bfill()
-    )
-    df['day_of_week'] = df['data'].dt.day_name()
-    df['hour'] = df['data'].dt.hour
-    return df.dropna(subset=['velocidade'])
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        query += " ORDER BY hr.data ASC"
+
+        mycursor.execute(query)
+        results = mycursor.fetchall()
+        col_names = [desc[0] for desc in mycursor.description]
+        df = pd.DataFrame(results, columns=col_names)
+        mycursor.close()
+        mydb.close()
+
+        st.write("Tipos de dados lidos do banco:")
+        st.write(df.dtypes)
+
+        # Tenta converter a coluna 'velocidade' para numérico, forçando erros para NaN
+        df['velocidade'] = pd.to_numeric(df['velocidade'], errors='coerce')
+
+        # Exibe as linhas onde a conversão falhou (eram valores não numéricos)
+        non_numeric_rows = df[df['velocidade'].isna()]
+        if not non_numeric_rows.empty:
+            st.warning("Valores não numéricos encontrados na coluna 'velocidade' ao ler do banco (convertidos para NaN):")
+            st.dataframe(non_numeric_rows)
+
+        return df
+    except Exception as e:
+        st.error(f"Falha na conexão com o banco (usando mysql.connector): {str(e)}")
+        st.stop()
 
 # === DETECÇÃO DE ANOMALIAS ===
 def detect_anomalies(df):
@@ -85,9 +107,13 @@ def seasonal_decomposition_plot(df):
 def create_arima_forecast(df):
     model = ARIMA(df['y'], order=(1, 1, 1))
     results = model.fit()
-    forecast = results.get_forecast(steps=10)
+    forecast = results.get_forecast(steps=20)  # número de passos que o modelo ARIMA vai prever
+
+    # Use o comprimento de 'predicted_mean' para definir o número de períodos
+    forecast_dates = pd.date_range(start=df['ds'].max(), periods=len(forecast.predicted_mean) + 1, freq='3min')[1:]
+
     return pd.DataFrame({
-        'ds': pd.date_range(start=df['ds'].max(), periods=22, freq='3min')[1:],
+        'ds': forecast_dates,
         'yhat': forecast.predicted_mean,
         'yhat_lower': forecast.conf_int().iloc[:, 0],
         'yhat_upper': forecast.conf_int().iloc[:, 1]
@@ -150,10 +176,10 @@ def main():
     date_start = pd.to_datetime(date_range[0])
     date_end = pd.to_datetime(date_range[1])
 
-    processed_df = processed_df[
-        (processed_df['data'] >= date_start) &
-        (processed_df['data'] <= date_end) &
-        (processed_df['velocidade'] >= min_speed) &
+    processed_df = processed_df[(
+        processed_df['data'] >= date_start) & 
+        (processed_df['data'] <= date_end) & 
+        (processed_df['velocidade'] >= min_speed) & 
         (processed_df['velocidade'] <= max_speed)
     ]
 
@@ -164,8 +190,7 @@ def main():
     # === PREVISÃO ARIMA ===
     st.subheader("🔮 Previsão de Velocidade (ARIMA)")
 
-    st.markdown("""
-    Este gráfico mostra a previsão de velocidade para os próximos 60 minutos (20 passos de 3 minutos) usando o modelo ARIMA.
+    st.markdown("""Este gráfico mostra a previsão de velocidade para os próximos 60 minutos (20 passos de 3 minutos) usando o modelo ARIMA.
     A linha laranja representa a previsão, enquanto a faixa sombreada mostra o intervalo de confiança da previsão.
     """)
 
@@ -259,6 +284,10 @@ def main():
         file_name='dados_filtrados.csv',
         mime='text/csv',
     )
+
+    # Atualizar a cada 5 minutos
+    time.sleep(300)  # Atraso de 5 minutos
+    st.experimental_rerun()  # Forçar o recarregamento da página
 
 if __name__ == "__main__":
     main()

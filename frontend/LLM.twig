@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Minha Página com App Streamlit</title>
+<style>
+  /* Opcional: Estilo para o contêiner do iframe */
+  .streamlit-container {
+    width: 100%; /* ou um valor fixo, ex: 800px */
+    height: 700px; /* Ajuste a altura conforme necessário */
+    margin: auto; /* Centraliza o contêiner se tiver largura fixa */
+    border: 1px solid #ccc; /* Borda opcional */
+    box-shadow: 2px 2px 8px #888888; /* Sombra opcional */
+  }
+
+  /* Estilo para o iframe */
+  .streamlit-iframe {
+    width: 100%; /* Faz o iframe preencher o contêiner */
+    height: 100%; /* Faz o iframe preencher o contêiner */
+    border: none; /* Remove a borda padrão do iframe */
+  }
+</style>
+</head>
+<body>
+
+<h1>Título da Sua Página</h1>
+
+<p>Este é o conteúdo da sua página HTML acima do aplicativo Streamlit.</p>
+
+<div class="streamlit-container">
+  <iframe class="streamlit-iframe"
+          src="https://wazebrllm-jbwnepobdizuxfcvvaaqle.streamlit.app/?embed_options=show_toolbar,show_colored_line,show_padding,show_footer"
+          title="Meu Aplicativo Streamlit de Análise de Rotas">
+  </iframe>
+</div>
+
+<p>Este é o conteúdo da sua página HTML abaixo do aplicativo Streamlit.</p>
+
+</body>
+</html>
