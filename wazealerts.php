@@ -198,28 +198,151 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
     }
 }
 
+function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
+    $currentDateTime = date('Y-m-d H:i:s');
+    
+    $pdo->beginTransaction();
+    
+    try {
+        // Busca jams existentes
+        $stmt = $pdo->prepare("SELECT uuid FROM jams WHERE source_url = ? AND status = 1");
+        $stmt->execute([$url]);
+        $dbUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        $incomingUuids = array_column($jams, 'uuid');
+        
+        // Query para inserir/atualizar jams
+        $stmtJam = $pdo->prepare("
+            INSERT INTO jams (
+                uuid, country, city, level, speedKMH, length, turnType, endNode, speed,
+                roadType, delay, street, pubMillis, id_parceiro, source_url, status,
+                date_received, date_updated
+            ) VALUES (
+                :uuid, :country, :city, :level, :speedKMH, :length, :turnType, :endNode, :speed,
+                :roadType, :delay, :street, :pubMillis, :id_parceiro, :source_url, :status,
+                :date_received, :date_updated
+            )
+            ON DUPLICATE KEY UPDATE
+                country = VALUES(country),
+                city = VALUES(city),
+                level = VALUES(level),
+                speedKMH = VALUES(speedKMH),
+                length = VALUES(length),
+                turnType = VALUES(turnType),
+                endNode = VALUES(endNode),
+                speed = VALUES(speed),
+                roadType = VALUES(roadType),
+                delay = VALUES(delay),
+                street = VALUES(street),
+                pubMillis = VALUES(pubMillis),
+                status = 1,
+                date_updated = NOW()
+        ");
+        
+        // Query para inserir linhas
+        $stmtLine = $pdo->prepare("
+            INSERT INTO jam_lines (jam_uuid, x, y)
+            VALUES (:jam_uuid, :x, :y)
+        ");
+        
+        // Query para inserir segmentos
+        $stmtSegment = $pdo->prepare("
+            INSERT INTO jam_segments (jam_uuid, fromNode, ID_segment, toNode, isForward)
+            VALUES (:jam_uuid, :fromNode, :ID_segment, :toNode, :isForward)
+        ");
+        
+        foreach ($jams as $jam) {
+            // Insere/Atualiza o jam principal
+            $stmtJam->execute([
+                ':uuid' => $jam['uuid'],
+                ':country' => $jam['country'] ?? null,
+                ':city' => $jam['city'] ?? null,
+                ':level' => $jam['level'] ?? null,
+                ':speedKMH' => $jam['speedKMH'] ?? null,
+                ':length' => $jam['length'] ?? null,
+                ':turnType' => $jam['turnType'] ?? null,
+                ':endNode' => $jam['endNode'] ?? null,
+                ':speed' => $jam['speed'] ?? null,
+                ':roadType' => $jam['roadType'] ?? null,
+                ':delay' => $jam['delay'] ?? null,
+                ':street' => $jam['street'] ?? null,
+                ':pubMillis' => $jam['pubMillis'] ?? null,
+                ':id_parceiro' => $id_parceiro,
+                ':source_url' => $url,
+                ':status' => 1,
+                ':date_received' => $currentDateTime,
+                ':date_updated' => $currentDateTime
+            ]);
+            
+            // Insere linhas (coordenadas)
+            if (!empty($jam['line'])) {
+                foreach ($jam['line'] as $point) {
+                    $stmtLine->execute([
+                        ':jam_uuid' => $jam['uuid'],
+                        ':x' => $point['x'],
+                        ':y' => $point['y']
+                    ]);
+                }
+            }
+            
+            // Insere segmentos
+            if (!empty($jam['segments'])) {
+                foreach ($jam['segments'] as $segment) {
+                    $stmtSegment->execute([
+                        ':jam_uuid' => $jam['uuid'],
+                        ':fromNode' => $segment['fromNode'] ?? null,
+                        ':ID_segment' => $segment['ID'] ?? null,
+                        ':toNode' => $segment['toNode'] ?? null,
+                        ':isForward' => $segment['isForward'] ?? null
+                    ]);
+                }
+            }
+        }
+        
+        // Desativa jams não presentes
+        $stmtDeactivate = $pdo->prepare("
+            UPDATE jams SET status = 0, date_updated = NOW()
+            WHERE uuid = ? AND source_url = ?
+        ");
+        foreach ($dbUuids as $uuid) {
+            if (!in_array($uuid, $incomingUuids)) {
+                $stmtDeactivate->execute([$uuid, $url]);
+            }
+        }
+        
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+}
+
+
 
 // Função principal para processar os alertas
 function processAlerts() {
     $pdo = Database::getConnection();
-
-    // Recupera todas as URLs e seus respectivos id_parceiro
     $urls = getUrlsFromDb($pdo);
 
     foreach ($urls as $entry) {
         $url = $entry['url'];
         $id_parceiro = $entry['id_parceiro'];
-
         $jsonData = fetchAlertsFromApi($url);
 
-        if ($jsonData && isset($jsonData['alerts'])) {
+        if ($jsonData) {
             try {
-                saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
-                } catch (Exception $e) {
-                    echo "Erro ao salvar alertas: " . $e->getMessage() . PHP_EOL;
+                // Processa Alertas
+                if (!empty($jsonData['alerts'])) {
+                    saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
                 }
-        } else {
-            echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
+                
+                // Processa Jams
+                if (!empty($jsonData['jams'])) {
+                    saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
+                }
+            } catch (Exception $e) {
+                echo "Erro ao processar dados: " . $e->getMessage() . PHP_EOL;
+            }
         }
     }
 }
