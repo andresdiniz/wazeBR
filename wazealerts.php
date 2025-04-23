@@ -213,7 +213,11 @@ function processAlerts() {
         $jsonData = fetchAlertsFromApi($url);
 
         if ($jsonData && isset($jsonData['alerts'])) {
-            saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+            try {
+                saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+                } catch (Exception $e) {
+                    echo "Erro ao salvar alertas: " . $e->getMessage() . PHP_EOL;
+                }
         } else {
             echo "Nenhum dado de alerta processado para a URL: $url" . PHP_EOL;
         }
