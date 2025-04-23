@@ -1,19 +1,19 @@
 <?php return array(
     'root' => array(
-        'name' => '__root__',
+        'name' => 'glaycon/wazebr',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b7f1fabf35475f8ee6af005dac793f873f045771',
+        'reference' => 'e06e25393423f2da1b0197a3c06c3b003da2de8a',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-        '__root__' => array(
+        'glaycon/wazebr' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b7f1fabf35475f8ee6af005dac793f873f045771',
+            'reference' => 'e06e25393423f2da1b0197a3c06c3b003da2de8a',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
