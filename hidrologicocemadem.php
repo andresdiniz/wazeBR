@@ -90,7 +90,7 @@ try {
                     ];
 
                     // Verifica duplicidade
-                    $stmtCheck = $pdo->prepare("SELECT 1 FROM sua_tabela 
+                    $stmtCheck = $pdo->prepare("SELECT 1 FROM leituras_cemaden 
                                                 WHERE codigo_estacao = ? 
                                                 AND data_leitura = ? 
                                                 AND hora_leitura = ?");
@@ -101,7 +101,7 @@ try {
                     ]);
 
                     if (!$stmtCheck->fetchColumn()) {
-                        $stmt = $pdo->prepare("INSERT INTO sua_tabela (
+                        $stmt = $pdo->prepare("INSERT INTO leituras_cemaden (
                             data_leitura, hora_leitura, valor, offset, 
                             cota_atencao, cota_alerta, cota_transbordamento,
                             nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
@@ -144,7 +144,7 @@ try {
                     'nivel_atual' => (float)$registro['valor']
                 ];
 
-                $stmtCheck = $pdo->prepare("SELECT 1 FROM sua_tabela 
+                $stmtCheck = $pdo->prepare("SELECT 1 FROM leituras_cemaden 
                                             WHERE codigo_estacao = ? 
                                             AND data_leitura = ? 
                                             AND hora_leitura = ?");
@@ -155,7 +155,7 @@ try {
                 ]);
 
                 if (!$stmtCheck->fetchColumn()) {
-                    $stmt = $pdo->prepare("INSERT INTO sua_tabela (
+                    $stmt = $pdo->prepare("INSERT INTO leituras_cemaden (
                         data_leitura, hora_leitura, valor, offset, 
                         cota_atencao, cota_alerta, cota_transbordamento,
                         nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
