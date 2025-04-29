@@ -59,6 +59,7 @@ $twig = new Environment($loader, [
 
 ]);
 $twig->addExtension(new \Twig\Extension\DebugExtension()); // Extensão para debug
+$twig->addExtension(new \Twig\Extension\ProfilerExtension()); // Extensão para profiler
 
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
