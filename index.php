@@ -43,9 +43,13 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 // Configurações básicas
-$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'); // <-- mover para cá
+session_start();
 
-$publicRoutes = ['blog', 'login', 'recuperar-senha'];
+// Verifica se o usuário está logado
+if (empty($_SESSION['usuario_id'])) {
+    header("Location: login.html");
+    exit();
+}
 
 // Configura o Twig
 $loader = new FilesystemLoader('./frontend');
@@ -108,12 +112,6 @@ $combinedData = [
     ];
 
 var_dump($combinedData);*/
-
-// Verifica se o usuário está logado
-if (!in_array($uri, $publicRoutes) && empty($_SESSION['usuario_id'])) {
-    header("Location: /login");
-    exit();
-}
 
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
