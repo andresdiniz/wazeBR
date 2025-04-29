@@ -58,20 +58,44 @@
     <p>Carregando rota...</p>
 </div>
 
-<!-- Modal para o Mapa -->
-<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mapModalLabel">Mapa da Rota</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Container para o mapa -->
-                <div id="mapContainer" style="width: 100%; height: 500px;"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+<div class="modal-body row">
+    <!-- Mapa -->
+    <div class="col-md-8">
+        <div id="mapContainer" class="rounded border" style="height: 500px;"></div>
+    </div>
+    
+    <!-- Sidebar de Informações -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">ESTATÍSTICAS</h6>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <small class="text-muted">Velocidade Atual</small>
+                        <h4 class="text-primary">{{ route.avg_speed|number_format(1) }} km/h</h4>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Velocidade Histórica</small>
+                        <h4 class="text-secondary">{{ route.historic_speed|number_format(1) }} km/h</h4>
+                    </div>
+                </div>
+
+                <div class="progress mb-4" style="height: 8px;">
+                    <div class="progress-bar bg-warning" 
+                         style="width: {{ ((route.avg_speed / route.historic_speed) * 100)|min(100) }}%">
+                    </div>
+                </div>
+
+                <h6 class="mt-4"><i class="fas fa-exclamation-triangle text-danger"></i> Irregularidades</h6>
+                <ul class="list-group">
+                    {% for point in irregularidades %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Ponto {{ loop.index }}</span>
+                        <span class="text-muted">{{ point.x|number_format(5) }}, {{ point.y|number_format(5) }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
