@@ -120,8 +120,14 @@ var_dump($combinedData);*/
 } catch (Exception $e) {
     // Lida com outros erros gerais e exibe página de erro
     http_response_code(500);
-    $data['errorMessage'] = $e->getMessage();
+    $dados['errorCode'] = 500;
+    $dados['errorTitle'] = 'Erro interno do servidor';
+    $dados['errorMessage'] = $e->getMessage();
+    $dados['errorDescription'] = 'Ocorreu um erro ao processar sua requisição. Tente novamente mais tarde.';
+    $dados['pagina_retorno'] = '/';
+
     echo $twig->render('error.twig', $dados);
+
 }
 
 // Renderiza o footer

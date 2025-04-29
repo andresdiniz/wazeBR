@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro - {{ titulo }}</title>
+    <title>Erro - {{ titulo|default('Erro Desconhecido') }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,12 +18,19 @@
             background-color: #fff;
             border: 1px solid #f5c6cb;
             border-radius: 8px;
+            max-width: 600px;
         }
         .error-container h1 {
             font-size: 50px;
+            margin-bottom: 10px;
+        }
+        .error-container h2 {
+            font-size: 30px;
+            margin-bottom: 20px;
         }
         .error-container p {
-            font-size: 20px;
+            font-size: 18px;
+            margin: 10px 0;
         }
         .error-container a {
             color: #721c24;
@@ -38,9 +45,13 @@
 <body>
 
     <div class="error-container">
-        <h1>ERRO GERADO</h1>
-        <p>{{ errorMessage }}</p>
-        <p><a href="{{ pagina_retorno }}">Voltar para a página inicial</a></p>
+        <h1>Erro {{ errorCode|default('000') }}</h1>
+        <h2>{{ errorTitle|default('Erro inesperado') }}</h2>
+        <p>{{ errorMessage|default('Algo deu errado ao processar sua requisição.') }}</p>
+        {% if errorDescription is defined %}
+            <p><em>{{ errorDescription }}</em></p>
+        {% endif %}
+        <p><a href="{{ pagina_retorno|default('/') }}">Voltar para a página inicial</a></p>
     </div>
 
 </body>
