@@ -1,28 +1,29 @@
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h2 class="h3 mb-0 text-gray-800">ROTAS Monitoradas</h2> {# Added a descriptive title #}
-        {# Optional: Add a button here for adding new routes if needed #}
-        {# <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Adicionar Nova Rota</a> #}
+        <h2 class="h3 mb-0 text-gray-800">ROTAS Monitoradas</h2>
     </div>
 
+    {# DEBUG temporário: remova em produção #}
+    <pre>{{ dump(routes) }}</pre>
+
     <div class="row">
-        <div class="col-12"> {# Use full column width for the content #}
+        <div class="col-12">
             {% if routes is not empty %}
-                <div class="card shadow mb-4"> {# Wrap table in a card for better visual structure #}
+                <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Detalhes das Rotas</h6> {# Card title #}
+                        <h6 class="m-0 font-weight-bold text-primary">Detalhes das Rotas</h6>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive"> {# Ensure table is responsive #}
-                            <table class="table table-hover table-bordered" id="routesTable" width="100%" cellspacing="0"> {# Added table-hover, ID, and width #}
-                                <thead class="thead-dark"> {# Used thead-dark for Bootstrap standard dark header #}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="routesTable" width="100%" cellspacing="0">
+                                <thead class="thead-dark">
                                     <tr>
                                         <th>Nome da Rota</th>
                                         <th>Início</th>
                                         <th>Fim</th>
-                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal (km/h)</th> {# Hid on medium screens too, maybe lg is better #}
-                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal (min)</th> {# Hid on medium screens too #}
+                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal (km/h)</th>
+                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal (min)</th>
                                         <th class="text-center">Vel. Atual (km/h)</th>
                                         <th class="text-center">Tempo Atual (min)</th>
                                         <th class="text-center">Atraso (min)</th>
@@ -31,28 +32,42 @@
                                 </thead>
                                 <tbody>
                                     {% for route in routes %}
-                                    {# Apply Bootstrap context classes for delay/on-time if desired, or keep custom classes #}
-                                    <tr data-uuid="{{ route.id }}" class="{% if (route.avg_time - route.historic_time) / 60 > 1 %}table-warning{% elif (route.avg_time - route.historic_time) / 60 > 5 %}table-danger{% else %}table-light{% endif %}"> {# Using Bootstrap context classes based on delay #}
-                                        <td data-toggle="tooltip" data-placement="top" title="{{ route.name }}" class="text-truncate" style="max-width: 150px;">{{ route.name }}</td> {# Added data-placement and text-truncate #}
-                                        <td data-toggle="tooltip" data-placement="top" title="{{ route.from_name }}" class="text-truncate" style="max-width: 150px;">{{ route.from_name }}</td> {# Added text-truncate #}
-                                        <td data-toggle="tooltip" data-placement="top" title="{{ route.to_name }}" class="text-truncate" style="max-width: 150px;">{{ route.to_name }}</td> {# Added text-truncate #}
-                                        <td class="d-none d-lg-table-cell text-center" data-toggle="tooltip" data-placement="top" title="{{ route.historic_speed|number_format(2) }} Km/h">{{ route.historic_speed|number_format(2) }}</td> {# Added text-center, removed "Km/h" from cell #}
-                                        <td class="d-none d-lg-table-cell text-center" data-toggle="tooltip" data-placement="top" title="{{ (route.historic_time / 60)|number_format(2) }} min">{{ (route.historic_time / 60)|number_format(1) }}</td> {# Added text-center, min format to 1 #}
-                                        <td class="text-center" data-toggle="tooltip" data-placement="top" title="{{ route.avg_speed|number_format(2) }} Km/h">{{ route.avg_speed|number_format(2) }}</td> {# Added text-center #}
-                                        <td class="text-center" data-toggle="tooltip" data-placement="top" title="{{ (route.avg_time / 60)|number_format(2) }} min">{{ (route.avg_time / 60)|number_format(1) }}</td> {# Added text-center, min format to 1 #}
-                                        {# Calculate delay in minutes #}
-                                        {% set delay_minutes = (route.avg_time - route.historic_time) / 60 %}
-                                        <td class="text-center {% if delay_minutes > 1 %}text-danger font-weight-bold{% else %}text-success{% endif %}" data-toggle="tooltip" data-placement="top" title="{{ delay_minutes|number_format(2) }} min">{{ delay_minutes|number_format(1) }}</td> {# Added text-center, color based on delay #}
-                                        <td class="text-center">
-                                            <button class="btn btn-primary btn-sm view-route" {# Used btn-primary for action #}
-                                                data-toggle="modal" {# Corrected data-toggle to 'modal' #}
-                                                data-target="#mapModal"
-                                                data-route-id="{{ route.id }}"
-                                                data-toggle="tooltip" data-placement="top" title="Ver detalhes da rota">
-                                                <i class="fas fa-map-marker-alt"></i> VER MAPA {# Added icon and clearer text #}
-                                            </button>
-                                        </td>
-                                    </tr>
+                                        {% set historic_time = route.historic_time|default(0) %}
+                                        {% set avg_time = route.avg_time|default(0) %}
+                                        {% set delay_minutes = (avg_time - historic_time) / 60 %}
+                                        <tr data-uuid="{{ route.id }}" class="
+                                            {% if delay_minutes > 5 %}
+                                                table-danger
+                                            {% elseif delay_minutes > 1 %}
+                                                table-warning
+                                            {% else %}
+                                                table-light
+                                            {% endif %}
+                                        ">
+                                            <td data-toggle="tooltip" title="{{ route.name }}" class="text-truncate" style="max-width: 150px;">{{ route.name }}</td>
+                                            <td data-toggle="tooltip" title="{{ route.from_name }}" class="text-truncate" style="max-width: 150px;">{{ route.from_name }}</td>
+                                            <td data-toggle="tooltip" title="{{ route.to_name }}" class="text-truncate" style="max-width: 150px;">{{ route.to_name }}</td>
+                                            <td class="d-none d-lg-table-cell text-center" title="{{ route.historic_speed|number_format(2) }} Km/h">{{ route.historic_speed|default(0)|number_format(2) }}</td>
+                                            <td class="d-none d-lg-table-cell text-center" title="{{ (historic_time / 60)|number_format(2) }} min">{{ (historic_time / 60)|number_format(1) }}</td>
+                                            <td class="text-center" title="{{ route.avg_speed|number_format(2) }} Km/h">{{ route.avg_speed|default(0)|number_format(2) }}</td>
+                                            <td class="text-center" title="{{ (avg_time / 60)|number_format(2) }} min">{{ (avg_time / 60)|number_format(1) }}</td>
+                                            <td class="text-center 
+                                                {% if delay_minutes > 1 %}
+                                                    text-danger font-weight-bold
+                                                {% else %}
+                                                    text-success
+                                                {% endif %}
+                                            " title="{{ delay_minutes|number_format(2) }} min">{{ delay_minutes|number_format(1) }}</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-primary btn-sm view-route"
+                                                    data-toggle="modal"
+                                                    data-target="#mapModal"
+                                                    data-route-id="{{ route.id }}"
+                                                    title="Ver detalhes da rota">
+                                                    <i class="fas fa-map-marker-alt"></i> VER MAPA
+                                                </button>
+                                            </td>
+                                        </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -60,89 +75,59 @@
                     </div>
                 </div>
             {% else %}
-                <div class="alert alert-info text-center" role="alert"> {# Use Bootstrap alert for no data message #}
+                <div class="alert alert-info text-center" role="alert">
                     <h4 class="alert-heading">Sem Rotas Monitoradas!</h4>
                     <p>Não há rotas configuradas ou dados disponíveis no momento.</p>
-                    {# Optional: Add a link to add routes #}
-                    {# <hr>
-                    <p class="mb-0">Clique <a href="#">aqui</a> para adicionar uma nova rota.</p> #}
                 </div>
             {% endif %}
         </div>
     </div>
 
-    {# Loading indicator - position outside the main row, maybe fixed or centered #}
-    {# This implementation assumes it's a simple indicator below the content. A fixed overlay is better for UX. #}
     <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
-        <div class="spinner-border text-primary" role="status"> {# Bootstrap spinner #}
+        <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Carregando...</span>
         </div>
-        <p class="mt-2 text-muted">Carregando detalhes da rota...</p> {# Loading text below spinner #}
+        <p class="mt-2 text-muted">Carregando detalhes da rota...</p>
     </div>
-
-
 </div>
-{# --- Modal Structure --- #}
-{# This should be placed outside the main container-fluid, typically at the end of the body #}
+
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document"> {# Increased modal size #}
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="mapModalLabel">Detalhes da Rota: <span id="modalRouteName"></span></h5> {# Dynamic title #}
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title">Detalhes da Rota: <span id="modalRouteName"></span></h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-lg-8 mb-4 mb-lg-0"> {# Use lg for map/sidebar split, stack on md-sm #}
-                         <h6 class="text-muted mb-2">Visualização da Rota no Mapa</h6> {# Added title for map section #}
-                        <div id="mapContainer" class="rounded border" style="height: 500px;"></div> {# Height is crucial for map libs #}
+                    <div class="col-lg-8 mb-4 mb-lg-0">
+                        <h6 class="text-muted mb-2">Visualização da Rota no Mapa</h6>
+                        <div id="mapContainer" class="rounded border" style="height: 500px;"></div>
                     </div>
-
                     <div class="col-lg-4">
-                        <div class="card h-100"> {# h-100 helps card take full height #}
+                        <div class="card h-100">
                             <div class="card-body">
-                                <h6 class="card-title text-muted">ESTATÍSTICAS ATUAIS</h6> {# Clearer title #}
-
-                                <div class="mb-4"> {# Added margin-bottom #}
-                                    <small class="text-muted d-block">Velocidade Média Atual</small> {# d-block makes small take full width #}
-                                    <h4 class="text-primary" id="modalAvgSpeed">- km/h</h4> {# Placeholder and ID for dynamic update #}
-                                    {# Optional: Add icon <i class="fas fa-tachometer-alt text-primary"></i> #}
+                                <h6 class="card-title text-muted">ESTATÍSTICAS ATUAIS</h6>
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Velocidade Média Atual</small>
+                                    <h4 class="text-primary" id="modalAvgSpeed">- km/h</h4>
                                 </div>
-
-                                <div class="mb-4"> {# Added margin-bottom #}
-                                     <small class="text-muted d-block">Velocidade Histórica</small>
-                                     <h4 class="text-secondary" id="modalHistoricSpeed">- km/h</h4> {# Placeholder and ID #}
-                                    {# Optional: Add icon <i class="fas fa-chart-line text-secondary"></i> #}
+                                <div class="mb-4">
+                                    <small class="text-muted d-block">Velocidade Histórica</small>
+                                    <h4 class="text-secondary" id="modalHistoricSpeed">- km/h</h4>
                                 </div>
-
-                                {# Speed Comparison / Progress Bar #}
                                 <h6 class="text-muted mt-4 mb-2">Comparativo de Velocidade</h6>
                                 <div class="progress mb-4" style="height: 8px;">
-                                    {# The width calculation should ideally be done in JS after fetching data for the modal #}
                                     <div class="progress-bar bg-warning" role="progressbar"
-                                        style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="speedProgressBar"> {# Placeholder width #}
+                                         style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                         id="speedProgressBar">
                                     </div>
                                 </div>
-
-
-                                <h6 class="mt-4 mb-2"><i class="fas fa-exclamation-triangle text-danger mr-1"></i> Possíveis Irregularidades na Rota</h6> {# Added icon and margin #}
-                                <ul class="list-group list-group-flush" id="irregularitiesList"> {# Used list-group-flush for borderless list #}
-                                    {# Irregularities will be populated here via JS #}
-                                    <li class="list-group-item text-muted">Nenhuma irregularidade detectada recentemente.</li> {# Default message #}
-                                    {# {% for point in irregularidades %} #}
-                                    {# <li class="list-group-item d-flex justify-content-between align-items-center"> #}
-                                    {#    <span>Ponto {{ loop.index }}</span> #}
-                                    {#    <span class="badge badge-secondary">{{ point.x|number_format(5) }}, {{ point.y|number_format(5) }}</span> #} {# Using badge for coordinates #}
-                                    {# </li> #}
-                                    {# {% endfor %} #}
+                                <h6 class="mt-4 mb-2"><i class="fas fa-exclamation-triangle text-danger mr-1"></i> Possíveis Irregularidades na Rota</h6>
+                                <ul class="list-group list-group-flush" id="irregularitiesList">
+                                    <li class="list-group-item text-muted">Nenhuma irregularidade detectada recentemente.</li>
                                 </ul>
                             </div>
-                             {# Optional: Add modal footer for actions #}
-                            {# <div class="card-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                            </div> #}
                         </div>
                     </div>
                 </div>
@@ -154,6 +139,4 @@
     </div>
 </div>
 
-
-{# Your custom scripts and tooltip initialization #}
 <script src="../js/scripts-routes.js"></script>
