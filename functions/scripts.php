@@ -552,14 +552,19 @@ function generateUuid() {
 function measurePerformance(callable $function, &$metric) {
     $start = microtime(true);
     $memoryStart = memory_get_usage();
-    
-    // Inicia a captura de tráfego de rede
+
+    // Rede - fallback para ambientes sem exec
     $networkStart = [
-        'bytes_sent' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2')),
-        'bytes_recv' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2 | tail -1'))
+        'bytes_sent' => 0,
+        'bytes_recv' => 0
     ];
 
-    // Inicia as estatísticas do banco de dados
+    if (function_exists('exec')) {
+        $networkStart['bytes_sent'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
+        $networkStart['bytes_recv'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
+    }
+
+    // Banco de dados
     $dbStart = [
         'queries' => 0,
         'time' => 0,
@@ -568,20 +573,22 @@ function measurePerformance(callable $function, &$metric) {
 
     $result = $function();
 
-    // Captura métricas finais
     $networkEnd = [
-        'bytes_sent' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2')),
-        'bytes_recv' => (int)trim(exec('ifconfig | grep -o "bytes:[0-9]*" | cut -d: -f2 | tail -1'))
+        'bytes_sent' => 0,
+        'bytes_recv' => 0
     ];
 
-    // Calcula métricas de rede
+    if (function_exists('exec')) {
+        $networkEnd['bytes_sent'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
+        $networkEnd['bytes_recv'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
+    }
+
     $networkMetrics = [
         'bytes_sent' => $networkEnd['bytes_sent'] - $networkStart['bytes_sent'],
         'bytes_recv' => $networkEnd['bytes_recv'] - $networkStart['bytes_recv'],
-        'http_response_size' => ob_get_length() // Tamanho da resposta HTTP
+        'http_response_size' => ob_get_length()
     ];
 
-    // Calcula métricas do banco de dados
     $dbMetrics = [
         'connection_time' => round((microtime(true) - $dbStart['connection_time']) * 1000, 2) . ' ms',
         'total_queries' => $GLOBALS['query_count'] ?? 0,
@@ -594,7 +601,7 @@ function measurePerformance(callable $function, &$metric) {
         'network' => $networkMetrics,
         'database' => $dbMetrics
     ];
-    
+
     return $result;
 }
 
@@ -608,7 +615,11 @@ function savePerformanceMetrics($metrics, $startTime) {
         ],
         'detailed_metrics' => $metrics
     ];
-    
+    $logDir = $_SERVER['DOCUMENT_ROOT'] . '/desempenho';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0775, true);
+        }
+
     file_put_contents(
         $_SERVER['DOCUMENT_ROOT'] . '/desempenho/metrics-' . date('Y-m-d') . '.log',
         json_encode($logData, JSON_PRETTY_PRINT) . PHP_EOL,
