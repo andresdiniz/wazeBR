@@ -1,0 +1,135 @@
+<?php
+
+// Certifique-se de que este script está no local correto (ex: no mesmo nível da pasta 'frontend' e 'backend', ou um nível acima se o seu index.php estiver em public_html e este script em public_html/api)
+// O caminho '../config/configbd.php' sugere que config/ está um nível acima da pasta deste script. Ajuste se necessário.
+require_once __DIR__ . '/../config/configbd.php'; // Ajuste o caminho conforme a estrutura do seu projeto
+// Inclua outras dependências ou autoload se necessário
+
+// Definir o cabeçalho para JSON
+header('Content-Type: application/json');
+
+// Função para retornar resposta JSON de erro
+function sendErrorResponse($message, $statusCode = 500) {
+    http_response_code($statusCode);
+    echo json_encode(['error' => $message]);
+    exit;
+}
+
+// Verificar se a requisição é GET e se os parâmetros necessários existem
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    sendErrorResponse('Método não permitido.', 405);
+}
+
+$action = $_GET['action'] ?? null;
+$routeId = $_GET['route_id'] ?? null;
+
+// Verificar se a action e o route_id foram fornecidos
+if ($action === null || $routeId === null) {
+    sendErrorResponse('Parâmetros "action" e "route_id" são obrigatórios.', 400);
+}
+
+// Lógica para action=get_route_details
+if ($action === 'get_route_details') {
+    try {
+        // Conectar ao banco de dados
+        $pdo = Database::getConnection(); // Assumindo que Database::getConnection() retorna uma instância de PDO
+
+        // --- 1. Obter detalhes gerais da rota (overall_stats) ---
+        $stmtRoute = $pdo->prepare("
+            SELECT
+                id, name, from_name, to_name, length, jam_level, time, type,
+                bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y,
+                url_id, id_parceiro, avg_speed, avg_time, historic_time, is_active, historic_speed
+            FROM routes
+            WHERE id = :route_id
+        ");
+        $stmtRoute->bindParam(':route_id', $routeId, PDO::PARAM_STR);
+        $stmtRoute->execute();
+        $overallStats = $stmtRoute->fetch(PDO::FETCH_ASSOC);
+
+        // Verificar se a rota foi encontrada
+        if (!$overallStats) {
+            sendErrorResponse('Rota não encontrada.', 404);
+        }
+
+        // Formatar overall_stats para garantir que números sejam floats/ints
+         $overallStats['length'] = (int) $overallStats['length'];
+         $overallStats['jam_level'] = (int) $overallStats['jam_level'];
+         $overallStats['time'] = (int) $overallStats['time'];
+         $overallStats['url_id'] = (int) $overallStats['url_id'];
+         $overallStats['id_parceiro'] = $overallStats['id_parceiro'] !== null ? (int) $overallStats['id_parceiro'] : null;
+         $overallStats['avg_speed'] = $overallStats['avg_speed'] !== null ? (float) $overallStats['avg_speed'] : null;
+         $overallStats['avg_time'] = $overallStats['avg_time'] !== null ? (int) $overallStats['avg_time'] : null;
+         $overallStats['historic_time'] = (int) $overallStats['historic_time'];
+         $overallStats['is_active'] = (bool) $overallStats['is_active']; // Assumindo 0/1
+         $overallStats['historic_speed'] = (float) $overallStats['historic_speed'];
+         // bbox fields are already double in schema
+
+
+        // --- 2. Obter irregularidades (jams) associadas a esta rota ---
+        // Assumindo que a tabela 'jams' tem colunas 'route_id', 'x', 'y', 'type', 'level'
+        // Ajuste o SELECT e as colunas se a sua tabela 'jams' for diferente
+        $stmtJams = $pdo->prepare("
+            SELECT id, x, y, type, level, speed, delay, speed_kmh, length
+            FROM jams
+            WHERE route_id = :route_id
+        ");
+        $stmtJams->bindParam(':route_id', $routeId, PDO::PARAM_STR);
+        $stmtJams->execute();
+        $jams = $stmtJams->fetchAll(PDO::FETCH_ASSOC);
+
+        // --- 3. Construir a resposta final no formato esperado pelo JavaScript ---
+        $responseData = [
+            'overall_stats' => $overallStats,
+            'subroutes' => [] // Inicializa como array vazio - Veja a Limitação Importante acima
+        ];
+
+        // Se houver jams, adicioná-los a um "subroute" fictício para corresponder à estrutura JS
+        // NOTA: Isto não fornece a geometria da rota, apenas os pontos de irregularidade.
+        if (!empty($jams)) {
+             $irregularityPoints = [];
+             foreach ($jams as $jam) {
+                 // Adiciona apenas x e y, conforme esperado pelo JS para irregularidades
+                 $irregularityPoints[] = [
+                     'x' => (float) $jam['x'],
+                     'y' => (float) $jam['y'],
+                     'type' => $jam['type'], // Incluir type e level pode ser útil
+                     'level' => (int) $jam['level'],
+                     'speed_kmh' => (float) $jam['speed_kmh'], // Exemplo, se disponível
+                     'length' => (float) $jam['length'], // Exemplo, se disponível
+                     'delay' => (int) $jam['delay'] // Exemplo, se disponível
+                 ];
+             }
+
+             // Cria um objeto subroute fictício para conter as irregularidades
+             $dummySubroute = [
+                 'id' => $routeId . '_irregularities', // ID fictício
+                 'name' => 'Pontos de Irregularidade', // Nome fictício
+                 'route_points' => [], // **ARRAY VAZIO: GEOMETRIA NÃO DISPONÍVEL**
+                 'irregularities' => $irregularityPoints // Adiciona os pontos de jam aqui
+             ];
+
+             $responseData['subroutes'][] = $dummySubroute; // Adiciona o subroute fictício ao array
+        }
+        // Se não houver jams, subroutes permanecerá vazio [], o que o JS trata.
+
+
+        // Enviar a resposta JSON
+        echo json_encode($responseData);
+
+    } catch (PDOException $e) {
+        // Erro de banco de dados
+        error_log("Erro de PDO em wazeportapi.php (get_route_details): " . $e->getMessage());
+        sendErrorResponse('Erro de banco de dados ao obter detalhes da rota.', 500);
+    } catch (Exception $e) {
+        // Outros erros
+         error_log("Erro geral em wazeportapi.php (get_route_details): " . $e->getMessage());
+        sendErrorResponse('Ocorreu um erro interno ao processar a requisição.', 500);
+    }
+
+} else {
+    // Action desconhecida
+    sendErrorResponse('Action desconhecida.', 400);
+}
+
+?>
