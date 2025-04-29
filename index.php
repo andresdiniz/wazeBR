@@ -47,12 +47,6 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'); // <-- mover
 
 $publicRoutes = ['blog', 'login', 'recuperar-senha'];
 
-// Verifica se o usuário está logado
-if (!in_array($uri, $publicRoutes) && empty($_SESSION['usuario_id'])) {
-    header("Location: /login");
-    exit();
-}
-
 // Configura o Twig
 $loader = new FilesystemLoader('./frontend');
 $twig = new Environment($loader, [
@@ -114,6 +108,12 @@ $combinedData = [
     ];
 
 var_dump($combinedData);*/
+
+// Verifica se o usuário está logado
+if (!in_array($uri, $publicRoutes) && empty($_SESSION['usuario_id'])) {
+    header("Location: /login");
+    exit();
+}
 
 } catch (\Twig\Error\LoaderError $e) {
     // Renderiza página 404 caso o template não seja encontrado
