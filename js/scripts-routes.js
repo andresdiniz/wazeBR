@@ -205,7 +205,7 @@ $(document).ready(function () {
         clearRouteMapLayers(); // Clear map before loading new data
         initializeRouteMap(); // Ensure map is initialized
 
-        const apiUrl = `../wazeportapi.php?action=get_route_details&route_id=${routeId}`; // Assuming an API endpoint for route details
+        const apiUrl = `../api.php?action=get_route_details&route_id=${routeId}`; // Assuming an API endpoint for route details
 
         fetch(apiUrl)
             .then(response => {
