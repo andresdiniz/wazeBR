@@ -1,118 +1,137 @@
-// scripts-routes.js
+document.addEventListener('DOMContentLoaded', () => {
+    const mapModal = document.getElementById('mapModal');
+    let mapInstance = null;
+    let routeLayer = null;
 
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('mapModal');
-    const mapContainer = document.getElementById('mapContainer');
-    let map, heatLayer;
+    // Abre o modal e carrega a rota
+    document.querySelectorAll('.view-route').forEach(button => {
+        button.addEventListener('click', async () => {
+            const routeId = button.dataset.routeId;
+            const modalTitle = document.getElementById('modalRouteName');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            
+            modalTitle.textContent = 'Carregando...';
+            document.getElementById('mapContainer').innerHTML = '';
+            document.getElementById('heatmapChart').innerHTML = '';
+            
+            loadingIndicator.style.display = 'block';
 
-    // Inicializa mapa quando o modal abre
-    $('#mapModal').on('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const routeId = button.getAttribute('data-route-id');
+            try {
+                const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
+                const result = await response.json();
 
-        document.getElementById('loadingIndicator').style.display = 'block';
-        fetchRouteDetails(routeId);
+                if (result.error) {
+                    alert('Erro ao buscar detalhes: ' + result.error);
+                    return;
+                }
+
+                const { route, geometry, historic, heatmap, subroutes } = result.data;
+
+                modalTitle.textContent = route.name;
+                renderMap(geometry);
+                renderHeatmap(heatmap);
+                renderInsights(route, geometry);
+            } catch (err) {
+                console.error('Erro ao carregar rota:', err);
+                alert('Erro ao carregar rota. Veja o console para mais detalhes.');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
     });
 
-    function fetchRouteDetails(routeId) {
-        fetch(`/api/index.php?action=get_route_details&route_id=${routeId}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('loadingIndicator').style.display = 'none';
-                renderMap(data.geometry);
-                renderHeatmap(data.heatmap);
-                renderInsights(data);
-            })
-            .catch(error => {
-                document.getElementById('loadingIndicator').style.display = 'none';
-                alert('Erro ao carregar os detalhes da rota');
-                console.error(error);
-            });
-    }
-
     function renderMap(geometry) {
-        if (!map) {
-            map = L.map(mapContainer).setView([-15.7801, -47.9292], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
+        if (!geometry || geometry.length === 0) return;
+
+        if (mapInstance) {
+            mapInstance.remove();
         }
 
-        if (heatLayer) heatLayer.remove();
+        mapInstance = L.map('mapContainer').setView([geometry[0].y, geometry[0].x], 14);
 
-        const latlngs = geometry.map(point => [point.y, point.x]);
-        L.polyline(latlngs, { color: 'blue' }).addTo(map);
-        map.fitBounds(latlngs);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(mapInstance);
+
+        const latlngs = geometry.map(p => [p.y, p.x]);
+        routeLayer = L.polyline(latlngs, { color: 'blue', weight: 5 }).addTo(mapInstance);
+        mapInstance.fitBounds(routeLayer.getBounds());
     }
 
     function renderHeatmap(heatmapData) {
-        const chartContainer = document.getElementById('heatmapChart');
+        const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const data = heatmapData.map(item => [
+            parseInt(item.hour), 
+            parseInt(item.day_of_week) - 1,
+            parseFloat(item.avg_speed)
+        ]);
 
-        const hours = [...Array(24).keys()];
-        const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        const matrix = Array.from({ length: 7 }, () => Array(24).fill(0));
-
-        heatmapData.forEach(row => {
-            const day = (row.day_of_week + 5) % 7; // Ajusta para começar no domingo
-            matrix[day][row.hour] = row.avg_speed;
-        });
-
-        Highcharts.chart(chartContainer, {
+        Highcharts.chart('heatmapChart', {
             chart: {
                 type: 'heatmap',
-                height: 250
+                plotBorderWidth: 1,
+                height: 200
             },
             title: null,
             xAxis: {
-                categories: hours
+                categories: Array.from({ length: 24 }, (_, i) => `${i}h`),
+                title: null
             },
             yAxis: {
-                categories: days,
-                title: null
+                categories: categories,
+                title: null,
+                reversed: true
             },
             colorAxis: {
                 min: 0,
                 minColor: '#FFFFFF',
                 maxColor: '#007BFF'
             },
-            legend: {
-                enabled: false
-            },
+            legend: { enabled: false },
             series: [{
+                name: 'Velocidade Média',
                 borderWidth: 1,
-                data: [].concat(...matrix.map((row, y) => row.map((val, x) => [x, y, val]))),
+                data: data,
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    color: '#000',
+                    format: '{point.value:.1f}'
                 }
             }]
         });
     }
 
-    function renderInsights(data) {
-        document.getElementById('modalRouteName').textContent = data.route.name;
+    function renderInsights(route, geometry) {
+        const avgSpeed = parseFloat(route.avg_speed || 0);
+        const historicSpeed = parseFloat(route.historic_speed || 0);
+        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        const jamLevel = parseFloat(route.jam_level || 0);
 
-        const avg = data.route.avg_speed;
-        const hist = data.route.historic_speed;
-        const percentDiff = ((avg - hist) / hist * 100).toFixed(0);
-        const jamLevel = data.route.jam_level;
-        const irregularities = data.geometry.filter(p => p.irregularity_id !== null).length;
+        // Velocidade
+        document.querySelector('#mapModal .card-body .text-primary').innerText = `${avgSpeed.toFixed(1)} km/h`;
+        document.querySelector('#mapModal .card-body .text-secondary').innerText = `${historicSpeed.toFixed(1)} km/h`;
 
-        const insights = {
-            avg_speed_comparison: {
-                percent_diff: percentDiff
-            },
-            irregularities,
-            jam_level: {
-                trend: jamLevel >= 4 ? 'high' : 'moderate'
-            }
-        };
+        const speedDiff = avgSpeed - historicSpeed;
+        const progressBar = document.querySelector('#mapModal .progress-bar');
+        progressBar.style.width = `${Math.abs(speedDiff)}%`;
+        progressBar.classList.remove('bg-danger', 'bg-success');
+        progressBar.classList.add(speedDiff >= 0 ? 'bg-success' : 'bg-danger');
 
-        // Atualiza DOM
-        document.querySelector('.card-body h4.text-primary').textContent = `${avg.toFixed(1)} km/h`;
-        document.querySelector('.card-body h4.text-secondary').textContent = `${hist.toFixed(1)} km/h`;
-        document.querySelector('.progress-bar.bg-success, .progress-bar.bg-danger').style.width = `${Math.abs(percentDiff)}%`;
-        document.querySelector('.text-danger.h2').textContent = insights.irregularities;
-        document.querySelector('.progress-bar.bg-danger, .progress-bar.bg-warning').style.width = `${(jamLevel / 5) * 100}%`;
-        document.querySelector('.badge.ml-2').textContent = `Nível ${jamLevel}`;
+        // Irregularidades
+        document.querySelector('#mapModal .card-body .text-danger').innerText = irregularities;
+
+        // Congestionamento
+        const jamPercent = (jamLevel / 5) * 100;
+        const jamBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, .progress-bar.bg-danger');
+        if (jamBar) {
+            jamBar.style.width = `${jamPercent}%`;
+        }
+
+        const jamBadge = document.querySelector('#mapModal .badge');
+        if (jamBadge) {
+            jamBadge.innerText = `Nível ${jamLevel}`;
+            jamBadge.classList.remove('badge-warning', 'badge-danger');
+            jamBadge.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
+        }
     }
 });
