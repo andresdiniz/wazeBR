@@ -649,3 +649,9 @@ function getFeaturedPosts($pdo, $limit = 3) {
     $stmt->execute([$limit]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function sendErrorResponse($message, $statusCode = 500) {
+    http_response_code($statusCode);
+    echo json_encode(['error' => $message]);
+    exit;
+}
