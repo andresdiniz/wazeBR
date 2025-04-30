@@ -119,4 +119,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }]
         });
     }    
+
+    function renderInsights(route, geometry) {
+        // Exibindo as velocidades (atual e histórica)
+        const avgSpeed = parseFloat(route.avg_speed || 0);
+        const historicSpeed = parseFloat(route.historic_speed || 0);
+        
+        // Exibindo irregularidades (pontos críticos na rota)
+        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        
+        // Exibindo o nível de congestionamento (de 0 a 5)
+        const jamLevel = parseFloat(route.jam_level || 0);
+    
+        // Selecionando elementos do modal para atualização dos dados
+        const avgSpeedElement = document.querySelector('#mapModal .card-body .text-primary');
+        const historicSpeedElement = document.querySelector('#mapModal .card-body .text-secondary');
+        const irregularitiesElement = document.querySelector('#mapModal .card-body .text-danger');
+        const jamLevelElement = document.querySelector('#mapModal .card-body .badge');
+        const jamProgressBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, #mapModal .card-body .progress-bar.bg-danger');
+        const progressBar = document.querySelector('#mapModal .progress-bar');
+    
+        // Velocidade média atual
+        avgSpeedElement.innerText = `${avgSpeed.toFixed(1)} km/h`;
+        historicSpeedElement.innerText = `${historicSpeed.toFixed(1)} km/h`;
+    
+        // Calculando a diferença entre a velocidade atual e a histórica
+        const speedDiff = avgSpeed - historicSpeed;
+    
+        // Atualizando a barra de progresso para comparar a velocidade
+        progressBar.style.width = `${Math.abs(speedDiff)}%`;
+        progressBar.classList.remove('bg-danger', 'bg-success');
+        progressBar.classList.add(speedDiff >= 0 ? 'bg-success' : 'bg-danger');
+    
+        // Irregularidades
+        irregularitiesElement.innerText = irregularities;
+    
+        // Nível de congestionamento
+        const jamPercent = (jamLevel / 5) * 100;
+        if (jamProgressBar) {
+            jamProgressBar.style.width = `${jamPercent}%`;
+        }
+    
+        // Atualizando o badge de congestionamento
+        if (jamLevelElement) {
+            jamLevelElement.innerText = `Nível ${jamLevel}`;
+            jamLevelElement.classList.remove('badge-warning', 'badge-danger');
+            jamLevelElement.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
+        }
+    }
+    
 });
