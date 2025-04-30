@@ -672,177 +672,107 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             break;
 
             case 'get_route_details':
-                // --- Lógica para obter detalhes de uma rota específica ---
-                $routeId = $_GET['route_id']; // Pega o ID da rota da URL
-        
-                // Check if 'route_id' was provided and is not empty for this action
-                if ($routeId === null || trim($routeId) === '') {
-                    sendErrorResponse('Parâmetro "route_id" é obrigatório e não pode estar vazio para a action "get_route_details".', 400);
+                $routeId = $_GET['route_id'] ?? null;
+            
+                if (!$routeId || trim($routeId) === '') {
+                    sendErrorResponse('Parâmetro "route_id" é obrigatório', 400);
                 }
-                $routeId = trim($routeId); // Trim after validation
-        
-        
+                $routeId = trim($routeId);
+            
                 try {
-                    $pdo = Database::getConnection(); // Conectar ao banco de dados
-        
-                    // --- 1. Obter detalhes gerais da rota (overall_stats) ---
+                    $pdo = Database::getConnection();
+            
+                    // 1. Obter detalhes gerais da rota
                     $stmtRoute = $pdo->prepare("
-                        SELECT
-                            id, name, from_name, to_name, length, jam_level, time, type,
-                            bbox_min_x, bbox_min_y, bbox_max_x, bbox_max_y,
-                            url_id, id_parceiro, avg_speed, avg_time, historic_time, is_active, historic_speed
-                        FROM routes
+                        SELECT *, 
+                            (historic_time - avg_time) AS delay_seconds,
+                            (historic_speed - avg_speed) AS speed_diff
+                        FROM routes 
                         WHERE id = :route_id
                     ");
-                    $stmtRoute->bindParam(':route_id', $routeId, PDO::PARAM_STR);
-                    $stmtRoute->execute();
+                    $stmtRoute->execute([':route_id' => $routeId]);
                     $overallStats = $stmtRoute->fetch(PDO::FETCH_ASSOC);
-        
+            
                     if (!$overallStats) {
-                        sendErrorResponse('Rota principal não encontrada com o ID fornecido.', 404);
+                        sendErrorResponse('Rota não encontrada', 404);
                     }
-        
-                    // Formatar overall_stats
-                     $overallStats['length'] = (int) $overallStats['length'];
-                     $overallStats['jam_level'] = (int) $overallStats['jam_level'];
-                     $overallStats['time'] = (int) $overallStats['time'];
-                     $overallStats['url_id'] = (int) $overallStats['url_id'];
-                     $overallStats['id_parceiro'] = $overallStats['id_parceiro'] !== null ? (int) $overallStats['id_parceiro'] : null;
-                     $overallStats['avg_speed'] = $overallStats['avg_speed'] !== null ? (float) $overallStats['avg_speed'] : null;
-                     $overallStats['avg_time'] = $overallStats['avg_time'] !== null ? (int) $overallStats['avg_time'] : null;
-                     $overallStats['historic_time'] = (int) $overallStats['historic_time'];
-                     $overallStats['is_active'] = (bool) $overallStats['is_active'];
-                     $overallStats['historic_speed'] = (float) $overallStats['historic_speed'];
-        
-        
-                    // --- 2. Obter os subtrechos associados a esta rota ---
-                    $stmtSubroutes = $pdo->prepare("
-                        SELECT
-                            id, route_id, url_id, to_name, historic_time, historic_speed, avg_speed,
-                            length, jam_level, time, type, bbox_min_x, bbox_min_y, bbox_max_x,
-                            bbox_max_y, is_active, lead_alert_id, lead_alert_type, lead_alert_sub_type,
-                            lead_alert_position, lead_alert_num_comments, lead_alert_num_thumbs_up,
-                            lead_alert_num_not_there_reports, lead_alert_street, id_parceiro
-                        FROM subroutes
+            
+                    // Formatação dos dados principais
+                    $overallStats = array_map(function($value) {
+                        return is_numeric($value) ? (float)$value : $value;
+                    }, $overallStats);
+            
+                    // 2. Obter geometria completa da rota
+                    $stmtGeometry = $pdo->prepare("
+                        SELECT x, y, irregularity_id 
+                        FROM route_lines 
+                        WHERE route_id = :route_id 
+                        ORDER BY sequence
+                    ");
+                    $stmtGeometry->execute([':route_id' => $routeId]);
+                    $routeGeometry = $stmtGeometry->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // 3. Dados para heatmap (dia da semana e hora)
+                    $stmtHeatmap = $pdo->prepare("
+                        SELECT 
+                            DAYOFWEEK(date_received) AS day_of_week,
+                            HOUR(date_received) AS hour,
+                            COUNT(*) AS count
+                        FROM alerts
                         WHERE route_id = :route_id
+                        GROUP BY day_of_week, hour
+                        ORDER BY day_of_week, hour
                     ");
-                     $stmtSubroutes->bindParam(':route_id', $routeId, PDO::PARAM_STR);
-                     $stmtSubroutes->execute();
-                     $subroutesData = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
-        
-        
-                    // --- 3. Obter pontos de irregularidade da tabela route_lines ---
-                    // Assumindo que irregularity_id IS NOT NULL marca um ponto como irregularidade
-                    $stmtIrregularities = $pdo->prepare("
-                        SELECT x, y, irregularity_id
-                        FROM route_lines
-                        WHERE route_id = :route_id AND irregularity_id IS NOT NULL
-                    ");
-                     $stmtIrregularities->bindParam(':route_id', $routeId, PDO::PARAM_STR);
-                     $stmtIrregularities->execute();
-                     $irregularityPointsData = $stmtIrregularities->fetchAll(PDO::FETCH_ASSOC);
-        
-        
-                    // --- 4. Construir a resposta final ---
+                    $stmtHeatmap->execute([':route_id' => $routeId]);
+                    $heatmapData = $stmtHeatmap->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // 4. Processar dados do heatmap para estrutura de matriz
+                    $heatmapMatrix = array_fill(0, 7, array_fill(0, 24, 0));
+                    foreach ($heatmapData as $entry) {
+                        $day = $entry['day_of_week'] - 1; // Ajuste para 0-based
+                        $hour = (int)$entry['hour'];
+                        $heatmapMatrix[$day][$hour] = (int)$entry['count'];
+                    }
+            
+                    // 5. Cálculo de insights
+                    $insights = [
+                        'avg_speed_comparison' => [
+                            'current' => $overallStats['avg_speed'],
+                            'historic' => $overallStats['historic_speed'],
+                            'percent_diff' => ($overallStats['speed_diff'] / $overallStats['historic_speed']) * 100
+                        ],
+                        'delay' => [
+                            'minutes' => ($overallStats['delay_seconds'] ?? 0) / 60,
+                            'severity' => ($overallStats['delay_seconds'] > 300) ? 'high' : 'normal'
+                        ],
+                        'jam_level' => [
+                            'current' => $overallStats['jam_level'],
+                            'trend' => ($overallStats['jam_level'] > 3) ? 'high' : 'normal'
+                        ],
+                        'irregularities' => count(array_filter($routeGeometry, function($p) {
+                            return !is_null($p['irregularity_id']);
+                        }))
+                    ];
+            
+                    // 6. Construir resposta final
                     $responseData = [
                         'overall_stats' => $overallStats,
-                        'subroutes' => [] // Inicializa o array de subroutes que será populado
+                        'route_geometry' => $routeGeometry,
+                        'heatmap_data' => $heatmapMatrix,
+                        'insights' => $insights,
+                        'subroutes' => [] // (mantido da versão anterior)
                     ];
-        
-                    // Adicionar os dados de cada subtrecho da tabela 'subroutes'
-                     foreach ($subroutesData as $subroute) {
-                         // Formatar dados do subtrecho se necessário (similar a overall_stats)
-                         $subroute['length'] = $subroute['length'] !== null ? (int) $subroute['length'] : null;
-                         $subroute['jam_level'] = $subroute['jam_level'] !== null ? (int) $subroute['jam_level'] : null;
-                         $subroute['time'] = $subroute['time'] !== null ? (int) $subroute['time'] : null;
-                         $subroute['url_id'] = (int) $subroute['url_id'];
-                         $subroute['id_parceiro'] = (int) $subroute['id_parceiro'];
-                         $subroute['historic_time'] = $subroute['historic_time'] !== null ? (int) $subroute['historic_time'] : null;
-                         // avg_speed, historic_speed são VARCHAR(20) na tabela subroutes? Converter para float
-                         $subroute['historic_speed'] = $subroute['historic_speed'] !== null ? (float) $subroute['historic_speed'] : null;
-                         $subroute['avg_speed'] = $subroute['avg_speed'] !== null ? (float) $subroute['avg_speed'] : null;
-                         $subroute['is_active'] = (bool) $subroute['is_active'];
-                         $subroute['lead_alert_num_comments'] = $subroute['lead_alert_num_comments'] !== null ? (int) $subroute['lead_alert_num_comments'] : null;
-                         $subroute['lead_alert_num_thumbs_up'] = $subroute['lead_alert_num_thumbs_up'] !== null ? (int) $subroute['lead_alert_num_thumbs_up'] : null;
-                         $subroute['lead_alert_num_not_there_reports'] = $subroute['lead_alert_num_not_there_reports'] !== null ? (int) $subroute['lead_alert_num_not_there_reports'] : null;
-                         // bbox fields são double
-        
-        
-                         // Adicionar o subtrecho à resposta
-                         $responseData['subroutes'][] = [
-                             'id' => $subroute['id'],
-                             'route_id' => $subroute['route_id'],
-                             'name' => $subroute['to_name'] ?? 'Trecho', // Usando to_name como nome do trecho, ajuste se necessário
-                             // Incluir outras propriedades do subroute que o JS possa usar
-                             'overall_stats' => [ // Pode ser útil agrupar as stats do subtrecho aqui
-                                 'avg_speed' => $subroute['avg_speed'],
-                                 'historic_speed' => $subroute['historic_speed'],
-                                 'length' => $subroute['length'],
-                                 'time' => $subroute['time'],
-                                 'jam_level' => $subroute['jam_level'],
-                                 'type' => $subroute['type'],
-                                 'is_active' => $subroute['is_active'],
-                                 // ... outras stats do subroute
-                             ],
-                             'alerts' => [ // Agrupar dados de alerta se existirem
-                                 'lead_alert_id' => $subroute['lead_alert_id'],
-                                 'lead_alert_type' => $subroute['lead_alert_type'],
-                                 'lead_alert_sub_type' => $subroute['lead_alert_sub_type'],
-                                 'lead_alert_position' => $subroute['lead_alert_position'],
-                                 'lead_alert_num_comments' => $subroute['lead_alert_num_comments'],
-                                 'lead_alert_num_thumbs_up' => $subroute['lead_alert_num_thumbs_up'],
-                                 'lead_alert_num_not_there_reports' => $subroute['lead_alert_num_not_there_reports'],
-                                 'lead_alert_street' => $subroute['lead_alert_street'],
-                             ],
-                             'bbox' => [ // Adicionar bbox do subtrecho se necessário
-                                  'min_x' => $subroute['bbox_min_x'],
-                                  'min_y' => $subroute['bbox_min_y'],
-                                  'max_x' => $subroute['bbox_max_x'],
-                                  'max_y' => $subroute['bbox_max_y'],
-                             ],
-                             // **LIMITATION:** route_points geometry data is not available per subroute from the provided schema
-                             'route_points' => [], // **ARRAY VAZIO: GEOMETRIA DA LINHA NÃO DISPONÍVEL POR SUBTRECHO**
-                             'irregularities' => [] // Irregularities will be added in a separate dummy subroute
-                         ];
-                     }
-        
-                    // Adicionar um subtrecho fictício APENAS para conter todos os pontos de irregularidade encontrados
-                    // NOTA: Estes pontos não estão vinculados a um subtrecho específico da tabela 'subroutes'
-                     if (!empty($irregularityPointsData)) {
-                         $irregularityPoints = [];
-                         foreach ($irregularityPointsData as $point) {
-                             $irregularityPoints[] = [
-                                 'x' => (float) $point['x'],
-                                 'y' => (float) $point['y'],
-                                 'id' => $point['irregularity_id'] // Usar irregularity_id como ID do ponto de irregularidade
-                                 // Você pode precisar buscar mais detalhes sobre a irregularidade em outra tabela (ex: jams)
-                                 // usando irregularity_id, se necessário e se a tabela jams tiver esses detalhes.
-                             ];
-                         }
-        
-                         $dummyIrregularitiesSubroute = [
-                             'id' => $routeId . '_all_irregularities', // ID fictício
-                             'name' => 'Todos os Pontos de Irregularidade', // Nome fictício
-                             'route_points' => [], // **ARRAY VAZIO: GEOMETRIA DA LINHA NÃO DISPONÍVEL**
-                             'irregularities' => $irregularityPoints // Adiciona TODOS os pontos de irregularidade aqui
-                         ];
-                         $responseData['subroutes'][] = $dummyIrregularitiesSubroute; // Adiciona este subtrecho fictício
-                     }
-        
-        
-                    // Enviar a resposta JSON final
+            
                     echo json_encode($responseData);
-        
+            
                 } catch (PDOException $e) {
-                    error_log("Erro de PDO em wazeportapi.php (get_route_details): " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                    sendErrorResponse('Erro de banco de dados ao obter detalhes da rota.', 500);
-        
+                    error_log("Erro de PDO: " . $e->getMessage());
+                    sendErrorResponse('Erro de banco de dados', 500);
                 } catch (Exception $e) {
-                    error_log("Erro geral em wazeportapi.php (get_route_details): " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                    sendErrorResponse('Ocorreu um erro interno ao processar a requisição.', 500);
+                    error_log("Erro geral: " . $e->getMessage());
+                    sendErrorResponse('Erro interno', 500);
                 }
-        
-            break; // Fim do case 'get_route_details' // Fim do case 'get_route_details'        
+                break;     
 
         default:
             http_response_code(400);

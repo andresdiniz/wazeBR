@@ -438,3 +438,43 @@ function logout() {
     window.location.href = '/logout'; // Example redirection
 }
 */
+
+function renderHeatmap(heatmapData) {
+    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    
+    const chart = new Chart(document.getElementById('heatmapChart'), {
+        type: 'matrix',
+        data: {
+            datasets: [{
+                label: 'Incidentes',
+                data: heatmapData.flatMap((day, di) => 
+                    day.map((count, hi) => ({x: hi, y: di, count}))
+                ),
+                backgroundColor: ({raw}) => {
+                    const alpha = Math.min(raw.count / 10, 1);
+                    return `rgba(244, 67, 54, ${alpha})`;
+                },
+                borderColor: 'rgba(200, 200, 200, 0.3)',
+                width: ({chart}) => (chart.chartArea.width / 24) - 1,
+                height: ({chart}) => (chart.chartArea.height / 7) - 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'linear',
+                    offset: true,
+                    ticks: {stepSize: 1},
+                    title: {text: 'Hora do Dia', display: true}
+                },
+                y: {
+                    type: 'category',
+                    labels: days,
+                    offset: true,
+                    reverse: true,
+                    title: {text: 'Dia da Semana', display: true}
+                }
+            }
+        }
+    });
+}
