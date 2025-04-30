@@ -780,7 +780,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             } catch (PDOException $e) {
                 // Erro de banco de dados
                 error_log("Erro de PDO em wazeportapi.php (get_route_details): " . $e->getMessage());
-                sendErrorResponse('Erro de banco de dados ao obter detalhes da rota.', 500);
+                sendErrorResponse('Erro de banco de dados ao obter detalhes da rota.'. $e->getMessage(), 500);
             } catch (Exception $e) {
                 // Outros erros
                     error_log("Erro geral em wazeportapi.php (get_route_details): " . $e->getMessage());
