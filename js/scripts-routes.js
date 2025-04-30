@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             colorAxis: {
                 min: 0,
                 minColor: '#FFFFFF',
-                maxColor: '#007BFF'
+                maxColor: '#FF0000'  // Ajusta para vermelho mais escuro nas velocidades mais baixas
             },
             legend: { enabled: false },
             series: [{
