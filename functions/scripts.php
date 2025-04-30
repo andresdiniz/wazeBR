@@ -655,3 +655,13 @@ function sendErrorResponse($message, $statusCode = 500) {
     echo json_encode(['error' => $message]);
     exit;
 }
+
+function sendSuccessResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'data' => $data
+    ]);
+    exit;
+}
