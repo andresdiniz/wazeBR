@@ -101,78 +101,54 @@
     </div>
 </div>
 
+<!-- Modal para visualizar rota -->
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detalhes da Rota: <span id="modalRouteName"></span></h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h5 class="modal-title" id="mapModalLabel" id="modalRouteName">Nome da Rota</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-8 mb-4 mb-lg-0">
-                        <div id="mapContainer" class="rounded border" style="height: 500px;"></div>
-                        <div class="mt-3">
-                            <h6 class="text-muted">Frequência de Incidentes</h6>
-                            <div id="heatmapChart" style="height: 200px;"></div>
+                <div id="mapContainer" style="height: 400px;"></div>  <!-- Mapa -->
+                <div id="heatmapChart" style="height: 200px;"></div> <!-- Heatmap -->
+
+                <!-- Informações sobre a rota -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Informações da Rota</h5>
+                        <p><strong>Velocidade média:</strong> <span class="text-primary"></span></p>
+                        <p><strong>Velocidade histórica:</strong> <span class="text-secondary"></span></p>
+
+                        <!-- Barra de progresso para velocidade -->
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h6 class="card-title text-muted">INSIGHTS</h6>
-                                
-                                <!-- Velocidade -->
-                                <div class="mb-4">
-                                    <small class="text-muted d-block">Desempenho de Velocidade</small>
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h4 class="text-primary">{{ overall_stats.avg_speed|number_format(1) }} km/h</h4>
-                                            <small class="text-muted">Atual</small>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-secondary">{{ overall_stats.historic_speed|number_format(1) }} km/h</h4>
-                                            <small class="text-muted">Histórico</small>
-                                        </div>
-                                    </div>
-                                    <div class="progress mt-2" style="height: 8px;">
-                                        <div class="progress-bar bg-{{ insights.avg_speed_comparison.percent_diff > 0 ? 'success' : 'danger' }}" 
-                                             style="width: {{ insights.avg_speed_comparison.percent_diff|abs }}%">
-                                        </div>
-                                    </div>
-                                </div>
-            
-                                <!-- Irregularidades -->
-                                <div class="mb-4">
-                                    <small class="text-muted d-block">Irregularidades Detectadas</small>
-                                    <h2 class="text-danger">{{ insights.irregularities }}</h2>
-                                    <small class="text-muted">pontos críticos na rota</small>
-                                </div>
-            
-                                <!-- Nível de Congestionamento -->
-                                <div class="mb-4">
-                                    <small class="text-muted d-block">Nível de Congestionamento</small>
-                                    <div class="d-flex align-items-center">
-                                        <div class="progress flex-grow-1" style="height: 20px;">
-                                            <div class="progress-bar bg-{{ insights.jam_level.trend == 'high' ? 'danger' : 'warning' }}" 
-                                                 style="width: {{ (overall_stats.jam_level / 5) * 100 }}%">
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-{{ insights.jam_level.trend == 'high' ? 'danger' : 'warning' }} ml-2">
-                                            Nível {{ overall_stats.jam_level }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+
+                        <!-- Irregularidades -->
+                        <p><strong>Irregularidades detectadas:</strong> <span class="text-danger"></span></p>
+
+                        <!-- Nível de congestionamento -->
+                        <p><strong>Nível de congestionamento:</strong> <span class="badge badge-warning"></span></p>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
+
+                        <!-- Melhor dia e horário -->
+                        <p class="best-day"></p>
+                        <p class="best-time"></p>
+
+                        <!-- Maior e menor velocidade -->
+                        <p class="max-speed"></p>
+                        <p class="min-speed"></p>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
 </div>
+
 
 <script src="../js/scripts-routes.js"></script>
