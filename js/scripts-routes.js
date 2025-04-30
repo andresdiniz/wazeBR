@@ -59,18 +59,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHeatmap(heatmapData, route) {
-        // Encontra a velocidade mínima e máxima para a rota
+        // Verifica as velocidades mínima e máxima para a rota
         const speeds = heatmapData.map(item => parseFloat(item.avg_speed));
-        const minSpeed = Math.min(...speeds);
-        const maxSpeed = Math.max(...speeds);
+        const minSpeed = Math.min(...speeds);  // Velocidade mínima
+        const maxSpeed = Math.max(...speeds);  // Velocidade máxima
+
+        // Se não houver dados de velocidade, não cria o gráfico
+        if (isNaN(minSpeed) || isNaN(maxSpeed)) {
+            alert("Não há dados suficientes para calcular o heatmap de velocidade.");
+            return;
+        }
 
         const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const data = heatmapData.map(item => [
             parseInt(item.hour),
-            parseInt(item.day_of_week) - 1,
+            parseInt(item.day_of_week) - 1,  // Ajustando para os dias da semana começarem em 0
             parseFloat(item.avg_speed)
         ]);
 
+        // Criando o gráfico de heatmap com a nova escala de cores
         Highcharts.chart('heatmapChart', {
             chart: {
                 type: 'heatmap',
@@ -88,10 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 reversed: true
             },
             colorAxis: {
-                min: minSpeed,  // Define o valor mínimo de velocidade
-                max: maxSpeed,  // Define o valor máximo de velocidade
-                minColor: '#FFFFFF',
-                maxColor: '#FF0000'  // Vermelho escuro para as velocidades mais baixas
+                min: minSpeed,  // Define a velocidade mínima da rota
+                max: maxSpeed,  // Define a velocidade máxima da rota
+                minColor: '#FFFFFF',  // Cor para a velocidade mais alta
+                maxColor: '#FF0000'  // Cor para a velocidade mais baixa (vermelho)
             },
             legend: { enabled: false },
             series: [{
@@ -101,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 dataLabels: {
                     enabled: true,
                     color: '#000',
-                    format: '{point.value:.1f}'
+                    format: '{point.value:.1f}'  // Exibe a velocidade média
                 }
             }]
         });
