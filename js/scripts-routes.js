@@ -63,20 +63,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const speeds = heatmapData.map(item => parseFloat(item.avg_speed));
         const minSpeed = Math.min(...speeds);  // Velocidade mínima
         const maxSpeed = Math.max(...speeds);  // Velocidade máxima
-
+    
         // Se não houver dados de velocidade, não cria o gráfico
         if (isNaN(minSpeed) || isNaN(maxSpeed)) {
             alert("Não há dados suficientes para calcular o heatmap de velocidade.");
             return;
         }
-
+    
+        // Para garantir que a escala de cores será visualmente distinta,
+        // se a variação entre min e max for pequena, vamos ajustar o valor máximo para ser um pouco maior que o máximo.
+        // Isso evita que a escala de cores seja muito estreita e o gráfico todo se torne vermelho.
+        const range = maxSpeed - minSpeed;
+        const adjustedMax = range < 5 ? maxSpeed + 5 : maxSpeed; // Se a diferença for muito pequena, aumenta o máximo para dar uma melhor distinção
+    
         const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const data = heatmapData.map(item => [
             parseInt(item.hour),
             parseInt(item.day_of_week) - 1,  // Ajustando para os dias da semana começarem em 0
             parseFloat(item.avg_speed)
         ]);
-
+    
         // Criando o gráfico de heatmap com a nova escala de cores
         Highcharts.chart('heatmapChart', {
             chart: {
@@ -96,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             colorAxis: {
                 min: minSpeed,  // Define a velocidade mínima da rota
-                max: maxSpeed,  // Define a velocidade máxima da rota
+                max: adjustedMax,  // Define a velocidade máxima ajustada
                 minColor: '#FFFFFF',  // Cor para a velocidade mais alta
                 maxColor: '#FF0000'  // Cor para a velocidade mais baixa (vermelho)
             },
@@ -112,39 +118,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }]
         });
-    }
-
-    function renderInsights(route, geometry) {
-        const avgSpeed = parseFloat(route.avg_speed || 0);
-        const historicSpeed = parseFloat(route.historic_speed || 0);
-        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
-        const jamLevel = parseFloat(route.jam_level || 0);
-
-        // Velocidade
-        document.querySelector('#mapModal .card-body .text-primary').innerText = `${avgSpeed.toFixed(1)} km/h`;
-        document.querySelector('#mapModal .card-body .text-secondary').innerText = `${historicSpeed.toFixed(1)} km/h`;
-
-        const speedDiff = avgSpeed - historicSpeed;
-        const progressBar = document.querySelector('#mapModal .progress-bar');
-        progressBar.style.width = `${Math.abs(speedDiff)}%`;
-        progressBar.classList.remove('bg-danger', 'bg-success');
-        progressBar.classList.add(speedDiff >= 0 ? 'bg-success' : 'bg-danger');
-
-        // Irregularidades
-        document.querySelector('#mapModal .card-body .text-danger').innerText = irregularities;
-
-        // Congestionamento
-        const jamPercent = (jamLevel / 5) * 100;
-        const jamBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, .progress-bar.bg-danger');
-        if (jamBar) {
-            jamBar.style.width = `${jamPercent}%`;
-        }
-
-        const jamBadge = document.querySelector('#mapModal .badge');
-        if (jamBadge) {
-            jamBadge.innerText = `Nível ${jamLevel}`;
-            jamBadge.classList.remove('badge-warning', 'badge-danger');
-            jamBadge.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
-        }
-    }
+    }    
 });
