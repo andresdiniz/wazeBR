@@ -124,8 +124,9 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 // --- Lógica da Aplicação ---
 // Verifica se o usuário está logado
 // Assumindo que 'login.html' é a página de login
+echo $_SESSION['usuario_id'] ?? 'não logado'; // Para debug, remova em produção
 if (empty($_SESSION['usuario_id'])) {
-    header("Location: login"); // Redireciona para a página de login
+    header("Location: login.html"); // Redireciona para a página de login
     exit(); // Encerra o script após o redirecionamento
 }
 
