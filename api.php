@@ -674,6 +674,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'get_route_details':
             // *** CORRECTED LOGIC ***
             // Check if 'route_id' was provided for this specific action
+            if (!isset($_GET['route_id'])) {
+                sendErrorResponse('Parâmetro "route_id" é obrigatório para a action "get_route_details".', 400);
+            }
+            $routeId = trim($_GET['route_id']);
+            if (empty($routeId)) {
+                sendErrorResponse('O parâmetro "route_id" não pode estar vazio.', 400);
+            }
+            // Verifica se o routeId é válido (opcional, dependendo do seu caso de uso) 
+            // if (!preg_match('/^[a-zA-Z0-9_]+$/', $routeId)) {
+            //     sendErrorResponse('O parâmetro "route_id" contém caracteres inválidos.', 400);   
+            // }
+
             if ($routeId === null) {
                     sendErrorResponse('Parâmetro "route_id" é obrigatório para a action "get_route_details".', 400);
             }
