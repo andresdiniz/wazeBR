@@ -731,6 +731,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     ");
                     $stmtSubroutes->execute([':route_id' => $routeId]);
                     $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
+
+                    // 4. Subrotas ativas da rota
+                    $stmtSubroutes = $pdo->prepare("
+                    SELECT * 
+                    FROM subroutes 
+                    WHERE route_id = :route_id
+                    AND is_active = 1
+                    ");
+                    $stmtSubroutes->execute([':route_id' => $routeId]);
+                    $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
+
             
                     // 5. Heatmap baseado em velocidades históricas
                     $stmtHeatmap = $pdo->prepare("
