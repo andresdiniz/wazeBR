@@ -677,12 +677,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 if (!$routeId || trim($routeId) === '') {
                     sendErrorResponse('Parâmetro "route_id" é obrigatório', 400);
                 }
+            
                 $routeId = trim($routeId);
             
                 try {
                     $pdo = Database::getConnection();
             
-                    // 1. Obter detalhes gerais da rota
+                    // 1. Detalhes gerais da rota
                     $stmtRoute = $pdo->prepare("
                         SELECT *, 
                             (historic_time - avg_time) AS delay_seconds,
@@ -702,17 +703,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         return is_numeric($value) ? (float)$value : $value;
                     }, $overallStats);
             
-                    // 2. Obter geometria completa da rota
+                    // 2. Geometria da rota
                     $stmtGeometry = $pdo->prepare("
                         SELECT x, y, irregularity_id 
                         FROM route_lines 
                         WHERE route_id = :route_id 
-                        ORDER BY sequence
+                        ORDER BY id
                     ");
                     $stmtGeometry->execute([':route_id' => $routeId]);
                     $routeGeometry = $stmtGeometry->fetchAll(PDO::FETCH_ASSOC);
             
-                    // 3. Dados para heatmap (dia da semana e hora)
+                    // 3. Histórico de desempenho da rota
+                    $stmtHistory = $pdo->prepare("
+                        SELECT data, velocidade, tempo
+                        FROM historic_routes
+                        WHERE route_id = :route_id
+                        ORDER BY data DESC
+                    ");
+                    $stmtHistory->execute([':route_id' => $routeId]);
+                    $historicData = $stmtHistory->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // 4. Subrotas da rota
+                    $stmtSubroutes = $pdo->prepare("
+                        SELECT * 
+                        FROM subroutes 
+                        WHERE route_id = :route_id
+                    ");
+                    $stmtSubroutes->execute([':route_id' => $routeId]);
+                    $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // 5. Heatmap de alertas (Exemplo, ajustar conforme estrutura real)
                     $stmtHeatmap = $pdo->prepare("
                         SELECT 
                             DAYOFWEEK(date_received) AS day_of_week,
@@ -721,58 +741,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         FROM alerts
                         WHERE route_id = :route_id
                         GROUP BY day_of_week, hour
-                        ORDER BY day_of_week, hour
                     ");
                     $stmtHeatmap->execute([':route_id' => $routeId]);
-                    $heatmapData = $stmtHeatmap->fetchAll(PDO::FETCH_ASSOC);
+                    $heatmap = $stmtHeatmap->fetchAll(PDO::FETCH_ASSOC);
             
-                    // 4. Processar dados do heatmap para estrutura de matriz
-                    $heatmapMatrix = array_fill(0, 7, array_fill(0, 24, 0));
-                    foreach ($heatmapData as $entry) {
-                        $day = $entry['day_of_week'] - 1; // Ajuste para 0-based
-                        $hour = (int)$entry['hour'];
-                        $heatmapMatrix[$day][$hour] = (int)$entry['count'];
-                    }
+                    // Resposta final
+                    sendSuccessResponse([
+                        'route' => $overallStats,
+                        'geometry' => $routeGeometry,
+                        'historic' => $historicData,
+                        'subroutes' => $subroutes,
+                        'heatmap' => $heatmap
+                    ]);
             
-                    // 5. Cálculo de insights
-                    $insights = [
-                        'avg_speed_comparison' => [
-                            'current' => $overallStats['avg_speed'],
-                            'historic' => $overallStats['historic_speed'],
-                            'percent_diff' => ($overallStats['speed_diff'] / $overallStats['historic_speed']) * 100
-                        ],
-                        'delay' => [
-                            'minutes' => ($overallStats['delay_seconds'] ?? 0) / 60,
-                            'severity' => ($overallStats['delay_seconds'] > 300) ? 'high' : 'normal'
-                        ],
-                        'jam_level' => [
-                            'current' => $overallStats['jam_level'],
-                            'trend' => ($overallStats['jam_level'] > 3) ? 'high' : 'normal'
-                        ],
-                        'irregularities' => count(array_filter($routeGeometry, function($p) {
-                            return !is_null($p['irregularity_id']);
-                        }))
-                    ];
-            
-                    // 6. Construir resposta final
-                    $responseData = [
-                        'overall_stats' => $overallStats,
-                        'route_geometry' => $routeGeometry,
-                        'heatmap_data' => $heatmapMatrix,
-                        'insights' => $insights,
-                        'subroutes' => [] // (mantido da versão anterior)
-                    ];
-            
-                    echo json_encode($responseData);
-            
-                } catch (PDOException $e) {
-                    error_log("Erro de PDO: " . $e->getMessage());
-                    sendErrorResponse('Erro de banco de dados', 500);
                 } catch (Exception $e) {
-                    error_log("Erro geral: " . $e->getMessage());
-                    sendErrorResponse('Erro interno', 500);
+                    sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
                 }
-                break;     
+                break;                 
 
         default:
             http_response_code(400);
