@@ -58,81 +58,150 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.fitBounds(routeLayer.getBounds());
     }
 
-    function renderInsights(route, geometry) {
+    function renderInsights(route, geometry, heatmapData) {
+        // Dados iniciais
+        const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const periodos = {
+            'Madrugada': [0, 1, 2, 3, 4, 5],
+            'Manhã': [6, 7, 8, 9, 10, 11],
+            'Tarde': [12, 13, 14, 15, 16, 17],
+            'Noite': [18, 19, 20, 21, 22, 23]
+        };
+        const jamLevels = ['Fluido', 'Leve', 'Moderado', 'Intenso', 'Congestionado', 'Parado'];
+    
+        // Processamento dos dados
         const avgSpeed = parseFloat(route.avg_speed || 0);
         const historicSpeed = parseFloat(route.historic_speed || 0);
-        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        const speedVariation = historicSpeed !== 0 ? ((avgSpeed - historicSpeed) / historicSpeed * 100) : 0;
+        
+        // Análise de velocidades
+        const speeds = heatmapData.map(item => parseFloat(item.avg_speed)).sort((a, b) => a - b);
+        const percentis = {
+            p25: speeds[Math.floor(speeds.length * 0.25)] || 0,
+            p50: speeds[Math.floor(speeds.length * 0.5)] || 0,
+            p75: speeds[Math.floor(speeds.length * 0.75)] || 0
+        };
+    
+        // Otimização do processamento
+        let totals = { days: {}, hours: {}, periods: {} };
+        let counts = { days: {}, hours: {}, periods: {} };
+        let maxValues = { day: -Infinity, hour: -Infinity, period: -Infinity };
+        let best = { day: '', hour: '', period: '' };
+    
+        heatmapData.forEach(item => {
+            const day = parseInt(item.day_of_week);
+            const hour = parseInt(item.hour);
+            const speed = parseFloat(item.avg_speed);
+    
+            // Atualizar totais por dia
+            totals.days[day] = (totals.days[day] || 0) + speed;
+            counts.days[day] = (counts.days[day] || 0) + 1;
+    
+            // Atualizar totais por hora
+            totals.hours[hour] = (totals.hours[hour] || 0) + speed;
+            counts.hours[hour] = (counts.hours[hour] || 0) + 1;
+    
+            // Atualizar períodos
+            const period = Object.entries(periodos).find(([_, hours]) => hours.includes(hour))?.[0];
+            if (period) {
+                totals.periods[period] = (totals.periods[period] || 0) + speed;
+                counts.periods[period] = (counts.periods[period] || 0) + 1;
+            }
+        });
+    
+        // Calcular melhores momentos
+        Object.entries(totals.days).forEach(([day, total]) => {
+            const avg = total / counts.days[day];
+            if (avg > maxValues.day) {
+                maxValues.day = avg;
+                best.day = `${daysOfWeek[day]} (${(new Date().getMonth() + 1).toString().padStart(2, '0')}/${new Date().getFullYear()})`;
+            }
+        });
+    
+        Object.entries(totals.hours).forEach(([hour, total]) => {
+            const avg = total / counts.hours[hour];
+            if (avg > maxValues.hour) {
+                maxValues.hour = avg;
+                best.hour = `${hour.toString().padStart(2, '0')}h`;
+            }
+        });
+    
+        Object.entries(totals.periods).forEach(([period, total]) => {
+            const avg = total / counts.periods[period];
+            if (avg > maxValues.period) {
+                maxValues.period = avg;
+                best.period = period;
+            }
+        });
+    
+        // Atualização da UI
+        const updateElement = (selector, content, attribute = 'innerText') => {
+            const element = document.querySelector(selector);
+            if (element) element[attribute] = content;
+        };
+    
+        // Velocidades e variação
+        updateElement('#mapModal .current-speed', `${avgSpeed.toFixed(1)} km/h`);
+        updateElement('#mapModal .historic-speed', `${historicSpeed.toFixed(1)} km/h`);
+        updateElement('#mapModal .speed-variation', 
+            `${speedVariation.toFixed(1)}% ${speedVariation >= 0 ? '↑' : '↓'}`, 
+            'innerHTML'
+        );
+    
+        // Nível de congestionamento
         const jamLevel = parseFloat(route.jam_level || 0);
+        updateElement('#mapModal .jam-level', `${jamLevel} - ${jamLevels[jamLevel]}`);
         
-        // Melhor dia e horário
-        const bestDay = "12/12/2025"; // Exemplo de data; substitua pela lógica real
-        const bestTime = "15:00"; // Exemplo de horário; substitua pela lógica real
-        
-        const maxSpeed = Math.max(...geometry.map(p => p.speed));
-        const minSpeed = Math.min(...geometry.map(p => p.speed));
+        // Melhores momentos
+        updateElement('#mapModal .best-day', best.day);
+        updateElement('#mapModal .best-hour', best.hour);
+        updateElement('#mapModal .best-period', best.period);
     
-        // Exibindo as informações
-        document.querySelector('#mapModal .card-body .text-primary').innerText = `${avgSpeed.toFixed(1)} km/h`;
-        document.querySelector('#mapModal .card-body .text-secondary').innerText = `${historicSpeed.toFixed(1)} km/h`;
+        // Estatísticas de velocidade
+        updateElement('#mapModal .p25-speed', `${percentis.p25.toFixed(1)} km/h`);
+        updateElement('#mapModal .p50-speed', `${percentis.p50.toFixed(1)} km/h`);
+        updateElement('#mapModal .p75-speed', `${percentis.p75.toFixed(1)} km/h`);
     
+        // Visualizações
+        updateElement('#mapModal .speed-sparkline', 
+            `<div class="sparkline" data-values="${speeds.join(',')}"></div>`, 
+            'innerHTML'
+        );
+    
+        // Atualizar elementos interativos
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            new bootstrap.Tooltip(el, { trigger: 'hover' });
+        });
+    
+        // Atualizar progress bars
         const speedDiff = avgSpeed - historicSpeed;
-        const progressBar = document.querySelector('#mapModal .progress-bar');
-        progressBar.style.width = `${Math.abs(speedDiff)}%`;
-        progressBar.classList.remove('bg-danger', 'bg-success');
-        progressBar.classList.add(speedDiff >= 0 ? 'bg-success' : 'bg-danger');
-    
-        document.querySelector('#mapModal .card-body .text-danger').innerText = irregularities;
-    
-        const jamPercent = (jamLevel / 5) * 100;
-        const jamBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, .progress-bar.bg-danger');
-        if (jamBar) {
-            jamBar.style.width = `${jamPercent}%`;
+        const progressBar = document.querySelector('#mapModal .speed-progress');
+        if (progressBar) {
+            progressBar.style.width = `${Math.min(Math.abs(speedDiff), 100)}%`;
+            progressBar.className = `progress-bar ${speedDiff >= 0 ? 'bg-success' : 'bg-danger'}`;
+            progressBar.setAttribute('data-bs-toggle', 'tooltip');
+            progressBar.setAttribute('title', `Diferença: ${speedDiff.toFixed(1)} km/h`);
         }
     
-        const jamBadge = document.querySelector('#mapModal .badge');
-        if (jamBadge) {
-            jamBadge.innerText = `Nível ${jamLevel}`;
-            jamBadge.classList.remove('badge-warning', 'badge-danger');
-            jamBadge.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
-        }
-    
-        // "Pitada especial" com base no estado atual da via
-        const specialInsight = getSpecialInsight(avgSpeed, historicSpeed, jamLevel, bestDay, bestTime, maxSpeed, minSpeed, irregularities);
-        document.querySelector('#mapModal .card-body .special-insight').innerText = specialInsight;
+        // Irregularidades
+        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        updateElement('#mapModal .irregularities-count', irregularities);
     }
     
-    function getSpecialInsight(avgSpeed, historicSpeed, jamLevel, bestDay, bestTime, maxSpeed, minSpeed, irregularities) {
-        let insight = '';
-    
-        // Comparando a velocidade média com a histórica
-        if (avgSpeed > historicSpeed) {
-            insight += `A velocidade média de hoje está melhor do que a histórica. `;
-        } else {
-            insight += `A velocidade média de hoje está abaixo da histórica. `;
-        }
-    
-        // Detalhes sobre o congestionamento
-        if (jamLevel >= 4) {
-            insight += `O nível de congestionamento está alto (Nível ${jamLevel}), evite sair agora. `;
-        } else if (jamLevel >= 2) {
-            insight += `O tráfego está moderado (Nível ${jamLevel}), pode ser um bom momento para viajar. `;
-        } else {
-            insight += `O tráfego está fluindo bem, aproveite para sair agora! `;
-        }
-    
-        // Melhores horários e dias
-        insight += `O melhor dia para essa rota foi ${bestDay}, e o melhor horário foi por volta de ${bestTime}.`;
-    
-        // Maior e menor velocidade
-        insight += `A maior velocidade registrada foi ${maxSpeed} km/h, e a menor foi ${minSpeed} km/h.`;
-    
-        // Irregularidades detectadas
-        if (irregularities > 0) {
-            insight += `Foram detectadas ${irregularities} irregularidades ao longo da rota, fique atento.`;
-        }
-    
-        return insight;
-    }    
+    // Inicializar tooltips ao carregar
+    document.addEventListener('DOMContentLoaded', () => {
+        const sparklines = document.querySelectorAll('.sparkline');
+        sparklines.forEach(spark => {
+            const values = spark.dataset.values.split(',').map(Number);
+            new Sparkline(spark, {
+                width: 100,
+                height: 30,
+                lineColor: '#4e73df',
+                fillColor: '#d1d3e2',
+                spotRadius: 3
+            });
+        });
+    });
 
     function renderHeatmap(heatmapData, route) {
         // Verifica as velocidades mínima e máxima para a rota
