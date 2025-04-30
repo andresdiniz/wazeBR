@@ -698,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         sendErrorResponse('Rota não encontrada', 404);
                     }
             
-                    // Formatação dos dados principais
+                    // Conversão de valores numéricos
                     $overallStats = array_map(function($value) {
                         return is_numeric($value) ? (float)$value : $value;
                     }, $overallStats);
@@ -732,13 +732,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $stmtSubroutes->execute([':route_id' => $routeId]);
                     $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
             
-                    // 5. Heatmap de alertas (Exemplo, ajustar conforme estrutura real)
+                    // 5. Heatmap baseado em velocidades históricas
                     $stmtHeatmap = $pdo->prepare("
                         SELECT 
-                            DAYOFWEEK(date_received) AS day_of_week,
-                            HOUR(date_received) AS hour,
-                            COUNT(*) AS count
-                        FROM alerts
+                            DAYOFWEEK(data) AS day_of_week,
+                            HOUR(data) AS hour,
+                            AVG(velocidade) AS avg_speed,
+                            COUNT(*) AS samples
+                        FROM historic_routes
                         WHERE route_id = :route_id
                         GROUP BY day_of_week, hour
                     ");
@@ -757,7 +758,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 } catch (Exception $e) {
                     sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
                 }
-                break;                 
+                break;                             
 
         default:
             http_response_code(400);
