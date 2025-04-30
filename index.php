@@ -2,6 +2,9 @@
 
 // --- Configuração Inicial ---
 
+// Inicia a sessão
+session_start();
+
 // Define o caminho para o arquivo .env (assumindo que está na mesma pasta do script)
 $envPath = __DIR__ . '/.env';
 
@@ -119,14 +122,10 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 
 
 // --- Lógica da Aplicação ---
-
-// Inicia a sessão
-session_start();
-
 // Verifica se o usuário está logado
 // Assumindo que 'login.html' é a página de login
 if (empty($_SESSION['usuario_id'])) {
-    header("Location: login.html"); // Redireciona para a página de login
+    header("Location: login"); // Redireciona para a página de login
     exit(); // Encerra o script após o redirecionamento
 }
 
