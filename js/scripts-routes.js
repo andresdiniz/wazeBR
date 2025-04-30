@@ -58,68 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.fitBounds(routeLayer.getBounds());
     }
 
-    function renderHeatmap(heatmapData, route) {
-        // Verifica as velocidades mínima e máxima para a rota
-        const speeds = heatmapData.map(item => parseFloat(item.avg_speed));
-        const minSpeed = Math.min(...speeds);  // Velocidade mínima
-        const maxSpeed = Math.max(...speeds);  // Velocidade máxima
-    
-        // Se não houver dados de velocidade, não cria o gráfico
-        if (isNaN(minSpeed) || isNaN(maxSpeed)) {
-            alert("Não há dados suficientes para calcular o heatmap de velocidade.");
-            return;
-        }
-    
-        // Para garantir que a escala de cores será visualmente distinta,
-        // se a variação entre min e max for pequena, vamos ajustar o valor máximo para ser um pouco maior que o máximo.
-        // Isso evita que a escala de cores seja muito estreita e o gráfico todo se torne vermelho.
-        const range = maxSpeed - minSpeed;
-        const adjustedMax = range < 5 ? maxSpeed + 5 : maxSpeed; // Se a diferença for muito pequena, aumenta o máximo para dar uma melhor distinção
-    
-        const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        const data = heatmapData.map(item => [
-            parseInt(item.hour),
-            parseInt(item.day_of_week) - 1,  // Ajustando para os dias da semana começarem em 0
-            parseFloat(item.avg_speed)
-        ]);
-    
-        // Criando o gráfico de heatmap com a nova escala de cores
-        Highcharts.chart('heatmapChart', {
-            chart: {
-                type: 'heatmap',
-                plotBorderWidth: 1,
-                height: 200
-            },
-            title: null,
-            xAxis: {
-                categories: Array.from({ length: 24 }, (_, i) => `${i}h`),
-                title: null
-            },
-            yAxis: {
-                categories: categories,
-                title: null,
-                reversed: true
-            },
-            colorAxis: {
-                min: minSpeed,  // Define a velocidade mínima da rota
-                max: adjustedMax,  // Define a velocidade máxima ajustada
-                minColor: '#FFFFFF',  // Cor para a velocidade mais alta
-                maxColor: '#FF0000'  // Cor para a velocidade mais baixa (vermelho)
-            },
-            legend: { enabled: false },
-            series: [{
-                name: 'Velocidade Média',
-                borderWidth: 1,
-                data: data,
-                dataLabels: {
-                    enabled: true,
-                    color: '#000',
-                    format: '{point.value:.1f}'  // Exibe a velocidade média
-                }
-            }]
-        });
-    }    
-
     function renderInsights(route, geometry) {
         // Exibindo as velocidades (atual e histórica)
         const avgSpeed = parseFloat(route.avg_speed || 0);
@@ -167,5 +105,65 @@ document.addEventListener('DOMContentLoaded', () => {
             jamLevelElement.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
         }
     }
+
+    function renderHeatmap(heatmapData, route) {
+        // Verifica as velocidades mínima e máxima para a rota
+        const speeds = heatmapData.map(item => parseFloat(item.avg_speed));
+        const minSpeed = Math.min(...speeds);  // Velocidade mínima
+        const maxSpeed = Math.max(...speeds);  // Velocidade máxima
     
+        // Se não houver dados de velocidade, não cria o gráfico
+        if (isNaN(minSpeed) || isNaN(maxSpeed)) {
+            alert("Não há dados suficientes para calcular o heatmap de velocidade.");
+            return;
+        }
+    
+        // Para garantir que a escala de cores será visualmente distinta,
+        // se a variação entre min e max for pequena, vamos ajustar o valor máximo para ser um pouco maior que o máximo.
+        const range = maxSpeed - minSpeed;
+        const adjustedMax = range < 5 ? maxSpeed + 5 : maxSpeed; // Se a diferença for muito pequena, aumenta o máximo para dar uma melhor distinção
+    
+        const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const data = heatmapData.map(item => [
+            parseInt(item.hour),
+            parseInt(item.day_of_week) - 1,  // Ajustando para os dias da semana começarem em 0
+            parseFloat(item.avg_speed)
+        ]);
+    
+        // Criando o gráfico de heatmap com a nova escala de cores
+        Highcharts.chart('heatmapChart', {
+            chart: {
+                type: 'heatmap',
+                plotBorderWidth: 1,
+                height: 200
+            },
+            title: null,
+            xAxis: {
+                categories: Array.from({ length: 24 }, (_, i) => `${i}h`),
+                title: null
+            },
+            yAxis: {
+                categories: categories,
+                title: null,
+                reversed: true
+            },
+            colorAxis: {
+                min: minSpeed,  // Define a velocidade mínima da rota
+                max: adjustedMax,  // Define a velocidade máxima ajustada
+                minColor: '#FFFFFF',  // Cor para a velocidade mais alta
+                maxColor: '#FF0000'  // Cor para a velocidade mais baixa (vermelho)
+            },
+            legend: { enabled: false },
+            series: [{
+                name: 'Velocidade Média',
+                borderWidth: 1,
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    color: '#000',
+                    format: '{point.value:.1f}'  // Exibe a velocidade média
+                }
+            }]
+        });
+    }    
 });
