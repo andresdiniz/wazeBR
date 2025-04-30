@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 modalTitle.textContent = route.name;
                 renderMap(geometry);
-                renderHeatmap(heatmap);
+                renderHeatmap(heatmap, route);  // Passa os dados da rota para o heatmap
                 renderInsights(route, geometry);
             } catch (err) {
                 console.error('Erro ao carregar rota:', err);
@@ -58,10 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.fitBounds(routeLayer.getBounds());
     }
 
-    function renderHeatmap(heatmapData) {
+    function renderHeatmap(heatmapData, route) {
+        // Encontra a velocidade mínima e máxima para a rota
+        const speeds = heatmapData.map(item => parseFloat(item.avg_speed));
+        const minSpeed = Math.min(...speeds);
+        const maxSpeed = Math.max(...speeds);
+
         const categories = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const data = heatmapData.map(item => [
-            parseInt(item.hour), 
+            parseInt(item.hour),
             parseInt(item.day_of_week) - 1,
             parseFloat(item.avg_speed)
         ]);
@@ -83,9 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 reversed: true
             },
             colorAxis: {
-                min: 0,
+                min: minSpeed,  // Define o valor mínimo de velocidade
+                max: maxSpeed,  // Define o valor máximo de velocidade
                 minColor: '#FFFFFF',
-                maxColor: '#FF0000'  // Ajusta para vermelho mais escuro nas velocidades mais baixas
+                maxColor: '#FF0000'  // Vermelho escuro para as velocidades mais baixas
             },
             legend: { enabled: false },
             series: [{
