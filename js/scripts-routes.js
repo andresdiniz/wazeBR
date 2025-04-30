@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalTitle.textContent = route.name;
                 renderMap(geometry);
                 renderHeatmap(heatmap, route);  // Passa os dados da rota para o heatmap
-                renderInsights(route, geometry);
+                renderInsights(route, geometry, heatmap);  // Passa os dados da rota e do heatmap para as análises
             } catch (err) {
                 console.error('Erro ao carregar rota:', err);
                 alert('Erro ao carregar rota. Veja o console para mais detalhes.');
@@ -58,53 +58,110 @@ document.addEventListener('DOMContentLoaded', () => {
         mapInstance.fitBounds(routeLayer.getBounds());
     }
 
-    function renderInsights(route, geometry) {
+    function renderInsights(route, geometry, heatmapData) {
         // Exibindo as velocidades (atual e histórica)
         const avgSpeed = parseFloat(route.avg_speed || 0);
         const historicSpeed = parseFloat(route.historic_speed || 0);
         
         // Exibindo irregularidades (pontos críticos na rota)
         const irregularities = geometry.filter(p => p.irregularity_id != null).length;
-        
+    
         // Exibindo o nível de congestionamento (de 0 a 5)
         const jamLevel = parseFloat(route.jam_level || 0);
     
-        // Selecionando elementos do modal para atualização dos dados
-        const avgSpeedElement = document.querySelector('#mapModal .card-body .text-primary');
-        const historicSpeedElement = document.querySelector('#mapModal .card-body .text-secondary');
-        const irregularitiesElement = document.querySelector('#mapModal .card-body .text-danger');
-        const jamLevelElement = document.querySelector('#mapModal .card-body .badge');
-        const jamProgressBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, #mapModal .card-body .progress-bar.bg-danger');
-        const progressBar = document.querySelector('#mapModal .progress-bar');
+        // Definindo variáveis para o melhor dia e horário
+        let bestDay = '';
+        let bestTime = '';
+        let maxSpeed = -Infinity;
+        let minSpeed = Infinity;
     
-        // Velocidade média atual
-        avgSpeedElement.innerText = `${avgSpeed.toFixed(1)} km/h`;
-        historicSpeedElement.innerText = `${historicSpeed.toFixed(1)} km/h`;
+        let totalSpeedByDay = {};  // Armazenando a soma das velocidades por dia
+        let totalSpeedByHour = {};  // Armazenando a soma das velocidades por hora
+        let countByDay = {};  // Contador para dias
+        let countByHour = {};  // Contador para horas
+    
+        heatmapData.forEach(item => {
+            const day = parseInt(item.day_of_week);  // Dia da semana (0 a 6)
+            const hour = parseInt(item.hour);  // Hora do dia (0 a 23)
+            const speed = parseFloat(item.avg_speed);
+    
+            // Identificando a maior e a menor velocidade
+            if (speed > maxSpeed) maxSpeed = speed;
+            if (speed < minSpeed) minSpeed = speed;
+    
+            // Somando as velocidades por dia e hora
+            if (!totalSpeedByDay[day]) totalSpeedByDay[day] = 0;
+            if (!totalSpeedByHour[hour]) totalSpeedByHour[hour] = 0;
+            if (!countByDay[day]) countByDay[day] = 0;
+            if (!countByHour[hour]) countByHour[hour] = 0;
+    
+            totalSpeedByDay[day] += speed;
+            totalSpeedByHour[hour] += speed;
+            countByDay[day] += 1;
+            countByHour[hour] += 1;
+        });
+    
+        // Calculando a média de velocidade por dia e hora
+        let maxAvgSpeedByDay = -Infinity;
+        let maxAvgSpeedByHour = -Infinity;
+        
+        for (let day in totalSpeedByDay) {
+            const avgSpeedByDay = totalSpeedByDay[day] / countByDay[day];
+            if (avgSpeedByDay > maxAvgSpeedByDay) {
+                maxAvgSpeedByDay = avgSpeedByDay;
+                bestDay = `${(day + 1).toString().padStart(2, '0')}/${(new Date().getFullYear()).toString()}`
+            }
+        }
+        
+        for (let hour in totalSpeedByHour) {
+            const avgSpeedByHour = totalSpeedByHour[hour] / countByHour[hour];
+            if (avgSpeedByHour > maxAvgSpeedByHour) {
+                maxAvgSpeedByHour = avgSpeedByHour;
+                bestTime = `${hour.toString().padStart(2, '0')}h`;
+            }
+        }
+    
+        // Exibindo as informações no modal
+        document.querySelector('#mapModal .card-body .text-primary').innerText = `${avgSpeed.toFixed(1)} km/h`;
+        document.querySelector('#mapModal .card-body .text-secondary').innerText = `${historicSpeed.toFixed(1)} km/h`;
     
         // Calculando a diferença entre a velocidade atual e a histórica
         const speedDiff = avgSpeed - historicSpeed;
     
         // Atualizando a barra de progresso para comparar a velocidade
+        const progressBar = document.querySelector('#mapModal .progress-bar');
         progressBar.style.width = `${Math.abs(speedDiff)}%`;
         progressBar.classList.remove('bg-danger', 'bg-success');
         progressBar.classList.add(speedDiff >= 0 ? 'bg-success' : 'bg-danger');
     
         // Irregularidades
-        irregularitiesElement.innerText = irregularities;
+        document.querySelector('#mapModal .card-body .text-danger').innerText = irregularities;
     
         // Nível de congestionamento
         const jamPercent = (jamLevel / 5) * 100;
-        if (jamProgressBar) {
-            jamProgressBar.style.width = `${jamPercent}%`;
+        const jamBar = document.querySelector('#mapModal .card-body .progress-bar.bg-warning, #mapModal .card-body .progress-bar.bg-danger');
+        if (jamBar) {
+            jamBar.style.width = `${jamPercent}%`;
         }
     
-        // Atualizando o badge de congestionamento
-        if (jamLevelElement) {
-            jamLevelElement.innerText = `Nível ${jamLevel}`;
-            jamLevelElement.classList.remove('badge-warning', 'badge-danger');
-            jamLevelElement.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
+        const jamBadge = document.querySelector('#mapModal .badge');
+        if (jamBadge) {
+            jamBadge.innerText = `Nível ${jamLevel}`;
+            jamBadge.classList.remove('badge-warning', 'badge-danger');
+            jamBadge.classList.add(jamLevel >= 4 ? 'badge-danger' : 'badge-warning');
         }
-    }
+    
+        // Exibindo as informações calculadas
+        const bestDayElement = document.querySelector('#mapModal .best-day');
+        const bestTimeElement = document.querySelector('#mapModal .best-time');
+        const maxSpeedElement = document.querySelector('#mapModal .max-speed');
+        const minSpeedElement = document.querySelector('#mapModal .min-speed');
+    
+        if (bestDayElement) bestDayElement.innerText = `Melhor Dia: ${bestDay}`;
+        if (bestTimeElement) bestTimeElement.innerText = `Melhor Horário: ${bestTime}`;
+        if (maxSpeedElement) maxSpeedElement.innerText = `Maior Velocidade: ${maxSpeed.toFixed(1)} km/h`;
+        if (minSpeedElement) minSpeedElement.innerText = `Menor Velocidade: ${minSpeed.toFixed(1)} km/h`;
+    }    
 
     function renderHeatmap(heatmapData, route) {
         // Verifica as velocidades mínima e máxima para a rota
