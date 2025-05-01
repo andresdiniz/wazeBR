@@ -82,49 +82,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ... (manter mesma implementação anterior de processamento de dados)
         
-        // Novo conteúdo HTML simplificado e otimizado
+        // Novo template HTML com organização em 2 colunas
         const insightsHTML = `
-            <div class="insights-grid">
-                <div class="insight-item">
-                    <small class="text-muted">Velocidade Atual</small>
-                    <h4 class="text-primary">${avgSpeed} km/h</h4>
-                </div>
-                
-                <div class="insight-item">
-                    <small class="text-muted">Velocidade Histórica</small>
-                    <h4 class="text-secondary">${historicSpeed} km/h</h4>
-                </div>
-                
-                <div class="insight-item">
-                    <small class="text-muted">Variação</small>
-                    <h4 class="${speedVariation >= 0 ? 'text-success' : 'text-danger'}">
-                        ${speedVariationFormatted}% ${speedVariationArrow}
-                    </h4>
-                </div>
-                
-                <div class="insight-item">
-                    <small class="text-muted">Congestionamento</small>
-                    <div class="d-flex align-items-center">
-                        <div class="progress flex-grow-1" style="height: 8px;">
-                            <div class="progress-bar bg-${jamLevel > 3 ? 'danger' : 'warning'}" 
-                                 style="width: ${(jamLevel / 5) * 100}%">
-                            </div>
+        <div class="col-md-6"> <!-- Coluna esquerda -->
+            <div class="insight-item mb-3">
+                <small class="text-muted d-block">Velocidade Atual</small>
+                <h4 class="text-primary">${avgSpeed} km/h</h4>
+            </div>
+            
+            <div class="insight-item mb-3">
+                <small class="text-muted d-block">Velocidade Histórica</small>
+                <h4 class="text-secondary">${historicSpeed} km/h</h4>
+            </div>
+            
+            <div class="insight-item mb-3">
+                <small class="text-muted d-block">Variação</small>
+                <h4 class="${speedVariation >= 0 ? 'text-success' : 'text-danger'}">
+                    ${speedVariationFormatted}% ${speedVariationArrow}
+                </h4>
+            </div>
+        </div>
+        
+        <div class="col-md-6"> <!-- Coluna direita -->
+            <div class="insight-item mb-3">
+                <small class="text-muted d-block">Congestionamento</small>
+                <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar bg-${jamLevel > 3 ? 'danger' : 'warning'}" 
+                            style="width: ${(jamLevel / 5) * 100}%">
                         </div>
-                        <small class="badge badge-${jamLevel > 3 ? 'danger' : 'warning'} ml-2">
-                            Nível ${jamLevel}
-                        </small>
                     </div>
-                </div>
-                
-                <div class="insight-item">
-                    <small class="text-muted">Melhor Horário</small>
-                    <h5 class="mb-0">${best.period}</h5>
-                    <small class="text-muted">${best.day}</small>
+                    <small class="badge badge-${jamLevel > 3 ? 'danger' : 'warning'} ml-2">
+                        Nível ${jamLevel}
+                    </small>
                 </div>
             </div>
-        `;
+            
+            <div class="insight-item mb-3">
+                <small class="text-muted d-block">Melhor Horário</small>
+                <h5 class="mb-0">${best.period}</h5>
+                <small class="text-muted">${best.day}</small>
+            </div>
+            
+            <div class="insight-item">
+                <small class="text-muted d-block">Irregularidades</small>
+                <h4 class="text-danger">${irregularities}</h4>
+            </div>
+        </div>
+    `;
 
-        containerElement.innerHTML = insightsHTML;
+    containerElement.innerHTML = insightsHTML;
     }
 
     function renderLineChart(containerId, historicData) {
