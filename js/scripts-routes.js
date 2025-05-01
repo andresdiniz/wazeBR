@@ -112,18 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingIndicator.style.display = 'block';
 
             try {
-                 // Verificar cache primeiro
-                 const cachedData = routeCache.get(routeId);
-                 if (cachedData) {
-                     const { route, geometry, historic, heatmap } = cachedData;
-                     // Usar dados do cache
-                     modalTitle.textContent = route.name || 'Detalhes da Rota';
-                     renderMap(mapContainer.id, geometry);
-                     renderHeatmap(heatmapChartContainer.id, heatmap);
-                     renderInsights(insightsContainer, route, geometry, heatmap);
-                     if (historic?.length) renderLineChart(lineChartContainer.id, historic);
-                     return;
-                 }
                 const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
                 if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
                 
@@ -132,15 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { route, geometry, historic, heatmap } = result.data;
 
-                const normalizedData = {
-                    ...result.data,
-                    geometry: result.data.geometry.map(p => ({
-                        lat: parseFloat(p.y),
-                        lng: parseFloat(p.x),
-                    }))
-                };
                 
-                routeCache.set(routeId, normalizedData);
+                routeCache.set(routeId, result.data);
 
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
