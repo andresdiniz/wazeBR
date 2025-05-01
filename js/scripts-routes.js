@@ -341,7 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const currentDateFormatted = `${currentDay}/${currentMonth}/${currentYear}`;
 
                     // Atribui o nome do dia da semana + data atual formatada
-                    best.day = `${daysOfWeek[dayIndex]} (${currentDateFormatted})`;
+                    best.day = currentDateFormatted;
+                    best.weekday = daysOfWeek[dayIndex]; // Ex: ""
                     // --- FIM MODIFICAÇÃO ---
                 }
             }
@@ -429,12 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="insight-item mb-3">
                 <small class="text-muted d-block">Melhor Horário</small>
                 <h5 class="mb-0">${best.period}</h5>
-                <small class="text-muted">${best.day}</small>
             </div>
 
             <div class="insight-item mb-3">
-                <small class="text-muted d-block">Melhor Dia</small>
-                <small class="text-muted">${best.day}</small>
+                <small class="text-muted d-block">Melhor Dia da Semana</small>
+                <small class="text-muted">${best.weekday}</small>
             </div>
             
             <div class="insight-item">
