@@ -9,6 +9,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Configurações do cache (5 minutos)
+    const CACHE_PREFIX = 'routeCache_';
+    const CACHE_EXPIRATION_MINUTES = 5;
+
+    const routeCache = {
+        get: (routeId) => {
+            try {
+                const cacheKey = CACHE_PREFIX + routeId;
+                const cachedData = localStorage.getItem(cacheKey);
+                if (!cachedData) return null;
+    
+                const { timestamp, data } = JSON.parse(cachedData);
+                const age = (Date.now() - timestamp) / 1000 / 60;
+    
+                if (age < CACHE_EXPIRATION_MINUTES) {
+                    // Normalizar estrutura geográfica
+                    return {
+                        ...data,
+                        geometry: data.geometry.map(p => ({
+                            lat: parseFloat(p.lat),
+                            lng: parseFloat(p.lng),
+                        }))
+                    };
+                }
+                return null;
+            } catch (e) {
+                console.error('Erro ao recuperar cache:', e);
+                return null;
+            }
+        },
+        set: (routeId, data) => {
+            try {
+                const cacheKey = CACHE_PREFIX + routeId;
+                // Converter para estrutura serializável
+                const cacheData = {
+                    timestamp: Date.now(),
+                    data: {
+                        ...data,
+                        geometry: data.geometry.map(p => ({
+                            lat: p.y,  // Armazenar como latitude
+                            lng: p.x,  // Armazenar como longitude
+                        }))
+                    }
+                };
+                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Erro ao salvar no cache:', e);
+            }
+        }
+    };
 
     // Adicione este observer para reinicializar o modal
     $('#mapModal').on('hidden.bs.modal', () => {
@@ -62,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingIndicator.style.display = 'block';
 
             try {
-                 // Verificar cache primeiro
                 const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
                 if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
                 
@@ -71,8 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { route, geometry, historic, heatmap } = result.data;
 
-                // Atualizar cache
-                routeCache.set(routeId, { route, geometry, historic, heatmap });
+                
+                routeCache.set(routeId, result.data);
 
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
@@ -414,7 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const jamLevelDescription = jamLevels[jamLevel] || 'Desconhecido'; // Usa descrição ou 'Desconhecido' se o nível for inválido
 
         // Conta o número de pontos na geometria que têm irregularidades mapeadas
-        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        // aqui é passivel de melhorias no php 
+        // const irregularities = geometry.filter(p => p.irregularity_id != null).length;
         
         // Novo template HTML com organização em 2 colunas
         const insightsHTML = `
