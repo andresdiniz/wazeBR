@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Referência ao modal principal
+    // Função para formatar datas
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        if(isNaN(date)) return 'N/A';
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+    
     const mapModal = document.getElementById('mapModal');
 
     // Instâncias para gerenciar mapa e gráfico (inicialmente nulas)
