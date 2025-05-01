@@ -9,56 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Configurações do cache (5 minutos)
-    const CACHE_PREFIX = 'routeCache_';
-    const CACHE_EXPIRATION_MINUTES = 5;
-
-    const routeCache = {
-        get: (routeId) => {
-            try {
-                const cacheKey = CACHE_PREFIX + routeId;
-                const cachedData = localStorage.getItem(cacheKey);
-                if (!cachedData) return null;
-    
-                const { timestamp, data } = JSON.parse(cachedData);
-                const age = (Date.now() - timestamp) / 1000 / 60;
-    
-                if (age < CACHE_EXPIRATION_MINUTES) {
-                    // Normalizar estrutura geográfica
-                    return {
-                        ...data,
-                        geometry: data.geometry.map(p => ({
-                            lat: parseFloat(p.lat),
-                            lng: parseFloat(p.lng),
-                        }))
-                    };
-                }
-                return null;
-            } catch (e) {
-                console.error('Erro ao recuperar cache:', e);
-                return null;
-            }
-        },
-        set: (routeId, data) => {
-            try {
-                const cacheKey = CACHE_PREFIX + routeId;
-                // Converter para estrutura serializável
-                const cacheData = {
-                    timestamp: Date.now(),
-                    data: {
-                        ...data,
-                        geometry: data.geometry.map(p => ({
-                            lat: p.y,  // Armazenar como latitude
-                            lng: p.x,  // Armazenar como longitude
-                        }))
-                    }
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-            } catch (e) {
-                console.error('Erro ao salvar no cache:', e);
-            }
-        }
-    };
 
     // Adicione este observer para reinicializar o modal
     $('#mapModal').on('hidden.bs.modal', () => {
@@ -120,8 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { route, geometry, historic, heatmap } = result.data;
 
-                
-                routeCache.set(routeId, result.data);
+                // Atualizar cache
+                routeCache.set(routeId, { route, geometry, historic, heatmap });
 
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
@@ -146,48 +96,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderMap(containerId, geometry) {
         const mapContainer = document.getElementById(containerId);
-        if (!mapContainer) return;
-    
-        // Reinicialização completa do container
-        mapContainer.innerHTML = '<div class="map-inner" style="height: 100%; width: 100%;"></div>';
-        const innerContainer = mapContainer.querySelector('.map-inner');
-    
-        if (!geometry || geometry.length === 0) {
-            mapContainer.innerHTML = '<p>Sem dados de geometria</p>';
+        if (!mapContainer) {
+            console.error(`Container do mapa não encontrado: #${containerId}`);
             return;
         }
-    
-        // Criar instância do mapa
-        mapInstance = L.map(innerContainer);
-    
-        // Configurar coordenadas
-        const latlngs = geometry.map(p => [p.lat, p.lng]);
-        const initialCoord = latlngs[0] || [-15.788, -47.879];
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(mapInstance);
-    
-        mapInstance.setView(initialCoord, 14);
-    
-        // Adicionar rota
-        if (latlngs.length > 0) {
-            routeLayer = L.polyline(latlngs, {
-                color: '#0066cc',
-                weight: 5,
-                opacity: 0.7
-            }).addTo(mapInstance);
-    
-            if (latlngs.length > 1) {
-                mapInstance.fitBounds(routeLayer.getBounds());
-            }
-        }
-    
-        // Forçar redimensionamento
-        setTimeout(() => {
-            mapInstance.invalidateSize(true);
-        }, 100);
-    }
+
+       // Verifica se há dados de geometria válidos
+       if (!geometry || geometry.length === 0) {
+           console.warn("Geometria vazia ou inválida, mapa não será renderizado.");
+            mapContainer.innerHTML = '<p>Sem dados de geometria para exibir no mapa.</p>'; // Exibe mensagem no container
+           return;
+       }
+
+       // A instância anterior já foi removida no handler do click
+
+       // Cria uma nova instância do mapa Leaflet no container especificado
+       mapInstance = L.map(containerId);
+
+       // Define a visualização inicial (pode ser ajustado depois com fitBounds)
+       // Usa o primeiro ponto da geometria. Leaflet espera [latitude, longitude].
+       if (geometry[0]) {
+           mapInstance.setView([geometry[0].y, geometry[0].x], 14);
+       } else {
+            mapContainer.innerHTML = '<p>Dados de geometria inválidos.</p>';
+            return;
+       }
+
+
+       // Adiciona a camada de tiles do OpenStreetMap
+       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+           attribution: '© OpenStreetMap contributors'
+       }).addTo(mapInstance);
+
+       // Mapeia os pontos de geometria para o formato [latitude, longitude] que o Leaflet espera para polylines
+       const latlngs = geometry.map(p => [p.y, p.x]);
+
+       // Cria a polyline da rota e a adiciona ao mapa
+       routeLayer = L.polyline(latlngs, { color: 'blue', weight: 5 }).addTo(mapInstance);
+
+       // Ajusta o zoom do mapa para mostrar toda a rota
+       if (latlngs.length > 1) { // Precisa de pelo menos 2 pontos para calcular bounds úteis
+            mapInstance.fitBounds(routeLayer.getBounds());
+       } else if (latlngs.length === 1) { // Apenas 1 ponto, centraliza nele
+            mapInstance.setView(latlngs[0], 14); // Mantém o zoom inicial ou ajusta se necessário
+       }
+   }
+
 
    function renderHeatmap(containerId, heatmapData, route) {
     const heatmapChartContainer = document.getElementById(containerId);
@@ -463,8 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const jamLevelDescription = jamLevels[jamLevel] || 'Desconhecido'; // Usa descrição ou 'Desconhecido' se o nível for inválido
 
         // Conta o número de pontos na geometria que têm irregularidades mapeadas
-        // aqui é passivel de melhorias no php 
-        // const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
         
         // Novo template HTML com organização em 2 colunas
         const insightsHTML = `
