@@ -9,6 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Adicione este observer para reinicializar o modal
+    $('#mapModal').on('hidden.bs.modal', () => {
+        // Limpeza mais agressiva ao fechar o modal
+        if (mapInstance) {
+            mapInstance.remove();
+            mapInstance = null;
+        }
+        if (routeLayer) {
+            routeLayer.remove();
+            routeLayer = null;
+        }
+        if (heatmapChartInstance) {
+            heatmapChartInstance.destroy();
+            heatmapChartInstance = null;
+        }
+        if (lineChartInstance) {
+            lineChartInstance.destroy();
+            lineChartInstance = null;
+        }
+    });
 
     const mapModal = document.getElementById('mapModal');
     let mapInstance = null;
