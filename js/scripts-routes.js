@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="insight-item mb-3">
                 <small class="text-muted d-block">Melhor Dia da Semana</small>
-                <small class="text-muted">${best.weekday}</small>
+                <small class="mb-0">${best.weekday}</small>
             </div>
             
             <div class="insight-item">
