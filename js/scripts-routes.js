@@ -13,18 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const CACHE_PREFIX = 'routeCache_';
     const CACHE_EXPIRATION_MINUTES = 5;
 
-    // Função para gerenciar o cache
     const routeCache = {
         get: (routeId) => {
             try {
                 const cacheKey = CACHE_PREFIX + routeId;
                 const cachedData = localStorage.getItem(cacheKey);
                 if (!cachedData) return null;
-
+    
                 const { timestamp, data } = JSON.parse(cachedData);
-                const age = (Date.now() - timestamp) / 1000 / 60; // Idade em minutos
-
-                return age < CACHE_EXPIRATION_MINUTES ? data : null;
+                const age = (Date.now() - timestamp) / 1000 / 60;
+    
+                if (age < CACHE_EXPIRATION_MINUTES) {
+                    // Normalizar estrutura geográfica
+                    return {
+                        ...data,
+                        geometry: data.geometry.map(p => ({
+                            lat: parseFloat(p.lat),
+                            lng: parseFloat(p.lng),
+                        }))
+                    };
+                }
+                return null;
             } catch (e) {
                 console.error('Erro ao recuperar cache:', e);
                 return null;
@@ -33,9 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
         set: (routeId, data) => {
             try {
                 const cacheKey = CACHE_PREFIX + routeId;
+                // Converter para estrutura serializável
                 const cacheData = {
                     timestamp: Date.now(),
-                    data: data
+                    data: {
+                        ...data,
+                        geometry: data.geometry.map(p => ({
+                            lat: p.y,  // Armazenar como latitude
+                            lng: p.x,  // Armazenar como longitude
+                        }))
+                    }
                 };
                 localStorage.setItem(cacheKey, JSON.stringify(cacheData));
             } catch (e) {
@@ -116,8 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { route, geometry, historic, heatmap } = result.data;
 
-                // Atualizar cache
-                routeCache.set(routeId, { route, geometry, historic, heatmap });
+                const normalizedData = {
+                    ...result.data,
+                    geometry: result.data.geometry.map(p => ({
+                        lat: parseFloat(p.y),
+                        lng: parseFloat(p.x),
+                    }))
+                };
+                
+                routeCache.set(routeId, normalizedData);
 
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
@@ -142,56 +165,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderMap(containerId, geometry) {
         const mapContainer = document.getElementById(containerId);
-        if (!mapContainer) {
-            console.error(`Container do mapa não encontrado: #${containerId}`);
-            return;
-        }
+        if (!mapContainer) return;
     
-        // Limpeza mais eficiente do container
+        // Reinicialização completa do container
         mapContainer.innerHTML = '<div class="map-inner" style="height: 100%; width: 100%;"></div>';
         const innerContainer = mapContainer.querySelector('.map-inner');
     
         if (!geometry || geometry.length === 0) {
-            console.warn("Geometria vazia ou inválida");
-            mapContainer.innerHTML = '<p>Sem dados de geometria para exibir no mapa.</p>';
+            mapContainer.innerHTML = '<p>Sem dados de geometria</p>';
             return;
         }
     
-        // Verifica a estrutura das coordenadas
-        console.log('Dados de geometria:', geometry[0]); // Para depuração
-    
-        // Cria nova instância no container interno
+        // Criar instância do mapa
         mapInstance = L.map(innerContainer);
     
-        // Converte as coordenadas para o formato correto [lat, lng]
-        const latlngs = geometry.map(p => {
-            // Verifica se as coordenadas estão invertidas
-            if (Math.abs(p.y) > 90 || Math.abs(p.x) > 180) { // Se y for longitude
-                return [p.x, p.y]; // Inverte as coordenadas
-            }
-            return [p.y, p.x]; // Mantém a ordem original
-        });
-    
-        // Configuração do mapa
-        const initialCoord = latlngs[0] || [-15.788, -47.879]; // Fallback para Brasília
-        mapInstance.setView(initialCoord, 14);
-    
+        // Configurar coordenadas
+        const latlngs = geometry.map(p => [p.lat, p.lng]);
+        const initialCoord = latlngs[0] || [-15.788, -47.879];
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(mapInstance);
     
-        // Adiciona a polyline corretamente
+        mapInstance.setView(initialCoord, 14);
+    
+        // Adicionar rota
         if (latlngs.length > 0) {
-            routeLayer = L.polyline(latlngs, { 
+            routeLayer = L.polyline(latlngs, {
                 color: '#0066cc',
                 weight: 5,
                 opacity: 0.7
             }).addTo(mapInstance);
-            
+    
             if (latlngs.length > 1) {
                 mapInstance.fitBounds(routeLayer.getBounds());
             }
         }
+    
+        // Forçar redimensionamento
+        setTimeout(() => {
+            mapInstance.invalidateSize(true);
+        }, 100);
     }
 
    function renderHeatmap(containerId, heatmapData, route) {
@@ -468,7 +482,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const jamLevelDescription = jamLevels[jamLevel] || 'Desconhecido'; // Usa descrição ou 'Desconhecido' se o nível for inválido
 
         // Conta o número de pontos na geometria que têm irregularidades mapeadas
-        const irregularities = geometry.filter(p => p.irregularity_id != null).length;
+        // aqui é passivel de melhorias no php 
+        // const irregularities = geometry.filter(p => p.irregularity_id != null).length;
         
         // Novo template HTML com organização em 2 colunas
         const insightsHTML = `
