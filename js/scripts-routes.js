@@ -471,84 +471,116 @@ document.addEventListener('DOMContentLoaded', () => {
     containerElement.innerHTML = insightsHTML;
     }
 
+    // Certifique-se de declarar lineChartInstance no escopo superior (fora desta função), por exemplo:
+    // let lineChartInstance = null;
+
+    /**
+     * Renderiza um gráfico de linha histórico usando Highcharts.
+     * @param {string} containerId O ID do elemento HTML onde o gráfico será renderizado.
+     * @param {Array<Object>} historicData Array de objetos com {date: string/Date, avg_speed: string}.
+     */
     function renderLineChart(containerId, historicData) {
         const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        // Limpeza mais rigorosa
+        if (!container) {
+            console.error(`Container para o gráfico de linha não encontrado: #${containerId}`);
+            return;
+        }
+
+        // Limpa a instância anterior do chart, se existir
         if (lineChartInstance) {
             lineChartInstance.destroy();
-            lineChartInstance = null;
+            lineChartInstance = null; // Reseta a referência
         }
-    
-        // Validação profunda dos dados
+
+        // --- Validação e Preparação dos Dados ---
+        // Filtra dados inválidos (data e velocidade) e mapeia para um formato de objeto mais útil
         const validData = historicData
-            .filter(item => item.date && !isNaN(new Date(item.date)) 
-            .map(item => ({
+            .filter(item => item.date && !isNaN(new Date(item.date))) // FILTRA: verifica se a data é válida
+            .map(item => ({ // MAPEIA: converte para objeto com Date e speed parseado
                 date: new Date(item.date),
                 speed: parseFloat(item.avg_speed)
             }))
-            .filter(item => !isNaN(item.speed)));
-    
+            .filter(item => !isNaN(item.speed)); // FILTRA: verifica se a velocidade é um número válido
+
+        // Se não houver dados válidos após a filtragem, exibe uma mensagem e retorna
         if (validData.length === 0) {
-            container.innerHTML = '<p>Sem dados históricos disponíveis</p>';
+            container.innerHTML = '<p>Sem dados históricos de velocidade disponíveis para o gráfico.</p>';
             return;
         }
-    
-        // Ordenação correta
-        validData.sort((a, b) => a.date - b.date);
-    
-        // Configuração aprimorada
+
+        // Ordena os dados pela data (necessário para gráficos de linha temporais)
+        validData.sort((a, b) => a.date.getTime() - b.date.getTime()); // Compara timestamps numéricos
+
+        // --- Configuração e Renderização do Gráfico Highcharts ---
+        // Cria a instância do gráfico Highcharts no container especificado
         lineChartInstance = Highcharts.chart(containerId, {
             chart: {
-                type: 'line',
-                height: 280,
-                zoomType: 'x'
+                type: 'line', // Tipo do gráfico
+                height: 280, // Altura fixa
+                zoomType: 'x' // Permite zoom horizontal no gráfico
             },
-            title: { 
-                text: 'Desempenho Histórico - Últimos 7 Dias',
+            title: {
+                text: 'Desempenho Histórico de Velocidade', // Título do gráfico (ajustado para ser mais geral)
+                align: 'left',
                 style: {
                     fontSize: '14px'
                 }
             },
             xAxis: {
-                type: 'datetime',
-                title: { text: 'Data' },
-                crosshair: true
+                type: 'datetime', // Eixo X representa datas/horas
+                title: { text: 'Data' }, // Título do eixo X
+                crosshair: true, // Adiciona uma linha cruzada ao passar o mouse
+                dateTimeLabelFormats: { // Formatos para os rótulos do eixo X (Highcharts escolhe o melhor)
+                    day: '%e. %b', // Ex: 1. Jan
+                    week: '%e. %b',
+                    month: '%b \'%y', // Ex: Jan '23
+                    year: '%Y' // Ex: 2023
+                }
             },
             yAxis: {
-                title: { text: 'Velocidade (km/h)' },
-                min: Math.floor(Math.min(...validData.map(d => d.speed)) - 5
+                title: { text: 'Velocidade (km/h)' }, // Título do eixo Y
+                // Define o mínimo do eixo Y para ser um pouco abaixo da menor velocidade, mas não negativo
+                min: Math.floor(Math.max(0, Math.min(...validData.map(d => d.speed)) - 5)) // CORRIGIDO: Adicionado parêntese e Math.max(0, ...)
             },
             series: [{
-                name: 'Velocidade Média',
+                name: 'Velocidade Média', // Nome da série (aparece na legenda e tooltip)
+                // Prepara os dados para a série: [timestamp_unix, velocidade]
                 data: validData.map(item => ({
-                    x: item.date.getTime(),
-                    y: item.speed,
-                    name: formatDate(item.date)
+                    x: item.date.getTime(), // Timestamp Unix para o eixo datetime
+                    y: item.speed, // Valor da velocidade para o eixo Y
+                    // Melhoria: Formatar data no tooltip usando Highcharts' tooltip.pointFormat ou formatter
+                    // name: formatDate(item.date) // Removido, formataremos no tooltip
                 })),
-                color: '#4e73df',
-                marker: {
-                    radius: 4,
-                    symbol: 'circle'
+                color: '#4e73df', // Cor da linha (ex: azul primário)
+                marker: { // Configuração dos marcadores nos pontos de dados
+                    radius: 4, // Tamanho do marcador
+                    symbol: 'circle' // Forma do marcador
                 },
                 tooltip: {
-                    headerFormat: '<b>{point.name}</b><br>',
-                    pointFormat: '{point.y:.1f} km/h'
+                    // Formato do tooltip ao passar o mouse sobre um ponto
+                    headerFormat: '<span style="font-size: 10px">{point.key:%A, %e. %b %Y}</span><br/>', // Formato da data/hora no cabeçalho
+                    pointFormat: '<span style="color:{point.color}">\u25CF</span> {series.name}: <b>{point.y:.1f} km/h</b><br/>' // Formato do ponto (velocidade)
+                    // Nota: O Highcharts lida com a formatação da data no headerFormat quando type: 'datetime'
                 }
             }],
             plotOptions: {
                 line: {
                     dataLabels: {
-                        enabled: true,
-                        format: '{y:.1f}',
+                        enabled: true, // Habilita os rótulos nos pontos (velocidade)
+                        format: '{y:.1f}', // Formato do rótulo (velocidade com 1 casa decimal)
                         style: {
-                            textOutline: 'none'
-                        }
+                            textOutline: 'none', // Remove contorno padrão do texto
+                            fontSize: '10px'
+                        },
+                        allowOverlap: true // Permite que rótulos se sobreponham (cuidado com muitos pontos)
+                    },
+                    lineWidth: 2, // Largura da linha
+                    marker: {
+                        enabled: true // Garante que os marcadores estejam habilitados
                     }
                 }
             },
-            credits: { enabled: false }
+            credits: { enabled: false } // Remove os créditos do Highcharts
         });
     }
 });
