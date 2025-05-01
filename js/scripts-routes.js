@@ -70,9 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const { route, geometry, historic, heatmap } = result.data;
 
-                // Atualizar cache
-                routeCache.set(routeId, { route, geometry, historic, heatmap });
-
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
                 // Renderizar componentes
