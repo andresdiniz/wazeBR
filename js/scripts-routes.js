@@ -228,17 +228,20 @@ document.addEventListener('DOMContentLoaded', () => {
              gridLineWidth: 0 // Remove linhas de grid no eixo Y
         },
         colorAxis: {
-            min: adjustedMin, // Velocidade mínima (ajustada) -> Mapeada para a primeira cor
-            max: adjustedMax, // Velocidade máxima (ajustada) -> Mapeada para a última cor
-            // Define as cores da escala. Vermelho para velocidade baixa, Verde para velocidade alta.
+            min: adjustedMin,
+            max: adjustedMax,
+            // Nova escala de cores mais perceptível
             stops: [
-                [0, '#FF0000'], // 0% da escala (velocidade mínima) -> Vermelho
-                [0.5, '#FFFF00'], // 50% da escala (velocidade intermediária) -> Amarelo
-                [1, '#00FF00'] // 100% da escala (velocidade máxima) -> Verde
+                [0, '#ff474c'],  // Vermelho (baixa velocidade)
+                [0.5, '#f7d54a'],// Amarelo (média velocidade)
+                [1, '#4bd15f']   // Verde (alta velocidade)
             ],
-             labels: {
-                 format: '{value:.1f} km/h' // Formato dos rótulos na legenda da cor
-             }
+            // Forçar diferença mínima de cores
+            minPadding: 0.1,
+            maxPadding: 0.1,
+            labels: {
+                format: '{value:.1f} km/h'
+            }
         },
         legend: {
              enabled: true, // Habilita a legenda da escala de cores
@@ -455,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="insight-item mb-3">
                 <small class="text-muted d-block">Melhor Dia da Semana</small>
-                <small class="mb-0">${best.weekday}</small>
+                <small class="text-muted">${best.weekday}</small>
             </div>
             
             <div class="insight-item">
@@ -470,51 +473,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderLineChart(containerId, historicData) {
         const container = document.getElementById(containerId);
-        if (!container || !historicData.length) return;
-
-        // Processar dados
-        const processedData = historicData
+        if (!container) return;
+        
+        // Limpeza mais rigorosa
+        if (lineChartInstance) {
+            lineChartInstance.destroy();
+            lineChartInstance = null;
+        }
+    
+        // Validação profunda dos dados
+        const validData = historicData
+            .filter(item => item.date && !isNaN(new Date(item.date)) 
             .map(item => ({
                 date: new Date(item.date),
                 speed: parseFloat(item.avg_speed)
             }))
-            .sort((a, b) => a.date - b.date);
-
-        // Configurar eixos
-        const categories = processedData.map(item => formatDate(item.date));
-        const data = processedData.map(item => item.speed);
-
-        // Criar gráfico
+            .filter(item => !isNaN(item.speed));
+    
+        if (validData.length === 0) {
+            container.innerHTML = '<p>Sem dados históricos disponíveis</p>';
+            return;
+        }
+    
+        // Ordenação correta
+        validData.sort((a, b) => a.date - b.date);
+    
+        // Configuração aprimorada
         lineChartInstance = Highcharts.chart(containerId, {
             chart: {
                 type: 'line',
-                height: 250
+                height: 280,
+                zoomType: 'x'
             },
-            title: { text: 'Desempenho Histórico - Últimos 7 Dias' },
+            title: { 
+                text: 'Desempenho Histórico - Últimos 7 Dias',
+                style: {
+                    fontSize: '14px'
+                }
+            },
             xAxis: {
-                categories,
+                type: 'datetime',
                 title: { text: 'Data' },
                 crosshair: true
             },
             yAxis: {
                 title: { text: 'Velocidade (km/h)' },
-                min: Math.min(...data) - 5
+                min: Math.floor(Math.min(...validData.map(d => d.speed)) - 5
             },
             series: [{
                 name: 'Velocidade Média',
-                data,
+                data: validData.map(item => ({
+                    x: item.date.getTime(),
+                    y: item.speed,
+                    name: formatDate(item.date)
+                })),
                 color: '#4e73df',
-                marker: { radius: 4 },
+                marker: {
+                    radius: 4,
+                    symbol: 'circle'
+                },
                 tooltip: {
-                    valueDecimals: 1,
-                    valueSuffix: ' km/h'
+                    headerFormat: '<b>{point.name}</b><br>',
+                    pointFormat: '{point.y:.1f} km/h'
                 }
             }],
             plotOptions: {
                 line: {
                     dataLabels: {
                         enabled: true,
-                        format: '{y:.1f} km/h'
+                        format: '{y:.1f}',
+                        style: {
+                            textOutline: 'none'
+                        }
                     }
                 }
             },
