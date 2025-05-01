@@ -146,48 +146,53 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`Container do mapa não encontrado: #${containerId}`);
             return;
         }
-
-       // Verifica se há dados de geometria válidos
-       if (!geometry || geometry.length === 0) {
-           console.warn("Geometria vazia ou inválida, mapa não será renderizado.");
-            mapContainer.innerHTML = '<p>Sem dados de geometria para exibir no mapa.</p>'; // Exibe mensagem no container
-           return;
-       }
-
-       // A instância anterior já foi removida no handler do click
-
-       // Cria uma nova instância do mapa Leaflet no container especificado
-       mapInstance = L.map(containerId);
-
-       // Define a visualização inicial (pode ser ajustado depois com fitBounds)
-       // Usa o primeiro ponto da geometria. Leaflet espera [latitude, longitude].
-       if (geometry[0]) {
-           mapInstance.setView([geometry[0].y, geometry[0].x], 14);
-       } else {
-            mapContainer.innerHTML = '<p>Dados de geometria inválidos.</p>';
+    
+        // Limpeza mais eficiente do container
+        mapContainer.innerHTML = '<div class="map-inner" style="height: 100%; width: 100%;"></div>';
+        const innerContainer = mapContainer.querySelector('.map-inner');
+    
+        if (!geometry || geometry.length === 0) {
+            console.warn("Geometria vazia ou inválida");
+            mapContainer.innerHTML = '<p>Sem dados de geometria para exibir no mapa.</p>';
             return;
-       }
-
-
-       // Adiciona a camada de tiles do OpenStreetMap
-       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-           attribution: '© OpenStreetMap contributors'
-       }).addTo(mapInstance);
-
-       // Mapeia os pontos de geometria para o formato [latitude, longitude] que o Leaflet espera para polylines
-       const latlngs = geometry.map(p => [p.y, p.x]);
-
-       // Cria a polyline da rota e a adiciona ao mapa
-       routeLayer = L.polyline(latlngs, { color: 'blue', weight: 5 }).addTo(mapInstance);
-
-       // Ajusta o zoom do mapa para mostrar toda a rota
-       if (latlngs.length > 1) { // Precisa de pelo menos 2 pontos para calcular bounds úteis
-            mapInstance.fitBounds(routeLayer.getBounds());
-       } else if (latlngs.length === 1) { // Apenas 1 ponto, centraliza nele
-            mapInstance.setView(latlngs[0], 14); // Mantém o zoom inicial ou ajusta se necessário
-       }
-   }
-
+        }
+    
+        // Verifica a estrutura das coordenadas
+        console.log('Dados de geometria:', geometry[0]); // Para depuração
+    
+        // Cria nova instância no container interno
+        mapInstance = L.map(innerContainer);
+    
+        // Converte as coordenadas para o formato correto [lat, lng]
+        const latlngs = geometry.map(p => {
+            // Verifica se as coordenadas estão invertidas
+            if (Math.abs(p.y) > 90 || Math.abs(p.x) > 180) { // Se y for longitude
+                return [p.x, p.y]; // Inverte as coordenadas
+            }
+            return [p.y, p.x]; // Mantém a ordem original
+        });
+    
+        // Configuração do mapa
+        const initialCoord = latlngs[0] || [-15.788, -47.879]; // Fallback para Brasília
+        mapInstance.setView(initialCoord, 14);
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(mapInstance);
+    
+        // Adiciona a polyline corretamente
+        if (latlngs.length > 0) {
+            routeLayer = L.polyline(latlngs, { 
+                color: '#0066cc',
+                weight: 5,
+                opacity: 0.7
+            }).addTo(mapInstance);
+            
+            if (latlngs.length > 1) {
+                mapInstance.fitBounds(routeLayer.getBounds());
+            }
+        }
+    }
 
    function renderHeatmap(containerId, heatmapData, route) {
     const heatmapChartContainer = document.getElementById(containerId);

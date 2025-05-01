@@ -705,7 +705,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             
                     // 2. Geometria da rota
                     $stmtGeometry = $pdo->prepare("
-                        SELECT x, y, irregularity_id 
+                        SELECT x, y 
                         FROM route_lines 
                         WHERE route_id = :route_id 
                         ORDER BY id
