@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 date: new Date(item.date),
                 speed: parseFloat(item.avg_speed)
             }))
-            .filter(item => !isNaN(item.speed));
+            .filter(item => !isNaN(item.speed)));
     
         if (validData.length === 0) {
             container.innerHTML = '<p>Sem dados históricos disponíveis</p>';
