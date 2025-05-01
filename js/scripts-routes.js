@@ -9,14 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    
 
     const mapModal = document.getElementById('mapModal');
-    /*let mapInstance = null;
+    let mapInstance = null;
     let routeLayer = null;
     let heatmapChartInstance = null;
     let lineChartInstance = null;
-    */
 
     document.querySelectorAll('.view-route').forEach(button => {
         button.addEventListener('click', async () => {
