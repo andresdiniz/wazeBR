@@ -9,6 +9,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Configurações do cache (5 minutos)
+    const CACHE_PREFIX = 'routeCache_';
+    const CACHE_EXPIRATION_MINUTES = 5;
+
+    // Função para gerenciar o cache
+    const routeCache = {
+        get: (routeId) => {
+            try {
+                const cacheKey = CACHE_PREFIX + routeId;
+                const cachedData = localStorage.getItem(cacheKey);
+                if (!cachedData) return null;
+
+                const { timestamp, data } = JSON.parse(cachedData);
+                const age = (Date.now() - timestamp) / 1000 / 60; // Idade em minutos
+
+                return age < CACHE_EXPIRATION_MINUTES ? data : null;
+            } catch (e) {
+                console.error('Erro ao recuperar cache:', e);
+                return null;
+            }
+        },
+        set: (routeId, data) => {
+            try {
+                const cacheKey = CACHE_PREFIX + routeId;
+                const cacheData = {
+                    timestamp: Date.now(),
+                    data: data
+                };
+                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Erro ao salvar no cache:', e);
+            }
+        }
+    };
+
     // Adicione este observer para reinicializar o modal
     $('#mapModal').on('hidden.bs.modal', () => {
         // Limpeza mais agressiva ao fechar o modal
@@ -61,6 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingIndicator.style.display = 'block';
 
             try {
+                 // Verificar cache primeiro
+                 const cachedData = routeCache.get(routeId);
+                 if (cachedData) {
+                     const { route, geometry, historic, heatmap } = cachedData;
+                     // Usar dados do cache
+                     modalTitle.textContent = route.name || 'Detalhes da Rota';
+                     renderMap(mapContainer.id, geometry);
+                     renderHeatmap(heatmapChartContainer.id, heatmap);
+                     renderInsights(insightsContainer, route, geometry, heatmap);
+                     if (historic?.length) renderLineChart(lineChartContainer.id, historic);
+                     return;
+                 }
                 const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
                 if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
                 
@@ -68,6 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.error) throw new Error(result.error);
 
                 const { route, geometry, historic, heatmap } = result.data;
+
+                // Atualizar cache
+                routeCache.set(routeId, { route, geometry, historic, heatmap });
 
                 modalTitle.textContent = route.name || 'Detalhes da Rota';
 
