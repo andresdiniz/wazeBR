@@ -665,3 +665,45 @@ function sendSuccessResponse($data, $statusCode = 200) {
     ]);
     exit;
 }
+
+
+function getLatestExecutionLogByStatus(PDO $pdo, string $status): array|false // Adicionado tipo de retorno (requer PHP 7.1+)
+{
+    // A consulta SQL busca a entrada mais recente para o status fornecido
+    $sql = "SELECT * FROM execution_log WHERE status = :status ORDER BY execution_time DESC LIMIT 1";
+
+    try {
+        // Prepara a consulta
+        $stmt = $pdo->prepare($sql);
+
+        // Verifica se a preparação falhou
+        if ($stmt === false) {
+            // Registra um erro no log do servidor (melhor que apenas silenciar)
+            error_log("PDO prepare failed for query: " . $sql);
+            // Dependendo da sua configuração, prepare pode lançar exceção aqui.
+            return false; // Retorna false para indicar falha na preparação
+        }
+
+        // Vincula o parâmetro :status. PDO::PARAM_STR é apropriado para strings.
+        // CORREÇÃO PRINCIPAL: Usando ':status' e a variável $status
+        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+
+        // Executa a consulta
+        // Verifica se a execução falhou
+        if ($stmt->execute() === false) {
+             // Registra informações detalhadas do erro de execução, se disponíveis
+             $errorInfo = $stmt->errorInfo();
+             error_log("PDO execute failed: " . $errorInfo[2]); // errorInfo[2] geralmente contém a mensagem de erro do driver
+             // Dependendo da sua configuração, execute pode lançar exceção aqui.
+            return false; // Retorna false para indicar falha na execução
+        }
+
+        // Busca a primeira (e única, devido ao LIMIT 1) linha como array associativo
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        // Captura exceções PDO se o PDO estiver configurado para PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        error_log("PDO Exception in getLatestExecutionLogByStatus: " . $e->getMessage());
+        return false; // Retorna false em caso de exceção
+    }
+}

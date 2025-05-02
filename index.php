@@ -164,6 +164,7 @@ $page = $uri ?: 'home'; // Define 'home' como padrão se a URI for vazia
 // Assumindo que getSitepages está definido em functions/scripts.php
 $pages = getSitepages($pdo, $page); // Este nome de variável 'pages' pode ser confuso com o plural
 $pageData = $pages['pageData'] ?? null; // Use null como padrão se a chave não existir
+$atualizacao = getLatestExecutionLogByStatus($pdo, 'success'); // Atualização dos dados do Waze
 
 // Prepara dados que serão passados para todos os templates fixos (header, sidebar, footer)
 $dados = [
@@ -171,6 +172,7 @@ $dados = [
     'settings' => $settings, // Configurações do site
     'session' => $_SESSION, // Dados da sessão
     'pagedata' => $pageData, // Dados da página específica (título, etc.)
+    'atualizacao' => $atualizacao, // Dados de atualização (se necessário)
     // Adicione aqui outros dados comuns se necessário
 ];
 
