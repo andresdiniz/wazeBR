@@ -257,14 +257,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.show();
 
                 DOM.mapModal.addEventListener('shown.bs.modal', () => {
-                    mapController.init('mapContainer', data.geometry[0]);
-                    mapController.plotRoute(data.geometry, data.stats.level);
                     setTimeout(() => {
+                        mapController.init('mapContainer', data.geometry[0]);
+                        mapController.plotRoute(data.geometry, data.stats.level);
+                
                         if (state.map) {
                             state.map.invalidateSize();
                             state.map.panBy([0, -30]);
                         }
-                    }, 50);
+                    }, 300); // Pequeno atraso extra garante que o modal esteja totalmente visível
                 }, { once: true });
 
                 DOM.modalElements.title.textContent = data.metadata.street;
