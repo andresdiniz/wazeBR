@@ -671,6 +671,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
+            case 'get_jams_details':
+
+                $routeId = $_GET['route_id'] ?? null;
+            
+                if (!isset($_GET['route_id']) || empty(trim($routeId))) {
+                    sendErrorResponse('O parâmetro route_id é obrigatório e não pode estar vazio.', 400);
+                }
+            
+                $routeId = trim($routeId);
+            
+                try {
+                    $pdo = Database::getConnection();
+            
+                    // Consulta principal do jam
+                    $stmtJam = $pdo->prepare("
+                        SELECT * FROM jams WHERE uuid = :route_id
+                    ");
+                    $stmtJam->execute([':route_id' => $routeId]);
+                    $jam = $stmtJam->fetch(PDO::FETCH_ASSOC);
+            
+                    if (!$jam) {
+                        sendErrorResponse('Nenhum congestionamento encontrado para a rota fornecida.', 404);
+                    }
+            
+                    // Consulta de segmentos
+                    $stmtSegments = $pdo->prepare("
+                        SELECT * FROM jam_segments WHERE jam_uuid = :route_id ORDER BY id
+                    ");
+                    $stmtSegments->execute([':route_id' => $routeId]);
+                    $segments = $stmtSegments->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // Consulta de linhas
+                    $stmtLines = $pdo->prepare("
+                        SELECT * FROM jam_lines WHERE jam_uuid = :route_id ORDER BY sequence
+                    ");
+                    $stmtLines->execute([':route_id' => $routeId]);
+                    $lines = $stmtLines->fetchAll(PDO::FETCH_ASSOC);
+            
+                    // Monta resposta
+                    $response = [
+                        'jam' => $jam,
+                        'segments' => $segments,
+                        'lines' => $lines,
+                    ];
+            
+                    sendSuccessResponse($response);
+            
+                } catch (Exception $e) {
+                    sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
+                }
+            
+                break;            
+
             case 'get_route_details':
                 $routeId = $_GET['route_id'] ?? null;
             

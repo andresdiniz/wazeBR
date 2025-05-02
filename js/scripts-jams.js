@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingIndicator.style.display = 'block';
 
             try {
-                const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
+                const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
                 if (!response.ok) throw new Error(`Erro HTTP! status: ${response.status}`);
                 
                 const result = await response.json();
