@@ -87,15 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.layers.route) {
                 state.map.removeLayer(state.layers.route);
             }
-    
-            const latLngs = geometry.map(p => [p.y, p.x]);
+        
+            const latLngs = geometry.map(p => [p.y, p.x]); // Já convertido no processData
             state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
                 .addTo(state.map);
-    
+        
             if (latLngs.length > 1) {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
-        },
+        }
     
         clear: () => { // <--- Método adicionado
             if (state.map) {
@@ -131,19 +131,32 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         processData: (rawData) => {
+            // Validação da estrutura principal
+            if (!rawData.jam || !rawData.lines) {
+                throw new Error('Estrutura de dados inválida da API');
+            }
+        
+            // Converter coordenadas para números
+            const geometry = rawData.lines.map(line => ({
+                x: parseFloat(line.x),
+                y: parseFloat(line.y)
+            }));
+        
             return {
                 metadata: {
                     id: rawData.jam.uuid,
                     street: rawData.jam.street,
-                    lastUpdate: utils.formatDate(rawData.jam.pubMillis)
+                    lastUpdate: utils.formatDate(rawData.jam.pubMillis),
+                    city: rawData.jam.city // Novo campo adicionado
                 },
-                geometry: rawData.lines,
+                geometry: geometry,
                 stats: {
-                    speed: rawData.jam.speedKMH,
-                    length: rawData.jam.length,
-                    delay: rawData.jam.delay
+                    speed: rawData.jam.speedKMH || 0,
+                    length: rawData.jam.length || 0,
+                    delay: rawData.jam.delay || 0,
+                    level: rawData.jam.level // Novo campo adicionado
                 },
-                segments: rawData.segments
+                segments: rawData.segments || []
             };
         }
     };
@@ -154,13 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const insightsHTML = `
                 <div class="col-md-6">
                     <div class="insight-item mb-3">
-                        <small class="text-muted d-block">Velocidade Atual</small>
-                        <h4 class="text-primary">${data.stats.speed} km/h</h4>
+                        <small class="text-muted d-block">Velocidade</small>
+                        <h4 class="text-primary">${data.stats.speed.toFixed(1)} km/h</h4>
                     </div>
                     
                     <div class="insight-item mb-3">
                         <small class="text-muted d-block">Extensão</small>
                         <h4 class="text-secondary">${data.stats.length} metros</h4>
+                    </div>
+                    
+                    <div class="insight-item mb-3">
+                        <small class="text-muted d-block">Nível de Congestionamento</small>
+                        <h4 class="text-warning">${data.stats.level}/5</h4>
                     </div>
                 </div>
                 
@@ -168,6 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="insight-item mb-3">
                         <small class="text-muted d-block">Atraso</small>
                         <h4 class="text-danger">${data.stats.delay} segundos</h4>
+                    </div>
+                    
+                    <div class="insight-item mb-3">
+                        <small class="text-muted d-block">Cidade</small>
+                        <h5 class="mb-0">${data.metadata.city}</h5>
                     </div>
                     
                     <div class="insight-item">
