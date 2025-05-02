@@ -84,45 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     
         plotRoute: (geometry) => {
-            if (!state.map) {
-              console.error("Mapa não inicializado.");
-              return;
-            }
-          
-            // Remove a camada de rota anterior, se existir
             if (state.layers.route) {
-              state.map.removeLayer(state.layers.route);
+                state.map.removeLayer(state.layers.route);
             }
-          
-            // Mapeia os pontos de geometria para o formato [latitude, longitude] do Leaflet
-            const latLngs = geometry.map(p => [p.y, p.x]);
-          
-            // Cria a polyline da rota
+        
+            const latLngs = geometry.map(p => [p.y, p.x]); // Já convertido no processData
             state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
-              .addTo(state.map);
-          
-            // --- Lógica de Zoom Aprimorada ---
+                .addTo(state.map);
+        
             if (latLngs.length > 1) {
-              const bounds = state.layers.route.getBounds();
-          
-              // Calcula qual seria o nível de zoom para caber todos os limites
-              const calculatedZoom = state.map.getBoundsZoom(bounds);
-          
-              const MIN_DESIRED_ZOOM = 12;
-          
-              if (calculatedZoom < MIN_DESIRED_ZOOM) {
-                state.map.setView(latLngs[0], MIN_DESIRED_ZOOM);
-                console.warn(`Rota longa. Zoom ajustado para ${MIN_DESIRED_ZOOM} e centralizado no início.`);
-              } else {
-                state.map.fitBounds(bounds);
-              }
-            } else if (latLngs.length === 1 && latLngs[0]) {
-              state.map.setView(latLngs[0], CONFIG.map.zoom);
-            } else {
-              console.warn("Geometria inválida ou vazia para plotar rota.");
+                state.map.fitBounds(state.layers.route.getBounds());
             }
-            // --- Fim da Lógica de Zoom Aprimorada ---
-        },          
+        },
 
         // Método para limpar o mapa e remover a camada de rota
         clear: () => { // <--- Método adicionado
@@ -234,35 +207,25 @@ document.addEventListener('DOMContentLoaded', () => {
         onModalOpen: async (event) => {
             const button = event.target.closest('.view-route');
             if (!button) return;
-          
+
             try {
-              const routeId = button.dataset.routeId;
-              DOM.modalElements.title.textContent = 'Carregando...';
-              DOM.loadingIndicator.style.display = 'block';
-          
-              const data = await dataManager.fetchRouteData(routeId);
-          
-              if (!data.geometry || data.geometry.length === 0) {
-                throw new Error('Geometria vazia');
-              }
-          
-              DOM.modalElements.title.textContent = data.metadata.street;
-              mapController.init('mapContainer', data.geometry[0]);
-              insightsRenderer.update(data);
-          
-              // Aguarda o modal abrir para então desenhar a rota
-              $('#mapModal').one('shown.bs.modal', () => {
-                setTimeout(() => {
-                  mapController.plotRoute(data.geometry);
-                }, 100);
-              });
-          
+                const routeId = button.dataset.routeId;
+                DOM.modalElements.title.textContent = 'Carregando...';
+                DOM.loadingIndicator.style.display = 'block';
+                const data = await dataManager.fetchRouteData(routeId);
+
+                DOM.modalElements.title.textContent = data.metadata.street;
+                
+                mapController.init('mapContainer', data.geometry[0]);
+                mapController.plotRoute(data.geometry);
+                insightsRenderer.update(data);
+
             } catch (error) {
-              utils.handleError(error, DOM.modalElements.insightsContainer);
+                utils.handleError(error, DOM.modalElements.insightsContainer);
             } finally {
-              DOM.loadingIndicator.style.display = 'none';
+                DOM.loadingIndicator.style.display = 'none';
             }
-          },          
+        },
 
         onModalClose: () => {
             DOM.modalElements.insightsContainer.innerHTML = '';
