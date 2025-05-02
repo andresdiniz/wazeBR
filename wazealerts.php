@@ -362,7 +362,7 @@ function processAlerts()
                 if (array_key_exists('jams', $jsonData)) {
                     saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
                 } else {
-                    // Chave 'jams' ausente, processar como array vazio para desativar os antigos
+                    // Se não veio a chave 'jams', considera como array vazio para desativar os existentes
                     saveJamsToDb($pdo, [], $url, $id_parceiro);
                 }
             } catch (Exception $e) {
