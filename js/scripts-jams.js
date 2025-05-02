@@ -234,25 +234,35 @@ document.addEventListener('DOMContentLoaded', () => {
         onModalOpen: async (event) => {
             const button = event.target.closest('.view-route');
             if (!button) return;
-
+          
             try {
-                const routeId = button.dataset.routeId;
-                DOM.modalElements.title.textContent = 'Carregando...';
-                DOM.loadingIndicator.style.display = 'block';
-                const data = await dataManager.fetchRouteData(routeId);
-
-                DOM.modalElements.title.textContent = data.metadata.street;
-                
-                mapController.init('mapContainer', data.geometry[0]);
-                mapController.plotRoute(data.geometry);
-                insightsRenderer.update(data);
-
+              const routeId = button.dataset.routeId;
+              DOM.modalElements.title.textContent = 'Carregando...';
+              DOM.loadingIndicator.style.display = 'block';
+          
+              const data = await dataManager.fetchRouteData(routeId);
+          
+              if (!data.geometry || data.geometry.length === 0) {
+                throw new Error('Geometria vazia');
+              }
+          
+              DOM.modalElements.title.textContent = data.metadata.street;
+              mapController.init('mapContainer', data.geometry[0]);
+              insightsRenderer.update(data);
+          
+              // Aguarda o modal abrir para então desenhar a rota
+              $('#mapModal').one('shown.bs.modal', () => {
+                setTimeout(() => {
+                  mapController.plotRoute(data.geometry);
+                }, 100);
+              });
+          
             } catch (error) {
-                utils.handleError(error, DOM.modalElements.insightsContainer);
+              utils.handleError(error, DOM.modalElements.insightsContainer);
             } finally {
-                DOM.loadingIndicator.style.display = 'none';
+              DOM.loadingIndicator.style.display = 'none';
             }
-        },
+          },          
 
         onModalClose: () => {
             DOM.modalElements.insightsContainer.innerHTML = '';
