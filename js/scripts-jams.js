@@ -271,57 +271,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handlers de Eventos
     // Atualize o event handler para garantir o timing correto
-const eventHandlers = {
-    onModalOpen: async (event) => {
-        const button = event.target.closest('.view-route');
-        if (!button) return;
+    const eventHandlers = {
+        onModalOpen: async (event) => {
+            const button = event.target.closest('.view-route');
+            if (!button) return;
 
-        try {
-            const routeId = button.dataset.routeId;
-            DOM.loadingIndicator.style.display = 'block';
-            DOM.modalElements.insightsContainer.innerHTML = '';
-            mapController.clear();
+            try {
+                const routeId = button.dataset.routeId;
+                DOM.loadingIndicator.style.display = 'block';
+                DOM.modalElements.insightsContainer.innerHTML = '';
+                mapController.clear();
 
-            const data = await dataManager.fetchRouteData(routeId);
-            const modal = new bootstrap.Modal(DOM.mapModal);
-            modal.show();
+                const data = await dataManager.fetchRouteData(routeId);
 
-            DOM.mapModal.addEventListener('shown.bs.modal', () => {
-                console.log('Modal visível - Inicializando mapa...');
-                
-                // Forçar redimensionamento do container
-                const mapContainer = document.getElementById('mapContainer');
-                mapContainer.style.display = 'block';
-                mapContainer.style.height = '500px';
-
-                // Inicializar mapa
-                mapController.init('mapContainer', {
-                    x: data.geometry[0].x,
-                    y: data.geometry[0].y
-                });
-
-                // Plotar rota após breve delay para renderização
-                setTimeout(() => {
-                    mapController.plotRoute(data.geometry, data.stats.level);
+                // Registra o listener antes de chamar modal.show
+                DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                    console.log('Modal visível - Inicializando mapa...');
                     
-                    // Ajustes finais após renderização
-                    if (state.map) {
-                        state.map.invalidateSize(true);
-                        console.log('Tamanho do mapa atualizado');
-                    }
-                }, 100);
+                    const mapContainer = DOM.modalElements.mapContainer;
+                    mapContainer.style.display = 'block';
+                    mapContainer.style.height = '500px';
+                
+                    mapController.init(mapContainer.id, {
+                        x: data.geometry[0].x,
+                        y: data.geometry[0].y
+                    });
+                
+                    setTimeout(() => {
+                        mapController.plotRoute(data.geometry, data.stats.level);
+                
+                        if (state.map) {
+                            state.map.invalidateSize(true);
+                            console.log('Tamanho do mapa atualizado');
+                        }
+                    }, 100);
+                }, { once: true });
 
-            }, { once: true });
+                const modal = new bootstrap.Modal(DOM.mapModal);
+                modal.show();            
 
-            DOM.modalElements.title.textContent = data.metadata.street;
-            insightsRenderer.update(data);
+                DOM.modalElements.title.textContent = data.metadata.street;
+                insightsRenderer.update(data);
 
-        } catch (error) {
-            utils.handleError(error, DOM.modalElements.insightsContainer);
-        } finally {
-            DOM.loadingIndicator.style.display = 'none';
-        }
-    },
+            } catch (error) {
+                utils.handleError(error, DOM.modalElements.insightsContainer);
+            } finally {
+                DOM.loadingIndicator.style.display = 'none';
+            }
+        },
         onModalClose: () => {
             mapController.clear();
             DOM.modalElements.insightsContainer.innerHTML = '';
@@ -334,10 +331,9 @@ const eventHandlers = {
         DOM.viewRouteButtons.forEach(button => {
             console.log('Associando evento ao botão', button);
             button.addEventListener('click', eventHandlers.onModalOpen);
-            console.log('Container do mapa:', document.getElementById('mapContainer'));
         });
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
-    };    
+    };
 
     init();
 });
