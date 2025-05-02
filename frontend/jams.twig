@@ -24,7 +24,7 @@
 
     <div class="row">
         <div class="col-12">
-            {% if routes is not empty %}
+            {% if jams is not empty %}
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Detalhes das Rotas</h6>
@@ -46,7 +46,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for route in routes %}
+                                    {% for jam in jams %}
                                         {% set historic_time = route.historic_time|default(0) %}
                                         {% set avg_time = route.avg_time|default(0) %}
                                         {% set delay_minutes = (avg_time - historic_time) / 60 %}

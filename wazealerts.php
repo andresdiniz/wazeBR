@@ -22,7 +22,7 @@ try {
 } catch (Exception $e) {
     // Em caso de erro, logar o erro no arquivo de log
     error_log("Erro ao carregar o .env: " . $e->getMessage()); // Usando error_log para garantir que o erro seja registrado4
-    logEmail("error", "Erro ao carregar o .env: ". $e->getMessage());
+    logEmail("error", "Erro ao carregar o .env: " . $e->getMessage());
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
@@ -32,7 +32,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
-    
+
     // Cria o diretório de logs se não existir
     if (!is_dir(__DIR__ . '/../logs')) {
         mkdir(__DIR__ . '/../logs', 0777, true);
@@ -43,21 +43,23 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 set_time_limit(1200);
 
 require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ .'/functions/scripts.php';
+require_once __DIR__ . '/functions/scripts.php';
 require_once __DIR__ . '/config/configs.php';
 
 // Função para buscar as URLs e os respectivos id_parceiro do banco de dados
-function getUrlsFromDb(PDO $pdo) {
+function getUrlsFromDb(PDO $pdo)
+{
     $stmt = $pdo->query("SELECT url, id_parceiro FROM urls_alerts");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Função para buscar dados da API usando cURL
-function fetchAlertsFromApi($url) {
+function fetchAlertsFromApi($url)
+{
     try {
         // Inicializa a sessão cURL
         $ch = curl_init($url);
-        
+
         // Configurações do cURL
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);   // Retorna a resposta em vez de exibi-la
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);   // Segue redirecionamentos
@@ -85,7 +87,8 @@ function fetchAlertsFromApi($url) {
 
 
 // Função para salvar os alertas no banco de dados
-function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
+function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
+{
     // Configuração do fuso horário (remova se global)
     date_default_timezone_set('America/Sao_Paulo');
 
@@ -198,7 +201,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
     }
 }
 
-function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
+function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
+{
     $currentDateTime = date('Y-m-d H:i:s');
 
     $pdo->beginTransaction();
@@ -208,10 +212,10 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
         $stmt = $pdo->prepare("SELECT uuid FROM jams WHERE source_url = ?");
         $stmt->execute([$url]);
         $existingUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        
+
         // 2. Processa cada jam recebido
         $processedUuids = [];
-        
+
         // Query para inserir/atualizar jams
         $stmtJam = $pdo->prepare("
             INSERT INTO jams (
@@ -283,7 +287,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
             if (!empty($jam['line'])) {
                 // Remove linhas antigas
                 $stmtDeleteLines->execute([$uuid]);
-                
+
                 // Insere novas linhas com sequência
                 $sequence = 0;
                 foreach ($jam['line'] as $point) {
@@ -300,7 +304,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
             if (!empty($jam['segments'])) {
                 // Remove segmentos antigos
                 $stmtDeleteSegments->execute([$uuid]);
-                
+
                 // Insere novos segmentos
                 foreach ($jam['segments'] as $segment) {
                     $stmtInsertSegment->execute([
@@ -323,7 +327,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
                 SET status = 0, date_updated = NOW()
                 WHERE uuid IN ($placeholders) AND source_url = ?
             ");
-            
+
             $params = array_merge($uuidsToDeactivate, [$url]);
             $stmtDeactivate->execute($params);
         }
@@ -337,7 +341,8 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro) {
 
 
 // Função principal para processar os alertas
-function processAlerts() {
+function processAlerts()
+{
     $pdo = Database::getConnection();
     $urls = getUrlsFromDb($pdo);
 
@@ -352,10 +357,13 @@ function processAlerts() {
                 if (!empty($jsonData['alerts'])) {
                     saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
                 }
-                
+
                 // Processa Jams
-                if (!empty($jsonData['jams'])) {
+                if (array_key_exists('jams', $jsonData)) {
                     saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
+                } else {
+                    // Chave 'jams' ausente, processar como array vazio para desativar os antigos
+                    saveJamsToDb($pdo, [], $url, $id_parceiro);
                 }
             } catch (Exception $e) {
                 echo "Erro ao processar dados: " . $e->getMessage() . PHP_EOL;
