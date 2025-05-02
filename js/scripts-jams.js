@@ -1,215 +1,293 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const formatDate = (dateInput) => {
-        const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-        return isNaN(date) ? 'N/A' : date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+    // Elementos DOM
+    const DOM = {
+        mapModal: document.getElementById('mapModal'),
+        viewRouteButtons: document.querySelectorAll('.view-route'),
+        loadingIndicator: document.querySelector('#loadingIndicator'),
+        modalElements: {
+            title: document.querySelector('#modalRouteName'),
+            mapContainer: document.querySelector('#mapContainer'),
+            insightsContainer: document.querySelector('#insightsContainer')
+        }
     };
 
-    // Estado global para gerenciar instâncias
+    // Estado da aplicação
     const state = {
         map: null,
-        routeLayer: null,
-        heatmapChart: null,
-        lineChart: null
+        layers: {
+            route: null
+        }
     };
 
     // Configurações
-    const config = {
+    const CONFIG = {
         map: {
             tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             attribution: '© OpenStreetMap contributors',
+            zoom: 14,
+            getColorForLevel: (level) => {
+                const colors = ['#4CAF50', '#FFEB3B', '#FF9800', '#F44336', '#D32F2F', '#B71C1C'];
+                return colors[Math.min(Math.max(level, 0), 5)];
+            },
             routeStyle: {
-                color: level => {
-                    const colors = ['#4CAF50', '#FFEB3B', '#FF9800', '#F44336', '#D32F2F', '#B71C1C'];
-                    return colors[Math.min(Math.max(level, 0), 5)];
-                },
                 weight: 6,
-                opacity: 0.8
+                opacity: 0.8,
+                lineJoin: 'round'
+            }
+        }
+    };
+
+    // Utilitários
+    const utils = {
+        formatDate: (dateInput) => {
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            try {
+                const date = new Date(dateInput);
+                return isNaN(date) ? 'N/A' : date.toLocaleString('pt-BR', options);
+            } catch (e) {
+                return 'N/A';
             }
         },
-        defaultZoom: 14
-    };
-
-    // Elementos DOM
-    const elements = {
-        mapModal: document.getElementById('mapModal'),
-        modalTitle: document.querySelector('#modalRouteName'),
-        loadingIndicator: document.querySelector('#loadingIndicator'),
-        mapContainer: document.querySelector('#mapContainer'),
-        insightsContainer: document.querySelector('#insightsContainer')
-    };
-
-    // Gerenciamento do Modal
-    const initModal = () => {
-        $(elements.mapModal).on('hidden.bs.modal', () => {
-            cleanUpResources();
-        });
-    };
-
-    const cleanUpResources = () => {
-        if (state.map) {
-            state.map.remove();
-            state.map = null;
-        }
-        if (state.heatmapChart) {
-            state.heatmapChart.destroy();
-            state.heatmapChart = null;
-        }
-        if (state.lineChart) {
-            state.lineChart.destroy();
-            state.lineChart = null;
-        }
-        elements.insightsContainer.innerHTML = '';
-    };
-
-    // Mapa
-    const initMap = (geometry) => {
-        if (!geometry || geometry.length === 0) return null;
-
-        const map = L.map(elements.mapContainer, {
-            preferCanvas: true,
-            fadeAnimation: true
-        }).setView([geometry[0].y, geometry[0].x], config.defaultZoom);
-
-        L.tileLayer(config.map.tileLayer, {
-            attribution: config.map.attribution
-        }).addTo(map);
-
-        return map;
-    };
-
-    const plotRoute = (geometry, level) => {
-        if (!state.map) return;
-
-        if (state.routeLayer) {
-            state.map.removeLayer(state.routeLayer);
-        }
-
-        const latLngs = geometry.map(p => [p.y, p.x]);
-        state.routeLayer = L.polyline(latLngs, {
-            color: config.map.routeStyle.color(level),
-            weight: config.map.routeStyle.weight,
-            opacity: config.map.routeStyle.opacity
-        }).addTo(state.map);
-
-        if (latLngs.length > 1) {
-            state.map.fitBounds(state.routeLayer.getBounds());
-        }
-    };
-
-    // Gráficos
-    const renderHeatmap = (containerId, data) => {
-        // Implementação do heatmap mantida
-    };
-
-    const renderLineChart = (containerId, data) => {
-        // Implementação do line chart mantida
-    };
-
-    // Insights
-    const renderInsights = (route, geometry, heatmapData) => {
-        const insightsHTML = `
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="card insight-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <i class="fas fa-tachometer-alt fa-2x text-primary me-3"></i>
-                                <div>
-                                    <small class="text-muted">Velocidade Atual</small>
-                                    <h3 class="mb-0">${route.avg_speed} km/h</h3>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-history fa-2x text-secondary me-3"></i>
-                                <div>
-                                    <small class="text-muted">Velocidade Histórica</small>
-                                    <h3 class="mb-0">${route.historic_speed} km/h</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        handleError: (error, container) => {
+            console.error(error);
+            container.innerHTML = `
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error.message || 'Erro ao carregar dados'}
                 </div>
-
-                <div class="col-md-6">
-                    <div class="card insight-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="progress flex-grow-1 me-3" style="height: 20px;">
-                                    <div class="progress-bar bg-danger" 
-                                         style="width: ${(route.jam_level/5)*100}%">
-                                    </div>
-                                </div>
-                                <div>
-                                    <small class="text-muted">Nível de Congestionamento</small>
-                                    <h3 class="mb-0">${route.jam_level}/5</h3>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-clock fa-2x text-warning me-3"></i>
-                                <div>
-                                    <small class="text-muted">Melhor Horário</small>
-                                    <h3 class="mb-0">${calculateBestTime(heatmapData)}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        elements.insightsContainer.innerHTML = insightsHTML;
+            `;
+        }
     };
 
-    // Event Handlers
-    const setupRouteButtons = () => {
-        document.querySelectorAll('.view-route').forEach(button => {
-            button.addEventListener('click', async () => {
-                try {
-                    elements.loadingIndicator.style.display = 'block';
-                    const routeId = button.dataset.routeId;
-                    
-                    const response = await fetch(`/api.php?action=get_route_details&route_id=${routeId}`);
-                    const result = await response.json();
-                    
-                    if (result.error) throw new Error(result.error);
-                    
-                    // Inicialização após abertura do modal
-                    $(elements.mapModal).on('shown.bs.modal', () => {
-                        state.map = initMap(result.data.geometry);
-                        if (state.map) {
-                            plotRoute(result.data.geometry, result.data.route.jam_level);
-                            state.map.invalidateSize();
-                        }
-                    }, {once: true});
+    // Controle do Mapa
+    const mapController = {
+        init: (containerId, coords) => {
+            if (state.map) mapController.clear();
 
-                    renderInsights(result.data.route, result.data.geometry, result.data.heatmap);
-                    $(elements.mapModal).modal('show');
+            state.map = L.map(containerId, {
+                preferCanvas: true,
+                fadeAnimation: true,
+                zoomControl: false
+            }).setView([coords.y, coords.x], CONFIG.map.zoom);
 
-                } catch (err) {
-                    console.error('Erro:', err);
-                    elements.insightsContainer.innerHTML = `
-                        <div class="alert alert-danger mt-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            ${err.message}
-                        </div>
-                    `;
-                } finally {
-                    elements.loadingIndicator.style.display = 'none';
+            L.tileLayer(CONFIG.map.tileLayer, {
+                attribution: CONFIG.map.attribution
+            }).addTo(state.map);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(state.map);
+        },
+
+        plotRoute: (geometry, level) => {
+            if (!state.map || !geometry?.length) return;
+
+            if (state.layers.route) {
+                state.map.removeLayer(state.layers.route);
+            }
+
+            const color = CONFIG.map.getColorForLevel(level);
+            const latLngs = geometry.map(p => [p.y, p.x]);
+
+            state.layers.route = L.polyline(latLngs, {
+                color,
+                ...CONFIG.map.routeStyle
+            }).addTo(state.map);
+
+            if (latLngs.length > 1) {
+                state.map.fitBounds(state.layers.route.getBounds(), {
+                    padding: [30, 30],
+                    maxZoom: 17
+                });
+            }
+        },
+
+        clear: () => {
+            if (state.map) {
+                state.map.remove();
+                state.map = null;
+            }
+            state.layers.route = null;
+        }
+    };
+
+    // Gerenciamento de Dados
+    const dataManager = {
+        async fetchRouteData(routeId) {
+            try {
+                const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+                const responseData = await response.json();
+                if (!responseData.data?.jam) throw new Error('Estrutura de dados inválida');
+
+                return this.processData(responseData.data);
+            } catch (error) {
+                throw error;
+            }
+        },
+
+        processData(rawData) {
+            if (!rawData.jam || !rawData.lines) {
+                throw new Error('Dados essenciais faltando');
+            }
+
+            return {
+                metadata: {
+                    id: rawData.jam.uuid,
+                    street: rawData.jam.street,
+                    lastUpdate: utils.formatDate(rawData.jam.pubMillis),
+                    city: rawData.jam.city
+                },
+                geometry: rawData.lines.map(line => ({
+                    x: parseFloat(line.x),
+                    y: parseFloat(line.y)
+                })),
+                stats: {
+                    speed: rawData.jam.speedKMH || 0,
+                    length: rawData.jam.length || 0,
+                    delay: rawData.jam.delay || 0,
+                    level: rawData.jam.level
                 }
-            });
-        });
+            };
+        }
+    };
+
+    // Renderização de Insights
+    const insightsRenderer = {
+        update: (data) => {
+            DOM.modalElements.insightsContainer.innerHTML = `
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            ${insightsRenderer.renderMetric('Velocidade Média', data.stats.speed.toFixed(1) + ' km/h', 'tachometer-alt', 'primary')}
+                            ${insightsRenderer.renderMetric('Extensão', data.stats.length + ' metros', 'ruler', 'info')}
+                            ${insightsRenderer.renderMetric('Atraso', data.stats.delay + ' segundos', 'clock', 'warning')}
+                            ${insightsRenderer.renderCongestionLevel(data.stats.level)}
+                            ${insightsRenderer.renderLocation(data.metadata.city, data.metadata.lastUpdate)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderMetric(title, value, icon, color) {
+            return `
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 bg-${color}-light rounded-3">
+                        <div class="icon-circle bg-${color} me-3">
+                            <i class="fas fa-${icon} text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">${title}</small>
+                            <h4 class="mb-0">${value}</h4>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderCongestionLevel(level) {
+            return `
+                <div class="col-12">
+                    <div class="p-3 bg-danger-light rounded-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-danger me-3">
+                                <i class="fas fa-traffic-light text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block">Nível de Congestionamento</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 20px;">
+                                        <div class="progress-bar bg-danger" style="width: ${(level / 5) * 100}%">
+                                        </div>
+                                    </div>
+                                    <h4 class="mb-0">${level}/5</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderLocation(city, lastUpdate) {
+            return `
+                <div class="col-12">
+                    <div class="p-3 bg-success-light rounded-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-success me-3">
+                                <i class="fas fa-city text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block">Localização</small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0">${city}</h4>
+                                    <small class="text-muted">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        ${lastUpdate}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    // Handlers de Eventos
+    const eventHandlers = {
+        onModalOpen: async (event) => {
+            const button = event.target.closest('.view-route');
+            if (!button) return;
+
+            try {
+                const routeId = button.dataset.routeId;
+                DOM.loadingIndicator.style.display = 'block';
+                DOM.modalElements.insightsContainer.innerHTML = '';
+                mapController.clear();
+
+                const data = await dataManager.fetchRouteData(routeId);
+                const modal = new bootstrap.Modal(DOM.mapModal);
+                modal.show();
+
+                DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                    mapController.init('mapContainer', data.geometry[0]);
+                    mapController.plotRoute(data.geometry, data.stats.level);
+                    setTimeout(() => {
+                        if (state.map) {
+                            state.map.invalidateSize();
+                            state.map.panBy([0, -30]);
+                        }
+                    }, 50);
+                }, { once: true });
+
+                DOM.modalElements.title.textContent = data.metadata.street;
+                insightsRenderer.update(data);
+            } catch (error) {
+                utils.handleError(error, DOM.modalElements.insightsContainer);
+            } finally {
+                DOM.loadingIndicator.style.display = 'none';
+            }
+        },
+
+        onModalClose: () => {
+            mapController.clear();
+            DOM.modalElements.insightsContainer.innerHTML = '';
+        }
     };
 
     // Inicialização
     const init = () => {
-        initModal();
-        setupRouteButtons();
+        DOM.viewRouteButtons.forEach(button => {
+            button.addEventListener('click', eventHandlers.onModalOpen);
+        });
+        DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
     };
 
     init();
