@@ -2,236 +2,236 @@
 <html lang="pt-br">
 
 <head>
-    <!-- Meta tags permanecem as mesmas -->
-    <title>Waze BR - Login</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Painel de Parceiros Waze Brasil">
+    <meta name="author" content="Waze Brasil">
+    <title>Waze BR - Login de Parceiros</title>
 
-    <!-- Custom fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom styles -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #3366CC;
-            --secondary-color: #FF6633;
-            --gradient-start: #3366CC;
-            --gradient-end: #33CCFF;
+            --waze-blue: #33CCFF;
+            --waze-orange: #FF6633;
+            --dark-blue: #1A237E;
         }
 
         body {
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-            font-family: 'Inter', sans-serif;
+            background: linear-gradient(45deg, var(--dark-blue), var(--waze-blue));
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
         }
 
-        .card {
+        .login-card {
             border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow: hidden;
-            transition: transform 0.3s ease;
+            background: rgba(255,255,255,0.95);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .bg-login-image {
-            background: linear-gradient(135deg, rgba(51,102,204,0.1) 0%, rgba(51,204,255,0.1) 100%);
+        .brand-section {
+            background: linear-gradient(45deg, var(--waze-blue), var(--waze-orange));
+            padding: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
         }
 
-        .bg-login-image:before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: url('data:image/svg+xml,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M44.4,-60.3C57.1,-52.7,66.2,-38.7,68.5,-23.8C70.8,-8.9,66.4,6.9,61.1,22.7C55.8,38.5,49.7,54.3,38.5,62.6C27.3,70.9,11.1,71.8,-3.7,76.6C-18.5,81.3,-36.9,89.9,-48.6,83.4C-60.2,76.8,-65,55.1,-67.2,34.9C-69.4,14.6,-68.9,-4.3,-63.3,-19.9C-57.7,-35.5,-47,-47.8,-34.8,-55.6C-22.6,-63.4,-8.8,-66.8,5.3,-73.8C19.3,-80.8,38.7,-91.5,44.4,-60.3Z" fill="%233366CC" fill-opacity="0.05"/></svg>');
-            animation: rotate 20s linear infinite;
+        .brand-logo {
+            width: 220px;
+            transition: transform 0.3s ease;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .brand-logo:hover {
+            transform: scale(1.05);
         }
 
-        .waze-logo {
-            width: 80%;
-            max-width: 280px;
-            position: relative;
-            z-index: 1;
+        .form-section {
+            padding: 40px;
         }
 
         .form-control {
             border-radius: 10px;
-            padding: 1rem;
+            padding: 15px 20px;
             border: 2px solid #e0e0e0;
             transition: all 0.3s ease;
         }
 
         .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 15px rgba(51,102,204,0.2);
+            border-color: var(--waze-blue);
+            box-shadow: 0 0 15px rgba(51,204,255,0.2);
         }
 
-        .btn-user {
-            background: var(--primary-color);
-            border: none;
+        .btn-waze {
+            background: linear-gradient(45deg, var(--waze-blue), var(--waze-orange));
+            color: white;
             padding: 15px 30px;
             border-radius: 10px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            border: none;
+            font-weight: 500;
             text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
 
-        .btn-user:after {
+        .btn-waze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(51,204,255,0.3);
+        }
+
+        .link-secondary {
+            color: var(--dark-blue) !important;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .link-secondary:after {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: rotate(45deg);
-            transition: all 0.5s ease;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--waze-orange);
+            transition: width 0.3s ease;
         }
 
-        .btn-user:hover:after {
-            left: 150%;
+        .link-secondary:hover:after {
+            width: 100%;
         }
 
-        .small {
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .small:hover {
-            color: var(--secondary-color) !important;
-        }
-
-        .custom-checkbox .custom-control-label:before {
-            border-radius: 5px;
-            border: 2px solid #dee2e6;
-        }
-
-        .custom-checkbox .custom-control-input:checked ~ .custom-control-label:before {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .alert {
-            background: rgba(231,74,59,0.1);
-            border-left: 4px solid #e74a3b;
+        .alert-waze {
+            background: rgba(255,102,51,0.1);
+            border-left: 4px solid var(--waze-orange);
             border-radius: 0 8px 8px 0;
         }
 
         @media (max-width: 768px) {
-            .bg-login-image {
-                height: 200px;
+            .brand-section {
+                padding: 30px;
             }
             
-            .waze-logo {
-                max-width: 200px;
+            .form-section {
+                padding: 30px;
+            }
+            
+            .brand-logo {
+                width: 180px;
             }
         }
     </style>
-
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L2SMMG4DKT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-L2SMMG4DKT');
-</script>
-
 </head>
 
-<body class="bg-gradient-primary">
-
+<body class="d-flex align-items-center">
     <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100">
-            <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg">
-                    <div class="card-body p-0">
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image">
-                                <img src="https://www.waze.com/static/images/header-logo.png" alt="Waze Logo" class="waze-logo">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="login-card">
+                    <div class="row g-0">
+                        <!-- Seção da Marca -->
+                        <div class="col-md-6 brand-section">
+                            <img src="https://www.waze.com/static/images/header-logo.png" 
+                                 alt="Waze Brasil" 
+                                 class="brand-logo">
+                        </div>
+                        
+                        <!-- Seção do Formulário -->
+                        <div class="col-md-6 form-section">
+                            <div class="text-center mb-5">
+                                <h2 class="mb-3">Acesso de Parceiros</h2>
+                                <p class="text-muted">Plataforma de gestão colaborativa</p>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center mb-5">
-                                        <h1 class="h3 font-weight-800 text-gray-900 mb-3">Bem-vindo ao Waze Partner Hub</h1>
-                                        <p class="text-muted">Gerencie suas parcerias e iniciativas de mobilidade urbana</p>
-                                    </div>
 
-                                    <!-- Mensagem de erro -->
-                                    <div id="errorMessage" class="alert" style="display: none;"></div>
+                            <!-- Mensagem de Erro -->
+                            <div id="errorMessage" class="alert alert-waze mb-4" style="display: none;"></div>
 
-                                    <form class="user" id="loginForm" action="login.php" method="POST" novalidate>
-                                        <div class="form-group">
-                                            <input type="email" id="email" class="form-control form-control-user" 
-                                                   placeholder="Email institucional" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="password" id="password" class="form-control form-control-user" 
-                                                   placeholder="Senha de acesso" required minlength="6">
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox small">
-                                                <input type="checkbox" class="custom-control-input" id="customCheck">
-                                                <label class="custom-control-label" for="customCheck">Manter sessão ativa</label>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-user btn-block">
-                                            Acessar Plataforma
-                                        </button>
-                                    </form>
-                                    <div class="text-center mt-4">
-                                        <a class="small font-weight-600" href="forgot-password.html">
-                                            Precisa de ajuda para acessar?
-                                        </a>
-                                    </div>
+                            <!-- Formulário de Login -->
+                            <form id="loginForm" action="login.php" method="POST">
+                                <div class="mb-4">
+                                    <input type="email" 
+                                           class="form-control"
+                                           id="email"
+                                           name="email"
+                                           placeholder="Email institucional"
+                                           required>
                                 </div>
-                            </div>
+                                
+                                <div class="mb-4">
+                                    <input type="password" 
+                                           class="form-control"
+                                           id="password"
+                                           name="password"
+                                           placeholder="Senha de acesso"
+                                           required
+                                           minlength="6">
+                                </div>
+                                
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" 
+                                           class="form-check-input"
+                                           id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">
+                                        Manter conectado
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" 
+                                        class="btn btn-waze w-100 mb-4">
+                                    Acessar Plataforma
+                                </button>
+                                
+                                <div class="text-center">
+                                    <a href="forgot-password.html" 
+                                       class="link-secondary">
+                                        Esqueceu sua senha?
+                                    </a>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
+
+                <!-- Footer -->
                 <div class="text-center mt-4">
-                    <p class="text-white">Novo parceiro? <a href="#" class="text-white font-weight-600">Solicite acesso</a></p>
+                    <p class="text-white mb-0">
+                        Novo parceiro? 
+                        <a href="#contact" class="text-white fw-bold">Solicite credenciais</a>
+                    </p>
+                    <p class="text-white mt-2">
+                        Suporte: 
+                        <a href="mailto:parceiros@wazebrasil.com" class="text-white">
+                            parceiros@wazebrasil.com
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="./js/sb-admin-2.min.js"></script>
-
-    <!-- Mostrar erro com JavaScript -->
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // Captura o parâmetro de erro da URL
+        // Tratamento de mensagens de erro
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('erro');
-
-        if (error) {
-            // Exibe a mensagem de erro
-            const errorMessageDiv = document.getElementById('errorMessage');
-            errorMessageDiv.innerHTML = error.replace('%20', ' ');  // Substitui %20 por espaço
-            errorMessageDiv.style.display = 'block';
+        
+        if(error) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = decodeURIComponent(error).replace(/\+/g, ' ');
+            errorDiv.style.display = 'block';
+            
+            // Auto-esconder após 5 segundos
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
         }
     </script>
-
 </body>
-
 </html>
