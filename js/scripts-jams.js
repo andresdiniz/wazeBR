@@ -193,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         onModalClose: () => {
-            chartController.destroy();
             mapController.clear();
         }
     };
