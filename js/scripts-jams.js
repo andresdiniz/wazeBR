@@ -95,8 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (latLngs.length > 1) {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
-        }
-    
+        },
+        
+        // Método para limpar o mapa e remover a camada de rota
         clear: () => { // <--- Método adicionado
             if (state.map) {
                 state.map.remove();
