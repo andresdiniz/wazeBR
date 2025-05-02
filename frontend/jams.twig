@@ -25,7 +25,7 @@
         height: 400px; /* ou 100% se dentro de algo com altura fixa */
         width: 100%;
     }
-    
+
     .leaflet-control-zoom {
         background: rgba(255, 255, 255, 0.8);
         border-radius: 4px;
@@ -88,10 +88,6 @@
     </style>
 <div class="container-fluid">
 
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h2 class="h3 mb-0 text-gray-800">ROTAS Monitoradas</h2>
-    </div>
-
     {# DEBUG temporário: remova em produção 
     <pre>{{ dump(routes) }}</pre>
     #}
@@ -101,7 +97,7 @@
             {% if jams is not empty %}
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Detalhes das Rotas</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Detalhes dos Consgestionamentos</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
