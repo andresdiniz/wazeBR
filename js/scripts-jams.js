@@ -328,11 +328,13 @@ const eventHandlers = {
 
     // Inicialização
     const init = () => {
+        console.log('Iniciando listeners dos botões...');
         DOM.viewRouteButtons.forEach(button => {
+            console.log('Associando evento ao botão', button);
             button.addEventListener('click', eventHandlers.onModalOpen);
         });
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
-    };
+    };    
 
     init();
 });
