@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         init: (containerId, coords) => {
             if (state.map) mapController.clear();
 
-            state.map = L.map(containerId, {
+            const containerEl = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+
+            state.map = L.map(containerEl, {
                 preferCanvas: true,
                 fadeAnimation: true,
                 zoomControl: false
