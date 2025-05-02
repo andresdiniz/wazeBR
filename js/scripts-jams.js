@@ -174,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 DOM.loadingIndicator.style.display = 'block';
 
                 mapController.clear();
-
                 const data = await dataManager.fetchRouteData(routeId);
 
                 DOM.modalElements.title.textContent = data.metadata.street;
