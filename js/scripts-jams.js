@@ -122,23 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Controle de gráficos
-    const chartController = {
-        heatmap: (containerId, data) => {
-            // Implementação otimizada do heatmap...
-        },
-
-        line: (containerId, historicData) => {
-            // Implementação melhorada do gráfico de linhas...
-        },
-
-        destroy: () => {
-            [state.charts.heatmap, state.charts.line].forEach(chart => {
-                if (chart) chart.destroy();
-            });
-        }
-    };
-
     // Gerenciador de dados
     const dataManager = {
         fetchRouteData: async (routeId) => {
@@ -174,9 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     length: rawData.jam.length,
                     delay: rawData.jam.delay
                 },
-                segments: rawData.segments,
-                heatmap: rawData.heatmap,
-                historic: rawData.historic
+                segments: rawData.segments
             };
         }
     };
@@ -201,9 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 mapController.init('mapContainer', data.geometry[0]);
                 mapController.plotRoute(data.geometry);
-                
-                chartController.heatmap('heatmapChart', data.heatmap);
-                chartController.line('lineChartContainer', data.historic);
 
                 insightsRenderer.update(data);
 
