@@ -249,19 +249,86 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Modal visível - Inicializando mapa...');
                     
                     try {
-                        mapController.init('mapContainer', data.geometry[0]);
-                        
-                        // Força redimensionamento do mapa
-                        setTimeout(() => {
-                            console.log('Ajustando tamanho do mapa...');
+                        // Atualize o mapController.init
+                        init: (containerId, coords) => {
+                            console.log('Inicializando mapa...', containerId, coords);
+                            
+                            // Destruir mapa existente
                             if (state.map) {
-                                state.map.invalidateSize(true);
-                                console.log('Tamanho do mapa ajustado');
-                                
-                                console.log('Plotando rota...');
-                                mapController.plotRoute(data.geometry);
+                                console.log('Removendo mapa existente...');
+                                state.map.remove();
+                                state.map = null;
                             }
-                        }, 300);
+
+                            // Garantir que o container está visível e tem dimensões
+                            const container = document.getElementById(containerId);
+                            if (!container) {
+                                throw new Error(`Container do mapa (${containerId}) não encontrado`);
+                            }
+                            
+                            console.log('Dimensões do container:', container.offsetWidth, 'x', container.offsetHeight);
+                            
+                            // Forçar exibição do container se necessário
+                            container.style.display = 'block';
+                            
+                            // Criar nova instância do mapa
+                            state.map = L.map(containerId, {
+                                preferCanvas: true,
+                                fadeAnimation: true,
+                                zoomControl: false // Adicionaremos manualmente depois
+                            }).setView([coords.y, coords.x], CONFIG.map.zoom);
+
+                            console.log('Mapa criado:', state.map);
+
+                            // Adicionar camada do mapa
+                            L.tileLayer(CONFIG.map.tileLayer, {
+                                attribution: CONFIG.map.attribution
+                            }).addTo(state.map);
+
+                            // Adicionar controles após redimensionamento
+                            setTimeout(() => {
+                                L.control.zoom({
+                                    position: 'topright'
+                                }).addTo(state.map);
+                            }, 500);
+
+                            return state.map;
+                        },
+
+                        // Atualize a parte do event handler
+                        DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                            console.log('Modal visível - Inicializando mapa...');
+                            
+                            try {
+                                mapController.init('mapContainer', data.geometry[0]);
+                                
+                                // Redimensionamento progressivo
+                                let retries = 0;
+                                const checkSize = () => {
+                                    retries++;
+                                    console.log(`Verificando tamanho (tentativa ${retries})...`);
+                                    
+                                    if (state.map) {
+                                        state.map.invalidateSize(true);
+                                        console.log('Tamanho do mapa ajustado');
+                                        
+                                        if (retries === 1) {
+                                            // Primeiro ajuste imediato
+                                            mapController.plotRoute(data.geometry);
+                                        }
+                                        if (retries < 3) {
+                                            // Ajustes adicionais
+                                            setTimeout(checkSize, 300);
+                                        }
+                                    }
+                                };
+                                
+                                setTimeout(checkSize, 150);
+                            } catch (error) {
+                                console.error('Erro na inicialização do mapa:', error);
+                                utils.handleError(error, DOM.modalElements.insightsContainer);
+                            }
+                        }, {once: true});
                     } catch (error) {
                         console.error('Erro na inicialização do mapa:', error);
                         utils.handleError(error, DOM.modalElements.insightsContainer);
