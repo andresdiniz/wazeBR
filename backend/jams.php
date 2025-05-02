@@ -13,35 +13,21 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
-session_start();
-
-$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Pega o valor ou usa um padrão (99)
-
 // Função para buscar todas as rotas (dados básicos)
-function getRoutesBasic(PDO $pdo, $id_parceiro) {
-    $query = "
+function getJamsBasic(PDO $pdo) {
+    $stmt = $pdo->prepare("
         SELECT 
             id, name, from_name, to_name, historic_speed, historic_time, avg_speed, avg_time 
         FROM 
-            routes
-    ";
-
-    // Adiciona o filtro apenas se for diferente de 99
-    if ($id_parceiro !== null && $id_parceiro != 99) {
-        $query .= " WHERE id_parceiro = :id_parceiro";
-        $stmt = $pdo->prepare($query);
-        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-    } else {
-        $stmt = $pdo->prepare($query);
-    }
-
+            jams
+        WHERE
+            STATUS = 1
+    ");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
-
 // Busca os dados das rotas para o template
 $data = [
-    'routes' => getRoutesBasic($pdo, $id_parceiro), // Envia apenas dados básicos
+    'jams' => getJamsBasic($pdo), // Envia apenas dados básicos
 ];
