@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hour: '2-digit',
                 minute: '2-digit'
             };
-
+            
             try {
                 const date = new Date(dateInput);
                 return isNaN(date) ? 'N/A' : date.toLocaleString('pt-BR', options);
@@ -70,28 +70,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.map) {
                 state.map.remove();
             }
-
+    
             state.map = L.map(containerId, {
                 preferCanvas: true,
                 fadeAnimation: true
             }).setView([coords.y, coords.x], CONFIG.map.zoom);
-
+    
             L.tileLayer(CONFIG.map.tileLayer, {
                 attribution: CONFIG.map.attribution
             }).addTo(state.map);
-
+    
             return state.map;
         },
-
+    
         plotRoute: (geometry) => {
             if (state.layers.route) {
                 state.map.removeLayer(state.layers.route);
             }
-
+        
             const latLngs = geometry.map(p => [p.y, p.x]); // Já convertido no processData
             state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
                 .addTo(state.map);
-
+        
             if (latLngs.length > 1) {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
@@ -110,32 +110,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gerenciador de dados
     // Gerenciador de dados corrigido
     const dataManager = {
-        async fetchRouteData(routeId) {
+        fetchRouteData: async (routeId) => {
             try {
                 const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
-
+                
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
 
                 const responseData = await response.json();
-
-                if (!responseData.data || !responseData.data.jam || !responseData.data.lines) {
-                    throw new Error('Estrutura de dados inválida da API ou dados essenciais faltando');
+                
+                // Acessar o objeto interno 'data'
+                if (!responseData.data || !responseData.data.jam) {
+                    throw new Error('Estrutura de dados inválida da API');
                 }
 
-                return this.processData(responseData.data);
+                return this.processData(responseData.data); // Passar responseData.data
             } catch (error) {
                 throw error;
             }
         },
 
-        processData(rawData) {
-            if (!rawData || !rawData.jam || !rawData.lines) {
-                throw new Error('Dados crus (rawData) essenciais faltando para processamento');
+        processData: (rawData) => {
+            // Validação ajustada para a estrutura correta
+            if (!rawData.jam || !rawData.lines) {
+                throw new Error('Dados essenciais faltando');
             }
 
-            const geometry = rawData.lines.map((line) => ({
+            // Converter coordenadas (manter mesma lógica)
+            const geometry = rawData.lines.map(line => ({
                 x: parseFloat(line.x),
                 y: parseFloat(line.y)
             }));
@@ -147,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lastUpdate: utils.formatDate(rawData.jam.pubMillis),
                     city: rawData.jam.city
                 },
-                geometry,
+                geometry: geometry,
                 stats: {
                     speed: rawData.jam.speedKMH || 0,
                     length: rawData.jam.length || 0,
@@ -158,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
     };
-
     // Renderização de insights
     const insightsRenderer = {
         update: (data) => {
@@ -197,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-
+            
             DOM.modalElements.insightsContainer.innerHTML = insightsHTML;
         }
     };
@@ -215,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await dataManager.fetchRouteData(routeId);
 
                 DOM.modalElements.title.textContent = data.metadata.street;
-
+                
                 mapController.init('mapContainer', data.geometry[0]);
                 mapController.plotRoute(data.geometry);
                 insightsRenderer.update(data);
