@@ -136,38 +136,21 @@
 
 <!-- Modal para exibir detalhes da rota -->
 <!-- Modal HTML -->
-<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Detalhes da Rota: <span id="modalRouteName"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="loadingIndicator" class="text-center" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Carregando dados da rota...</p>
-                </div>
-                
-                <div class="row g-4">
-                    <div class="col-12">
-                        <div id="mapContainer" style="height: 500px; border-radius: 8px;"></div>
-                    </div>
-                    
-                    <div class="col-12">
-                        <div id="insightsContainer"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Fechar
-                </button>
-            </div>
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="modalRouteName" class="modal-title">Título</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
+        <div class="modal-body">
+          <div id="loadingIndicator" style="display: none;">Carregando...</div>
+          <div id="mapContainer" style="display:none; height:500px;"></div>
+          <div id="insightsContainer"></div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+  
 
 <script src="../js/scripts-jams.js"></script>
