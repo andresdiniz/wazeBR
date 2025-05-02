@@ -207,47 +207,51 @@ document.addEventListener('DOMContentLoaded', () => {
         onModalOpen: async (event) => {
             const button = event.target.closest('.view-route');
             if (!button) return;
-          
+    
             try {
-              const routeId = button.dataset.routeId;
-              DOM.modalElements.title.textContent = 'Carregando...';
-              DOM.loadingIndicator.style.display = 'block';
-              const data = await dataManager.fetchRouteData(routeId);
-          
-              if (!data.geometry || data.geometry.length === 0) {
-                throw new Error('Geometria vazia ou inválida');
-              }
-          
-              DOM.modalElements.title.textContent = data.metadata.street;
-              insightsRenderer.update(data);
-          
-              // Mostra o modal primeiro
-              const modalInstance = new bootstrap.Modal(DOM.mapModal);
-              modalInstance.show();
-          
-              // Espera o modal estar completamente visível
-              DOM.mapModal.addEventListener('shown.bs.modal', () => {
-                // Inicializa e corrige tamanho do mapa
-                mapController.init('mapContainer', data.geometry[0]);
-          
-                // Garante o ajuste de tamanho correto
-                setTimeout(() => {
-                  state.map.invalidateSize(); // <-- ESSENCIAL
-                  mapController.plotRoute(data.geometry); // <-- Agora a rota aparece no centro
-                }, 200);
-              }, { once: true });
-          
+                const routeId = button.dataset.routeId;
+                DOM.modalElements.title.textContent = 'Carregando...';
+                DOM.loadingIndicator.style.display = 'block';
+    
+                // Busca dados da API
+                const data = await dataManager.fetchRouteData(routeId);
+                if (!data.geometry || data.geometry.length === 0) {
+                    throw new Error('Geometria da rota vazia ou inválida.');
+                }
+    
+                // Atualiza título e insights
+                DOM.modalElements.title.textContent = data.metadata.street;
+                insightsRenderer.update(data);
+    
+                // Abre o modal
+                const modalInstance = new bootstrap.Modal(DOM.mapModal);
+                modalInstance.show();
+    
+                // Aguarda o modal abrir completamente
+                DOM.mapModal.addEventListener(
+                    'shown.bs.modal',
+                    () => {
+                        mapController.init('mapContainer', data.geometry[0]);
+    
+                        setTimeout(() => {
+                            state.map.invalidateSize(); // Corrige tamanho do mapa
+                            mapController.plotRoute(data.geometry); // Plota e centraliza
+                        }, 150);
+                    },
+                    { once: true }
+                );
             } catch (error) {
-              utils.handleError(error, DOM.modalElements.insightsContainer);
+                utils.handleError(error, DOM.modalElements.insightsContainer);
             } finally {
-              DOM.loadingIndicator.style.display = 'none';
+                DOM.loadingIndicator.style.display = 'none';
             }
-        },   
-  
-      onModalClose: () => {
-        DOM.modalElements.insightsContainer.innerHTML = '';
-      }
-    };
+        },
+    
+        onModalClose: () => {
+            DOM.modalElements.insightsContainer.innerHTML = '';
+            mapController.clear(); // Boa prática: limpa o mapa ao fechar
+        }
+    };    
   
     const init = () => {
       DOM.viewRouteButtons.forEach(button => {
