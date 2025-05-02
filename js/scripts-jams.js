@@ -189,8 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const routeId = button.dataset.routeId;
                 DOM.modalElements.title.textContent = 'Carregando...';
                 DOM.loadingIndicator.style.display = 'block';
-
-                mapController.clear();
                 const data = await dataManager.fetchRouteData(routeId);
 
                 DOM.modalElements.title.textContent = data.metadata.street;
@@ -207,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         onModalClose: () => {
-            mapController.clear();
             DOM.modalElements.insightsContainer.innerHTML = '';
         }
     };
