@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 DOM.modalElements.title.textContent = 'Carregando...';
                 DOM.loadingIndicator.style.display = 'block';
 
-                chartController.destroy();
                 mapController.clear();
 
                 const data = await dataManager.fetchRouteData(routeId);
