@@ -17,7 +17,7 @@ $pdo = Database::getConnection();
 function getJamsBasic(PDO $pdo) {
     $stmt = $pdo->prepare("
         SELECT 
-            id, name, from_name, to_name, historic_speed, historic_time, avg_speed, avg_time 
+            *
         FROM 
             jams
         WHERE
@@ -31,5 +31,3 @@ function getJamsBasic(PDO $pdo) {
 $data = [
     'jams' => getJamsBasic($pdo), // Envia apenas dados básicos
 ];
-
-var_dump($data); // Debug: Exibe os dados obtidos
