@@ -84,18 +84,45 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     
         plotRoute: (geometry) => {
+            if (!state.map) {
+              console.error("Mapa não inicializado.");
+              return;
+            }
+          
+            // Remove a camada de rota anterior, se existir
             if (state.layers.route) {
-                state.map.removeLayer(state.layers.route);
+              state.map.removeLayer(state.layers.route);
             }
-        
-            const latLngs = geometry.map(p => [p.y, p.x]); // Já convertido no processData
+          
+            // Mapeia os pontos de geometria para o formato [latitude, longitude] do Leaflet
+            const latLngs = geometry.map(p => [p.y, p.x]);
+          
+            // Cria a polyline da rota
             state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
-                .addTo(state.map);
-        
+              .addTo(state.map);
+          
+            // --- Lógica de Zoom Aprimorada ---
             if (latLngs.length > 1) {
-                state.map.fitBounds(state.layers.route.getBounds());
+              const bounds = state.layers.route.getBounds();
+          
+              // Calcula qual seria o nível de zoom para caber todos os limites
+              const calculatedZoom = state.map.getBoundsZoom(bounds);
+          
+              const MIN_DESIRED_ZOOM = 12;
+          
+              if (calculatedZoom < MIN_DESIRED_ZOOM) {
+                state.map.setView(latLngs[0], MIN_DESIRED_ZOOM);
+                console.warn(`Rota longa. Zoom ajustado para ${MIN_DESIRED_ZOOM} e centralizado no início.`);
+              } else {
+                state.map.fitBounds(bounds);
+              }
+            } else if (latLngs.length === 1 && latLngs[0]) {
+              state.map.setView(latLngs[0], CONFIG.map.zoom);
+            } else {
+              console.warn("Geometria inválida ou vazia para plotar rota.");
             }
-        },
+            // --- Fim da Lógica de Zoom Aprimorada ---
+        },          
 
         // Método para limpar o mapa e remover a camada de rota
         clear: () => { // <--- Método adicionado
