@@ -84,25 +84,52 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         plotRoute: (geometry, level) => {
-            if (!state.map || !geometry?.length) return;
-
+            console.log('Iniciando plotagem da rota...', geometry);
+            
+            if (!state.map) {
+                console.error("Mapa não inicializado");
+                return;
+            }
+    
             if (state.layers.route) {
+                console.log('Removendo camada existente...');
                 state.map.removeLayer(state.layers.route);
             }
-
-            const color = CONFIG.map.getColorForLevel(level);
-            const latLngs = geometry.map(p => [p.y, p.x]);
-
-            state.layers.route = L.polyline(latLngs, {
-                color,
-                ...CONFIG.map.routeStyle
-            }).addTo(state.map);
-
-            if (latLngs.length > 1) {
-                state.map.fitBounds(state.layers.route.getBounds(), {
-                    padding: [30, 30],
-                    maxZoom: 17
+    
+            try {
+                console.log('Convertendo coordenadas...');
+                const latLngs = geometry.map(p => {
+                    // Converter para números flutuantes corretamente
+                    const lat = parseFloat(p.y.toString().replace(',', '.'));
+                    const lng = parseFloat(p.x.toString().replace(',', '.'));
+                    
+                    if (isNaN(lat) || isNaN(lng)) {
+                        throw new Error(`Coordenada inválida: ${p.y}, ${p.x}`);
+                    }
+                    return [lat, lng];
                 });
+    
+                console.log('Coordenadas válidas:', latLngs);
+                
+                const color = CONFIG.map.getColorForLevel(level);
+                state.layers.route = L.polyline(latLngs, {
+                    color,
+                    ...CONFIG.map.routeStyle
+                }).addTo(state.map);
+    
+                console.log('Rota adicionada:', state.layers.route);
+    
+                if (latLngs.length > 1) {
+                    console.log('Ajustando visualização...');
+                    const bounds = L.latLngBounds(latLngs);
+                    state.map.fitBounds(bounds, {
+                        padding: [30, 30],
+                        maxZoom: 17
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao plotar rota:', error);
+                throw error;
             }
         },
 
@@ -241,42 +268,58 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Handlers de Eventos
-    const eventHandlers = {
-        onModalOpen: async (event) => {
-            const button = event.target.closest('.view-route');
-            if (!button) return;
+    // Atualize o event handler para garantir o timing correto
+const eventHandlers = {
+    onModalOpen: async (event) => {
+        const button = event.target.closest('.view-route');
+        if (!button) return;
 
-            try {
-                const routeId = button.dataset.routeId;
-                DOM.loadingIndicator.style.display = 'block';
-                DOM.modalElements.insightsContainer.innerHTML = '';
-                mapController.clear();
+        try {
+            const routeId = button.dataset.routeId;
+            DOM.loadingIndicator.style.display = 'block';
+            DOM.modalElements.insightsContainer.innerHTML = '';
+            mapController.clear();
 
-                const data = await dataManager.fetchRouteData(routeId);
-                const modal = new bootstrap.Modal(DOM.mapModal);
-                modal.show();
+            const data = await dataManager.fetchRouteData(routeId);
+            const modal = new bootstrap.Modal(DOM.mapModal);
+            modal.show();
 
-                DOM.mapModal.addEventListener('shown.bs.modal', () => {
-                    setTimeout(() => {
-                        mapController.init('mapContainer', data.geometry[0]);
-                        mapController.plotRoute(data.geometry, data.stats.level);
+            DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                console.log('Modal visível - Inicializando mapa...');
                 
-                        if (state.map) {
-                            state.map.invalidateSize();
-                            state.map.panBy([0, -30]);
-                        }
-                    }, 300); // Pequeno atraso extra garante que o modal esteja totalmente visível
-                }, { once: true });
+                // Forçar redimensionamento do container
+                const mapContainer = document.getElementById('mapContainer');
+                mapContainer.style.display = 'block';
+                mapContainer.style.height = '500px';
 
-                DOM.modalElements.title.textContent = data.metadata.street;
-                insightsRenderer.update(data);
-            } catch (error) {
-                utils.handleError(error, DOM.modalElements.insightsContainer);
-            } finally {
-                DOM.loadingIndicator.style.display = 'none';
-            }
-        },
+                // Inicializar mapa
+                mapController.init('mapContainer', {
+                    x: data.geometry[0].x,
+                    y: data.geometry[0].y
+                });
 
+                // Plotar rota após breve delay para renderização
+                setTimeout(() => {
+                    mapController.plotRoute(data.geometry, data.stats.level);
+                    
+                    // Ajustes finais após renderização
+                    if (state.map) {
+                        state.map.invalidateSize(true);
+                        console.log('Tamanho do mapa atualizado');
+                    }
+                }, 100);
+
+            }, { once: true });
+
+            DOM.modalElements.title.textContent = data.metadata.street;
+            insightsRenderer.update(data);
+
+        } catch (error) {
+            utils.handleError(error, DOM.modalElements.insightsContainer);
+        } finally {
+            DOM.loadingIndicator.style.display = 'none';
+        }
+    },
         onModalClose: () => {
             mapController.clear();
             DOM.modalElements.insightsContainer.innerHTML = '';
