@@ -110,57 +110,55 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gerenciador de dados
     // Gerenciador de dados corrigido
     const dataManager = {
-        fetchRouteData: async (routeId) => {
-            try {
-                const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-
-                const responseData = await response.json();
-                
-                // Acessar o objeto interno 'data'
-                if (!responseData.data || !responseData.data.jam) {
-                    throw new Error('Estrutura de dados inválida da API');
-                }
-
-                return this.processData(responseData.data); // Passar responseData.data
-            } catch (error) {
-                throw error;
+        async fetchRouteData(routeId) {
+          try {
+            const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
+      
+            if (!response.ok) {
+              throw new Error(`Erro HTTP: ${response.status}`);
             }
+      
+            const responseData = await response.json();
+      
+            if (!responseData.data || !responseData.data.jam || !responseData.data.lines) {
+              throw new Error('Estrutura de dados inválida da API ou dados essenciais faltando');
+            }
+      
+            return this.processData(responseData.data);
+          } catch (error) {
+            throw error;
+          }
         },
-
-        processData: (rawData) => {
-            // Validação ajustada para a estrutura correta
-            if (!rawData.jam || !rawData.lines) {
-                throw new Error('Dados essenciais faltando');
-            }
-
-            // Converter coordenadas (manter mesma lógica)
-            const geometry = rawData.lines.map(line => ({
-                x: parseFloat(line.x),
-                y: parseFloat(line.y)
-            }));
-
-            return {
-                metadata: {
-                    id: rawData.jam.uuid,
-                    street: rawData.jam.street,
-                    lastUpdate: utils.formatDate(rawData.jam.pubMillis),
-                    city: rawData.jam.city
-                },
-                geometry: geometry,
-                stats: {
-                    speed: rawData.jam.speedKMH || 0,
-                    length: rawData.jam.length || 0,
-                    delay: rawData.jam.delay || 0,
-                    level: rawData.jam.level
-                },
-                segments: rawData.segments || []
-            };
+      
+        processData(rawData) {
+          if (!rawData || !rawData.jam || !rawData.lines) {
+            throw new Error('Dados crus (rawData) essenciais faltando para processamento');
+          }
+      
+          const geometry = rawData.lines.map((line) => ({
+            x: parseFloat(line.x),
+            y: parseFloat(line.y)
+          }));
+      
+          return {
+            metadata: {
+              id: rawData.jam.uuid,
+              street: rawData.jam.street,
+              lastUpdate: utils.formatDate(rawData.jam.pubMillis),
+              city: rawData.jam.city
+            },
+            geometry,
+            stats: {
+              speed: rawData.jam.speedKMH || 0,
+              length: rawData.jam.length || 0,
+              delay: rawData.jam.delay || 0,
+              level: rawData.jam.level
+            },
+            segments: rawData.segments || []
+          };
         }
-    };
+      };
+            
     // Renderização de insights
     const insightsRenderer = {
         update: (data) => {
