@@ -81,38 +81,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return state.map;
       },
   
-      plotRoute: (geometry) => {
+      // Modifique o mapController.plotRoute para adicionar logs de depuração
+    plotRoute: (geometry) => {
+        console.log('Iniciando plotagem da rota...', geometry);
+        
         if (!state.map) {
-          console.error("Mapa não inicializado.");
-          return;
+            console.error("Mapa não inicializado. State:", state);
+            return;
         }
-  
+
         if (state.layers.route) {
-          state.map.removeLayer(state.layers.route);
+            console.log('Removendo camada existente...');
+            state.map.removeLayer(state.layers.route);
         }
-  
-        const latLngs = geometry.map(p => [p.y, p.x]);
-  
-        state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
-          .addTo(state.map);
-  
-        if (latLngs.length > 1) {
-          const bounds = state.layers.route.getBounds();
-          const calculatedZoom = state.map.getBoundsZoom(bounds);
-          const MIN_DESIRED_ZOOM = 12;
-  
-          if (calculatedZoom < MIN_DESIRED_ZOOM) {
-            state.map.setView(latLngs[0], MIN_DESIRED_ZOOM);
-            console.warn(`Rota longa. Zoom ajustado para ${MIN_DESIRED_ZOOM} e centralizado no início.`);
-          } else {
-            state.map.fitBounds(bounds);
-          }
-        } else if (latLngs.length === 1 && latLngs[0]) {
-          state.map.setView(latLngs[0], CONFIG.map.zoom);
-        } else {
-          console.warn("Geometria inválida ou vazia para plotar rota.");
+
+        try {
+            console.log('Convertendo coordenadas...');
+            const latLngs = geometry.map(p => {
+                const latLng = [parseFloat(p.y), parseFloat(p.x)];
+                console.log('Ponto convertido:', latLng);
+                if (isNaN(latLng[0]) || isNaN(latLng[1])) {
+                    throw new Error(`Coordenada inválida: ${p.y}, ${p.x}`);
+                }
+                return latLng;
+            });
+
+            console.log('Coordenadas válidas:', latLngs);
+            
+            state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
+                .addTo(state.map);
+            console.log('Rota adicionada ao mapa:', state.layers.route);
+
+            if (latLngs.length > 1) {
+                console.log('Ajustando visualização...');
+                const bounds = state.layers.route.getBounds();
+                console.log('Bounds calculados:', bounds);
+                
+                const calculatedZoom = state.map.getBoundsZoom(bounds);
+                console.log('Zoom calculado:', calculatedZoom);
+                
+                state.map.fitBounds(bounds);
+                console.log('Visualização ajustada com sucesso');
+            } else if (latLngs.length === 1) {
+                console.log('Centralizando em único ponto:', latLngs[0]);
+                state.map.setView(latLngs[0], CONFIG.map.zoom);
+            }
+        } catch (error) {
+            console.error('Erro ao plotar rota:', error);
+            throw error;
         }
-      },
+    },
   
       clear: () => {
         if (state.map) {
@@ -209,38 +227,53 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!button) return;
     
             try {
+                console.log('Iniciando abertura do modal...');
                 const routeId = button.dataset.routeId;
                 DOM.modalElements.title.textContent = 'Carregando...';
                 DOM.loadingIndicator.style.display = 'block';
     
-                // Busca dados da API
+                console.log('Buscando dados da rota...');
                 const data = await dataManager.fetchRouteData(routeId);
+                console.log('Dados recebidos:', data);
+    
                 if (!data.geometry || data.geometry.length === 0) {
-                    throw new Error('Geometria da rota vazia ou inválida.');
+                    throw new Error('Geometria da rota vazia ou inválida');
                 }
     
-                // Atualiza título e insights
+                // Abre o modal primeiro
+                const modal = new bootstrap.Modal(DOM.mapModal);
+                modal.show();
+    
+                // Aguarda o modal estar totalmente visível
+                DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                    console.log('Modal visível - Inicializando mapa...');
+                    
+                    try {
+                        mapController.init('mapContainer', data.geometry[0]);
+                        
+                        // Força redimensionamento do mapa
+                        setTimeout(() => {
+                            console.log('Ajustando tamanho do mapa...');
+                            if (state.map) {
+                                state.map.invalidateSize(true);
+                                console.log('Tamanho do mapa ajustado');
+                                
+                                console.log('Plotando rota...');
+                                mapController.plotRoute(data.geometry);
+                            }
+                        }, 300);
+                    } catch (error) {
+                        console.error('Erro na inicialização do mapa:', error);
+                        utils.handleError(error, DOM.modalElements.insightsContainer);
+                    }
+                }, {once: true});
+    
+                // Atualiza a interface
                 DOM.modalElements.title.textContent = data.metadata.street;
                 insightsRenderer.update(data);
     
-                // Abre o modal
-                const modalInstance = new bootstrap.Modal(DOM.mapModal);
-                modalInstance.show();
-    
-                // Aguarda o modal abrir completamente
-                DOM.mapModal.addEventListener(
-                    'shown.bs.modal',
-                    () => {
-                        mapController.init('mapContainer', data.geometry[0]);
-    
-                        setTimeout(() => {
-                            state.map.invalidateSize(); // Corrige tamanho do mapa
-                            mapController.plotRoute(data.geometry); // Plota e centraliza
-                        }, 150);
-                    },
-                    { once: true }
-                );
             } catch (error) {
+                console.error('Erro geral:', error);
                 utils.handleError(error, DOM.modalElements.insightsContainer);
             } finally {
                 DOM.loadingIndicator.style.display = 'none';
@@ -248,8 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     
         onModalClose: () => {
+            console.log('Limpando estado...');
             DOM.modalElements.insightsContainer.innerHTML = '';
-            mapController.clear(); // Boa prática: limpa o mapa ao fechar
+            mapController.clear();
         }
     };    
   
