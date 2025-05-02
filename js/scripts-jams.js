@@ -7,9 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalElements: {
             title: document.querySelector('#modalRouteName'),
             mapContainer: document.querySelector('#mapContainer'),
-            heatmapChart: document.querySelector('#heatmapChart'),
-            insightsContainer: document.querySelector('#insightsContainer'),
-            lineChartContainer: document.querySelector('#lineChartContainer')
+            insightsContainer: document.querySelector('#insightsContainer')
         }
     };
 
@@ -17,12 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const state = {
         map: null,
         layers: {
-            route: null,
-            markers: null
-        },
-        charts: {
-            heatmap: null,
-            line: null
+            route: null
         }
     };
 
@@ -36,23 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 color: '#3366cc',
                 weight: 5,
                 opacity: 0.7
-            }
-        },
-        charts: {
-            heatmap: {
-                height: 300,
-                colorStops: [
-                    [0, '#ff474c'],
-                    [0.5, '#f7d54a'],
-                    [1, '#4bd15f']
-                ]
-            },
-            line: {
-                height: 280,
-                colors: {
-                    line: '#3366cc',
-                    marker: '#ffffff'
-                }
             }
         }
     };
@@ -119,6 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (latLngs.length > 1) {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
+        },
+
+        clear: () => {
+            if (state.map) {
+                state.map.remove();
+                state.map = null;
+            }
+            state.layers.route = null;
         }
     };
 
@@ -162,6 +146,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Renderização de insights
+    const insightsRenderer = {
+        update: (data) => {
+            const insightsHTML = `
+                <div class="col-md-6">
+                    <div class="insight-item mb-3">
+                        <small class="text-muted d-block">Velocidade Atual</small>
+                        <h4 class="text-primary">${data.stats.speed} km/h</h4>
+                    </div>
+                    
+                    <div class="insight-item mb-3">
+                        <small class="text-muted d-block">Extensão</small>
+                        <h4 class="text-secondary">${data.stats.length} metros</h4>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="insight-item mb-3">
+                        <small class="text-muted d-block">Atraso</small>
+                        <h4 class="text-danger">${data.stats.delay} segundos</h4>
+                    </div>
+                    
+                    <div class="insight-item">
+                        <small class="text-muted d-block">Última Atualização</small>
+                        <h5 class="mb-0">${data.metadata.lastUpdate}</h5>
+                    </div>
+                </div>
+            `;
+            
+            DOM.modalElements.insightsContainer.innerHTML = insightsHTML;
+        }
+    };
+
     // Handlers de eventos
     const eventHandlers = {
         onModalOpen: async (event) => {
@@ -180,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 mapController.init('mapContainer', data.geometry[0]);
                 mapController.plotRoute(data.geometry);
-
                 insightsRenderer.update(data);
 
             } catch (error) {
@@ -192,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         onModalClose: () => {
             mapController.clear();
+            DOM.modalElements.insightsContainer.innerHTML = '';
         }
     };
 
