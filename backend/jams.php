@@ -13,21 +13,33 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
+session_start();
+
+$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Pega o valor ou usa um padrão (99)
+
 // Função para buscar todas as rotas (dados básicos)
-function getJamsBasic(PDO $pdo) {
-    $stmt = $pdo->prepare("
-        SELECT 
-            *
-        FROM 
-            jams
-        WHERE
-            STATUS = 1
-    ");
+function getJamsBasic(PDO $pdo, $id_parceiro) {
+    // Base da query
+    $query = "
+        SELECT *
+        FROM jams
+        WHERE status = 1
+    ";
+
+    // Adiciona filtro por parceiro, se necessário
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    } else {
+        $stmt = $pdo->prepare($query);
+    }
+
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Busca os dados das rotas para o template
 $data = [
-    'jams' => getJamsBasic($pdo), // Envia apenas dados básicos
+    'jams' => getJamsBasic($pdo, $id_parceiro),
 ];
