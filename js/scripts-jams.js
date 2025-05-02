@@ -70,34 +70,34 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.map) {
                 state.map.remove();
             }
-
+    
             state.map = L.map(containerId, {
                 preferCanvas: true,
                 fadeAnimation: true
             }).setView([coords.y, coords.x], CONFIG.map.zoom);
-
+    
             L.tileLayer(CONFIG.map.tileLayer, {
                 attribution: CONFIG.map.attribution
             }).addTo(state.map);
-
+    
             return state.map;
         },
-
+    
         plotRoute: (geometry) => {
             if (state.layers.route) {
                 state.map.removeLayer(state.layers.route);
             }
-
+    
             const latLngs = geometry.map(p => [p.y, p.x]);
             state.layers.route = L.polyline(latLngs, CONFIG.map.routeStyle)
                 .addTo(state.map);
-
+    
             if (latLngs.length > 1) {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
         },
-
-        clear: () => {
+    
+        clear: () => { // <--- Método adicionado
             if (state.map) {
                 state.map.remove();
                 state.map = null;
