@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.map.fitBounds(state.layers.route.getBounds());
             }
         },
-        
+
         // Método para limpar o mapa e remover a camada de rota
         clear: () => { // <--- Método adicionado
             if (state.map) {
@@ -118,50 +118,49 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
 
-                const data = await response.json();
+                const responseData = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error);
+                // Acessar o objeto interno 'data'
+                if (!responseData.data || !responseData.data.jam) {
+                    throw new Error('Estrutura de dados inválida da API');
                 }
 
-                // Corrigindo a referência ao processData
-                return dataManager.processData(data);
+                return this.processData(responseData.data); // Passar responseData.data
             } catch (error) {
                 throw error;
             }
         },
 
         processData: (rawData) => {
-            // Validação da estrutura principal
+            // Validação ajustada para a estrutura correta
             if (!rawData.jam || !rawData.lines) {
-                throw new Error('Estrutura de dados inválida da API');
+                throw new Error('Dados essenciais faltando');
             }
-        
-            // Converter coordenadas para números
+
+            // Converter coordenadas (manter mesma lógica)
             const geometry = rawData.lines.map(line => ({
                 x: parseFloat(line.x),
                 y: parseFloat(line.y)
             }));
-        
+
             return {
                 metadata: {
                     id: rawData.jam.uuid,
                     street: rawData.jam.street,
                     lastUpdate: utils.formatDate(rawData.jam.pubMillis),
-                    city: rawData.jam.city // Novo campo adicionado
+                    city: rawData.jam.city
                 },
                 geometry: geometry,
                 stats: {
                     speed: rawData.jam.speedKMH || 0,
                     length: rawData.jam.length || 0,
                     delay: rawData.jam.delay || 0,
-                    level: rawData.jam.level // Novo campo adicionado
+                    level: rawData.jam.level
                 },
                 segments: rawData.segments || []
             };
         }
     };
-
     // Renderização de insights
     const insightsRenderer = {
         update: (data) => {
