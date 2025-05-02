@@ -1,7 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ... (mantenha as constantes DOM, state e CONFIG originais)
+    // Elementos DOM
+    const DOM = {
+        mapModal: document.getElementById('mapModal'),
+        viewRouteButtons: document.querySelectorAll('.view-route'),
+        loadingIndicator: document.querySelector('#loadingIndicator'),
+        modalElements: {
+            title: document.querySelector('#modalRouteName'),
+            mapContainer: document.querySelector('#mapContainer'),
+            insightsContainer: document.querySelector('#insightsContainer')
+        }
+    };
 
-    // Atualize o CONFIG para incluir cores dinâmicas
+    // Estado da aplicação
+    const state = {
+        map: null,
+        layers: {
+            route: null
+        }
+    };
+
+    // Configurações
     const CONFIG = {
         map: {
             tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -9,12 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             zoom: 14,
             getColorForLevel: (level) => {
                 const colors = [
-                    '#4CAF50', // Nível 0 - Verde
-                    '#FFEB3B', // Nível 1 - Amarelo
-                    '#FF9800', // Nível 2 - Laranja
-                    '#F44336', // Nível 3 - Vermelho
-                    '#D32F2F', // Nível 4 - Vermelho escuro
-                    '#B71C1C'  // Nível 5 - Vermelho muito escuro
+                    '#4CAF50', '#FFEB3B', '#FF9800', 
+                    '#F44336', '#D32F2F', '#B71C1C'
                 ];
                 return colors[Math.min(Math.max(level, 0), 5)];
             },
@@ -26,12 +40,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Modifique o mapController para melhor controle
+    // Utilitários
+    const utils = {
+        formatDate: (dateInput) => {
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            try {
+                const date = new Date(dateInput);
+                return isNaN(date) ? 'N/A' : date.toLocaleString('pt-BR', options);
+            } catch (e) {
+                return 'N/A';
+            }
+        },
+        handleError: (error, container) => {
+            console.error(error);
+            container.innerHTML = `
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error.message || 'Erro ao carregar dados'}
+                </div>
+            `;
+        }
+    };
+
+    // Controle do Mapa
     const mapController = {
         init: (containerId, coords) => {
-            if (state.map) {
-                this.clear();
-            }
+            if (state.map) this.clear();
 
             state.map = L.map(containerId, {
                 preferCanvas: true,
@@ -50,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         plotRoute: (geometry, level) => {
             if (!state.map) return;
 
-            // Remove camadas anteriores
             if (state.layers.route) {
                 state.map.removeLayer(state.layers.route);
             }
@@ -65,11 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lineJoin: CONFIG.map.routeStyle.lineJoin
             }).addTo(state.map);
 
-            // Ajuste de zoom responsivo
             if (latLngs.length > 1) {
                 const bounds = state.layers.route.getBounds();
                 state.map.fitBounds(bounds, {
-                    padding: [30, 30], // Espaçamento para elementos de UI
+                    padding: [30, 30],
                     maxZoom: 17
                 });
             }
@@ -84,91 +122,133 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Atualize o insightsRenderer para melhor visualização
+    // Gerenciamento de Dados
+    const dataManager = {
+        async fetchRouteData(routeId) {
+            try {
+                const response = await fetch(`/api.php?action=get_jams_details&route_id=${routeId}`);
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                
+                const responseData = await response.json();
+                if (!responseData.data?.jam) throw new Error('Estrutura de dados inválida');
+
+                return this.processData(responseData.data);
+            } catch (error) {
+                throw error;
+            }
+        },
+
+        processData(rawData) {
+            if (!rawData.jam || !rawData.lines) {
+                throw new Error('Dados essenciais faltando');
+            }
+
+            return {
+                metadata: {
+                    id: rawData.jam.uuid,
+                    street: rawData.jam.street,
+                    lastUpdate: utils.formatDate(rawData.jam.pubMillis),
+                    city: rawData.jam.city
+                },
+                geometry: rawData.lines.map(line => ({
+                    x: parseFloat(line.x),
+                    y: parseFloat(line.y)
+                })),
+                stats: {
+                    speed: rawData.jam.speedKMH || 0,
+                    length: rawData.jam.length || 0,
+                    delay: rawData.jam.delay || 0,
+                    level: rawData.jam.level
+                }
+            };
+        }
+    };
+
+    // Renderização de Insights
     const insightsRenderer = {
         update: (data) => {
-            const insightsHTML = `
-                <div class="row g-3">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary mb-4">
-                                    <i class="fas fa-road me-2"></i>${data.metadata.street}
-                                </h5>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="icon-circle bg-primary me-3">
-                                                <i class="fas fa-tachometer-alt text-white"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Velocidade Média</small>
-                                                <h4 class="mb-0">${data.stats.speed.toFixed(1)} km/h</h4>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="icon-circle bg-warning me-3">
-                                                <i class="fas fa-clock text-white"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Atraso Estimado</small>
-                                                <h4 class="mb-0">${data.stats.delay} segundos</h4>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="icon-circle bg-danger me-3">
-                                                <i class="fas fa-traffic-light text-white"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Nível de Congestionamento</small>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="progress flex-grow-1 me-2" style="height: 20px;">
-                                                        <div class="progress-bar bg-${this.getCongestionColor(data.stats.level)}" 
-                                                            role="progressbar" 
-                                                            style="width: ${(data.stats.level/5)*100}%">
-                                                        </div>
-                                                    </div>
-                                                    <h4 class="mb-0">${data.stats.level}/5</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon-circle bg-info me-3">
-                                                <i class="fas fa-city text-white"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted">Localização</small>
-                                                <h4 class="mb-0">${data.metadata.city}</h4>
-                                            </div>
+            DOM.modalElements.insightsContainer.innerHTML = `
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            ${this.renderMetric('Velocidade Média', data.stats.speed.toFixed(1) + ' km/h', 'tachometer-alt', 'primary')}
+                            ${this.renderMetric('Extensão', data.stats.length + ' metros', 'ruler', 'info')}
+                            ${this.renderMetric('Atraso', data.stats.delay + ' segundos', 'clock', 'warning')}
+                            ${this.renderCongestionLevel(data.stats.level)}
+                            ${this.renderLocation(data.metadata.city, data.metadata.lastUpdate)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderMetric(title, value, icon, color) {
+            return `
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center p-3 bg-${color}-light rounded-3">
+                        <div class="icon-circle bg-${color} me-3">
+                            <i class="fas fa-${icon} text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">${title}</small>
+                            <h4 class="mb-0">${value}</h4>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderCongestionLevel(level) {
+            return `
+                <div class="col-12">
+                    <div class="p-3 bg-danger-light rounded-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-danger me-3">
+                                <i class="fas fa-traffic-light text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block">Nível de Congestionamento</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 20px;">
+                                        <div class="progress-bar bg-danger" 
+                                            style="width: ${(level/5)*100}%">
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="mt-4 text-muted small">
-                                    <i class="fas fa-sync-alt me-1"></i>
-                                    Atualizado em: ${data.metadata.lastUpdate}
+                                    <h4 class="mb-0">${level}/5</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
-
-            DOM.modalElements.insightsContainer.innerHTML = insightsHTML;
         },
 
-        getCongestionColor: (level) => {
-            return ['success', 'warning', 'orange', 'danger', 'dark-danger', 'darkest-danger'][level];
+        renderLocation(city, lastUpdate) {
+            return `
+                <div class="col-12">
+                    <div class="p-3 bg-success-light rounded-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-success me-3">
+                                <i class="fas fa-city text-white"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Localização</small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0">${city}</h4>
+                                    <small class="text-muted">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        ${lastUpdate}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     };
 
-    // Atualize os event handlers para fluxo otimizado
+    // Handlers de Eventos
     const eventHandlers = {
         onModalOpen: async (event) => {
             const button = event.target.closest('.view-route');
@@ -179,31 +259,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 DOM.loadingIndicator.style.display = 'block';
                 DOM.modalElements.insightsContainer.innerHTML = '';
 
-                // Limpar estado anterior
+                // Resetar estado
                 mapController.clear();
 
                 // Buscar dados
                 const data = await dataManager.fetchRouteData(routeId);
 
-                // Mostrar modal primeiro
+                // Mostrar modal
                 const modal = new bootstrap.Modal(DOM.mapModal);
                 modal.show();
 
-                // Configurar mapa após o modal estar visível
+                // Configurar após abertura completa
                 DOM.mapModal.addEventListener('shown.bs.modal', () => {
                     mapController.init('mapContainer', data.geometry[0]);
                     mapController.plotRoute(data.geometry, data.stats.level);
                     
-                    // Ajuste final do mapa
+                    // Ajustes finais
                     setTimeout(() => {
                         if (state.map) {
                             state.map.invalidateSize();
-                            state.map.panBy([0, -30]); // Ajuste para controles de zoom
+                            state.map.panBy([0, -30]);
                         }
                     }, 50);
                 }, { once: true });
 
-                // Atualizar dados
+                // Atualizar conteúdo
                 DOM.modalElements.title.textContent = data.metadata.street;
                 insightsRenderer.update(data);
 
@@ -220,21 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ... (mantenha o restante da inicialização)
-});
-    
-        DOM.mapModal.addEventListener('show.bs.modal', eventHandlers.onModalOpen);
+    // Inicialização
+    const init = () => {
+        DOM.viewRouteButtons.forEach(button => {
+            button.addEventListener('click', eventHandlers.onModalOpen);
+        });
+
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
-    });
-    // Adicione os event listeners para os botões de abrir o modal
-    const viewRouteButtons = document.querySelectorAll('.view-route');
-    viewRouteButtons.forEach(button => {
-        button.addEventListener('click', eventHandlers.onModalOpen);
-    });
-    // Adicione o event listener para o fechamento do modal
-    DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
-    // Adicione o event listener para o botão de fechar o modal
-    const closeModalButton = document.querySelector('.btn-close');
-    closeModalButton.addEventListener('click', eventHandlers.onModalClose);
-    // Adicione o event listener para o botão de fechar o modal
-    const closeModalButton = document.querySelector('.btn-close');
+    };
+
+    init();
+});
