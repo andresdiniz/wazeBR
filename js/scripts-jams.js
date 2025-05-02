@@ -334,6 +334,7 @@ const eventHandlers = {
         DOM.viewRouteButtons.forEach(button => {
             console.log('Associando evento ao botão', button);
             button.addEventListener('click', eventHandlers.onModalOpen);
+            console.log('Container do mapa:', document.getElementById('mapContainer'));
         });
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
     };    
