@@ -31,3 +31,5 @@ function getJamsBasic(PDO $pdo) {
 $data = [
     'jams' => getJamsBasic($pdo), // Envia apenas dados básicos
 ];
+
+var_dump($data); // Debug: Exibe os dados obtidos
