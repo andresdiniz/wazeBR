@@ -13,79 +13,30 @@
 
 
 <style>
-    .leaflet-container {
-        height: 400px;
-        width: 100%;
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    .leaflet-control-attribution {
-        display: none;
-    }   
-
+    
+    .bg-orange { background-color: #FF9800 !important; }
+    .bg-dark-danger { background-color: #D32F2F !important; }
+    .bg-darkest-danger { background-color: #B71C1C !important; }
+    
     #mapContainer {
-        height: 400px; /* ou 100% se dentro de algo com altura fixa */
-        width: 100%;
+        height: 500px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
+    
     .leaflet-control-zoom {
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 4px;
-        padding: 5px;
+        margin-right: 15px !important;
+        margin-bottom: 15px !important;
     }
-    .leaflet-control-zoom a {
-        color: #000;
-    }
-    .leaflet-control-zoom a:hover {
-        color: #007bff;
-    }
-    .leaflet-control-zoom a:active {
-        color: #0056b3;
-    }
-    .leaflet-control-zoom a:focus {
-        outline: none;
-    }
-    
-    .leaflet-control-zoom a.leaflet-control-zoom-in {
-        background: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png') no-repeat center center;
-        width: 20px;
-        height: 20px;
-    }
-    .leaflet-control-zoom a.leaflet-control-zoom-out {
-        background: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png') no-repeat center center;
-        width: 20px;
-        height: 20px;
-    }
-    .leaflet-control-zoom a.leaflet-control-zoom-in:hover,
-    .leaflet-control-zoom a.leaflet-control-zoom-out:hover {
-        background-color: rgba(255, 255, 255, 0.8);
-    }
-    #mapModal {
-        font-family: 'Roboto', sans-serif;
-    }
-    
-    #mapModal .card {
-        border-radius: 10px;
-        transition: transform 0.3s ease;
-    }
-    
-    #mapModal .card:hover {
-        transform: translateY(-2px);
-    }
-    
-    #mapModal .modal-header {
-        border-radius: 0;
-        border-bottom: 3px solid rgba(255,255,255,0.2);
-    }
-    
-    #mapModal .close {
-        opacity: 0.8;
-        transition: opacity 0.3s ease;
-    }
-    
-    #mapModal .close:hover {
-        opacity: 1;
-    }
-
-    </style>
+</style>
 <div class="container-fluid">
 
     {# DEBUG temporário: remova em produção 
@@ -182,46 +133,34 @@
 
 <!-- Modal para exibir detalhes da rota -->
 <!-- Modal HTML -->
-<div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">Detalhes da Rota: <span id="modalRouteName"></span></h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
             <div class="modal-body">
                 <div id="loadingIndicator" class="text-center" style="display: none;">
-                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Carregando dados da rota...</p>
                 </div>
-
-                <div class="container-fluid">
-                    <div class="row">
-                        <!-- Mapa -->
-                        <div class="col-12 mb-4">
-                            <div id="mapContainer" style="height: 500px; border-radius: 8px;"></div>
-                        </div>
-
-                        <!-- Dados -->
-                        <div class="col-12" style="height: 100%;">
-                            <div class="card border-0 shadow">
-                                <div class="card-body">
-                                    <h6 class="text-primary mb-4">
-                                        <i class="fas fa-info-circle mr-2"></i>Informações da Via
-                                    </h6>
-                                    <div id="insightsContainer" class="row"></div>
-                                </div>
-                            </div>
-                        </div>
+                
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div id="mapContainer" style="height: 500px; border-radius: 8px;"></div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div id="insightsContainer"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times mr-2"></i>Fechar
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
                 </button>
             </div>
         </div>
