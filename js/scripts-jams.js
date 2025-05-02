@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Controle do Mapa
     const mapController = {
         init: (containerId, coords) => {
+            console.log('Leaflet está disponível?', typeof L !== 'undefined');
+            if (typeof L === 'undefined') {
+                console.error('Leaflet não está disponível');
+                return;
+            }
+            console.log('Container do mapa:', DOM.modalElements.mapContainer);
+            console.log('Coordenadas iniciais:', coords);
+            console.log('ID do container:', containerId);
+
             if (state.map) mapController.clear();
 
             const containerEl = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
@@ -284,8 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await dataManager.fetchRouteData(routeId);
 
+                console.log('Cheguei ate aqui!');
                 // Registra o listener antes de chamar modal.show
                 DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                    
                     console.log('Modal visível - Inicializando mapa...');
                     
                     const mapContainer = DOM.modalElements.mapContainer;
