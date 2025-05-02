@@ -13,28 +13,24 @@
 
 
 <style>
-    .icon-circle {
+    .insight-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .insight-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .fa-2x {
         width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .bg-orange { background-color: #FF9800 !important; }
-    .bg-dark-danger { background-color: #D32F2F !important; }
-    .bg-darkest-danger { background-color: #B71C1C !important; }
-    
-    #mapContainer {
-        height: 500px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .leaflet-control-zoom {
-        margin-right: 15px !important;
-        margin-bottom: 15px !important;
+        text-align: center;
     }
 </style>
 <div class="container-fluid">
