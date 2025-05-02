@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Gerenciador de dados
+    // Gerenciador de dados corrigido
     const dataManager = {
         fetchRouteData: async (routeId) => {
             try {
@@ -122,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.error);
                 }
 
-                return this.processData(data);
+                // Corrigindo a referência ao processData
+                return dataManager.processData(data);
             } catch (error) {
                 throw error;
             }
