@@ -66,7 +66,7 @@
                                             <td title="{{ jam.street }}">{{ jam.street }}</td>
                                             <td title="{{ jam.endNode }}">{{ jam.endNode }}</td>
                                             <td class="text-center">{{ speedKMH|number_format(2) }}</td>
-                                            <td class="text-center">{{ (speed / 60)|number_format(1) }}</td>
+                                            <td class="text-center">{{ (speed)|number_format(1) }}</td>
                                             <td class="text-center">{{ delay_minutes|number_format(1) }}</td>
                                             <td class="text-center">{{ length|number_format(0) }}</td>
                                             <td class="text-center">{{ pub_date|round(0, 'floor')|date("d/m/Y H:i") }}</td>
