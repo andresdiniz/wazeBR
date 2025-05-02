@@ -56,7 +56,7 @@
     const validPages = ['home', 'dashboard', 'routes', 'irregularidades'];
 
     if (validPages.includes(currentUrl)) {
-        // Atualiza a página a cada 120.000 milissegundos (2 minutos)
+        // Atualiza a página a cada 180.000 milissegundos (3 minutos)
         setInterval(function() {
             window.location.reload();
         }, 180000);
