@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Inicialização
+    // Inicialização
     const init = () => {
         console.log('Inicializando aplicação...');
         
@@ -423,6 +424,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Associar evento ao fechamento do modal
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
+        
+        // Não é mais necessário armazenar a instância do modal
+        // O Bootstrap 5 já gerencia isso via data-bs-dismiss
         
         // Inicialização completa - verificar se há problemas de modal aberto
         setTimeout(() => {
