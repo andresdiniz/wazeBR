@@ -380,9 +380,6 @@
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <button class="btn btn-success px-4 btn-export" onclick="exportData()">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> Exportar Dados
-                    </button>
                     <button class="btn btn-info px-4 btn-export" onclick="exportChart('comparisonChartVelocidade')">
                         <i class="bi bi-image"></i> Exportar Gráfico Velocidade
                     </button>
@@ -693,62 +690,6 @@
     
         $('#tabelaRota1').DataTable(tableConfig);
         $('#tabelaRota2').DataTable(tableConfig);
-    }
-
-    // Exportação de dados para Excel
-    function exportData() {
-        {% if dados and dados.merged_data %}
-            try {
-                loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js', function() {
-                    const headers = ['Data', 
-                                     '{{ route1_name }} - Velocidade (km/h)', 
-                                     '{{ route1_name }} - Tempo (s)', 
-                                     '{{ route2_name }} - Velocidade (km/h)', 
-                                     '{{ route2_name }} - Tempo (s)'];
-                                     
-                    const rows = {{ dados.merged_data|json_encode|raw }}.map(row => [
-                        row.data ? new Date(row.data).toLocaleString('pt-BR') : 'N/A',
-                        row.velocidade1 !== null ? Number(row.velocidade1).toFixed(1) : 'N/A',
-                        row.tempo1 !== null ? Number(row.tempo1).toFixed(1) : 'N/A',
-                        row.velocidade2 !== null ? Number(row.velocidade2).toFixed(1) : 'N/A',
-                        row.tempo2 !== null ? Number(row.tempo2).toFixed(1) : 'N/A'
-                    ]);
-
-                    // Criar planilha
-                    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-                    
-                    // Formatar células
-                    const range = XLSX.utils.decode_range(ws['!ref']);
-                    for(let C = 1; C <= 4; ++C) {
-                        for(let R = 1; R <= range.e.r; ++R) {
-                            const cellref = XLSX.utils.encode_cell({c:C, r:R});
-                            if(!ws[cellref]) continue;
-                            if(ws[cellref].v === 'N/A') continue;
-                            ws[cellref].t = 'n';
-                            ws[cellref].z = '0.0'; // Formato com 1 decimal
-                        }
-                    }
-                    
-                    // Largura das colunas
-                    ws['!cols'] = [
-                        { wch: 20 }, // Data
-                        { wch: 15 }, // Velocidade 1
-                        { wch: 15 }, // Tempo 1
-                        { wch: 15 }, // Velocidade 2
-                        { wch: 15 }  // Tempo 2
-                    ];
-
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, "Comparação");
-                    XLSX.writeFile(wb, `Comparação_Rotas_${new Date().toISOString().slice(0,10)}.xlsx`);
-                });
-            } catch (error) {
-                console.error('Erro na exportação:', error);
-                alert('Falha na exportação. Verifique se todas as bibliotecas foram carregadas.');
-            }
-        {% else %}
-            alert('Selecione ambas as rotas e um período válido antes de exportar.');
-        {% endif %}
     }
 
     // Exportação de gráficos para PNG
