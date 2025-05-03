@@ -343,11 +343,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 DOM.modalElements.title.textContent = data.metadata.street;
                 
                 // Criar ou mostrar modal usando Bootstrap 5
-                const modal = new bootstrap.Modal(DOM.mapModal);
+                const modalEl = DOM.mapModal;
+                const modal = new bootstrap.Modal(modalEl);
+                
+                // Armazenar a instância do modal para referência posterior
+                modalEl._bootstrapModal = modal;
+                
                 modal.show();
                 
                 // Esperar o modal estar totalmente visível antes de inicializar o mapa
-                DOM.mapModal.addEventListener('shown.bs.modal', () => {
+                modalEl.addEventListener('shown.bs.modal', () => {
                     console.log('Modal visível, inicializando mapa...');
                     
                     // Garantir que o container do mapa esteja visível
@@ -381,6 +386,19 @@ document.addEventListener('DOMContentLoaded', () => {
             mapController.clear();
             DOM.modalElements.insightsContainer.innerHTML = '';
             DOM.modalElements.mapContainer.style.display = 'none';
+            
+            // Remover backdrop e classes que podem estar causando o bloqueio
+            document.body.classList.remove('modal-open');
+            
+            // Remover qualquer backdrop que possa ter ficado
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Garantir que o overflow do body seja restaurado
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         }
     };
 
@@ -405,6 +423,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Associar evento ao fechamento do modal
         DOM.mapModal.addEventListener('hidden.bs.modal', eventHandlers.onModalClose);
+        
+        // Inicialização completa - verificar se há problemas de modal aberto
+        setTimeout(() => {
+            // Verificar e remover qualquer modal-backdrop órfão
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Remover classe modal-open do body se não houver modal aberto
+            if (!document.querySelector('.modal.show')) {
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }, 500);
         
         console.log('Aplicação inicializada com sucesso!');
     };
