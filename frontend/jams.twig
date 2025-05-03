@@ -248,53 +248,5 @@
     </div>
 </div>
 
-<!-- DataTables e Script Customizado -->
-<script>
-$(document).ready(function() {
-    // Inicializa o DataTables com recursos responsivos
-    $('#routesTable').DataTable({
-        responsive: true,
-        language: {
-            url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json"
-        },
-        columnDefs: [
-            { targets: 'no-sort', orderable: false },
-            { responsivePriority: 1, targets: [0, 1, 5, 9] },  // Prioridade para colunas mais importantes
-            { responsivePriority: 2, targets: [2, 8] },
-            { responsivePriority: 3, targets: [3, 4, 6, 7] }
-        ],
-        order: [[5, 'desc']], // Ordena por atraso (maior primeiro)
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-        dom: '<"d-flex justify-content-between align-items-center mb-3"<"d-flex align-items-center"l><"d-flex"f>>rtip'
-    });
-    
-    // Evento para abrir o modal do mapa
-    $(document).on('click', '.view-route', function() {
-        const routeId = $(this).data('route-id');
-        $('#loadingIndicator').show();
-        
-        // Aqui você pode chamar sua função original para carregar os detalhes da rota
-        // loadRouteDetails(routeId);
-        
-        // Esta é apenas uma simulação, substitua pelo seu código real
-        setTimeout(function() {
-            $('#loadingIndicator').hide();
-            $('#modalRouteName').text('Detalhes da Rota #' + routeId.substring(0, 8));
-        }, 500);
-    });
-    
-    // Função para redimensionar a tabela quando o modal for fechado
-    $('#mapModal').on('hidden.bs.modal', function () {
-        $('#routesTable').DataTable().responsive.recalc();
-    });
-    
-    // Ajusta a tabela quando a janela for redimensionada
-    $(window).resize(function() {
-        $('#routesTable').DataTable().responsive.recalc();
-    });
-});
-</script>
-
 <!-- Importar o script original -->
 <script src="../js/scripts-jams.js
