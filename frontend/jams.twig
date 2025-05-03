@@ -3,6 +3,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>     
 
+<!-- Bootstrap JS (certifique-se que está sendo carregado) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Highcharts -->
 <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -12,7 +14,6 @@
 <link rel="stylesheet" href="https://code.highcharts.com/css/highcharts.css" />
 
 <script src="https://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.js"></script>
-
 
 <style>
     .insight-card {
@@ -34,18 +35,34 @@
         width: 40px;
         text-align: center;
     }
+    
     #mapContainer {
         height: 500px;
         width: 100%;
-      }
-      
+    }
+    
+    .border-primary {
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .border-info {
+        border-left: 4px solid #0dcaf0;
+    }
+    
+    .border-warning {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .border-danger {
+        border-left: 4px solid #dc3545;
+    }
+    
+    .border-success {
+        border-left: 4px solid #198754;
+    }
 </style>
+
 <div class="container-fluid">
-
-    {# DEBUG temporário: remova em produção 
-    <pre>{{ dump(routes) }}</pre>
-    #}
-
     <div class="row">
         <div class="col-12">
             {% if jams is not empty %}
@@ -103,8 +120,8 @@
                                             </td>
                                             <td class="text-center">
                                                 <button class="btn btn-primary btn-sm view-route"
-                                                    data-toggle="modal"
-                                                    data-target="#mapModal"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#mapModal"
                                                     data-route-id="{{ jam.uuid }}"
                                                     title="Ver detalhes da rota">
                                                     <i class="fas fa-map-marker-alt"></i> VER MAPA
@@ -135,22 +152,20 @@
 </div>
 
 <!-- Modal para exibir detalhes da rota -->
-<!-- Modal HTML -->
-<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="modalRouteName" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 id="modalRouteName" class="modal-title">Título</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalRouteName" class="modal-title">Detalhes da Rota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="mapContainer"></div>
+                <div id="insightsContainer" class="mt-3"></div>
+            </div>
         </div>
-        <div class="modal-body">
-          <div id="loadingIndicator" style="display: none;">Carregando...</div>
-          <div id="mapContainer" style="display:none; height:500px;"></div>
-          <div id="insightsContainer"></div>
-        </div>
-      </div>
     </div>
-  </div>
-  
+</div>
 
+<!-- Importar o script corrigido -->
 <script src="../js/scripts-jams.js"></script>
