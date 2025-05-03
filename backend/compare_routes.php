@@ -241,6 +241,3 @@ $data = [
     'start_date' => $startDate,
     'end_date' => $endDate
 ];
-
-// Renderizar template
-echo $twig->render('comparacao_rotas.html.twig', $data);
