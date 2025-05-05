@@ -83,7 +83,6 @@
                                         <th class="text-center">Atraso (min)</th>
                                         <th class="text-center">Comprimento (m)</th>
                                         <th class="text-center">Publicado em</th>
-                                        <th class="text-center">Status</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -112,19 +111,12 @@
                                             <td class="text-center">{{ length|number_format(0) }}</td>
                                             <td class="text-center">{{ pub_date|round(0, 'floor')|date("d/m/Y H:i") }}</td>
                                             <td class="text-center">
-                                                {% if jam.status == 1 %}
-                                                    <span class="badge badge-success">Ativo</span>
-                                                {% else %}
-                                                    <span class="badge badge-secondary">Inativo</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="text-center">
                                                 <button class="btn btn-primary btn-sm view-route"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#mapModal"
                                                     data-route-id="{{ jam.uuid }}"
                                                     title="Ver detalhes da rota">
-                                                    <i class="fas fa-map-marker-alt"></i> VER MAPA
+                                                    <i class="fas fa-map-marker-alt"></i> VER
                                                 </button>
                                             </td>
                                         </tr>
