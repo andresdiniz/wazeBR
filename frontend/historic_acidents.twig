@@ -111,7 +111,6 @@
     </div>
 </div>
 
-
 <script>
     (function($) {
 
@@ -255,58 +254,4 @@
     
     })(jQuery);
 
-</script>
-
-<script>
-    // Configuração do WebSocket
-    const socketProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const socket = new WebSocket(socketProtocol + window.location.host + '/ws-alerts');
-
-    socket.onopen = function() {
-        $('#connectionStatus').html('<i class="fas fa-circle text-success"></i> Online');
-    };
-
-    socket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        if(data.type === 'new_alert') {
-            showAlertNotification(data);
-            refreshData();
-        }
-    };
-
-    socket.onclose = function() {
-        $('#connectionStatus').html('<i class="fas fa-circle text-danger"></i> Offline');
-    };
-
-    function showAlertNotification(data) {
-        const notification = new bootstrap.Toast(document.getElementById('liveToast'));
-        const toastBody = document.getElementById('toastBody');
-        toastBody.innerHTML = `
-            Novo alerta registrado!<br>
-            Local: ${data.street}<br>
-            Horário: ${new Date(data.timestamp).toLocaleTimeString()}
-        `;
-        notification.show();
-    }
-
-    async function refreshData() {
-        const currentFilters = {
-            start_date: $('#start_date').val(),
-            end_date: $('#end_date').val(),
-            group_by: $('#group_by').val()
-        };
-        await fetchAccidentAlerts(...Object.values(currentFilters));
-    }
-
-    // Toast de Notificação
-    const toastHTML = `
-        <div class="toast position-fixed top-1 end-1" id="liveToast" role="alert">
-            <div class="toast-header bg-warning">
-                <strong class="me-auto"><i class="fas fa-bell"></i> Novo Alerta</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body" id="toastBody"></div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', toastHTML);
 </script>
