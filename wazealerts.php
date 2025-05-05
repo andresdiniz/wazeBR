@@ -339,6 +339,29 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
     }
 }
 
+function saveJamsToDbEmpty(PDO $pdo, $id_parceiro)
+{
+    $currentDateTime = date('Y-m-d H:i:s');
+
+    $pdo->beginTransaction();
+
+    try {
+        // Desativa todos os jams para o parceiro
+        $stmtDeactivate = $pdo->prepare("
+            UPDATE jams 
+            SET status = 0, date_updated = NOW()
+            WHERE id_parceiro = ?
+        ");
+        $stmtDeactivate->execute([$id_parceiro]);
+
+        // Confirma a transação
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw new Exception("Erro ao desativar jams: " . $e->getMessage());
+    }
+}
+
 
 // Função principal para processar os alertas
 function processAlerts()
@@ -363,7 +386,7 @@ function processAlerts()
                     saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
                 } else {
                     // Se não veio a chave 'jams', considera como array vazio para desativar os existentes
-                    saveJamsToDb($pdo, [], $url, $id_parceiro);
+                    saveJamsToDbEmpty($pdo, [], $url, $id_parceiro);
                 }
             } catch (Exception $e) {
                 echo "Erro ao processar dados: " . $e->getMessage() . PHP_EOL;
