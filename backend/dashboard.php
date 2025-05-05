@@ -187,18 +187,39 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro = null) {
             return $stmt->fetch(PDO::FETCH_ASSOC);
         };
     
+        // Dados das tabelas originais
         $irregularities = $getData('irregularities');
         $subroutes = $getData('subroutes');
         $routes = $getData('routes');
     
-        $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0);
-        $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0);
+        // Obter dados da tabela jams
+        $jamsSql = "
+            SELECT 
+                SUM(length) AS lento,
+                SUM(delay) AS atraso
+            FROM jams
+            WHERE status = 1 $filter
+        ";
+        
+        $jamsStmt = $pdo->prepare($jamsSql);
+        foreach ($params as $key => $val) {
+            $jamsStmt->bindValue($key, $val, PDO::PARAM_INT);
+        }
+        $jamsStmt->execute();
+        $jamsData = $jamsStmt->fetch(PDO::FETCH_ASSOC);
+    
+        // Cálculo total incluindo dados da tabela jams
+        $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0) + ($jamsData['lento'] ?? 0);
+        $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0) + ($jamsData['atraso'] ?? 0);
     
         $result = [
             'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
             'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
             'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
         ];
+        
+        // Salvar no cache
+        file_put_contents($cacheFile, json_encode($result));
         
         return $result;
     }

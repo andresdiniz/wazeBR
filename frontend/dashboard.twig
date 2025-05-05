@@ -40,119 +40,364 @@
 {% endblock %}
 
 {% block body %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard de Alertas</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-800">
-  <div class="container mx-auto p-4 space-y-6">
-    <!-- Métricas do topo -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white shadow rounded p-4 text-center">
-        <p class="text-sm text-blue-500">Alertas Ativos (Hoje)</p>
-        <p class="text-2xl font-bold">{{ activeAlertsToday }}</p>
-      </div>
-      <div class="bg-white shadow rounded p-4 text-center">
-        <p class="text-sm text-green-500">Alertas Este Mês</p>
-        <p class="text-2xl font-bold">{{ totalAlertsThisMonth }}</p>
-      </div>
-      <div class="bg-white shadow rounded p-4 text-center">
-        <p class="text-sm text-cyan-500">KM Congestionados</p>
-        <p class="text-2xl font-bold">{{ traficdata.total_kms_lento }} km</p>
-      </div>
-      <div class="bg-white shadow rounded p-4 text-center">
-        <p class="text-sm text-yellow-500">Atraso Total</p>
-        <p class="text-2xl font-bold">{{ traficdata.total_atraso_minutos }} min</p>
-      </div>
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard de Alertas</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-download fa-sm text-white-50"></i> Exportar Dados
+        </a>
     </div>
 
-    <!-- Alertas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Acidentes Recentes -->
-      <div class="bg-white shadow rounded p-4">
-        <h2 class="text-lg font-semibold mb-2">Acidentes Recentes</h2>
-        {% if accidentAlerts is empty %}
-          <p class="text-sm text-gray-500">Nenhum acidente registrado recentemente</p>
-        {% else %}
-          <!-- Lista de acidentes -->
-        {% endif %}
-      </div>
+    <!-- Metrics Row -->
+    <div class="row">
+        <!-- Cards de Métricas -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Alertas Ativos (Hoje)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ activeAlertsToday }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      <!-- Congestionamentos Recentes -->
-      <div class="bg-white shadow rounded p-4">
-        <h2 class="text-lg font-semibold mb-2">Congestionamentos Recentes</h2>
-        {% if jamAlerts is empty %}
-          <p class="text-sm text-gray-500">Nenhum congestionamento registrado recentemente</p>
-        {% else %}
-          <!-- Lista de congestionamentos -->
-        {% endif %}
-      </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Alertas Este Mês
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalAlertsThisMonth }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                KM Congestionados
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_kms_lento }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-road fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Atraso Total
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_atraso_minutos }} min</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Tabelas Detalhadas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Buracos Recentes -->
-      <div class="bg-white shadow rounded p-4 overflow-auto">
-        <h2 class="text-lg font-semibold mb-4">Buracos Recentes</h2>
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th class="text-left">Cidade</th>
-              <th class="text-left">Rua</th>
-              <th class="text-left">Data</th>
-              <th class="text-left">Confiança</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for alert in hazardAlerts %}
-              <tr class="border-t">
-                <td>{{ alert.city }}</td>
-                <td>{{ alert.street }}</td>
-                <td>{{ alert.pubMillis|date("d/m/Y") }}</td>
-                <td>{{ alert.confidence }}</td>
-                <td><a href="#" class="text-blue-500 hover:underline">Detalhes</a></td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <!-- Tabelas de Alertas -->
+    <div class="row">
+        <!-- Tabela de Acidentes -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Acidentes Recentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if accidentAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="accidentsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in accidentAlerts %}
+                            <tr>
+                                <td>{{ alert.city }}</td>
+                                <td>{{ alert.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                       target="_blank" 
+                                       class="text-primary">
+                                        {{ alert.location_x|number_format(5) }}, {{ alert.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        {{ alert.confidence }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal"
+                                            data-alert="{{ {
+                                                'uuid': alert.uuid,
+                                                'city': alert.city,
+                                                'street': alert.street,
+                                                'location_x': alert.location_x,
+                                                'location_y': alert.location_y,
+                                                'pubMillis': alert.pubMillis,
+                                                'type': alert.type,
+                                                'subtype': alert.subtype,
+                                                'confidence': alert.confidence,
+                                                'status': alert.status
+                                            }|json_encode|e('html_attr') }}">
+                                        <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum acidente registrado recentemente</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-      <!-- Outros Alertas Recentes -->
-      <div class="bg-white shadow rounded p-4 overflow-auto">
-        <h2 class="text-lg font-semibold mb-4">Outros Alertas Recentes</h2>
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th class="text-left">Cidade</th>
-              <th class="text-left">Rua</th>
-              <th class="text-left">Data</th>
-              <th class="text-left">Confiança</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for alert in otherAlerts %}
-              <tr class="border-t">
-                <td>{{ alert.city }}</td>
-                <td>{{ alert.street }}</td>
-                <td>{{ alert.pubMillis|date("d/m/Y") }}</td>
-                <td>{{ alert.confidence }}</td>
-                <td><a href="#" class="text-blue-500 hover:underline">Detalhes</a></td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+        <!-- Tabela de Congestionamentos -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Congestionamentos Recentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if jamAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="jamsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for jam_alert in jamAlerts %}
+                            <tr>
+                                <td>{{ jam_alert.city }}</td>
+                                <td>{{ jam_alert.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ jam_alert.location_y }},{{ jam_alert.location_x }}" 
+                                    target="_blank" 
+                                    class="text-primary">
+                                        {{ jam_alert.location_x|number_format(5) }}, {{ jam_alert.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (jam_alert.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ jam_alert.confidence > 4 ? 'success' : jam_alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        {{ jam_alert.confidence }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal"
+                                            data-alert="{{ {
+                                                'uuid': jam_alert.uuid,
+                                                'city': jam_alert.city,
+                                                'street': jam_alert.street,
+                                                'location_x': jam_alert.location_x,
+                                                'location_y': jam_alert.location_y,
+                                                'pubMillis': jam_alert.pubMillis,
+                                                'type': jam_alert.type,
+                                                'confidence': jam_alert.confidence,
+                                                'status': jam_alert.status
+                                            }|json_encode|e('html_attr') }}">
+                                        <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum congestionamento registrado recentemente</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Buracos -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Buracos Recentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if hazardAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="jamsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pothole_alerts in hazardAlerts %}
+                            <tr>
+                                <td>{{ pothole_alerts.city }}</td>
+                                <td>{{ pothole_alerts.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ pothole_alerts.location_y }},{{ pothole_alerts.location_x }}" 
+                                    target="_blank" 
+                                    class="text-primary">
+                                        {{ pothole_alerts.location_x|number_format(5) }}, {{ pothole_alerts.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (pothole_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ pothole_alerts.confidence > 4 ? 'success' : pothole_alerts.confidence > 2 ? 'warning' : 'danger' }}">
+                                        {{ pothole_alerts.confidence }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                            data-toggle="modal" 
+                                            data-target="#alertModal"
+                                            data-alert="{{ {
+                                                'uuid': pothole_alerts.uuid,
+                                                'city': pothole_alerts.city,
+                                                'street': pothole_alerts.street,
+                                                'location_x': pothole_alerts.location_x,
+                                                'location_y': pothole_alerts.location_y,
+                                                'pubMillis': pothole_alerts.pubMillis,
+                                                'type': pothole_alerts.type,
+                                                'confidence': pothole_alerts.confidence,
+                                                'status': pothole_alerts.status
+                                            }|json_encode|e('html_attr') }}">
+                                        <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum buraco registrado</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Outros Alertas -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Outros Alertas Recentes</h6>
+                </div>
+                <div class="card-body">
+                    {% if otherAlerts is not empty %}
+                    <table class="table table-bordered table-hover" id="jamsTable">
+                        <thead>
+                            <tr>
+                                <th>Cidade</th>
+                                <th>Rua</th>
+                                <th>Localização</th>
+                                <th>Data</th>
+                                <th>Confiança</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for orther_alerts in otherAlerts %}
+                            <tr>
+                                <td>{{ orther_alerts.city }}</td>
+                                <td>{{ orther_alerts.street }}</td>
+                                <td>
+                                    <a href="https://www.waze.com/ul?ll={{ orther_alerts.location_y }},{{ orther_alerts.location_x }}" 
+                                    target="_blank" 
+                                    class="text-primary">
+                                        {{ orther_alerts.location_x|number_format(5) }}, {{ orther_alerts.location_y|number_format(5) }}
+                                    </a>
+                                </td>
+                                <td class="alert-date">{{ (orther_alerts.pubMillis/1000)|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    <span class="badge badge-{{ orther_alerts.confidence > 4 ? 'success' : orther_alerts.confidence > 2 ? 'warning' : 'danger' }}">
+                                        {{ orther_alerts.confidence }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info open-modal" 
+                                        data-toggle="modal" 
+                                        data-target="#alertModal"
+                                        data-alert='{{ {
+                                            "uuid": orther_alerts.uuid,
+                                            "city": orther_alerts.city,
+                                            "street": orther_alerts.street,
+                                            "location_x": orther_alerts.location_x,
+                                            "location_y": orther_alerts.location_y,
+                                            "pubMillis": orther_alerts.pubMillis,
+                                            "type": orther_alerts.type,
+                                            "confidence": orther_alerts.confidence,
+                                            "status": orther_alerts.status
+                                        }|json_encode|e('js') }}'>
+                                    <i class="fas fa-info-circle"></i> Detalhes
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">Nenhum buraco registrado</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Repetir estrutura para outras tabelas (Buracos, Congestionamentos, Outros Alertas) -->
+        <!-- ... -->
+
     </div>
-  </div>
-</body>
-</html>
-
+</div>
 
 <!-- Modal Único -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
