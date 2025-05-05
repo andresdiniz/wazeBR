@@ -2,7 +2,7 @@
 {% block stylesheets %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
-<style>
+<>
     /* Your existing custom styles */
     .card-header {
         background-color: #f8f9fa;
@@ -105,7 +105,7 @@
         cursor: pointer;
     }
 
-</style>
+</>
 {% endblock %}
 
 {% block body %}
@@ -469,73 +469,62 @@
 </div>
 
 <!-- Modal Único -->
-<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content p-3 shadow-lg rounded">
-                <div class="modal-header bg-primary text-white rounded-top py-3 px-4">
-                    <h5 class="modal-title" id="alertModalLabel">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> Detalhes do Evento
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-    
-                <div class="modal-body px-4" style="max-height: 70vh; overflow-y: auto;">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card border-0 shadow-sm p-3 mb-3">
-                                <h6 class="text-primary mb-3">Informações Gerais</h6>
-                                <p><strong>📌 UUID:</strong> <span id="modalUuid"></span></p>
-                                <p><strong>🏙️ Cidade:</strong> <span id="modalCity"></span></p>
-                                <p><strong>📍 Rua:</strong> <span id="modalStreet"></span></p>
-                                <p><strong>📡 Localização:</strong> <span id="modalLocation"></span></p>
-                            </div>
-                        </div>
-    
-                        <div class="col-md-6">
-                            <div class="card border-0 shadow-sm p-3 mb-3">
-                                <h6 class="text-primary mb-3">Detalhes do Alerta</h6>
-                                <p><strong>📅 Data:</strong> <span id="modalDate"></span></p>
-                                <p><strong>🛣️ KM Estimado:</strong> <span id="modalKm" class="badge bg-secondary"></span></p>
-                                <p><strong>🔍 Confiança:</strong> <span id="modalConfidence" class="badge"></span></p>
-                                <p><strong>⚠️ Status:</strong> <span id="modalStatus" class="badge"></span></p>
-                                <p><strong>🔗 Link Partner Hub:</strong> <a id="modalPartnerLink" class="badge bg-primary" target="_blank" rel="noopener noreferrer">Abrir</a></p>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <div class="card border-0 shadow-sm p-3 mb-3">
-                        <h6 class="text-primary mb-3">Classificação</h6>
-                        <p><strong>🚨 Tipo:</strong> <span id="modalType"></span></p>
-                        <p><strong>📌 Subtipo:</strong> <span id="modalSubtype"></span></p>
-                    </div>
-    
-                    <div class="card border-0 shadow-sm p-3">
-                        <h6 class="text-center text-muted mb-3">📍 Localização no Mapa (Waze)</h6>
-                        <div id="mapContainer" class="map-container">
-                                                </div>
-                    </div>
-                </div>
-    
-                <div class="modal-footer d-flex justify-content-between px-4 py-3">
-                    <div class="d-flex"> {# Grouping buttons #}
-                        <a id="modalWazeLink" class="btn btn-outline-primary mr-2" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-waze mr-1"></i> Ver no Waze
-                        </a>
-                        {# Added Street View Link Here #}
-                        <a id="modalStreetViewLink" class="btn btn-streetview" target="_blank" rel="noopener noreferrer">
-                            <i class="fas fa-street-view mr-1"></i> Street View
-                        </a>
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-1"></i> Fechar
-                    </button>
-                </div>
-            </div>
-         </div>
-   </div>
- 
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3 shadow-lg rounded">
+            <div class="modal-header bg-primary text-white rounded-top">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 mb-3">
+                            <p><strong>📌 UUID:</strong> <span id="modalUuid"></span></p>
+                            <p><strong>🏙️ Cidade:</strong> <span id="modalCity"></span></p>
+                            <p><strong>📍 Rua:</strong> <span id="modalStreet"></span></p>
+                            <p><strong>📡 Localização:</strong> <span id="modalLocation"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="alert-details">
+                            <p><strong>📅 Data:</strong> <span id="modalDate"></span></p>
+                            <p><strong>🛣️ KM Estimado:</strong> <span id="modalKm" class="badge bg-info"></span></p>
+                            <p><strong>🔍 Confiança:</strong> <span id="modalConfidence" class="badge"></span></p>
+                            <p><strong>⚠️ Status:</strong> <span id="modalStatus" class="badge"></span></p>
+                            <p><strong>🔗 Link:</strong> <a id="modalPartnerLink" class="badge bg-primary" target="_blank">Partner Hub</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm p-3 mb-3">
+                    <p><strong>🚨 Tipo:</strong> <span id="modalType"></span></p>
+                    <p><strong>📌 Subtipo:</strong> <span id="modalSubtype"></span></p>
+                </div>
+
+                <div class="card border-0 shadow-sm p-3">
+                    <h6 class="text-center text-muted">📍 Localização no Mapa</h6>
+                    <div id="mapContainer" class="map-container"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <a id="modalWazeLink" class="btn btn-outline-primary" target="_blank">
+                    <i class="fab fa-waze"></i> Ver no Waze
+                </a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
