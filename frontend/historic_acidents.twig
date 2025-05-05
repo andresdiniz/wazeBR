@@ -1,130 +1,63 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-<style>
-    .card-summary {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-    }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    .card-summary:hover {
-        transform: translateY(-5px);
-    }
-
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        margin: 20px 0;
-    }
-
-    .dataTables_wrapper {
-        padding: 15px;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .filter-label {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-</style>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <div class="container my-5">
-    <h1 class="text-center mb-4 display-4 font-weight-bold text-primary">
-        <i class="fas fa-traffic-light"></i> Histórico de Acidentes
-    </h1>
+    <h1 class="text-center mb-4">Histórico de Acidentes</h1>
 
-    <!-- Cards de Resumo -->
-    <div class="row mb-4" id="summaryCards">
-        <div class="col-md-4 mb-3">
-            <div class="card card-summary bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-exclamation-triangle"></i> Total de Acidentes</h5>
-                    <h2 class="card-text" id="totalAccidents">0</h2>
-                </div>
+    <form id="filterForm" class="my-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">Data Inicial:</label>
+                <input type="date" class="form-control" id="start_date" name="start_date">
             </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card card-summary bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-thermometer-half"></i> Média Diária</h5>
-                    <h2 class="card-text" id="dailyAverage">0</h2>
-                </div>
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">Data Final:</label>
+                <input type="date" class="form-control" id="end_date" name="end_date">
             </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card card-summary bg-warning text-dark">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Rua Mais Afetada</h5>
-                    <h2 class="card-text" id="mostAffectedStreet">-</h2>
-                </div>
+            <div class="col-md-4">
+                <label for="group_by" class="form-label">Agrupar por:</label>
+                <select class="form-control" id="group_by" name="group_by">
+                    <option value="date">Data</option>
+                    <option value="hour">Hora</option>
+                    <option value="street">Rua</option>
+                </select>
             </div>
-        </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card mb-4 border-0 shadow">
-        <div class="card-body">
-            <h4 class="card-title mb-4"><i class="fas fa-filter"></i> Filtros</h4>
-            <form id="filterForm">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="start_date" class="filter-label">Data Inicial:</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="end_date" class="filter-label">Data Final:</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="group_by" class="filter-label">Agrupar por:</label>
-                        <select class="form-control" id="group_by" name="group_by">
-                            <option value="date">Data</option>
-                            <option value="hour">Hora</option>
-                            <option value="street">Rua</option>
-                            <option value="severity">Gravidade</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-search"></i> Filtrar
-                        </button>
-                    </div>
-                </div>
+            <div>
                 <input type="hidden" id="id_parceiro" value="{{id_parceiro}}">
-            </form>
+            </div>
         </div>
-    </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Filtrar</button>
+    </form>
 
-    <!-- Gráfico -->
-    <div class="chart-container">
+    <div id="alertsTableContainer" class="my-5">
+        <table id="alertsTable" class="display table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Quantidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">Nenhum alerta carregado.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="alertsChartContainer" style="display: none;">
         <canvas id="alertsChart" height="400"></canvas>
-    </div>
-
-    <!-- Tabela -->
-    <div class="card border-0 shadow">
-        <div class="card-body">
-            <h4 class="card-title mb-4"><i class="fas fa-table"></i> Dados Detalhados</h4>
-            <table id="alertsTable" class="display table table-hover" style="width:100%">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Categoria</th>
-                        <th>Quantidade</th>
-                        <th>% do Total</th>
-                        <th>Variação</th>
-                        <th>Severidade</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
     </div>
 </div>
 
