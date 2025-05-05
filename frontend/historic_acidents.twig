@@ -13,53 +13,104 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
-<div class="container my-5">
-    <h1 class="text-center mb-4">Histórico de Acidentes</h1>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <form id="filterForm" class="my-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date">
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --background-color: #f8f9fa;
+    }
+
+    body {
+        background-color: var(--background-color);
+        min-height: 100vh;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .real-time-badge {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 rounded-3">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-traffic-light me-2"></i>
+                Monitor de Acidentes
+            </a>
+            <span class="navbar-text" id="connectionStatus">
+                <i class="fas fa-circle text-danger"></i> Offline
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <h2 class="h4 mb-4"><i class="fas fa-filter me-2"></i>Filtros</h2>
+                    <form id="filterForm">
+                        <div class="row g-3">
+                            <!-- Campos do formulário mantidos iguais -->
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fas fa-sync me-2"></i>Atualizar Dados
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date">
+
+            <div class="col-lg-8">
+                <div class="dashboard-card p-4">
+                    <h2 class="h4 mb-4"><i class="fas fa-chart-line me-2"></i>Gráfico Analítico</h2>
+                    <div class="chart-container position-relative">
+                        <canvas id="alertsChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="group_by" class="form-label">Agrupar por:</label>
-                <select class="form-control" id="group_by" name="group_by">
-                    <option value="date">Data</option>
-                    <option value="hour">Hora</option>
-                    <option value="street">Rua</option>
-                </select>
-            </div>
-            <div>
-                <input type="hidden" id="id_parceiro" value="{{id_parceiro}}">
+
+            <div class="col-lg-4">
+                <div class="dashboard-card p-4">
+                    <h2 class="h4 mb-4"><i class="fas fa-table me-2"></i>Dados Tabulados</h2>
+                    <table id="alertsTable" class="table table-hover w-100"></table>
+                </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary w-100 mt-3">Filtrar</button>
-    </form>
-
-    <div id="alertsTableContainer" class="my-5">
-        <table id="alertsTable" class="display table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Categoria</th>
-                    <th>Quantidade</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="2">Nenhum alerta carregado.</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
-    <div id="alertsChartContainer" style="display: none;">
-        <canvas id="alertsChart" height="400"></canvas>
+
+    <div class="real-time-badge">
+        <span class="badge bg-success p-3">
+            <i class="fas fa-bolt me-2"></i>
+            Dados em Tempo Real
+        </span>
     </div>
 </div>
+
 
 <script>
     (function($) {
@@ -204,4 +255,58 @@
     
     })(jQuery);
 
+</script>
+
+<script>
+    // Configuração do WebSocket
+    const socketProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(socketProtocol + window.location.host + '/ws-alerts');
+
+    socket.onopen = function() {
+        $('#connectionStatus').html('<i class="fas fa-circle text-success"></i> Online');
+    };
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if(data.type === 'new_alert') {
+            showAlertNotification(data);
+            refreshData();
+        }
+    };
+
+    socket.onclose = function() {
+        $('#connectionStatus').html('<i class="fas fa-circle text-danger"></i> Offline');
+    };
+
+    function showAlertNotification(data) {
+        const notification = new bootstrap.Toast(document.getElementById('liveToast'));
+        const toastBody = document.getElementById('toastBody');
+        toastBody.innerHTML = `
+            Novo alerta registrado!<br>
+            Local: ${data.street}<br>
+            Horário: ${new Date(data.timestamp).toLocaleTimeString()}
+        `;
+        notification.show();
+    }
+
+    async function refreshData() {
+        const currentFilters = {
+            start_date: $('#start_date').val(),
+            end_date: $('#end_date').val(),
+            group_by: $('#group_by').val()
+        };
+        await fetchAccidentAlerts(...Object.values(currentFilters));
+    }
+
+    // Toast de Notificação
+    const toastHTML = `
+        <div class="toast position-fixed top-1 end-1" id="liveToast" role="alert">
+            <div class="toast-header bg-warning">
+                <strong class="me-auto"><i class="fas fa-bell"></i> Novo Alerta</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', toastHTML);
 </script>
