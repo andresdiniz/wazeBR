@@ -379,10 +379,6 @@ function processAlerts()
                 // Processa Alertas
                 if (!empty($jsonData['alerts'])) {
                     saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
-                } else {
-                    // Se não veio a chave 'alerts', considera como array vazio para desativar os existentes
-                    echo "Desativando alertas para o parceiro: $id_parceiro" . PHP_EOL;
-                    saveJamsToDbEmpty($pdo,$id_parceiro);
                 }
 
                 // Processa Jams
@@ -391,6 +387,10 @@ function processAlerts()
                 } else {
                     // Se não veio a chave 'jams', considera como array vazio para desativar os existentes
                     echo "Desativando alertas para o parceiro: $id_parceiro" . PHP_EOL;
+                    saveJamsToDbEmpty($pdo, $id_parceiro);
+                }
+                if (empty($jsonData['jams'])) {
+                    echo "Nenhum  jam encontrado na URL: $url" . PHP_EOL;
                     saveJamsToDbEmpty($pdo, $id_parceiro);
                 }
             } catch (Exception $e) {
