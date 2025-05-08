@@ -234,3 +234,8 @@ try {
 // Renderização
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new \Twig\Environment($loader);
+
+echo $twig->render('jamsanalitics.twig', [
+    'analytics' => $data,
+    'is_admin' => ($_SESSION['usuario_id_parceiro'] == 99)
+]);
