@@ -14,24 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     };
-    
-    // Cores para os gráficos
-    const colors = {
-        primary: 'rgba(13, 110, 253, 0.7)',
-        primaryBorder: 'rgba(13, 110, 253, 1)',
-        secondary: 'rgba(108, 117, 125, 0.7)',
-        secondaryBorder: 'rgba(108, 117, 125, 1)',
-        success: 'rgba(25, 135, 84, 0.7)',
-        successBorder: 'rgba(25, 135, 84, 1)',
-        danger: 'rgba(220, 53, 69, 0.7)',
-        dangerBorder: 'rgba(220, 53, 69, 1)',
-        warning: 'rgba(255, 193, 7, 0.7)',
-        warningBorder: 'rgba(255, 193, 7, 1)',
-        info: 'rgba(13, 202, 240, 0.7)',
-        infoBorder: 'rgba(13, 202, 240, 1)'
-    };
-    
-    // Paleta de cores para múltiplas séries
+
+    // Função para gerar cores das bordas
+    const generateBorderColors = (colorsArray) => 
+        colorsArray.map(c => c.replace(/[\d.]+\)$/g, '1)'));
+
+    // Cores e paleta
     const colorPalette = [
         'rgba(13, 110, 253, 0.7)',   // primary
         'rgba(220, 53, 69, 0.7)',    // danger
@@ -45,212 +33,139 @@ document.addEventListener('DOMContentLoaded', function() {
         'rgba(214, 51, 132, 0.7)'    // pink
     ];
     
-    const colorPaletteBorders = colorPalette.map(color => color.replace('0.7', '1'));
-    
-    // Inicializar gráficos
-    
+    const colorPaletteBorders = generateBorderColors(colorPalette);
+
+    // Função para criação de eixos duplos
+    const dualAxisScales = (yTitle, y1Title) => ({
+        y: {
+            beginAtZero: true,
+            position: 'left',
+            title: { display: true, text: yTitle }
+        },
+        y1: {
+            beginAtZero: true,
+            position: 'right',
+            title: { display: true, text: y1Title },
+            grid: { drawOnChartArea: false }
+        }
+    });
+
     // 1. Gráfico de distribuição por hora
-    if (document.getElementById('hourlyChart')) {
-        const hourlyData = dashboardData.hourly_distribution;
-        const hours = hourlyData.map(item => `${item.hour_of_day}:00`);
-        const jamCounts = hourlyData.map(item => item.jam_count);
-        const avgDelays = hourlyData.map(item => item.avg_delay / 60); // Convertendo para minutos
-        
-        new Chart(document.getElementById('hourlyChart'), {
-            type: 'bar',
-            data: {
-                labels: hours,
-                datasets: [
-                    {
-                        label: 'Congestionamentos',
-                        data: jamCounts,
-                        backgroundColor: colors.primary,
-                        borderColor: colors.primaryBorder,
-                        borderWidth: 1,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Atraso Médio (min)',
-                        data: avgDelays,
-                        type: 'line',
-                        borderColor: colors.danger,
-                        backgroundColor: colors.danger,
-                        borderWidth: 2,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
+    initHourlyChart();
     // 2. Gráfico de distribuição por dia da semana
-    if (document.getElementById('weekdayChart')) {
-        // Ordene os dias da semana corretamente
-        const weekdayData = [...dashboardData.weekly_pattern]; 
-        
-        // Mapear nomes em português se necessário
-        const dayNames = {
-            'Sunday': 'Domingo',
-            'Monday': 'Segunda',
-            'Tuesday': 'Terça',
-            'Wednesday': 'Quarta',
-            'Thursday': 'Quinta',
-            'Friday': 'Sexta',
-            'Saturday': 'Sábado'
-        };
-        
-        // Ordenar por day_num para garantir a ordem correta
-        weekdayData.sort((a, b) => a.day_num - b.day_num);
-        
-        const days = weekdayData.map(item => dayNames[item.day_of_week] || item.day_of_week);
-        const dayJamCounts = weekdayData.map(item => item.jam_count);
-        const dayAvgDelays = weekdayData.map(item => item.avg_delay / 60); // Convertendo para minutos
-        
-        new Chart(document.getElementById('weekdayChart'), {
-            type: 'bar',
-            data: {
-                labels: days,
-                datasets: [
-                    {
-                        label: 'Congestionamentos',
-                        data: dayJamCounts,
-                        backgroundColor: colors.success,
-                        borderColor: colors.successBorder,
-                        borderWidth: 1,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Atraso Médio (min)',
-                        data: dayAvgDelays,
-                        type: 'line',
-                        borderColor: colors.warning,
-                        backgroundColor: colors.warning,
-                        borderWidth: 2,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
+    initWeekdayChart();
     // 3. Gráfico de nível de congestionamento
-    if (document.getElementById('levelChart')) {
-        const levelData = dashboardData.congestion_by_level;
-        const levels = levelData.map(item => `Nível ${item.level}`);
-        const levelCounts = levelData.map(item => item.jam_count);
-        const levelAvgDelays = levelData.map(item => item.avg_delay / 60); // Convertendo para minutos
+    initLevelChart();
+    // 4. Gráfico de distribuição de atrasos
+    initDelayDistributionChart();
+    // 5. Gráfico mensal
+    initMonthlyChart();
+    // 6. Gráfico de cidades
+    initCityChart();
+    // 7. Gráfico de tipo de via
+    initRoadTypeChart();
+    // 8. Gráfico de relação entre comprimento e atraso
+    initLengthVsDelayChart();
+
+    function initHourlyChart() {
+        const ctx = document.getElementById('hourlyChart');
+        if (!ctx) return;
+
+        const { hourly_distribution: data } = dashboardData;
+        const labels = data.map(item => `${item.hour_of_day}:00`);
         
-        new Chart(document.getElementById('levelChart'), {
+        new Chart(ctx, createDualAxisChartConfig(
+            labels,
+            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
+            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
+            'Número de Congestionamentos',
+            'Atraso Médio (min)'
+        ));
+    }
+
+    function initWeekdayChart() {
+        const ctx = document.getElementById('weekdayChart');
+        if (!ctx) return;
+
+        const daysMap = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const data = [...dashboardData.weekly_pattern]
+            .sort((a, b) => a.day_num - b.day_num);
+        
+        const labels = data.map(item => daysMap[item.day_num] || item.day_of_week);
+        
+        new Chart(ctx, createDualAxisChartConfig(
+            labels,
+            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)'],
+            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(255, 193, 7, 0.7)'],
+            'Número de Congestionamentos',
+            'Atraso Médio (min)'
+        ));
+    }
+
+    function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
+        const [pData, pLabel, pType, pColor] = primaryData;
+        const [sData, sLabel, sType, sColor] = secondaryData;
+        
+        return {
             type: 'bar',
             data: {
-                labels: levels,
+                labels,
                 datasets: [
                     {
-                        label: 'Congestionamentos',
-                        data: levelCounts,
-                        backgroundColor: colors.info,
-                        borderColor: colors.infoBorder,
+                        label: pLabel,
+                        data: pData,
+                        backgroundColor: pColor,
+                        borderColor: generateBorderColors([pColor])[0],
                         borderWidth: 1,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        type: pType
                     },
                     {
-                        label: 'Atraso Médio (min)',
-                        data: levelAvgDelays,
-                        type: 'line',
-                        borderColor: colors.danger,
-                        backgroundColor: colors.danger,
+                        label: sLabel,
+                        data: sData,
+                        borderColor: generateBorderColors([sColor])[0],
+                        backgroundColor: sColor,
                         borderWidth: 2,
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
+                        type: sType
                     }
                 ]
             },
             options: {
                 ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
+                scales: dualAxisScales(yTitle, y1Title)
             }
-        });
+        };
     }
-    
-    // 4. Gráfico de distribuição de atrasos
-    if (document.getElementById('delayDistChart')) {
-        const delayDistData = dashboardData.delay_distribution;
-        const delayRanges = delayDistData.map(item => item.delay_range);
-        const delayCounts = delayDistData.map(item => item.jam_count);
+
+    function initLevelChart() {
+        const ctx = document.getElementById('levelChart');
+        if (!ctx) return;
+
+        const data = dashboardData.congestion_by_level;
+        const labels = data.map(item => `Nível ${item.level}`);
         
-        new Chart(document.getElementById('delayDistChart'), {
+        new Chart(ctx, createDualAxisChartConfig(
+            labels,
+            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)'],
+            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
+            'Número de Congestionamentos',
+            'Atraso Médio (min)'
+        ));
+    }
+
+    function initDelayDistributionChart() {
+        const ctx = document.getElementById('delayDistChart');
+        if (!ctx) return;
+
+        const data = dashboardData.delay_distribution;
+        
+        new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: delayRanges,
+                labels: data.map(i => i.delay_range),
                 datasets: [{
-                    data: delayCounts,
+                    data: data.map(i => i.jam_count),
                     backgroundColor: colorPalette,
                     borderColor: colorPaletteBorders,
                     borderWidth: 1
@@ -259,128 +174,107 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 ...chartOptions,
                 plugins: {
-                    legend: {
-                        position: 'right',
-                    }
+                    legend: { position: 'right' }
                 }
             }
         });
     }
-    
-    // 5. Gráfico mensal
-    if (document.getElementById('monthlyChart')) {
-        const monthlyData = dashboardData.monthly_trend;
-        const months = monthlyData.map(item => item.month);
-        const monthJamCounts = monthlyData.map(item => item.jam_count);
-        const monthAvgDelays = monthlyData.map(item => item.avg_delay / 60); // Convertendo para minutos
+
+    function initMonthlyChart() {
+        const ctx = document.getElementById('monthlyChart');
+        if (!ctx) return;
+
+        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dec'];
+        const data = dashboardData.monthly_trend.map(item => ({
+            ...item,
+            month_name: months[item.month - 1] || item.month
+        }));
         
-        new Chart(document.getElementById('monthlyChart'), {
+        new Chart(ctx, {
             type: 'line',
             data: {
-                labels: months,
+                labels: data.map(i => i.month_name),
                 datasets: [
                     {
                         label: 'Congestionamentos',
-                        data: monthJamCounts,
-                        backgroundColor: colors.primary,
-                        borderColor: colors.primaryBorder,
+                        data: data.map(i => i.jam_count),
+                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
                         borderWidth: 2,
                         yAxisID: 'y',
-                        tension: 0.1
+                        tension: 0.4
                     },
                     {
                         label: 'Atraso Médio (min)',
-                        data: monthAvgDelays,
-                        backgroundColor: colors.danger,
-                        borderColor: colors.dangerBorder,
+                        data: data.map(i => i.avg_delay/60),
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
                         borderWidth: 2,
                         yAxisID: 'y1',
-                        tension: 0.1
+                        tension: 0.4
                     }
                 ]
             },
             options: {
                 ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
+                scales: dualAxisScales(
+                    'Número de Congestionamentos',
+                    'Atraso Médio (min)'
+                )
             }
         });
     }
-    
-    // 6. Gráfico de cidades
-    if (document.getElementById('cityChart')) {
-        const cityData = dashboardData.city_analysis.slice(0, 10); // Top 10 cidades
-        const cities = cityData.map(item => item.city);
-        const cityCounts = cityData.map(item => item.jam_count);
+
+    function initCityChart() {
+        const ctx = document.getElementById('cityChart');
+        if (!ctx) return;
+
+        const data = dashboardData.city_analysis
+            .sort((a, b) => b.jam_count - a.jam_count)
+            .slice(0, 10);
         
-        new Chart(document.getElementById('cityChart'), {
+        new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: cities,
+                labels: data.map(i => i.city),
                 datasets: [{
                     label: 'Congestionamentos',
-                    data: cityCounts,
-                    backgroundColor: colors.success,
-                    borderColor: colors.successBorder,
+                    data: data.map(i => i.jam_count),
+                    backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 ...chartOptions,
                 indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
-    
-    // 7. Gráfico de tipo de via
-    if (document.getElementById('roadTypeChart')) {
-        const roadTypeData = dashboardData.roadtype_analysis;
-        
-        // Mapeamento de roadType para descrições mais amigáveis
-        const roadTypeNames = {
-            1: 'Rua',
-            2: 'Avenida',
-            3: 'Rodovia',
-            4: 'Rua Principal',
-            5: 'Freeway',
-            6: 'Via Expressa',
-            7: 'Estrada de Terra',
-            8: 'Outro'
+
+    function initRoadTypeChart() {
+        const ctx = document.getElementById('roadTypeChart');
+        if (!ctx) return;
+
+        const typeMap = {
+            1: 'Rua', 2: 'Avenida', 3: 'Rodovia',
+            4: 'Rua Principal', 5: 'Freeway',
+            6: 'Via Expressa', 7: 'Estrada de Terra', 8: 'Outro'
         };
         
-        const roadTypes = roadTypeData.map(item => roadTypeNames[item.roadType] || `Tipo ${item.roadType}`);
-        const roadTypeCounts = roadTypeData.map(item => item.jam_count);
+        const data = dashboardData.roadtype_analysis
+            .map(item => ({
+                ...item,
+                typeName: typeMap[item.roadType] || `Tipo ${item.roadType}`
+            }));
         
-        new Chart(document.getElementById('roadTypeChart'), {
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: roadTypes,
+                labels: data.map(i => i.typeName),
                 datasets: [{
-                    data: roadTypeCounts,
+                    data: data.map(i => i.jam_count),
                     backgroundColor: colorPalette,
                     borderColor: colorPaletteBorders,
                     borderWidth: 1
@@ -389,61 +283,19 @@ document.addEventListener('DOMContentLoaded', function() {
             options: chartOptions
         });
     }
-    
-    // 8. Gráfico de relação entre comprimento e atraso
-    if (document.getElementById('lengthVsDelayChart')) {
-        const lengthData = dashboardData.length_vs_delay;
-        const lengthRanges = lengthData.map(item => item.length_range);
-        const lengthJamCounts = lengthData.map(item => item.jam_count);
-        const lengthAvgDelays = lengthData.map(item => item.avg_delay / 60); // Convertendo para minutos
+
+    function initLengthVsDelayChart() {
+        const ctx = document.getElementById('lengthVsDelayChart');
+        if (!ctx) return;
+
+        const data = dashboardData.length_vs_delay;
         
-        new Chart(document.getElementById('lengthVsDelayChart'), {
-            type: 'bar',
-            data: {
-                labels: lengthRanges,
-                datasets: [
-                    {
-                        label: 'Congestionamentos',
-                        data: lengthJamCounts,
-                        backgroundColor: colors.info,
-                        borderColor: colors.infoBorder,
-                        borderWidth: 1,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Atraso Médio (min)',
-                        data: lengthAvgDelays,
-                        type: 'line',
-                        borderColor: colors.danger,
-                        backgroundColor: colors.danger,
-                        borderWidth: 2,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Número de Congestionamentos'
-                        }
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
-            }
-        });
+        new Chart(ctx, createDualAxisChartConfig(
+            data.map(i => i.length_range),
+            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)'],
+            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
+            'Número de Congestionamentos',
+            'Atraso Médio (min)'
+        ));
     }
+});
