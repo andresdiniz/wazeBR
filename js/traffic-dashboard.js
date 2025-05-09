@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('delayDistChart');
         if (!ctx) return;
 
-        const data = heatmap;
+        const data = dadosatraso;
         console.log(data); // Verifique se os dados estão corretos
         
         new Chart(ctx, {
