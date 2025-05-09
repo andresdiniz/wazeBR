@@ -187,19 +187,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function initLevelChart() {
         const ctx = document.getElementById('levelChart');
         if (!ctx) return;
-
-        const data = dadosnivel;
+    
+        const data = dadosnivel; // Certifique-se que essa variável esteja definida corretamente via Twig
+    
         console.log(data); // Verifique se os dados estão corretos
-        const labels = data.map(item => `Nível ${item.level}`);
-        
-        new Chart(ctx, createDualAxisChartConfig(
+    
+        const labels = data.map(item => `Nível ${item.nivel}`);
+        const congestionamentos = data.map(item => item.total);
+    
+        new Chart(ctx, createSingleAxisChartConfig(
             labels,
-            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)'],
-            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
-            'Número de Congestionamentos',
-            'Atraso Médio (min)'
+            [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)']
         ));
-    }
+    }    
 
     function initDelayDistributionChart() {
         const ctx = document.getElementById('delayDistChart');
