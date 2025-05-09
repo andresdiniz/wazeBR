@@ -449,6 +449,7 @@
     
     <!-- Script para dashboard -->
     <script>
+        console.log('Dados do Dashboard:', {{ data|json_encode|raw }});
         // Dados para gráficos extraídos da variável PHp
         const data = {{horario|json_encode|raw}};
         const datasemana = {{semanal|json_encode|raw}};

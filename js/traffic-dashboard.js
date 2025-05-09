@@ -189,9 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ctx) return;
     
         const data = dadosnivel; // Certifique-se que essa variável esteja definida corretamente via Twig
-    
-        console.log(data); // Verifique se os dados estão corretos
-    
+        
         const labels = data.map(item => `Nível ${item.nivel}`);
         const congestionamentos = data.map(item => item.total);
     
