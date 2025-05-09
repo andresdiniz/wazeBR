@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const { hourly_distribution: data } = dashboardData;
 
-        console.log(data);
+        console.log(dashboardData);
         const labels = data.map(item => `${item.hour_of_day}:00`);
         
         new Chart(ctx, createDualAxisChartConfig(
