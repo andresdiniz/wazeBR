@@ -217,8 +217,8 @@
                                         <tbody>
                                             {% for street in ruas %}
                                             <tr>
-                                                <td>{{ street.street }}</td>
-                                                <td>{{ street.jam_count }}</td>
+                                                <td>{{ street.rua }}</td>
+                                                <td>{{ street.total }}</td>
                                                 <td>{{ (street.avg_delay/60)|number_format(1) }}</td>
                                                 <td>{{ street.avg_length|number_format(0) }}</td>
                                                 <td>{{ (street.max_delay/60)|number_format(1) }}</td>
