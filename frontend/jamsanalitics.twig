@@ -84,20 +84,20 @@
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (data.summary.avg_delay/60)|number_format(1) }}</div>
+                                            <div class="summary-value">{{ (analytics['resumo']['atraso_medio']/60)|number_format(1) }}</div>
                                             <div class="summary-label">Atraso Médio (minutos)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (data.summary.avg_length/1000)|number_format(2) }}</div>
+                                            <div class="summary-value">{{ (analytics['resumo']['comprimento_medio']/1000)|number_format(2) }}</div>
                                             <div class="summary-label">Comprimento Médio (km)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ data.summary.avg_speed|number_format(1) }}</div>
-                                            <div class="summary-label">Velocidade Média (km/h)</div>
+                                            <div class="summary-value">{{ (analytics['resumo']['max_atraso']/60)|number_format(1) }}</div>
+                                            <div class="summary-label">Maior Atraso em Minutos</div>
                                         </div>
                                     </div>
                                 </div>
