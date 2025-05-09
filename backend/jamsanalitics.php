@@ -123,19 +123,28 @@ class TrafficJamAnalyzer {
 
     private function getTopRuas($id_parceiro) {
         $query = "SELECT 
-                    street as rua,
-                    COUNT(*) as total
+                    street AS rua,
+                    COUNT(*) AS total,
+                    ROUND(AVG(delay) / 60, 1) AS atraso_medio_min,
+                    ROUND(AVG(length), 1) AS comprimento_medio_m,
+                    ROUND(AVG(speedKMH), 1) AS velocidade_media_kmh,
+                    ROUND(MAX(delay) / 60, 1) AS atraso_max_min
                 FROM jams
                 WHERE street IS NOT NULL";
-        
+    
         $this->addPartnerFilter($query, $id_parceiro);
+    
         $query .= " GROUP BY rua ORDER BY total DESC LIMIT 10";
-        
+    
         $stmt = $this->pdo->prepare($query);
-        if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        if ($id_parceiro != 99) {
+            $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        }
         $stmt->execute();
+    
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
 
     private function getNiveisCongestionamento($id_parceiro) {
         $query = "SELECT 
