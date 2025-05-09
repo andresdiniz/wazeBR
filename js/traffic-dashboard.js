@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
     
-        const data = horarioData;
+        const data = {{horario}}; // Dados do gráfico de horários
         console.log(data); // Verifique se os dados estão corretos
     
         // Adaptado ao novo formato: [{ hora, total }]
