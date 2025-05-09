@@ -184,19 +184,23 @@ class TrafficJamAnalyzer {
 
     private function getTopSegmentos($id_parceiro) {
         $query = "SELECT 
-                    js.ID_segment as segmento,
-                    COUNT(*) as total
+                    js.ID_segment AS segmento,
+                    COUNT(*) AS total,
+                    ROUND(AVG(j.delay) / 60, 1) AS atraso_medio_min,
+                    ROUND(AVG(j.length), 1) AS comprimento_medio_m,
+                    ROUND(MAX(j.delay) / 60, 1) AS atraso_max_min
                 FROM jam_segments js
-                JOIN jams j ON js.jam_uuid = j.uuid";
-        
-        $this->addPartnerFilter($query, $id_parceiro);
-        $query .= " GROUP BY segmento ORDER BY total DESC LIMIT 10";
-        
+                JOIN jams j ON js.jam_uuid = j.uuid
+                WHERE j.id_parceiro = :id_parceiro
+                GROUP BY js.ID_segment
+                ORDER BY total DESC
+                LIMIT 10";
+    
         $stmt = $this->pdo->prepare($query);
-        if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    }    
 }
 
 // Processamento principal
