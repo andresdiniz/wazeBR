@@ -234,3 +234,17 @@ try {
 // Renderização
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new \Twig\Environment($loader);
+
+$data = array_merge($data, [
+    'resumo' => $data['resumo'],    
+    'horario' => $data['horario'],
+    'semanal' => $data['semanal'],
+    'mensal' => $data['mensal'],
+    'cidades' => $data['cidades'],
+    'ruas' => $data['ruas'],
+    'niveis' => $data['niveis'],
+    'tipos_via' => $data['tipos_via'],
+    'heatmap' => $data['heatmap'],
+    'segmentos' => $data['segmentos'],
+    'meta' => $data['meta']
+]);
