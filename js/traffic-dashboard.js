@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ));
     }
 
-    let weekdayChartInstance = null; // ✅ Declara fora da função
+    let weekdayChartInstance = null; // ✅ declare fora
 
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
@@ -108,13 +108,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const congestionamentos = data.map(d => d.total);
 
+        // ✅ atribuição (sem redeclarar)
         weekdayChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
 
-    
+        
     
 
     function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
