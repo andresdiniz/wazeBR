@@ -185,6 +185,7 @@ class TrafficJamAnalyzer {
     private function getTopSegmentos($id_parceiro) {
         $query = "SELECT 
                     js.ID_segment AS segmento,
+                    j.street AS rua,
                     COUNT(*) AS total,
                     ROUND(AVG(j.delay) / 60, 1) AS atraso_medio_min,
                     ROUND(AVG(j.length), 1) AS comprimento_medio_m,
@@ -192,7 +193,7 @@ class TrafficJamAnalyzer {
                 FROM jam_segments js
                 JOIN jams j ON js.jam_uuid = j.uuid
                 WHERE j.id_parceiro = :id_parceiro
-                GROUP BY js.ID_segment
+                GROUP BY js.ID_segment, j.street
                 ORDER BY total DESC
                 LIMIT 10";
     
@@ -200,7 +201,8 @@ class TrafficJamAnalyzer {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }    
+    }
+        
 }
 
 // Processamento principal

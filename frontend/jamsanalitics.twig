@@ -171,6 +171,7 @@
                                         <thead>
                                             <tr>
                                                 <th>ID Segmento</th>
+                                                <th>Rua</th>
                                                 <th>Contagem</th>
                                                 <th>Atraso Médio (min)</th>
                                                 <th>Comprimento Médio (m)</th>
@@ -181,6 +182,7 @@
                                             {% for segment in segmentos %}
                                             <tr>
                                                 <td>{{ segment.segmento }}</td>
+                                                <td>{{ segment.rua }}</td>
                                                 <td>{{ segment.total }}</td>
                                                 <td>{{ (segment.atraso_medio_min/60)|number_format(1) }}</td>
                                                 <td>{{ segment.comprimento_medio_m|number_format(0) }}</td>
