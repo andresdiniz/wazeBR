@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('levelChart');
         if (!ctx) return;
 
-        const data = dashboardData.congestion_by_level;
+        const data = dadosnivel;
         const labels = data.map(item => `Nível ${item.level}`);
         
         new Chart(ctx, createDualAxisChartConfig(
