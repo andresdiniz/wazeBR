@@ -85,9 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'Atraso Médio (min)' // Esse eixo ficará vazio
         ));
     }
-    
-
-    let weekdayChartInstance;
 
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
