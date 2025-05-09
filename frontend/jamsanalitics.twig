@@ -134,7 +134,7 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="mb-0">Congestionamentos por Nível</h5>
+                                <h5 class="mb-0">Congestionamentos por Nível da Via</h5>
                             </div>
                             <div class="card-body">
                                 <canvas id="levelChart"></canvas>
@@ -452,6 +452,7 @@
         // Dados para gráficos extraídos da variável PHp
         const data = {{horario|json_encode|raw}};
         const datasemana = {{semanal|json_encode|raw}};
+        const dadosnivel = {{niveis|json_encode|raw}};
 
         //const dashboardData = {{analytics|json_encode|raw}};
     </script>
