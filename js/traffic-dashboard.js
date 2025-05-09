@@ -70,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initHourlyChart() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
-    
-        console.log(data); // Verifique se os dados estão corretos
-    
+        
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
         const congestionamentos = data.map(item => item.total);
@@ -104,8 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
-
-        console.log(data); // Verifique se os dados estão corretos
 
         const labels = data.map(d => {
             const idx = dayOrder.indexOf(d.dia);
@@ -193,6 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ctx) return;
 
         const data = dadosnivel;
+        console.log(data); // Verifique se os dados estão corretos
         const labels = data.map(item => `Nível ${item.level}`);
         
         new Chart(ctx, createDualAxisChartConfig(
