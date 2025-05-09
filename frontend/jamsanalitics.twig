@@ -440,11 +440,11 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Adicione antes do fechamento do body
+    <!-- Adicione antes do fechamento do body -->
     <script>
     // Converta os dados para JSON no console
-    console.log('Dados do Dashboard:', {{ analytics|json_encode|raw }});
-    </script>-->
+    console.log('Dados do Dashboard:', {{ data|json_encode|raw }});
+    </script>
     
     <!-- Script para dashboard -->
     <script>
