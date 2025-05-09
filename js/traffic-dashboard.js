@@ -103,7 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Ordenar dados conforme dia da semana
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
-    
+        
+        console.log(data); // Para depuração
+        
         const labels = data.map(d => {
             const idx = dayOrder.indexOf(d.dia);
             return dayLabelsPT[idx] || d.dia;
