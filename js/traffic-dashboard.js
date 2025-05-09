@@ -90,22 +90,33 @@ document.addEventListener('DOMContentLoaded', function() {
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
-
-        const daysMap = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const data = [...dashboardData.semanal]
-            .sort((a, b) => a.day_num - b.day_num);
-        
-        console.log('dados semanais', data);
-        const labels = data.map(item => daysMap[item.day_num] || item.day_of_week);
-        
-        new Chart(ctx, createDualAxisChartConfig(
+    
+        const rawData = dashboardData.semanal; // ajuste conforme a real chave
+        if (!Array.isArray(rawData)) {
+            console.error('Dados semanais inválidos');
+            return;
+        }
+    
+        // Ordem desejada dos dias da semana (em inglês)
+        const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    
+        // Ordenar dados conforme dia da semana
+        const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
+    
+        const labels = data.map(d => {
+            const idx = dayOrder.indexOf(d.dia);
+            return dayLabelsPT[idx] || d.dia;
+        });
+    
+        const congestionamentos = data.map(d => d.total);
+    
+        new Chart(ctx, createSingleAxisChartConfig(
             labels,
-            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)'],
-            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(255, 193, 7, 0.7)'],
-            'Número de Congestionamentos',
-            'Atraso Médio (min)'
+            [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
+    
 
     function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
         const [pData, pLabel, pType, pColor] = primaryData;
