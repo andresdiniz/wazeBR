@@ -81,12 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
             window.hourlyChartInstance.destroy();
         }
     
-        window.hourlyChartInstance = new Chart(ctx, createDualAxisChartConfig(
+        window.hourlyChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
-            [[], 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'], // Linha vazia, pois não há avg_delay
-            'Número de Congestionamentos',
-            'Atraso Médio (min)' // Esse eixo ficará vazio
+            [[], 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'] // Linha vazia, pois não há avg_delay
         ));
     }
 
