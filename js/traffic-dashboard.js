@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
     
-        const { hourly_distribution: data } = dashboardData;
+        const data = dashboardData.horario;
     
         // Verifique o conteúdo
-        //console.log(data);
+        console.log(data);
     
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
