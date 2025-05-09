@@ -71,14 +71,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
     
-        const data = {{horario}}; // Dados do gráfico de horários
         console.log(data); // Verifique se os dados estão corretos
     
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
         const congestionamentos = data.map(item => item.total);
+
+        if (window.hourlyChartInstance) {
+            window.hourlyChartInstance.destroy();
+        }
     
-        new Chart(ctx, createDualAxisChartConfig(
+        window.hourlyChartInstance = new Chart(ctx, createDualAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
             [[], 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'], // Linha vazia, pois não há avg_delay
