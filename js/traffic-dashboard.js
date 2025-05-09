@@ -90,10 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
-        console.log(dashboardData);
 
         const daysMap = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const data = [...dashboardData.weekly_pattern]
+        const data = [...dashboardData.semanal]
             .sort((a, b) => a.day_num - b.day_num);
         
         const labels = data.map(item => daysMap[item.day_num] || item.day_of_week);
