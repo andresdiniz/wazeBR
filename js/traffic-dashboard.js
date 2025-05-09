@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Atraso Médio (min)' // Esse eixo ficará vazio
         ));
     }
-    
+
     // ✅ Declare no topo, antes de qualquer uso
     var weekdayChartInstance = null;
 
@@ -116,8 +116,38 @@ document.addEventListener('DOMContentLoaded', function() {
         ));
     }
     
+    function createSingleAxisChartConfig(labels, [data, label, type, color]) {
+        return {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: color,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: label
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        };
+    }  
     
-
     function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
         const [pData, pLabel, pType, pColor] = primaryData;
         const [sData, sLabel, sType, sColor] = secondaryData;
