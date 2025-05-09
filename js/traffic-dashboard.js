@@ -202,16 +202,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function initDelayDistributionChart() {
         const ctx = document.getElementById('delayDistChart');
         if (!ctx) return;
-
-        const data = dadosatraso;
+    
+        const data = dadosatraso; // Certifique-se de declarar essa variável no template via Twig
+    
         console.log(data); // Verifique se os dados estão corretos
-        
+    
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: data.map(i => i.delay_range),
+                labels: data.map(i => i.rua),
                 datasets: [{
-                    data: data.map(i => i.jam_count),
+                    data: data.map(i => i.total),
                     backgroundColor: colorPalette,
                     borderColor: colorPaletteBorders,
                     borderWidth: 1
@@ -225,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+   
 
     function initMonthlyChart() {
         const ctx = document.getElementById('monthlyChart');
@@ -271,77 +273,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function initCityChart() {
-        const ctx = document.getElementById('cityChart');
-        if (!ctx) return;
-
-        const data = dashboardData.city_analysis
-            .sort((a, b) => b.jam_count - a.jam_count)
-            .slice(0, 10);
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(i => i.city),
-                datasets: [{
-                    label: 'Congestionamentos',
-                    data: data.map(i => i.jam_count),
-                    backgroundColor: 'rgba(25, 135, 84, 0.7)',
-                    borderColor: 'rgba(25, 135, 84, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                ...chartOptions,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function initRoadTypeChart() {
-        const ctx = document.getElementById('roadTypeChart');
-        if (!ctx) return;
-
-        const typeMap = {
-            1: 'Rua', 2: 'Avenida', 3: 'Rodovia',
-            4: 'Rua Principal', 5: 'Freeway',
-            6: 'Via Expressa', 7: 'Estrada de Terra', 8: 'Outro'
-        };
-        
-        const data = dashboardData.roadtype_analysis
-            .map(item => ({
-                ...item,
-                typeName: typeMap[item.roadType] || `Tipo ${item.roadType}`
-            }));
-        
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: data.map(i => i.typeName),
-                datasets: [{
-                    data: data.map(i => i.jam_count),
-                    backgroundColor: colorPalette,
-                    borderColor: colorPaletteBorders,
-                    borderWidth: 1
-                }]
-            },
-            options: chartOptions
-        });
-    }
-
-    function initLengthVsDelayChart() {
-        const ctx = document.getElementById('lengthVsDelayChart');
-        if (!ctx) return;
-
-        const data = dashboardData.length_vs_delay;
-        
-        new Chart(ctx, createDualAxisChartConfig(
-            data.map(i => i.length_range),
-            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)'],
-            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
-            'Número de Congestionamentos',
-            'Atraso Médio (min)'
-        ));
-    }
 });
