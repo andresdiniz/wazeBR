@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = [...dashboardData.semanal]
             .sort((a, b) => a.day_num - b.day_num);
         
+        console.log(data);
         const labels = data.map(item => daysMap[item.day_num] || item.day_of_week);
         
         new Chart(ctx, createDualAxisChartConfig(
