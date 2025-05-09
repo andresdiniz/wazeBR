@@ -87,25 +87,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 
+    let weekdayChartInstance;
+
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
     
-        const rawData = dashboardData.semanal; // ajuste conforme a real chave
-        if (!Array.isArray(rawData)) {
-            console.error('Dados semanais inválidos');
-            return;
+        if (weekdayChartInstance) {
+            weekdayChartInstance.destroy(); // <--- importante!
         }
     
-        // Ordem desejada dos dias da semana (em inglês)
+        const rawData = dashboardData.semanal;
         const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    
-        // Ordenar dados conforme dia da semana
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
-        
-        console.log(data); // Para depuração
-        
+    
         const labels = data.map(d => {
             const idx = dayOrder.indexOf(d.dia);
             return dayLabelsPT[idx] || d.dia;
@@ -113,11 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
         const congestionamentos = data.map(d => d.total);
     
-        new Chart(ctx, createSingleAxisChartConfig(
+        weekdayChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
+    
     
 
     function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
