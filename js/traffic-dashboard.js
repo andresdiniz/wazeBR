@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ctx) return;
     
         const data = horarioData;
+        console.log(data); // Verifique se os dados estão corretos
     
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
