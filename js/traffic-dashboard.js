@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             weekdayChartInstance.destroy();
         }
 
-        const rawData = semanaData;
+        const rawData = datasemana;
         const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
