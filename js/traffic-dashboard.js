@@ -86,31 +86,34 @@ document.addEventListener('DOMContentLoaded', function() {
         ));
     }
 
+    let weekdayChartInstance = null; // ✅ Declara fora da função
+
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
-    
+
         if (weekdayChartInstance) {
-            weekdayChartInstance.destroy(); // <--- importante!
+            weekdayChartInstance.destroy();
         }
-    
+
         const rawData = dashboardData.semanal;
         const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
-    
+
         const labels = data.map(d => {
             const idx = dayOrder.indexOf(d.dia);
             return dayLabelsPT[idx] || d.dia;
         });
-    
+
         const congestionamentos = data.map(d => d.total);
-    
+
         weekdayChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
+
     
     
 
