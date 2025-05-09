@@ -70,20 +70,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function initHourlyChart() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
-
+    
         const { hourly_distribution: data } = dashboardData;
-
-        console.log(dashboardData);
-        const labels = data.map(item => `${item.hour_of_day}:00`);
-        
+    
+        // Verifique o conteúdo
+        //console.log(data);
+    
+        // Adaptado ao novo formato: [{ hora, total }]
+        const labels = data.map(item => `${item.hora}:00`);
+        const congestionamentos = data.map(item => item.total);
+    
         new Chart(ctx, createDualAxisChartConfig(
             labels,
-            [data.map(i => i.jam_count), 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
-            [data.map(i => i.avg_delay/60), 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'],
+            [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
+            [[], 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'], // Linha vazia, pois não há avg_delay
             'Número de Congestionamentos',
-            'Atraso Médio (min)'
+            'Atraso Médio (min)' // Esse eixo ficará vazio
         ));
     }
+    
 
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
