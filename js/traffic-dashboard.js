@@ -203,29 +203,64 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('delayDistChart');
         if (!ctx) return;
     
-        const data = dadosatraso; // Certifique-se de declarar essa variável no template via Twig
+        const data = dadosatraso;
     
-        console.log(data); // Verifique se os dados estão corretos
+        const labels = data.map(i => i.rua);
+        const values = data.map(i => i.total);
     
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut', // troca para doughnut para visual mais moderno
             data: {
-                labels: data.map(i => i.rua),
+                labels,
                 datasets: [{
-                    data: data.map(i => i.total),
+                    data: values,
                     backgroundColor: colorPalette,
                     borderColor: colorPaletteBorders,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    hoverOffset: 10 // destaque ao passar o mouse
                 }]
             },
             options: {
                 ...chartOptions,
+                cutout: '50%', // centraliza melhor no doughnut
                 plugins: {
-                    legend: { position: 'right' }
+                    legend: {
+                        position: 'bottom', // melhor para listas grandes
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = values.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percent}%)`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Ruas com Mais Congestionamentos',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    }
                 }
             }
         });
-    }
+    }    
 
 
 });
