@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const dayLabelsPT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         const data = dayOrder.map(dayName => rawData.find(d => d.dia === dayName) || { dia: dayName, total: 0 });
 
+        console.log(data); // Verifique se os dados estão corretos
+
         const labels = data.map(d => {
             const idx = dayOrder.indexOf(d.dia);
             return dayLabelsPT[idx] || d.dia;
