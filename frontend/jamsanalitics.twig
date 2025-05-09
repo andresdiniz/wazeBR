@@ -184,9 +184,9 @@
                                                 <td>{{ segment.segmento }}</td>
                                                 <td>{{ segment.rua }}</td>
                                                 <td>{{ segment.total }}</td>
-                                                <td>{{ (segment.atraso_medio_min/60)|number_format(1) }}</td>
-                                                <td>{{ segment.comprimento_medio_m|number_format(0) }}</td>
-                                                <td>{{ (segment.atraso_max_min/60)|number_format(1) }}</td>
+                                                <td>{{ (segment.atraso_medio_min) }}</td>
+                                                <td>{{ segment.comprimento_medio_m }}</td>
+                                                <td>{{ (segment.atraso_max_min) }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
