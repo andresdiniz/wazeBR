@@ -244,18 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 return `${label}: ${value} (${percent}%)`;
                             }
                         }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Ruas com Mais Congestionamentos',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
                     }
                 }
             }
