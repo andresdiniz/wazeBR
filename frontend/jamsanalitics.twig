@@ -180,8 +180,8 @@
                                         <tbody>
                                             {% for segment in segmentos %}
                                             <tr>
-                                                <td>{{ segment.ID_segment }}</td>
-                                                <td>{{ segment.jam_count }}</td>
+                                                <td>{{ segment.segmento }}</td>
+                                                <td>{{ segment.total }}</td>
                                                 <td>{{ (segment.avg_delay/60)|number_format(1) }}</td>
                                                 <td>{{ segment.avg_length|number_format(0) }}</td>
                                                 <td>{{ (segment.max_delay/60)|number_format(1) }}</td>
