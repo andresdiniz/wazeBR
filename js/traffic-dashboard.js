@@ -73,9 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
         const data = dashboardData.horario;
     
-        // Verifique o conteúdo
-        console.log(data);
-    
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
         const congestionamentos = data.map(item => item.total);
@@ -93,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
+        console.log(dashboardData);
 
         const daysMap = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         const data = [...dashboardData.weekly_pattern]
