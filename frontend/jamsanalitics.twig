@@ -108,6 +108,7 @@
                     <!-- Gráfico de distribuição por hora -->
                     <div class="col-md-6">
                         <div class="card">
+
                             <div class="card-header">
                                 <h5 class="mb-0">Distribuição por Hora do Dia</h5>
                             </div>
@@ -449,6 +450,7 @@
     <!-- Script para dashboard -->
     <script>
         // Dados para gráficos extraídos da variável PHp
+        const horarioData = {{ horario|json_encode|raw }};
         const dashboardData = {{analytics|json_encode|raw}};
     </script>
     <script src="../js/traffic-dashboard.js"></script>

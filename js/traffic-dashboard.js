@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('hourlyChart');
         if (!ctx) return;
     
-        const data = dashboardData.horario;
+        const data = horarioData;
     
         // Adaptado ao novo formato: [{ hora, total }]
         const labels = data.map(item => `${item.hora}:00`);
