@@ -450,8 +450,8 @@
     <!-- Script para dashboard -->
     <script>
         // Dados para gráficos extraídos da variável PHp
-        const horarioData = {{horario}};
-        const semanaData = {{semanal}};
+        const dados = {{data|json_encode|raw}};
+        console.log('Dados do Dashboard:', dados);
         //const dashboardData = {{analytics|json_encode|raw}};
     </script>
     <script src="../js/traffic-dashboard.js"></script>
