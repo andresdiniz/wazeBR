@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ));
     }
 
-    const weekdayChartInstance = null; // ✅ Declara fora da função
+    let weekdayChartInstance = null; // ✅ Declara fora da função
 
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
