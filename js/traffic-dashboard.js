@@ -59,13 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // 4. Gráfico de distribuição de atrasos
     initDelayDistributionChart();
     // 5. Gráfico mensal
-    initMonthlyChart();
+    //initMonthlyChart();
     // 6. Gráfico de cidades
-    initCityChart();
+    //initCityChart();
     // 7. Gráfico de tipo de via
-    initRoadTypeChart();
+    //initRoadTypeChart();
     // 8. Gráfico de relação entre comprimento e atraso
-    initLengthVsDelayChart();
+    //initLengthVsDelayChart();
 
     function initHourlyChart() {
         const ctx = document.getElementById('hourlyChart');
@@ -226,51 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-   
 
-    function initMonthlyChart() {
-        const ctx = document.getElementById('monthlyChart');
-        if (!ctx) return;
-
-        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dec'];
-        const data = dashboardData.monthly_trend.map(item => ({
-            ...item,
-            month_name: months[item.month - 1] || item.month
-        }));
-        
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(i => i.month_name),
-                datasets: [
-                    {
-                        label: 'Congestionamentos',
-                        data: data.map(i => i.jam_count),
-                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
-                        borderWidth: 2,
-                        yAxisID: 'y',
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Atraso Médio (min)',
-                        data: data.map(i => i.avg_delay/60),
-                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                        borderColor: 'rgba(220, 53, 69, 1)',
-                        borderWidth: 2,
-                        yAxisID: 'y1',
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                ...chartOptions,
-                scales: dualAxisScales(
-                    'Número de Congestionamentos',
-                    'Atraso Médio (min)'
-                )
-            }
-        });
-    }
 
 });
