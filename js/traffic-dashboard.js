@@ -85,13 +85,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'Atraso Médio (min)' // Esse eixo ficará vazio
         ));
     }
-
-    let weekdayChartInstance = null; // ✅ declare fora
+    
+    // ✅ Declare no topo, antes de qualquer uso
+    var weekdayChartInstance = null;
 
     function initWeekdayChart() {
         const ctx = document.getElementById('weekdayChart');
         if (!ctx) return;
 
+        // ✅ Isso agora funciona corretamente
         if (weekdayChartInstance) {
             weekdayChartInstance.destroy();
         }
@@ -108,14 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const congestionamentos = data.map(d => d.total);
 
-        // ✅ atribuição (sem redeclarar)
         weekdayChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
-
-        
+    
     
 
     function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y1Title) {
