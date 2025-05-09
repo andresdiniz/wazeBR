@@ -78,25 +78,25 @@
                                 <div class="row">
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ analytics['resumo']['total']|number_format }}</div>
+                                            <div class="summary-value">{{ resumo['total']|number_format }}</div>
                                             <div class="summary-label">Congestionamentos Totais</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (analytics['resumo']['atraso_medio']/60)|number_format(1) }}</div>
+                                            <div class="summary-value">{{ (resumo['atraso_medio']/60)|number_format(1) }}</div>
                                             <div class="summary-label">Atraso Médio (minutos)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (analytics['resumo']['comprimento_medio']/1000)|number_format(2) }}</div>
+                                            <div class="summary-value">{{ (resumo['comprimento_medio']/1000)|number_format(2) }}</div>
                                             <div class="summary-label">Comprimento Médio (km)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (analytics['resumo']['max_atraso']/60)|number_format(1) }}</div>
+                                            <div class="summary-value">{{ (resumo['max_atraso']/60)|number_format(1) }}</div>
                                             <div class="summary-label">Maior Atraso em Minutos</div>
                                         </div>
                                     </div>
@@ -443,12 +443,12 @@
     <!-- Adicione antes do fechamento do body -->
     <script>
     // Converta os dados para JSON no console
-    console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
+    //console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
     </script>
     
     <!-- Script para dashboard -->
     <script>
-        // Dados para gráficos extraídos da variável PHP
+        // Dados para gráficos extraídos da variável PHp
         const dashboardData = {{analytics|json_encode|raw}};
     </script>
     <script src="../js/traffic-dashboard.js"></script>
