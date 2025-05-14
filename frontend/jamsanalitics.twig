@@ -456,7 +456,7 @@
         const datasemana = {{ semanal|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const dadosnivel = {{ niveis|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const dadosatraso = {{ ruas|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const mensal = {{ mensal|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const mensal = {{ mes|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const atrasocomprimento = {{ length_delay|json_encode(constant('JSON_HEX_TAG'))|raw }};
 
         console.log('Dados por hora:', {{ horario|json_encode|raw }});
