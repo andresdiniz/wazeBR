@@ -43,6 +43,7 @@ class TrafficJamAnalyzer {
     }
 
     public function getAllData($id_parceiro) {
+    try {
         return [
             'resumo' => $this->getResumo($id_parceiro),
             'horario' => $this->getDistribuicaoHoraria($id_parceiro),
@@ -53,10 +54,14 @@ class TrafficJamAnalyzer {
             'niveis' => $this->getNiveisCongestionamento($id_parceiro),
             'tipos_via' => $this->getTiposVia($id_parceiro),
             'heatmap' => $this->getHeatmap($id_parceiro),
-            'segmentos' => $this->getTopSegmentos($id_parceiro)
-            //'length_delay' => $this->getLengthDelayData($id_parceiro),
+            'segmentos' => $this->getTopSegmentos($id_parceiro),
+            'length_delay' => $this->getLengthDelayData($id_parceiro),
         ];
+    } catch (\PDOException $e) {
+        return ['error' => $e->getMessage()];
     }
+}
+
 
     private function getResumo($id_parceiro) {
         $query = "SELECT 
