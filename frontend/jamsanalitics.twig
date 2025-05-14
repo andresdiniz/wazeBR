@@ -456,7 +456,8 @@
         const datasemana = {{semanal|json_encode|raw}};
         const dadosnivel = {{niveis|json_encode|raw}};
         const dadosatraso = {{ruas|json_encode|raw}};
-        console.log('Dados de segmentos:', {{ segmentos|json_encode|raw }});
+        const length_delay = {{comprimento|json_encode|raw}};
+        console.log('Dados de segmentos:', {{ length_delay }});
 
     </script>
     <script src="../js/traffic-dashboard.js"></script>
