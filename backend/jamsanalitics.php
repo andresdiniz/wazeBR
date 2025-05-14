@@ -3,15 +3,28 @@
  * Traffic Jam Analysis Dashboard - Dados Consolidados
  */
 
-session_start();
 
-require_once './config/configbd.php';
-require_once './vendor/autoload.php';
+// Nível de relatório de erros
+error_reporting(E_ALL);
 
-if (!isset($_SESSION['usuario_id_parceiro'])) {
-    header('Location: login.php');
-    exit;
-}
+// Desativar exibição de erros na tela
+ini_set('display_errors', 0);
+
+// Ativar logs de erros
+ini_set('log_errors', 1);
+
+// Definir caminho do arquivo de log
+ini_set('error_log', 'php_errors.log');
+
+require_once './config/configbd.php'; // Conexão ao banco de dados
+require_once './vendor/autoload.php'; // Autoloader do Composer
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
+// Configura o carregador do Twig para buscar templates na pasta "frontend"
+$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
+$twig = new Environment($loader);
 
 class TrafficJamAnalyzer {
     private $pdo;
