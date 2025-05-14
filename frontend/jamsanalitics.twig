@@ -457,7 +457,9 @@
         const dadosnivel = {{niveis|json_encode|raw}};
         const dadosatraso = {{ruas|json_encode|raw}};
         const atrasocomprimento = {{length_delay|json_encode|raw}};
-        console.log('Dados de segmentos:', {{ segmentos|json_encode|raw }});
+        console.log('Dados por hora:', {{ horario|json_encode|raw }});
+        console.log('Dados por hora:', {{ semanal|json_encode|raw }});
+        console.log('Dados por mensal:', {{ mensal|json_encode|raw }});
 
     </script>
     <script src="../js/traffic-dashboard.js"></script>
