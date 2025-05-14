@@ -159,33 +159,44 @@ class TrafficJamAnalyzer {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function getLengthDelayData($id_parceiro, int $limit = 1000): array {
+   public function getLengthDelayData($id_parceiro, int $limit = 1000): array {
         try {
-            $query = "SELECT 
-                        id,
-                        length AS comprimento,
-                        delay AS atraso
-                    FROM jams";
+            $query = "SELECT uuid, length AS comprimento, delay AS atraso FROM jams";
+            $conditions = [
+                "length IS NOT NULL",
+                "delay IS NOT NULL",
+                "length > 0",
+                "delay > 0"
+            ];
 
-            $hasFilter = $this->addPartnerFilter($query, $id_parceiro);
+            // Adiciona filtro de parceiro apenas se não for 99
+            $usePartnerFilter = $id_parceiro != 99;
+            if ($usePartnerFilter) {
+                $conditions[] = "id_parceiro = :id_parceiro";
+            }
 
-            $query .= $hasFilter 
-                ? " AND length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0"
-                : " WHERE length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0";
-
+            $query .= " WHERE " . implode(" AND ", $conditions);
             $query .= " ORDER BY date_received DESC LIMIT :limit";
 
             $stmt = $this->pdo->prepare($query);
-            if ($hasFilter) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+
+            if ($usePartnerFilter) {
+                $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+            }
+
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         } catch (\PDOException $e) {
             error_log("Erro SQL em getLengthDelayData: " . $e->getMessage());
             return [];
         }
     }
+
+
+
 
     private function getNiveisCongestionamento($id_parceiro) {
         $query = "SELECT 
