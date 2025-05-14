@@ -312,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('DOMContentLoaded', function () {
             const monthlyData = mensal;
 
+            console.log(monthlyData);
+            const labels = monthlyData.map(d => d.mes);
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
