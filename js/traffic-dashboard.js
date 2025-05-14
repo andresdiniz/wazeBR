@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. Gráfico mensal
     initMonthlyChart();
     // 6. Gráfico de cidades
-    initSemanal();
+    hourlyChart();
     // 7. Gráfico de tipo de via
     //initRoadTypeChart();
     // 8. Gráfico de relação entre comprimento e atraso
@@ -271,4 +271,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-    }
+    }}
