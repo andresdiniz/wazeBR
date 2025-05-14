@@ -342,241 +342,130 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } // Fechamento correto da função initMonthlyChart
 
-// Assume you have Chart.js, Chart.js Matrix Controller, and chartjs-plugin-datalabels loaded
-// <script src="https://cdn.jsdelivr.net/npm/chart.js@4.x/dist/chart.umd.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.x/dist/chartjs-chart-matrix.min.js"></script>
-// <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.x/dist/chartjs-plugin-datalabels.min.js"></script>
 
+// Assume you have Plotly.js included in your HTML file.
+// You can include it via CDN like this:
+// <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+// Or by downloading the library and hosting it locally.
 
-function weeklyHourlyHeatmap() {
-    // Certifique-se que a variável diaxsemana esteja definida corretamente via Twig
-    // Ex: var diaxsemana = {{ sua_variavel_twig | json_encode() | raw }};
-    const semanaldata = diaxsemana;
+function weeklyHourlyHeatmapPlotly() {
+    var semanaldata = diaxsemana; // Dados de entrada, deve ser um array de objetos com {dia, hora, media_velocidade, quantidade, media_nivel, media_atraso}
+    // Seleciona o contêiner onde o gráfico Plotly será renderizado.
+    // Plotly geralmente renderiza em uma div, não diretamente em um canvas existente.
+    const container = document.querySelector('.grafico-calor');
 
-    // Seleciona o contêiner onde o canvas já existe
-    const chartContainer = document.querySelector('.grafico-calor');
-    const canvas = document.getElementById('heatmapChart');
-
-    // Verifica se o contêiner, o canvas e os dados existem
-    if (!chartContainer || !canvas || !semanaldata || semanaldata.length === 0) {
-        console.error("Container do gráfico, canvas ou dados não encontrados.");
+    // Verifica se o contêiner e os dados existem
+    if (!container || !semanaldata || semanaldata.length === 0) {
+        console.error("Container do gráfico (.grafico-calor) ou dados não encontrados.");
         return;
     }
 
-    // Dias da semana
+    // Dias da semana (na ordem para o eixo Y: Domingo no topo)
     const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    // Calculate min and max speed for color mapping
-    const speeds = semanaldata.map(d => d.media_velocidade);
-    const minSpeed = Math.min(...speeds);
-    const maxSpeed = Math.max(...speeds);
+    // Inicializa arrays 2D para os valores do heatmap (z) e texto do tooltip (text_matrix).
+    // A dimensão será 7 dias (linhas) x 24 horas (colunas).
+    const z = Array(7).fill(null).map(() => Array(24).fill(null));
+    const text_matrix = Array(7).fill(null).map(() => Array(24).fill(''));
 
-    // Color interpolation function (blue to yellow/green) - mimicking the image's color scale idea
-    const getColor = (value) => {
-        if (value === undefined || value === null) return 'rgb(220, 220, 220)'; // Light grey for missing data
+    // Popula os arrays z e text_matrix com os dados de entrada.
+    const speeds = [];
+    semanaldata.forEach(d => {
+        // Verifica se os valores de dia e hora são válidos para os índices do array
+        if (d.dia >= 0 && d.dia < 7 && d.hora >= 0 && d.hora < 24) {
+            const speed = d.media_velocidade;
+            z[d.dia][d.hora] = speed;
+            speeds.push(speed); // Coleta as velocidades para encontrar min/max
 
-        // Normalize the speed value to a 0-1 range
-        const percent = (value - minSpeed) / (maxSpeed - minSpeed);
-
-        // Interpolate between several color stops for a gradient effect
-        const colorStops = [
-            { stop: 0, color: [68, 1, 84] },   // Purple
-            { stop: 0.25, color: [59, 82, 139] }, // Blue-ish
-            { stop: 0.5, color: [36, 152, 147] }, // Green-ish
-            { stop: 0.75, color: [138, 201, 87] }, // Yellow-green-ish
-            { stop: 1, color: [253, 231, 37] }    // Yellow
-        ];
-
-        let c1 = colorStops[0], c2 = colorStops[0];
-        for (let i = 0; i < colorStops.length - 1; i++) {
-            if (percent >= colorStops[i].stop && percent <= colorStops[i+1].stop) {
-                c1 = colorStops[i];
-                c2 = colorStops[i+1];
-                break;
-            }
-            // Handle values outside the defined stops range
-             if (percent < colorStops[0].stop) {
-                 c1 = colorStops[0];
-                 c2 = colorStops[0];
-             } else if (percent > colorStops[colorStops.length - 1].stop) {
-                 c1 = colorStops[colorStops.length - 1];
-                 c2 = colorStops[colorStops.length - 1];
-             }
-        }
-
-        // Avoid division by zero if c1.stop === c2.stop (happens at the edges or with uniform data)
-        const rangePercent = (c1.stop === c2.stop) ? 0 : (percent - c1.stop) / (c2.stop - c1.stop);
-
-
-        const r = Math.round(c1.color[0] + (c2.color[0] - c1.color[0]) * rangePercent);
-        const g = Math.round(c1.color[1] + (c2.color[1] - c1.color[1]) * rangePercent);
-        const b = Math.round(c1.color[2] + (c2.color[2] - c1.color[2]) * rangePercent);
-
-        return `rgb(${r}, ${g}, ${b})`;
-    };
-
-    // Create data points for all possible hours (0-23) and days (0-6)
-    // This ensures the grid is complete even if data is missing for a cell.
-    const completeMatrixData = [];
-    for (let dia = 0; dia < 7; dia++) {
-        for (let hora = 0; hora < 24; hora++) {
-            const dataPoint = semanaldata.find(d => d.dia === dia && d.hora === hora);
-            if (dataPoint) {
-                completeMatrixData.push({
-                    x: hora,
-                    y: dia,
-                    v: {
-                        quantidade: dataPoint.quantidade,
-                        media_nivel: parseFloat(dataPoint.media_nivel),
-                        media_velocidade: dataPoint.media_velocidade,
-                        media_atraso: parseFloat(dataPoint.media_atraso)
-                    }
-                });
-            } else {
-                // Add a placeholder for missing data
-                completeMatrixData.push({
-                    x: hora,
-                    y: dia,
-                    v: null // Indicates missing data
-                });
-            }
-        }
-    }
-
-    // Destroy existing chart instance if it exists
-    if (Chart.getChart('heatmapChart')) {
-        Chart.getChart('heatmapChart').destroy();
-    }
-
-    const chart = new Chart(canvas, {
-        type: 'matrix',
-        data: {
-            datasets: [{
-                label: 'Velocidade Média (km/h)', // Updated label
-                data: completeMatrixData,
-                backgroundColor: ctx => {
-                    if (ctx.raw.v === null) {
-                        return 'rgb(240, 240, 240)'; // Lighter grey for missing data
-                    }
-                    return getColor(ctx.raw.v.media_velocidade);
-                },
-                borderColor: 'rgba(0, 0, 0, 0.1)', // Border between cells
-                borderWidth: 1,
-                width: ({ chart }) => chart.chartArea.width / 24,
-                height: ({ chart }) => chart.chartArea.height / 7,
-                hoverBackgroundColor: '#ffff66', // Example hover effect
-                hoverBorderColor: '#ffff00'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            aspectRatio: 2, // Adjust aspect ratio if needed to match the image shape
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Velocidade Média por Dia da Semana e Hora', // Updated title
-                    font: {
-                        size: 16
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        title: ctx => {
-                            const data = ctx[0].raw.v;
-                            if (data === null) return 'Dados Indisponíveis';
-                            return `${data.hora}:00 - ${dias[data.dia]}`;
-                        },
-                        label: ctx => {
-                            const data = ctx.raw.v;
-                            if (data === null) return 'Sem dados para este período';
-                            return [
-                                `Quantidade: ${data.quantidade}`,
-                                `Nível Médio: ${data.media_nivel.toFixed(2)}`,
-                                `Velocidade Média: ${data.media_velocidade.toFixed(2)} km/h`,
-                                `Atraso Médio: ${data.media_atraso.toFixed(2)}`
-                            ];
-                        }
-                    }
-                },
-                legend: {
-                    display: false // Hide default legend, a color scale is needed (often done manually or with a plugin)
-                },
-                datalabels: { // Configuration for chartjs-plugin-datalabels
-                    color: '#000', // Color of the text
-                    font: {
-                        size: 9, // Smaller font size for readability in cells
-                        weight: 'bold'
-                    },
-                    formatter: function(value, context) {
-                        // Display average speed rounded to 1 decimal place
-                        if (value && value.v && value.v.media_velocidade !== undefined) {
-                            return value.v.media_velocidade.toFixed(1);
-                        }
-                        return ''; // Don't display anything for missing data
-                    },
-                    display: function(context) {
-                        // Display label only if there is data for the cell
-                        return context.dataset.data[context.dataIndex].v !== null;
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    type: 'linear',
-                    position: 'bottom', // X-axis at the bottom as in the image
-                    ticks: {
-                        callback: val => {
-                            // Ensure ticks are integers and within bounds
-                            if (Number.isInteger(val) && val >= 0 && val < 24) {
-                                return `${val}`; // Display just the hour number
-                            }
-                            return ''; // Hide ticks outside 0-23
-                        },
-                        stepSize: 1, // Ensure a tick for each hour
-                        autoSkip: false // Prevent skipping hours if space is limited
-                    },
-                    title: {
-                        display: true,
-                        text: 'Hora do Dia'
-                    },
-                    grid: {
-                        display: false // Hide grid lines for a cleaner look
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    ticks: {
-                        callback: val => {
-                            // Ensure ticks are integers and within bounds
-                            if (Number.isInteger(val) && val >= 0 && val < 7) {
-                                return dias[val];
-                            }
-                            return ''; // Hide ticks outside 0-6
-                        },
-                        stepSize: 1 // Ensure a tick for each day
-                    },
-                    title: {
-                        display: true,
-                        text: 'Dia da Semana'
-                    },
-                    reverse: true, // Keep Sunday (0) at the top as in the image
-                    grid: {
-                        display: false // Hide grid lines
-                    }
-                }
-            }
+            // Formata o texto completo para o tooltip
+            text_matrix[d.dia][d.hora] = `Quantidade: ${d.quantidade}<br>Nível Médio: ${parseFloat(d.media_nivel).toFixed(2)}<br>Velocidade Média: ${speed.toFixed(2)} km/h<br>Atraso Médio: ${parseFloat(d.media_atraso).toFixed(2)}`;
         }
     });
 
-    // Note: A color scale legend like the one in your image
-    // is not automatically generated by the Chart.js Matrix plugin.
-    // You would typically need a separate plugin or custom code
-    // to create that legend alongside the chart.
+    // Calcula a velocidade mínima e máxima para mapeamento de cores.
+    // Define valores padrão caso não haja dados para evitar erros.
+    const minSpeed = speeds.length > 0 ? Math.min(...speeds) : 0;
+    const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 100; // Valor máximo padrão se nenhum dado for encontrado
+
+    // Define os rótulos dos eixos X (horas) e Y (dias).
+    const x_labels = Array.from({ length: 24 }, (_, i) => i); // [0, 1, ..., 23]
+    const y_labels = dias; // ['Dom', 'Seg', ..., 'Sáb']
+
+    // Define os dados para o gráfico heatmap
+    const data = [{
+        z: z, // Matriz 2D com os valores a serem mapeados pela cor
+        x: x_labels, // Rótulos do eixo X
+        y: y_labels, // Rótulos do eixo Y
+        type: 'heatmap', // Tipo do gráfico
+        colorscale: 'Viridis', // Escala de cores (Viridis é semelhante à imagem)
+        showscale: true, // Mostra a barra de escala de cor
+        colorbar: {
+            title: {
+                text: 'Velocidade Média (km/h)', // Título da barra de cor
+                side: 'right'
+            }
+        },
+        text: text_matrix, // Matriz 2D com o texto personalizado para cada célula
+        hoverinfo: 'text', // Mostra apenas o texto personalizado no tooltip
+        zmin: minSpeed, // Valor mínimo para a escala de cor
+        zmax: maxSpeed  // Valor máximo para a escala de cor
+    }];
+
+    // Define o layout do gráfico
+    const layout = {
+        title: 'Velocidade Média por Dia da Semana e Hora', // Título principal do gráfico
+        xaxis: {
+            title: 'Hora do Dia', // Título do eixo X
+            tickvals: x_labels, // Define onde os ticks do eixo X aparecem
+            ticktext: x_labels.map(hour => `${hour}`), // Define o texto dos ticks do eixo X
+            side: 'bottom', // Posição do eixo X
+            type: 'category', // Trata os ticks como categorias para espaçamento uniforme
+            tickmode: 'array',
+            showgrid: false // Oculta as linhas de grade do eixo X
+        },
+        yaxis: {
+            title: 'Dia da Semana', // Título do eixo Y
+            tickvals: Array.from({ length: 7 }, (_, i) => i), // Define onde os ticks do eixo Y aparecem
+            ticktext: y_labels, // Define o texto dos ticks do eixo Y
+            autorange: 'reversed', // Inverte a ordem do eixo Y para ter Domingo no topo
+            type: 'category', // Trata os ticks como categorias para espaçamento uniforme
+            tickmode: 'array',
+            showgrid: false // Oculta as linhas de grade do eixo Y
+        },
+        // Ajusta as margens para melhor visualização dos rótulos e títulos
+        margin: {
+            l: 70, // margem esquerda
+            r: 20, // margem direita
+            b: 60, // margem inferior
+            t: 60, // margem superior
+        },
+        hovermode: 'closest', // Modo do tooltip
+        // Define as dimensões iniciais do gráfico com base no contêiner
+        width: container.offsetWidth,
+        height: container.offsetWidth / 2, // Ajuste a proporção conforme necessário
+    };
+
+    // Configurações adicionais (opcional)
+    const config = {
+        responsive: true // Torna o gráfico responsivo
+        // displayModeBar: false // Oculta a barra de ferramentas do Plotly
+    };
+
+    // Limpa o conteúdo anterior da div contêiner (se houver)
+    container.innerHTML = '';
+
+    // Renderiza o gráfico na div contêiner especificada
+    Plotly.newPlot(container, data, layout, config);
+
+    // Nota: Exibir os valores numéricos diretamente dentro de cada célula
+    // (como na imagem que você mostrou) não é uma funcionalidade padrão e simples
+    // do tipo heatmap no Plotly. Geralmente, isso é feito usando anotações,
+    // o que pode adicionar complexidade considerável ao código, especialmente
+    // com muitos pontos de dados ou dados faltantes. O tooltip já mostra os detalhes.
 }
 
-// Assuming diaxsemana is populated elsewhere, call the function to render the chart:
-// weeklyHourlyHeatmap();
-
+// Para usar esta função, chame-a passando seus dados (diaxsemana)
+// e o seletor do elemento HTML onde o gráfico deve ser renderizado:
+// weeklyHourlyHeatmapPlotly(diaxsemana, '.grafico-calor');
 
 });
