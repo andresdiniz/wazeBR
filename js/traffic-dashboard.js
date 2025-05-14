@@ -132,6 +132,113 @@ document.addEventListener('DOMContentLoaded', function() {
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)']
         ));
     } 
+
+    function initDelayDistributionChart() {
+        const ctx = document.getElementById('delayDistChart');
+        if (!ctx) return;
+    
+        const data = dadosatraso;
+    
+        const labels = data.map(i => i.rua);
+        const values = data.map(i => i.total);
+    
+        new Chart(ctx, {
+            type: 'doughnut', // troca para doughnut para visual mais moderno
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colorPalette,
+                    borderColor: colorPaletteBorders,
+                    borderWidth: 1,
+                    hoverOffset: 10 // destaque ao passar o mouse
+                }]
+            },
+            options: {
+                ...chartOptions,
+                cutout: '50%', // centraliza melhor no doughnut
+                plugins: {
+                    legend: {
+                        position: 'bottom', // melhor para listas grandes
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = values.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }  
+
+    function timexlenght() {
+        const rawData = atrasocomprimento;
+
+        const dataPoints = rawData.map(item => ({
+            x: item.comprimento,
+            y: item.atraso,
+            label: item.uuid
+        }));
+
+        const ctx = document.getElementById('lengthVsDelayChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Segmentos (UUID)',
+                    data: dataPoints,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `UUID: ${context.raw.label}, Comprimento: ${context.raw.x}m, Atraso: ${context.raw.y}s`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Correlação: Comprimento vs Atraso'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Comprimento (metros)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Atraso (segundos)'
+                        }
+                    }
+                }
+            }
+        });
+    }
     
     function createSingleAxisChartConfig(labels, [data, label, type, color]) {
         return {
