@@ -343,36 +343,45 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanalxdata = diaxsemana; // Dados recebidos do PHP
+        const semanalxdata = diaxsemana;
 
         console.log('Dados dia/hora:', semanalxdata);
 
         const container = document.querySelector('#time .row');
         if (!container || semanalxdata.length === 0) return;
 
-        // Configuração de cores aprimorada
+        // Configuração de cores
         const colorScale = [
-            '#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', 
+            '#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C',
             '#FC4E2A', '#E31A1C', '#BD0026', '#800026'
         ];
 
         // Pré-processamento dos dados
-        const matrixData = semanalxdata.map(d => ({
-            x: d.hora,
-            y: d.dia,
-            v: d.quantidade,
-            nivel: d.media_nivel,
-            velocidade: d.media_velocidade,
-            atraso: d.media_atraso
-        }));
+        const dataMap = semanalxdata.reduce((acc, d) => {
+            acc[`${d.dia}-${d.hora}`] = d;
+            return acc;
+        }, {});
 
-        // Valores para a escala de cores
-        const maxQuantidade = Math.max(...matrixData.map(d => d.v));
-        const quantiles = Array.from({length: colorScale.length}, (_, i) => 
-            Math.ceil(maxQuantidade * (i + 1) / colorScale.length)
-        );
+        // Cria matriz de dados completa
+        const dias = 7;
+        const horas = 24;
+        const matrixData = [];
+        
+        for (let dia = 0; dia < dias; dia++) {
+            for (let hora = 0; hora < horas; hora++) {
+                const key = `${dia}-${hora}`;
+                matrixData.push({
+                    x: hora,
+                    y: dia,
+                    v: dataMap[key]?.quantidade || 0,
+                    nivel: dataMap[key]?.media_nivel || 0,
+                    velocidade: dataMap[key]?.media_velocidade || 0,
+                    atraso: dataMap[key]?.media_atraso || 0
+                });
+            }
+        }
 
-        // Destrói gráfico anterior se existir
+        // Destrói gráfico anterior
         if (window.heatmapChart) {
             window.heatmapChart.destroy();
         }
@@ -386,28 +395,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Configuração do gráfico
         window.heatmapChart = new Chart(canvas, {
-            type: 'matrix',
+            type: 'bar',
             data: {
                 datasets: [{
                     label: 'Intensidade do Tráfego',
                     data: matrixData,
                     backgroundColor: (ctx) => {
                         const value = ctx.raw.v;
-                        const index = quantiles.findIndex(q => value <= q);
-                        return colorScale[index] || colorScale[colorScale.length - 1];
+                        if (value === 0) return '#f0f0f0';
+                        const max = Math.max(...matrixData.map(d => d.v));
+                        const percent = value / max;
+                        const index = Math.floor(percent * (colorScale.length - 1));
+                        return colorScale[index];
                     },
                     borderWidth: 0,
-                    width: ({chart}) => (chart.chartArea.width / 24) - 1,
-                    height: ({chart}) => (chart.chartArea.height / 7) - 1
+                    barPercentage: 1,
+                    categoryPercentage: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             title: (context) => {
@@ -429,32 +439,32 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: 'linear',
                         position: 'top',
                         offset: true,
+                        min: -0.5,
+                        max: 23.5,
                         ticks: {
                             stepSize: 1,
                             callback: (value) => `${value.toString().padStart(2, '0')}:00`
                         },
-                        title: {
-                            display: true,
-                            text: 'Hora do Dia'
-                        },
-                        grid: {
-                            display: false
-                        }
+                        title: { text: 'Hora do Dia', display: true },
+                        grid: { display: false }
                     },
                     y: {
                         type: 'linear',
                         reverse: true,
+                        min: -0.5,
+                        max: 6.5,
                         ticks: {
                             stepSize: 1,
                             callback: (value) => ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][value]
                         },
-                        title: {
-                            display: true,
-                            text: 'Dia da Semana'
-                        },
-                        grid: {
-                            display: false
-                        }
+                        title: { text: 'Dia da Semana', display: true },
+                        grid: { display: false }
+                    }
+                },
+                elements: {
+                    bar: {
+                        borderWidth: 0,
+                        borderSkipped: false
                     }
                 }
             }
