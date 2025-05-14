@@ -40,7 +40,8 @@ class TrafficJamAnalyzer {
             'niveis' => $this->getNiveisCongestionamento($id_parceiro),
             'tipos_via' => $this->getTiposVia($id_parceiro),
             'heatmap' => $this->getHeatmap($id_parceiro),
-            'segmentos' => $this->getTopSegmentos($id_parceiro)
+            'segmentos' => $this->getTopSegmentos($id_parceiro),
+            'length_delay' => $this->getLengthDelayData($id_parceiro)
         ];
     }
 
@@ -145,7 +146,30 @@ class TrafficJamAnalyzer {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-
+    public function getLengthDelayData($id_parceiro, int $limit = 1000): array {
+        $query = "SELECT 
+                    id,
+                    length AS comprimento,
+                    delay AS atraso
+                FROM jams";
+        
+        // Aplica filtro de parceiro se necessário
+        $hasFilter = $this->addPartnerFilter($query, $id_parceiro);
+        
+        // Adiciona condições complementares
+        $query .= $hasFilter 
+            ? " AND length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0"
+            : " WHERE length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0";
+        
+        $query .= " ORDER BY date_received DESC LIMIT :limit";
+        
+        $stmt = $this->pdo->prepare($query);
+        if ($hasFilter) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     private function getNiveisCongestionamento($id_parceiro) {
         $query = "SELECT 
                     level as nivel,
@@ -261,5 +285,6 @@ $data = array_merge($data, [
     'tipos_via' => $data['tipos_via'],
     'heatmap' => $data['heatmap'],
     'segmentos' => $data['segmentos'],
-    'meta' => $data['meta']
+    'meta' => $data['meta'],
+    'length_delay' => $data['length_delay']
 ]);
