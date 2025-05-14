@@ -55,6 +55,7 @@ class TrafficJamAnalyzer {
             'heatmap' => $this->getHeatmap($id_parceiro),
             'segmentos' => $this->getTopSegmentos($id_parceiro),
             'length_delay' => $this->getLengthDelayData($id_parceiro),
+            'dia_hora' => $this->getDiaHoraData($id_parceiro)
         ];
     }
 
@@ -263,6 +264,35 @@ class TrafficJamAnalyzer {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    private function getDiaHoraData($id_parceiro): array {
+        $query = "SELECT 
+                    DAYOFWEEK(date_received) - 1 AS dia,  /* 0=Domingo, 6=Sábado */
+                    HOUR(date_received) AS hora,
+                    COUNT(*) AS quantidade,
+                    ROUND(AVG(level), 2) AS media_nivel,
+                    ROUND(AVG(speedKMH), 2) AS media_velocidade,
+                    ROUND(AVG(delay), 2) AS media_atraso
+                FROM jams";
+
+        $this->addPartnerFilter($query, $id_parceiro);
+        
+        $query .= " GROUP BY dia, hora ORDER BY dia, hora";
+
+        try {
+            $stmt = $this->pdo->prepare($query);
+            if ($id_parceiro != 99) {
+                $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar dados dia/hora: " . $e->getMessage());
+            return [];
+        }
+    }
+
         
 }
 
@@ -314,5 +344,6 @@ $data = array_merge($data, [
     'heatmap' => $data['heatmap'],
     'segmentos' => $data['segmentos'],
     'meta' => $data['meta'],
-    'length_delay' => $data['length_delay']
+    'length_delay' => $data['length_delay'],
+    'dia_hora' => $data['dia_hora']
 ]);

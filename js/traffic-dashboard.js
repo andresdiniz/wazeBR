@@ -343,11 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanaldata = datasemana; // [{ dia: 0-6, hora: 0-23, total: N }]
-        const daydata = data;
+        const semanalxdata = diaxsemana; // [{ dia: 0-6, hora: 0-23, total: N }]
 
-        console.log('semanaldata', semanaldata);
-        console.log('daydata', daydata);
+        console.log('semanalxdata', semanalxdata);
 
         const container = document.querySelector('#time .row');
         if (!container || semanaldata.length === 0) return;
