@@ -311,8 +311,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function initMonthlyChart() {
         const monthlyData = mensal;
 
-        console.log(monthlyData);
-        const labels = monthlyData.map(d => d.mes);
         const ctx = document.getElementById('monthlyChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
@@ -345,8 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function hourlyChart(data) {
-    document.addEventListener('DOMContentLoaded', function () {
         const hourlyData = data;
+
+        console.log(hourlyData);
 
         const maxTotal = Math.max(...hourlyData.map(d => d.total));
         const getColor = (value) => {
@@ -392,7 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-    });
     }
 
 });
