@@ -54,7 +54,7 @@ class TrafficJamAnalyzer {
             'tipos_via' => $this->getTiposVia($id_parceiro),
             'heatmap' => $this->getHeatmap($id_parceiro),
             'segmentos' => $this->getTopSegmentos($id_parceiro),
-            'length_delay' => $this->getLengthDelayData($id_parceiro)
+            'length_delay' => $this->getLengthDelayData($id_parceiro),
         ];
     }
 
