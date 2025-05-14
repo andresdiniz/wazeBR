@@ -205,29 +205,203 @@ $('#editModal').on('show.bs.modal', function (event) {
     modal.find('#editIdParceiro').val(id_parceiro);
     modal.find('#editUrl').val(url);
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const config = {
+        apiBase: '/api.php',
+        csrfToken: document.querySelector('meta[name="csrf-token"]').content
+    };
 
-// Função para excluir URL
-function deleteUrl(id) {
-    if (confirm('Tem certeza que deseja excluir esta URL?')) {
-        // Lógica para excluir a URL
-        console.log('URL excluída: ' + id);
-        // Aqui você pode adicionar a lógica para excluir a URL do banco de dados
-    }
-}
+    // Função genérica para requisições
+    const apiRequest = async (params, method = 'GET', body = null) => {
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': config.csrfToken
+        };
 
-// Lógica para enviar o formulário de criação
-$('#createForm').on('submit', function (event) {
-    event.preventDefault();
-    // Lógica para criar nova URL
-    console.log('Nova URL criada');
-    // Aqui você pode adicionar a lógica para enviar os dados para o servidor e criar a nova URL
-});
+        try {
+            const query = new URLSearchParams(params).toString();
+            const url = `${config.apiBase}?${query}`;
 
-// Lógica para enviar o formulário de edição
-$('#editForm').on('submit', function (event) {
-    event.preventDefault();
-    // Lógica para editar URL existente
-    console.log('URL editada');
-    // Aqui você pode adicionar a lógica para enviar os dados para o servidor e atualizar a URL existente
+            const response = await fetch(url, {
+                method,
+                headers,
+                body: method !== 'GET' ? JSON.stringify(body) : null
+            });
+
+            if (!response.ok) throw new Error('Erro na requisição');
+            return await response.json();
+
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('danger', 'Erro na operação');
+            throw error;
+        }
+    };
+
+    // Busca de Usuários
+    const searchUsers = async (action, query) => {
+        return apiRequest({ action, query });
+    };
+
+    // Configuração genérica de busca
+    const setupSearch = (inputId, resultId, action, callback) => {
+        let timeout;
+        const input = document.getElementById(inputId);
+        const resultContainer = document.getElementById(resultId);
+
+        input.addEventListener('input', async (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                if (e.target.value.length >= 3) {
+                    try {
+                        const data = await searchUsers(action, e.target.value);
+                        renderResults(resultContainer, data, callback);
+                    } catch (error) {
+                        resultContainer.innerHTML = '<li class="list-group-item">Erro na busca</li>';
+                    }
+                }
+            }, 300);
+        });
+    };
+
+    // Renderização de resultados
+    const renderResults = (container, data, callback) => {
+        if (data.success && data.users.length > 0) {
+            container.innerHTML = data.users.map(user => `
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${user.id}">
+                    ${user.nome} (${user.email})
+                    <button class="btn btn-sm btn-primary">${callback.label}</button>
+                </li>
+            `).join('');
+
+            container.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.target.closest('li').dataset.id;
+                    callback.action(userId);
+                });
+            });
+        } else {
+            container.innerHTML = '<li class="list-group-item">Nenhum resultado encontrado</li>';
+        }
+    };
+
+    // Configuração dos modais
+    setupSearch('searchAlterar', 'resultAlterar', 'alterar', {
+        label: 'Editar',
+        action: async (userId) => {
+            try {
+                const user = await apiRequest({ action: 'get_user', id: userId });
+                openEditModal(user);
+            } catch (error) {
+                showToast('danger', 'Erro ao carregar usuário');
+            }
+        }
+    });
+
+    setupSearch('searchResetSenha', 'resultResetSenha', 'reset_senha', {
+        label: 'Resetar',
+        action: async (userId) => {
+            if (confirm('Confirmar reset de senha?')) {
+                try {
+                    await apiRequest({ action: 'reset_password' }, 'POST', { userId });
+                    showToast('success', 'Senha resetada com sucesso');
+                } catch (error) {
+                    showToast('danger', 'Erro ao resetar senha');
+                }
+            }
+        }
+    });
+
+    setupSearch('searchApagar', 'resultApagar', 'apagar', {
+        label: 'Excluir',
+        action: async (userId) => {
+            if (confirm('Confirmar exclusão permanente?')) {
+                try {
+                    await apiRequest({ action: 'delete_user' }, 'DELETE', { userId });
+                    showToast('success', 'Usuário excluído com sucesso');
+                } catch (error) {
+                    showToast('danger', 'Erro ao excluir usuário');
+                }
+            }
+        }
+    });
+
+    // Modal de Edição
+    const openEditModal = (user) => {
+        document.getElementById('editUserId').value = user.id;
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editEmail').value = user.email;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    };
+
+    // Submit do formulário de edição
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('editUserId').value;
+        const formData = {
+            username: document.getElementById('editUsername').value,
+            email: document.getElementById('editEmail').value
+        };
+
+        try {
+            await apiRequest({ action: 'update_user' }, 'PUT', formData);
+            showToast('success', 'Usuário atualizado com sucesso');
+            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+        } catch (error) {
+            showToast('danger', 'Erro ao atualizar usuário');
+        }
+    });
+
+    // Submit do formulário de cadastro
+    document.getElementById('formCadastrar').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = {
+            nome: document.getElementById('nomeUsuario').value,
+            usuario: document.getElementById('nomeDeUsuario').value,
+            email: document.getElementById('emailUsuario').value,
+            senha: document.getElementById('senhaUsuario').value,
+            type: document.getElementById('typeSelect').value,
+            id_parceiro: document.getElementById('parceirosSelect').value
+        };
+
+        try {
+            await apiRequest({ action: 'cadastrar_usuario' }, 'POST', formData);
+            showToast('success', 'Usuário cadastrado com sucesso');
+            bootstrap.Modal.getInstance(document.getElementById('modalCadastrar')).hide();
+            e.target.reset();
+        } catch (error) {
+            showToast('danger', 'Erro ao cadastrar usuário');
+        }
+    });
+
+    // Função para exibir notificações
+    const showToast = (type, message) => {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        new bootstrap.Toast(toast).show();
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    // Carregar parceiros
+    const loadParceiros = async () => {
+        try {
+            const response = await apiRequest({ action: 'get_parceiros' });
+            const select = document.getElementById('parceirosSelect');
+            select.innerHTML = response.nomes.map(p => `
+                <option value="${p.id}">${p.Nome}</option>
+            `).join('');
+        } catch (error) {
+            console.error('Erro ao carregar parceiros:', error);
+        }
+    };
+
+    loadParceiros();
 });
 </script>
