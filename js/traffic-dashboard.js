@@ -309,41 +309,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initMonthlyChart() {
-            const monthlyData = mensal;
+        const monthlyData = mensal;
 
-            console.log(monthlyData);
-            const labels = monthlyData.map(d => d.mes);
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthlyData.map(d => d.mes),
-                    datasets: [{
-                        label: 'Total de Congestionamentos',
-                        data: monthlyData.map(d => d.total),
-                        fill: false,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.3)',
-                        tension: 0.3
-                    }]
+        console.log(monthlyData);
+        const labels = monthlyData.map(d => d.mes);
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(d => d.mes),
+                datasets: [{
+                    label: 'Total de Congestionamentos',
+                    data: monthlyData.map(d => d.total),
+                    fill: false,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.3)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Tendência Mensal de Congestionamentos'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Tendência Mensal de Congestionamentos'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
+            }
         });
-    }
 
     function hourlyChart(data) {
     document.addEventListener('DOMContentLoaded', function () {
