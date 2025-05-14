@@ -343,96 +343,223 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanaldata = datasemana; // [{ dia: 0-6, hora: 0-23, total: N }]
-        const daydata = data;
-
-        console.log('semanaldata', semanaldata);
-        console.log('daydata', daydata);
-
+        const semanaldata = diaxsemana; // Certifique-se que essa variável esteja definida corretamente via Twig
         const container = document.querySelector('#time .row');
-        if (!container || semanaldata.length === 0) return;
+        if (!container || !semanaldata || semanaldata.length === 0) return;
 
         // Dias da semana
         const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
         // Cria canvas
         const chartContainer = document.createElement('div');
+        chartContainer.style.cssText = 'position: relative; height: 500px; width: 100%'; // Adjust height as needed
         const canvas = document.createElement('canvas');
         canvas.id = 'heatmapChart';
         chartContainer.appendChild(canvas);
+
         container.innerHTML = ''; // limpa antes de inserir
         container.appendChild(chartContainer);
 
-        const maxTotal = Math.max(...semanaldata.map(d => d.total));
+        // Calculate min and max speed for color mapping
+        const speeds = semanaldata.map(d => d.media_velocidade);
+        const minSpeed = Math.min(...speeds);
+        const maxSpeed = Math.max(...speeds);
+
+        // Color interpolation function (blue to yellow/green) - mimicking the image's color scale idea
         const getColor = (value) => {
-            const percent = value / maxTotal;
-            const r = Math.round(255 * percent);
-            const g = Math.round(255 * (1 - percent));
-            return `rgb(${r},${g},0)`;
+            if (value === undefined || value === null) return 'rgb(220, 220, 220)'; // Light grey for missing data
+
+            // Normalize the speed value to a 0-1 range
+            const percent = (value - minSpeed) / (maxSpeed - minSpeed);
+
+            // Interpolate between a start and end color (e.g., blue-ish to yellow-ish)
+            // Using a color scale that represents speed well (lower speed = "worse", higher speed = "better")
+            // Example: Purple -> Blue -> Green -> Yellow
+            const colorStops = [
+                { stop: 0, color: [68, 1, 84] },   // Purple
+                { stop: 0.25, color: [59, 82, 139] }, // Blue-ish
+                { stop: 0.5, color: [36, 152, 147] }, // Green-ish
+                { stop: 0.75, color: [138, 201, 87] }, // Yellow-green-ish
+                { stop: 1, color: [253, 231, 37] }    // Yellow
+            ];
+
+            let c1 = colorStops[0], c2 = colorStops[0];
+            for (let i = 0; i < colorStops.length - 1; i++) {
+                if (percent >= colorStops[i].stop && percent <= colorStops[i+1].stop) {
+                    c1 = colorStops[i];
+                    c2 = colorStops[i+1];
+                    break;
+                }
+                if (percent > colorStops[colorStops.length - 1].stop) {
+                    c1 = colorStops[colorStops.length - 1];
+                    c2 = colorStops[colorStops.length - 1];
+                }
+            }
+
+            const rangePercent = (percent - c1.stop) / (c2.stop - c1.stop);
+
+            const r = Math.round(c1.color[0] + (c2.color[0] - c1.color[0]) * rangePercent);
+            const g = Math.round(c1.color[1] + (c2.color[1] - c1.color[1]) * rangePercent);
+            const b = Math.round(c1.color[2] + (c2.color[2] - c1.color[2]) * rangePercent);
+
+            return `rgb(${r}, ${g}, ${b})`;
         };
 
-        const matrixData = semanaldata.map(d => ({
-            x: d.hora,
-            y: d.dia,
-            v: d.total
-        }));
+        // Create data points for all possible hours (0-23) and days (0-6)
+        // This ensures the grid is complete even if data is missing for a cell.
+        const completeMatrixData = [];
+        for (let dia = 0; dia < 7; dia++) {
+            for (let hora = 0; hora < 24; hora++) {
+                const dataPoint = semanaldata.find(d => d.dia === dia && d.hora === hora);
+                if (dataPoint) {
+                    completeMatrixData.push({
+                        x: hora,
+                        y: dia,
+                        v: {
+                            quantidade: dataPoint.quantidade,
+                            media_nivel: parseFloat(dataPoint.media_nivel),
+                            media_velocidade: dataPoint.media_velocidade,
+                            media_atraso: parseFloat(dataPoint.media_atraso)
+                        }
+                    });
+                } else {
+                    // Add a placeholder for missing data
+                    completeMatrixData.push({
+                        x: hora,
+                        y: dia,
+                        v: null // Indicates missing data
+                    });
+                }
+            }
+        }
 
-        new Chart(canvas, {
+
+        const chart = new Chart(canvas, {
             type: 'matrix',
             data: {
                 datasets: [{
-                    label: 'Congestionamentos por Hora e Dia',
-                    data: matrixData,
-                    backgroundColor: ctx => getColor(ctx.raw.v),
+                    label: 'Velocidade Média (km/h)', // Updated label
+                    data: completeMatrixData,
+                    backgroundColor: ctx => {
+                        if (ctx.raw.v === null) {
+                            return 'rgb(240, 240, 240)'; // Lighter grey for missing data
+                        }
+                        return getColor(ctx.raw.v.media_velocidade);
+                    },
+                    borderColor: 'rgba(0, 0, 0, 0.1)', // Border between cells
                     borderWidth: 1,
                     width: ({ chart }) => chart.chartArea.width / 24,
-                    height: ({ chart }) => chart.chartArea.height / 7
+                    height: ({ chart }) => chart.chartArea.height / 7,
+                    hoverBackgroundColor: '#ffff66', // Example hover effect
+                    hoverBorderColor: '#ffff00'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                aspectRatio: 2, // Adjust aspect ratio if needed to match the image shape
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Heatmap: Hora do Dia × Dia da Semana'
+                        text: 'Velocidade Média por Dia da Semana e Hora', // Updated title
+                        font: {
+                            size: 16
+                        }
                     },
                     tooltip: {
                         callbacks: {
-                            title: ctx => `${ctx[0].raw.x}:00 - ${dias[ctx[0].raw.y]}`,
-                            label: ctx => `Congestionamentos: ${ctx.raw.v}`
+                            title: ctx => {
+                                const data = ctx[0].raw.v;
+                                if (data === null) return 'Dados Indisponíveis';
+                                return `${data.hora}:00 - ${dias[data.dia]}`;
+                            },
+                            label: ctx => {
+                                const data = ctx.raw.v;
+                                if (data === null) return 'Sem dados para este período';
+                                return [
+                                    `Quantidade: ${data.quantidade}`,
+                                    `Nível Médio: ${data.media_nivel.toFixed(2)}`,
+                                    `Velocidade Média: ${data.media_velocidade.toFixed(2)} km/h`,
+                                    `Atraso Médio: ${data.media_atraso.toFixed(2)}`
+                                ];
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false // Hide default legend, a color scale is needed (often done manually or with a plugin)
+                    },
+                    datalabels: { // Configuration for chartjs-plugin-datalabels
+                        color: '#000', // Color of the text
+                        font: {
+                            size: 9, // Smaller font size for readability in cells
+                            weight: 'bold'
+                        },
+                        formatter: function(value, context) {
+                            // Display average speed rounded to 1 decimal place
+                            if (value && value.v && value.v.media_velocidade !== undefined) {
+                                return value.v.media_velocidade.toFixed(1);
+                            }
+                            return ''; // Don't display anything for missing data
+                        },
+                        display: function(context) {
+                            // Display label only if there is data for the cell
+                            return context.dataset.data[context.dataIndex].v !== null;
                         }
                     }
                 },
                 scales: {
                     x: {
                         type: 'linear',
-                        position: 'top',
+                        position: 'bottom', // X-axis at the bottom as in the image
                         ticks: {
-                            callback: val => `${val}:00`,
-                            maxTicksLimit: 24
+                            callback: val => {
+                                // Ensure ticks are integers and within bounds
+                                if (Number.isInteger(val) && val >= 0 && val < 24) {
+                                    return `${val}`; // Display just the hour number
+                                }
+                                return ''; // Hide ticks outside 0-23
+                            },
+                            stepSize: 1, // Ensure a tick for each hour
+                            autoSkip: false // Prevent skipping hours if space is limited
                         },
                         title: {
                             display: true,
                             text: 'Hora do Dia'
+                        },
+                        grid: {
+                            display: false // Hide grid lines for a cleaner look
                         }
                     },
                     y: {
                         type: 'linear',
                         ticks: {
-                            callback: val => dias[val]
+                            callback: val => {
+                                // Ensure ticks are integers and within bounds
+                                if (Number.isInteger(val) && val >= 0 && val < 7) {
+                                    return dias[val];
+                                }
+                                return ''; // Hide ticks outside 0-6
+                            },
+                            stepSize: 1 // Ensure a tick for each day
                         },
                         title: {
                             display: true,
                             text: 'Dia da Semana'
                         },
-                        reverse: true
+                        reverse: true, // Keep Sunday (0) at the top as in the image
+                        grid: {
+                            display: false // Hide grid lines
+                        }
                     }
                 }
             }
         });
-    }
 
+        // Note: A color scale legend like the one in your image
+        // is not automatically generated by the Chart.js Matrix plugin.
+        // You would typically need a separate plugin or custom code
+        // to create that legend alongside the chart.
+    }
 
 
 });
