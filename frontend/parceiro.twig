@@ -193,18 +193,32 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-// Preenche o modal de edição com os dados da URL selecionada
-$('#editModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget);
-    var id = button.data('id');
-    var id_parceiro = button.data('id_parceiro');
-    var url = button.data('url');
-    
-    var modal = $(this);
-    modal.find('#editId').val(id);
-    modal.find('#editIdParceiro').val(id_parceiro);
-    modal.find('#editUrl').val(url);
-});
+// Função para deletar URL
+async function deleteUrl(id) {
+    if (confirm('Confirmar exclusão permanente?')) {
+        try {
+            const response = await fetch(`../api.php?action=delete_url&id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast('success', 'URL excluída com sucesso');
+                location.reload();
+            } else {
+                showToast('danger', result.message);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('danger', 'Erro ao excluir URL');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const config = {
         apiBase: '../api.php',
@@ -212,17 +226,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Função genérica para requisições
-    const apiRequest = async (params, method = 'GET', body = null) => {
+    const apiRequest = async (action, params = {}, method = 'GET', body = null) => {
         const headers = {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': config.csrfToken
         };
 
         try {
-            const query = new URLSearchParams(params).toString();
-            const url = `${config.apiBase}?${query}`;
-
-            const response = await fetch(url, {
+            const query = new URLSearchParams({action, ...params}).toString();
+            const response = await fetch(`${config.apiBase}?${query}`, {
                 method,
                 headers,
                 body: method !== 'GET' ? JSON.stringify(body) : null
@@ -238,139 +250,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Busca de Usuários
-    const searchUsers = async (action, query) => {
-        return apiRequest({ action, query });
-    };
-
-    // Configuração genérica de busca
-    const setupSearch = (inputId, resultId, action, callback) => {
-        let timeout;
+    // Configuração das buscas
+    const setupSearch = (inputId, tableBodyId, action) => {
         const input = document.getElementById(inputId);
-        const resultContainer = document.getElementById(resultId);
+        const tableBody = document.getElementById(tableBodyId);
+        let timeout;
 
-        input.addEventListener('input', async (e) => {
+        input.addEventListener('input', (e) => {
             clearTimeout(timeout);
             timeout = setTimeout(async () => {
                 if (e.target.value.length >= 3) {
                     try {
-                        const data = await searchUsers(action, e.target.value);
-                        renderResults(resultContainer, data, callback);
+                        const data = await apiRequest(action, {query: e.target.value});
+                        renderTableResults(tableBody, data);
                     } catch (error) {
-                        resultContainer.innerHTML = '<li class="list-group-item">Erro na busca</li>';
+                        tableBody.innerHTML = '<tr><td colspan="4">Erro na busca</td></tr>';
                     }
                 }
             }, 300);
         });
     };
 
-    // Renderização de resultados
-    const renderResults = (container, data, callback) => {
+    // Renderização de resultados em tabela
+    const renderTableResults = (container, data) => {
         if (data.success && data.users.length > 0) {
             container.innerHTML = data.users.map(user => `
-                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${user.id}">
-                    ${user.nome} (${user.email})
-                    <button class="btn btn-sm btn-primary">${callback.label}</button>
-                </li>
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.id_parceiro}</td>
+                    <td>${user.url}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" 
+                            data-toggle="modal" 
+                            data-target="#editModal" 
+                            data-id="${user.id}"
+                            data-id_parceiro="${user.id_parceiro}"
+                            data-url="${user.url}">
+                            Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUrl(${user.id})">Excluir</button>
+                    </td>
+                </tr>
             `).join('');
-
-            container.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.closest('li').dataset.id;
-                    callback.action(userId);
-                });
-            });
         } else {
-            container.innerHTML = '<li class="list-group-item">Nenhum resultado encontrado</li>';
+            container.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum resultado encontrado</td></tr>';
         }
     };
 
-    // Configuração dos modais
-    setupSearch('searchAlterar', 'resultAlterar', 'alterar', {
-        label: 'Editar',
-        action: async (userId) => {
-            try {
-                const user = await apiRequest({ action: 'get_user', id: userId });
-                openEditModal(user);
-            } catch (error) {
-                showToast('danger', 'Erro ao carregar usuário');
-            }
-        }
-    });
-
-    setupSearch('searchResetSenha', 'resultResetSenha', 'reset_senha', {
-        label: 'Resetar',
-        action: async (userId) => {
-            if (confirm('Confirmar reset de senha?')) {
-                try {
-                    await apiRequest({ action: 'reset_password' }, 'POST', { userId });
-                    showToast('success', 'Senha resetada com sucesso');
-                } catch (error) {
-                    showToast('danger', 'Erro ao resetar senha');
-                }
-            }
-        }
-    });
-
-    setupSearch('searchApagar', 'resultApagar', 'apagar', {
-        label: 'Excluir',
-        action: async (userId) => {
-            if (confirm('Confirmar exclusão permanente?')) {
-                try {
-                    await apiRequest({ action: 'delete_user' }, 'DELETE', { userId });
-                    showToast('success', 'Usuário excluído com sucesso');
-                } catch (error) {
-                    showToast('danger', 'Erro ao excluir usuário');
-                }
-            }
-        }
-    });
+    // Configurar todas as buscas
+    setupSearch('searchAlterar', 'resultAlterar', 'alterar');
+    setupSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
+    setupSearch('searchApagar', 'resultApagar', 'apagar');
 
     // Modal de Edição
-    const openEditModal = (user) => {
-        document.getElementById('editUserId').value = user.id;
-        document.getElementById('editUsername').value = user.username;
-        document.getElementById('editEmail').value = user.email;
-        new bootstrap.Modal(document.getElementById('editModal')).show();
-    };
+    $('#editModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        const id_parceiro = button.data('id_parceiro');
+        const url = button.data('url');
+        
+        const modal = $(this);
+        modal.find('#editId').val(id);
+        modal.find('#editIdParceiro').val(id_parceiro);
+        modal.find('#editUrl').val(url);
+    });
 
     // Submit do formulário de edição
     document.getElementById('editForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('editUserId').value;
         const formData = {
-            username: document.getElementById('editUsername').value,
-            email: document.getElementById('editEmail').value
+            id: document.getElementById('editId').value,
+            id_parceiro: document.getElementById('editIdParceiro').value,
+            url: document.getElementById('editUrl').value
         };
 
         try {
-            await apiRequest({ action: 'update_user' }, 'PUT', formData);
-            showToast('success', 'Usuário atualizado com sucesso');
-            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+            const result = await apiRequest('update_url', {}, 'PUT', formData);
+            if (result.success) {
+                showToast('success', 'URL atualizada com sucesso');
+                $('#editModal').modal('hide');
+                location.reload();
+            }
         } catch (error) {
-            showToast('danger', 'Erro ao atualizar usuário');
+            showToast('danger', 'Erro ao atualizar URL');
         }
     });
 
     // Submit do formulário de cadastro
-    document.getElementById('formCadastrar').addEventListener('submit', async (e) => {
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = {
-            nome: document.getElementById('nomeUsuario').value,
-            usuario: document.getElementById('nomeDeUsuario').value,
-            email: document.getElementById('emailUsuario').value,
-            senha: document.getElementById('senhaUsuario').value,
-            type: document.getElementById('typeSelect').value,
-            id_parceiro: document.getElementById('parceirosSelect').value
+            id_parceiro: document.getElementById('createIdParceiro').value,
+            nome_tabela: document.getElementById('createNomeTabela').value,
+            url: document.getElementById('createUrl').value
         };
 
         try {
-            await apiRequest({ action: 'cadastrar_usuario' }, 'POST', formData);
-            showToast('success', 'Usuário cadastrado com sucesso');
-            bootstrap.Modal.getInstance(document.getElementById('modalCadastrar')).hide();
-            e.target.reset();
+            const result = await apiRequest('create_url', {}, 'POST', formData);
+            if (result.success) {
+                showToast('success', 'URL cadastrada com sucesso');
+                $('#createModal').modal('hide');
+                location.reload();
+            }
         } catch (error) {
-            showToast('danger', 'Erro ao cadastrar usuário');
+            showToast('danger', 'Erro ao cadastrar URL');
         }
     });
 
@@ -389,19 +372,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.remove(), 3000);
     };
 
-    // Carregar parceiros
-    const loadParceiros = async () => {
+    // Carregar parceiros inicialmente
+    (async () => {
         try {
-            const response = await apiRequest({ action: 'get_parceiros' });
-            const select = document.getElementById('parceirosSelect');
+            const response = await apiRequest('get_parceiros');
+            const select = document.getElementById('createIdParceiro');
             select.innerHTML = response.nomes.map(p => `
                 <option value="${p.id}">${p.Nome}</option>
             `).join('');
         } catch (error) {
             console.error('Erro ao carregar parceiros:', error);
         }
-    };
-
-    loadParceiros();
+    })();
 });
 </script>
