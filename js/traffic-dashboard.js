@@ -344,6 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function hourlyChart(data) {
     // Verificação de segurança crítica
+        console.log('Dados recebidos para hourlyChart:', data);
         if (!Array.isArray(data) {
             console.error('Dados inválidos para hourlyChart:', data);
             return;
@@ -352,8 +353,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.querySelector('#time .row');
         if (!container) return;
 
-        // Extrai dados de forma segura
-        const hourlyData = data.filter(d => d.hora !== undefined && d.total !== undefined);
         
         // Verifica se há dados válidos após filtragem
         if (hourlyData.length === 0) {
