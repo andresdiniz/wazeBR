@@ -1,122 +1,157 @@
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h2 class="h3 mb-0 text-gray-800">ADMINISTRAR USÚARIOS</h2>
+        <h1 class="h3 mb-0 text-gray-800">Administração de Usuários</h1>
+        <button class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#helpModal">
+            <i class="fas fa-question-circle"></i> Ajuda
+        </button>
     </div>
 
-    <!-- Content Row -->
-    <div class="row">
-        <div class="container">
-            <div class="row">
-                {% if users.type == 1 or users.type == 2 %}<!-- Card 1 -->
-                    <div class="col-md-3 col-sm-6 mb-4">
-                        <div class="card shadow-sm">
-                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                            <div class="card-body">
-                                <h5 class="card-title">Cadastrar</h5>
-                                <p class="card-text">Cadastrar Usuarios</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">Cadastrar</button>
-                            </div>
-                        </div>
+    <!-- Cards Section -->
+    <div class="row justify-content-center">
+        {% if users.type == 1 or users.type == 2 %}
+        <!-- Cadastrar -->
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
                     </div>
-
-                    <!-- Card 2 -->
-                    <div class="col-md-3 col-sm-6 mb-4">
-                        <div class="card shadow-sm">
-                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                            <div class="card-body">
-                                <h5 class="card-title">Alterar Usuarios</h5>
-                                <p class="card-text">Alterar propriedades</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlterar">Alterar</button>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-
-                <!-- Card 3 -->
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                        <div class="card-body">
-                            <h5 class="card-title">Reset de Senha</h5>
-                            <p class="card-text">Realizar o reset de senha</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalResetSenha">Reset Senha</button>
-                        </div>
-                    </div>
+                    <h5 class="card-title text-primary">Novo Usuário</h5>
+                    <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                        Cadastrar
+                    </button>
                 </div>
-                {% if users.type == 1 or users.type == 2 %}
-                    <!-- Card 4 -->
-                    <div class="col-md-3 col-sm-6 mb-4">
-                        <div class="card shadow-sm">
-                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card image cap">
-                            <div class="card-body">
-                                <h5 class="card-title">Apagar Usuario</h5>
-                                <p class="card-text">Apagar Usuario</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalApagar">Apagar</button>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
             </div>
         </div>
+
+        <!-- Alterar -->
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-edit fa-3x text-warning mb-3"></i>
+                    </div>
+                    <h5 class="card-title text-warning">Editar Usuário</h5>
+                    <button class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#modalAlterar">
+                        Alterar
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Reset Senha -->
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-key fa-3x text-info mb-3"></i>
+                    </div>
+                    <h5 class="card-title text-info">Resetar Senha</h5>
+                    <button class="btn btn-outline-info w-100" data-bs-toggle="modal" data-bs-target="#modalResetSenha">
+                        Resetar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if users.type == 1 or users.type == 2 %}
+        <!-- Excluir -->
+        <div class="col-xl-2 col-md-4 mb-4">
+            <div class="card border-left-danger shadow h-100">
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
+                    </div>
+                    <h5 class="card-title text-danger">Excluir Usuário</h5>
+                    <button class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#modalApagar">
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <!-- Modals -->
-<!-- Modais para cada funcionalidade -->
 <!-- Modal Cadastrar -->
-<div class="modal fade" id="modalCadastrar" tabindex="-1" aria-labelledby="modalCadastrarLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalCadastrar" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="formCadastrar">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalCadastrarLabel">Cadastrar Usuário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastrar Novo Usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formCadastrar" novalidate>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nomeUsuario" class="form-label">Nome</label>
-                        <input type="text" class="form-control" id="nomeUsuario" name="nome" required>
+                        <label class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nome" required>
+                        <div class="invalid-feedback">Por favor insira o nome completo</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="nomeDeUsuario" class="form-label">Nome de Usuário</label>
-                        <input type="text" class="form-control" id="nomeDeUsuario" name="usuario" required>
+                    
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nome de Usuário <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="usuario" required>
+                                <div class="invalid-feedback">Escolha um nome de usuário</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Usuário <span class="text-danger">*</span></label>
+                                <select name="type" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    {% if session.type == 1 %}
+                                    <option value="1">Super Usuário</option>
+                                    {% endif %}
+                                    <option value="2">Administrador</option>
+                                    <option value="3">Usuário de Teste</option>
+                                    <option value="4">Usuário Geral</option>
+                                </select>
+                                <div class="invalid-feedback">Selecione um tipo</div>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="emailUsuario" class="form-label">Email do Usuário</label>
-                        <input type="email" class="form-control" id="emailUsuario" name="email" required>
+                        <label class="form-label">E-mail <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" name="email" required>
+                        <div class="invalid-feedback">Insira um e-mail válido</div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="senhaUsuario" class="form-label">Senha</label>
-                        <input type="password" class="form-control" id="senhaUsuario" name="senha" required>
+                        <label class="form-label">Senha Temporária <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="senha" required 
+                                   pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$">
+                            <button class="btn btn-outline-secondary" type="button" id="generatePassword">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                            <div class="invalid-feedback">Mínimo 8 caracteres com letras e números</div>
+                        </div>
                     </div>
+
                     <div class="mb-3">
-                        <label for="typeSelect" class="form-label">Nivel de Usuario</label>
-                        <select id="typeSelect" name="type" class="form-control" required>
-                            <option value="" selected>Selecione o tipo</option>
-                            {% if session.type == 1 %}
-                                <option value="1" selected>Super User / Dev</option>
-                            {% endif %}
-                            <option value="2" selected>Administrador Conta</option>
-                            <option value="3" selected>Usuário de Teste / Treinamento</option>
-                            <option value="4" selected>Usuário Geral</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="parceirosSelect" class="form-label">Parceiro</label>
-                        <select id="parceirosSelect" name="id_parceiro" class="form-control" required>
-                            <option value="">Selecione o parceiro</option>
+                        <label class="form-label">Parceiro Associado <span class="text-danger">*</span></label>
+                        <select name="id_parceiro" class="form-select" required>
+                            <option value="">Selecione um parceiro...</option>
                             {% for parceiro in parceiros %}
-                                <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
-                            {% else %}
-                                <option value="">Nenhum parceiro encontrado</option>
+                            <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
                             {% endfor %}
                         </select>
+                        <div class="invalid-feedback">Selecione um parceiro</div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="salvarUsuario" class="btn btn-primary">Salvar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Salvar
+                    </button>
                 </div>
             </form>
         </div>
@@ -124,263 +159,275 @@
 </div>
 
 <!-- Modal Alterar -->
-<div class="modal fade" id="modalAlterar" tabindex="-1" aria-labelledby="modalAlterarLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalAlterar" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalAlterarLabel">Alterar Usuário</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Editar Usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchAlterar" class="form-control" placeholder="Buscar por nome ou email">
-                <ul id="resultAlterar" class="list-group"></ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary">Salvar Alterações</button>
+                <div class="input-group mb-3">
+                    <input type="text" id="searchAlterar" class="form-control" 
+                           placeholder="Buscar usuário por nome, e-mail ou nome de usuário">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>E-mail</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultAlterar">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center" id="paginationAlterar"></ul>
+                </nav>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Reset de Senha -->
-<div class="modal fade" id="modalResetSenha" tabindex="-1" aria-labelledby="modalResetSenhaLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Modal ResetSenha -->
+<div class="modal fade" id="modalResetSenha" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalResetSenhaLabel">Reset de Senha</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Resetar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchResetSenha" class="form-control" placeholder="Buscar por nome ou email">
-                <ul id="resultResetSenha" class="list-group mt-2"></ul>
+                <div class="input-group mb-3">
+                    <input type="text" id="searchResetSenha" class="form-control" 
+                           placeholder="Buscar usuário para resetar senha">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="list-group" id="resultResetSenha"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary">Resetar Senha</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal Apagar -->
-<div class="modal fade" id="modalApagar" tabindex="-1" aria-labelledby="modalApagarLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalApagar" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalApagarLabel">Apagar Usuário</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchApagar" class="form-control" placeholder="Buscar por nome ou email">
-                <ul id="resultApagar" class="list-group mt-2"></ul>
+                <div class="input-group mb-3">
+                    <input type="text" id="searchApagar" class="form-control" 
+                           placeholder="Buscar usuário para excluir">
+                    <button class="btn btn-outline-danger" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="list-group" id="resultApagar"></div>
+                
+                <div class="alert alert-danger mt-3 d-none" id="deleteWarning">
+                    <i class="fas fa-exclamation-triangle"></i> Esta ação é irreversível! 
+                    Todos os dados associados serão permanentemente removidos.
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger">Apagar</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    Confirmar Exclusão
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de edição -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Editar Usuário</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-question-circle"></i> Ajuda</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" id="editUserId">
-                    <div class="mb-3">
-                        <label for="editUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editUsername" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="saveChanges()">Salvar Alterações</button>
+                <h6>Guia Rápido:</h6>
+                <ul>
+                    <li><span class="badge bg-primary">Cadastrar:</span> Cria novos usuários com diferentes níveis de acesso</li>
+                    <li><span class="badge bg-warning">Alterar:</span> Edita informações de usuários existentes</li>
+                    <li><span class="badge bg-info">Resetar Senha:</span> Define uma nova senha temporária</li>
+                    <li><span class="badge bg-danger">Excluir:</span> Remove permanentemente usuários do sistema</li>
+                </ul>
+                <p class="text-muted small">Permissões necessárias podem variar conforme seu nível de acesso</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Script para busca AJAX -->
 <script>
-    // Função genérica para busca
-    function performSearch(inputId, resultId, functionName) {
-    const inputField = document.getElementById(inputId);
-    const resultList = document.getElementById(resultId);
-
-    inputField.addEventListener('input', () => {
-        const query = inputField.value;
-
-        if (query.length >= 3) {
-            fetch(`api.php?action=${functionName}&query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Limpar resultados anteriores
-                    resultList.innerHTML = '';
-
-                    if (data.success) {
-                        // Adicionar resultados
-                        data.users.forEach(item => {
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                            li.textContent = `${item.username} (${item.email})`;
-
-                            // Criar ícone de editar
-                            const editIcon = document.createElement('i');
-                            editIcon.className = 'fas fa-edit text-primary';
-                            editIcon.style.cursor = 'pointer';
-                            editIcon.addEventListener('click', () => openEditModal(item));
-
-                            li.appendChild(editIcon);
-                            resultList.appendChild(li);
-                        });
-                    } else {
-                        resultList.innerHTML = '<li class="list-group-item text-danger">Nenhum usuário encontrado.</li>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao buscar:', error);
-                    resultList.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar resultados.</li>';
-                });
-        } else {
-            resultList.innerHTML = ''; // Limpar resultados se o texto for muito curto
-        }
-    });
-}
-
-// Função para abrir o modal de edição
-function openEditModal(user) {
-    const modalElement = document.getElementById('editModal');
-    const modal = new bootstrap.Modal(modalElement);
-    document.getElementById('editUsername').value = user.username;
-    document.getElementById('editEmail').value = user.email;
-    document.getElementById('editUserId').value = user.id;
-    modal.show();
-}
-
-// Função para salvar as alterações
-function saveChanges() {
-    const userId = document.getElementById('editUserId').value;
-    const username = document.getElementById('editUsername').value;
-    const email = document.getElementById('editEmail').value;
-
-    fetch('api.php?action=update_user', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: userId, username: username, email: email }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Usuário atualizado com sucesso!');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-            modal.hide();
-            // Atualizar a lista de resultados ou recarregar a página
-        } else {
-            alert('Erro ao atualizar usuário: ' + (data.message || 'Erro desconhecido.'));
-        }
-    })
-    .catch(error => console.error('Erro ao atualizar usuário:', error));
-}
-const sessionType = {{ session.type | json_encode | raw }};
-console.log(sessionType);
-
-// Função para carregar os parceiros no select
-function carregarParceiros(sessionType) {
-    const parceirosSelect = document.getElementById("parceirosSelect");
-
-    fetch(`api.php?action=get_parceiros&sessionType=${encodeURIComponent(sessionType)}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error("Erro na requisição: " + response.status);
-        }
-        return response.json();
-    })
-    .then((data) => {
-        if (data.success) {
-            // Limpa as opções existentes no select
-            parceirosSelect.innerHTML = sessionType == 1 
-                ? "<option value='99'>Todos Parceiros</option>" 
-                : "<option value=''>Selecione um parceiro</option>";
-
-            // Adiciona as novas opções
-            data.nomes.forEach((item) => {
-                const option = document.createElement("option");
-                option.value = item.id; // Use um valor único, se disponível, como um ID
-                option.textContent = item.Nome;
-                parceirosSelect.appendChild(option);
-            });
-        } else {
-            console.error("Erro: " + data.message);
-        }
-    })
-    .catch((error) => {
-        console.error("Erro ao carregar os parceiros:", error);
-        alert("Erro ao carregar os parceiros. Por favor, tente novamente mais tarde.");
-    });
-}
-
-// Inicializar buscas e carregar parceiros
 document.addEventListener('DOMContentLoaded', () => {
-    performSearch('searchAlterar', 'resultAlterar', 'alterar');
-    performSearch('searchResetSenha', 'resultResetSenha', 'reset_senha');
-    performSearch('searchApagar', 'resultApagar', 'apagar');
+    // Configurações globais
+    const config = {
+        debounceTime: 300,
+        itemsPerPage: 10,
+        csrfToken: '{{ csrf_token() }}' // Implementar CSRF
+    };
 
-    // Carregar parceiros ao abrir o modal
-    const modalCadastrar = document.getElementById('modalCadastrar');
-    modalCadastrar.addEventListener('show.bs.modal', () => carregarParceiros(sessionType));
-
-    // Carregar parceiros ao carregar a página
-    carregarParceiros(sessionType);
-
-    // Submeter o formulário de cadastro
-    document.getElementById('salvarUsuario').addEventListener('click', () => {
-        const form = document.getElementById('formCadastrar');
-        const formData = new FormData(form);
-
-        fetch('api.php?action=cadastrar_usuario', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Usuário cadastrado com sucesso!');
-                form.reset(); // Limpa o formulário
-
-                // Certifique-se de que o modal tem o ID correto
-                const modalElement = document.getElementById('modalCadastrar');
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-
-                // Fecha o modal
-                if (modalInstance) {
-                    modalInstance.hide();
-                } else {
-                    console.error('Instância do modal não encontrada!');
-                }
-            } else {
-                alert('Erro ao cadastrar usuário: ' + (data.message || 'Erro desconhecido.'));
-            }
-        })
-        .catch(error => console.error('Erro ao cadastrar usuário:', error));
+    // Gerador de senha
+    document.getElementById('generatePassword').addEventListener('click', () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let password = '';
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.querySelector('input[name="senha"]').value = password;
     });
+
+    // Validação de formulário
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    // Função de busca genérica
+    const createSearchHandler = (inputId, resultId, endpoint) => {
+        let timeout;
+        document.getElementById(inputId).addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                if (e.target.value.length >= 3) {
+                    try {
+                        const response = await fetch(`${endpoint}?q=${encodeURIComponent(e.target.value)}`);
+                        const data = await response.json();
+                        updateResults(resultId, data);
+                    } catch (error) {
+                        console.error('Search error:', error);
+                    }
+                }
+            }, config.debounceTime);
+        });
+    };
+
+    // Atualização de resultados
+    const updateResults = (containerId, data) => {
+        const container = document.getElementById(containerId);
+        if (data.success && data.users.length > 0) {
+            container.innerHTML = data.users.map(user => `
+                <tr>
+                    <td>${user.nome}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${user.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            container.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum resultado encontrado</td></tr>';
+        }
+    };
+
+    // Inicializar buscas
+    createSearchHandler('searchAlterar', 'resultAlterar', '/api/users/search');
+    createSearchHandler('searchResetSenha', 'resultResetSenha', '/api/users/search');
+    createSearchHandler('searchApagar', 'resultApagar', '/api/users/search');
+
+    // Gerenciamento de estado dos modals
+    const modals = ['Cadastrar', 'Alterar', 'ResetSenha', 'Apagar'];
+    modals.forEach(modal => {
+        const modalElement = document.getElementById(`modal${modal}`);
+        modalElement.addEventListener('shown.bs.modal', () => {
+            document.getElementById(`search${modal}`).focus();
+        });
+    });
+
+    // Confirmação de exclusão
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+        const selectedUser = document.querySelector('#resultApagar .active');
+        if (selectedUser) {
+            const userId = selectedUser.dataset.id;
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': config.csrfToken
+                    }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('success', 'Usuário excluído com sucesso');
+                    $('#modalApagar').modal('hide');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showToast('error', 'Erro ao excluir usuário');
+            }
+        }
+    });
+
+    // Feedback visual
+    const showToast = (type, message) => {
+        const toastContainer = document.createElement('div');
+        toastContainer.innerHTML = `
+            <div class="toast align-items-center text-white bg-${type} border-0">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(toastContainer);
+        new bootstrap.Toast(toastContainer.querySelector('.toast')).show();
+        setTimeout(() => toastContainer.remove(), 5000);
+    };
 });
 </script>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+.list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
