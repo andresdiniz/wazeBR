@@ -14,7 +14,7 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
 // Definir caminho do arquivo de log
-ini_set('error_log', 'php_errors.log');
+ini_set('error_log', __DIR__.'php_errors.log');
 
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
