@@ -458,9 +458,6 @@
         const dadosatraso = {{ ruas|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const mensal = {{ mes|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const atrasocomprimento = {{ length_delay|json_encode(constant('JSON_HEX_TAG'))|raw }};
-
-        hourlyChart(data);
-
         console.log('Dados por hora:', data);
 
     </script>

@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. Gráfico mensal
     initMonthlyChart();
     // 6. Gráfico de cidades
-    //hourlyChart();
+    hourlyChart();
     // 7. Gráfico de tipo de via
     //initRoadTypeChart();
     // 8. Gráfico de relação entre comprimento e atraso
@@ -342,9 +342,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } // Fechamento correto da função initMonthlyChart
 
-    function hourlyChart(data) {
+    function hourlyChart() {
     // Verificação de segurança crítica
         console.log('Dados recebidos para hourlyChart:', data);
+
+        hourlyData = data;
 
         const container = document.querySelector('#time .row');
         if (!container) return;
