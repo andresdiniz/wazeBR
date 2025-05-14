@@ -343,94 +343,62 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanalxdata = diaxsemana;
+        const semanalxdata = diaxsemana; // [{ dia: 0-6, hora: 0-23, total: N }]
 
-        console.log('Dados dia/hora:', semanalxdata);
+        console.log('semanalxdata', semanalxdata);
 
         const container = document.querySelector('#time .row');
-        if (!container || semanalxdata.length === 0) return;
+        if (!container || semanaldata.length === 0) return;
 
-        // Configuração de cores
-        const colorScale = [
-            '#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C',
-            '#FC4E2A', '#E31A1C', '#BD0026', '#800026'
-        ];
+        // Dias da semana
+        const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        // Pré-processamento dos dados
-        const dataMap = semanalxdata.reduce((acc, d) => {
-            acc[`${d.dia}-${d.hora}`] = d;
-            return acc;
-        }, {});
-
-        // Cria matriz de dados completa
-        const dias = 7;
-        const horas = 24;
-        const matrixData = [];
-        
-        for (let dia = 0; dia < dias; dia++) {
-            for (let hora = 0; hora < horas; hora++) {
-                const key = `${dia}-${hora}`;
-                matrixData.push({
-                    x: hora,
-                    y: dia,
-                    v: dataMap[key]?.quantidade || 0,
-                    nivel: dataMap[key]?.media_nivel || 0,
-                    velocidade: dataMap[key]?.media_velocidade || 0,
-                    atraso: dataMap[key]?.media_atraso || 0
-                });
-            }
-        }
-
-        // Destrói gráfico anterior
-        if (window.heatmapChart) {
-            window.heatmapChart.destroy();
-        }
-
-        // Criação do canvas
+        // Cria canvas
+        const chartContainer = document.createElement('div');
         const canvas = document.createElement('canvas');
-        canvas.style.width = '100%';
-        canvas.style.height = '500px';
-        container.innerHTML = '';
-        container.appendChild(canvas);
+        canvas.id = 'heatmapChart';
+        chartContainer.appendChild(canvas);
+        container.innerHTML = ''; // limpa antes de inserir
+        container.appendChild(chartContainer);
 
-        // Configuração do gráfico
-        window.heatmapChart = new Chart(canvas, {
-            type: 'bar',
+        const maxTotal = Math.max(...semanaldata.map(d => d.total));
+        const getColor = (value) => {
+            const percent = value / maxTotal;
+            const r = Math.round(255 * percent);
+            const g = Math.round(255 * (1 - percent));
+            return `rgb(${r},${g},0)`;
+        };
+
+        const matrixData = semanaldata.map(d => ({
+            x: d.hora,
+            y: d.dia,
+            v: d.total
+        }));
+
+        new Chart(canvas, {
+            type: 'matrix',
             data: {
                 datasets: [{
-                    label: 'Intensidade do Tráfego',
+                    label: 'Congestionamentos por Hora e Dia',
                     data: matrixData,
-                    backgroundColor: (ctx) => {
-                        const value = ctx.raw.v;
-                        if (value === 0) return '#f0f0f0';
-                        const max = Math.max(...matrixData.map(d => d.v));
-                        const percent = value / max;
-                        const index = Math.floor(percent * (colorScale.length - 1));
-                        return colorScale[index];
-                    },
-                    borderWidth: 0,
-                    barPercentage: 1,
-                    categoryPercentage: 1
+                    backgroundColor: ctx => getColor(ctx.raw.v),
+                    borderWidth: 1,
+                    width: ({ chart }) => chart.chartArea.width / 24,
+                    height: ({ chart }) => chart.chartArea.height / 7
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Heatmap: Hora do Dia × Dia da Semana'
+                    },
                     tooltip: {
                         callbacks: {
-                            title: (context) => {
-                                const data = context[0].raw;
-                                const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-                                return `${dias[data.y]} - ${data.x.toString().padStart(2, '0')}:00`;
-                            },
-                            label: (context) => [
-                                `Congestionamentos: ${context.raw.v}`,
-                                `Nível médio: ${context.raw.nivel}`,
-                                `Velocidade média: ${context.raw.velocidade} km/h`,
-                                `Atraso médio: ${context.raw.atraso} seg`
-                            ]
+                            title: ctx => `${ctx[0].raw.x}:00 - ${dias[ctx[0].raw.y]}`,
+                            label: ctx => `Congestionamentos: ${ctx.raw.v}`
                         }
                     }
                 },
@@ -438,33 +406,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     x: {
                         type: 'linear',
                         position: 'top',
-                        offset: true,
-                        min: -0.5,
-                        max: 23.5,
                         ticks: {
-                            stepSize: 1,
-                            callback: (value) => `${value.toString().padStart(2, '0')}:00`
+                            callback: val => `${val}:00`,
+                            maxTicksLimit: 24
                         },
-                        title: { text: 'Hora do Dia', display: true },
-                        grid: { display: false }
+                        title: {
+                            display: true,
+                            text: 'Hora do Dia'
+                        }
                     },
                     y: {
                         type: 'linear',
-                        reverse: true,
-                        min: -0.5,
-                        max: 6.5,
                         ticks: {
-                            stepSize: 1,
-                            callback: (value) => ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][value]
+                            callback: val => dias[val]
                         },
-                        title: { text: 'Dia da Semana', display: true },
-                        grid: { display: false }
-                    }
-                },
-                elements: {
-                    bar: {
-                        borderWidth: 0,
-                        borderSkipped: false
+                        title: {
+                            display: true,
+                            text: 'Dia da Semana'
+                        },
+                        reverse: true
                     }
                 }
             }
