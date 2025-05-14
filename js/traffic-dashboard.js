@@ -342,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    } // Fechamento correto da função initMonthlyChart
 
     function hourlyChart(data) {
     document.addEventListener('DOMContentLoaded', function () {
@@ -393,4 +394,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     }
+
 });
