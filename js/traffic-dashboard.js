@@ -345,10 +345,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function hourlyChart(data) {
     // Verificação de segurança crítica
         console.log('Dados recebidos para hourlyChart:', data);
-        if (!Array.isArray(data) {
-            console.error('Dados inválidos para hourlyChart:', data);
-            return;
-        }
 
         const container = document.querySelector('#time .row');
         if (!container) return;
