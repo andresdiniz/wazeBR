@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. Gráfico mensal
     initMonthlyChart();
     // 6. Gráfico de cidades
-    weeklyHourlyHeatmap();
+    //weeklyHourlyHeatmap();
     // 7. Gráfico de tipo de via
     //weeklyHourlyHeatmap();
     // 8. Gráfico de relação entre comprimento e atraso
@@ -343,9 +343,11 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanalxdata = diaxsemana; // [{ dia: 0-6, hora: 0-23, total: N }]
+        const semanaldata = datasemana; // [{ dia: 0-6, hora: 0-23, total: N }]
+        const daydata = data;
 
-        console.log('semanalxdata', semanalxdata);
+        console.log('semanaldata', semanaldata);
+        console.log('daydata', daydata);
 
         const container = document.querySelector('#time .row');
         if (!container || semanaldata.length === 0) return;
