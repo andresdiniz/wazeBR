@@ -343,62 +343,84 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function weeklyHourlyHeatmap() {
-        const semanalxdata = diaxsemana; // [{ dia: 0-6, hora: 0-23, total: N }]
+        const semanalxdata = diaxsemana; // Dados recebidos do PHP
 
-        console.log('semanalxdata', semanalxdata);
+        console.log('Dados dia/hora:', semanalxdata);
 
         const container = document.querySelector('#time .row');
-        if (!container || semanaldata.length === 0) return;
+        if (!container || semanalxdata.length === 0) return;
 
-        // Dias da semana
-        const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        // Configuração de cores aprimorada
+        const colorScale = [
+            '#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', 
+            '#FC4E2A', '#E31A1C', '#BD0026', '#800026'
+        ];
 
-        // Cria canvas
-        const chartContainer = document.createElement('div');
-        const canvas = document.createElement('canvas');
-        canvas.id = 'heatmapChart';
-        chartContainer.appendChild(canvas);
-        container.innerHTML = ''; // limpa antes de inserir
-        container.appendChild(chartContainer);
-
-        const maxTotal = Math.max(...semanaldata.map(d => d.total));
-        const getColor = (value) => {
-            const percent = value / maxTotal;
-            const r = Math.round(255 * percent);
-            const g = Math.round(255 * (1 - percent));
-            return `rgb(${r},${g},0)`;
-        };
-
-        const matrixData = semanaldata.map(d => ({
+        // Pré-processamento dos dados
+        const matrixData = semanalxdata.map(d => ({
             x: d.hora,
             y: d.dia,
-            v: d.total
+            v: d.quantidade,
+            nivel: d.media_nivel,
+            velocidade: d.media_velocidade,
+            atraso: d.media_atraso
         }));
 
-        new Chart(canvas, {
+        // Valores para a escala de cores
+        const maxQuantidade = Math.max(...matrixData.map(d => d.v));
+        const quantiles = Array.from({length: colorScale.length}, (_, i) => 
+            Math.ceil(maxQuantidade * (i + 1) / colorScale.length)
+        );
+
+        // Destrói gráfico anterior se existir
+        if (window.heatmapChart) {
+            window.heatmapChart.destroy();
+        }
+
+        // Criação do canvas
+        const canvas = document.createElement('canvas');
+        canvas.style.width = '100%';
+        canvas.style.height = '500px';
+        container.innerHTML = '';
+        container.appendChild(canvas);
+
+        // Configuração do gráfico
+        window.heatmapChart = new Chart(canvas, {
             type: 'matrix',
             data: {
                 datasets: [{
-                    label: 'Congestionamentos por Hora e Dia',
+                    label: 'Intensidade do Tráfego',
                     data: matrixData,
-                    backgroundColor: ctx => getColor(ctx.raw.v),
-                    borderWidth: 1,
-                    width: ({ chart }) => chart.chartArea.width / 24,
-                    height: ({ chart }) => chart.chartArea.height / 7
+                    backgroundColor: (ctx) => {
+                        const value = ctx.raw.v;
+                        const index = quantiles.findIndex(q => value <= q);
+                        return colorScale[index] || colorScale[colorScale.length - 1];
+                    },
+                    borderWidth: 0,
+                    width: ({chart}) => (chart.chartArea.width / 24) - 1,
+                    height: ({chart}) => (chart.chartArea.height / 7) - 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Heatmap: Hora do Dia × Dia da Semana'
+                    legend: {
+                        display: false
                     },
                     tooltip: {
                         callbacks: {
-                            title: ctx => `${ctx[0].raw.x}:00 - ${dias[ctx[0].raw.y]}`,
-                            label: ctx => `Congestionamentos: ${ctx.raw.v}`
+                            title: (context) => {
+                                const data = context[0].raw;
+                                const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                                return `${dias[data.y]} - ${data.x.toString().padStart(2, '0')}:00`;
+                            },
+                            label: (context) => [
+                                `Congestionamentos: ${context.raw.v}`,
+                                `Nível médio: ${context.raw.nivel}`,
+                                `Velocidade média: ${context.raw.velocidade} km/h`,
+                                `Atraso médio: ${context.raw.atraso} seg`
+                            ]
                         }
                     }
                 },
@@ -406,25 +428,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     x: {
                         type: 'linear',
                         position: 'top',
+                        offset: true,
                         ticks: {
-                            callback: val => `${val}:00`,
-                            maxTicksLimit: 24
+                            stepSize: 1,
+                            callback: (value) => `${value.toString().padStart(2, '0')}:00`
                         },
                         title: {
                             display: true,
                             text: 'Hora do Dia'
+                        },
+                        grid: {
+                            display: false
                         }
                     },
                     y: {
                         type: 'linear',
+                        reverse: true,
                         ticks: {
-                            callback: val => dias[val]
+                            stepSize: 1,
+                            callback: (value) => ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][value]
                         },
                         title: {
                             display: true,
                             text: 'Dia da Semana'
                         },
-                        reverse: true
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
