@@ -452,12 +452,13 @@
     <!-- Script para dashboard -->
     <script>
         // Dados para gráficos extraídos da variável PHp
-        const data = {{horario|json_encode|raw}};
-        const datasemana = {{semanal|json_encode|raw}};
-        const dadosnivel = {{niveis|json_encode|raw}};
-        const dadosatraso = {{ruas|json_encode|raw}};
-        const mensal = {{ mensal|json_encode|raw }};
-        const atrasocomprimento = {{length_delay|json_encode|raw}};
+        const data = {{ horario|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const datasemana = {{ semanal|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const dadosnivel = {{ niveis|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const dadosatraso = {{ ruas|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const mensal = {{ mensal|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const atrasocomprimento = {{ length_delay|json_encode(constant('JSON_HEX_TAG'))|raw }};
+
         console.log('Dados por hora:', {{ horario|json_encode|raw }});
         console.log('Dados por hora:', {{ semanal|json_encode|raw }});
         console.log('Dados por mensal:', {{ mensal|json_encode|raw }});

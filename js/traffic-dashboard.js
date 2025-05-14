@@ -309,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initMonthlyChart() {
-        document.addEventListener('DOMContentLoaded', function () {
             const monthlyData = mensal;
 
             console.log(monthlyData);
