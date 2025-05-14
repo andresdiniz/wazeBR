@@ -352,11 +352,11 @@ function weeklyHourlyHeatmapPlotly() {
     var semanaldata = diaxsemana; // Dados de entrada, deve ser um array de objetos com {dia, hora, media_velocidade, quantidade, media_nivel, media_atraso}
     // Seleciona o contêiner onde o gráfico Plotly será renderizado.
     // Plotly geralmente renderiza em uma div, não diretamente em um canvas existente.
-    const container = document.querySelector('.card-body');
+    const container = document.querySelector('.heat');
 
     // Verifica se o contêiner e os dados existem
     if (!container || !semanaldata || semanaldata.length === 0) {
-        console.error("Container do gráfico (.card-body) ou dados não encontrados.");
+        console.error("Container do gráfico (.heat) ou dados não encontrados.");
         return;
     }
 
