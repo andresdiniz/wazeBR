@@ -159,7 +159,7 @@ class TrafficJamAnalyzer {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-   public function getLengthDelayData($id_parceiro, int $limit = 1000): array {
+   public function getLengthDelayData($id_parceiro, int $limit = 100): array {
         try {
             $query = "SELECT uuid, length AS comprimento, delay AS atraso FROM jams";
             $conditions = [
