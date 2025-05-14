@@ -117,6 +117,21 @@ document.addEventListener('DOMContentLoaded', function() {
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(25, 135, 84, 0.7)']
         ));
     }
+
+    function initLevelChart() {
+        const ctx = document.getElementById('levelChart');
+        if (!ctx) return;
+    
+        const data = dadosnivel; // Certifique-se que essa variável esteja definida corretamente via Twig
+        
+        const labels = data.map(item => `Nível ${item.nivel}`);
+        const congestionamentos = data.map(item => item.total);
+    
+        new Chart(ctx, createSingleAxisChartConfig(
+            labels,
+            [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)']
+        ));
+    } 
     
     function createSingleAxisChartConfig(labels, [data, label, type, color]) {
         return {
