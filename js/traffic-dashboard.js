@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. Gráfico de comprimento vs atraso
     timexlenght();
     // 5. Gráfico mensal
-    //initMonthlyChart();
+    initMonthlyChart();
     // 6. Gráfico de cidades
-    //initCityChart();
+    initSemanal();
     // 7. Gráfico de tipo de via
     //initRoadTypeChart();
     // 8. Gráfico de relação entre comprimento e atraso
@@ -186,126 +186,89 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    function initLevelChart() {
-        const ctx = document.getElementById('levelChart');
-        if (!ctx) return;
-    
-        const data = dadosnivel; // Certifique-se que essa variável esteja definida corretamente via Twig
-        
-        const labels = data.map(item => `Nível ${item.nivel}`);
-        const congestionamentos = data.map(item => item.total);
-    
-        new Chart(ctx, createSingleAxisChartConfig(
-            labels,
-            [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 202, 240, 0.7)']
-        ));
-    }    
+    function initMonthlyChart() {
+        document.addEventListener('DOMContentLoaded', function () {
+            const monthlyData = mensal;
 
-    function initDelayDistributionChart() {
-        const ctx = document.getElementById('delayDistChart');
-        if (!ctx) return;
-    
-        const data = dadosatraso;
-    
-        const labels = data.map(i => i.rua);
-        const values = data.map(i => i.total);
-    
-        new Chart(ctx, {
-            type: 'doughnut', // troca para doughnut para visual mais moderno
-            data: {
-                labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: colorPalette,
-                    borderColor: colorPaletteBorders,
-                    borderWidth: 1,
-                    hoverOffset: 10 // destaque ao passar o mouse
-                }]
-            },
-            options: {
-                ...chartOptions,
-                cutout: '50%', // centraliza melhor no doughnut
-                plugins: {
-                    legend: {
-                        position: 'bottom', // melhor para listas grandes
-                        labels: {
-                            boxWidth: 12,
-                            padding: 15,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                const label = context.label || '';
-                                const value = context.raw;
-                                const total = values.reduce((a, b) => a + b, 0);
-                                const percent = ((value / total) * 100).toFixed(1);
-                                return `${label}: ${value} (${percent}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }   
-    
-    function timexlenght() {
-        const rawData = atrasocomprimento;
-
-        const dataPoints = rawData.map(item => ({
-            x: item.comprimento,
-            y: item.atraso,
-            label: item.uuid
-        }));
-
-        const ctx = document.getElementById('lengthVsDelayChart').getContext('2d');
-
-        new Chart(ctx, {
-            type: 'scatter',
-            data: {
-                datasets: [{
-                    label: 'Segmentos (UUID)',
-                    data: dataPoints,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `UUID: ${context.raw.label}, Comprimento: ${context.raw.x}m, Atraso: ${context.raw.y}s`;
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Correlação: Comprimento vs Atraso'
-                    }
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyData.map(d => d.mes),
+                    datasets: [{
+                        label: 'Total de Congestionamentos',
+                        data: monthlyData.map(d => d.total),
+                        fill: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.3)',
+                        tension: 0.3
+                    }]
                 },
-                scales: {
-                    x: {
+                options: {
+                    responsive: true,
+                    plugins: {
                         title: {
                             display: true,
-                            text: 'Comprimento (metros)'
+                            text: 'Tendência Mensal de Congestionamentos'
                         }
                     },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Atraso (segundos)'
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
                 }
-            }
+            });
         });
-        }
-    });
+    }
 
+    function hourlyChart() {
+        document.addEventListener('DOMContentLoaded', function () {
+            const hourlyData = data;
+
+            const maxTotal = Math.max(...hourlyData.map(d => d.total));
+            const getColor = (value) => {
+                const percent = value / maxTotal;
+                const r = Math.round(255 * percent);
+                const g = Math.round(255 * (1 - percent));
+                return `rgb(${r},${g},0)`;
+            };
+
+            const chartContainer = document.createElement('div');
+            const canvas = document.createElement('canvas');
+            canvas.id = 'hourlyChart';
+            chartContainer.appendChild(canvas);
+
+            const container = document.querySelector('#time .row');
+            if (container) {
+                container.prepend(chartContainer);
+            }
+
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: hourlyData.map(d => `${d.hora}:00`),
+                    datasets: [{
+                        label: 'Congestionamentos por Hora',
+                        data: hourlyData.map(d => d.total),
+                        backgroundColor: hourlyData.map(d => getColor(d.total))
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Heatmap de Congestionamentos por Hora'
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    }
