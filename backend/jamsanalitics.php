@@ -43,7 +43,6 @@ class TrafficJamAnalyzer {
     }
 
     public function getAllData($id_parceiro) {
-    try {
         return [
             'resumo' => $this->getResumo($id_parceiro),
             'horario' => $this->getDistribuicaoHoraria($id_parceiro),
@@ -57,11 +56,7 @@ class TrafficJamAnalyzer {
             'segmentos' => $this->getTopSegmentos($id_parceiro),
             'length_delay' => $this->getLengthDelayData($id_parceiro),
         ];
-    } catch (\PDOException $e) {
-        return ['error' => $e->getMessage()];
     }
-}
-
 
     private function getResumo($id_parceiro) {
         $query = "SELECT 
@@ -165,29 +160,33 @@ class TrafficJamAnalyzer {
     }
     
     public function getLengthDelayData($id_parceiro, int $limit = 1000): array {
-        $query = "SELECT 
-                    id,
-                    length AS comprimento,
-                    delay AS atraso
-                FROM jams";
-        
-        // Aplica filtro de parceiro se necessário
-        $hasFilter = $this->addPartnerFilter($query, $id_parceiro);
-        
-        // Adiciona condições complementares
-        $query .= $hasFilter 
-            ? " AND length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0"
-            : " WHERE length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0";
-        
-        $query .= " ORDER BY date_received DESC LIMIT :limit";
-        
-        $stmt = $this->pdo->prepare($query);
-        if ($hasFilter) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $query = "SELECT 
+                        id,
+                        length AS comprimento,
+                        delay AS atraso
+                    FROM jams";
+
+            $hasFilter = $this->addPartnerFilter($query, $id_parceiro);
+
+            $query .= $hasFilter 
+                ? " AND length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0"
+                : " WHERE length IS NOT NULL AND delay IS NOT NULL AND length > 0 AND delay > 0";
+
+            $query .= " ORDER BY date_received DESC LIMIT :limit";
+
+            $stmt = $this->pdo->prepare($query);
+            if ($hasFilter) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Erro SQL em getLengthDelayData: " . $e->getMessage());
+            return [];
+        }
     }
+
     private function getNiveisCongestionamento($id_parceiro) {
         $query = "SELECT 
                     level as nivel,
