@@ -343,10 +343,32 @@ document.addEventListener('DOMContentLoaded', function() {
     } // Fechamento correto da função initMonthlyChart
 
     function hourlyChart(data) {
-        const hourlyData = data;
+    // Verificação de segurança crítica
+        if (!Array.isArray(data) {
+            console.error('Dados inválidos para hourlyChart:', data);
+            return;
+        }
 
-        console.log(hourlyData);
+        const container = document.querySelector('#time .row');
+        if (!container) return;
 
+        // Extrai dados de forma segura
+        const hourlyData = data.filter(d => d.hora !== undefined && d.total !== undefined);
+        
+        // Verifica se há dados válidos após filtragem
+        if (hourlyData.length === 0) {
+            console.warn('Nenhum dado válido para o gráfico horário');
+            return;
+        }
+
+        // Cria elementos do gráfico
+        const chartContainer = document.createElement('div');
+        const canvas = document.createElement('canvas');
+        canvas.id = 'hourlyChart';
+        chartContainer.appendChild(canvas);
+        container.prepend(chartContainer);
+
+        // Prepara dados de cores
         const maxTotal = Math.max(...hourlyData.map(d => d.total));
         const getColor = (value) => {
             const percent = value / maxTotal;
@@ -355,16 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return `rgb(${r},${g},0)`;
         };
 
-        const chartContainer = document.createElement('div');
-        const canvas = document.createElement('canvas');
-        canvas.id = 'hourlyChart';
-        chartContainer.appendChild(canvas);
-
-        const container = document.querySelector('#time .row');
-        if (container) {
-            container.prepend(chartContainer);
-        }
-
+        // Cria o gráfico
         new Chart(canvas, {
             type: 'bar',
             data: {
@@ -378,17 +391,10 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Heatmap de Congestionamentos por Hora'
-                    },
+                    title: { display: true, text: 'Heatmap de Congestionamentos por Hora' },
                     legend: { display: false }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                scales: { y: { beginAtZero: true } }
             }
         });
     }
