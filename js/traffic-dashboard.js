@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 6. Gráfico de cidades
     hourlyChart();
     // 7. Gráfico de tipo de via
-    //initRoadTypeChart();
+    weeklyHourlyHeatmap();
     // 8. Gráfico de relação entre comprimento e atraso
     //initLengthVsDelayChart();
 
