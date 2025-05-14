@@ -222,53 +222,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function hourlyChart() {
-        document.addEventListener('DOMContentLoaded', function () {
-            const hourlyData = data;
+    function hourlyChart(data) {
+    document.addEventListener('DOMContentLoaded', function () {
+        const hourlyData = data;
 
-            const maxTotal = Math.max(...hourlyData.map(d => d.total));
-            const getColor = (value) => {
-                const percent = value / maxTotal;
-                const r = Math.round(255 * percent);
-                const g = Math.round(255 * (1 - percent));
-                return `rgb(${r},${g},0)`;
-            };
+        const maxTotal = Math.max(...hourlyData.map(d => d.total));
+        const getColor = (value) => {
+            const percent = value / maxTotal;
+            const r = Math.round(255 * percent);
+            const g = Math.round(255 * (1 - percent));
+            return `rgb(${r},${g},0)`;
+        };
 
-            const chartContainer = document.createElement('div');
-            const canvas = document.createElement('canvas');
-            canvas.id = 'hourlyChart';
-            chartContainer.appendChild(canvas);
+        const chartContainer = document.createElement('div');
+        const canvas = document.createElement('canvas');
+        canvas.id = 'hourlyChart';
+        chartContainer.appendChild(canvas);
 
-            const container = document.querySelector('#time .row');
-            if (container) {
-                container.prepend(chartContainer);
-            }
+        const container = document.querySelector('#time .row');
+        if (container) {
+            container.prepend(chartContainer);
+        }
 
-            new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: hourlyData.map(d => `${d.hora}:00`),
-                    datasets: [{
-                        label: 'Congestionamentos por Hora',
-                        data: hourlyData.map(d => d.total),
-                        backgroundColor: hourlyData.map(d => getColor(d.total))
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Heatmap de Congestionamentos por Hora'
-                        },
-                        legend: { display: false }
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: hourlyData.map(d => `${d.hora}:00`),
+                datasets: [{
+                    label: 'Congestionamentos por Hora',
+                    data: hourlyData.map(d => d.total),
+                    backgroundColor: hourlyData.map(d => getColor(d.total))
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Heatmap de Congestionamentos por Hora'
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
+            }
         });
-    }}
+    });
+}
