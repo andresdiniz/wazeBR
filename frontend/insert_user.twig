@@ -308,4 +308,215 @@ document.getElementById('generatePass').addEventListener('click', function() {
         }, false)
     })
 })()
+document.addEventListener('DOMContentLoaded', () => {
+    const config = {
+        apiBase: '/api/users',
+        csrfToken: document.querySelector('meta[name="csrf-token"]').content
+    };
+
+    // Inicialização de Modais
+    const initModal = (modalId) => {
+        const modalElement = document.getElementById(modalId);
+        if(modalElement) {
+            return new bootstrap.Modal(modalElement);
+        }
+        return null;
+    };
+
+    const modals = {
+        cadastrar: initModal('modalCadastrar'),
+        alterar: initModal('modalAlterar'),
+        resetSenha: initModal('modalResetSenha'),
+        apagar: initModal('modalApagar'),
+        edit: initModal('editModal')
+    };
+
+    // Função genérica para requisições
+    const apiRequest = async (endpoint, method, body = null) => {
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': config.csrfToken
+        };
+
+        try {
+            const response = await fetch(`${config.apiBase}${endpoint}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : null
+            });
+
+            if (!response.ok) throw new Error('Erro na requisição');
+            return await response.json();
+            
+        } catch (error) {
+            console.error('Erro:', error);
+            showToast('danger', 'Erro na operação');
+            throw error;
+        }
+    };
+
+    // Busca de Usuários
+    const searchUsers = async (query) => {
+        return apiRequest(`/search?q=${encodeURIComponent(query)}`, 'GET');
+    };
+
+    // Função genérica para busca
+    const setupSearch = (inputId, resultId, callback) => {
+        let timeout;
+        const input = document.getElementById(inputId);
+        const resultContainer = document.getElementById(resultId);
+
+        input.addEventListener('input', async (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                if (e.target.value.length >= 3) {
+                    try {
+                        const data = await searchUsers(e.target.value);
+                        renderResults(resultContainer, data, callback);
+                    } catch (error) {
+                        resultContainer.innerHTML = '<li class="list-group-item">Erro na busca</li>';
+                    }
+                }
+            }, 300);
+        });
+    };
+
+    // Renderização de resultados
+    const renderResults = (container, data, callback) => {
+        container.innerHTML = data.users.map(user => `
+            <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${user.id}">
+                ${user.nome} (${user.email})
+                <button class="btn btn-sm btn-primary">${callback.label}</button>
+            </li>
+        `).join('');
+
+        container.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const userId = e.target.closest('li').dataset.id;
+                callback.action(userId);
+            });
+        });
+    };
+
+    // Configuração dos modais
+    setupSearch('searchAlterar', 'resultAlterar', {
+        label: 'Editar',
+        action: async (userId) => {
+            try {
+                const user = await apiRequest(`/${userId}`, 'GET');
+                openEditModal(user);
+                modals.alterar.hide();
+            } catch (error) {
+                showToast('danger', 'Erro ao carregar usuário');
+            }
+        }
+    });
+
+    setupSearch('searchResetSenha', 'resultResetSenha', {
+        label: 'Resetar',
+        action: async (userId) => {
+            try {
+                await apiRequest(`/${userId}/reset-password`, 'POST');
+                showToast('success', 'Senha resetada com sucesso');
+                modals.resetSenha.hide();
+            } catch (error) {
+                showToast('danger', 'Erro ao resetar senha');
+            }
+        }
+    });
+
+    setupSearch('searchApagar', 'resultApagar', {
+        label: 'Excluir',
+        action: async (userId) => {
+            if (confirm('Confirmar exclusão permanente?')) {
+                try {
+                    await apiRequest(`/${userId}`, 'DELETE');
+                    showToast('success', 'Usuário excluído com sucesso');
+                    modals.apagar.hide();
+                } catch (error) {
+                    showToast('danger', 'Erro ao excluir usuário');
+                }
+            }
+        }
+    });
+
+    // Modal de Edição
+    const openEditModal = (user) => {
+        document.getElementById('editUserId').value = user.id;
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editEmail').value = user.email;
+        modals.edit.show();
+    };
+
+    // Submit do formulário de edição
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('editUserId').value;
+        const formData = {
+            username: document.getElementById('editUsername').value,
+            email: document.getElementById('editEmail').value
+        };
+
+        try {
+            await apiRequest(`/${userId}`, 'PUT', formData);
+            showToast('success', 'Usuário atualizado com sucesso');
+            modals.edit.hide();
+        } catch (error) {
+            showToast('danger', 'Erro ao atualizar usuário');
+        }
+    });
+
+    // Submit do formulário de cadastro
+    document.getElementById('formCadastrar').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = {
+            nome: document.getElementById('nomeUsuario').value,
+            usuario: document.getElementById('nomeDeUsuario').value,
+            email: document.getElementById('emailUsuario').value,
+            senha: document.getElementById('senhaUsuario').value,
+            type: document.getElementById('typeSelect').value,
+            id_parceiro: document.getElementById('parceirosSelect').value
+        };
+
+        try {
+            await apiRequest('', 'POST', formData);
+            showToast('success', 'Usuário cadastrado com sucesso');
+            modals.cadastrar.hide();
+            e.target.reset();
+        } catch (error) {
+            showToast('danger', 'Erro ao cadastrar usuário');
+        }
+    });
+
+    // Função para exibir notificações
+    const showToast = (type, message) => {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        new bootstrap.Toast(toast).show();
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    // Carregar parceiros
+    const loadParceiros = async () => {
+        try {
+            const response = await fetch('/api/parceiros');
+            const data = await response.json();
+            const select = document.getElementById('parceirosSelect');
+            select.innerHTML = data.map(p => `
+                <option value="${p.id}">${p.Nome}</option>
+            `).join('');
+        } catch (error) {
+            console.error('Erro ao carregar parceiros:', error);
+        }
+    };
+
+    loadParceiros();
+});
 </script>
