@@ -284,7 +284,18 @@
 </style>
 
 <script defer>
+    function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null; // Se não encontrar
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Usando:
+    const id_parceiro = getCookie('usuario_id_parceiro');
+    console.log('id_parceiro:', id_parceiro);
+
     const config = {
     apiBase: '../api.php',
     endpoints: {
