@@ -287,7 +287,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const config = {
     apiBase: '../api.php',
-    csrfToken: `<?= $_SESSION['csrf_token'] ?>`,
     endpoints: {
         users: '?action=users',
         resetPassword: '?action=reset-password',
