@@ -482,30 +482,53 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         console.log('Dados do formulário:', formData);
-        
+
         try {
-            await apiRequest('cadastrar_usuario', 'GET', formData);
-            showToast('success', 'Usuário cadastrado com sucesso');
-            modals.cadastrar.hide();
-            e.target.reset();
+            const response = await apiRequest('/usuarios', 'POST', formData);
+            
+            if (response.success) {
+                showToast('success', 'Usuário cadastrado com sucesso!');
+                modals.cadastrar.hide();
+                e.target.reset();
+                
+                // Atualizar a lista de usuários após 1s
+                setTimeout(() => {
+                    window.location.reload(); // Ou atualize a tabela via AJAX
+                }, 1000);
+            }
         } catch (error) {
-            showToast('danger', 'Erro ao cadastrar usuário');
+            showToast('danger', error.message || 'Erro ao cadastrar usuário');
         }
     });
 
     // Função para exibir notificações
     const showToast = (type, message) => {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        
         toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
             </div>
         `;
-        document.body.appendChild(toast);
-        new bootstrap.Toast(toast).show();
-        setTimeout(() => toast.remove(), 3000);
+        
+        toastContainer.appendChild(toast);
+        new bootstrap.Toast(toast, { autohide: true, delay: 3000 }).show();
+    };
+
+    // Criar container se não existir
+    const createToastContainer = () => {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.position = 'fixed';
+        container.style.top = '20px';
+        container.style.right: '20px';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
     };
 
     // Carregar parceiros
