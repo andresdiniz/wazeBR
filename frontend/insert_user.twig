@@ -284,38 +284,35 @@
 </style>
 
 <script defer>
-    function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null; // Se não encontrar
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Usando:
     const id_parceiro = getCookie('usuario_id_parceiro');
-    console.log('id_parceiro:', id_parceiro);
-
+    const csrfToken = getCookie('csrf_token') || document.querySelector('meta[name="csrf-token"]')?.content;
+    
     const config = {
-    apiBase: '../api.php',
-    endpoints: {
-        users: '?action=users',
-        resetPassword: '?action=reset-password',
-        parceiros: (id_parceiro) => `?action=get_parceiros&sessionType=${id_parceiro}`
-    }
-};
+        apiBase: '../api.php',
+        csrfToken: csrfToken,
+        endpoints: {
+            users: '?action=users',
+            resetPassword: '?action=reset-password',
+            parceiros: `?action=get_parceiros&sessionType=${id_parceiro}`
+        }
+    };
 
-    console.log('Config :', config);
+    console.log('Config:', config);
 
-    // Modal instances
     const modals = {
         cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
         alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
         resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
         apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
     };
-
-
 
     const showToast = (type, message) => {
         const toastContainer = document.getElementById('toastContainer') || (() => {
@@ -344,7 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiRequest = async (endpoint, method = 'GET', body = null) => {
         try {
-            const res = await fetch(`${config.apiBase}${endpoint}`, {
+            const url = new URL(`${config.apiBase}${endpoint}`);
+            const res = await fetch(url, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -353,10 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: body ? JSON.stringify(body) : null
             });
 
-            if (!res.ok) throw new Error((await res.json()).message || 'Erro na requisição');
-            return await res.json();
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Erro na requisição');
+            return data;
         } catch (err) {
             console.error(err);
+            showToast('danger', err.message || 'Erro na comunicação com o servidor');
             throw err;
         }
     };
@@ -376,12 +376,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.getElementById('searchAlterar');
         const tbody = document.getElementById('resultAlterar');
 
-        input.addEventListener('input', debounce(async () => {
-            const query = input.value.trim();
+        const searchUsers = debounce(async (query) => {
             if (query.length < 3) return;
-
+            
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
                 tbody.innerHTML = data.users.map(u => `
                     <tr>
                         <td>${u.nome}</td>
@@ -395,18 +394,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>
                 `).join('');
             } catch (err) {
-                showToast('danger', err.message);
+                tbody.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado</td></tr>';
             }
-        }));
+        }, 500);
+
+        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
 
         tbody.addEventListener('click', async e => {
             const btn = e.target.closest('.btn-edit');
             if (!btn) return;
 
             try {
-                const user = await apiRequest(`${config.endpoints.users}/${btn.dataset.id}`);
-                alert(`Abrir formulário de edição para: ${user.nome}`);
-                // Aqui você pode abrir outro modal ou preencher um formulário para edição.
+                const user = await apiRequest(`${config.endpoints.users}&id=${btn.dataset.id}`);
+                // Implementar lógica de edição aqui
+                console.log('Editar usuário:', user);
+                modals.alterar.hide();
+                showToast('success', `Editando usuário: ${user.nome}`);
             } catch (err) {
                 showToast('danger', err.message);
             }
@@ -421,25 +424,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('resultResetSenha');
         const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
 
-        input.addEventListener('input', debounce(async () => {
-            const query = input.value.trim();
+        const searchUsers = debounce(async (query) => {
             if (query.length < 3) return;
-
+            
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
                 list.innerHTML = data.users.map(u => `
                     <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
                         ${u.nome} (${u.email})
                     </button>
                 `).join('');
             } catch (err) {
-                showToast('danger', err.message);
+                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
             }
-        }));
+        }, 500);
+
+        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
 
         list.addEventListener('click', e => {
-            [...list.children].forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
+            const item = e.target.closest('.list-group-item-action');
+            if (!item) return;
+            
+            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
         });
 
         confirmBtn.addEventListener('click', async () => {
@@ -447,8 +454,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!selected) return showToast('warning', 'Selecione um usuário');
 
             try {
-                await apiRequest(config.endpoints.resetPassword, 'POST', { userId: selected.dataset.id });
-                showToast('success', 'Senha resetada!');
+                await apiRequest(config.endpoints.resetPassword, 'POST', { 
+                    userId: selected.dataset.id 
+                });
+                showToast('success', 'Senha resetada com sucesso!');
                 modals.resetSenha.hide();
             } catch (err) {
                 showToast('danger', err.message);
@@ -464,25 +473,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('resultApagar');
         const confirmBtn = document.querySelector('#modalApagar .btn-danger');
 
-        input.addEventListener('input', debounce(async () => {
-            const query = input.value.trim();
+        const searchUsers = debounce(async (query) => {
             if (query.length < 3) return;
-
+            
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
                 list.innerHTML = data.users.map(u => `
                     <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
                         ${u.nome} (${u.email})
                     </button>
                 `).join('');
             } catch (err) {
-                showToast('danger', err.message);
+                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
             }
-        }));
+        }, 500);
+
+        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
 
         list.addEventListener('click', e => {
-            [...list.children].forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
+            const item = e.target.closest('.list-group-item-action');
+            if (!item) return;
+            
+            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
         });
 
         confirmBtn.addEventListener('click', async () => {
@@ -490,8 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!selected) return showToast('warning', 'Selecione um usuário');
 
             try {
-                await apiRequest(`${config.endpoints.users}/${selected.dataset.id}`, 'DELETE');
-                showToast('success', 'Usuário removido!');
+                await apiRequest(`${config.endpoints.users}&id=${selected.dataset.id}`, 'DELETE');
+                showToast('success', 'Usuário removido com sucesso!');
                 modals.apagar.hide();
                 setTimeout(() => location.reload(), 1500);
             } catch (err) {
@@ -505,13 +518,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========================
     (async () => {
         try {
-            const parceiros = await apiRequest(config.endpoints.parceiros);
+            const data = await apiRequest(config.endpoints.parceiros);
             const select = document.getElementById('parceirosSelect');
+            
             if (select) {
-                select.innerHTML = parceiros.map(p => `<option value="${p.id}">${p.Nome}</option>`).join('');
+                select.innerHTML = data.map(p => `
+                    <option value="${p.id}">${p.Nome}</option>
+                `).join('');
             }
         } catch (err) {
-            showToast('danger', err.message);
+            showToast('danger', 'Erro ao carregar parceiros');
         }
     })();
 });
