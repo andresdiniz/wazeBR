@@ -289,12 +289,15 @@ document.addEventListener('DOMContentLoaded', () => {
         apiBase: '../api.php',
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.content,
         endpoints: {
-            users: '/users',
-            resetPassword: '/reset-password',
-            parceiros: '/parceiros'
+            users: '?action=users',
+            resetPassword: '?action=reset-password',
+            parceiros: '?action=parceiros'
         }
     };
 
+    console.log('Config :', config);
+
+    // Modal instances
     const modals = {
         cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
         alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
