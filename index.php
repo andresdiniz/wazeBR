@@ -5,6 +5,10 @@
 // Inicia a sessão
 session_start();
 
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Define o caminho para o arquivo .env (assumindo que está na mesma pasta do script)
 $envPath = __DIR__ . '/.env';
 
