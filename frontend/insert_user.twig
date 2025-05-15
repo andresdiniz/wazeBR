@@ -311,8 +311,7 @@ document.getElementById('generatePass').addEventListener('click', function() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const config = {
-        apiBase: 'api.php',
-        csrfToken: document.querySelector('meta[name="csrf-token"]').content
+        apiBase: '../api.php',
     };
 
     console.log('Configuração carregada:', config);
