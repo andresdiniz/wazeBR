@@ -481,6 +481,8 @@ document.addEventListener('DOMContentLoaded', () => {
             id_parceiro: document.getElementById('parceirosSelect').value
         };
 
+        console.log('Dados do formulário:', formData);
+        
         try {
             await apiRequest('cadastrar_usuario', 'GET', formData);
             showToast('success', 'Usuário cadastrado com sucesso');
