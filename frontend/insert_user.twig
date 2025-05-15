@@ -308,11 +308,14 @@ document.getElementById('generatePass').addEventListener('click', function() {
         }, false)
     })
 })()
+
 document.addEventListener('DOMContentLoaded', () => {
     const config = {
-        apiBase: '/api/users',
+        apiBase: 'api.php',
         csrfToken: document.querySelector('meta[name="csrf-token"]').content
     };
+
+    console.log('Configuração carregada:', config);
 
     // Inicialização de Modais
     const initModal = (modalId) => {
@@ -479,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            await apiRequest('', 'POST', formData);
+            await apiRequest('cadastrar_usuario', 'GET', formData);
             showToast('success', 'Usuário cadastrado com sucesso');
             modals.cadastrar.hide();
             e.target.reset();
