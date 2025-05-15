@@ -171,6 +171,7 @@
                                            required
                                            minlength="6">
                                 </div>
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
                                 
                                 <div class="mb-4 form-check">
                                     <input type="checkbox" 

@@ -1,93 +1,105 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
 ini_set('log_errors', 1);
 ini_set('error_log', 'error_log.log');
+
+session_start();
+
+// Verificar CSRF Token
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        error_log("Tentativa de CSRF detectada");
+        http_response_code(403);
+        exit('Ação não autorizada');
+    }
+}
 
 try {
     require_once './config/configbd.php';
     require_once './functions/scripts.php';
-    session_start(); // Iniciar a sessão
-
-    // Obter conexão com o banco
+    
     $pdo = Database::getConnection();
 
     // Consulta por email
     $sql = "SELECT * FROM users WHERE email = :email";
     $stmt = $pdo->prepare($sql);
 
-    // Pega o email enviado via POST
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $password = isset($_POST['password']) ? trim($_POST['password']) : '';
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'] ?? '';
 
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-
-    // Executa a query
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        // Obtém os dados do usuário
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Verifica a senha usando password_verify
         if (password_verify($password, $user['password'])) {
-            // Salva dados do usuário na sessão (exceto senha)
-            session_regenerate_id(true); // Prevenir fixação de sessão
-            $_SESSION['usuario_id'] = $user['id'];
-            $_SESSION['usuario_nome'] = $user['nome'];
-            $_SESSION['usuario_email'] = $user['email'];
-            $_SESSION['usuario_username'] = $user['username'];
-            $_SESSION['usuario_photo'] = $user['photo'];
-            $_SESSION['usuario_id_parceiro'] = $user['id_parceiro'];
-            $_SESSION['type'] = $user['type'];
+            // Regenerar ID da sessão
+            session_regenerate_id(true);
 
-            setcookie('usuario_id_parceiro', $user['id_parceiro'], time() + (86400 * 30), "/");
+            // Definir dados da sessão
+            $_SESSION = [
+                'usuario_id' => $user['id'],
+                'usuario_nome' => $user['nome'],
+                'usuario_email' => $user['email'],
+                'usuario_username' => $user['username'],
+                'usuario_photo' => $user['photo'],
+                'usuario_id_parceiro' => $user['id_parceiro'],
+                'type' => $user['type'],
+                'csrf_token' => bin2hex(random_bytes(32))
+            ];
 
+            setcookie('usuario_id_parceiro', $user['id_parceiro'], [
+                'expires' => time() + (86400 * 30),
+                'path' => '/',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Strict'
+            ]);
+
+            // Registrar login no histórico
             $ip = getIp();
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido';
 
-            try {
-                // Prepara a consulta SQL para inserção
-                $sql = "
-                    INSERT INTO historic_login (user, data_hora, ip)
-                    VALUES (:user, :data_hora, :ip)
-                ";
-                $stmt = $pdo->prepare($sql);
+            $sql = "
+                INSERT INTO historic_login 
+                (user_id, login_time, ip_address, user_agent, success)
+                VALUES 
+                (:user_id, NOW(), :ip, :user_agent, 1)
+            ";
 
-                // Define os valores a serem inseridos
-                $dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
-                $dataHora = $dateTime->format('Y-m-d H:i:s'); // Formata a data no padrão Y-m-d H:i:s
-                $stmt->bindParam(':user', $_SESSION['usuario_id']);
-                $stmt->bindParam(':data_hora', $dataHora);
-                $stmt->bindParam(':ip', $ip);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':user_id' => $user['id'],
+                ':ip' => $ip,
+                ':user_agent' => substr($userAgent, 0, 255)
+            ]);
 
-                // Executa o comando SQL
-                $stmt->execute();
-            } catch (PDOException $e) {
-                // Lida com erros de execução e loga
-                error_log("Erro ao inserir histórico de login: " . $e->getMessage());
-                $_SESSION['login_error'] = "Erro ao registrar o login.";
-                header("Location: login.html");
-                exit();
-            }
-
-            // Redireciona para a página inicial
             header("Location: /");
             exit();
-        } else {
-            // Caso a senha esteja incorreta
-            header("Location: login.html?erro=Senha%20incorreta");
-            exit();
         }
-    } else {
-        // Caso o email não exista no banco
-        header("Location: login.html?erro=Email%20incorreto");
-        exit();
     }
+
+    // Registrar tentativa fracassada
+    $sql = "
+        INSERT INTO historic_login 
+        (user_id, login_time, ip_address, user_agent, success)
+        VALUES 
+        (NULL, NOW(), :ip, :user_agent, 0)
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':ip' => getIp(),
+        ':user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido', 0, 255)
+    ]);
+
+    header("Location: login.html?erro=Credenciais inválidas");
+    exit();
+
 } catch (PDOException $e) {
-    // Logar o erro no banco
-    error_log("Erro ao acessar o banco: " . $e->getMessage());
-    $_SESSION['login_error'] = "Erro ao acessar o banco.";
-    header("Location: login.html");
+    error_log("Erro de banco: " . $e->getMessage());
+    header("Location: login.html?erro=Erro no sistema");
     exit();
 }
