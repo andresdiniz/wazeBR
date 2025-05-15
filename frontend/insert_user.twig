@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     endpoints: {
         users: '?action=users',
         resetPassword: '?action=reset-password',
-        parceiros: '?action=get_parceiros&sessionType=${idParceiro}'
+        parceiros: (id_parceiro) => `?action=get_parceiros&sessionType=${id_parceiro}`
     }
 };
 
