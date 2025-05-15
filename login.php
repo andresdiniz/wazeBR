@@ -1,4 +1,13 @@
 <?php
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error) {
+        echo "<pre>";
+        print_r($error);
+        echo "</pre>";
+    }
+});
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
