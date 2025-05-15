@@ -295,12 +295,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const getModal = (id) => bootstrap.Modal.getOrCreateInstance(document.getElementById(id));
+
     const modals = {
-        cadastrar: bootstrap.Modal.getOrCreateInstance('#modalCadastrar'),
-        alterar: bootstrap.Modal.getOrCreateInstance('#modalAlterar'),
-        resetSenha: bootstrap.Modal.getOrCreateInstance('#modalResetSenha'),
-        apagar: bootstrap.Modal.getOrCreateInstance('#modalApagar')
+        cadastrar: getModal('modalCadastrar'),
+        alterar: getModal('modalAlterar'),
+        resetSenha: getModal('modalResetSenha'),
+        apagar: getModal('modalApagar')
     };
+
 
     const showToast = (type, message) => {
         const toastContainer = document.getElementById('toastContainer') || (() => {
