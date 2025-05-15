@@ -285,7 +285,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Configurações globais
     const config = {
         apiBase: '../api.php',
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.content,
@@ -296,45 +295,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Elementos dos modais
     const modals = {
-        cadastrar: new bootstrap.Modal('#modalCadastrar'),
-        alterar: new bootstrap.Modal('#modalAlterar'),
-        resetSenha: new bootstrap.Modal('#modalResetSenha'),
-        apagar: new bootstrap.Modal('#modalApagar')
+        cadastrar: bootstrap.Modal.getOrCreateInstance('#modalCadastrar'),
+        alterar: bootstrap.Modal.getOrCreateInstance('#modalAlterar'),
+        resetSenha: bootstrap.Modal.getOrCreateInstance('#modalResetSenha'),
+        apagar: bootstrap.Modal.getOrCreateInstance('#modalApagar')
     };
 
-    // Toast Notifications
     const showToast = (type, message) => {
         const toastContainer = document.getElementById('toastContainer') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.style.position = 'fixed';
-            container.style.top = '20px';
-            container.style.right = '20px';
-            container.style.zIndex = '9999';
-            document.body.appendChild(container);
-            return container;
+            const div = document.createElement('div');
+            div.id = 'toastContainer';
+            div.style.position = 'fixed';
+            div.style.top = '1rem';
+            div.style.right = '1rem';
+            div.style.zIndex = '1055';
+            document.body.appendChild(div);
+            return div;
         })();
 
         const toast = document.createElement('div');
+        toast.className = `toast show bg-${type} text-white mb-2`;
+        toast.setAttribute('role', 'alert');
         toast.innerHTML = `
-            <div class="toast align-items-center text-white bg-${type} border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-
         toastContainer.appendChild(toast);
-        new bootstrap.Toast(toast, { autohide: true, delay: 3000 }).show();
+        setTimeout(() => toast.remove(), 4000);
     };
 
-    // Função genérica para requisições
-    const apiRequest = async (endpoint, method, body = null) => {
+    const apiRequest = async (endpoint, method = 'GET', body = null) => {
         try {
-            const response = await fetch(`${config.apiBase}${endpoint}`, {
+            const res = await fetch(`${config.apiBase}${endpoint}`, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -343,235 +338,166 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: body ? JSON.stringify(body) : null
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erro na requisição');
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Erro:', error);
-            throw error;
+            if (!res.ok) throw new Error((await res.json()).message || 'Erro na requisição');
+            return await res.json();
+        } catch (err) {
+            console.error(err);
+            throw err;
         }
     };
 
-    // 1. Modal Cadastrar
-    const initCadastrarModal = () => {
-        const form = document.getElementById('formCadastrar');
-        const btnSubmit = form.querySelector('button[type="submit"]');
-        const spinner = btnSubmit.querySelector('.spinner-border');
-
-        // Gerador de Senha
-        document.getElementById('generatePass').addEventListener('click', () => {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&';
-            document.getElementById('senhaUsuario').value = Array.from({length: 12}, () => 
-                chars[Math.floor(Math.random() * chars.length)]).join('');
-        });
-
-        // Validação em tempo real
-        form.querySelectorAll('input, select').forEach(field => {
-            field.addEventListener('input', () => {
-                if (field.hasAttribute('required')) {
-                    field.classList.toggle('is-invalid', !field.value.trim());
-                }
-                if (field.id === 'emailUsuario') {
-                    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value);
-                    field.classList.toggle('is-invalid', !isValid);
-                }
-            });
-        });
-
-        // Submit do formulário
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated');
-                return;
-            }
-
-            btnSubmit.disabled = true;
-            spinner.classList.remove('d-none');
-
-            try {
-                const formData = {
-                    nome: document.getElementById('nomeUsuario').value.trim(),
-                    usuario: document.getElementById('nomeDeUsuario').value.trim(),
-                    email: document.getElementById('emailUsuario').value.trim().toLowerCase(),
-                    senha: document.getElementById('senhaUsuario').value,
-                    type: document.getElementById('typeSelect').value,
-                    id_parceiro: document.getElementById('parceirosSelect').value
-                };
-
-                await apiRequest(config.endpoints.users, 'POST', formData);
-                
-                showToast('success', 'Usuário cadastrado com sucesso!');
-                form.reset();
-                modals.cadastrar.hide();
-                setTimeout(window.location.reload, 2000);
-
-            } catch (error) {
-                showToast('danger', error.message);
-            } finally {
-                btnSubmit.disabled = false;
-                spinner.classList.add('d-none');
-                form.classList.remove('was-validated');
-            }
-        });
+    const debounce = (fn, delay = 300) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
     };
 
-    // 2. Modal Alterar
-    const initAlterarModal = () => {
-        const searchInput = document.getElementById('searchAlterar');
-        const resultsContainer = document.getElementById('resultAlterar');
-        let timeout = null;
+    // ========================
+    // Modal Alterar Usuário
+    // ========================
+    (() => {
+        const input = document.getElementById('searchAlterar');
+        const tbody = document.getElementById('resultAlterar');
 
-        // Busca de usuários
-        const searchUsers = async (query) => {
+        input.addEventListener('input', debounce(async () => {
+            const query = input.value.trim();
+            if (query.length < 3) return;
+
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`, 'GET');
-                renderResults(data.users);
-            } catch (error) {
-                showToast('danger', error.message);
+                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td>${u.nome}</td>
+                        <td>${u.usuario}</td>
+                        <td>${u.email}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning btn-edit" data-id="${u.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showToast('danger', err.message);
             }
-        };
+        }));
 
-        // Renderização dos resultados
-        const renderResults = (users) => {
-            resultsContainer.innerHTML = users.map(user => `
-                <tr>
-                    <td>${user.nome}</td>
-                    <td>${user.usuario}</td>
-                    <td>${user.email}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning btn-edit" data-id="${user.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        };
+        tbody.addEventListener('click', async e => {
+            const btn = e.target.closest('.btn-edit');
+            if (!btn) return;
 
-        // Evento de busca
-        searchInput.addEventListener('input', () => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                if (searchInput.value.length >= 3) searchUsers(searchInput.value);
-            }, 300);
-        });
-
-        // Edição de usuário
-        resultsContainer.addEventListener('click', async (e) => {
-            if (e.target.closest('.btn-edit')) {
-                const userId = e.target.closest('.btn-edit').dataset.id;
-                try {
-                    const user = await apiRequest(`${config.endpoints.users}/${userId}`, 'GET');
-                    openEditModal(user);
-                } catch (error) {
-                    showToast('danger', error.message);
-                }
+            try {
+                const user = await apiRequest(`${config.endpoints.users}/${btn.dataset.id}`);
+                alert(`Abrir formulário de edição para: ${user.nome}`);
+                // Aqui você pode abrir outro modal ou preencher um formulário para edição.
+            } catch (err) {
+                showToast('danger', err.message);
             }
         });
-    };
+    })();
 
-    // 3. Modal ResetSenha
-    const initResetSenhaModal = () => {
-        const searchInput = document.getElementById('searchResetSenha');
-        const resultsContainer = document.getElementById('resultResetSenha');
-        const btnConfirm = document.querySelector('#modalResetSenha .btn-primary');
+    // ========================
+    // Modal Resetar Senha
+    // ========================
+    (() => {
+        const input = document.getElementById('searchResetSenha');
+        const list = document.getElementById('resultResetSenha');
+        const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
 
-        // Busca e renderização
-        const searchUsers = async (query) => {
+        input.addEventListener('input', debounce(async () => {
+            const query = input.value.trim();
+            if (query.length < 3) return;
+
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`, 'GET');
-                resultsContainer.innerHTML = data.users.map(user => `
-                    <button type="button" class="list-group-item list-group-item-action" data-id="${user.id}">
-                        ${user.nome} (${user.email})
+                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                list.innerHTML = data.users.map(u => `
+                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                        ${u.nome} (${u.email})
                     </button>
                 `).join('');
-            } catch (error) {
-                showToast('danger', error.message);
+            } catch (err) {
+                showToast('danger', err.message);
             }
-        };
+        }));
 
-        // Evento de busca
-        searchInput.addEventListener('input', () => {
-            if (searchInput.value.length >= 3) searchUsers(searchInput.value);
+        list.addEventListener('click', e => {
+            [...list.children].forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
         });
 
-        // Confirmação de reset
-        btnConfirm.addEventListener('click', async () => {
-            const selected = resultsContainer.querySelector('.active');
-            if (!selected) return;
+        confirmBtn.addEventListener('click', async () => {
+            const selected = list.querySelector('.active');
+            if (!selected) return showToast('warning', 'Selecione um usuário');
 
             try {
                 await apiRequest(config.endpoints.resetPassword, 'POST', { userId: selected.dataset.id });
-                showToast('success', 'Senha resetada com sucesso!');
+                showToast('success', 'Senha resetada!');
                 modals.resetSenha.hide();
-            } catch (error) {
-                showToast('danger', error.message);
+            } catch (err) {
+                showToast('danger', err.message);
             }
         });
-    };
+    })();
 
-    // 4. Modal Apagar
-    const initApagarModal = () => {
-        const searchInput = document.getElementById('searchApagar');
-        const resultsContainer = document.getElementById('resultApagar');
-        const btnConfirm = document.querySelector('#modalApagar .btn-danger');
+    // ========================
+    // Modal Apagar Usuário
+    // ========================
+    (() => {
+        const input = document.getElementById('searchApagar');
+        const list = document.getElementById('resultApagar');
+        const confirmBtn = document.querySelector('#modalApagar .btn-danger');
 
-        // Busca e renderização
-        const searchUsers = async (query) => {
+        input.addEventListener('input', debounce(async () => {
+            const query = input.value.trim();
+            if (query.length < 3) return;
+
             try {
-                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`, 'GET');
-                resultsContainer.innerHTML = data.users.map(user => `
-                    <button type="button" class="list-group-item list-group-item-action" data-id="${user.id}">
-                        ${user.nome} (${user.email})
+                const data = await apiRequest(`${config.endpoints.users}?q=${encodeURIComponent(query)}`);
+                list.innerHTML = data.users.map(u => `
+                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                        ${u.nome} (${u.email})
                     </button>
                 `).join('');
-            } catch (error) {
-                showToast('danger', error.message);
+            } catch (err) {
+                showToast('danger', err.message);
             }
-        };
+        }));
 
-        // Evento de busca
-        searchInput.addEventListener('input', () => {
-            if (searchInput.value.length >= 3) searchUsers(searchInput.value);
+        list.addEventListener('click', e => {
+            [...list.children].forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
         });
 
-        // Confirmação de exclusão
-        btnConfirm.addEventListener('click', async () => {
-            const selected = resultsContainer.querySelector('.active');
-            if (!selected) return;
+        confirmBtn.addEventListener('click', async () => {
+            const selected = list.querySelector('.active');
+            if (!selected) return showToast('warning', 'Selecione um usuário');
 
             try {
                 await apiRequest(`${config.endpoints.users}/${selected.dataset.id}`, 'DELETE');
-                showToast('success', 'Usuário excluído com sucesso!');
+                showToast('success', 'Usuário removido!');
                 modals.apagar.hide();
-                setTimeout(window.location.reload, 1500);
-            } catch (error) {
-                showToast('danger', error.message);
+                setTimeout(() => location.reload(), 1500);
+            } catch (err) {
+                showToast('danger', err.message);
             }
         });
-    };
+    })();
 
-    // Inicialização dos modais
-    initCadastrarModal();
-    initAlterarModal();
-    initResetSenhaModal();
-    initApagarModal();
-
+    // ========================
     // Carregar parceiros
-    const loadParceiros = async () => {
+    // ========================
+    (async () => {
         try {
-            const data = await apiRequest(config.endpoints.parceiros, 'GET');
+            const parceiros = await apiRequest(config.endpoints.parceiros);
             const select = document.getElementById('parceirosSelect');
-            select.innerHTML = data.map(p => `<option value="${p.id}">${p.Nome}</option>`).join('');
-        } catch (error) {
-            showToast('danger', error.message);
+            if (select) {
+                select.innerHTML = parceiros.map(p => `<option value="${p.id}">${p.Nome}</option>`).join('');
+            }
+        } catch (err) {
+            showToast('danger', err.message);
         }
-    };
-
-    loadParceiros();
+    })();
 });
 </script>
