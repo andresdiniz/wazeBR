@@ -9,6 +9,7 @@
     <meta name="keywords" content="{{pagedata.keywords}}">
     <meta name="created"{{pagedata.created_at}}>
     <meta name="author" content="">
+    <meta name="csrf-token" content="<?= $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32)) ?>">
 
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
