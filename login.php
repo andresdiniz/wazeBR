@@ -1,12 +1,4 @@
 <?php
-register_shutdown_function(function () {
-    $error = error_get_last();
-    if ($error) {
-        echo "<pre>";
-        print_r($error);
-        echo "</pre>";
-    }
-});
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -15,19 +7,6 @@ ini_set('error_log', 'error_log.log');
 date_default_timezone_set('America/Sao_Paulo'); // Definir timezone no PHP
 
 session_start();
-
-// Verificação CSRF
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) {
-        error_log('Tentativa de acesso sem CSRF token');
-        die('Acesso não autorizado');
-    }
-    
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        error_log('CSRF token inválido de ' . $_SERVER['REMOTE_ADDR']);
-        die('Token de segurança inválido');
-    }
-}
 
 try {
     require_once './config/configbd.php';
