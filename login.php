@@ -285,8 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            required
                                            minlength="6">
                                 </div>
-                                <input type="hidden" name="csrf_token" id="csrfToken">
-
+                                
                                 <div class="mb-4 form-check">
                                     <input type="checkbox" 
                                            class="form-check-input"
@@ -347,29 +346,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 errorDiv.style.display = 'none';
             }, 5000);
         }
-    </script>
-
-    <script>
-        // Geração do Token CSRF
-        function generateCSRFToken() {
-            const randomValues = new Uint32Array(2);
-            crypto.getRandomValues(randomValues);
-            return randomValues[0].toString(36) + randomValues[1].toString(36);
-        }
-
-        // Armazenar e injetar token
-        document.addEventListener('DOMContentLoaded', () => {
-            let token = sessionStorage.getItem('csrf_token');
-            
-            if (!token) {
-                token = generateCSRFToken();
-                sessionStorage.setItem('csrf_token', token);
-            }
-            
-            document.getElementById('csrfToken').value = token;
-        });
-
-        // Tratamento de erros (mantido igual)
     </script>
     
 </body>
