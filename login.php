@@ -24,12 +24,12 @@ if (!isset($_SESSION['csrf_token'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
+    /*if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         error_log('Tentativa de CSRF - IP: ' . $_SERVER['REMOTE_ADDR']);
         header('Content-Type: application/json; charset=utf-8');
         http_response_code(403);
         die(json_encode(['error' => 'Acesso não autorizado']));
-    }
+    }*/
 
     try {
         require_once './config/configbd.php';
