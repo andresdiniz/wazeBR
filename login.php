@@ -19,18 +19,6 @@ function redirectWithError(string $msg): void {
 $login_error = $_SESSION['login_error'] ?? null;
 unset($_SESSION['login_error']);
 
-// Função para obter IP com fallback
-function getIp(): string {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-        return $_SERVER['REMOTE_ADDR'];
-    }
-    return '0.0.0.0';
-}
-
 // Se usuário já está logado, redireciona para dashboard
 if (isset($_SESSION['usuario_id'])) {
     header("Location: /dashboard");
