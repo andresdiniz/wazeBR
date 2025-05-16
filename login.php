@@ -1,6 +1,12 @@
 <?php
 session_start();
 
+if (isset($_SESSION['usuario_id'])) {
+    // Usuário já logado, vai pro dashboard
+    header("Location: /dashboard");
+    exit();
+}
+
 // Configurações iniciais
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
