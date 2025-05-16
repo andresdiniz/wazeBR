@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 // Configurações iniciais
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -17,23 +16,12 @@ function redirectWithError($msg) {
     exit();
 }
 
-// Função para criar cookie seguro
-function setRememberMe($userId) {
-    $token = bin2hex(random_bytes(32));
-    setcookie('remember_me', $token, time() + (86400 * 7), '/', '', true, true);
-    $_SESSION['remember_me_token'] = $token;
-    
-    $pdo = Database::getConnection();
-    $stmt = $pdo->prepare("UPDATE users SET remember_token = ?, remember_expire = DATE_ADD(NOW(), INTERVAL 7 DAY) WHERE id = ?");
-    $stmt->execute([$token, $userId]);
-}
-
 // CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $posted_token = $_POST['csrf_token'] ?? '';
     $session_token = $_SESSION['csrf_token'] ?? '';
 
-    if (!$posted_token || !hash_equals($session_token, $posted_token)) {
+    if (!$posted_token || $posted_token !== $session_token) {
         redirectWithError('Token CSRF inválido.');
     }
 }
@@ -43,7 +31,6 @@ try {
 
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'] ?? '';
-    $rememberMe = isset($_POST['remember']) ? true : false;
 
     $stmt = $pdo->prepare("SELECT id, password, nome, email, username, photo, id_parceiro, type FROM users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
@@ -66,10 +53,6 @@ try {
             'csrf_token' => bin2hex(random_bytes(32))
         ];
 
-        if ($rememberMe) {
-            setRememberMe($user['id']);
-        }
-
         $stmt = $pdo->prepare("INSERT INTO historic_login (user_id, login_time, ip, user_agent, success) VALUES (?, ?, ?, ?, 1)");
         $stmt->execute([$user['id'], $dataHora, $ip, $userAgent]);
 
@@ -77,11 +60,12 @@ try {
         exit();
     }
 
+    // Login falhou
     $stmt = $pdo->prepare("INSERT INTO historic_login (login_time, ip, user_agent, success) VALUES (?, ?, ?, 0)");
     $stmt->execute([$dataHora, $ip, $userAgent]);
 
     sleep(random_int(1, 3));
-    redirectWithError('Credenciais inválidas');
+    redirectWithError('Credenciais inv\u00e1lidas');
 
 } catch (PDOException $e) {
     error_log("Erro PDO: " . $e->getMessage());
@@ -90,106 +74,184 @@ try {
     error_log("Erro geral: " . $e->getMessage());
     redirectWithError('Erro inesperado');
 }
-
-
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrf_token = $_SESSION['csrf_token'];
-
 ?>
 
-<!-- HTML Modernizado e Acessível -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login Parceiros - Waze BR</title>
+    <title>Waze BR - Login de Parceiros</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --waze-blue: #33CCFF;
+            --waze-orange: #FF6633;
+            --dark-blue: #1A237E;
+        }
+
         body {
-            background: #1A237E linear-gradient(135deg, #1A237E, #33CCFF);
+            background: linear-gradient(45deg, var(--dark-blue), var(--waze-blue));
+            height: 100vh;
             font-family: 'Roboto', sans-serif;
+        }
+
+        .login-card {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.95);
+            overflow: hidden;
+        }
+
+        .brand-section {
+            background: linear-gradient(45deg, var(--waze-blue), var(--waze-orange));
+            padding: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
         }
-        .login-card {
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            overflow: hidden;
-            display: flex;
-            max-width: 900px;
+
+        .brand-logo {
+            width: 220px;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--waze-blue);
+            box-shadow: 0 0 15px rgba(51,204,255,0.2);
+        }
+
+        .btn-waze {
+            background: linear-gradient(45deg, var(--waze-blue), var(--waze-orange));
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-waze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(51,204,255,0.3);
+        }
+
+        .link-secondary {
+            color: var(--dark-blue) !important;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .link-secondary:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--waze-orange);
+            transition: width 0.3s ease;
+        }
+
+        .link-secondary:hover:after {
             width: 100%;
         }
-        .brand-section {
-            background: linear-gradient(135deg, #33CCFF, #FF6633);
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
+
+        .alert-waze {
+            background: rgba(255,102,51,0.1);
+            border-left: 4px solid var(--waze-orange);
+            border-radius: 0 8px 8px 0;
         }
-        .form-section {
-            flex: 1;
-            padding: 40px;
-        }
-        .form-control, .btn {
-            border-radius: 10px;
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #33CCFF, #FF6633);
-            border: none;
-            color: white;
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-        .alert {
-            border-left: 5px solid #FF6633;
+
+        @media (max-width: 768px) {
+            .brand-section {
+                padding: 30px;
+            }
+            .form-section {
+                padding: 30px;
+            }
+            .brand-logo {
+                width: 180px;
+            }
         }
     </style>
 </head>
-<body>
-<main class="login-card">
-    <div class="brand-section">
-        <img src="/img/login-img.svg" alt="Logo Waze Brasil" width="200" height="200">
-    </div>
-    <div class="form-section">
-        <h2 class="mb-3">Login de Parceiros</h2>
-        <p class="text-muted mb-4">Acesse sua plataforma colaborativa</p>
+<body class="d-flex align-items-center">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="login-card">
+                <div class="row g-0">
+                    <!-- Marca -->
+                    <div class="col-md-6 brand-section">
+                        <img src="/img/login-img.jpeg" alt="Waze Brasil" class="brand-logo">
+                    </div>
 
-        <?php if (isset($_GET['erro'])): ?>
-            <div class="alert alert-warning" role="alert">
-                <?= htmlspecialchars($_GET['erro']) ?>
-            </div>
-        <?php endif; ?>
+                    <!-- Formulário -->
+                    <div class="col-md-6 form-section">
+                        <div class="text-center mb-5">
+                            <h2 class="mb-3">Acesso de Parceiros</h2>
+                            <p class="text-muted">Plataforma de gestão colaborativa</p>
+                        </div>
 
-        <form method="POST" action="login.php" aria-label="Formulário de login de parceiros">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" id="email" required autocomplete="email">
+                        <!-- Erro -->
+                        <?php if (isset($_GET['erro'])): ?>
+                            <div class="alert alert-waze mb-4">
+                                <?= htmlspecialchars($_GET['erro']) ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Form -->
+                        <form method="POST" action="login.php">
+                            <div class="mb-4">
+                                <input type="email" class="form-control" name="email" placeholder="Email institucional" required>
+                            </div>
+                            <div class="mb-4">
+                                <input type="password" class="form-control" name="password" placeholder="Senha de acesso" required minlength="6">
+                            </div>
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+
+                            <div class="mb-4 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Manter conectado</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-waze w-100 mb-4">Acessar Plataforma</button>
+
+                            <div class="text-center">
+                                <a href="forgot-password.html" class="link-secondary">Esqueceu sua senha?</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Senha</label>
-                <input type="password" class="form-control" name="password" id="password" required autocomplete="current-password" minlength="6">
+
+            <!-- Rodapé -->
+            <div class="text-center mt-4">
+                <p class="text-white mb-0">Novo parceiro? <a href="#contact" class="text-white fw-bold">Solicite credenciais</a></p>
+                <p class="text-white mt-2">Suporte: <a href="mailto:parceiros@wazebrasil.com" class="text-white">parceiros@wazebrasil.com</a></p>
             </div>
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                <label class="form-check-label" for="remember">Manter conectado por 7 dias</label>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
-            <p class="mt-3 text-center">
-                <a href="forgot-password.html" class="text-decoration-none">Esqueceu sua senha?</a>
-            </p>
-        </form>
+        </div>
     </div>
-</main>
+</div>
 </body>
 </html>
