@@ -127,7 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -279,7 +278,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <!-- Mensagem de Erro -->
-                            <div id="errorMessage" class="alert alert-waze mb-4" style="display: none;"></div>
+                            <div id="errorMessage" style="display: none; color: red; background: #ffe0e0; padding: 10px; border: 1px solid red; margin-bottom: 10px; border-radius: 4px;">
+    <!-- A mensagem de erro aparecerá aqui -->
+                            </div>
+
 
                             <!-- Formulário de Login -->
                             <form id="loginForm" action="login.php" method="POST">
@@ -349,21 +351,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Tratamento de mensagens de erro
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('erro');
-        
-        if(error) {
+
+        if (error) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = decodeURIComponent(error).replace(/\+/g, ' ');
             errorDiv.style.display = 'block';
-            
-            // Auto-esconder após 5 segundos
+
             setTimeout(() => {
                 errorDiv.style.display = 'none';
             }, 5000);
         }
     </script>
+
     
 </body>
 </html>
