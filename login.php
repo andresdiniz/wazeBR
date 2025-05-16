@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row g-0">
                         <!-- Seção da Marca -->
                         <div class="col-md-6 brand-section">
-                            <img src="/img/login-img.jpeg"
+                            <img src="/img/logologin.webp"
                                  alt="Waze Brasil" 
                                  class="brand-logo">
                         </div>
