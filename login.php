@@ -2,31 +2,28 @@
 header("X-XSS-Protection: 1; mode=block");
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com;");
 header('X-Frame-Options: DENY');
-header('Cache-Control: public, max-age=31536000'); // 1 ano para estáticos
-
+header('Cache-Control: public, max-age=31536000');
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error_log.log');
-date_default_timezone_set('America/Sao_Paulo'); // Definir fuso horário
+date_default_timezone_set('America/Sao_Paulo');
 
 session_set_cookie_params([
     'httponly' => true,
-    'secure' => true,  // só funciona em HTTPS, obrigatório em produção
+    'secure' => true,
     'samesite' => 'Strict'
 ]);
 
 session_start();
 
-// Gera token CSRF se não existir
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Verificação CSRF (única, no início)
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         error_log('Tentativa de CSRF - IP: ' . $_SERVER['REMOTE_ADDR']);
         header('Content-Type: application/json; charset=utf-8');
@@ -40,27 +37,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo = Database::getConnection();
 
-        // Sanitização de inputs
         $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         $password = $_POST['password'] ?? '';
 
-        // Verificar email e senha básicos antes de consultar
+        $dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+        $dataHora = $dateTime->format('Y-m-d H:i:s');
+        $ip = substr(getIp(), 0, 50);
+        $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido', 0, 255);
+
+        // Verificar limite de tentativas
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM historic_login 
+                               WHERE ip = ? AND success = 0 
+                               AND login_time > (NOW() - INTERVAL 10 MINUTE)");
+        $stmt->execute([$ip]);
+        $tentativasFalhas = $stmt->fetchColumn();
+
+        if ($tentativasFalhas >= 5) {
+            header("Location: /login?erro=Muitas tentativas. Tente novamente em alguns minutos.");
+            exit();
+        }
+
         if (!$email || empty($password)) {
             header("Location: /login?erro=Email ou senha inválidos");
             exit();
         }
 
-        // Consulta segura
         $stmt = $pdo->prepare("SELECT id, password, nome, email, username, photo, id_parceiro, type 
-                              FROM users WHERE email = ? LIMIT 1");
+                               FROM users WHERE email = ? LIMIT 1");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Dados para log
-        $dateTime = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
-        $dataHora = $dateTime->format('Y-m-d H:i:s');
-        $ip = substr(getIp(), 0, 50);
-        $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? 'Desconhecido', 0, 255);
 
         if ($user && password_verify($password, $user['password'])) {
             session_regenerate_id(true);
@@ -73,39 +78,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'usuario_photo' => $user['photo'],
                 'usuario_id_parceiro' => $user['id_parceiro'],
                 'type' => $user['type'],
-                'csrf_token' => bin2hex(random_bytes(32)) // Regenera token após login
+                'csrf_token' => bin2hex(random_bytes(32))
             ];
 
-            // Registrar login bem-sucedido
             $stmt = $pdo->prepare("
                 INSERT INTO historic_login 
-                (user_id, login_time, ip, user_agent, success)
-                VALUES (?, ?, ?, ?, 1)
+                (user_id, login_time, ip, user_agent, success, email_attempt)
+                VALUES (?, ?, ?, ?, 1, ?)
             ");
             $stmt->execute([
                 $user['id'],
                 $dataHora,
                 $ip,
-                $userAgent
+                $userAgent,
+                $email
             ]);
 
             header("Location: /dashboard");
             exit();
         }
 
-        // Registrar login falhado
+        // Login falhou
         $stmt = $pdo->prepare("
             INSERT INTO historic_login 
-            (login_time, ip, user_agent, success)
-            VALUES (?, ?, ?, 0)
+            (login_time, ip, user_agent, success, email_attempt)
+            VALUES (?, ?, ?, 0, ?)
         ");
         $stmt->execute([
             $dataHora,
             $ip,
-            $userAgent
+            $userAgent,
+            $email
         ]);
 
-        // Prevenção contra força bruta
         sleep(random_int(1, 3));
         header("Location: /login?erro=Credenciais inválidas");
         exit();
