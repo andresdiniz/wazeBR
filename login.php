@@ -1,9 +1,21 @@
 <?php
+header("X-XSS-Protection: 1; mode=block");
+header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com;");
+header('X-Frame-Options: DENY');
+header('Cache-Control: public, max-age=31536000'); // 1 ano para estáticos
+
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error_log.log');
 date_default_timezone_set('America/Sao_Paulo'); // Definir fuso horário
+
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => true,  // só funciona em HTTPS, obrigatório em produção
+    'samesite' => 'Strict'
+]);
 
 session_start();
 
@@ -285,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            required
                                            minlength="6">
                                 </div>
-                                
+
                                 <div class="mb-4 form-check">
                                     <input type="checkbox" 
                                            class="form-check-input"
