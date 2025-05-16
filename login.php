@@ -1,12 +1,6 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrf_token = $_SESSION['csrf_token'];
-
-
 // Configurações iniciais
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -95,6 +89,13 @@ try {
     error_log("Erro geral: " . $e->getMessage());
     redirectWithError('Erro inesperado');
 }
+
+// Para GET, gera o token e mostra o formulário:
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
+
 ?>
 
 <!-- HTML Modernizado e Acessível -->
