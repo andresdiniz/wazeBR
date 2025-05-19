@@ -93,6 +93,30 @@
                 </tbody>
             </table>
         </div>
+        <!-- Modal Original -->
+        <div class="modal fade" id="editModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title">Atualizar Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="updateForm" method="POST" action="/sua-action">
+                        <div class="modal-body">
+                            <input type="hidden" name="uuid" id="modal-uuid">
+                            <div class="d-grid gap-2">
+                                <button type="submit" name="status" value="resolvido" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
+                                </button>
+                                <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-lg">
+                                    <i class="bi bi-x-circle me-2"></i>Não Existe
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
