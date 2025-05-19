@@ -385,7 +385,7 @@
                         if (typeof table !== 'undefined' && table.ajax) {
                             table.ajax.reload(null, false);
                         } else {
-                            location.reload();
+                            alert(result.message || 'Ocorreu um erro atualize a pagina e tente novamente.');
                         }
                     } else {
                         console.error('Erro na resposta:', result);
