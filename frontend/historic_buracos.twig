@@ -5,19 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Buracos</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         /* Custom styles for badges based on confidence level */
         .badge.bg-success { background-color: #28a745 !important; }
-        .badge.bg-warning { background-color: #ffc107 !important; }
+        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; } /* Added color for warning readability */
         .badge.bg-danger { background-color: #dc3545 !important; }
         /* Smaller font for labels in filter card */
         .form-label.small { font-size: 0.85em; }
-        /* Adjust button group for DataTables export buttons */
-        div.dt-button-collection button.dt-button { margin-bottom: 5px; }
+        /* Adjust button group for DataTables export buttons to stack on small screens */
+        .dt-buttons .btn-group {
+            display: flex;
+            flex-wrap: wrap; /* Allow buttons to wrap to next line */
+            gap: 5px; /* Space between buttons */
+        }
+        .dt-buttons .btn-group .btn {
+            margin-right: 0 !important; /* Remove default margin */
+            flex-grow: 1; /* Allow buttons to grow and fill space */
+        }
+
+        /* Ensure filter input has a consistent look */
+        .dataTables_filter input {
+            min-width: 150px; /* Ensure search bar is not too narrow */
+        }
     </style>
 </head>
 <body>
@@ -70,7 +83,7 @@
         <div class="col-md-4">
             <div class="card border-danger border-2 shadow-sm h-100">
                 <div class="card-body py-2">
-                    <span class="small text-muted">Registros Não Visíveis (inativos/removidos)</span>
+                    <span class="small text-muted">Registros Não Visíveis (ocultos)</span>
                     <h3 class="mb-0 text-danger" id="count-hidden">0</h3>
                 </div>
             </div>
@@ -80,16 +93,16 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <h5 class="card-title mb-3 text-muted">Relatório de Buracos</h5>
-            <table id="buracos-table" class="table table-hover table-sm table-responsive" style="width:100%">
+            <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm table-responsive" style="width:100%">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
+                        <th style="width: 30px;">#</th>
                         <th>Cidade</th>
                         <th>Rua</th>
-                        <th>Confiança</th>
-                        <th>Data</th>
-                        <th>Coordenadas</th>
-                        <th class="text-center" width="100">Ações</th>
+                        <th style="width: 80px;">Confiança</th>
+                        <th style="width: 140px;">Data</th>
+                        <th style="width: 120px;">Coordenadas</th>
+                        <th class="text-center no-export" style="width: 100px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,9 +112,8 @@
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>
-                            {% set confidenceValue = buraco.confidence %}
                             {# The actual badge styling will be applied by DataTables JS render function #}
-                            {{ confidenceValue }}
+                            {{ buraco.confidence }}
                         </td>
                         <td data-order="{{ buraco.pubMillis }}">
                             {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
@@ -193,10 +205,12 @@
         // Initialize DataTable
         const table = new DataTable('#buracos-table', {
             // Define the DOM structure for DataTables elements
-            // B: Buttons, f: Filtering, r: Processing display, t: Table, i: Information, p: Pagination
+            // l: Length changing input control (Show X entries), B: Buttons, f: Filtering, r: Processing display, t: Table, i: Information, p: Pagination
             dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
-                 '<"row"<"col-12"rt>>' + // Middle: table
-                 '<"row"<"col-md-6"i><"col-md-6"p>>', // Bottom: info and pagination
+                 '<"row mt-2"<"col-12"rt>>' + // Middle: table
+                 '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
+                 '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
+            
             buttons: [
                 {
                     extend: 'copy',
@@ -228,30 +242,56 @@
                 url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
             },
             columnDefs: [
+                { targets: 0, width: '30px', className: 'text-center' }, // # - fixed width, center align
+                { targets: 1, width: '120px' }, // Cidade - fixed width
+                { targets: 2, width: 'auto' }, // Rua - auto width to fill remaining space
                 {
-                    orderable: false,
-                    targets: [6], // Disable sorting for 'Ações' column (index 6)
-                    className: 'no-export' // Add 'no-export' class to exclude from export
-                },
-                {
-                    targets: 3, // Target the 'Confiança' column (index 3)
+                    targets: 3, // Confiança - fixed width, render with badge
+                    width: '80px',
+                    className: 'text-center', // Center align confidence badge
                     render: (data, type, row) => {
                         if (type === 'display') {
-                            // Render with badge for display
                             return formatConfidence(data);
                         }
-                        // For other types (e.g., 'sort', 'filter'), return the raw number
-                        return parseFloat(data) || 0;
+                        return parseFloat(data) || 0; // Return raw number for sorting/filtering
                     }
+                },
+                { targets: 4, width: '140px' }, // Data - fixed width
+                { targets: 5, width: '120px' }, // Coordenadas - fixed width
+                {
+                    orderable: false,
+                    targets: [6], // Ações - Disable sorting, exclude from export, center align, fixed width
+                    className: 'no-export text-center',
+                    width: '100px'
                 }
+            ],
+            // Pagination controls
+            paging: true, // Enable pagination (true by default, but explicit is good)
+            pageLength: 10, // Default number of rows per page
+            lengthMenu: [
+                [10, 25, 50, -1], // Values for the dropdown
+                [10, 25, 50, 'Todos'] // Display text for the dropdown
             ],
             initComplete: function () {
                 // Remove default DataTables button group class for better Bootstrap styling
-                $('.dt-buttons').removeClass('btn-group');
+                const dtButtons = document.querySelector('.dt-buttons');
+                if (dtButtons) {
+                    dtButtons.classList.remove('btn-group');
+                }
+                
                 // Add Bootstrap form-control classes to the search input
-                $('.dataTables_filter input').addClass('form-control form-control-sm');
-                // Ensure the search input has a placeholder
-                $('.dataTables_filter input').attr('placeholder', 'Pesquisar...');
+                const searchInput = document.querySelector('.dataTables_filter input');
+                if (searchInput) {
+                    searchInput.classList.add('form-control', 'form-control-sm');
+                    // Ensure the search input has a placeholder
+                    searchInput.setAttribute('placeholder', 'Pesquisar...');
+                }
+
+                // Add Bootstrap form-select class to the length menu dropdown
+                const lengthSelect = document.querySelector('.dataTables_length select');
+                if (lengthSelect) {
+                    lengthSelect.classList.add('form-select', 'form-select-sm');
+                }
             }
         });
 
