@@ -328,21 +328,38 @@
                 e.preventDefault();
 
                 const formData = new FormData(form);
+
+                // Debug dos dados enviados
                 for (let [key, value] of formData.entries()) {
                     console.log(`${key}: ${value}`);
                 }
 
-                const result = await response.json();
+                try {
+                    const response = await fetch('/api.php?action=atualizaburaco', {
+                        method: 'POST',
+                        body: formData
+                    });
 
-                if (response.ok) {
-                    modal.hide();
-                    alert(result.message || 'Status atualizado com sucesso.');
-                    table.ajax.reload(null, false); // se estiver usando ajax no DataTables
-                } else {
-                    alert(result.error || 'Erro ao atualizar status.');
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        modal.hide();
+                        alert(result.message || 'Status atualizado com sucesso.');
+                        if (typeof table !== 'undefined' && table.ajax) {
+                            table.ajax.reload(null, false); // Só se estiver usando AJAX no DataTables
+                        } else {
+                            location.reload(); // alternativa simples
+                        }
+                    } else {
+                        alert(result.error || 'Erro ao atualizar status.');
+                    }
+                } catch (error) {
+                    console.error('Erro na requisição:', error);
+                    alert('Erro inesperado ao enviar o formulário.');
                 }
             });
         };
+
 
 
         initModal();
