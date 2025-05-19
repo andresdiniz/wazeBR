@@ -12,19 +12,17 @@
     <style>
         /* Custom styles for badges based on confidence level */
         .badge.bg-success { background-color: #28a745 !important; }
-        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; }
+        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; } /* Added color for warning readability */
         .badge.bg-danger { background-color: #dc3545 !important; }
         /* Smaller font for labels in filter card */
         .form-label.small { font-size: 0.85em; }
         /* Adjust button group for DataTables export buttons to stack on small screens */
-        .dt-buttons .btn-group {
+        div.dt-buttons {
             display: flex;
             flex-wrap: wrap; /* Allow buttons to wrap to next line */
             gap: 5px; /* Space between buttons */
-        }
-        .dt-buttons .btn-group .btn {
-            margin-right: 0 !important; /* Remove default margin */
-            flex-grow: 1; /* Allow buttons to grow and fill space */
+            /* Ensure the button container itself is aligned correctly */
+            align-items: center;
         }
 
         /* Ensure filter input has a consistent look */
@@ -33,10 +31,10 @@
         }
 
         /* Ensure the table itself uses table-layout: fixed for better column distribution */
-        /* This can be a double-edged sword: good for full width, bad if content overflows */
-        /* For this scenario, it's often necessary to ensure all space is utilized */
+        /* This forces the table to use 100% of available width */
         #buracos-table {
-            table-layout: fixed; /* Ensures columns stretch to fit available width */
+            table-layout: fixed;
+            width: 100% !important; /* Force 100% width, important for fixed layout */
         }
         /* Make sure table cells don't wrap unless necessary, to prevent fixed layout issues */
         #buracos-table tbody td {
@@ -105,50 +103,52 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <h5 class="card-title mb-3 text-muted">Relatório de Buracos</h5>
-            <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm table-responsive" style="width:100%">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-center">#</th>
-                        <th>Cidade</th>
-                        <th>Rua</th>
-                        <th class="text-center">Confiança</th>
-                        <th>Data</th>
-                        <th>Coordenadas</th>
-                        <th class="text-center no-export">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for buraco in buracos %}
-                    <tr data-uuid="{{ buraco.uuid }}">
-                        <td>{{ loop.index }}</td>
-                        <td>{{ buraco.city }}</td>
-                        <td>{{ buraco.street }}</td>
-                        <td>
-                            {# The actual badge styling will be applied by DataTables JS render function #}
-                            {{ buraco.confidence }}
-                        </td>
-                        <td data-order="{{ buraco.pubMillis }}">
-                            {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
-                        </td>
-                        <td>
-                            <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}"
-                                target="_blank" class="btn btn-link btn-sm py-0" title="Ver no Mapa">
-                                <i class="bi bi-geo-alt"></i> Ver mapa
-                            </a>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado para os filtros aplicados.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive"> {# Added this wrapper div for responsiveness #}
+                <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm" style="width:100%">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>Cidade</th>
+                            <th>Rua</th>
+                            <th class="text-center">Confiança</th>
+                            <th>Data</th>
+                            <th>Coordenadas</th>
+                            <th class="text-center no-export">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for buraco in buracos %}
+                        <tr data-uuid="{{ buraco.uuid }}">
+                            <td>{{ loop.index }}</td>
+                            <td>{{ buraco.city }}</td>
+                            <td>{{ buraco.street }}</td>
+                            <td>
+                                {# The actual badge styling will be applied by DataTables JS render function #}
+                                {{ buraco.confidence }}
+                            </td>
+                            <td data-order="{{ buraco.pubMillis }}">
+                                {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
+                            </td>
+                            <td>
+                                <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}"
+                                    target="_blank" class="btn btn-link btn-sm py-0" title="Ver no Mapa">
+                                    <i class="bi bi-geo-alt"></i> Ver mapa
+                                </a>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado para os filtros aplicados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> {# Close .table-responsive wrapper #}
         </div>
     </div>
 
@@ -217,10 +217,11 @@
         // Initialize DataTable
         const table = new DataTable('#buracos-table', {
             // Define the DOM structure for DataTables elements
-            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' +
-                 '<"row mt-2"<"col-12"rt>>' +
-                 '<"row"<"col-md-5"l><"col-md-7"p>>' +
-                 '<"row"<"col-12"i>>',
+            // B: Buttons, f: Filtering/Search, r: Processing display, t: Table, i: Information, p: Pagination, l: Length changing input control
+            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
+                 '<"row mt-2"<"col-12"rt>>' + // Middle: table
+                 '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
+                 '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
             
             buttons: [
                 {
@@ -242,39 +243,43 @@
                     exportOptions: { columns: ':not(.no-export)' }
                 }
             ],
-            order: [[4, 'desc']],
+            order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
             },
             columnDefs: [
-                // Set explicit small widths for fixed columns
+                // Fixed small widths for columns with generally consistent content
                 { targets: 0, width: '30px', className: 'text-center' }, // #
                 { targets: 3, width: '80px', className: 'text-center', render: formatConfidence }, // Confiança
                 { targets: 4, width: '140px' }, // Data
                 { targets: 6, width: '100px', orderable: false, className: 'no-export text-center' }, // Ações
 
-                // Let DataTables auto-distribute width for other columns (Cidade, Rua, Coordenadas)
-                // By not specifying width for targets 1, 2, and 5, DataTables will automatically size them
-                // to fill the remaining space, especially with `table-layout: fixed` CSS.
+                // No explicit width for targets 1 (Cidade), 2 (Rua), and 5 (Coordenadas).
+                // With `table-layout: fixed` CSS and `autoWidth: true` (default), these columns
+                // will automatically distribute the remaining space to fill the 100% width.
             ],
-            paging: true,
-            pageLength: 10,
+            paging: true, // Enable pagination
+            pageLength: 10, // Default number of rows per page
             lengthMenu: [
-                [10, 25, 50, -1],
-                [10, 25, 50, 'Todos']
+                [10, 25, 50, -1], // Values for the dropdown
+                [10, 25, 50, 'Todos'] // Display text for the dropdown
             ],
             initComplete: function () {
-                const dtButtons = document.querySelector('.dt-buttons');
-                if (dtButtons) {
-                    dtButtons.classList.remove('btn-group');
+                // Get the DataTables button container using native JS
+                const dtButtonsContainer = document.querySelector('.dt-buttons');
+                if (dtButtonsContainer) {
+                    // Remove default DataTables button group class that might conflict with our flex styles
+                    dtButtonsContainer.classList.remove('btn-group');
                 }
                 
+                // Get the DataTables search input using native JS
                 const searchInput = document.querySelector('.dataTables_filter input');
                 if (searchInput) {
                     searchInput.classList.add('form-control', 'form-control-sm');
                     searchInput.setAttribute('placeholder', 'Pesquisar...');
                 }
 
+                // Get the DataTables length menu select using native JS
                 const lengthSelect = document.querySelector('.dataTables_length select');
                 if (lengthSelect) {
                     lengthSelect.classList.add('form-select', 'form-select-sm');
@@ -282,7 +287,7 @@
             }
         });
 
-        // Function to update the statistic counters
+        // Function to update the statistic counters based on DataTables state
         const updateCounters = () => {
             const totalRecords = table.data().count();
             const filteredRecords = table.rows({ search: 'applied' }).count();
@@ -293,9 +298,11 @@
             document.getElementById('count-hidden').textContent = hiddenRecords;
         };
 
+        // Update counters on initial load and whenever the table redraws
         table.on('draw', updateCounters);
         updateCounters();
 
+        // Initialize and handle the Bootstrap Modal
         const initModal = () => {
             const modalElement = document.getElementById('editModal');
             if (!modalElement) return;
