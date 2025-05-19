@@ -129,7 +129,7 @@
                                 </a>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status">
+                                <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status" data-uuid={{ buraco.uuid }}>
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </td>
@@ -152,7 +152,7 @@
                     <h5 class="modal-title" id="editModalLabel">Atualizar Status do Buraco</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="updateForm" method="POST" action="/sua-action">
+                <form id="updateForm" method="POST" action="/api.php?atualizaburaco">
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
                         <p class="text-muted small">Selecione uma ação para este registro:</p>
