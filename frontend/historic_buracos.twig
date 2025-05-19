@@ -1,28 +1,47 @@
-<!-- CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Buracos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Custom styles for badges based on confidence level */
+        .badge.bg-success { background-color: #28a745 !important; }
+        .badge.bg-warning { background-color: #ffc107 !important; }
+        .badge.bg-danger { background-color: #dc3545 !important; }
+        /* Smaller font for labels in filter card */
+        .form-label.small { font-size: 0.85em; }
+        /* Adjust button group for DataTables export buttons */
+        div.dt-button-collection button.dt-button { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
 
 <div class="container mt-4">
-    <!-- Filtros -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
+            <h5 class="card-title mb-3 text-muted">Filtrar Registros</h5>
             <form method="GET" action="" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label for="filter-date" class="form-label small text-muted mb-1">Data específica</label>
+                <div class="col-md-4 col-lg-3">
+                    <label for="filter-date" class="form-label small text-muted mb-1">Data Específica</label>
                     <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
-                        value="{{ filters.date ?? '' }}">
+                           value="{{ filters.date ?? '' }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3">
                     <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
                     <select id="filter-period" name="period" class="form-select form-select-sm">
                         <option value="">Todos</option>
-                        <option value="7" {{ filters.period == '7' ? 'selected' : '' }}>Última semana</option>
-                        <option value="15" {{ filters.period == '15' ? 'selected' : '' }}>Últimos 15 dias</option>
-                        <option value="30" {{ filters.period == '30' ? 'selected' : '' }}>Último mês</option>
+                        <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
+                        <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
+                        <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-grid">
+                <div class="col-md-4 col-lg-2 d-grid">
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="bi bi-funnel me-1"></i>Filtrar
                     </button>
@@ -31,38 +50,37 @@
         </div>
     </div>
 
-    <!-- Estatísticas -->
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-success border-2">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-success border-2 shadow-sm h-100">
                 <div class="card-body py-2">
-                    <span class="small text-muted">Total</span>
+                    <span class="small text-muted">Total de Registros</span>
                     <h3 class="mb-0 text-success" id="count-total">0</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-danger border-2">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-info border-2 shadow-sm h-100">
                 <div class="card-body py-2">
-                    <span class="small text-muted">Filtrados</span>
-                    <h3 class="mb-0 text-danger" id="count-filtered">0</h3>
+                    <span class="small text-muted">Registros Filtrados</span>
+                    <h3 class="mb-0 text-info" id="count-filtered">0</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-primary border-2">
+            <div class="card border-danger border-2 shadow-sm h-100">
                 <div class="card-body py-2">
-                    <span class="small text-muted">Restantes</span>
-                    <h3 class="mb-0 text-primary" id="count-remaining">0</h3>
+                    <span class="small text-muted">Registros Não Visíveis (inativos/removidos)</span>
+                    <h3 class="mb-0 text-danger" id="count-hidden">0</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabela -->
     <div class="card shadow-sm">
         <div class="card-body">
-            <table id="buracos-table" class="table table-hover table-sm w-100">
+            <h5 class="card-title mb-3 text-muted">Relatório de Buracos</h5>
+            <table id="buracos-table" class="table table-hover table-sm table-responsive" style="width:100%">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
@@ -71,7 +89,7 @@
                         <th>Confiança</th>
                         <th>Data</th>
                         <th>Coordenadas</th>
-                        <th width="100">Ações</th>
+                        <th class="text-center" width="100">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,30 +99,28 @@
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>
-                            {% set confidence = buraco.confidence %}
-                            {% set color = confidence >= 4 ? 'success' : confidence >= 2 ? 'warning' : 'danger' %}
-                            <span class="badge bg-{{ color }}">
-                                {{ confidence }} ({{ confidence * 20 }}%)
-                            </span>
+                            {% set confidenceValue = buraco.confidence %}
+                            {# The actual badge styling will be applied by DataTables JS render function #}
+                            {{ confidenceValue }}
                         </td>
                         <td data-order="{{ buraco.pubMillis }}">
                             {{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}
                         </td>
                         <td>
                             <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}"
-                                target="_blank" class="btn btn-link btn-sm py-0">
+                                target="_blank" class="btn btn-link btn-sm py-0" title="Ver no Mapa">
                                 <i class="bi bi-geo-alt"></i> Ver mapa
                             </a>
                         </td>
-                        <td>
-                            <button class="btn btn-outline-primary btn-sm btn-edit">
+                        <td class="text-center">
+                            <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado</td>
+                        <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado para os filtros aplicados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -112,25 +128,28 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title">Atualizar Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="editModalLabel">Atualizar Status do Buraco</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="updateForm" method="POST" action="/sua-action">
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
-                        <div class="d-grid gap-2">
+                        <p class="text-muted small">Selecione uma ação para este registro:</p>
+                        <div class="d-grid gap-3">
                             <button type="submit" name="status" value="resolvido" class="btn btn-success btn-lg">
                                 <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
                             </button>
                             <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-lg">
-                                <i class="bi bi-x-circle me-2"></i>Não Existe
+                                <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
                             </button>
                         </div>
+                    </div>
+                    <div class="modal-footer justify-content-start">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -138,54 +157,147 @@
     </div>
 </div>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Inicialização do DataTable
-    const table = $('#buracos-table').DataTable({
-        dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-        buttons: ['copy', 'excel', 'pdf'],
-        order: [[4, 'desc']],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
-        },
-        columnDefs: [
-            { orderable: false, targets: [6], className: 'no-export' },
-            { type: 'num', targets: 3 } // Ordenação numérica para confiança
-        ],
-        initComplete: function() {
-            $('.dt-buttons').removeClass('btn-group');
-        }
+    document.addEventListener('DOMContentLoaded', function () {
+        // Helper function to convert confidence value to percentage and determine badge color
+        const formatConfidence = (value) => {
+            let numValue = parseFloat(value);
+            if (isNaN(numValue)) {
+                numValue = 0; // Default if value is not a valid number
+            }
+            const percentage = (numValue * 20).toFixed(0) + '%'; // 0-5 scale to 0-100%
+            let color;
+            if (numValue >= 4) {
+                color = 'success'; // High confidence
+            } else if (numValue >= 2) {
+                color = 'warning'; // Medium confidence
+            } else {
+                color = 'danger'; // Low confidence
+            }
+            return `<span class="badge bg-${color}">${numValue} (${percentage})</span>`;
+        };
+
+        // Initialize DataTable
+        const table = new DataTable('#buracos-table', {
+            // Define the DOM structure for DataTables elements
+            // B: Buttons, f: Filtering, r: Processing display, t: Table, i: Information, p: Pagination
+            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
+                 '<"row"<"col-12"rt>>' + // Middle: table
+                 '<"row"<"col-md-6"i><"col-md-6"p>>', // Bottom: info and pagination
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="bi bi-clipboard"></i> Copiar',
+                    className: 'btn btn-outline-secondary btn-sm',
+                    exportOptions: {
+                        columns: ':not(.no-export)' // Exclude columns with 'no-export' class
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                    className: 'btn btn-outline-success btn-sm',
+                    exportOptions: {
+                        columns: ':not(.no-export)'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                    className: 'btn btn-outline-danger btn-sm',
+                    exportOptions: {
+                        columns: ':not(.no-export)'
+                    }
+                }
+            ],
+            order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
+            },
+            columnDefs: [
+                {
+                    orderable: false,
+                    targets: [6], // Disable sorting for 'Ações' column (index 6)
+                    className: 'no-export' // Add 'no-export' class to exclude from export
+                },
+                {
+                    targets: 3, // Target the 'Confiança' column (index 3)
+                    render: (data, type, row) => {
+                        if (type === 'display') {
+                            // Render with badge for display
+                            return formatConfidence(data);
+                        }
+                        // For other types (e.g., 'sort', 'filter'), return the raw number
+                        return parseFloat(data) || 0;
+                    }
+                }
+            ],
+            initComplete: function () {
+                // Remove default DataTables button group class for better Bootstrap styling
+                $('.dt-buttons').removeClass('btn-group');
+                // Add Bootstrap form-control classes to the search input
+                $('.dataTables_filter input').addClass('form-control form-control-sm');
+                // Ensure the search input has a placeholder
+                $('.dataTables_filter input').attr('placeholder', 'Pesquisar...');
+            }
+        });
+
+        // Function to update the statistic counters
+        const updateCounters = () => {
+            const totalRecords = table.data().count(); // Total records in the dataset
+            const filteredRecords = table.rows({ search: 'applied' }).count(); // Records visible after search/filters
+            const hiddenRecords = totalRecords - filteredRecords; // Records not currently visible
+
+            document.getElementById('count-total').textContent = totalRecords;
+            document.getElementById('count-filtered').textContent = filteredRecords;
+            document.getElementById('count-hidden').textContent = hiddenRecords;
+        };
+
+        // Update counters on initial load and whenever the table redraws (e.g., on search, sort, paginate)
+        table.on('draw', updateCounters);
+        updateCounters(); // Initial update
+
+        // Initialize and handle the Bootstrap Modal
+        const initModal = () => {
+            const modalElement = document.getElementById('editModal');
+            if (!modalElement) return; // Exit if modal element is not found
+
+            const modal = new bootstrap.Modal(modalElement);
+
+            // Add event listener to the table body for delegation (more efficient for dynamic content)
+            document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
+                const button = e.target.closest('button.open-edit-modal');
+                if (!button) return; // If clicked element is not our button, do nothing
+
+                const row = button.closest('tr'); // Get the closest table row
+                if (!row) return;
+
+                const uuid = row.dataset.uuid; // Get the UUID from the data-uuid attribute on the row
+                if (!uuid) {
+                    console.warn('UUID not found for this row.');
+                    return;
+                }
+
+                document.getElementById('modal-uuid').value = uuid; // Set the hidden input value in the modal
+                modal.show(); // Show the Bootstrap modal
+            });
+        };
+
+        initModal(); // Call the modal initialization function
     });
-
-    // Atualizar contadores
-    const updateCounters = () => {
-        const total = table.rows().count();
-        const filtered = table.rows({ search: 'applied' }).count();
-        
-        $('#count-total').text(total);
-        $('#count-filtered').text(filtered);
-        $('#count-remaining').text(total - filtered);
-    };
-
-    // Eventos do DataTable
-    table.on('draw', updateCounters);
-    updateCounters();
-
-    // Modal Handler
-    $('#buracos-table').on('click', '.btn-edit', function() {
-        const uuid = $(this).closest('tr').data('uuid');
-        $('#modal-uuid').val(uuid);
-        new bootstrap.Modal('#editModal').show();
-    });
-});
 </script>
+</body>
+</html>
