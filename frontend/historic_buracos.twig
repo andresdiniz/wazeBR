@@ -176,25 +176,23 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="updateForm">
-                    <div class="modal-body">
-                        <input type="hidden" name="uuid" id="modal-uuid">
-                        <input type="hidden" name="status" id="modal-status"> <!-- novo campo oculto -->
+                    <input type="hidden" name="uuid" id="modal-uuid">
+                    <input type="hidden" name="status" id="modal-status">
 
-                        <p class="text-muted small">Selecione uma ação para este registro:</p>
-                        <div class="d-grid gap-3">
-                            <button type="button" data-status="resolvido" class="btn btn-success btn-lg submit-status">
-                                <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
-                            </button>
-                            <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
-                                <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
-                            </button>
-                            <button type="button" data-status="nao_resolvido"
-                                class="btn btn-warning btn-lg submit-status">
-                                <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
-                            </button>
-                        </div>
+                    <p class="text-muted small">Selecione uma ação para este registro:</p>
+                    <div class="d-grid gap-3">
+                        <button type="button" data-status="resolvido" class="btn btn-success btn-lg submit-status">
+                            <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
+                        </button>
+                        <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
+                            <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
+                        </button>
+                        <button type="button" data-status="nao_resolvido" class="btn btn-warning btn-lg submit-status">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
+                        </button>
                     </div>
-                    <div class="modal-footer justify-content-start">
+
+                    <div class="modal-footer justify-content-start mt-3">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </form>
@@ -349,15 +347,25 @@
                 modal.show();
             });
 
-            // Lógica dos botões de envio com status
+            // Botões com status
             document.querySelectorAll('.submit-status').forEach(button => {
                 button.addEventListener('click', async () => {
                     const status = button.dataset.status;
                     const form = document.getElementById('updateForm');
                     const uuid = document.getElementById('modal-uuid').value;
-                    document.getElementById('modal-status').value = status;
 
+                    if (!uuid || !status) {
+                        alert('UUID ou status ausente.');
+                        return;
+                    }
+
+                    document.getElementById('modal-status').value = status;
                     const formData = new FormData(form);
+
+                    // Debug opcional
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}: ${value}`);
+                    }
 
                     try {
                         const response = await fetch('/api.php?action=atualizaburaco', {
@@ -365,9 +373,14 @@
                             body: formData
                         });
 
-                        const result = await response.json();
+                        let result;
+                        try {
+                            result = await response.json();
+                        } catch (jsonError) {
+                            throw new Error('Resposta não é um JSON válido.');
+                        }
 
-                        if (response.ok) {
+                        if (response.ok && result.success) {
                             modal.hide();
                             alert(result.message || 'Status atualizado com sucesso.');
                             if (typeof table !== 'undefined' && table.ajax) {
@@ -376,6 +389,7 @@
                                 location.reload();
                             }
                         } else {
+                            console.error('Erro na resposta:', result);
                             alert(result.error || 'Erro ao atualizar status.');
                         }
                     } catch (error) {
