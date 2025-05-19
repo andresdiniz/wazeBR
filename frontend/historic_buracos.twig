@@ -152,19 +152,22 @@
                     <h5 class="modal-title" id="editModalLabel">Atualizar Status do Buraco</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="updateForm" method="POST" action="/api.php?action=atualizaburaco">
+                <form id="updateForm">
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
+                        <input type="hidden" name="status" id="modal-status"> <!-- novo campo oculto -->
+
                         <p class="text-muted small">Selecione uma ação para este registro:</p>
                         <div class="d-grid gap-3">
-                            <button type="submit" name="status" value="resolvido" class="btn btn-success btn-lg">
-                                <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
-                            </button>
-                            <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-lg">
-                                <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
-                            </button>
-                            <button type="submit" name="status" value="nao_resolvido" class="btn btn-warning btn-lg">
-                                <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
+                        <button type="button" data-status="resolvido" class="btn btn-success btn-lg submit-status">
+                            <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
+                        </button>
+                        <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
+                            <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
+                        </button>
+                        <button type="button" data-status="nao_resolvido" class="btn btn-warning btn-lg submit-status">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
+                        </button>
                         </div>
                     </div>
                     <div class="modal-footer justify-content-start">
@@ -314,54 +317,50 @@
 
                 const uuid = row.dataset.uuid;
                 if (!uuid) {
-                    console.warn('UUID not found for this row.');
-                    return;
+                console.warn('UUID not found for this row.');
+                return;
                 }
 
                 document.getElementById('modal-uuid').value = uuid;
                 modal.show();
             });
 
-            // Enviar formulário via fetch
-            const form = document.getElementById('updateForm');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            // Lógica dos botões de envio com status
+            document.querySelectorAll('.submit-status').forEach(button => {
+                button.addEventListener('click', async () => {
+                const status = button.dataset.status;
+                const form = document.getElementById('updateForm');
+                const uuid = document.getElementById('modal-uuid').value;
+                document.getElementById('modal-status').value = status;
 
                 const formData = new FormData(form);
 
-                // Debug dos dados enviados
-                for (let [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
-
                 try {
                     const response = await fetch('/api.php?action=atualizaburaco', {
-                        method: 'POST',
-                        body: formData
+                    method: 'POST',
+                    body: formData
                     });
 
                     const result = await response.json();
 
                     if (response.ok) {
-                        modal.hide();
-                        alert(result.message || 'Status atualizado com sucesso.');
-                        if (typeof table !== 'undefined' && table.ajax) {
-                            table.ajax.reload(null, false); // Só se estiver usando AJAX no DataTables
-                        } else {
-                            location.reload(); // alternativa simples
-                        }
+                    modal.hide();
+                    alert(result.message || 'Status atualizado com sucesso.');
+                    if (typeof table !== 'undefined' && table.ajax) {
+                        table.ajax.reload(null, false);
                     } else {
-                        alert(result.error || 'Erro ao atualizar status.');
+                        location.reload();
+                    }
+                    } else {
+                    alert(result.error || 'Erro ao atualizar status.');
                     }
                 } catch (error) {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro inesperado ao enviar o formulário.');
+                    console.error('Erro ao enviar formulário:', error);
+                    alert('Erro inesperado ao enviar os dados.');
                 }
+                });
             });
         };
-
-
-
         initModal();
     });
 </script>
