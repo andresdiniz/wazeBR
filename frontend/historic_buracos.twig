@@ -12,7 +12,7 @@
     <style>
         /* Custom styles for badges based on confidence level */
         .badge.bg-success { background-color: #28a745 !important; }
-        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; } /* Added color for warning readability */
+        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; }
         .badge.bg-danger { background-color: #dc3545 !important; }
         /* Smaller font for labels in filter card */
         .form-label.small { font-size: 0.85em; }
@@ -30,6 +30,18 @@
         /* Ensure filter input has a consistent look */
         .dataTables_filter input {
             min-width: 150px; /* Ensure search bar is not too narrow */
+        }
+
+        /* Ensure the table itself uses table-layout: fixed for better column distribution */
+        /* This can be a double-edged sword: good for full width, bad if content overflows */
+        /* For this scenario, it's often necessary to ensure all space is utilized */
+        #buracos-table {
+            table-layout: fixed; /* Ensures columns stretch to fit available width */
+        }
+        /* Make sure table cells don't wrap unless necessary, to prevent fixed layout issues */
+        #buracos-table tbody td {
+            white-space: normal; /* Allow text to wrap naturally within cells */
+            word-wrap: break-word; /* Break long words */
         }
     </style>
 </head>
@@ -96,13 +108,13 @@
             <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm table-responsive" style="width:100%">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 30px;">#</th>
+                        <th class="text-center">#</th>
                         <th>Cidade</th>
                         <th>Rua</th>
-                        <th style="width: 80px;">Confiança</th>
-                        <th style="width: 140px;">Data</th>
-                        <th style="width: 120px;">Coordenadas</th>
-                        <th class="text-center no-export" style="width: 100px;">Ações</th>
+                        <th class="text-center">Confiança</th>
+                        <th>Data</th>
+                        <th>Coordenadas</th>
+                        <th class="text-center no-export">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -188,16 +200,16 @@
         const formatConfidence = (value) => {
             let numValue = parseFloat(value);
             if (isNaN(numValue)) {
-                numValue = 0; // Default if value is not a valid number
+                numValue = 0;
             }
-            const percentage = (numValue * 20).toFixed(0) + '%'; // 0-5 scale to 0-100%
+            const percentage = (numValue * 20).toFixed(0) + '%';
             let color;
             if (numValue >= 4) {
-                color = 'success'; // High confidence
+                color = 'success';
             } else if (numValue >= 2) {
-                color = 'warning'; // Medium confidence
+                color = 'warning';
             } else {
-                color = 'danger'; // Low confidence
+                color = 'danger';
             }
             return `<span class="badge bg-${color}">${numValue} (${percentage})</span>`;
         };
@@ -205,89 +217,64 @@
         // Initialize DataTable
         const table = new DataTable('#buracos-table', {
             // Define the DOM structure for DataTables elements
-            // l: Length changing input control (Show X entries), B: Buttons, f: Filtering, r: Processing display, t: Table, i: Information, p: Pagination
-            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
-                 '<"row mt-2"<"col-12"rt>>' + // Middle: table
-                 '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
-                 '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
+            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' +
+                 '<"row mt-2"<"col-12"rt>>' +
+                 '<"row"<"col-md-5"l><"col-md-7"p>>' +
+                 '<"row"<"col-12"i>>',
             
             buttons: [
                 {
                     extend: 'copy',
                     text: '<i class="bi bi-clipboard"></i> Copiar',
                     className: 'btn btn-outline-secondary btn-sm',
-                    exportOptions: {
-                        columns: ':not(.no-export)' // Exclude columns with 'no-export' class
-                    }
+                    exportOptions: { columns: ':not(.no-export)' }
                 },
                 {
                     extend: 'excelHtml5',
                     text: '<i class="bi bi-file-earmark-excel"></i> Excel',
                     className: 'btn btn-outline-success btn-sm',
-                    exportOptions: {
-                        columns: ':not(.no-export)'
-                    }
+                    exportOptions: { columns: ':not(.no-export)' }
                 },
                 {
                     extend: 'pdfHtml5',
                     text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
                     className: 'btn btn-outline-danger btn-sm',
-                    exportOptions: {
-                        columns: ':not(.no-export)'
-                    }
+                    exportOptions: { columns: ':not(.no-export)' }
                 }
             ],
-            order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
+            order: [[4, 'desc']],
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
             },
             columnDefs: [
-                { targets: 0, width: '30px', className: 'text-center' }, // # - fixed width, center align
-                { targets: 1, width: '120px' }, // Cidade - fixed width
-                { targets: 2, width: 'auto' }, // Rua - auto width to fill remaining space
-                {
-                    targets: 3, // Confiança - fixed width, render with badge
-                    width: '80px',
-                    className: 'text-center', // Center align confidence badge
-                    render: (data, type, row) => {
-                        if (type === 'display') {
-                            return formatConfidence(data);
-                        }
-                        return parseFloat(data) || 0; // Return raw number for sorting/filtering
-                    }
-                },
-                { targets: 4, width: '140px' }, // Data - fixed width
-                { targets: 5, width: '120px' }, // Coordenadas - fixed width
-                {
-                    orderable: false,
-                    targets: [6], // Ações - Disable sorting, exclude from export, center align, fixed width
-                    className: 'no-export text-center',
-                    width: '100px'
-                }
+                // Set explicit small widths for fixed columns
+                { targets: 0, width: '30px', className: 'text-center' }, // #
+                { targets: 3, width: '80px', className: 'text-center', render: formatConfidence }, // Confiança
+                { targets: 4, width: '140px' }, // Data
+                { targets: 6, width: '100px', orderable: false, className: 'no-export text-center' }, // Ações
+
+                // Let DataTables auto-distribute width for other columns (Cidade, Rua, Coordenadas)
+                // By not specifying width for targets 1, 2, and 5, DataTables will automatically size them
+                // to fill the remaining space, especially with `table-layout: fixed` CSS.
             ],
-            // Pagination controls
-            paging: true, // Enable pagination (true by default, but explicit is good)
-            pageLength: 10, // Default number of rows per page
+            paging: true,
+            pageLength: 10,
             lengthMenu: [
-                [10, 25, 50, -1], // Values for the dropdown
-                [10, 25, 50, 'Todos'] // Display text for the dropdown
+                [10, 25, 50, -1],
+                [10, 25, 50, 'Todos']
             ],
             initComplete: function () {
-                // Remove default DataTables button group class for better Bootstrap styling
                 const dtButtons = document.querySelector('.dt-buttons');
                 if (dtButtons) {
                     dtButtons.classList.remove('btn-group');
                 }
                 
-                // Add Bootstrap form-control classes to the search input
                 const searchInput = document.querySelector('.dataTables_filter input');
                 if (searchInput) {
                     searchInput.classList.add('form-control', 'form-control-sm');
-                    // Ensure the search input has a placeholder
                     searchInput.setAttribute('placeholder', 'Pesquisar...');
                 }
 
-                // Add Bootstrap form-select class to the length menu dropdown
                 const lengthSelect = document.querySelector('.dataTables_length select');
                 if (lengthSelect) {
                     lengthSelect.classList.add('form-select', 'form-select-sm');
@@ -297,46 +284,43 @@
 
         // Function to update the statistic counters
         const updateCounters = () => {
-            const totalRecords = table.data().count(); // Total records in the dataset
-            const filteredRecords = table.rows({ search: 'applied' }).count(); // Records visible after search/filters
-            const hiddenRecords = totalRecords - filteredRecords; // Records not currently visible
+            const totalRecords = table.data().count();
+            const filteredRecords = table.rows({ search: 'applied' }).count();
+            const hiddenRecords = totalRecords - filteredRecords;
 
             document.getElementById('count-total').textContent = totalRecords;
             document.getElementById('count-filtered').textContent = filteredRecords;
             document.getElementById('count-hidden').textContent = hiddenRecords;
         };
 
-        // Update counters on initial load and whenever the table redraws (e.g., on search, sort, paginate)
         table.on('draw', updateCounters);
-        updateCounters(); // Initial update
+        updateCounters();
 
-        // Initialize and handle the Bootstrap Modal
         const initModal = () => {
             const modalElement = document.getElementById('editModal');
-            if (!modalElement) return; // Exit if modal element is not found
+            if (!modalElement) return;
 
             const modal = new bootstrap.Modal(modalElement);
 
-            // Add event listener to the table body for delegation (more efficient for dynamic content)
             document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
                 const button = e.target.closest('button.open-edit-modal');
-                if (!button) return; // If clicked element is not our button, do nothing
+                if (!button) return;
 
-                const row = button.closest('tr'); // Get the closest table row
+                const row = button.closest('tr');
                 if (!row) return;
 
-                const uuid = row.dataset.uuid; // Get the UUID from the data-uuid attribute on the row
+                const uuid = row.dataset.uuid;
                 if (!uuid) {
                     console.warn('UUID not found for this row.');
                     return;
                 }
 
-                document.getElementById('modal-uuid').value = uuid; // Set the hidden input value in the modal
-                modal.show(); // Show the Bootstrap modal
+                document.getElementById('modal-uuid').value = uuid;
+                modal.show();
             });
         };
 
-        initModal(); // Call the modal initialization function
+        initModal();
     });
 </script>
 </body>
