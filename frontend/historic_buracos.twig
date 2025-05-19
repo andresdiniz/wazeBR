@@ -304,6 +304,7 @@
 
             const modal = new bootstrap.Modal(modalElement);
 
+            // Abrir modal com UUID
             document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
                 const button = e.target.closest('button.open-edit-modal');
                 if (!button) return;
@@ -320,7 +321,30 @@
                 document.getElementById('modal-uuid').value = uuid;
                 modal.show();
             });
+
+            // Enviar formulário via fetch
+            const form = document.getElementById('updateForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    modal.hide();
+                    alert(result.message || 'Status atualizado com sucesso.');
+                    table.ajax.reload(null, false); // se estiver usando ajax no DataTables
+                } else {
+                    alert(result.error || 'Erro ao atualizar status.');
+                }
+            });
         };
+
 
         initModal();
     });
