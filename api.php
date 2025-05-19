@@ -871,7 +871,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             try {
                 $pdo = Database::getConnection();
-                $updateQuery = "UPDATE alerts SET status = :status WHERE uuid = :uuid";
+                $updateQuery = "UPDATE alerts SET confirmado = :status WHERE uuid = :uuid";
                 $stmt = $pdo->prepare($updateQuery);
                 $stmt->bindParam(':status', $status, PDO::PARAM_STR);
                 $stmt->bindParam(':uuid', $id, PDO::PARAM_STR);
