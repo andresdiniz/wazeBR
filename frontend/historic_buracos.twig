@@ -152,7 +152,7 @@
                     <h5 class="modal-title" id="editModalLabel">Atualizar Status do Buraco</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="updateForm" method="POST" action="/api.php?atualizaburaco">
+                <form id="updateForm" method="POST" action="/api.php?action=atualizaburaco">
                     <div class="modal-body">
                         <input type="hidden" name="uuid" id="modal-uuid">
                         <p class="text-muted small">Selecione uma ação para este registro:</p>
@@ -328,10 +328,9 @@
                 e.preventDefault();
 
                 const formData = new FormData(form);
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
 
                 const result = await response.json();
 

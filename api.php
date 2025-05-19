@@ -843,7 +843,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     switch ($action) {
-
         case 'atualizaburaco':
             $id = $_POST['uuid'] ?? null;
             $statusInput = $_POST['status'] ?? null;
