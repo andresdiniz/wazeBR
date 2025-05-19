@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,101 +12,134 @@
 
     <style>
         /* Custom styles for badges based on confidence level */
-        .badge.bg-success { background-color: #28a745 !important; }
-        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; } /* Added color for warning readability */
-        .badge.bg-danger { background-color: #dc3545 !important; }
+        .badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #333 !important;
+        }
+
+        /* Added color for warning readability */
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
         /* Smaller font for labels in filter card */
-        .form-label.small { font-size: 0.85em; }
+        .form-label.small {
+            font-size: 0.85em;
+        }
+
         /* Adjust button group for DataTables export buttons to stack on small screens */
         div.dt-buttons {
             display: flex;
-            flex-wrap: wrap; /* Allow buttons to wrap to next line */
-            gap: 5px; /* Space between buttons */
+            flex-wrap: wrap;
+            /* Allow buttons to wrap to next line */
+            gap: 5px;
+            /* Space between buttons */
             /* Ensure the button container itself is aligned correctly */
             align-items: center;
         }
 
         /* Ensure filter input has a consistent look */
         .dataTables_filter input {
-            min-width: 150px; /* Ensure search bar is not too narrow */
+            min-width: 150px;
+            /* Ensure search bar is not too narrow */
         }
 
         /* Ensure the table itself uses table-layout: fixed for better column distribution */
         /* This forces the table to use 100% of available width */
         #buracos-table {
             table-layout: fixed;
-            width: 100% !important; /* Force 100% width, important for fixed layout */
+            width: 100% !important;
+            /* Force 100% width, important for fixed layout */
         }
+
         /* Make sure table cells don't wrap unless necessary, to prevent fixed layout issues */
         #buracos-table tbody td {
-            white-space: normal; /* Allow text to wrap naturally within cells */
-            word-wrap: break-word; /* Break long words */
+            white-space: normal;
+            /* Allow text to wrap naturally within cells */
+            word-wrap: break-word;
+            /* Break long words */
         }
     </style>
 </head>
+
 <body>
 
-<div class="container mt-4">
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3 text-muted">Filtrar Registros</h5>
-            <form method="GET" action="" class="row g-3 align-items-end">
-                <div class="col-md-4 col-lg-3">
-                    <label for="filter-date" class="form-label small text-muted mb-1">Data Específica</label>
-                    <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
-                           value="{{ filters.date ?? '' }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
-                    <select id="filter-period" name="period" class="form-select form-select-sm">
-                        <option value="">Todos</option>
-                        <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
-                        <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
-                        <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
-                    </select>
-                </div>
-                <div class="col-md-4 col-lg-2 d-grid">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="bi bi-funnel me-1"></i>Filtrar
-                    </button>
-                </div>
-            </form>
+    <div class="container mt-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3 text-muted">Filtrar Registros</h5>
+                <form method="GET" action="" class="row g-3 align-items-end">
+                    <div class="col-md-4 col-lg-3">
+                        <label for="filter-date" class="form-label small text-muted mb-1">Data Específica</label>
+                        <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
+                            value="{{ filters.date ?? '' }}">
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
+                        <select id="filter-period" name="period" class="form-select form-select-sm">
+                            <option value="">Todos</option>
+                            <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
+                            <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
+                            <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 col-lg-2 d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-funnel me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3 mb-md-0">
-            <div class="card border-success border-2 shadow-sm h-100">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Total de Registros</span>
-                    <h3 class="mb-0 text-success" id="count-total">0</h3>
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card border-success border-2 shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <span class="small text-muted">Total de Registros</span>
+                        <h3 class="mb-0 text-success" id="count-total">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card border-info border-2 shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <span class="small text-muted">Registros Filtrados</span>
+                        <h3 class="mb-0 text-info" id="count-filtered">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0"> {# Added mb-3 mb-md-0 for consistent spacing #}
+                <div class="card border-primary border-2 shadow-sm h-100"> {# Changed border color to primary #}
+                    <div class="card-body py-2">
+                        <span class="small text-muted">Registros Confirmados</span>
+                        <h3 class="mb-0 text-primary" id="count-confirmed">0</h3> {# Changed text color to primary #}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0"> {# Added mb-3 mb-md-0 for consistent spacing #}
+                <div class="card border-warning border-2 shadow-sm h-100"> {# Changed border color to warning #}
+                    <div class="card-body py-2">
+                        <span class="small text-muted">Registros Não resolvidos</span>
+                        <h3 class="mb-0 text-warning" id="count-not-resolved">0</h3> {# Changed text color to warning #}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0"> {# Kept original 'hidden' card, adjusted spacing #}
+                <div class="card border-danger border-2 shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <span class="small text-muted">Registros Ocultos (inativos/removidos)</span> {# Clarified label
+                        #}
+                        <h3 class="mb-0 text-danger" id="count-hidden">0</h3>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-            <div class="card border-info border-2 shadow-sm h-100">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Registros Filtrados</span>
-                    <h3 class="mb-0 text-info" id="count-filtered">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-danger border-2 shadow-sm h-100">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Registros Confirmados</span>
-                    <h3 class="mb-0 text-danger" id="count-hidden">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-danger border-2 shadow-sm h-100">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Registros Não resolvidos</span>
-                    <h3 class="mb-0 text-danger" id="count-hidden">0</h3>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <div class="card shadow-sm">
@@ -183,7 +217,8 @@
                             <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
                                 <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
                             </button>
-                            <button type="button" data-status="nao_resolvido" class="btn btn-warning btn-lg submit-status">
+                            <button type="button" data-status="nao_resolvido"
+                                class="btn btn-warning btn-lg submit-status">
                                 <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
                             </button>
                         </div>
@@ -195,204 +230,205 @@
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js"></script>
 
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Helper function to convert confidence value to percentage and determine badge color
-        const formatConfidence = (value) => {
-            let numValue = parseFloat(value);
-            if (isNaN(numValue)) {
-                numValue = 0;
-            }
-            const percentage = (numValue * 20).toFixed(0) + '%';
-            let color;
-            if (numValue >= 4) {
-                color = 'success';
-            } else if (numValue >= 2) {
-                color = 'warning';
-            } else {
-                color = 'danger';
-            }
-            return `<span class="badge bg-${color}">${numValue} (${percentage})</span>`;
-        };
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Helper function to convert confidence value to percentage and determine badge color
+            const formatConfidence = (value) => {
+                let numValue = parseFloat(value);
+                if (isNaN(numValue)) {
+                    numValue = 0;
+                }
+                const percentage = (numValue * 20).toFixed(0) + '%';
+                let color;
+                if (numValue >= 4) {
+                    color = 'success';
+                } else if (numValue >= 2) {
+                    color = 'warning';
+                } else {
+                    color = 'danger';
+                }
+                return `<span class="badge bg-${color}">${numValue} (${percentage})</span>`;
+            };
 
-        // Initialize DataTable
-        const table = new DataTable('#buracos-table', {
-            // Define the DOM structure for DataTables elements
-            // B: Buttons, f: Filtering/Search, r: Processing display, t: Table, i: Information, p: Pagination, l: Length changing input control
-            dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
-                 '<"row mt-2"<"col-12"rt>>' + // Middle: table
-                 '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
-                 '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
-            
-            buttons: [
-                {
-                    extend: 'copy',
-                    text: '<i class="bi bi-clipboard"></i> Copiar',
-                    className: 'btn btn-outline-secondary btn-sm',
-                    exportOptions: { columns: ':not(.no-export)' }
+            // Initialize DataTable
+            const table = new DataTable('#buracos-table', {
+                // Define the DOM structure for DataTables elements
+                // B: Buttons, f: Filtering/Search, r: Processing display, t: Table, i: Information, p: Pagination, l: Length changing input control
+                dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
+                    '<"row mt-2"<"col-12"rt>>' + // Middle: table
+                    '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
+                    '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
+
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: '<i class="bi bi-clipboard"></i> Copiar',
+                        className: 'btn btn-outline-secondary btn-sm',
+                        exportOptions: { columns: ':not(.no-export)' }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                        className: 'btn btn-outline-success btn-sm',
+                        exportOptions: { columns: ':not(.no-export)' }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                        className: 'btn btn-outline-danger btn-sm',
+                        exportOptions: { columns: ':not(.no-export)' }
+                    }
+                ],
+                order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
                 },
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
-                    className: 'btn btn-outline-success btn-sm',
-                    exportOptions: { columns: ':not(.no-export)' }
-                },
-                {
-                    extend: 'pdfHtml5',
-                    text: '<i class="bi bi-file-earmark-pdf"></i> PDF',
-                    className: 'btn btn-outline-danger btn-sm',
-                    exportOptions: { columns: ':not(.no-export)' }
+                columnDefs: [
+                    // Fixed small widths for columns with generally consistent content
+                    { targets: 0, width: '30px', className: 'text-center' }, // #
+                    { targets: 3, width: '100px', className: 'text-center', render: formatConfidence }, // Confiança
+                    { targets: 4, width: '150px' }, // Data (Adjusted from 200px)
+                    { targets: 6, width: '80px', orderable: false, className: 'no-export text-center' }, // Ações
+
+                    // No explicit width for targets 1 (Cidade), 2 (Rua), and 5 (Coordenadas).
+                    // With `table-layout: fixed` CSS and `autoWidth: true` (default), these columns
+                    // will automatically distribute the remaining space to fill the 100% width.
+                ],
+                paging: true, // Enable pagination
+                pageLength: 10, // Default number of rows per page
+                lengthMenu: [
+                    [10, 25, 50, -1], // Values for the dropdown
+                    [10, 25, 50, 'Todos'] // Display text for the dropdown
+                ],
+                initComplete: function () {
+                    // Get the DataTables button container using native JS
+                    const dtButtonsContainer = document.querySelector('.dt-buttons');
+                    if (dtButtonsContainer) {
+                        // Remove default DataTables button group class that might conflict with our flex styles
+                        dtButtonsContainer.classList.remove('btn-group');
+                    }
+
+                    // Get the DataTables search input using native JS
+                    const searchInput = document.querySelector('.dataTables_filter input');
+                    if (searchInput) {
+                        searchInput.classList.add('form-control', 'form-control-sm');
+                        searchInput.setAttribute('placeholder', 'Pesquisar...');
+                    }
+
+                    // Get the DataTables length menu select using native JS
+                    const lengthSelect = document.querySelector('.dataTables_length select');
+                    if (lengthSelect) {
+                        lengthSelect.classList.add('form-select', 'form-select-sm');
+                    }
                 }
-            ],
-            order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
-            language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
-            },
-            columnDefs: [
-                // Fixed small widths for columns with generally consistent content
-                { targets: 0, width: '30px', className: 'text-center' }, // #
-                { targets: 3, width: '100px', className: 'text-center', render: formatConfidence }, // Confiança
-                { targets: 4, width: '150px' }, // Data (Adjusted from 200px)
-                { targets: 6, width: '80px', orderable: false, className: 'no-export text-center' }, // Ações
-
-                // No explicit width for targets 1 (Cidade), 2 (Rua), and 5 (Coordenadas).
-                // With `table-layout: fixed` CSS and `autoWidth: true` (default), these columns
-                // will automatically distribute the remaining space to fill the 100% width.
-            ],
-            paging: true, // Enable pagination
-            pageLength: 10, // Default number of rows per page
-            lengthMenu: [
-                [10, 25, 50, -1], // Values for the dropdown
-                [10, 25, 50, 'Todos'] // Display text for the dropdown
-            ],
-            initComplete: function () {
-                // Get the DataTables button container using native JS
-                const dtButtonsContainer = document.querySelector('.dt-buttons');
-                if (dtButtonsContainer) {
-                    // Remove default DataTables button group class that might conflict with our flex styles
-                    dtButtonsContainer.classList.remove('btn-group');
-                }
-                
-                // Get the DataTables search input using native JS
-                const searchInput = document.querySelector('.dataTables_filter input');
-                if (searchInput) {
-                    searchInput.classList.add('form-control', 'form-control-sm');
-                    searchInput.setAttribute('placeholder', 'Pesquisar...');
-                }
-
-                // Get the DataTables length menu select using native JS
-                const lengthSelect = document.querySelector('.dataTables_length select');
-                if (lengthSelect) {
-                    lengthSelect.classList.add('form-select', 'form-select-sm');
-                }
-            }
-        });
-
-        // Function to update the statistic counters based on DataTables state
-        const updateCounters = () => {
-            const totalRecords = table.data().count();
-            const filteredRecords = table.rows({ search: 'applied' }).count();
-            const hiddenRecords = totalRecords - filteredRecords;
-
-            document.getElementById('count-total').textContent = totalRecords;
-            document.getElementById('count-filtered').textContent = filteredRecords;
-            document.getElementById('count-hidden').textContent = hiddenRecords;
-        };
-
-        // Update counters on initial load and whenever the table redraws
-        table.on('draw', updateCounters);
-        updateCounters();
-
-        // Initialize and handle the Bootstrap Modal
-        const initModal = () => {
-            const modalElement = document.getElementById('editModal');
-            if (!modalElement) return;
-
-            const modal = new bootstrap.Modal(modalElement);
-
-            // Abrir modal com UUID
-            document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
-                const button = e.target.closest('button.open-edit-modal');
-                if (!button) return;
-
-                const row = button.closest('tr');
-                if (!row) return;
-
-                const uuid = button.dataset.uuid; // Get UUID directly from the button's data-uuid
-                if (!uuid) {
-                    console.warn('UUID not found for this row.');
-                    return;
-                }
-
-                document.getElementById('modal-uuid').value = uuid;
-                modal.show();
             });
 
-            // Botões com status
-            document.querySelectorAll('.submit-status').forEach(button => {
-                button.addEventListener('click', async () => {
-                    const status = button.dataset.status;
-                    const form = document.getElementById('updateForm');
-                    const uuid = document.getElementById('modal-uuid').value;
+            // Function to update the statistic counters based on DataTables state
+            const updateCounters = () => {
+                const totalRecords = table.data().count();
+                const filteredRecords = table.rows({ search: 'applied' }).count();
+                const hiddenRecords = totalRecords - filteredRecords;
 
-                    if (!uuid || !status) {
-                        alert('UUID ou status ausente.');
+                document.getElementById('count-total').textContent = totalRecords;
+                document.getElementById('count-filtered').textContent = filteredRecords;
+                document.getElementById('count-hidden').textContent = hiddenRecords;
+            };
+
+            // Update counters on initial load and whenever the table redraws
+            table.on('draw', updateCounters);
+            updateCounters();
+
+            // Initialize and handle the Bootstrap Modal
+            const initModal = () => {
+                const modalElement = document.getElementById('editModal');
+                if (!modalElement) return;
+
+                const modal = new bootstrap.Modal(modalElement);
+
+                // Abrir modal com UUID
+                document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
+                    const button = e.target.closest('button.open-edit-modal');
+                    if (!button) return;
+
+                    const row = button.closest('tr');
+                    if (!row) return;
+
+                    const uuid = button.dataset.uuid; // Get UUID directly from the button's data-uuid
+                    if (!uuid) {
+                        console.warn('UUID not found for this row.');
                         return;
                     }
 
-                    document.getElementById('modal-status').value = status;
-                    const formData = new FormData(form);
-
-                    // Debug opcional
-                    for (let [key, value] of formData.entries()) {
-                        console.log(`${key}: ${value}`);
-                    }
-
-                    const response = await fetch('/api.php?action=atualizaburaco', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    let result;
-                    try {
-                        result = await response.json();
-                    } catch (jsonError) {
-                        console.error('API did not return valid JSON:', jsonError);
-                        alert('Resposta do servidor inválida. Verifique o console para mais detalhes.');
-                        return;
-                    }
-
-                    if (response.ok && result.success) {
-                        modal.hide();
-                        alert(result.message || 'Status atualizado com sucesso.');
-                        // *** AQUI É A MUDANÇA PRINCIPAL ***
-                        // Como a tabela não é carregada via AJAX, recarregue a página inteira
-                        location.reload(); 
-                        // **********************************
-                    } else {
-                        console.error('Erro na resposta:', result);
-                        alert(result.error || 'Erro ao atualizar status.');
-                    }
+                    document.getElementById('modal-uuid').value = uuid;
+                    modal.show();
                 });
-            });
-        };
-        initModal();
-    });
-</script>
+
+                // Botões com status
+                document.querySelectorAll('.submit-status').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const status = button.dataset.status;
+                        const form = document.getElementById('updateForm');
+                        const uuid = document.getElementById('modal-uuid').value;
+
+                        if (!uuid || !status) {
+                            alert('UUID ou status ausente.');
+                            return;
+                        }
+
+                        document.getElementById('modal-status').value = status;
+                        const formData = new FormData(form);
+
+                        // Debug opcional
+                        for (let [key, value] of formData.entries()) {
+                            console.log(`${key}: ${value}`);
+                        }
+
+                        const response = await fetch('/api.php?action=atualizaburaco', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        let result;
+                        try {
+                            result = await response.json();
+                        } catch (jsonError) {
+                            console.error('API did not return valid JSON:', jsonError);
+                            alert('Resposta do servidor inválida. Verifique o console para mais detalhes.');
+                            return;
+                        }
+
+                        if (response.ok && result.success) {
+                            modal.hide();
+                            alert(result.message || 'Status atualizado com sucesso.');
+                            // *** AQUI É A MUDANÇA PRINCIPAL ***
+                            // Como a tabela não é carregada via AJAX, recarregue a página inteira
+                            location.reload();
+                            // **********************************
+                        } else {
+                            console.error('Erro na resposta:', result);
+                            alert(result.error || 'Erro ao atualizar status.');
+                        }
+                    });
+                });
+            };
+            initModal();
+        });
+    </script>
 </body>
+
 </html>
