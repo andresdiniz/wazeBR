@@ -96,9 +96,9 @@
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>
-                            {% set confidenceValue = buraco.confidence %}
+                            {% set confidenceValue = buraco.confidence %} {# Valor original 0-5 #}
                             <span class="badge">
-                                {{ confidenceValue }} ({{ (confidenceValue * 20)|int }}%)
+                                {{ confidenceValue }} ({{ confidenceValue * 20 }}%)
                             </span>
                         </td>
                         <td data-order="{{ buraco.pubMillis }}">
@@ -166,7 +166,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Função de conversão de confiança
         const convertConfidence = (value) => (value * 20) + '%';
-        console.log('Confidence conversion function loaded.');
+         console.log('Confidence conversion function loaded.');
         console.log(value);
 
         // Configuração do DataTable
