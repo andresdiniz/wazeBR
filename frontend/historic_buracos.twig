@@ -367,34 +367,29 @@
                         console.log(`${key}: ${value}`);
                     }
 
+                    const response = await fetch('/api.php?action=atualizaburaco', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    let result;
                     try {
-                        const response = await fetch('/api.php?action=atualizaburaco', {
-                            method: 'POST',
-                            body: formData
-                        });
+                        result = await response.json();
+                    } catch (jsonError) {
+                        throw new Error('Resposta não é um JSON válido.');
+                    }
 
-                        let result;
-                        try {
-                            result = await response.json();
-                        } catch (jsonError) {
-                            throw new Error('Resposta não é um JSON válido.');
-                        }
-
-                        if (response.ok && result.success) {
-                            modal.hide();
-                            alert(result.message || 'Status atualizado com sucesso.');
-                            if (typeof table !== 'undefined' && table.ajax) {
-                                table.ajax.reload(null, false);
-                            } else {
-                                location.reload();
-                            }
+                    if (response.ok && result.success) {
+                        modal.hide();
+                        alert(result.message || 'Status atualizado com sucesso.');
+                        if (typeof table !== 'undefined' && table.ajax) {
+                            table.ajax.reload(null, false);
                         } else {
-                            console.error('Erro na resposta:', result);
-                            alert(result.error || 'Erro ao atualizar status.');
+                            location.reload();
                         }
-                    } catch (error) {
-                        console.error('Erro ao enviar formulário:', error);
-                        alert('Erro inesperado ao enviar os dados.');
+                    } else {
+                        console.error('Erro na resposta:', result);
+                        alert(result.error || 'Erro ao atualizar status.');
                     }
                 });
             });
