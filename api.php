@@ -843,6 +843,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     switch ($action) {
+
         case 'atualizaburaco':
             $id = $_POST['uuid'] ?? null;
             $statusInput = $_POST['status'] ?? null;
@@ -887,9 +888,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 http_response_code(500);
                 echo json_encode(['error' => 'Erro no banco de dados.', 'details' => $e->getMessage()]);
             }
-            break;
-
-
+        break;
+        
         case 'cadastrar_usuario':
             // Lógica para cadastrar usuário
             $email = $_POST['email'] ?? null;
