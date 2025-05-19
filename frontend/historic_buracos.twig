@@ -1,42 +1,62 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
+<style>
+    /* Custom styles for badges based on confidence level */
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
 
-    <style>
-        /* Custom styles for badges based on confidence level */
-        .badge.bg-success { background-color: #28a745 !important; }
-        .badge.bg-warning { background-color: #ffc107 !important; color: #333 !important; } /* Added color for warning readability */
-        .badge.bg-danger { background-color: #dc3545 !important; }
-        /* Smaller font for labels in filter card */
-        .form-label.small { font-size: 0.85em; }
-        /* Adjust button group for DataTables export buttons to stack on small screens */
-        div.dt-buttons {
-            display: flex;
-            flex-wrap: wrap; /* Allow buttons to wrap to next line */
-            gap: 5px; /* Space between buttons */
-            /* Ensure the button container itself is aligned correctly */
-            align-items: center;
-        }
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #333 !important;
+    }
 
-        /* Ensure filter input has a consistent look */
-        .dataTables_filter input {
-            min-width: 150px; /* Ensure search bar is not too narrow */
-        }
+    /* Added color for warning readability */
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
 
-        /* Ensure the table itself uses table-layout: fixed for better column distribution */
-        /* This forces the table to use 100% of available width */
-        #buracos-table {
-            table-layout: fixed;
-            width: 100% !important; /* Force 100% width, important for fixed layout */
-        }
-        /* Make sure table cells don't wrap unless necessary, to prevent fixed layout issues */
-        #buracos-table tbody td {
-            white-space: normal; /* Allow text to wrap naturally within cells */
-            word-wrap: break-word; /* Break long words */
-        }
-    </style>
+    /* Smaller font for labels in filter card */
+    .form-label.small {
+        font-size: 0.85em;
+    }
+
+    /* Adjust button group for DataTables export buttons to stack on small screens */
+    div.dt-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        /* Allow buttons to wrap to next line */
+        gap: 5px;
+        /* Space between buttons */
+        /* Ensure the button container itself is aligned correctly */
+        align-items: center;
+    }
+
+    /* Ensure filter input has a consistent look */
+    .dataTables_filter input {
+        min-width: 150px;
+        /* Ensure search bar is not too narrow */
+    }
+
+    /* Ensure the table itself uses table-layout: fixed for better column distribution */
+    /* This forces the table to use 100% of available width */
+    #buracos-table {
+        table-layout: fixed;
+        width: 100% !important;
+        /* Force 100% width, important for fixed layout */
+    }
+
+    /* Make sure table cells don't wrap unless necessary, to prevent fixed layout issues */
+    #buracos-table tbody td {
+        white-space: normal;
+        /* Allow text to wrap naturally within cells */
+        word-wrap: break-word;
+        /* Break long words */
+    }
+</style>
 
 <div class="container mt-4">
     <div class="card shadow-sm mb-4">
@@ -46,7 +66,7 @@
                 <div class="col-md-4 col-lg-3">
                     <label for="filter-date" class="form-label small text-muted mb-1">Data Específica</label>
                     <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
-                           value="{{ filters.date ?? '' }}">
+                        value="{{ filters.date ?? '' }}">
                 </div>
                 <div class="col-md-4 col-lg-3">
                     <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
@@ -97,7 +117,8 @@
         <div class="card-body">
             <h5 class="card-title mb-3 text-muted">Relatório de Buracos</h5>
             <div class="table-responsive"> {# Added this wrapper div for responsiveness #}
-                <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm" style="width:100%">
+                <table id="buracos-table" class="table table-hover table-striped table-bordered table-sm"
+                    style="width:100%">
                     <thead class="table-light">
                         <tr>
                             <th class="text-center">#</th>
@@ -129,14 +150,16 @@
                                 </a>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-outline-secondary btn-sm open-edit-modal" title="Atualizar Status" data-uuid={{ buraco.uuid }}>
+                                <button class="btn btn-outline-secondary btn-sm open-edit-modal"
+                                    title="Atualizar Status" data-uuid={{ buraco.uuid }}>
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado para os filtros aplicados.</td>
+                            <td colspan="7" class="text-center text-muted py-4">Nenhum registro encontrado para os
+                                filtros aplicados.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -159,15 +182,16 @@
 
                         <p class="text-muted small">Selecione uma ação para este registro:</p>
                         <div class="d-grid gap-3">
-                        <button type="button" data-status="resolvido" class="btn btn-success btn-lg submit-status">
-                            <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
-                        </button>
-                        <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
-                            <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
-                        </button>
-                        <button type="button" data-status="nao_resolvido" class="btn btn-warning btn-lg submit-status">
-                            <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
-                        </button>
+                            <button type="button" data-status="resolvido" class="btn btn-success btn-lg submit-status">
+                                <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
+                            </button>
+                            <button type="button" data-status="nao_existe" class="btn btn-danger btn-lg submit-status">
+                                <i class="bi bi-x-circle me-2"></i>Não Existe / Falso Positivo
+                            </button>
+                            <button type="button" data-status="nao_resolvido"
+                                class="btn btn-warning btn-lg submit-status">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Não Resolvido / Aguardando
+                            </button>
                         </div>
                     </div>
                     <div class="modal-footer justify-content-start">
@@ -217,10 +241,10 @@
             // Define the DOM structure for DataTables elements
             // B: Buttons, f: Filtering/Search, r: Processing display, t: Table, i: Information, p: Pagination, l: Length changing input control
             dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
-                 '<"row mt-2"<"col-12"rt>>' + // Middle: table
-                 '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
-                 '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
-            
+                '<"row mt-2"<"col-12"rt>>' + // Middle: table
+                '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
+                '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
+
             buttons: [
                 {
                     extend: 'copy',
@@ -269,7 +293,7 @@
                     // Remove default DataTables button group class that might conflict with our flex styles
                     dtButtonsContainer.classList.remove('btn-group');
                 }
-                
+
                 // Get the DataTables search input using native JS
                 const searchInput = document.querySelector('.dataTables_filter input');
                 if (searchInput) {
@@ -317,8 +341,8 @@
 
                 const uuid = row.dataset.uuid;
                 if (!uuid) {
-                console.warn('UUID not found for this row.');
-                return;
+                    console.warn('UUID not found for this row.');
+                    return;
                 }
 
                 document.getElementById('modal-uuid').value = uuid;
@@ -328,36 +352,36 @@
             // Lógica dos botões de envio com status
             document.querySelectorAll('.submit-status').forEach(button => {
                 button.addEventListener('click', async () => {
-                const status = button.dataset.status;
-                const form = document.getElementById('updateForm');
-                const uuid = document.getElementById('modal-uuid').value;
-                document.getElementById('modal-status').value = status;
+                    const status = button.dataset.status;
+                    const form = document.getElementById('updateForm');
+                    const uuid = document.getElementById('modal-uuid').value;
+                    document.getElementById('modal-status').value = status;
 
-                const formData = new FormData(form);
+                    const formData = new FormData(form);
 
-                try {
-                    const response = await fetch('/api.php?action=atualizaburaco', {
-                    method: 'POST',
-                    body: formData
-                    });
+                    try {
+                        const response = await fetch('/api.php?action=atualizaburaco', {
+                            method: 'POST',
+                            body: formData
+                        });
 
-                    const result = await response.json();
+                        const result = await response.json();
 
-                    if (response.ok) {
-                    modal.hide();
-                    alert(result.message || 'Status atualizado com sucesso.');
-                    if (typeof table !== 'undefined' && table.ajax) {
-                        table.ajax.reload(null, false);
-                    } else {
-                        location.reload();
+                        if (response.ok) {
+                            modal.hide();
+                            alert(result.message || 'Status atualizado com sucesso.');
+                            if (typeof table !== 'undefined' && table.ajax) {
+                                table.ajax.reload(null, false);
+                            } else {
+                                location.reload();
+                            }
+                        } else {
+                            alert(result.error || 'Erro ao atualizar status.');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar formulário:', error);
+                        alert('Erro inesperado ao enviar os dados.');
                     }
-                    } else {
-                    alert(result.error || 'Erro ao atualizar status.');
-                    }
-                } catch (error) {
-                    console.error('Erro ao enviar formulário:', error);
-                    alert('Erro inesperado ao enviar os dados.');
-                }
                 });
             });
         };
