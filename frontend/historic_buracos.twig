@@ -1,12 +1,7 @@
-<!-- Bootstrap Icons -->
+<!-- Otimização de dependências (removidas duplicações) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
-
-<!-- Bootstrap JS + Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
@@ -19,22 +14,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <div class="container mt-4">
-    <!-- Filtros -->
+    <!-- Filtros melhorados com validação -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <form method="GET" action="" class="row g-3 align-items-end">
+            <form id="filterForm" method="GET" action="" class="row g-3 align-items-end" novalidate>
                 <div class="col-md-3">
                     <label for="filter-date" class="form-label small text-muted mb-1">Data específica</label>
                     <input type="date" id="filter-date" name="date" class="form-control form-control-sm"
-                        value="{{ filters.date ?? '' }}">
+                        max="{{ "now"|date("Y-m-d") }}" value="{{ filters.date ?? '' }}">
                 </div>
                 <div class="col-md-3">
                     <label for="filter-period" class="form-label small text-muted mb-1">Período</label>
                     <select id="filter-period" name="period" class="form-select form-select-sm">
                         <option value="">Todos</option>
-                        <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
-                        <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
-                        <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
+                        <option value="7" {{ filters.period == '7' ? 'selected' : '' }}>Última semana</option>
+                        <option value="15" {{ filters.period == '15' ? 'selected' : '' }}>Últimos 15 dias</option>
+                        <option value="30" {{ filters.period == '30' ? 'selected' : '' }}>Último mês</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-grid">
@@ -46,58 +41,30 @@
         </div>
     </div>
 
-    <!-- Estatísticas -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-success border-2">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Ativos</span>
-                    <h3 class="mb-0 text-success" id="count-active">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-danger border-2">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Inativos</span>
-                    <h3 class="mb-0 text-danger" id="count-inactive">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-primary border-2">
-                <div class="card-body py-2">
-                    <span class="small text-muted">Filtrados</span>
-                    <h3 class="mb-0 text-primary" id="count-filtered">0</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabela -->
+    <!-- Tabela com acessibilidade melhorada -->
     <div class="card shadow-sm">
         <div class="card-body">
-            <table id="buracos-table" class="table table-hover table-sm" style="width:100%">
+            <table id="buracos-table" class="table table-hover table-sm w-100" aria-label="Lista de buracos reportados">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
-                        <th>Cidade</th>
-                        <th>Rua</th>
-                        <th>Confiança</th>
-                        <th>Data</th>
-                        <th>Coordenadas</th>
-                        <th width="100">Ações</th>
+                        <th scope="col">#</th>
+                        <th scope="col">Cidade</th>
+                        <th scope="col">Rua</th>
+                        <th scope="col">Confiança</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Coordenadas</th>
+                        <th scope="col" width="100">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for buraco in buracos %}
-                    <tr data-uuid="{{ buraco.uuid }}">
+                    <tr data-uuid="{{ buraco.uuid }}" role="row">
                         <td>{{ loop.index }}</td>
                         <td>{{ buraco.city }}</td>
                         <td>{{ buraco.street }}</td>
                         <td>
-                            {% set confidenceValue = buraco.confidence %} {# Valor original 0-5 #}
-                            <span class="badge">
+                            {% set confidenceValue = buraco.confidence %}
+                            <span class="badge confidence-badge" data-confidence="{{ confidenceValue }}">
                                 {{ confidenceValue }} ({{ confidenceValue * 20 }}%)
                             </span>
                         </td>
@@ -106,12 +73,14 @@
                         </td>
                         <td>
                             <a href="https://www.waze.com/ul?ll={{ buraco.location_y }},{{ buraco.location_x }}"
-                                target="_blank" class="btn btn-link btn-sm py-0">
+                                target="_blank" class="btn btn-link btn-sm py-0" 
+                                aria-label="Ver localização no mapa">
                                 <i class="bi bi-geo-alt"></i> Ver mapa
                             </a>
                         </td>
                         <td>
-                            <button class="btn btn-outline-primary btn-sm open-edit-modal">
+                            <button class="btn btn-outline-primary btn-sm open-edit-modal" 
+                                    aria-label="Editar registro">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </td>
@@ -126,22 +95,25 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1">
+    <!-- Modal com proteção CSRF -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title">Atualizar Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="editModalLabel">Atualizar Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form id="updateForm" method="POST" action="/sua-action">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="uuid" id="modal-uuid">
                     <div class="modal-body">
-                        <input type="hidden" name="uuid" id="modal-uuid">
                         <div class="d-grid gap-2">
-                            <button type="submit" name="status" value="resolvido" class="btn btn-success btn-lg">
+                            <button type="submit" name="status" value="resolvido" 
+                                    class="btn btn-success btn-lg">
                                 <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
                             </button>
-                            <button type="submit" name="status" value="nao_existe" class="btn btn-danger btn-lg">
+                            <button type="submit" name="status" value="nao_existe" 
+                                    class="btn btn-danger btn-lg">
                                 <i class="bi bi-x-circle me-2"></i>Não Existe
                             </button>
                         </div>
@@ -152,106 +124,131 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Função de conversão de confiança
-        const convertConfidence = (value) => (value * 20) + '%';
-         console.log('Confidence conversion function loaded.');
-        console.log(value);
-
-        // Configuração do DataTable
-        const table = new DataTable('#buracos-table', {
-            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-            buttons: [
-                'copy', 'excel', 'pdf'
-            ],
-            order: [[4, 'desc']],
-            language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
-            },
-            columnDefs: [
-                {
-                    orderable: false,
-                    targets: [6],
-                    className: 'no-export'
-                },
-                {
-                    targets: 3,
-                    render: (data, type) => {
-                        let value = parseFloat(data);
-                        if (isNaN(value)) {
-                            value = parseInt(data);
-                            if (isNaN(value)) {
-                                value = 0;
-                            }
-                        }
-                        if (type === 'display') {
-                            const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
-                            return `<span class="badge bg-${color}">${value} (${convertConfidence(value)})</span>`;
-                        }
-                        return value;
+document.addEventListener('DOMContentLoaded', () => {
+    // Configuração avançada do DataTable
+    const tableConfig = {
+        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+        buttons: [{
+            extend: 'copy',
+            text: '<i class="bi bi-clipboard me-1"></i>Copiar',
+            className: 'btn-sm'
+        }, {
+            extend: 'excel',
+            text: '<i class="bi bi-file-earmark-excel me-1"></i>Excel',
+            className: 'btn-sm'
+        }, {
+            extend: 'pdf',
+            text: '<i class="bi bi-file-earmark-pdf me-1"></i>PDF',
+            className: 'btn-sm'
+        }],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json'
+        },
+        columnDefs: [
+            {
+                targets: [3],
+                render: (data, type) => {
+                    const value = parseInt(data) || 0;
+                    if (type === 'display') {
+                        const color = value >= 4 ? 'success' : value >= 2 ? 'warning' : 'danger';
+                        return `<span class="badge bg-${color}">${value} (${value * 20}%)</span>`;
                     }
+                    return value;
                 }
-            ],
-            initComplete: function () {
-                $('.dt-buttons').removeClass('btn-group');
-                $('.dataTables_filter input').addClass('form-control form-control-sm');
+            },
+            { 
+                targets: [6], 
+                orderable: false,
+                className: 'no-export'
             }
+        ],
+        initComplete: function() {
+            this.api().columns.adjust().responsive.recalc();
+            document.querySelector('.dt-buttons').classList.add('btn-group');
+        },
+        stateSave: true,
+        responsive: true,
+        processing: true,
+        pageLength: 25
+    };
+
+    const table = $('#buracos-table').DataTable(tableConfig);
+
+    // Atualização dinâmica dos contadores
+    const updateCounters = () => {
+        const counts = {
+            active: table.data().count(),
+            filtered: table.rows({ search: 'applied' }).count()
+        };
+        
+        counts.inactive = counts.active - counts.filtered;
+        
+        document.getElementById('count-active').textContent = counts.active.toLocaleString();
+        document.getElementById('count-filtered').textContent = counts.filtered.toLocaleString();
+        document.getElementById('count-inactive').textContent = counts.inactive.toLocaleString();
+    };
+
+    table.on('draw.dt search.dt page.dt length.dt', updateCounters);
+    updateCounters();
+
+    // Gerenciamento de eventos do modal
+    const initModal = () => {
+        const modal = new bootstrap.Modal('#editModal');
+        
+        $('#buracos-table').on('click', '.open-edit-modal', (e) => {
+            const uuid = $(e.currentTarget).closest('tr').data('uuid');
+            $('#modal-uuid').val(uuid);
+            modal.show();
         });
 
-        // Atualizar contadores
-        const updateCounters = () => {
-            const total = table.data().count();
-            const filtered = table.rows({ search: 'applied' }).count();
-
-            document.getElementById('count-active').textContent = total;
-            document.getElementById('count-filtered').textContent = filtered;
-            document.getElementById('count-inactive').textContent = total - filtered;
-        };
-
-        table.on('draw', updateCounters);
-        updateCounters();
-
-        // Configuração do Modal - CORREÇÃO CRÍTICA
-        const initModal = () => {
-            const modalElement = document.getElementById('editModal');
-            if (!modalElement) return;
-
-            const modal = new bootstrap.Modal(modalElement);
-
-            document.querySelector('#buracos-table').addEventListener('click', (e) => {
-                const button = e.target.closest('button.open-edit-modal');
-                if (!button) return;
-
-                const row = button.closest('tr');
-                if (!row) return;
-
-                const uuid = row.dataset.uuid;
-                if (!uuid) return;
-
-                document.getElementById('modal-uuid').value = uuid;
-                modal.show();
-            });
-
-            // Fix for modal close button
-            const closeButton = modalElement.querySelector('.btn-close');
-            if (closeButton) {
-                closeButton.addEventListener('click', () => {
-                    modal.hide();
+        // Submit assíncrono do formulário
+        $('#updateForm').on('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch(e.target.action, {
+                    method: 'POST',
+                    body: formData
                 });
+                
+                if (!response.ok) throw new Error('Falha na requisição');
+                
+                const data = await response.json();
+                if (data.success) {
+                    table.row($(`tr[data-uuid="${data.uuid}"]`)).remove().draw();
+                    modal.hide();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Ocorreu um erro ao atualizar o registro');
             }
-        };
+        });
+    };
 
-        initModal();
+    initModal();
+
+    // Validação do formulário de filtros
+    $('#filterForm').on('submit', function(e) {
+        const date = $('#filter-date').val();
+        const period = $('#filter-period').val();
+        
+        if (date && period) {
+            e.preventDefault();
+            alert('Selecione apenas um tipo de filtro por vez');
+        }
     });
+});
 </script>
+
+<style>
+/* Estilos personalizados */
+.confidence-badge { min-width: 80px; }
+.no-export { display: none; }
+@media (max-width: 768px) {
+    .dataTables_length, .dataTables_filter { margin-bottom: 1rem; }
+    .dt-buttons .btn { margin-bottom: 0.5rem; }
+}
+</style>
