@@ -94,34 +94,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Modal com proteção CSRF -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="editModalLabel">Atualizar Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <form id="updateForm" method="POST" action="/sua-action">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="uuid" id="modal-uuid">
-                    <div class="modal-body">
-                        <div class="d-grid gap-2">
-                            <button type="submit" name="status" value="resolvido" 
-                                    class="btn btn-success btn-lg">
-                                <i class="bi bi-check-circle me-2"></i>Marcar como Resolvido
-                            </button>
-                            <button type="submit" name="status" value="nao_existe" 
-                                    class="btn btn-danger btn-lg">
-                                <i class="bi bi-x-circle me-2"></i>Não Existe
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
