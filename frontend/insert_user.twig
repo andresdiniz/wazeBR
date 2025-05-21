@@ -552,14 +552,14 @@
 
                 showToast('success', result.message || 'Usuário cadastrado com sucesso!');
                 $('#modalCadastrar').modal('hide');
+                // Corrigir fundo cinza bloqueado (caso o backdrop fique preso)
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
                 form.reset();
                 form.classList.remove('was-validated');
             } catch (err) {
                 showToast('danger', err.message);
             }
         });
-
-
-
     });
 </script>
