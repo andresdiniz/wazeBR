@@ -345,6 +345,7 @@
         const apiRequest = async (endpoint, method = 'GET', body = null) => {
             try {
                 const idParceiro = getCookie('parceiro_id');
+                console.log('ID Parceiro:', idParceiro);
                 if (!idParceiro) throw new Error('ID do parceiro não encontrado');
 
                 const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
