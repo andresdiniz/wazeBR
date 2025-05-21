@@ -294,102 +294,97 @@
 </script>
 
 <script defer>
+document.addEventListener('DOMContentLoaded', () => {
+    const config = {
+        apiBase: '../api.php',
+        endpoints: {
+            users: '?action=get_users',
+            resetPassword: '?action=reset-password'
+        }
+    };
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const config = {
-            apiBase: '../api.php',
-            endpoints: {
-                users: '?action=get_users',
-                resetPassword: '?action=reset-password'
+    const parceiroId = window.parceiroId || null;
+    if (!parceiroId) {
+        console.error('ID do parceiro não está definido.');
+        return;
+    }
 
-            }
-        };
+    const modals = {
+        cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
+        alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
+        resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
+        apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
+    };
 
-        console.log('Config:', config.endpoints);
+    const showToast = (type, message) => {
+        const toastContainer = document.getElementById('toastContainer') || (() => {
+            const div = document.createElement('div');
+            div.id = 'toastContainer';
+            div.style.position = 'fixed';
+            div.style.top = '1rem';
+            div.style.right = '1rem';
+            div.style.zIndex = '1055';
+            document.body.appendChild(div);
+            return div;
+        })();
 
-        const modals = {
-            cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
-            alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
-            resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
-            apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
-        };
-
-        const showToast = (type, message) => {
-            const toastContainer = document.getElementById('toastContainer') || (() => {
-                const div = document.createElement('div');
-                div.id = 'toastContainer';
-                div.style.position = 'fixed';
-                div.style.top = '1rem';
-                div.style.right = '1rem';
-                div.style.zIndex = '1055';
-                document.body.appendChild(div);
-                return div;
-            })();
-
-            const toast = document.createElement('div');
-            toast.className = `toast show bg-${type} text-white mb-2`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
+        const toast = document.createElement('div');
+        toast.className = `toast show bg-${type} text-white mb-2`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">${message}</div>
                 <button type="button" class="btn-close btn-close-white m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        };
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    };
 
-        const apiRequest = async (endpoint, method = 'GET', body = null) => {
-            try {
-                const idParceiro = parceiroId
-                console.log('ID Parceiro:', idParceiro);
-                if (!idParceiro) throw new Error('ID do parceiro não encontrado');
+    const apiRequest = async (endpoint, method = 'GET', body = null) => {
+        try {
+            const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
+            url.searchParams.set('id_parceiro', parceiroId);
 
-                const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
-                url.searchParams.set('id_parceiro', idParceiro);
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body && method !== 'GET' ? JSON.stringify(body) : null
+            });
 
-                const res = await fetch(url, {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: body && method !== 'GET' ? JSON.stringify(body) : null
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Erro na requisição');
-                return data;
-            } catch (err) {
-                console.error(err);
-                showToast('danger', err.message || 'Erro na comunicação com o servidor');
-                throw err;
-            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Erro na requisição');
+            return data;
+        } catch (err) {
+            console.error(err);
+            showToast('danger', err.message || 'Erro na comunicação com o servidor');
+            throw err;
         }
+    };
 
-        const debounce = (fn, delay = 300) => {
-            let timer;
-            return (...args) => {
-                clearTimeout(timer);
-                timer = setTimeout(() => fn.apply(this, args), delay);
-            };
+    const debounce = (fn, delay = 300) => {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
         };
+    };
 
-        // ========================
-        // Modal Alterar Usuário
-        // ========================
-        (() => {
-            const input = document.getElementById('searchAlterar');
-            const tbody = document.getElementById('resultAlterar');
+    // Modal Alterar Usuário
+    (() => {
+        const input = document.getElementById('searchAlterar');
+        const tbody = document.getElementById('resultAlterar');
 
-            const searchUsers = debounce(async (query) => {
-                if (query.length < 3) return;
-
-                try {
-                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                    tbody.innerHTML = data.users.map(u => `
+        const searchUsers = debounce(async (query) => {
+            if (query.length < 3) return;
+            try {
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                tbody.innerHTML = data.users.map(u => `
                     <tr>
-                        <td>${u.nome}</td>
-                        <td>${u.usuario}</td>
+                        <td>${u.username}</td>
+                        <td>${u.username}</td>
                         <td>${u.email}</td>
                         <td>
                             <button class="btn btn-sm btn-warning btn-edit" data-id="${u.id}">
@@ -398,173 +393,167 @@
                         </td>
                     </tr>
                 `).join('');
-                } catch (err) {
-                    tbody.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado</td></tr>';
-                }
-            }, 500);
-
-            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
-
-            tbody.addEventListener('click', async e => {
-                const btn = e.target.closest('.btn-edit');
-                if (!btn) return;
-
-                try {
-                    const user = await apiRequest(`${config.endpoints.users}&id=${btn.dataset.id}`);
-                    // Implementar lógica de edição aqui
-                    console.log('Editar usuário:', user);
-                    modals.alterar.hide();
-                    showToast('success', `Editando usuário: ${user.nome}`);
-                } catch (err) {
-                    showToast('danger', err.message);
-                }
-            });
-        })();
-
-        // ========================
-        // Modal Resetar Senha
-        // ========================
-        (() => {
-            const input = document.getElementById('searchResetSenha');
-            const list = document.getElementById('resultResetSenha');
-            const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
-
-            const searchUsers = debounce(async (query) => {
-                if (query.length < 3) return;
-
-                try {
-                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                    list.innerHTML = data.users.map(u => `
-                <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
-                    ${u.username} (${u.email})
-                </button>
-            `).join('');
-                } catch (err) {
-                    list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
-                }
-            }, 500);
-
-            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
-
-            list.addEventListener('click', e => {
-                const item = e.target.closest('.list-group-item-action');
-                if (!item) return;
-
-                list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
-
-            confirmBtn.addEventListener('click', async () => {
-                const selected = list.querySelector('.active');
-                if (!selected) return showToast('warning', 'Selecione um usuário');
-
-                try {
-                    await apiRequest(config.endpoints.resetPassword, 'POST', {
-                        userId: selected.dataset.id
-                    });
-                    showToast('success', 'Senha resetada com sucesso!');
-                    modals.resetSenha.hide();
-                } catch (err) {
-                    showToast('danger', err.message);
-                }
-            });
-        })();
-
-
-        // ========================
-        // Modal Apagar Usuário
-        // ========================
-        (() => {
-            const input = document.getElementById('searchApagar');
-            const list = document.getElementById('resultApagar');
-            const confirmBtn = document.querySelector('#modalApagar .btn-danger');
-
-            const searchUsers = debounce(async (query) => {
-                if (query.length < 3) return;
-
-                try {
-                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                    list.innerHTML = data.users.map(u => `
-                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
-                        ${u.username} (${u.email})
-                    </button>
-                `).join('');
-                } catch (err) {
-                    list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
-                }
-            }, 500);
-
-            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
-
-            list.addEventListener('click', e => {
-                const item = e.target.closest('.list-group-item-action');
-                if (!item) return;
-
-                list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
-
-            confirmBtn.addEventListener('click', async () => {
-                const selected = list.querySelector('.active');
-                if (!selected) return showToast('warning', 'Selecione um usuário');
-
-                try {
-                    await apiRequest(`${config.endpoints.users}&id=${selected.dataset.id}`, 'DELETE');
-                    showToast('success', 'Usuário removido com sucesso!');
-                    modals.apagar.hide();
-                    setTimeout(() => location.reload(), 1500);
-                } catch (err) {
-                    showToast('danger', err.message);
-                }
-            });
-        })();
-
-        document.getElementById('generatePass').addEventListener('click', () => {
-            const length = 12;
-            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
-            let password = '';
-            for (let i = 0, n = charset.length; i < length; ++i) {
-                password += charset.charAt(Math.floor(Math.random() * n));
+            } catch {
+                tbody.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado</td></tr>';
             }
-            const senhaInput = document.getElementById('senhaUsuario');
-            senhaInput.value = password;
-            senhaInput.setCustomValidity(''); // limpa erro se houver
-        });
+        }, 500);
 
-        document.getElementById('formCadastrar').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        input.addEventListener('input', e => searchUsers(e.target.value.trim()));
 
-            const form = this;
-
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated');
-                return;
-            }
-
-            const formData = new FormData(form);
+        tbody.addEventListener('click', async e => {
+            const btn = e.target.closest('.btn-edit');
+            if (!btn) return;
 
             try {
-                const response = await fetch('../api.php?action=cadastrar_usuario', {
-                    method: 'POST',
-                    body: formData
-                });
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(btn.dataset.id)}`);
+                const user = data.users?.find(u => u.id == btn.dataset.id);
+                if (!user) throw new Error('Usuário não encontrado');
 
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'Erro ao cadastrar usuário.');
-                }
-
-                showToast('success', result.message || 'Usuário cadastrado com sucesso!');
-                $('#modalCadastrar').modal('hide');
-                // Corrigir fundo cinza bloqueado (caso o backdrop fique preso)
-                $('body').removeClass('modal-open');
-                $('.modal-backdrop').remove();
-                form.reset();
-                form.classList.remove('was-validated');
+                // Aqui você pode preencher um formulário de edição se quiser
+                console.log('Editar usuário:', user);
+                modals.alterar.hide();
+                showToast('success', `Editando usuário: ${user.username}`);
             } catch (err) {
                 showToast('danger', err.message);
             }
         });
+    })();
+
+    // Modal Resetar Senha
+    (() => {
+        const input = document.getElementById('searchResetSenha');
+        const list = document.getElementById('resultResetSenha');
+        const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
+
+        const searchUsers = debounce(async (query) => {
+            if (query.length < 3) return;
+            try {
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                list.innerHTML = data.users.map(u => `
+                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                        ${u.username} (${u.email})
+                    </button>
+                `).join('');
+            } catch {
+                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
+            }
+        }, 500);
+
+        input.addEventListener('input', e => searchUsers(e.target.value.trim()));
+
+        list.addEventListener('click', e => {
+            const item = e.target.closest('.list-group-item-action');
+            if (!item) return;
+
+            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+
+        confirmBtn.addEventListener('click', async () => {
+            const selected = list.querySelector('.active');
+            if (!selected) return showToast('warning', 'Selecione um usuário');
+
+            try {
+                await apiRequest(config.endpoints.resetPassword, 'POST', {
+                    userId: selected.dataset.id
+                });
+                showToast('success', 'Senha resetada com sucesso!');
+                modals.resetSenha.hide();
+            } catch (err) {
+                showToast('danger', err.message);
+            }
+        });
+    })();
+
+    // Modal Apagar Usuário
+    (() => {
+        const input = document.getElementById('searchApagar');
+        const list = document.getElementById('resultApagar');
+        const confirmBtn = document.querySelector('#modalApagar .btn-danger');
+
+        const searchUsers = debounce(async (query) => {
+            if (query.length < 3) return;
+            try {
+                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                list.innerHTML = data.users.map(u => `
+                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                        ${u.username} (${u.email})
+                    </button>
+                `).join('');
+            } catch {
+                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
+            }
+        }, 500);
+
+        input.addEventListener('input', e => searchUsers(e.target.value.trim()));
+
+        list.addEventListener('click', e => {
+            const item = e.target.closest('.list-group-item-action');
+            if (!item) return;
+
+            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+
+        confirmBtn.addEventListener('click', async () => {
+            const selected = list.querySelector('.active');
+            if (!selected) return showToast('warning', 'Selecione um usuário');
+
+            try {
+                await apiRequest(`${config.endpoints.users}&id=${selected.dataset.id}`, 'DELETE');
+                showToast('success', 'Usuário removido com sucesso!');
+                modals.apagar.hide();
+                setTimeout(() => location.reload(), 1500);
+            } catch (err) {
+                showToast('danger', err.message);
+            }
+        });
+    })();
+
+    // Gerar senha aleatória
+    document.getElementById('generatePass').addEventListener('click', () => {
+        const length = 12;
+        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+        let password = '';
+        for (let i = 0; i < length; ++i) {
+            password += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        const senhaInput = document.getElementById('senhaUsuario');
+        senhaInput.value = password;
+        senhaInput.setCustomValidity('');
     });
+
+    // Enviar formulário de cadastro
+    document.getElementById('formCadastrar').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = this;
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('../api.php?action=cadastrar_usuario', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.error || 'Erro ao cadastrar usuário.');
+
+            showToast('success', result.message || 'Usuário cadastrado com sucesso!');
+            $('#modalCadastrar').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            form.reset();
+            form.classList.remove('was-validated');
+        } catch (err) {
+            showToast('danger', err.message);
+        }
+    });
+});
 </script>
