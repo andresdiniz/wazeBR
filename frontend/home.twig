@@ -1,13 +1,10 @@
-<!-- Adicionando Leaflet.js -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Início do conteúdo -->
 <div class="container mt-5">
 
     <div class="row">
-        <!-- Acidentes -->
-        <div class="col-xl-6 col-lg-12 mb-4">
+        <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-car-crash"></i> Acidentes
@@ -21,8 +18,8 @@
                                     <th>Cidade</th>
                                     <th>Rua</th>
                                     <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
+                                    <th>Data</th>
+                                    <th>Confiança</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -41,15 +38,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
+                                            data-target="#alertModal{{ alert.uuid }}"
+                                            data-lat="{{ alert.location_y }}"
+                                            data-lon="{{ alert.location_x }}">
                                             Detalhes
                                         </button>
                                     </td>
                                 </tr>
-
                                 {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
@@ -62,8 +58,7 @@
             </div>
         </div>
 
-        <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-12 mb-4">
+        <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-warning text-dark">
                     <i class="fas fa-traffic-light"></i> Congestionamentos
@@ -77,8 +72,8 @@
                                     <th>Cidade</th>
                                     <th>Rua</th>
                                     <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
+                                    <th>Data</th>
+                                    <th>Confiança</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -97,15 +92,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
+                                            data-target="#alertModal{{ alert.uuid }}"
+                                            data-lat="{{ alert.location_y }}"
+                                            data-lon="{{ alert.location_x }}">
                                             Detalhes
                                         </button>
                                     </td>
                                 </tr>
-
                                 {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
@@ -120,54 +114,69 @@
     </div>
 </div>
 
-<!-- Script para Mapas e API DNIT -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", async function () {
+        $(".open-modal").on("click", function () {
             let lat = $(this).data("lat");
             let lon = $(this).data("lon");
             let modalId = $(this).attr("data-target");
             let mapId = modalId.replace("#alertModal", "map-");
-            let kmId = modalId.replace("#alertModal", "km-value-");
 
-            // Inicialização do mapa
-            setTimeout(() => {
-                let map = L.map(mapId).setView([lat, lon], 13);
+            // Inicialização do mapa após o modal ser exibido
+            $(modalId).on('shown.bs.modal', function () {
+                if (!L.DomUtil.get(mapId)._leaflet_id) { // Verifica se o mapa já foi inicializado
+                    let map = L.map(mapId).setView([lat, lon], 15);
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(map);
 
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
-            }, 500);
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup("Localização do Alerta")
+                        .openPopup();
 
-            // Chama a função assíncrona para buscar o KM
-            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
-            $(`#${kmId}`).text(km || "Não encontrado");
+                    // Invalida o tamanho do mapa para que ele seja redimensionado corretamente dentro do modal
+                    setTimeout(function() {
+                        map.invalidateSize();
+                    }, 100);
+                }
+            });
         });
+
+        // Inicialização do DataTables para ambas as tabelas
+        if ($('#accidentsTable').length) {
+            $('#accidentsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                }
+            });
+        }
+
+        if ($('#trafficTable').length) {
+            $('#trafficTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                }
+            });
+        }
     });
+
+    // Função assíncrona para buscar o KM (manter se for utilizada em 'modal.twig')
+    async function buscarKmDnit(latitude, longitude, raio) {
+        // Implemente a lógica para buscar o KM usando a API do DNIT aqui
+        // Este é um placeholder. A implementação real dependerá da API do DNIT.
+        console.log("Buscando KM para:", latitude, longitude, raio);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simula uma chamada de API
+        return "KM Desconhecido"; // Retorno padrão
+    }
 </script>
 
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
 
-<!-- CSS do DataTables (Se necessário) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<!-- CSS dos Botões do DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 
-
-<!-- JS do DataTables -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-
-<!-- JS dos Botões do DataTables -->
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-
-<!-- JS para exportação para CSV, Excel, PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
