@@ -80,7 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'type' => $user['type'],
                 'csrf_token' => bin2hex(random_bytes(32))
             ];
-            
+
+            setcookie('parceiro_id', $user['id_parceiro'], 0, '/', '', true, true);
+
 
             $stmt = $pdo->prepare("
                 INSERT INTO historic_login 
@@ -160,9 +162,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .login-card {
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .brand-section {
@@ -195,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .form-control:focus {
             border-color: var(--waze-blue);
-            box-shadow: 0 0 15px rgba(51,204,255,0.2);
+            box-shadow: 0 0 15px rgba(51, 204, 255, 0.2);
         }
 
         .btn-waze {
@@ -212,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .btn-waze:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(51,204,255,0.3);
+            box-shadow: 0 5px 15px rgba(51, 204, 255, 0.3);
         }
 
         .link-secondary {
@@ -237,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .alert-waze {
-            background: rgba(255,102,51,0.1);
+            background: rgba(255, 102, 51, 0.1);
             border-left: 4px solid var(--waze-orange);
             border-radius: 0 8px 8px 0;
         }
@@ -246,11 +248,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .brand-section {
                 padding: 30px;
             }
-            
+
             .form-section {
                 padding: 30px;
             }
-            
+
             .brand-logo {
                 width: 180px;
             }
@@ -266,11 +268,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row g-0">
                         <!-- Seção da Marca -->
                         <div class="col-md-6 brand-section">
-                            <img src="/img/logologin.webp"
-                                 alt="Waze Brasil" 
-                                 class="brand-logo">
+                            <img src="/img/logologin.webp" alt="Waze Brasil" class="brand-logo">
                         </div>
-                        
+
                         <!-- Seção do Formulário -->
                         <div class="col-md-6 form-section">
                             <div class="text-center mb-5">
@@ -279,50 +279,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <!-- Mensagem de Erro -->
-                            <div id="errorMessage" style="display: none; color: red; background: #ffe0e0; padding: 10px; border: 1px solid red; margin-bottom: 10px; border-radius: 4px;">
-    <!-- A mensagem de erro aparecerá aqui -->
+                            <div id="errorMessage"
+                                style="display: none; color: red; background: #ffe0e0; padding: 10px; border: 1px solid red; margin-bottom: 10px; border-radius: 4px;">
+                                <!-- A mensagem de erro aparecerá aqui -->
                             </div>
 
 
                             <!-- Formulário de Login -->
                             <form id="loginForm" action="login.php" method="POST">
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>" />
+                                <input type="hidden" name="csrf_token"
+                                    value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>" />
                                 <div class="mb-4">
-                                    <input type="email" 
-                                           class="form-control"
-                                           id="email"
-                                           name="email"
-                                           placeholder="Email institucional"
-                                           required>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        placeholder="Email institucional" required>
                                 </div>
-                                
+
                                 <div class="mb-4">
-                                    <input type="password" 
-                                           class="form-control"
-                                           id="password"
-                                           name="password"
-                                           placeholder="Senha de acesso"
-                                           required
-                                           minlength="6">
+                                    <input type="password" class="form-control" id="password" name="password"
+                                        placeholder="Senha de acesso" required minlength="6">
                                 </div>
 
                                 <div class="mb-4 form-check">
-                                    <input type="checkbox" 
-                                           class="form-check-input"
-                                           id="rememberMe">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
                                     <label class="form-check-label" for="rememberMe">
                                         Manter conectado
                                     </label>
                                 </div>
-                                
-                                <button type="submit" 
-                                        class="btn btn-waze w-100 mb-4">
+
+                                <button type="submit" class="btn btn-waze w-100 mb-4">
                                     Acessar Plataforma
                                 </button>
-                                
+
                                 <div class="text-center">
-                                    <a href="forgot-password.html" 
-                                       class="link-secondary">
+                                    <a href="forgot-password.html" class="link-secondary">
                                         Esqueceu sua senha?
                                     </a>
                                 </div>
@@ -334,11 +323,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Footer -->
                 <div class="text-center mt-4">
                     <p class="text-white mb-0">
-                        Novo parceiro? 
+                        Novo parceiro?
                         <a href="#contact" class="text-white fw-bold">Solicite credenciais</a>
                     </p>
                     <p class="text-white mt-2">
-                        Suporte: 
+                        Suporte:
                         <a href="mailto:parceiros@wazebrasil.com" class="text-white">
                             parceiros@wazebrasil.com
                         </a>
@@ -350,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('erro');
@@ -366,6 +355,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 
-    
+
 </body>
+
 </html>

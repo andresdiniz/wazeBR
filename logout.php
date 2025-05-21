@@ -22,11 +22,17 @@ if (ini_get("session.use_cookies")) {
         $params["path"], $params["domain"],
         $params["secure"], $params["httponly"]
     );
+
+    // Remove o cookie parceiro_id
+    setcookie('parceiro_id', '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
 }
 
 // Destrói a sessão no servidor
 session_destroy();
 
-// Redireciona para a página de login (ou qualquer outra)
+// Redireciona para a página de login
 header("Location: /login?erro=Logout realizado com sucesso");
 exit();
