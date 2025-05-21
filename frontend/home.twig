@@ -2,17 +2,16 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <div class="container mt-5">
-
     <div class="row">
         <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-car-crash"></i> Acidentes
                 </div>
                 <div class="card-body">
                     {% if accidentAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="accidentsTable">
+                        <table class="table table-striped table-bordered w-100" id="accidentsTable">
                             <thead>
                                 <tr>
                                     <th>Cidade</th>
@@ -29,15 +28,15 @@
                                     <td>{{ alert.city }}</td>
                                     <td>{{ alert.street }}</td>
                                     <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Waze</a>
                                     </td>
                                     <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
+                                    <td class="text-center">
                                         <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                             data-target="#alertModal{{ alert.uuid }}"
                                             data-lat="{{ alert.location_y }}"
@@ -59,14 +58,14 @@
         </div>
 
         <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-warning text-dark">
                     <i class="fas fa-traffic-light"></i> Congestionamentos
                 </div>
                 <div class="card-body">
                     {% if jamAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="trafficTable">
+                        <table class="table table-striped table-bordered w-100" id="trafficTable">
                             <thead>
                                 <tr>
                                     <th>Cidade</th>
@@ -83,15 +82,15 @@
                                     <td>{{ alert.city }}</td>
                                     <td>{{ alert.street }}</td>
                                     <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Waze</a>
                                     </td>
                                     <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
+                                    <td class="text-center">
                                         <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                             data-target="#alertModal{{ alert.uuid }}"
                                             data-lat="{{ alert.location_y }}"
@@ -122,9 +121,8 @@
             let modalId = $(this).attr("data-target");
             let mapId = modalId.replace("#alertModal", "map-");
 
-            // Inicialização do mapa após o modal ser exibido
             $(modalId).on('shown.bs.modal', function () {
-                if (!L.DomUtil.get(mapId)._leaflet_id) { // Verifica se o mapa já foi inicializado
+                if (!L.DomUtil.get(mapId)._leaflet_id) {
                     let map = L.map(mapId).setView([lat, lon], 15);
 
                     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -135,7 +133,6 @@
                         .bindPopup("Localização do Alerta")
                         .openPopup();
 
-                    // Invalida o tamanho do mapa para que ele seja redimensionado corretamente dentro do modal
                     setTimeout(function() {
                         map.invalidateSize();
                     }, 100);
@@ -143,12 +140,13 @@
             });
         });
 
-        // Inicialização do DataTables para ambas as tabelas
         if ($('#accidentsTable').length) {
             $('#accidentsTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                }
+                },
+                // Opcional: para melhor visualização em telas menores
+                "scrollX": true
             });
         }
 
@@ -156,27 +154,23 @@
             $('#trafficTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-                }
+                },
+                // Opcional: para melhor visualização em telas menores
+                "scrollX": true
             });
         }
     });
 
-    // Função assíncrona para buscar o KM (manter se for utilizada em 'modal.twig')
     async function buscarKmDnit(latitude, longitude, raio) {
-        // Implemente a lógica para buscar o KM usando a API do DNIT aqui
-        // Este é um placeholder. A implementação real dependerá da API do DNIT.
         console.log("Buscando KM para:", latitude, longitude, raio);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simula uma chamada de API
-        return "KM Desconhecido"; // Retorno padrão
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return "KM Desconhecido";
     }
 </script>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
