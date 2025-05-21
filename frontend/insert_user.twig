@@ -290,7 +290,7 @@
 </style>
 
 <script>
-  const parceiroId = '{{ session.id_parceiro}}';
+  const parceiroId = '{{ session.usuario_id_parceiro}}';
 </script>
 
 <script defer>
@@ -341,7 +341,7 @@
 
         const apiRequest = async (endpoint, method = 'GET', body = null) => {
             try {
-                const idParceiro = parceiroId;
+                const idParceiro = parceiroId
                 console.log('ID Parceiro:', idParceiro);
                 if (!idParceiro) throw new Error('ID do parceiro não encontrado');
 
