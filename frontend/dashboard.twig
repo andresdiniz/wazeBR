@@ -4,6 +4,80 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
 {% endblock %}
 
+<style>
+/* Melhorias mínimas para responsividade */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+        vertical-align: middle;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    /* Ocultar colunas menos importantes em mobile */
+    .d-none-mobile {
+        display: none !important;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .d-none-mobile {
+        display: table-cell !important;
+    }
+}
+
+/* Melhor aproveitamento da área */
+.container {
+    max-width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+/* Tabelas mais compactas */
+.table-sm th, .table-sm td {
+    padding: 0.5rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Melhorar legibilidade dos badges */
+.badge {
+    min-width: 45px;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Botões de ação mais compactos */
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+</style>
+
 {% block body %}
 <div class="container-fluid">
 
