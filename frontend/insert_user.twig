@@ -290,7 +290,7 @@
 </style>
 
 <script>
-  const parceiroId = '{{ session.usuario_id_parceiro}}';
+    const parceiroId = '{{ session.usuario_id_parceiro}}';
 </script>
 
 <script defer>
@@ -435,10 +435,10 @@
                 try {
                     const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
                     list.innerHTML = data.users.map(u => `
-                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
-                        ${u.nome} (${u.email})
-                    </button>
-                `).join('');
+                <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                    ${u.username} (${u.email})
+                </button>
+            `).join('');
                 } catch (err) {
                     list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
                 }
@@ -469,6 +469,7 @@
                 }
             });
         })();
+
 
         // ========================
         // Modal Apagar Usuário
