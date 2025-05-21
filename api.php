@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'get_users':
             session_start();
 
-            $search = $_GET['search'] ?? '';
+            $search = $_GET['q'] ?? '';
             $search = trim($search);
             $id_parceiro = $_GET['id_parceiro'] ?? '';
 
