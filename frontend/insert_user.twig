@@ -291,16 +291,12 @@ function getCookie(name) {
     return null;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const id_parceiro = getCookie('usuario_id_parceiro');
-    
+document.addEventListener('DOMContentLoaded', () => {    
     const config = {
         apiBase: '../api.php',
         endpoints: {
             users: '?action=users',
-            resetPassword: '?action=reset-password',
-            parceiros: `?action=get_parceiros&sessionType=${id_parceiro}`
-        }
+            resetPassword: '?action=reset-password'        }
     };
 
     console.log('Config:', config.endpoints);
@@ -509,25 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('danger', err.message);
             }
         });
-    })();
-
-    // ========================
-    // Carregar parceiros
-    // ========================
-    (async () => {
-        try {
-            const data = await apiRequest(config.endpoints.parceiros);
-            const select = document.getElementById('parceirosSelect');
-
-            if (select) {
-                select.innerHTML = data.nomes.map(p => `
-                    <option value="${p.id}">${p.Nome}</option>
-                `).join('');
-            }
-
-        } catch (err) {
-            showToast('danger', 'Erro ao carregar parceiros');
-        }
     })();
 });
 </script>
