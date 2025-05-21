@@ -293,7 +293,6 @@ function getCookie(name) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const id_parceiro = getCookie('usuario_id_parceiro');
-    const csrfToken = getCookie('csrf_token') || document.querySelector('meta[name="csrf-token"]')?.content;
     
     const config = {
         apiBase: '../api.php',
@@ -345,8 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(url, {
                 method,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken
+                    'Content-Type': 'application/json'
                 },
                 body: body ? JSON.stringify(body) : null
             });
