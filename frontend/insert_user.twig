@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const apiRequest = async (endpoint, method = 'GET', body = null) => {
         try {
-            const url = new URL(`${config.apiBase}${endpoint}`);
+            const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
             console.log('Request URL:', url.toString());
             const res = await fetch(url, {
                 method,
