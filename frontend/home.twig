@@ -1,552 +1,176 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoramento de Tráfego</title>
-
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <style>
-        .stats-card {
-            border-left: 4px solid;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stats-card.accidents {
-            border-left-color: #dc3545;
-        }
-
-        .stats-card.traffic {
-            border-left-color: #ffc107;
-        }
-
-        .badge-confidence {
-            font-size: 0.75rem;
-            padding: 0.375rem 0.5rem;
-        }
-
-        .table-actions {
-            white-space: nowrap;
-        }
-
-        .alert-empty {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            color: #6c757d;
-        }
-
-        .alert-empty i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .card-header-icon {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-header-icon .badge {
-            font-size: 0.75rem;
-        }
-
-        .map-container {
-            height: 300px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .confidence-high {
-            background-color: #28a745 !important;
-        }
-
-        .confidence-medium {
-            background-color: #ffc107 !important;
-            color: #212529 !important;
-        }
-
-        .confidence-low {
-            background-color: #dc3545 !important;
-        }
-
-        .filters-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .refresh-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        @media (max-width: 768px) {
-            .table-responsive {
-                font-size: 0.875rem;
-            }
-
-            .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Header com estatísticas resumidas -->
-    <div class="container-fluid bg-light border-bottom py-3 mb-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card stats-card accidents h-100">
-                        <div class="card-body text-center">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <i class="fas fa-car-crash text-danger fa-2x"></i>
-                                </div>
-                                <div class="text-right">
-                                    <h4 class="mb-0 text-danger font-weight-bold">
-                                        {% if accidentAlerts is not empty %}{{ accidentAlerts|length }}{% else %}0{%
-                                        endif %}
-                                    </h4>
-                                    <small class="text-muted">Acidentes Ativos</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-car-crash"></i> Acidentes
                 </div>
-                <div class="col-md-6">
-                    <div class="card stats-card traffic h-100">
-                        <div class="card-body text-center">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <i class="fas fa-traffic-light text-warning fa-2x"></i>
-                                </div>
-                                <div class="text-right">
-                                    <h4 class="mb-0 text-warning font-weight-bold">
-                                        {% if jamAlerts is not empty %}{{ jamAlerts|length }}{% else %}0{% endif %}
-                                    </h4>
-                                    <small class="text-muted">Congestionamentos</small>
-                                </div>
-                            </div>
-                        </div>
+                <div class="card-body">
+                    {% if accidentAlerts is not empty %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered w-100" id="accidentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Cidade</th>
+                                    <th>Rua</th>
+                                    <th>Localização</th>
+                                    <th>Data</th>
+                                    <th>Confiança</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in accidentAlerts %}
+                                <tr>
+                                    <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
+                                    <td>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Waze</a>
+                                    </td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                            {{ alert.confidence }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
+                                            data-target="#alertModal{{ alert.uuid }}"
+                                            data-lat="{{ alert.location_y }}"
+                                            data-lon="{{ alert.location_x }}">
+                                            Detalhes
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+                    {% else %}
+                    <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-traffic-light"></i> Congestionamentos
+                </div>
+                <div class="card-body">
+                    {% if jamAlerts is not empty %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered w-100" id="trafficTable">
+                            <thead>
+                                <tr>
+                                    <th>Cidade</th>
+                                    <th>Rua</th>
+                                    <th>Localização</th>
+                                    <th>Data</th>
+                                    <th>Confiança</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in jamAlerts %}
+                                <tr>
+                                    <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
+                                    <td>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Waze</a>
+                                    </td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                            {{ alert.confidence }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
+                                            data-target="#alertModal{{ alert.uuid }}"
+                                            data-lat="{{ alert.location_y }}"
+                                            data-lon="{{ alert.location_x }}">
+                                            Detalhes
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">Não há congestionamentos registrados no momento.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="container">
-        <!-- Filtros -->
-        <div class="filters-section">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <select class="form-control form-control-sm" id="cityFilter">
-                                <option value="">Todas as cidades</option>
-                                <!-- Opções serão preenchidas via JS -->
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <select class="form-control form-control-sm" id="confidenceFilter">
-                                <option value="">Todas as confianças</option>
-                                <option value="high">Alta (>80)</option>
-                                <option value="medium">Média (50-80)</option>
-                                <option value="low">Baixa (<50)< /option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="date" class="form-control form-control-sm" id="dateFilter">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-right">
-                    <button class="btn btn-outline-primary btn-sm" id="clearFilters">
-                        <i class="fas fa-times"></i> Limpar Filtros
-                    </button>
-                    <button class="btn btn-primary btn-sm ml-2" id="refreshData">
-                        <i class="fas fa-sync-alt"></i> Atualizar
-                    </button>
-                </div>
-            </div>
-        </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".open-modal").on("click", function () {
+            let lat = $(this).data("lat");
+            let lon = $(this).data("lon");
+            let modalId = $(this).attr("data-target");
+            let mapId = modalId.replace("#alertModal", "map-");
 
-        <!-- Conteúdo Principal -->
-        <div class="row">
-            <!-- Acidentes -->
-            <div class="col-lg-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-danger text-white">
-                        <div class="card-header-icon">
-                            <div>
-                                <i class="fas fa-car-crash mr-2"></i>
-                                <strong>Acidentes</strong>
-                            </div>
-                            {% if accidentAlerts is not empty %}
-                            <span class="badge badge-light">{{ accidentAlerts|length }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        {% if accidentAlerts is not empty %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="accidentsTable">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Local</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Confiança</th>
-                                        <th class="text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for alert in accidentAlerts %}
-                                    <tr data-city="{{ alert.city }}" data-confidence="{{ alert.confidence }}">
-                                        <td>
-                                            <div>
-                                                <strong class="text-primary">{{ alert.city }}</strong>
-                                                <br>
-                                                <small class="text-muted">{{ alert.street }}</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <small>{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</small>
-                                            <br>
-                                            <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i:s")
-                                                }}</small>
-                                        </td>
-                                        <td class="text-center">
-                                            <span
-                                                class="badge badge-confidence {% if alert.confidence > 80 %}confidence-high{% elseif alert.confidence > 50 %}confidence-medium{% else %}confidence-low{% endif %}">
-                                                {{ alert.confidence }}%
-                                            </span>
-                                        </td>
-                                        <td class="text-center table-actions">
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-outline-info btn-sm open-modal"
-                                                    data-toggle="modal" data-target="#alertModal{{ alert.uuid }}"
-                                                    data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
-                                                    title="Ver detalhes">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                    target="_blank" class="btn btn-outline-primary btn-sm"
-                                                    title="Abrir no Waze">
-                                                    <i class="fab fa-waze"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <!-- Modal seria incluído aqui -->
-                                    <!-- {% include 'modal.twig' with {'alert': alert} %} -->
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="alert-empty">
-                            <i class="fas fa-car-crash"></i>
-                            <h5>Nenhum acidente registrado</h5>
-                            <p class="mb-0">Não há eventos de acidentes no momento.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+            $(modalId).on('shown.bs.modal', function () {
+                if (!L.DomUtil.get(mapId)._leaflet_id) {
+                    let map = L.map(mapId).setView([lat, lon], 15);
 
-            <!-- Congestionamentos -->
-            <div class="col-lg-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-warning text-dark">
-                        <div class="card-header-icon">
-                            <div>
-                                <i class="fas fa-traffic-light mr-2"></i>
-                                <strong>Congestionamentos</strong>
-                            </div>
-                            {% if jamAlerts is not empty %}
-                            <span class="badge badge-dark">{{ jamAlerts|length }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        {% if jamAlerts is not empty %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0" id="trafficTable">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Local</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Confiança</th>
-                                        <th class="text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for alert in jamAlerts %}
-                                    <tr data-city="{{ alert.city }}" data-confidence="{{ alert.confidence }}">
-                                        <td>
-                                            <div>
-                                                <strong class="text-primary">{{ alert.city }}</strong>
-                                                <br>
-                                                <small class="text-muted">{{ alert.street }}</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <small>{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</small>
-                                            <br>
-                                            <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i:s")
-                                                }}</small>
-                                        </td>
-                                        <td class="text-center">
-                                            <span
-                                                class="badge badge-confidence {% if alert.confidence > 80 %}confidence-high{% elseif alert.confidence > 50 %}confidence-medium{% else %}confidence-low{% endif %}">
-                                                {{ alert.confidence }}%
-                                            </span>
-                                        </td>
-                                        <td class="text-center table-actions">
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-outline-info btn-sm open-modal"
-                                                    data-toggle="modal" data-target="#alertModal{{ alert.uuid }}"
-                                                    data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
-                                                    title="Ver detalhes">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                    target="_blank" class="btn btn-outline-primary btn-sm"
-                                                    title="Abrir no Waze">
-                                                    <i class="fab fa-waze"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <!-- Modal seria incluído aqui -->
-                                    <!-- {% include 'modal.twig' with {'alert': alert} %} -->
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="alert-empty">
-                            <i class="fas fa-traffic-light"></i>
-                            <h5>Nenhum congestionamento</h5>
-                            <p class="mb-0">Não há congestionamentos registrados no momento.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(map);
 
-    <!-- Botão de refresh flutuante -->
-    <button class="btn btn-primary btn-lg refresh-btn rounded-circle" id="floatingRefresh" title="Atualizar dados">
-        <i class="fas fa-sync-alt"></i>
-    </button>
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup("Localização do Alerta")
+                        .openPopup();
 
-    <!-- Exemplo de Modal melhorado (você adaptará para seu modal.twig) -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-map-marker-alt text-primary mr-2"></i>
-                        Detalhes do Alerta
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="font-weight-bold">Informações</h6>
-                            <ul class="list-unstyled">
-                                <li><strong>Cidade:</strong> <span class="modal-city"></span></li>
-                                <li><strong>Rua:</strong> <span class="modal-street"></span></li>
-                                <li><strong>Data:</strong> <span class="modal-date"></span></li>
-                                <li><strong>Confiança:</strong> <span class="modal-confidence"></span></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="font-weight-bold">Localização</h6>
-                            <div class="map-container" id="modalMap"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="#" class="btn btn-primary modal-waze-link" target="_blank">
-                        <i class="fab fa-waze mr-1"></i> Abrir no Waze
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    setTimeout(function() {
+                        map.invalidateSize();
+                    }, 100);
+                }
+            });
+        });
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            // Inicialização das DataTables melhorada
-            const dataTableConfig = {
+        if ($('#accidentsTable').length) {
+            $('#accidentsTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
                 },
-                responsive: true,
-                pageLength: 10,
-                order: [[1, 'desc']], // Ordenar por data
-                columnDefs: [
-                    { orderable: false, targets: [3] } // Desabilitar ordenação na coluna de ações
-                ]
-            };
-
-            let accidentsTable, trafficTable;
-
-            if ($('#accidentsTable').length) {
-                accidentsTable = $('#accidentsTable').DataTable(dataTableConfig);
-            }
-
-            if ($('#trafficTable').length) {
-                trafficTable = $('#trafficTable').DataTable(dataTableConfig);
-            }
-
-            // Preenchimento dos filtros
-            populateFilters();
-
-            // Event listeners para filtros
-            $('#cityFilter, #confidenceFilter, #dateFilter').on('change', function () {
-                applyFilters();
+                // Opcional: para melhor visualização em telas menores
+                "scrollX": true
             });
-
-            $('#clearFilters').on('click', function () {
-                $('#cityFilter, #confidenceFilter, #dateFilter').val('');
-                if (accidentsTable) accidentsTable.search('').draw();
-                if (trafficTable) trafficTable.search('').draw();
-            });
-
-            // Refresh buttons
-            $('#refreshData, #floatingRefresh').on('click', function () {
-                $(this).find('i').addClass('fa-spin');
-                // Simular refresh - você implementará a lógica real
-                setTimeout(() => {
-                    $(this).find('i').removeClass('fa-spin');
-                    // location.reload(); // ou sua lógica de refresh
-                }, 1000);
-            });
-
-            // Modal handling melhorado
-            $('.open-modal').on('click', function () {
-                const lat = $(this).data('lat');
-                const lon = $(this).data('lon');
-                const modalId = $(this).attr('data-target');
-                const mapId = modalId.replace('#alertModal', 'map-');
-
-                $(modalId).on('shown.bs.modal', function () {
-                    initializeModalMap(mapId, lat, lon);
-                });
-            });
-
-            function populateFilters() {
-                // Coletar cidades únicas das tabelas
-                const cities = new Set();
-                $('[data-city]').each(function () {
-                    cities.add($(this).data('city'));
-                });
-
-                cities.forEach(city => {
-                    $('#cityFilter').append(`<option value="${city}">${city}</option>`);
-                });
-            }
-
-            function applyFilters() {
-                const cityFilter = $('#cityFilter').val();
-                const confidenceFilter = $('#confidenceFilter').val();
-                const dateFilter = $('#dateFilter').val();
-
-                // Aplicar filtros nas tabelas
-                [accidentsTable, trafficTable].forEach(table => {
-                    if (table) {
-                        table.rows().every(function () {
-                            const row = $(this.node());
-                            let show = true;
-
-                            if (cityFilter && row.data('city') !== cityFilter) {
-                                show = false;
-                            }
-
-                            if (confidenceFilter) {
-                                const confidence = row.data('confidence');
-                                if (confidenceFilter === 'high' && confidence <= 80) show = false;
-                                if (confidenceFilter === 'medium' && (confidence <= 50 || confidence > 80)) show = false;
-                                if (confidenceFilter === 'low' && confidence > 50) show = false;
-                            }
-
-                            // Filtro de data seria implementado aqui se necessário
-
-                            row.toggle(show);
-                        });
-                    }
-                });
-            }
-
-            function initializeModalMap(mapId, lat, lon) {
-                if (!document.getElementById(mapId.replace('#', '')) || L.DomUtil.get(mapId.replace('#', ''))._leaflet_id) {
-                    return;
-                }
-
-                const map = L.map(mapId.replace('#', '')).setView([lat, lon], 15);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup('Localização do Alerta')
-                    .openPopup();
-
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 100);
-            }
-        });
-
-        // Função para buscar KM DNIT (mantida do código original)
-        async function buscarKmDnit(latitude, longitude, raio) {
-            console.log("Buscando KM para:", latitude, longitude, raio);
-            await new Promise(resolve => setTimeout(resolve, 500));
-            return "KM Desconhecido";
         }
-    </script>
-</body>
 
-</html>
+        if ($('#trafficTable').length) {
+            $('#trafficTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                },
+                // Opcional: para melhor visualização em telas menores
+                "scrollX": true
+            });
+        }
+    });
+
+    async function buscarKmDnit(latitude, longitude, raio) {
+        console.log("Buscando KM para:", latitude, longitude, raio);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return "KM Desconhecido";
+    }
+</script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
