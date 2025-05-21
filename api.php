@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
                 error_log($message, 3, $logFile);
 
-                echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.']);
+                echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.'.$e->getMessage()]);
             }
 
 
