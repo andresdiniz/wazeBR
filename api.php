@@ -71,16 +71,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $pdo = Database::getConnection();
 
                 $sql = "
-            SELECT id, username, email 
-            FROM users 
-            WHERE id_parceiro = :id_parceiro 
-              AND (username LIKE :search OR email LIKE :search) 
-            LIMIT 100
-        ";
+                    SELECT id, username, email 
+                    FROM users 
+                    WHERE id_parceiro = :id_parceiro 
+                    AND (username LIKE :search1 OR email LIKE :search2) 
+                    LIMIT 100
+                ";
                 $stmt = $pdo->prepare($sql);
                 $likeSearch = '%' . $search . '%';
                 $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-                $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+                $stmt->bindParam(':search1', $likeSearch, PDO::PARAM_STR);
+                $stmt->bindParam(':search2', $likeSearch, PDO::PARAM_STR);
+
                 $stmt->execute();
 
                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -99,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
                 error_log($message, 3, $logFile);
 
-                echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.'.$e->getMessage()]);
+                echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.' . $e->getMessage()]);
             }
 
 
