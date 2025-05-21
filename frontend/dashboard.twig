@@ -3,71 +3,71 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
-    /* Estilos otimizados para todas as tabelas */
-    .card {
-        margin-bottom: 1.5rem;
-        border: 1px solid #e3e6f0;
-        border-radius: 0.35rem;
-    }
+/* Estilos otimizados para todas as tabelas */
+.card {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+}
 
-    .card-header {
-        background-color: #f8f9fc;
-        padding: 0.75rem 1.25rem;
-        border-bottom: 1px solid #e3e6f0;
-    }
+.card-header {
+    background-color: #f8f9fc;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #e3e6f0;
+}
 
-    .table-responsive {
-        overflow-x: auto;
-    }
+.table-responsive {
+    overflow-x: auto;
+}
 
+.table-sm {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
+
+.table-sm th, 
+.table-sm td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.badge {
+    font-weight: 500;
+    min-width: 65px;
+    padding: 0.4em 0.65em;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+    .d-none-mobile {
+        display: none !important;
+    }
+    
     .table-sm {
-        font-size: 0.875rem;
-        margin-bottom: 0;
+        font-size: 0.8rem;
     }
-
-    .table-sm th,
-    .table-sm td {
-        padding: 0.5rem;
-        vertical-align: middle;
+    
+    .btn-group-sm > .btn {
+        padding: 0.2rem 0.3rem;
     }
+}
 
-    .badge {
-        font-weight: 500;
-        min-width: 65px;
-        padding: 0.4em 0.65em;
-    }
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.25rem;
+}
 
-    .btn-group-sm>.btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
+.metric-card {
+    transition: transform 0.15s ease-in-out;
+}
 
-    @media (max-width: 767.98px) {
-        .d-none-mobile {
-            display: none !important;
-        }
-
-        .table-sm {
-            font-size: 0.8rem;
-        }
-
-        .btn-group-sm>.btn {
-            padding: 0.2rem 0.3rem;
-        }
-    }
-
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 0.25rem 0.5rem;
-        margin-left: 0.25rem;
-    }
-
-    .metric-card {
-        transition: transform 0.15s ease-in-out;
-    }
-
-    .metric-card:hover {
-        transform: translateY(-3px);
-    }
+.metric-card:hover {
+    transform: translateY(-3px);
+}
 </style>
 {% endblock %}
 
@@ -151,8 +151,7 @@
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Atraso Total
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_atraso_minutos }}
-                                min</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ traficdata.total_atraso_minutos }} min</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -199,15 +198,16 @@
                                         <small class="text-muted">{{ (alert.pubMillis/1000)|date('H:i') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal" data-alert="{{ {
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                    data-toggle="modal" 
+                                                    data-target="#alertModal"
+                                                    data-alert="{{ {
                                                         'uuid': alert.uuid,
                                                         'city': alert.city,
                                                         'street': alert.street,
@@ -219,8 +219,9 @@
                                                     }|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                target="_blank" class="btn btn-primary btn-sm">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                               target="_blank" 
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -274,15 +275,16 @@
                                         <small class="text-muted">{{ (alert.pubMillis/1000)|date('H:i') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal" data-alert="{{ {
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                    data-toggle="modal" 
+                                                    data-target="#alertModal"
+                                                    data-alert="{{ {
                                                         'uuid': alert.uuid,
                                                         'city': alert.city,
                                                         'street': alert.street,
@@ -294,8 +296,9 @@
                                                     }|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                target="_blank" class="btn btn-primary btn-sm">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                               target="_blank" 
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -349,15 +352,16 @@
                                         <small class="text-muted">{{ (alert.pubMillis/1000)|date('H:i') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal" data-alert="{{ {
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                    data-toggle="modal" 
+                                                    data-target="#alertModal"
+                                                    data-alert="{{ {
                                                         'uuid': alert.uuid,
                                                         'city': alert.city,
                                                         'street': alert.street,
@@ -369,8 +373,9 @@
                                                     }|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                target="_blank" class="btn btn-primary btn-sm">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                               target="_blank" 
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -424,15 +429,16 @@
                                         <small class="text-muted">{{ (alert.pubMillis/1000)|date('H:i') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
+                                        <span class="badge badge-{{ alert.confidence > 4 ? 'success' : alert.confidence > 2 ? 'warning' : 'danger' }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal" data-alert="{{ {
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                    data-toggle="modal" 
+                                                    data-target="#alertModal"
+                                                    data-alert="{{ {
                                                         'uuid': alert.uuid,
                                                         'city': alert.city,
                                                         'street': alert.street,
@@ -444,8 +450,9 @@
                                                     }|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                                                target="_blank" class="btn btn-primary btn-sm">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                               target="_blank" 
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -468,52 +475,46 @@
 </div>
 {% endblock %}
 
-{# Ordem CORRETA de carregamento #}
+{% block javascripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-
 <script>
-// Correção do DataTables + Modal
 $(document).ready(function() {
-    // Configuração das tabelas
+    // Configuração comum para todas as tabelas
     const tableConfig = {
         dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         pageLength: 10,
+        lengthMenu: [5, 10, 25, 50, 100],
+        autoWidth: false,
         responsive: true,
+        order: [[2, 'desc']],
         language: {
             url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-        }
+        },
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel"></i> Excel',
+                className: 'btn btn-success btn-sm'
+            },
+            {
+                extend: 'pdfHtml5',
+                text: '<i class="fas fa-file-pdf"></i> PDF',
+                className: 'btn btn-danger btn-sm'
+            }
+        ]
     };
 
-    $('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
-
-    // Controle do Modal
-    $('.open-modal').on('click', function() {
-        const alertData = JSON.parse($(this).data('alert'));
-        const modal = $('#alertModal');
-        
-        // Preencher dados do modal
-        modal.find('#modalUuid').text(alertData.uuid);
-        modal.find('#modalCity').text(alertData.city);
-        modal.find('#modalStreet').text(alertData.street);
-        modal.find('#modalType').text(alertData.type);
-        modal.find('#modalConfidence').text(alertData.confidence);
-        
-        // Atualizar link do Waze
-        modal.find('#modalWazeLink').attr(
-            'href', 
-            `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
-        );
-        
-        modal.modal('show');
-    });
+    // Inicializar todas as tabelas
+    $('#accidentsTable').DataTable(tableConfig);
+    $('#jamsTable').DataTable(tableConfig);
+    $('#hazardsTable').DataTable(tableConfig);
+    $('#othersTable').DataTable(tableConfig);
 });
 </script>
 {% endblock %}
