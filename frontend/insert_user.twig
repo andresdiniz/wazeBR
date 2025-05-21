@@ -485,7 +485,7 @@
                     const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
                     list.innerHTML = data.users.map(u => `
                     <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
-                        ${u.nome} (${u.email})
+                        ${u.username} (${u.email})
                     </button>
                 `).join('');
                 } catch (err) {
