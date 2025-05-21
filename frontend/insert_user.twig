@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    console.log('Config:', config);
+    console.log('Config:', config.endpoints);
 
     const modals = {
         cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
@@ -340,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiRequest = async (endpoint, method = 'GET', body = null) => {
         try {
             const url = new URL(`${config.apiBase}${endpoint}`);
+            console.log('Request URL:', url.toString());
             const res = await fetch(url, {
                 method,
                 headers: {
