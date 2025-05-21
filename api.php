@@ -9,6 +9,7 @@ require_once __DIR__ . '/functions/scripts.php'; // Funções de suporte
 
 require_once __DIR__ . '/config/configbd.php'; // Configuração de dados basicos do sistema
 
+
 use Dotenv\Dotenv;
 
 if (!file_exists($envPath)) {
@@ -90,9 +91,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     echo json_encode(['success' => false, 'message' => 'Nenhum usuário encontrado.']);
                 }
             } catch (PDOException $e) {
-                error_log("Erro no banco de dados: " . $e->getMessage());
+                $logFile = $_SERVER['DOCUMENT_ROOT'] . '/logs/erros.log'; // Caminho absoluto seguro
+
+                $timestamp = date('Y-m-d H:i:s');
+                $message = "[$timestamp] Erro ao buscar usuário no sistema.\n";
+                $message .= "[$timestamp] Erro PDO: " . $e->getMessage() . "\n";
+
+                error_log($message, 3, $logFile);
+
                 echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.']);
             }
+
 
             break;
 
