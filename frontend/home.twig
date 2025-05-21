@@ -1,38 +1,28 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Adicionando Leaflet.js -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<style>
-    .alert-map {
-        height: 300px;
-        width: 100%;
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-    }
-    
-    .confidence-badge {
-        min-width: 60px;
-    }
-</style>
-
+<!-- Início do conteúdo -->
 <div class="container mt-5">
-    <div class="row g-4">
+
+    <div class="row">
         <!-- Acidentes -->
-        <div class="col-xl-6 col-lg-12">
+        <div class="col-xl-6 col-lg-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <i class="fas fa-car-crash me-2"></i>Acidentes
+                    <i class="fas fa-car-crash"></i> Acidentes
                 </div>
                 <div class="card-body">
                     {% if accidentAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped align-middle">
-                            <thead class="table-light">
+                        <table class="table table-striped table-bordered" id="accidentsTable">
+                            <thead>
                                 <tr>
                                     <th>Cidade</th>
+                                    <th>Rua</th>
                                     <th>Localização</th>
-                                    <th>Data</th>
-                                    <th>Confiança</th>
+                                    <th>Data Evento</th>
+                                    <th>Nota</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -40,58 +30,55 @@
                                 {% for alert in accidentAlerts %}
                                 <tr>
                                     <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
                                     <td>
-                                        <small class="text-muted d-block">{{ alert.street }}</small>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
-                                           target="_blank" 
-                                           class="btn btn-link btn-sm">
-                                            Ver no mapa
-                                        </a>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
                                     </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }}</td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                     <td>
-                                        <span class="badge confidence-badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}%
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                            {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-outline-primary btn-sm" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#alertModal{{ alert.uuid }}">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                                data-target="#alertModal{{ alert.uuid }}" 
+                                                data-lat="{{ alert.location_y }}" 
+                                                data-lon="{{ alert.location_x }}">
                                             Detalhes
                                         </button>
                                     </td>
                                 </tr>
+
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-info mb-0 text-center">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Não há eventos de acidentes registrados
-                    </div>
+                    <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-12">
+        <div class="col-xl-6 col-lg-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-warning text-dark">
-                    <i class="fas fa-traffic-light me-2"></i>Congestionamentos
+                    <i class="fas fa-traffic-light"></i> Congestionamentos
                 </div>
                 <div class="card-body">
                     {% if jamAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped align-middle">
-                            <thead class="table-light">
+                        <table class="table table-striped table-bordered" id="trafficTable">
+                            <thead>
                                 <tr>
                                     <th>Cidade</th>
+                                    <th>Rua</th>
                                     <th>Localização</th>
-                                    <th>Data</th>
-                                    <th>Confiança</th>
+                                    <th>Data Evento</th>
+                                    <th>Nota</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -99,37 +86,33 @@
                                 {% for alert in jamAlerts %}
                                 <tr>
                                     <td>{{ alert.city }}</td>
+                                    <td>{{ alert.street }}</td>
                                     <td>
-                                        <small class="text-muted d-block">{{ alert.street }}</small>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
-                                           target="_blank" 
-                                           class="btn btn-link btn-sm">
-                                            Ver no mapa
-                                        </a>
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
                                     </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }}</td>
+                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
                                     <td>
-                                        <span class="badge confidence-badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}%
+                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                            {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-outline-primary btn-sm" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#alertModal{{ alert.uuid }}">
+                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
+                                                data-target="#alertModal{{ alert.uuid }}" 
+                                                data-lat="{{ alert.location_y }}" 
+                                                data-lon="{{ alert.location_x }}">
                                             Detalhes
                                         </button>
                                     </td>
                                 </tr>
+
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-info mb-0 text-center">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Não há congestionamentos registrados
-                    </div>
+                    <p class="text-center">Não há congestionamentos registrados no momento.</p>
                     {% endif %}
                 </div>
             </div>
@@ -137,78 +120,54 @@
     </div>
 </div>
 
-{% include 'modal.twig' %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+<!-- Script para Mapas e API DNIT -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = new bootstrap.Modal('#dynamicAlertModal');
-    let currentMap = null;
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".open-modal").on("click", async function () {
+            let lat = $(this).data("lat");
+            let lon = $(this).data("lon");
+            let modalId = $(this).attr("data-target");
+            let mapId = modalId.replace("#alertModal", "map-");
+            let kmId = modalId.replace("#alertModal", "km-value-");
 
-    document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
-        button.addEventListener('click', async () => {
-            const alertData = {
-                uuid: button.getAttribute('data-bs-target').replace('#alertModal', ''),
-                lat: parseFloat(button.dataset.lat),
-                lon: parseFloat(button.dataset.lon),
-                city: button.closest('tr').querySelector('td:first-child').textContent,
-                street: button.closest('tr').querySelector('td:nth-child(2) small').textContent,
-                confidence: button.closest('tr').querySelector('.confidence-badge').textContent,
-                date: button.closest('tr').querySelector('td:nth-child(3)').textContent,
-                note: button.closest('tr').querySelector('td:nth-child(5)')?.textContent || 'N/A'
-            };
+            // Inicialização do mapa
+            setTimeout(() => {
+                let map = L.map(mapId).setView([lat, lon], 13);
 
-            // Carregar conteúdo do modal
-            const modalContent = `
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <p><strong>Cidade:</strong> ${alertData.city}</p>
-                        <p><strong>Rua:</strong> ${alertData.street}</p>
-                        <p><strong>Coordenadas:</strong><br> 
-                            Lat: ${alertData.lat.toFixed(6)}, Lon: ${alertData.lon.toFixed(6)}
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Data/Hora:</strong> ${alertData.date}</p>
-                        <p><strong>Confiança:</strong> ${alertData.confidence}</p>
-                        <p><strong>KM DNIT:</strong> <span id="kmValue">${await getDnitKm(alertData.lat, alertData.lon)}</span></p>
-                    </div>
-                    <div class="col-12">
-                        <div class="alert-map" id="leafletMap"></div>
-                    </div>
-                </div>
-            `;
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(map);
 
-            document.getElementById('modalContent').innerHTML = modalContent;
-            modal.show();
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup("Localização do Alerta")
+                    .openPopup();
+            }, 500);
 
-            // Inicializar mapa após o modal ser exibido
-            modal._element.addEventListener('shown.bs.modal', () => {
-                if(currentMap) currentMap.remove();
-                
-                currentMap = L.map('leafletMap').setView([alertData.lat, alertData.lon], 15);
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(currentMap);
-
-                L.marker([alertData.lat, alertData.lon])
-                    .addTo(currentMap)
-                    .bindPopup('Localização exata do alerta');
-            });
+            // Chama a função assíncrona para buscar o KM
+            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
+            $(`#${kmId}`).text(km || "Não encontrado");
         });
     });
-
-    async function getDnitKm(lat, lon) {
-        try {
-            // Simular chamada à API
-            await new Promise(resolve => setTimeout(resolve, 800));
-            return (Math.random() * 100).toFixed(1) + ' km';
-        } catch {
-            return 'Indisponível';
-        }
-    }
-});
 </script>
+
+
+<!-- CSS do DataTables (Se necessário) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+
+<!-- CSS dos Botões do DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
+
+
+<!-- JS do DataTables -->
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<!-- JS dos Botões do DataTables -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+
+<!-- JS para exportação para CSV, Excel, PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+

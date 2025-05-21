@@ -1,12 +1,14 @@
 <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
-     data-bs-lat="{{ alert.location_y }}" data-bs-lon="{{ alert.location_x }}">
+     data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-3 shadow-lg rounded">
             <div class="modal-header bg-primary text-white rounded-top">
                 <h5 class="modal-title">
                     <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
                 </h5>
-                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
@@ -22,12 +24,14 @@
 
                     <div class="col-md-6">
                         <div class="alert-details">
-                            <p><strong>📅 Data:</strong>
-                                {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }}
+                            <!-- Data -->
+                            <p><strong>📅 Data:</strong> 
+                                {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }} 
                                 <small class="text-muted">(UTC)</small>
                             </p>
-
-                            <p><strong>🛣️ KM Estimado:</strong>
+                        
+                            <!-- KM Estimado -->
+                            <p><strong>🛣️ KM Estimado:</strong> 
                                 <span id="km-value-{{ alert.uuid }}" class="badge bg-info">
                                     {% if alert.estimated_km %}
                                         KM {{ alert.estimated_km|number_format(2, ',') }}
@@ -36,22 +40,25 @@
                                     {% endif %}
                                 </span>
                             </p>
-
-                            <p><strong>🔍 Confiança:</strong>
+                        
+                            <!-- Confiança -->
+                            <p><strong>🔍 Confiança:</strong> 
                                 <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
-                                      data-bs-toggle="tooltip"
+                                      data-bs-toggle="tooltip" 
                                       title="Nível de confiança na precisão do alerta">
                                     {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
                                 </span>
                             </p>
-
-                            <p><strong>⚠️ Status:</strong>
+                        
+                            <!-- Status -->
+                            <p><strong>⚠️ Status:</strong> 
                                 <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }}">
                                     {{ alert.status == 1 ? "Ativo" : "Inativo" }}
                                     <span class="visually-hidden">Status do alerta</span>
                                 </span>
                             </p>
-
+                        
+                            <!-- Link -->
                             <p><strong>🔗 Link Relacionado:</strong>
                                 <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
                                    class="badge bg-primary text-decoration-none"
@@ -85,21 +92,22 @@
                     ></iframe>
                     <small id="map-description-{{ alert.uuid }}" class="text-muted">
                         Mapa interativo mostrando a localização precisa do alerta {{ alert.uuid }}. Clique no botão abaixo para abrir no Waze.
+    
                     </small>
                 </div>
             </div>
 
             <div class="modal-footer d-flex justify-content-between">
-                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
+                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
                    class="btn btn-outline-primary" target="_blank">
                     <i class="fab fa-waze"></i> Ver no Waze
                 </a>
-
+                
                 <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
                     <i class="fas fa-check"></i> Confirmar Alerta
                 </button>
-
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Fechar
                 </button>
             </div>
@@ -112,35 +120,17 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll("[id^=alertModal]").forEach(modal => {
         modal.addEventListener("show.bs.modal", async function () {
             const uuid = modal.id.replace("alertModal", "");
-            const latitude = parseFloat(modal.getAttribute("data-bs-lat"));
-            const longitude = parseFloat(modal.getAttribute("data-bs-lon"));
+            const latitude = parseFloat(modal.getAttribute("data-lat"));
+            const longitude = parseFloat(modal.getAttribute("data-lon"));
 
             if (!isNaN(latitude) && !isNaN(longitude)) {
-                const km = await buscarKmDnit(longitude, latitude);
+                const km = buscarKmDnit(longitude, latitude);
                 document.getElementById(`km-value-${uuid}`).textContent = km;
             }
         });
     });
-
-    // Inicialize tooltips do Bootstrap 5
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 });
 
-async function buscarKmDnit(longitude, latitude) {
-    // Sua lógica para buscar o KM do DNIT usando latitude e longitude
-    console.log(`Buscando KM para lon: ${longitude}, lat: ${latitude}`);
-    // Simulação de uma chamada de API
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const kmAleatorio = Math.floor(Math.random() * 1000).toFixed(2);
-            resolve(`KM ${kmAleatorio}`);
-        }, 750);
-    });
-}
-
-function confirmarAlerta(uuid) {
-    console.log(`Alerta ${uuid} confirmado! (Implemente a lógica de confirmação)`);
-    // Aqui você implementaria a lógica para confirmar o alerta
-}
 </script>
+
+<script src="./js/scripts.js"></script>
