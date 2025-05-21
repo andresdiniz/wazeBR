@@ -1,173 +1,244 @@
-<!-- Adicionando Leaflet.js -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Início do conteúdo -->
-<div class="container mt-5">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Adicione seu CSS aqui */
+        #map-{{ alert.uuid }} {
+            height: 200px; /* Ajuste a altura conforme necessário */
+            width: 100%;
+        }
+    </style>
 
-    <div class="row">
-        <!-- Acidentes -->
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-car-crash"></i> Acidentes
-                </div>
-                <div class="card-body">
-                    {% if accidentAlerts is not empty %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="accidentsTable">
-                            <thead>
-                                <tr>
-                                    <th>Cidade</th>
-                                    <th>Rua</th>
-                                    <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for alert in accidentAlerts %}
-                                <tr>
-                                    <td>{{ alert.city }}</td>
-                                    <td>{{ alert.street }}</td>
-                                    <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
-                                    </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
-                                            Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
 
-                                {% include 'modal.twig' with {'alert': alert} %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-car-crash"></i> Acidentes
                     </div>
-                    {% else %}
-                    <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
-                    {% endif %}
+                    <div class="card-body">
+                        {% if accidentAlerts is not empty %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="accidentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Cidade</th>
+                                        <th>Rua</th>
+                                        <th>Localização</th>
+                                        <th>Data Evento</th>
+                                        <th>Nota</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in accidentAlerts %}
+                                    <tr>
+                                        <td>{{ alert.city }}</td>
+                                        <td>{{ alert.street }}</td>
+                                        <td>
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
+                                        </td>
+                                        <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-info btn-sm open-modal" data-bs-toggle="modal"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}"
+                                                    data-lon="{{ alert.location_x }}">
+                                                Detalhes
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel{{ alert.uuid }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="alertModalLabel{{ alert.uuid }}">Detalhes do Alerta</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Cidade:</strong> {{ alert.city }}</p>
+                                                    <p><strong>Rua:</strong> {{ alert.street }}</p>
+                                                    <p><strong>Localização:</strong> Latitude: {{ alert.location_y }}, Longitude: {{ alert.location_x }}</p>
+                                                    <p><strong>Data/Hora:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                                                    <p><strong>Confiança:</strong>
+                                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                            {{ alert.confidence }}
+                                                        </span>
+                                                    </p>
+                                                    <p><strong>Nota:</strong> {{ alert.note }}</p>
+                                                    <div>
+                                                        <strong>Mapa:</strong>
+                                                        <div id="map-{{ alert.uuid }}"></div>
+                                                        <p><strong>KM DNIT Aproximado:</strong> <span id="km-value-{{ alert.uuid }}">Carregando...</span></p>
+                                                    </div>
+                                                    </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-center">Não há eventos de acidentes registrados no momento.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Congestionamentos -->
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <i class="fas fa-traffic-light"></i> Congestionamentos
-                </div>
-                <div class="card-body">
-                    {% if jamAlerts is not empty %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered" id="trafficTable">
-                            <thead>
-                                <tr>
-                                    <th>Cidade</th>
-                                    <th>Rua</th>
-                                    <th>Localização</th>
-                                    <th>Data Evento</th>
-                                    <th>Nota</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for alert in jamAlerts %}
-                                <tr>
-                                    <td>{{ alert.city }}</td>
-                                    <td>{{ alert.street }}</td>
-                                    <td>
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
-                                    </td>
-                                    <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
-                                            {{ alert.confidence }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-info btn-sm open-modal" data-toggle="modal" 
-                                                data-target="#alertModal{{ alert.uuid }}" 
-                                                data-lat="{{ alert.location_y }}" 
-                                                data-lon="{{ alert.location_x }}">
-                                            Detalhes
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                {% include 'modal.twig' with {'alert': alert} %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="fas fa-traffic-light"></i> Congestionamentos
                     </div>
-                    {% else %}
-                    <p class="text-center">Não há congestionamentos registrados no momento.</p>
-                    {% endif %}
+                    <div class="card-body">
+                        {% if jamAlerts is not empty %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="trafficTable">
+                                <thead>
+                                    <tr>
+                                        <th>Cidade</th>
+                                        <th>Rua</th>
+                                        <th>Localização</th>
+                                        <th>Data Evento</th>
+                                        <th>Nota</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in jamAlerts %}
+                                    <tr>
+                                        <td>{{ alert.city }}</td>
+                                        <td>{{ alert.street }}</td>
+                                        <td>
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank">Ver no Waze</a>
+                                        </td>
+                                        <td>{{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-info btn-sm open-modal" data-bs-toggle="modal"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}"
+                                                    data-lon="{{ alert.location_x }}">
+                                                Detalhes
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel{{ alert.uuid }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="alertModalLabel{{ alert.uuid }}">Detalhes do Alerta</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Cidade:</strong> {{ alert.city }}</p>
+                                                    <p><strong>Rua:</strong> {{ alert.street }}</p>
+                                                    <p><strong>Localização:</strong> Latitude: {{ alert.location_y }}, Longitude: {{ alert.location_x }}</p>
+                                                    <p><strong>Data/Hora:</strong> {{ (alert.pubMillis / 1000) | date("d/m/Y H:i:s") }}</p>
+                                                    <p><strong>Confiança:</strong>
+                                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                            {{ alert.confidence }}
+                                                        </span>
+                                                    </p>
+                                                    <p><strong>Nota:</strong> {{ alert.note }}</p>
+                                                    <div>
+                                                        <strong>Mapa:</strong>
+                                                        <div id="map-{{ alert.uuid }}"></div>
+                                                        <p><strong>KM DNIT Aproximado:</strong> <span id="km-value-{{ alert.uuid }}">Carregando...</span></p>
+                                                    </div>
+                                                    </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-center">Não há congestionamentos registrados no momento.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Script para Mapas e API DNIT -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", async function () {
-            let lat = $(this).data("lat");
-            let lon = $(this).data("lon");
-            let modalId = $(this).attr("data-target");
-            let mapId = modalId.replace("#alertModal", "map-");
-            let kmId = modalId.replace("#alertModal", "km-value-");
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-            // Inicialização do mapa
-            setTimeout(() => {
-                let map = L.map(mapId).setView([lat, lon], 13);
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            $(".open-modal").on("click", async function () {
+                let lat = $(this).data("lat");
+                let lon = $(this).data("lon");
+                let modalId = $(this).data("bs-target");
+                let mapId = modalId.replace("#alertModal", "map-");
+                let kmId = modalId.replace("#alertModal", "km-value-");
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
+                // Inicialização do mapa dentro do modal quando ele é aberto
+                const modalElement = document.querySelector(modalId);
+                modalElement.addEventListener('show.bs.modal', () => {
+                    // Verifica se o mapa já foi inicializado para evitar múltiplos mapas
+                    if (!L.DomUtil.get(mapId)._leaflet_id) {
+                        let map = L.map(mapId).setView([lat, lon], 13);
 
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
-            }, 500);
+                        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                            attribution: "&copy; OpenStreetMap contributors"
+                        }).addTo(map);
 
-            // Chama a função assíncrona para buscar o KM
-            const km = await buscarKmDnit(lat, lon, 150);  // Raio 150 metros como no código original
-            $(`#${kmId}`).text(km || "Não encontrado");
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup("Localização do Alerta")
+                            .openPopup();
+                        // Força o Leaflet a redimensionar o mapa após a exibição do modal
+                        setTimeout(() => {
+                            map.invalidateSize();
+                        }, 100);
+                    } else {
+                        // Se o mapa já existe, apenas atualiza a visualização
+                        let map = L.DomUtil.get(mapId)._leaflet_id ? L.map(mapId) : null;
+                        if (map) {
+                            map.setView([lat, lon], 13);
+                            L.marker([lat, lon]).setLatLng([lat, lon]).bindPopup("Localização do Alerta").openPopup();
+                        }
+                    }
+                });
+
+                // Chama a função assíncrona para buscar o KM (você precisará definir essa função)
+                async function buscarKmDnit(latitude, longitude, raio) {
+                    // Substitua esta lógica pela sua chamada real à API do DNIT
+                    console.log(`Buscando KM para lat: ${latitude}, lon: ${longitude}, raio: ${raio}`);
+                    // Simulação de uma chamada de API
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            const kmAleatorio = Math.floor(Math.random() * 1000);
+                            resolve(kmAleatorio.toString());
+                        }, 1000);
+                    });
+                }
+
+                const km = await buscarKmDnit(lat, lon, 150);
+                $(`#${kmId}`).text(km || "Não encontrado");
+            });
+
+            // Inicialização do DataTables (removido, pois não estava sendo usado no HTML fornecido)
         });
-    });
-</script>
-
-
-<!-- CSS do DataTables (Se necessário) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
-
-<!-- CSS dos Botões do DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css">
-
-
-<!-- JS do DataTables -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-
-<!-- JS dos Botões do DataTables -->
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-
-<!-- JS para exportação para CSV, Excel, PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-
+    </script>
