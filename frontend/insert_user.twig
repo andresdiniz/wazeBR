@@ -518,12 +518,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await apiRequest(config.endpoints.parceiros);
             const select = document.getElementById('parceirosSelect');
-            
+
             if (select) {
-                select.innerHTML = data.map(p => `
+                select.innerHTML = data.nomes.map(p => `
                     <option value="${p.id}">${p.Nome}</option>
                 `).join('');
             }
+
         } catch (err) {
             showToast('danger', 'Erro ao carregar parceiros');
         }
