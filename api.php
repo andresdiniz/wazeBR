@@ -48,6 +48,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $action = $_GET['action'] ?? null;
 
     switch ($action) {
+
+        case 'get_users':
+            session_start();
+
+            $search = $_GET['search'] ?? '';
+            $search = trim($search);
+            $id_parceiro = $_SESSION['id_parceiro'] ?? null;
+
+            if (!$id_parceiro || !is_numeric($id_parceiro)) {
+                echo json_encode(['success' => false, 'message' => 'ID do parceiro da sessão inválido.']);
+                exit;
+            }
+
+            if (strlen($search) < 3) {
+                echo json_encode(['success' => false, 'message' => 'Digite ao menos 3 caracteres para busca.']);
+                exit;
+            }
+
+            try {
+                $pdo = Database::getConnection();
+
+                $sql = "
+            SELECT id, username, email 
+            FROM users 
+            WHERE id_parceiro = :id_parceiro 
+              AND (username LIKE :search OR email LIKE :search) 
+            LIMIT 100
+        ";
+                $stmt = $pdo->prepare($sql);
+                $likeSearch = '%' . $search . '%';
+                $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+                $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+                $stmt->execute();
+
+                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if ($results) {
+                    echo json_encode(['success' => true, 'users' => $results]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Nenhum usuário encontrado.']);
+                }
+            } catch (PDOException $e) {
+                error_log("Erro no banco de dados: " . $e->getMessage());
+                echo json_encode(['success' => false, 'message' => 'Erro interno. Tente novamente mais tarde.']);
+            }
+
+            break;
+
         case 'get_route_lines':
             // Verifica se o parâmetro 'route_id' foi fornecido
             if (!isset($_GET['route_id'])) {
@@ -671,133 +719,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
-            case 'get_jams_details':
+        case 'get_jams_details':
 
-                $routeId = $_GET['route_id'] ?? null;
-            
-                if (!isset($_GET['route_id']) || empty(trim($routeId))) {
-                    sendErrorResponse('O parâmetro route_id é obrigatório e não pode estar vazio.', 400);
-                }
-            
-                $routeId = trim($routeId);
-            
-                try {
-                    $pdo = Database::getConnection();
-            
-                    // Consulta principal do jam
-                    $stmtJam = $pdo->prepare("
+            $routeId = $_GET['route_id'] ?? null;
+
+            if (!isset($_GET['route_id']) || empty(trim($routeId))) {
+                sendErrorResponse('O parâmetro route_id é obrigatório e não pode estar vazio.', 400);
+            }
+
+            $routeId = trim($routeId);
+
+            try {
+                $pdo = Database::getConnection();
+
+                // Consulta principal do jam
+                $stmtJam = $pdo->prepare("
                         SELECT * FROM jams WHERE uuid = :route_id
                     ");
-                    $stmtJam->execute([':route_id' => $routeId]);
-                    $jam = $stmtJam->fetch(PDO::FETCH_ASSOC);
-            
-                    if (!$jam) {
-                        sendErrorResponse('Nenhum congestionamento encontrado para a rota fornecida.', 404);
-                    }
-            
-                    // Consulta de segmentos
-                    $stmtSegments = $pdo->prepare("
+                $stmtJam->execute([':route_id' => $routeId]);
+                $jam = $stmtJam->fetch(PDO::FETCH_ASSOC);
+
+                if (!$jam) {
+                    sendErrorResponse('Nenhum congestionamento encontrado para a rota fornecida.', 404);
+                }
+
+                // Consulta de segmentos
+                $stmtSegments = $pdo->prepare("
                         SELECT * FROM jam_segments WHERE jam_uuid = :route_id ORDER BY id
                     ");
-                    $stmtSegments->execute([':route_id' => $routeId]);
-                    $segments = $stmtSegments->fetchAll(PDO::FETCH_ASSOC);
-            
-                    // Consulta de linhas
-                    $stmtLines = $pdo->prepare("
+                $stmtSegments->execute([':route_id' => $routeId]);
+                $segments = $stmtSegments->fetchAll(PDO::FETCH_ASSOC);
+
+                // Consulta de linhas
+                $stmtLines = $pdo->prepare("
                         SELECT * FROM jam_lines WHERE jam_uuid = :route_id ORDER BY sequence
                     ");
-                    $stmtLines->execute([':route_id' => $routeId]);
-                    $lines = $stmtLines->fetchAll(PDO::FETCH_ASSOC);
-            
-                    // Monta resposta
-                    $response = [
-                        'jam' => $jam,
-                        'segments' => $segments,
-                        'lines' => $lines,
-                    ];
-            
-                    sendSuccessResponse($response);
-            
-                } catch (Exception $e) {
-                    sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
-                }
-            
-                break;            
+                $stmtLines->execute([':route_id' => $routeId]);
+                $lines = $stmtLines->fetchAll(PDO::FETCH_ASSOC);
 
-            case 'get_route_details':
-                $routeId = $_GET['route_id'] ?? null;
-            
-                if (!$routeId || trim($routeId) === '') {
-                    sendErrorResponse('Parâmetro "route_id" é obrigatório', 400);
-                }
-            
-                $routeId = trim($routeId);
-            
-                try {
-                    $pdo = Database::getConnection();
-            
-                    // 1. Detalhes gerais da rota
-                    $stmtRoute = $pdo->prepare("
+                // Monta resposta
+                $response = [
+                    'jam' => $jam,
+                    'segments' => $segments,
+                    'lines' => $lines,
+                ];
+
+                sendSuccessResponse($response);
+
+            } catch (Exception $e) {
+                sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
+            }
+
+            break;
+
+        case 'get_route_details':
+            $routeId = $_GET['route_id'] ?? null;
+
+            if (!$routeId || trim($routeId) === '') {
+                sendErrorResponse('Parâmetro "route_id" é obrigatório', 400);
+            }
+
+            $routeId = trim($routeId);
+
+            try {
+                $pdo = Database::getConnection();
+
+                // 1. Detalhes gerais da rota
+                $stmtRoute = $pdo->prepare("
                         SELECT *, 
                             (historic_time - avg_time) AS delay_seconds,
                             (historic_speed - avg_speed) AS speed_diff
                         FROM routes 
                         WHERE id = :route_id
                     ");
-                    $stmtRoute->execute([':route_id' => $routeId]);
-                    $overallStats = $stmtRoute->fetch(PDO::FETCH_ASSOC);
-            
-                    if (!$overallStats) {
-                        sendErrorResponse('Rota não encontrada', 404);
-                    }
-            
-                    // Conversão de valores numéricos
-                    $overallStats = array_map(function($value) {
-                        return is_numeric($value) ? (float)$value : $value;
-                    }, $overallStats);
-            
-                    // 2. Geometria da rota
-                    $stmtGeometry = $pdo->prepare("
+                $stmtRoute->execute([':route_id' => $routeId]);
+                $overallStats = $stmtRoute->fetch(PDO::FETCH_ASSOC);
+
+                if (!$overallStats) {
+                    sendErrorResponse('Rota não encontrada', 404);
+                }
+
+                // Conversão de valores numéricos
+                $overallStats = array_map(function ($value) {
+                    return is_numeric($value) ? (float) $value : $value;
+                }, $overallStats);
+
+                // 2. Geometria da rota
+                $stmtGeometry = $pdo->prepare("
                         SELECT x, y 
                         FROM route_lines 
                         WHERE route_id = :route_id 
                         ORDER BY id
                     ");
-                    $stmtGeometry->execute([':route_id' => $routeId]);
-                    $routeGeometry = $stmtGeometry->fetchAll(PDO::FETCH_ASSOC);
-            
-                    // 3. Histórico de desempenho da rota
-                    $stmtHistory = $pdo->prepare("
+                $stmtGeometry->execute([':route_id' => $routeId]);
+                $routeGeometry = $stmtGeometry->fetchAll(PDO::FETCH_ASSOC);
+
+                // 3. Histórico de desempenho da rota
+                $stmtHistory = $pdo->prepare("
                         SELECT data, velocidade, tempo
                         FROM historic_routes
                         WHERE route_id = :route_id
                         ORDER BY data DESC
                     ");
-                    $stmtHistory->execute([':route_id' => $routeId]);
-                    $historicData = $stmtHistory->fetchAll(PDO::FETCH_ASSOC);
-            
-                    // 4. Subrotas da rota
-                    $stmtSubroutes = $pdo->prepare("
+                $stmtHistory->execute([':route_id' => $routeId]);
+                $historicData = $stmtHistory->fetchAll(PDO::FETCH_ASSOC);
+
+                // 4. Subrotas da rota
+                $stmtSubroutes = $pdo->prepare("
                         SELECT * 
                         FROM subroutes 
                         WHERE route_id = :route_id
                     ");
-                    $stmtSubroutes->execute([':route_id' => $routeId]);
-                    $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
+                $stmtSubroutes->execute([':route_id' => $routeId]);
+                $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
 
-                    // 4. Subrotas ativas da rota
-                    $stmtSubroutes = $pdo->prepare("
+                // 4. Subrotas ativas da rota
+                $stmtSubroutes = $pdo->prepare("
                     SELECT * 
                     FROM subroutes 
                     WHERE route_id = :route_id
                     AND is_active = 1
                     ");
-                    $stmtSubroutes->execute([':route_id' => $routeId]);
-                    $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
+                $stmtSubroutes->execute([':route_id' => $routeId]);
+                $subroutes = $stmtSubroutes->fetchAll(PDO::FETCH_ASSOC);
 
-            
-                    // 5. Heatmap baseado em velocidades históricas
-                    $stmtHeatmap = $pdo->prepare("
+
+                // 5. Heatmap baseado em velocidades históricas
+                $stmtHeatmap = $pdo->prepare("
                         SELECT 
                             DAYOFWEEK(data) AS day_of_week,
                             HOUR(data) AS hour,
@@ -807,22 +855,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         WHERE route_id = :route_id
                         GROUP BY day_of_week, hour
                     ");
-                    $stmtHeatmap->execute([':route_id' => $routeId]);
-                    $heatmap = $stmtHeatmap->fetchAll(PDO::FETCH_ASSOC);
-            
-                    // Resposta final
-                    sendSuccessResponse([
-                        'route' => $overallStats,
-                        'geometry' => $routeGeometry,
-                        'historic' => $historicData,
-                        'subroutes' => $subroutes,
-                        'heatmap' => $heatmap
-                    ]);
-            
-                } catch (Exception $e) {
-                    sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
-                }
-                break;                             
+                $stmtHeatmap->execute([':route_id' => $routeId]);
+                $heatmap = $stmtHeatmap->fetchAll(PDO::FETCH_ASSOC);
+
+                // Resposta final
+                sendSuccessResponse([
+                    'route' => $overallStats,
+                    'geometry' => $routeGeometry,
+                    'historic' => $historicData,
+                    'subroutes' => $subroutes,
+                    'heatmap' => $heatmap
+                ]);
+
+            } catch (Exception $e) {
+                sendErrorResponse('Erro interno: ' . $e->getMessage(), 500);
+            }
+            break;
 
         default:
             http_response_code(400);
@@ -887,8 +935,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 http_response_code(500);
                 echo json_encode(['error' => 'Erro no banco de dados.', 'details' => $e->getMessage()]);
             }
-        break;
-        
+            break;
+
         case 'cadastrar_usuario':
             // Lógica para cadastrar usuário
             $email = $_POST['email'] ?? null;
