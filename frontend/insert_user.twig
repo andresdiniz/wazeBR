@@ -16,7 +16,8 @@
                     </div>
                     <h5 class="card-title text-primary mb-1">Cadastrar</h5>
                     <p class="card-text text-muted small">Novos usuários no sistema</p>
-                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalCadastrar">
                         Acessar
                     </button>
                 </div>
@@ -32,7 +33,8 @@
                     </div>
                     <h5 class="card-title text-warning mb-1">Alterar</h5>
                     <p class="card-text text-muted small">Editar informações</p>
-                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalAlterar">
+                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalAlterar">
                         Acessar
                     </button>
                 </div>
@@ -49,7 +51,8 @@
                     </div>
                     <h5 class="card-title text-info mb-1">Reset de Senha</h5>
                     <p class="card-text text-muted small">Redefinição de acesso</p>
-                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalResetSenha">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalResetSenha">
                         Acessar
                     </button>
                 </div>
@@ -84,7 +87,7 @@
                 <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Novo Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="formCadastrar" class="needs-validation" novalidate action="javascript:void(0);">  
+            <form id="formCadastrar" class="needs-validation" novalidate action="javascript:void(0);">
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
@@ -92,7 +95,7 @@
                             <input type="text" class="form-control" id="nomeUsuario" name="nome" required>
                             <div class="invalid-feedback">Por favor insira o nome completo</div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label for="nomeDeUsuario" class="form-label">Nome de Usuário</label>
                             <div class="input-group">
@@ -101,7 +104,7 @@
                             </div>
                             <div class="invalid-feedback">Escolha um nome de usuário</div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label for="typeSelect" class="form-label">Nível de Acesso</label>
                             <select id="typeSelect" name="type" class="form-select" required>
@@ -115,7 +118,7 @@
                             </select>
                             <div class="invalid-feedback">Selecione um nível de acesso</div>
                         </div>
-                        
+
                         <div class="col-12">
                             <label for="emailUsuario" class="form-label">E-mail</label>
                             <div class="input-group">
@@ -124,27 +127,27 @@
                             </div>
                             <div class="invalid-feedback">Insira um e-mail válido</div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label for="senhaUsuario" class="form-label">Senha</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="senhaUsuario" name="senha" 
-                                       pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$" required>
+                                <input type="password" class="form-control" id="senhaUsuario" name="senha"
+                                    pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$" required>
                                 <button type="button" class="btn btn-outline-secondary" id="generatePass">
                                     <i class="fas fa-dice"></i>
                                 </button>
                             </div>
                             <small class="form-text text-muted">Mínimo 8 caracteres alfanuméricos</small>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label for="parceirosSelect" class="form-label">Parceiro</label>
                             <select id="parceirosSelect" name="id_parceiro" class="form-select" required>
                                 <option value="" disabled selected>Selecione...</option>
                                 {% for parceiro in parceiros %}
-                                    <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
+                                <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
                                 {% else %}
-                                    <option disabled>Nenhum parceiro encontrado</option>
+                                <option disabled>Nenhum parceiro encontrado</option>
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback">Selecione um parceiro</div>
@@ -178,7 +181,7 @@
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
@@ -217,7 +220,7 @@
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="list-group" id="resultResetSenha">
                     <!-- Resultados aqui -->
                 </div>
@@ -236,7 +239,8 @@
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="input-group mb-3">
@@ -245,11 +249,11 @@
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                
+
                 <div class="list-group" id="resultApagar">
                     <!-- Resultados aqui -->
                 </div>
-                
+
                 <div class="alert alert-danger mt-3">
                     <i class="fas fa-exclamation-circle me-2"></i>
                     Esta ação é irreversível! Todos os dados serão permanentemente removidos.
@@ -265,117 +269,120 @@
 
 <!-- Estilos Adicionais -->
 <style>
-.hover-scale {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-}
-.hover-scale:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-.icon-circle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
+    .hover-scale {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 
 <script defer>
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {    
-    const config = {
-        apiBase: '../api.php',
-        endpoints: {
-            users: '?action=users',
-            resetPassword: '?action=reset-password'        }
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+        const config = {
+            apiBase: '../api.php',
+            endpoints: {
+                users: '?action=users',
+                resetPassword: '?action=reset-password'
+            }
+        };
 
-    console.log('Config:', config.endpoints);
+        console.log('Config:', config.endpoints);
 
-    const modals = {
-        cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
-        alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
-        resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
-        apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
-    };
+        const modals = {
+            cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
+            alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
+            resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
+            apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
+        };
 
-    const showToast = (type, message) => {
-        const toastContainer = document.getElementById('toastContainer') || (() => {
-            const div = document.createElement('div');
-            div.id = 'toastContainer';
-            div.style.position = 'fixed';
-            div.style.top = '1rem';
-            div.style.right = '1rem';
-            div.style.zIndex = '1055';
-            document.body.appendChild(div);
-            return div;
-        })();
+        const showToast = (type, message) => {
+            const toastContainer = document.getElementById('toastContainer') || (() => {
+                const div = document.createElement('div');
+                div.id = 'toastContainer';
+                div.style.position = 'fixed';
+                div.style.top = '1rem';
+                div.style.right = '1rem';
+                div.style.zIndex = '1055';
+                document.body.appendChild(div);
+                return div;
+            })();
 
-        const toast = document.createElement('div');
-        toast.className = `toast show bg-${type} text-white mb-2`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
+            const toast = document.createElement('div');
+            toast.className = `toast show bg-${type} text-white mb-2`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">${message}</div>
                 <button type="button" class="btn-close btn-close-white m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    };
-
-    const apiRequest = async (endpoint, method = 'GET', body = null) => {
-        try {
-            const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
-            console.log('Request URL:', url.toString());
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: body ? JSON.stringify(body) : null
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Erro na requisição');
-            return data;
-        } catch (err) {
-            console.error(err);
-            showToast('danger', err.message || 'Erro na comunicação com o servidor');
-            throw err;
-        }
-    };
-
-    const debounce = (fn, delay = 300) => {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn.apply(this, args), delay);
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         };
-    };
 
-    // ========================
-    // Modal Alterar Usuário
-    // ========================
-    (() => {
-        const input = document.getElementById('searchAlterar');
-        const tbody = document.getElementById('resultAlterar');
-
-        const searchUsers = debounce(async (query) => {
-            if (query.length < 3) return;
-            
+        const apiRequest = async (endpoint, method = 'GET', body = null) => {
             try {
-                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                tbody.innerHTML = data.users.map(u => `
+                const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
+                console.log('Request URL:', url.toString());
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: body ? JSON.stringify(body) : null
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Erro na requisição');
+                return data;
+            } catch (err) {
+                console.error(err);
+                showToast('danger', err.message || 'Erro na comunicação com o servidor');
+                throw err;
+            }
+        };
+
+        const debounce = (fn, delay = 300) => {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        };
+
+        // ========================
+        // Modal Alterar Usuário
+        // ========================
+        (() => {
+            const input = document.getElementById('searchAlterar');
+            const tbody = document.getElementById('resultAlterar');
+
+            const searchUsers = debounce(async (query) => {
+                if (query.length < 3) return;
+
+                try {
+                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                    tbody.innerHTML = data.users.map(u => `
                     <tr>
                         <td>${u.nome}</td>
                         <td>${u.usuario}</td>
@@ -387,124 +394,171 @@ document.addEventListener('DOMContentLoaded', () => {
                         </td>
                     </tr>
                 `).join('');
-            } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado</td></tr>';
-            }
-        }, 500);
+                } catch (err) {
+                    tbody.innerHTML = '<tr><td colspan="4">Nenhum resultado encontrado</td></tr>';
+                }
+            }, 500);
 
-        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
+            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
 
-        tbody.addEventListener('click', async e => {
-            const btn = e.target.closest('.btn-edit');
-            if (!btn) return;
+            tbody.addEventListener('click', async e => {
+                const btn = e.target.closest('.btn-edit');
+                if (!btn) return;
 
-            try {
-                const user = await apiRequest(`${config.endpoints.users}&id=${btn.dataset.id}`);
-                // Implementar lógica de edição aqui
-                console.log('Editar usuário:', user);
-                modals.alterar.hide();
-                showToast('success', `Editando usuário: ${user.nome}`);
-            } catch (err) {
-                showToast('danger', err.message);
-            }
-        });
-    })();
+                try {
+                    const user = await apiRequest(`${config.endpoints.users}&id=${btn.dataset.id}`);
+                    // Implementar lógica de edição aqui
+                    console.log('Editar usuário:', user);
+                    modals.alterar.hide();
+                    showToast('success', `Editando usuário: ${user.nome}`);
+                } catch (err) {
+                    showToast('danger', err.message);
+                }
+            });
+        })();
 
-    // ========================
-    // Modal Resetar Senha
-    // ========================
-    (() => {
-        const input = document.getElementById('searchResetSenha');
-        const list = document.getElementById('resultResetSenha');
-        const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
+        // ========================
+        // Modal Resetar Senha
+        // ========================
+        (() => {
+            const input = document.getElementById('searchResetSenha');
+            const list = document.getElementById('resultResetSenha');
+            const confirmBtn = document.querySelector('#modalResetSenha .btn-primary');
 
-        const searchUsers = debounce(async (query) => {
-            if (query.length < 3) return;
-            
-            try {
-                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                list.innerHTML = data.users.map(u => `
+            const searchUsers = debounce(async (query) => {
+                if (query.length < 3) return;
+
+                try {
+                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                    list.innerHTML = data.users.map(u => `
                     <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
                         ${u.nome} (${u.email})
                     </button>
                 `).join('');
-            } catch (err) {
-                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
+                } catch (err) {
+                    list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
+                }
+            }, 500);
+
+            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
+
+            list.addEventListener('click', e => {
+                const item = e.target.closest('.list-group-item-action');
+                if (!item) return;
+
+                list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+
+            confirmBtn.addEventListener('click', async () => {
+                const selected = list.querySelector('.active');
+                if (!selected) return showToast('warning', 'Selecione um usuário');
+
+                try {
+                    await apiRequest(config.endpoints.resetPassword, 'POST', {
+                        userId: selected.dataset.id
+                    });
+                    showToast('success', 'Senha resetada com sucesso!');
+                    modals.resetSenha.hide();
+                } catch (err) {
+                    showToast('danger', err.message);
+                }
+            });
+        })();
+
+        // ========================
+        // Modal Apagar Usuário
+        // ========================
+        (() => {
+            const input = document.getElementById('searchApagar');
+            const list = document.getElementById('resultApagar');
+            const confirmBtn = document.querySelector('#modalApagar .btn-danger');
+
+            const searchUsers = debounce(async (query) => {
+                if (query.length < 3) return;
+
+                try {
+                    const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
+                    list.innerHTML = data.users.map(u => `
+                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
+                        ${u.nome} (${u.email})
+                    </button>
+                `).join('');
+                } catch (err) {
+                    list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
+                }
+            }, 500);
+
+            input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
+
+            list.addEventListener('click', e => {
+                const item = e.target.closest('.list-group-item-action');
+                if (!item) return;
+
+                list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+
+            confirmBtn.addEventListener('click', async () => {
+                const selected = list.querySelector('.active');
+                if (!selected) return showToast('warning', 'Selecione um usuário');
+
+                try {
+                    await apiRequest(`${config.endpoints.users}&id=${selected.dataset.id}`, 'DELETE');
+                    showToast('success', 'Usuário removido com sucesso!');
+                    modals.apagar.hide();
+                    setTimeout(() => location.reload(), 1500);
+                } catch (err) {
+                    showToast('danger', err.message);
+                }
+            });
+        })();
+
+        document.getElementById('generatePass').addEventListener('click', () => {
+            const length = 12;
+            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+            let password = '';
+            for (let i = 0, n = charset.length; i < length; ++i) {
+                password += charset.charAt(Math.floor(Math.random() * n));
             }
-        }, 500);
-
-        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
-
-        list.addEventListener('click', e => {
-            const item = e.target.closest('.list-group-item-action');
-            if (!item) return;
-            
-            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
+            const senhaInput = document.getElementById('senhaUsuario');
+            senhaInput.value = password;
+            senhaInput.setCustomValidity(''); // limpa erro se houver
         });
 
-        confirmBtn.addEventListener('click', async () => {
-            const selected = list.querySelector('.active');
-            if (!selected) return showToast('warning', 'Selecione um usuário');
+        document.getElementById('formCadastrar').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = this;
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const formData = new FormData(form);
 
             try {
-                await apiRequest(config.endpoints.resetPassword, 'POST', { 
-                    userId: selected.dataset.id 
+                const response = await fetch('?action=cadastrar_usuario', {
+                    method: 'POST',
+                    body: formData
                 });
-                showToast('success', 'Senha resetada com sucesso!');
-                modals.resetSenha.hide();
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao cadastrar usuário.');
+                }
+
+                showToast('success', result.message || 'Usuário cadastrado com sucesso!');
+                bootstrap.Modal.getInstance(document.getElementById('modalCadastrar')).hide();
+                form.reset();
+                form.classList.remove('was-validated');
             } catch (err) {
                 showToast('danger', err.message);
             }
         });
-    })();
 
-    // ========================
-    // Modal Apagar Usuário
-    // ========================
-    (() => {
-        const input = document.getElementById('searchApagar');
-        const list = document.getElementById('resultApagar');
-        const confirmBtn = document.querySelector('#modalApagar .btn-danger');
 
-        const searchUsers = debounce(async (query) => {
-            if (query.length < 3) return;
-            
-            try {
-                const data = await apiRequest(`${config.endpoints.users}&q=${encodeURIComponent(query)}`);
-                list.innerHTML = data.users.map(u => `
-                    <button type="button" class="list-group-item list-group-item-action" data-id="${u.id}">
-                        ${u.nome} (${u.email})
-                    </button>
-                `).join('');
-            } catch (err) {
-                list.innerHTML = '<div class="list-group-item">Nenhum resultado encontrado</div>';
-            }
-        }, 500);
-
-        input.addEventListener('input', (e) => searchUsers(e.target.value.trim()));
-
-        list.addEventListener('click', e => {
-            const item = e.target.closest('.list-group-item-action');
-            if (!item) return;
-            
-            list.querySelectorAll('.list-group-item-action').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-        });
-
-        confirmBtn.addEventListener('click', async () => {
-            const selected = list.querySelector('.active');
-            if (!selected) return showToast('warning', 'Selecione um usuário');
-
-            try {
-                await apiRequest(`${config.endpoints.users}&id=${selected.dataset.id}`, 'DELETE');
-                showToast('success', 'Usuário removido com sucesso!');
-                modals.apagar.hide();
-                setTimeout(() => location.reload(), 1500);
-            } catch (err) {
-                showToast('danger', err.message);
-            }
-        });
-    })();
-});
+    });
 </script>
