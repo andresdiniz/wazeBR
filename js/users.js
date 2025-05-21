@@ -17,11 +17,11 @@ class UserManager {
     initEventListeners() {
         // Geração de senha
         document.getElementById('generatePass').addEventListener('click', () => this.generatePassword());
-        
+
         // Submissão de formulários
         document.getElementById('formCadastrar').addEventListener('submit', (e) => this.handleFormSubmit(e, 'cadastrar'));
         document.getElementById('formAlterar').addEventListener('submit', (e) => this.handleFormSubmit(e, 'alterar'));
-        
+
         // Buscas dinâmicas
         ['Alterar', 'ResetSenha', 'Apagar'].forEach(action => {
             const input = document.getElementById(`search${action}`);
@@ -38,7 +38,7 @@ class UserManager {
                 try {
                     const res = await fetch(url, {
                         method,
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         body: body && JSON.stringify(body)
                     });
                     return await res.json();
@@ -54,7 +54,7 @@ class UserManager {
         event.preventDefault();
         const form = event.target;
         const submitBtn = form.querySelector('button[type="submit"]');
-        
+
         if (!form.checkValidity()) {
             form.classList.add('was-validated');
             return;
@@ -92,19 +92,19 @@ class UserManager {
             numbers: '0123456789',
             symbols: '!@#$%&*?'
         };
-        
+
         let password = [
             charset.uppercase[Math.floor(Math.random() * 26)],
             charset.lowercase[Math.floor(Math.random() * 26)],
             charset.numbers[Math.floor(Math.random() * 10)],
             charset.symbols[Math.floor(Math.random() * 7)]
         ];
-        
+
         for (let i = 4; i < 12; i++) {
             const charType = Object.keys(charset)[Math.floor(Math.random() * 4)];
             password.push(charset[charType][Math.floor(Math.random() * charset[charType].length)]);
         }
-        
+
         const senhaInput = document.getElementById('senhaUsuario');
         senhaInput.value = password.sort(() => 0.5 - Math.random()).join('');
         senhaInput.dispatchEvent(new Event('input'));
@@ -145,7 +145,7 @@ class UserManager {
     async refreshUserLists() {
         try {
             const response = await this.api.request('users');
-            ['Alterar', 'ResetSenha', 'Apagar'].forEach(action => 
+            ['Alterar', 'ResetSenha', 'Apagar'].forEach(action =>
                 this.updateResults(action.toLowerCase(), response.users)
             );
         } catch (error) {
@@ -165,6 +165,31 @@ class UserManager {
         document.body.appendChild(toast._element);
         toast.show();
         setTimeout(() => toast.dispose(), 4000);
+    }
+
+    generatePassword() {
+        const charset = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            numbers: '0123456789',
+            symbols: '!@#$%&*?'
+        };
+
+        let password = [
+            charset.uppercase[Math.floor(Math.random() * 26)],
+            charset.lowercase[Math.floor(Math.random() * 26)],
+            charset.numbers[Math.floor(Math.random() * 10)],
+            charset.symbols[Math.floor(Math.random() * 7)]
+        ];
+
+        for (let i = 4; i < 12; i++) {
+            const charType = Object.keys(charset)[Math.floor(Math.random() * 4)];
+            password.push(charset[charType][Math.floor(Math.random() * charset[charType].length)]);
+        }
+
+        const senhaInput = document.getElementById('senhaUsuario');
+        senhaInput.value = password.sort(() => 0.5 - Math.random()).join('');
+        senhaInput.dispatchEvent(new Event('input'));
     }
 }
 
