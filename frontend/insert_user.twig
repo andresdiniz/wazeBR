@@ -290,6 +290,13 @@
 </style>
 
 <script defer>
+    window.config = window.config || {};
+    window.config.id_parceiro = {{ session.id_parceiro |default (0) }};
+    window.config.type = {{ session.type |default (0) }};
+    window.config.user = {{ session.user |default ('') | json_encode | raw }};
+    window.config.nome = {{ session.nome |default ('') | json_encode | raw }};
+    window.config.email = {{ session.email |default ('') | json_encode | raw }};
+    window.config.id_usuario = {{ session.id_usuario |default (0) }};
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -343,14 +350,11 @@
 
         const apiRequest = async (endpoint, method = 'GET', body = null) => {
             try {
-                const idParceiro = sessionStorage.getItem('id_parceiro');
-                if (!idParceiro) throw new Error('ID do parceiro não encontrado na sessão');
+                const idParceiro = window.config?.id_parceiro;
+                if (!idParceiro) throw new Error('ID do parceiro não encontrado');
 
-                // Constrói a URL e adiciona id_parceiro como parâmetro GET
                 const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
                 url.searchParams.set('id_parceiro', idParceiro);
-
-                console.log('Request URL:', url.toString());
 
                 const res = await fetch(url, {
                     method,
@@ -368,9 +372,8 @@
                 showToast('danger', err.message || 'Erro na comunicação com o servidor');
                 throw err;
             }
-        };
-
-
+        }
+        
         const debounce = (fn, delay = 300) => {
             let timer;
             return (...args) => {

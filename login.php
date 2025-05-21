@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'type' => $user['type'],
                 'csrf_token' => bin2hex(random_bytes(32))
             ];
+            
 
             $stmt = $pdo->prepare("
                 INSERT INTO historic_login 
