@@ -504,24 +504,24 @@
             console.log('Modal aberto');
             // Obter dados do alerta a partir do atributo data-alert
 
-            const alertData = data('alert');
-        const modal = $j('#alertModal');
+            const alertData = $j(this).data('alert');
+            const modal = $j('#alertModal');
 
-        // Preencher dados do modal
-        modal.find('#modalUuid').text(alertData.uuid);
-        modal.find('#modalCity').text(alertData.city);
-        modal.find('#modalStreet').text(alertData.street);
-        modal.find('#modalType').text(alertData.type);
-        modal.find('#modalConfidence').text(alertData.confidence);
+            // Preencher dados do modal
+            modal.find('#modalUuid').text(alertData.uuid);
+            modal.find('#modalCity').text(alertData.city);
+            modal.find('#modalStreet').text(alertData.street);
+            modal.find('#modalType').text(alertData.type);
+            modal.find('#modalConfidence').text(alertData.confidence);
 
-        // Atualizar link do Waze
-        modal.find('#modalWazeLink').attr(
-            'href',
-            `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
-        );
+            // Atualizar link do Waze
+            modal.find('#modalWazeLink').attr(
+                'href',
+                `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
+            );
 
-        modal.modal('show');
+            modal.modal('show');
+        });
     });
-});
 </script>
 {% endblock %}
