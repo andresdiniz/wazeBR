@@ -551,13 +551,14 @@
                 }
 
                 showToast('success', result.message || 'Usuário cadastrado com sucesso!');
-                bootstrap.Modal.getInstance(document.getElementById('modalCadastrar')).hide();
+                $('#modalCadastrar').modal('hide');
                 form.reset();
                 form.classList.remove('was-validated');
             } catch (err) {
                 showToast('danger', err.message);
             }
         });
+
 
 
     });
