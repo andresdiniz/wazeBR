@@ -539,7 +539,7 @@
             const formData = new FormData(form);
 
             try {
-                const response = await fetch('?action=cadastrar_usuario', {
+                const response = await fetch('../api.php?action=cadastrar_usuario', {
                     method: 'POST',
                     body: formData
                 });
