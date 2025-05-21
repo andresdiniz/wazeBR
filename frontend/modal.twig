@@ -1,146 +1,212 @@
 <div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
      data-bs-lat="{{ alert.location_y }}" data-bs-lon="{{ alert.location_x }}">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content p-3 shadow-lg rounded">
-            <div class="modal-header bg-primary text-white rounded-top">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
-                </h5>
-                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white position-relative">
+                <div class="w-100 d-flex align-items-center">
+                    <i class="fas fa-traffic-light fa-2x me-3"></i>
+                    <div>
+                        <h5 class="modal-title mb-0">Detalhes do Alerta</h5>
+                        <small class="opacity-75">ID: {{ alert.uuid }}</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white position-absolute top-20 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm p-3 mb-3">
-                            <p><strong>📌 UUID:</strong> {{ alert.uuid }}</p>
-                            <p><strong>🏙️ Cidade:</strong> {{ alert.city }}</p>
-                            <p><strong>📍 Rua:</strong> {{ alert.street }}</p>
-                            <p><strong>📡 Localização:</strong> Lat: {{ alert.location_y }}, Lon: {{ alert.location_x }}</p>
+            <div class="modal-body bg-light p-4">
+                <div class="row g-4">
+                    <!-- Seção de Informações Principais -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom">
+                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações Básicas</h6>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4 text-muted">Localização</dt>
+                                    <dd class="col-sm-8">
+                                        {{ alert.street }}<br>
+                                        <small class="text-muted">{{ alert.city }}</small>
+                                    </dd>
+
+                                    <dt class="col-sm-4 text-muted">Coordenadas</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="d-inline-block" data-bs-toggle="tooltip" title="Latitude">
+                                            {{ alert.location_y|number_format(6) }}
+                                        </span>, 
+                                        <span class="d-inline-block" data-bs-toggle="tooltip" title="Longitude">
+                                            {{ alert.location_x|number_format(6) }}
+                                        </span>
+                                    </dd>
+
+                                    <dt class="col-sm-4 text-muted">Data/Hora</dt>
+                                    <dd class="col-sm-8">
+                                        {{ (alert.pubMillis/1000)|date("d/m/Y H:i") }} UTC
+                                        <br><small class="text-muted">{{ (alert.pubMillis/1000)|date("T") }}</small>
+                                    </dd>
+                                </dl>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="alert-details">
-                            <p><strong>📅 Data:</strong>
-                                {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }}
-                                <small class="text-muted">(UTC)</small>
-                            </p>
+                    <!-- Seção de Status e Métricas -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Estatísticas</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row small g-3">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-info-light rounded text-center">
+                                            <div class="text-info mb-1">
+                                                <i class="fas fa-road fa-fw"></i>
+                                            </div>
+                                            <div class="fw-bold" id="km-value-{{ alert.uuid }}">
+                                                {% if alert.estimated_km %}
+                                                    KM {{ alert.estimated_km|number_format(2, ',') }}
+                                                {% else %}
+                                                    <div class="spinner-grow spinner-grow-sm text-info" role="status">
+                                                        <span class="visually-hidden">Carregando...</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted">KM Estimado</small>
+                                        </div>
+                                    </div>
 
-                            <p><strong>🛣️ KM Estimado:</strong>
-                                <span id="km-value-{{ alert.uuid }}" class="badge bg-info">
-                                    {% if alert.estimated_km %}
-                                        KM {{ alert.estimated_km|number_format(2, ',') }}
-                                    {% else %}
-                                        <span class="spinner-border spinner-border-sm" role="status"></span> Calculando...
-                                    {% endif %}
-                                </span>
-                            </p>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-warning-light rounded text-center">
+                                            <div class="text-warning mb-1">
+                                                <i class="fas fa-shield-alt fa-fw"></i>
+                                            </div>
+                                            <div class="fw-bold">
+                                                {{ alert.confidence }} / 5
+                                            </div>
+                                            <small class="text-muted">Confiança</small>
+                                        </div>
+                                    </div>
 
-                            <p><strong>🔍 Confiança:</strong>
-                                <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
-                                      data-bs-toggle="tooltip"
-                                      title="Nível de confiança na precisão do alerta">
-                                    {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
-                                </span>
-                            </p>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-success-light rounded text-center">
+                                            <div class="text-success mb-1">
+                                                <i class="fas fa-power-off fa-fw"></i>
+                                            </div>
+                                            <div class="fw-bold">
+                                                {{ alert.status == 1 ? "Ativo" : "Inativo" }}
+                                            </div>
+                                            <small class="text-muted">Status</small>
+                                        </div>
+                                    </div>
 
-                            <p><strong>⚠️ Status:</strong>
-                                <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }}">
-                                    {{ alert.status == 1 ? "Ativo" : "Inativo" }}
-                                    <span class="visually-hidden">Status do alerta</span>
-                                </span>
-                            </p>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-primary-light rounded text-center">
+                                            <div class="text-primary mb-1">
+                                                <i class="fas fa-tag fa-fw"></i>
+                                            </div>
+                                            <div class="fw-bold">
+                                                {{ alert.type }}
+                                            </div>
+                                            <small class="text-muted">Tipo</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <p><strong>🔗 Link Relacionado:</strong>
-                                <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
-                                   class="badge bg-primary text-decoration-none"
-                                   target="_blank"
-                                   rel="noopener noreferrer"
-                                   aria-label="Abrir alerta no Waze">
-                                    Ver no Waze Partner Hub ↗
+                    <!-- Seção do Mapa -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Localização</h6>
+                                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                                   class="btn btn-sm btn-outline-primary" 
+                                   target="_blank">
+                                   Abrir no Waze
                                 </a>
-                            </p>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="ratio ratio-16x9">
+                                    <iframe
+                                        id="map-{{ alert.uuid }}"
+                                        class="w-100 h-100 rounded-bottom"
+                                        src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1"
+                                        loading="lazy"
+                                        allowfullscreen
+                                        title="Mapa do Alerta {{ alert.uuid }}">
+                                    </iframe>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="card border-0 shadow-sm p-3 mb-3">
-                    <p id = "tipo-alerta-{{ alert.uuid }}"><strong>🚨 Tipo:</strong> {{ alert.type }}</p>
-                    <p id="subtipo-alerta-{{ alert.uuid }}"><strong>📌 Subtipo:</strong> {{ alert.subtype }}</p>
-                </div>
-
-                <div class="card border-0 shadow-sm p-3">
-                    <h6 class="text-center text-muted">📍 Localização no Mapa (Waze)</h6>
-                    <iframe
-                        id="map-{{ alert.uuid }}"
-                        class="rounded shadow-sm border"
-                        src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1&campaign=alerts_{{ alert.uuid }}&vehicle=car&hidegeopins=false&timestamp={{ alert.pubMillis }}"
-                        style="width: 100%; height: 400px; min-height: 300px; border-color: #e0e0e0;"
-                        allow="geolocation *; fullscreen"
-                        title="Localização exata do alerta {{ alert.code }} no mapa"
-                        loading="lazy"
-                        referrerpolicy="strict-origin-when-cross-origin"
-                        aria-describedby="map-description-{{ alert.uuid }}"
-                    ></iframe>
-                    <small id="map-description-{{ alert.uuid }}" class="text-muted">
-                        Mapa interativo mostrando a localização precisa do alerta {{ alert.uuid }}. Clique no botão abaixo para abrir no Waze.
-                    </small>
-                </div>
             </div>
 
-            <div class="modal-footer d-flex justify-content-between">
-                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                   class="btn btn-outline-primary" target="_blank">
-                    <i class="fab fa-waze"></i> Ver no Waze
-                </a>
-
-                <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
-                    <i class="fas fa-check"></i> Confirmar Alerta
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
                 </button>
-
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Fechar
-                </button>
+                <div>
+                    <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}" 
+                       class="btn btn-outline-secondary me-2"
+                       target="_blank">
+                       <i class="fas fa-external-link-alt me-2"></i>Partner Hub
+                    </a>
+                    <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
+                        <i class="fas fa-check-circle me-2"></i>Confirmar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .bg-info-light { background-color: #e3f2fd; }
+    .bg-warning-light { background-color: #fff3cd; }
+    .bg-success-light { background-color: #d4edda; }
+    .bg-primary-light { background-color: #cfe2ff; }
+    .modal-header { border-radius: 0; }
+    .card { border-radius: 0.5rem; }
+</style>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("[id^=alertModal]").forEach(modal => {
-        modal.addEventListener("show.bs.modal", async function () {
-            const uuid = modal.id.replace("alertModal", "");
-            const latitude = parseFloat(modal.getAttribute("data-bs-lat"));
-            const longitude = parseFloat(modal.getAttribute("data-bs-lon"));
+document.addEventListener("DOMContentLoaded", function() {
+    // Inicialização de tooltips
+    const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip))
 
-            if (!isNaN(latitude) && !isNaN(longitude)) {
-                const km = await buscarKmDnit(longitude, latitude);
-                document.getElementById(`km-value-${uuid}`).textContent = km;
+    // Atualização dinâmica do KM
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', async function(e) {
+            const uuid = modal.id.replace('alertModal', '')
+            const lat = parseFloat(modal.dataset.bsLat)
+            const lon = parseFloat(modal.dataset.bsLon)
+
+            if(!isNaN(lat) && !isNaN(lon)) {
+                const kmElement = document.getElementById(`km-value-${uuid}`)
+                if(kmElement && !kmElement.dataset.loaded) {
+                    const km = await buscarKmDnit(lon, lat)
+                    kmElement.innerHTML = `${km}<br><small class="text-muted">DNIT</small>`
+                    kmElement.dataset.loaded = true
+                }
             }
-        });
-    });
+        })
+    })
+})
 
-    // Inicialize tooltips do Bootstrap 5
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-});
-
-async function buscarKmDnit(longitude, latitude) {
-    // Sua lógica para buscar o KM do DNIT usando latitude e longitude
-    console.log(`Buscando KM para lon: ${longitude}, lat: ${latitude}`);
-    // Simulação de uma chamada de API
+async function buscarKmDnit(lon, lat) {
+    // Simulação de API - Substituir por chamada real
     return new Promise(resolve => {
         setTimeout(() => {
-            const kmAleatorio = Math.floor(Math.random() * 1000).toFixed(2);
-            resolve(`KM ${kmAleatorio}`);
-        }, 750);
-    });
+            resolve(`KM ${(Math.random() * 100).toFixed(1)}`)
+        }, 800)
+    })
 }
 
 function confirmarAlerta(uuid) {
-    console.log(`Alerta ${uuid} confirmado! (Implemente a lógica de confirmação)`);
-    // Aqui você implementaria a lógica para confirmar o alerta
+    console.log(`Confirmando alerta ${uuid}`)
+    // Implementar lógica de confirmação
 }
 </script>
