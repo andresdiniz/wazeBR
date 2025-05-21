@@ -494,38 +494,38 @@ var $j = jQuery.noConflict();
 <script>
 // Correção do DataTables + Modal
 $j(document).ready(function() {
-    // Configuração das tabelas
-    const tableConfig = {
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        pageLength: 10,
-        responsive: true,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-        }
-    };
+    // Configuração das tabelas
+    const tableConfig = {
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        pageLength: 10,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+        }
+    };
 
-    $j('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
+    $j('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
 
-    // Controle do Modal
-    $j('.open-modal').on('click', function() {
-        const alertData = JSON.parse($j(this).data('alert'));
-        const modal = $j('#alertModal');
-        
-        // Preencher dados do modal
-        modal.find('#modalUuid').text(alertData.uuid);
-        modal.find('#modalCity').text(alertData.city);
-        modal.find('#modalStreet').text(alertData.street);
-        modal.find('#modalType').text(alertData.type);
-        modal.find('#modalConfidence').text(alertData.confidence);
-        
-        // Atualizar link do Waze
-        modal.find('#modalWazeLink').attr(
-            'href', 
-            `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
-        );
-        
-        modal.modal('show');
-    });
+    // Controle do Modal
+    $j('.open-modal').on('click', function() {
+        const alertData = JSON.parse($j(this).data('alert'));
+        const modal = $j('#alertModal');
+
+        // Preencher dados do modal
+        modal.find('#modalUuid').text(alertData.uuid);
+        modal.find('#modalCity').text(alertData.city);
+        modal.find('#modalStreet').text(alertData.street);
+        modal.find('#modalType').text(alertData.type);
+        modal.find('#modalConfidence').text(alertData.confidence);
+
+        // Atualizar link do Waze
+        modal.find('#modalWazeLink').attr(
+            'href',
+            `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
+        );
+
+        modal.modal('show');
+    });
 });
 </script>
 {% endblock %}
