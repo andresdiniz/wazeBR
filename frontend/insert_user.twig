@@ -290,13 +290,6 @@
 </style>
 
 <script defer>
-    window.config = window.config || {};
-    window.config.id_parceiro = {{ session.id_parceiro |default (0) }};
-    window.config.type = {{ session.type |default (0) }};
-    window.config.user = {{ session.user |default ('') | json_encode | raw }};
-    window.config.nome = {{ session.nome |default ('') | json_encode | raw }};
-    window.config.email = {{ session.email |default ('') | json_encode | raw }};
-    window.config.id_usuario = {{ session.id_usuario |default (0) }};
 
     document.addEventListener('DOMContentLoaded', () => {
         const config = {
@@ -309,6 +302,14 @@
         };
 
         console.log('Config:', config.endpoints);
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
 
         const modals = {
             cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
