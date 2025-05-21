@@ -505,6 +505,7 @@
             // Obter dados do alerta a partir do atributo data-alert
 
             const alertData = $j(this).data('alert');
+            console.log('Dados do alerta:', alertData);
             const modal = $j('#alertModal');
 
             // Preencher dados do modal
@@ -521,7 +522,4 @@
             );
 
             modal.modal('show');
-        });
-    });
-</script>
-{% endblock %}
+       
