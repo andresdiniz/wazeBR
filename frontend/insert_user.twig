@@ -303,6 +303,7 @@
             endpoints: {
                 users: '?action=get_users',
                 resetPassword: '?action=reset-password'
+
             }
         };
 
@@ -342,14 +343,21 @@
 
         const apiRequest = async (endpoint, method = 'GET', body = null) => {
             try {
+                const idParceiro = sessionStorage.getItem('id_parceiro');
+                if (!idParceiro) throw new Error('ID do parceiro não encontrado na sessão');
+
+                // Constrói a URL e adiciona id_parceiro como parâmetro GET
                 const url = new URL(`${config.apiBase}${endpoint}`, window.location.origin);
+                url.searchParams.set('id_parceiro', idParceiro);
+
                 console.log('Request URL:', url.toString());
+
                 const res = await fetch(url, {
                     method,
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: body ? JSON.stringify(body) : null
+                    body: body && method !== 'GET' ? JSON.stringify(body) : null
                 });
 
                 const data = await res.json();
@@ -361,6 +369,7 @@
                 throw err;
             }
         };
+
 
         const debounce = (fn, delay = 300) => {
             let timer;

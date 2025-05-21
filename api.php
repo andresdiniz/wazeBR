@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $search = $_GET['search'] ?? '';
             $search = trim($search);
-            $id_parceiro = $_SESSION['id_parceiro'] ?? null;
+            $id_parceiro = $_GET['id_parceiro'] ?? '';
 
             if (!$id_parceiro || !is_numeric($id_parceiro)) {
                 echo json_encode(['success' => false, 'message' => 'ID do parceiro da sessão inválido.']);
