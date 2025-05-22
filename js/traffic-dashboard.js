@@ -65,9 +65,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // 6. Gráfico de cidades
     weeklyHourlyHeatmapPlotly();
     // 7. Gráfico de tipo de via
-    //weeklyHourlyHeatmap();
-    // 8. Gráfico de relação entre comprimento e atraso
-    //initLengthVsDelayChart();
+    // 10. Novos gráficos adicionados
+    initTotalKmHourlyChart();      // Gráfico de extensão horária
+    initWeekdayComparisonChart(); // Comparativo diário
 
     function initHourlyChart() {
         const ctx = document.getElementById('hourlyChart');
