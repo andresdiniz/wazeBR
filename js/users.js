@@ -3,7 +3,7 @@ class UserManager {
         this.initModals();
         this.initEventListeners();
         this.initApiHandlers();
-        this.refreshUserLists();
+        // this.refreshUserLists(); // Removido para não carregar na inicialização
     }
 
     initModals() {
@@ -40,6 +40,9 @@ class UserManager {
 
         // Confirmação de Exclusão
         document.getElementById('confirmDelete')?.addEventListener('click', () => this.handleUserDelete());
+
+        // Carregar a lista de usuários ao carregar a página (opcional, se desejar um carregamento inicial)
+        this.refreshUserLists();
     }
 
     initApiHandlers() {
