@@ -98,7 +98,7 @@
                                 <td class="text-center">{{ (jam.speed)|number_format(1) }}</td>
                                 <td class="text-center">{{ jam.delay_minutes|number_format(1) }}</td>
                                 <td class="text-center">{{ jam.length|number_format(0) }}</td>
-                                <td class="text-center">{{ (jam.pubMillis / 1000)|round|date("d/m/Y H:i") }}</td>
+                                <td class="text-center">{{ (jam.pubMillis / 1000)|round|date("d/m/Y H:i:s") }}</td>
                                 <td class="text-center">
                                     <button class="btn btn-primary btn-sm view-route" data-bs-toggle="modal"
                                         data-bs-target="#mapModal" data-route-id="{{ jam.uuid }}"
