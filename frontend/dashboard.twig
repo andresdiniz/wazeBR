@@ -509,6 +509,7 @@
             // Construir o ID correto do modal
             const modalId = `#alertModal${alertData.uuid}`;
             const modal = $j(modalId);
+            console.log('Elemento modal selecionado:', modal);
 
             // Preencher dados do modal (usando os IDs corretos do SEU modal)
             modal.find('.modal-body p strong:contains("UUID:")').next().text(alertData.uuid);
