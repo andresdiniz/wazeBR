@@ -509,13 +509,7 @@ $j(document).ready(function () {
     $j(document).on('click', '.open-modal', function() {
         const alertData = JSON.parse($j(this).data('alert'));
         const modalId = `#alertModal${alertData.uuid}`;
-        
-        // Atualizar conteúdo do modal específico
-        $j(`${modalId} .modal-uuid`).text(alertData.uuid);
-        $j(`${modalId} .modal-city`).text(alertData.city);
-        $j(`${modalId} .modal-street`).text(alertData.street);
-        $j(`${modalId} .modal-confidence`).text(alertData.confidence);
-        
+        console.log(modalId);        
         // Mostrar o modal específico
         $j(modalId).modal('show');
     });
