@@ -644,10 +644,9 @@
                 try {
                     const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
                     console.log("Resultado da busca KM:", km);
-                    $('#modalKm').text(typeof km === 'number' ? `KM ${km.toFixed(2)}` : 'Não encontrado');
+                    $('#modalKm').text(${km});
                 } catch (error) {
                     console.error("Erro ao buscar KM:", error);
-                    console.log("Resultado da busca KM:", km);
                     $('#modalKm').text('Erro na busca').addClass('text-danger');
                 }
 
