@@ -1,65 +1,92 @@
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Chart.js -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
-    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Chart.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 
 
-    <style>
-        .card {
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            font-weight: 500;
-            background-color: #f8f9fa;
-        }
-        .summary-item {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            background-color: #f8f9fa;
-        }
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .summary-label {
-            font-size: 14px;
-            color: #6c757d;
-        }
-        .table-responsive {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        #hourlyChart, #weekdayChart, #levelChart, #monthlyChart, 
-        #cityChart, #roadTypeChart, #delayDistChart, #lengthVsDelayChart {
-            height: 300px;
-        }
-        .nav-tabs .nav-link {
-            color: #495057;
-        }
-        .nav-tabs .nav-link.active {
-            font-weight: bold;
-        }
-    </style>
+<style>
+    .insight {
+        background: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        font-weight: 500;
+        background-color: #f8f9fa;
+    }
+
+    .summary-item {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+    }
+
+    .summary-value {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .summary-label {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    #hourlyChart,
+    #weekdayChart,
+    #levelChart,
+    #monthlyChart,
+    #cityChart,
+    #roadTypeChart,
+    #delayDistChart,
+    #lengthVsDelayChart {
+        height: 300px;
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+    }
+</style>
 </head>
+
 <body>
     <div class="container-fluid py-4">
         <h1 class="mb-4">Dashboard de Análise de Congestionamentos</h1>
-        
+
         <!-- Nav tabs para principais análises -->
         <ul class="nav nav-tabs mb-4" id="analysisTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Visão Geral</button>
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
+                    type="button" role="tab" aria-controls="overview" aria-selected="true">Visão Geral</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="segments-tab" data-bs-toggle="tab" data-bs-target="#segments" type="button" role="tab" aria-controls="segments" aria-selected="false">Segmentos</button>
+                <button class="nav-link" id="segments-tab" data-bs-toggle="tab" data-bs-target="#segments" type="button"
+                    role="tab" aria-controls="segments" aria-selected="false">Segmentos</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="time-tab" data-bs-toggle="tab" data-bs-target="#time" type="button" role="tab" aria-controls="time" aria-selected="false">Análise Temporal</button>
+                <button class="nav-link" id="time-tab" data-bs-toggle="tab" data-bs-target="#time" type="button"
+                    role="tab" aria-controls="time" aria-selected="false">Análise Temporal</button>
             </li>
         </ul>
-        
+
         <!-- Tab content -->
         <div class="tab-content" id="analysisTabContent">
             <!-- Visão Geral -->
@@ -75,25 +102,29 @@
                                 <div class="row">
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ resumo['total']|number_format(0, '', '') }}</div>
+                                            <div class="summary-value">{{ resumo['total']|number_format(0, '', '') }}
+                                            </div>
                                             <div class="summary-label">Congestionamentos Totais</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (resumo['atraso_medio']/60)|number_format(1) }}</div>
+                                            <div class="summary-value">{{ (resumo['atraso_medio']/60)|number_format(1)
+                                                }}</div>
                                             <div class="summary-label">Atraso Médio (minutos)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (resumo['comprimento_medio']/1000)|number_format(2) }}</div>
+                                            <div class="summary-value">{{
+                                                (resumo['comprimento_medio']/1000)|number_format(2) }}</div>
                                             <div class="summary-label">Comprimento Médio (km)</div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-6">
                                         <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (resumo['max_atraso']/60)|number_format(1) }}</div>
+                                            <div class="summary-value">{{ (resumo['max_atraso']/60)|number_format(1) }}
+                                            </div>
                                             <div class="summary-label">Maior Atraso em Minutos</div>
                                         </div>
                                     </div>
@@ -101,7 +132,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Gráfico de distribuição por hora -->
                     <div class="col-md-6">
                         <div class="card">
@@ -114,7 +145,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Gráfico de distribuição por dia da semana -->
                     <div class="col-md-6">
                         <div class="card">
@@ -126,7 +157,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Gráfico de nível de congestionamento -->
                     <div class="col-md-6">
                         <div class="card">
@@ -138,7 +169,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Distribuição de atrasos -->
                     <div class="col-md-6">
                         <div class="card">
@@ -152,7 +183,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Segmentos -->
             <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
                 <div class="row">
@@ -192,7 +223,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Top Ruas -->
                     <div class="col-md-12 mt-4">
                         <div class="card">
@@ -227,7 +258,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Relação Tamanho vs Atraso -->
                     <div class="col-md-12 mt-4">
                         <div class="card">
@@ -241,7 +272,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Análise Temporal -->
             <div class="tab-pane fade" id="time" role="tabpanel" aria-labelledby="time-tab">
                 <div class="row g-4">
@@ -269,6 +300,15 @@
                         </div>
                     </div>
                 </div>
+                <div class="chart-card">
+                    <h3>Extensão Horária</h3>
+                    <canvas id="totalKmHourlyChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Comparativo Diário</h3>
+                    <canvas id="weekdayComparisonChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -277,27 +317,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Adicione antes do fechamento do body -->
     <script>
-    // Converta os dados para JSON no console
-    //console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
+        // Converta os dados para JSON no console
+        //console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
     </script>
-    
+
     <!-- Script para dashboard -->
     <script>
         // Dados para gráficos extraídos da variável PHp
-        const data = {{ horario|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const datasemana = {{ semanal|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const dadosnivel = {{ niveis|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const dadosatraso = {{ ruas|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const mensal = {{ mes|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const atrasocomprimento = {{ length_delay|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const diaxsemana = {{ dia_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const km_por_hora = {{ km_por_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const km_por_dia_semana = {{ km_por_dia_semana|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const media_km_por_hora = {{ media_km_por_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
-        const media_km_por_dia_semana = {{ media_km_por_dia_semana|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const data = {{ horario| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const datasemana = {{ semanal| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const dadosnivel = {{ niveis| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const dadosatraso = {{ ruas| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const mensal = {{ mes| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const atrasocomprimento = {{ length_delay| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const diaxsemana = {{ dia_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const km_por_hora = {{ km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const km_por_dia_semana = {{ km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const media_km_por_hora = {{ media_km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        const media_km_por_dia_semana = {{ media_km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
 
 
         console.log('Dados do gráfico de horas:', km_por_hora);
@@ -308,4 +348,5 @@
     </script>
     <script src="../js/traffic-dashboard.js"></script>
 </body>
+
 </html>
