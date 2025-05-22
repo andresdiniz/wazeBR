@@ -44,9 +44,14 @@ class UserManager {
 
     initApiHandlers() {
         this.api = {
-            request: async (endpoint, method = 'GET', data = null) => {
-                const url = new URL(`${globalConfig.apiBase}`);
-                url.searchParams.append('action', globalConfig.endpoints[endpoint]);
+            request: async (endpointKey, method = 'GET', data = null) => {
+                const endpoint = globalConfig.endpoints[endpointKey];
+                if (!endpoint) {
+                    console.error(`Endpoint not found: ${endpointKey}`);
+                    throw new Error(`Endpoint não encontrado: ${endpointKey}`);
+                }
+                const url = new URL(globalConfig.apiBase);
+                url.searchParams.append('action', endpoint);
                 url.searchParams.append('id_parceiro', globalConfig.parceiroId);
 
                 const config = {
@@ -63,10 +68,15 @@ class UserManager {
 
                 try {
                     const res = await fetch(url, config);
-                    if (!res.ok) throw new Error(await res.text());
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        console.error(`API Error on ${endpoint}:`, errorText);
+                        throw new Error(errorText);
+                    }
                     return await res.json();
                 } catch (error) {
-                    this.showToast('danger', error.message || 'Erro na comunicação');
+                    this.showToast('danger', error.message || 'Erro na comunicação com a API');
+                    console.error('API Request Error:', error);
                     throw error;
                 }
             }
@@ -114,9 +124,9 @@ class UserManager {
         if (searchTerm.length < 3) return;
 
         try {
-            const response = await this.api.request('searchUsers', 'GET', { 
+            const response = await this.api.request('searchUsers', 'GET', {
                 q: searchTerm,
-                actionType: action 
+                actionType: action
             });
             this.updateResults(action, response.users);
         } catch (error) {
@@ -134,8 +144,8 @@ class UserManager {
                 <td>${user.username}</td>
                 <td>${user.email}</td>
                 <td>
-                    <button class="btn btn-sm btn-${action === 'apagar' ? 'danger' : 'warning'} btn-action" 
-                            data-id="${user.id}" 
+                    <button class="btn btn-sm btn-${action === 'apagar' ? 'danger' : 'warning'} btn-action"
+                            data-id="${user.id}"
                             data-action="${action}">
                         <i class="fas fa-${this.getActionIcon(action)}"></i>
                     </button>
@@ -156,7 +166,7 @@ class UserManager {
     async handleUserAction(button) {
         const action = button.dataset.action;
         const userId = button.dataset.id;
-        
+
         try {
             if (action === 'alterar') {
                 const response = await this.api.request('getUser', 'GET', { id: userId });
@@ -178,10 +188,10 @@ class UserManager {
 
     async handlePasswordReset() {
         try {
-            const response = await this.api.request('resetPassword', 'POST', { 
-                id: this.selectedUser 
+            const response = await this.api.request('resetPassword', 'POST', {
+                id: this.selectedUser
             });
-            
+
             if (response.success) {
                 this.showToast('success', 'Senha resetada com sucesso!');
                 this.modals.resetSenha.hide();
@@ -194,10 +204,10 @@ class UserManager {
 
     async handleUserDelete() {
         try {
-            const response = await this.api.request('deleteUser', 'DELETE', { 
-                id: this.selectedUser 
+            const response = await this.api.request('deleteUser', 'DELETE', {
+                id: this.selectedUser
             });
-            
+
             if (response.success) {
                 this.showToast('success', 'Usuário excluído com sucesso!');
                 this.modals.apagar.hide();
@@ -265,7 +275,7 @@ class UserManager {
 
         const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
         toastContainer.appendChild(toastEl);
-        
+
         new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 }).show();
         setTimeout(() => toastEl.remove(), 3000);
     }
