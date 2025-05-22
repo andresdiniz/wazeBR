@@ -6,11 +6,24 @@ class UserManager {
     }
 
     initModals() {
+        const modalElements = {
+            cadastrar: document.getElementById('modalCadastrar'),
+            alterar: document.getElementById('modalAlterar'),
+            resetSenha: document.getElementById('modalResetSenha'),
+            apagar: document.getElementById('modalApagar')
+        };
+
+        for (const key in modalElements) {
+            if (!modalElements[key]) {
+                console.error(`Elemento do modal ${key} não encontrado!`);
+            }
+        }
+
         this.modals = {
-            cadastrar: new bootstrap.Modal('#modalCadastrar'),
-            alterar: new bootstrap.Modal('#modalAlterar'),
-            resetSenha: new bootstrap.Modal('#modalResetSenha'),
-            apagar: new bootstrap.Modal('#modalApagar')
+            cadastrar: new bootstrap.Modal(modalElements.cadastrar),
+            alterar: new bootstrap.Modal(modalElements.alterar),
+            resetSenha: new bootstrap.Modal(modalElements.resetSenha),
+            apagar: new bootstrap.Modal(modalElements.apagar)
         };
     }
 
