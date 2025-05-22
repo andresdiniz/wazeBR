@@ -591,7 +591,9 @@
 
             try {
                 // 1. Corrigir o parse dos dados
-                const alertData = JSON.parse(button.data('alert').replace(/&quot;/g, '"'));
+                const alertData = JSON.parse(button.data('alert'));
+
+                console.log('Dados do alerta:', alertData);
 
                 // 2. Preencher dados básicos
                 $('#modalUuid').text(alertData.uuid);
