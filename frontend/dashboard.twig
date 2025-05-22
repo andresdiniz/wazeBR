@@ -643,8 +643,10 @@
                 $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
                 try {
                     const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
-                    $('#modalKm').text(km !== null ? `KM ${km.toFixed(2)}` : 'Não encontrado');
+                    console.log("Resultado da busca KM:", km);
+                    $('#modalKm').text(typeof km === 'number' ? `KM ${km.toFixed(2)}` : 'Não encontrado');
                 } catch (error) {
+                    console.error("Erro ao buscar KM:", error);
                     $('#modalKm').text('Erro na busca').addClass('text-danger');
                 }
 
