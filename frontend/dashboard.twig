@@ -641,13 +641,21 @@
 
                 // 6. Buscar KM com tratamento de erro
                 $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
+
                 try {
                     const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
+
                     console.log("Resultado da busca KM:", km);
-                    $('#modalKm').text(${km});
+
+                    if (typeof km === 'number' && !isNaN(km)) {
+                        $('#modalKm').removeClass('text-danger').text(`KM ${km.toFixed(2)}`);
+                    } else {
+                        $('#modalKm').addClass('text-warning').text('KM não encontrado');
+                    }
+
                 } catch (error) {
                     console.error("Erro ao buscar KM:", error);
-                    $('#modalKm').text('Erro na busca').addClass('text-danger');
+                    $('#modalKm').addClass('text-danger').text('Erro na busca');
                 }
 
                 // 7. Atualizar tooltips após carregamento
