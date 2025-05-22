@@ -226,6 +226,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -301,6 +302,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -376,6 +378,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -451,6 +454,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -468,9 +472,6 @@
 </div>
 {% endblock %}
 
-{% for alert in alerts %}
-    {% include 'modal.twig' with {'alert': alert} %}
-{% endfor %}
 
 
 {% block javascripts %}
@@ -490,87 +491,34 @@
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
 
 <script>
-    // Correção do DataTables + Modal
-    $j(document).ready(function () {
-        // Configuração das tabelas
-        const tableConfig = {
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            pageLength: 10,
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            }
-        };
+// Configuração corrigida
+$j(document).ready(function () {
+    // Inicialização do DataTables
+    const tableConfig = {
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        pageLength: 10,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+        }
+    };
 
-        $j('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
+    $j('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
 
-        // Controle do Modal
-        $j('.open-modal').on('click', function () {
-            console.log('Modal aberto');
-            // Obter dados do alerta a partir do atributo data-alert
-            const alertData = $j(this).data('alert');
-            console.log('Dados do alerta:', alertData);
-
-            // Construir o ID correto do modal
-            const modalId = `#alertModal${alertData.uuid}`;
-            const modal = $j(modalId);
-            console.log('Elemento modal selecionado:', modal);
-
-            // Preencher dados do modal (usando os IDs corretos do SEU modal)
-            modal.find('.modal-body p strong:contains("UUID:")').next().text(alertData.uuid);
-            modal.find('.modal-body p strong:contains("Cidade:")').next().text(alertData.city);
-            modal.find('.modal-body p strong:contains("Rua:")').next().text(alertData.street);
-            modal.find('.modal-body p strong:contains("Tipo:")').next().text(alertData.type);
-            modal.find('.modal-body p strong:contains("Confiança:") span').text(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`);
-
-            // Atualizar link do Waze
-            modal.find('.modal-footer a:contains("Ver no Waze")').attr(
-                'href',
-                `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
-            );
-
-            modal.modal('show');
-        });
+    // Controle de modais dinâmicos
+    $j(document).on('click', '.open-modal', function() {
+        const alertData = JSON.parse($j(this).data('alert'));
+        const modalId = `#alertModal${alertData.uuid}`;
+        
+        // Atualizar conteúdo do modal específico
+        $j(`${modalId} .modal-uuid`).text(alertData.uuid);
+        $j(`${modalId} .modal-city`).text(alertData.city);
+        $j(`${modalId} .modal-street`).text(alertData.street);
+        $j(`${modalId} .modal-confidence`).text(alertData.confidence);
+        
+        // Mostrar o modal específico
+        $j(modalId).modal('show');
     });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const alertModals = document.querySelectorAll("[id^=alertModal]");
-        alertModals.forEach(modal => {
-            modal.addEventListener("show.bs.modal", async function () {
-                const uuid = modal.id.replace("alertModal", "");
-                const latitude = parseFloat(modal.getAttribute("data-lat"));
-                const longitude = parseFloat(modal.getAttribute("data-lon"));
-
-                if (!isNaN(latitude) && !isNaN(longitude)) {
-                    const kmSpan = document.getElementById(`km-value-${uuid}`);
-                    if (kmSpan && kmSpan.textContent.includes('Calculando')) {
-                        const km = await buscarKmDnit(longitude, latitude);
-                        kmSpan.textContent = km !== null ? `KM ${km.toFixed(2).replace('.', ',')}` : 'Não encontrado';
-                    }
-                }
-            });
-        });
-
-        // Inicializar tooltips do Bootstrap
-        $j(function () {
-            $j('[data-toggle="tooltip"]').tooltip()
-        })
-    });
-
-    // Placeholder para a função de buscar KM
-    async function buscarKmDnit(longitude, latitude) {
-        // Simulação de chamada de API
-        console.log("Buscando KM para:", latitude, longitude);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Retorne o valor real do KM aqui
-        const randomKM = Math.random() * 100;
-        return randomKM;
-    }
-
-    // Placeholder para a função de confirmar alerta
-    function confirmarAlerta(uuid) {
-        alert(`Alerta ${uuid} confirmado! (Funcionalidade não implementada)`);
-        // Aqui você chamaria sua função para confirmar o alerta no backend
-    }
+});
 </script>
 {% endblock %}
