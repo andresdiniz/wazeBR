@@ -581,63 +581,70 @@
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Configuração do modal
+        // Configuração do modal corrigida
         $('#alertModal').on('show.bs.modal', async function (event) {
             const button = $(event.relatedTarget);
-            const alertData = JSON.parse(button.data('alert'));
 
-            // Preencher dados básicos
-            $('#modalUuid').text(alertData.uuid);
-            $('#modalCity').text(alertData.city);
-            $('#modalStreet').text(alertData.street);
-            $('#modalLat').text(alertData.location[1].toFixed(6));
-            $('#modalLon').text(alertData.location[0].toFixed(6));
-            $('#modalDate').text(new Date(alertData.timestamp).toLocaleString());
-            $('#modalType').text(alertData.type);
-            $('#modalSubtype').text(alertData.subtype || 'N/A');
+            try {
+                // 1. Corrigir o parse dos dados
+                const alertData = JSON.parse(button.data('alert').replace(/&quot;/g, '"'));
 
-            // Atualizar iframes
-            $('#modalMap').attr('src',
-                `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`
-            );
+                // 2. Preencher dados básicos
+                $('#modalUuid').text(alertData.uuid);
+                $('#modalCity').text(alertData.city);
+                $('#modalStreet').text(alertData.street);
+                $('#modalLat').text(alertData.location[1].toFixed(6));
+                $('#modalLon').text(alertData.location[0].toFixed(6));
+                $('#modalDate').text(new Date(alertData.timestamp).toLocaleString('pt-BR'));
+                $('#modalType').text(alertData.type);
+                $('#modalSubtype').text(alertData.subtype || 'N/A');
 
-            $('#modalStreetView').attr('src',
-                `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE_API&location=${alertData.location[1]},${alertData.location[0]}&fov=80&heading=70&pitch=0`
-            );
+                // 3. Atualizar iframes corretamente
+                const wazeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`;
+                $('#modalMap').attr('src', wazeSrc);
 
-            // Atualizar links
-            $('#modalPartnerLink').attr('href',
-                `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`
-            );
+                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${alertData.location[1]},${alertData.location[0]}`;
+                $('#modalStreetView').attr('src', streetViewSrc);
 
-            $('#modalWazeLink').attr('href',
-                `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
-            );
+                // 4. Atualizar links
+                $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
+                $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`);
 
-            // Status e Confiança
-            $('#modalStatus')
-                .text(alertData.status === 1 ? "Ativo" : "Inativo")
-                .removeClass()
-                .addClass(`badge badge-${alertData.status === 1 ? 'success' : 'danger'}`);
+                // 5. Atualizar status e confiança
+                $('#modalStatus')
+                    .text(alertData.status === 1 ? "Ativo" : "Inativo")
+                    .removeClass()
+                    .addClass(`badge badge-${alertData.status === 1 ? 'success' : 'danger'}`);
 
-            $('#modalConfidence')
-                .html(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`)
-                .removeClass()
-                .addClass(`badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`)
-                .tooltip({ title: "Nível de confiança na precisão do alerta", placement: "top" });
+                $('#modalConfidence')
+                    .html(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`)
+                    .removeClass()
+                    .addClass(`badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`);
 
-            // Buscar KM
-            $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
-            const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
-            $('#modalKm').text(km !== null ? `KM ${km.toFixed(2)}` : 'Não encontrado');
+                // 6. Buscar KM com tratamento de erro
+                $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
+                try {
+                    const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
+                    $('#modalKm').text(km !== null ? `KM ${km.toFixed(2)}` : 'Não encontrado');
+                } catch (error) {
+                    $('#modalKm').text('Erro na busca').addClass('text-danger');
+                }
 
-            // Configurar botão de confirmação
-            $('#modalConfirmBtn').off('click').click(() => confirmarAlerta(alertData.uuid));
+                // 7. Atualizar tooltips após carregamento
+                $('[data-toggle="tooltip"]').tooltip('dispose').tooltip();
+
+            } catch (error) {
+                console.error('Erro ao cargar dados do alerta:', error);
+                $('#alertModal').modal('hide');
+                alert('Erro ao carregar detalhes do alerta');
+            }
         });
 
-        // Inicializar tooltips
-        $('[data-toggle="tooltip"]').tooltip();
+        // Inicialização do DataTables
+        $('.table').DataTable({
+            // Sua configuração do DataTables
+        });
     });
-    
+
 </script>
 {% endblock %}
