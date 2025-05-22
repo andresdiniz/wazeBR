@@ -103,10 +103,10 @@
                                 <td title="{{ jam.city }}">{{ jam.city }}</td>
                                 <td title="{{ jam.street }}">{{ jam.street }}</td>
                                 <td title="{{ jam.endNode }}">{{ jam.endNode }}</td>
-                                <td class="text-center">{{ speedKMH|number_format(2) }}</td>
-                                <td class="text-center">{{ (speed)|number_format(1) }}</td>
-                                <td class="text-center">{{ delay_minutes|number_format(1) }}</td>
-                                <td class="text-center">{{ length|number_format(0) }}</td>
+                                <td class="text-center">{{ speedKMH}}</td>
+                                <td class="text-center">{{ (speed)}}</td>
+                                <td class="text-center">{{ delay_minutes }}</td>
+                                <td class="text-center">{{ length }}</td>
                                 <td class="text-center">{{ pub_date|round(0, 'floor')|date("d/m/Y H:i") }}</td>
                                 <td class="text-center">
                                     <button class="btn btn-primary btn-sm view-route" data-bs-toggle="modal"
