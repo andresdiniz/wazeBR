@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.bootstrap5.css">
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.4.0/css/rowGroup.dataTables.min.css">
+    <script src="https://cdn.datatables.net/rowgroup/1.4.0/js/dataTables.rowGroup.min.js"></script>
+
     <style>
         /* Custom styles for badges based on confidence level */
         .badge.bg-success {
@@ -259,33 +262,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Helper function to convert confidence value to percentage and determine badge color
+            // Helper function para formatar a confiança
             const formatConfidence = (value) => {
                 let numValue = parseFloat(value);
-                if (isNaN(numValue)) {
-                    numValue = 0;
-                }
+                if (isNaN(numValue)) numValue = 0;
                 const percentage = (numValue * 20).toFixed(0) + '%';
-                let color;
-                if (numValue >= 4) {
-                    color = 'success';
-                } else if (numValue >= 2) {
-                    color = 'warning';
-                } else {
-                    color = 'danger';
-                }
+                let color = numValue >= 4 ? 'success' : numValue >= 2 ? 'warning' : 'danger';
                 return `<span class="badge bg-${color}">${numValue} (${percentage})</span>`;
             };
 
-            // Initialize DataTable
-            const table = new DataTable('#buracos-table', {
-                // Define the DOM structure for DataTables elements
-                // B: Buttons, f: Filtering/Search, r: Processing display, t: Table, i: Information, p: Pagination, l: Length changing input control
-                dom: '<"row"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>' + // Top: buttons and filter
-                    '<"row mt-2"<"col-12"rt>>' + // Middle: table
-                    '<"row"<"col-md-5"l><"col-md-7"p>>' + // Bottom: length changing and pagination
-                    '<"row"<"col-12"i>>', // Bottom: information (moved to its own row for clarity)
-
+            // Configuração inicial da DataTable
+            let table = new DataTable('#buracos-table', {
+                dom: '<"row mb-3"<"col-md-4"l><"col-md-4"B><"col-md-4"g>><"row"<"col-md-12"f>><"row mt-2"<"col-12"rt>><"row"<"col-md-5"i><"col-md-7"p>>',
                 buttons: [
                     {
                         extend: 'copy',
@@ -306,139 +294,148 @@
                         exportOptions: { columns: ':not(.no-export)' }
                     }
                 ],
-                order: [[4, 'desc']], // Default sort by 'Data' column (index 4) in descending order
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' // Portuguese localization
+                order: [[2, 'asc'], [4, 'desc']],
+                language: { url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/pt-BR.json' },
+                rowGroup: {
+                    dataSrc: 2,
+                    className: 'group-row',
+                    enable: true
                 },
                 columnDefs: [
-                    // Fixed small widths for columns with generally consistent content
-                    { targets: 0, width: '30px', className: 'text-center' }, // #
-                    { targets: 3, width: '100px', className: 'text-center', render: formatConfidence }, // Confiança
-                    { targets: 4, width: '150px' }, // Data (Adjusted from 200px)
-                    { targets: 6, width: '80px', orderable: false, className: 'no-export text-center' }, // Ações
-
-                    // No explicit width for targets 1 (Cidade), 2 (Rua), and 5 (Coordenadas).
-                    // With `table-layout: fixed` CSS and `autoWidth: true` (default), these columns
-                    // will automatically distribute the remaining space to fill the 100% width.
+                    { targets: 0, width: '30px', className: 'text-center' },
+                    { targets: 2, visible: false }, // Oculta a coluna de Rua
+                    { targets: 3, width: '100px', className: 'text-center', render: formatConfidence },
+                    { targets: 4, width: '150px' },
+                    { targets: 6, width: '80px', orderable: false, className: 'no-export text-center' }
                 ],
-                paging: true, // Enable pagination
-                pageLength: 10, // Default number of rows per page
-                lengthMenu: [
-                    [10, 25, 50, -1], // Values for the dropdown
-                    [10, 25, 50, 'Todos'] // Display text for the dropdown
-                ],
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
                 initComplete: function () {
-                    // Get the DataTables button container using native JS
-                    const dtButtonsContainer = document.querySelector('.dt-buttons');
-                    if (dtButtonsContainer) {
-                        // Remove default DataTables button group class that might conflict with our flex styles
-                        dtButtonsContainer.classList.remove('btn-group');
-                    }
+                    // Aplica estilos aos controles
+                    const elements = [
+                        ['.dt-buttons', 'btn-group', 'flex-wrap gap-2'],
+                        ['.dataTables_filter input', 'form-control form-control-sm', 'Pesquisar...'],
+                        ['.dataTables_length select', 'form-select form-select-sm']
+                    ];
 
-                    // Get the DataTables search input using native JS
-                    const searchInput = document.querySelector('.dataTables_filter input');
-                    if (searchInput) {
-                        searchInput.classList.add('form-control', 'form-control-sm');
-                        searchInput.setAttribute('placeholder', 'Pesquisar...');
-                    }
-
-                    // Get the DataTables length menu select using native JS
-                    const lengthSelect = document.querySelector('.dataTables_length select');
-                    if (lengthSelect) {
-                        lengthSelect.classList.add('form-select', 'form-select-sm');
-                    }
+                    elements.forEach(([selector, classes, placeholder]) => {
+                        const el = document.querySelector(selector);
+                        if (el) {
+                            if (classes) el.className += ` ${classes}`;
+                            if (placeholder) el.placeholder = placeholder;
+                        }
+                    });
                 }
             });
 
-            // Function to update the statistic counters based on DataTables state
+            // Adiciona seletor de agrupamento
+            const groupSelector = document.createElement('select');
+            groupSelector.className = 'form-select form-select-sm w-auto mb-2';
+            groupSelector.innerHTML = `
+        <option value="2">Agrupar por Rua</option>
+        <option value="1">Agrupar por Cidade</option>
+        <option value="-1">Sem Agrupamento</option>
+    `;
+
+            document.querySelector('#buracos-table_wrapper').prepend(groupSelector);
+
+            // Função para atualizar o agrupamento
+            function updateGrouping(columnIndex) {
+                const column = table.column(columnIndex);
+
+                if (columnIndex === -1) {
+                    table.rowGroup().dataSrc(null).draw();
+                    table.column(2).visible(true);
+                    table.column(1).visible(true);
+                } else {
+                    table.rowGroup().dataSrc(columnIndex).draw();
+                    table.column(columnIndex).visible(false);
+                    if (columnIndex === 2) table.column(1).visible(true);
+                }
+            }
+
+            // Evento de mudança no seletor
+            groupSelector.addEventListener('change', function () {
+                updateGrouping(parseInt(this.value));
+            });
+
+            // Estilos para grupos
+            const style = document.createElement('style');
+            style.innerHTML = `
+        tr.group-row td {
+            background-color: #e9ecef;
+            font-weight: bold;
+            border-top: 2px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
+            transition: background-color 0.3s;
+        }
+        tr.group-row:hover td {
+            background-color: #dae0e5 !important;
+        }
+        tr.group-row td:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+        tr.group-row td:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+    `;
+            document.head.appendChild(style);
+
+            // Atualizador de contadores
             const updateCounters = () => {
                 const totalRecords = table.data().count();
                 const filteredRecords = table.rows({ search: 'applied' }).count();
-                const hiddenRecords = totalRecords - filteredRecords;
 
                 document.getElementById('count-total').textContent = totalRecords;
                 document.getElementById('count-filtered').textContent = filteredRecords;
-                document.getElementById('count-hidden').textContent = hiddenRecords;
+                document.getElementById('count-hidden').textContent = totalRecords - filteredRecords;
             };
 
-            // Update counters on initial load and whenever the table redraws
             table.on('draw', updateCounters);
             updateCounters();
 
-            // Initialize and handle the Bootstrap Modal
-            const initModal = () => {
-                const modalElement = document.getElementById('editModal');
-                if (!modalElement) return;
+            // Controle do Modal
+            const editModal = new bootstrap.Modal('#editModal');
 
-                const modal = new bootstrap.Modal(modalElement);
+            document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
+                const button = e.target.closest('button.open-edit-modal');
+                if (!button) return;
 
-                // Abrir modal com UUID
-                document.querySelector('#buracos-table tbody').addEventListener('click', (e) => {
-                    const button = e.target.closest('button.open-edit-modal');
-                    if (!button) return;
+                const uuid = button.dataset.uuid;
+                if (!uuid) return;
 
-                    const row = button.closest('tr');
-                    if (!row) return;
+                document.getElementById('modal-uuid').value = uuid;
+                editModal.show();
+            });
 
-                    const uuid = button.dataset.uuid; // Get UUID directly from the button's data-uuid
-                    if (!uuid) {
-                        console.warn('UUID not found for this row.');
-                        return;
-                    }
+            // Envio do formulário
+            document.querySelectorAll('.submit-status').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const status = button.dataset.status;
+                    const uuid = document.getElementById('modal-uuid').value;
 
-                    document.getElementById('modal-uuid').value = uuid;
-                    modal.show();
-                });
-
-                // Botões com status
-                document.querySelectorAll('.submit-status').forEach(button => {
-                    button.addEventListener('click', async () => {
-                        const status = button.dataset.status;
-                        const form = document.getElementById('updateForm');
-                        const uuid = document.getElementById('modal-uuid').value;
-
-                        if (!uuid || !status) {
-                            alert('UUID ou status ausente.');
-                            return;
-                        }
-
-                        document.getElementById('modal-status').value = status;
-                        const formData = new FormData(form);
-
-                        // Debug opcional
-                        for (let [key, value] of formData.entries()) {
-                            console.log(`${key}: ${value}`);
-                        }
-
+                    try {
                         const response = await fetch('/api.php?action=atualizaburaco', {
                             method: 'POST',
-                            body: formData
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ uuid, status })
                         });
 
-                        let result;
-                        try {
-                            result = await response.json();
-                        } catch (jsonError) {
-                            console.error('API did not return valid JSON:', jsonError);
-                            alert('Resposta do servidor inválida. Verifique o console para mais detalhes.');
-                            return;
-                        }
+                        const result = await response.json();
 
                         if (response.ok && result.success) {
-                            modal.hide();
-                            alert(result.message || 'Status atualizado com sucesso.');
-                            // *** AQUI É A MUDANÇA PRINCIPAL ***
-                            // Como a tabela não é carregada via AJAX, recarregue a página inteira
-                            location.reload();
-                            // **********************************
+                            editModal.hide();
+                            location.reload(); // Atualiza os dados
                         } else {
-                            console.error('Erro na resposta:', result);
-                            alert(result.error || 'Erro ao atualizar status.');
+                            alert(result.error || 'Erro na atualização');
                         }
-                    });
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        alert('Falha na comunicação com o servidor');
+                    }
                 });
-            };
-            initModal();
+            });
         });
     </script>
 </body>
