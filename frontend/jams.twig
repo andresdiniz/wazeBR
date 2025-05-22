@@ -96,7 +96,7 @@
                                 <td title="{{ jam.endNode }}">{{ jam.endNode }}</td>
                                 <td class="text-center">{{ jam.speedKMH|number_format(2) }}</td>
                                 <td class="text-center">{{ (jam.speed)|number_format(1) }}</td>
-                                <td class="text-center">{{ jam.delay_minutes|number_format(1) }}</td>
+                                <td class="text-center">{{ jam.delay|number_format(1) }}</td>
                                 <td class="text-center">{{ jam.length|number_format(0) }}</td>
                                 <td class="text-center">{{ (jam.pubMillis / 1000)|round|date("d/m/Y H:i:s") }}</td>
                                 <td class="text-center">
