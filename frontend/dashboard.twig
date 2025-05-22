@@ -646,11 +646,12 @@
                     const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
 
                     console.log("Resultado da busca KM:", km);
+                    const kmNumero = parseFloat(km);
 
-                    if (typeof km === 'number' && !isNaN(km)) {
-                        $('#modalKm').removeClass('text-danger').text(`KM ${km.toFixed(2)}`);
+                    if (!isNaN(kmNumero)) {
+                        $('#modalKm').removeClass('text-danger').text(`KM Estimado: KM ${kmNumero.toFixed(2)}`);
                     } else {
-                        $('#modalKm').addClass('text-warning').text('KM não encontrado');
+                        $('#modalKm').addClass('text-warning').text('KM Estimado: KM não encontrado');
                     }
 
                 } catch (error) {
