@@ -62,14 +62,6 @@
         border-left: 4px solid #198754;
     }
 
-    @media (max-width: 768px) {
-        #routesTable th:nth-child(4), /* Vel. Normal */
-        #routesTable td:nth-child(4),
-        #routesTable th:nth-child(7), /* Comprimento */
-        #routesTable td:nth-child(7) {
-            display: none;
-        }
-    }
 </style>
 
 <div class="container-fluid">
@@ -103,11 +95,11 @@
                                 <td title="{{ jam.city }}">{{ jam.city }}</td>
                                 <td title="{{ jam.street }}">{{ jam.street }}</td>
                                 <td title="{{ jam.endNode }}">{{ jam.endNode }}</td>
-                                <td class="text-center">{{ speedKMH}}</td>
-                                <td class="text-center">{{ (speed)}}</td>
-                                <td class="text-center">{{ delay_minutes }}</td>
-                                <td class="text-center">{{ length }}</td>
-                                <td class="text-center">{{ pub_date|round(0, 'floor')|date("d/m/Y H:i") }}</td>
+                                <td class="text-center">{{ jam.speedKMH|number_format(2) }}</td>
+                                <td class="text-center">{{ (jam.speed)|number_format(1) }}</td>
+                                <td class="text-center">{{ jam.delay_minutes|number_format(1) }}</td>
+                                <td class="text-center">{{ jam.length|number_format(0) }}</td>
+                                <td class="text-center">{{ jam.pub_date|round(0, 'floor')|date("d/m/Y H:i") }}</td>
                                 <td class="text-center">
                                     <button class="btn btn-primary btn-sm view-route" data-bs-toggle="modal"
                                         data-bs-target="#mapModal" data-route-id="{{ jam.uuid }}"
@@ -157,11 +149,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    let jamsData = {{ jams|json_encode|raw }};
-    console.log(jamsData);
-</script>
 
 <!-- Importar o script corrigido -->
 <script src="../js/scripts-jams.js"></script>
