@@ -55,8 +55,40 @@ class TrafficJamAnalyzer {
             'heatmap' => $this->getHeatmap($id_parceiro),
             'segmentos' => $this->getTopSegmentos($id_parceiro),
             'length_delay' => $this->getLengthDelayData($id_parceiro),
-            'dia_hora' => $this->getDiaHoraData($id_parceiro)
+            'dia_hora' => $this->getDiaHoraData($id_parceiro),
+            'km_por_hora' => $this->getKmPorHora($id_parceiro),
+            'km_por_dia_semana' => $this->getKmPorDiaSemana($id_parceiro)
         ];
+    }
+
+    private function getKmPorHora($id_parceiro) {
+        $query = "SELECT
+            HOUR(date_received) AS hora,
+            ROUND(SUM(length) / 1000, 2) AS total_km
+        FROM jams";
+
+        $this->addPartnerFilter($query, $id_parceiro);
+        $query .= " GROUP BY hora ORDER BY hora";
+
+        $stmt = $this->pdo->prepare($query);
+        if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function getKmPorDiaSemana($id_parceiro) {
+        $query = "SELECT
+            DAYNAME(date_received) AS dia_semana,
+            ROUND(SUM(length) / 1000, 2) AS total_km
+        FROM jams";
+
+        $this->addPartnerFilter($query, $id_parceiro);
+        $query .= " GROUP BY dia_semana ORDER BY DAYOFWEEK(date_received)";
+
+        $stmt = $this->pdo->prepare($query);
+        if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     private function getResumo($id_parceiro) {
@@ -345,5 +377,7 @@ $data = array_merge($data, [
     'segmentos' => $data['segmentos'],
     'meta' => $data['meta'],
     'length_delay' => $data['length_delay'],
-    'dia_hora' => $data['dia_hora']
+    'dia_hora' => $data['dia_hora'],
+    'km_por_hora' => $data['km_por_hora'],
+    'km_por_dia_semana' => $data['km_por_dia_semana']
 ]);
