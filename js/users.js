@@ -3,7 +3,7 @@ class UserManager {
         this.initModals();
         this.initEventListeners();
         this.initApiHandlers();
-        // this.refreshUserLists(); // Removido para não carregar na inicialização
+        // this.refreshUserLists(); // Removido daqui
     }
 
     initModals() {
@@ -41,8 +41,8 @@ class UserManager {
         // Confirmação de Exclusão
         document.getElementById('confirmDelete')?.addEventListener('click', () => this.handleUserDelete());
 
-        // Carregar a lista de usuários ao carregar a página (opcional, se desejar um carregamento inicial)
-        this.refreshUserLists();
+        // Carregar a lista de usuários ao carregar a página (opcional)
+        // this.refreshUserLists();
     }
 
     initApiHandlers() {
@@ -55,7 +55,7 @@ class UserManager {
                 }
                 try {
                     const baseURL = new URL(globalConfig.apiBase, window.location.href);
-                    const url = new URL(baseURL); // Use the resolved absolute URL
+                    const url = new URL(baseURL);
 
                     url.searchParams.append('action', endpoint);
                     url.searchParams.append('id_parceiro', globalConfig.parceiroId);
@@ -114,7 +114,7 @@ class UserManager {
                 this.showToast('success', `Usuário ${action === 'cadastrar' ? 'cadastrado' : 'atualizado'}!`);
                 this.modals[action].hide();
                 form.reset();
-                await this.refreshUserLists();
+                await this.refreshUserLists(); // Chama o refresh APÓS o sucesso
             }
         } catch (error) {
             this.showToast('danger', error.message);
