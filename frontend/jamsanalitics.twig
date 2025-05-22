@@ -296,9 +296,11 @@
         const diaxsemana = {{ dia_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const km_por_hora = {{ km_por_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
         const km_por_dia_semana = {{ km_por_dia_semana|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const media_km_por_hora = {{ media_km_por_hora|json_encode(constant('JSON_HEX_TAG'))|raw }};
+        const media_km_por_dia_semana = {{ media_km_por_dia_semana|json_encode(constant('JSON_HEX_TAG'))|raw }};
 
-        console.log('Dados do gráfico de horas:', km_por_hora);
-        console.log('Dados do gráfico de dias da semana:', km_por_dia_semana);
+        console.log('Dados do gráfico de horas:', media_km_por_hora);
+        console.log('Dados do gráfico de dias da semana:', media_km_por_dia_semana);
 
     </script>
     <script src="../js/traffic-dashboard.js"></script>
