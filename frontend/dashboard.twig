@@ -208,15 +208,16 @@
                                         <div class="btn-group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal" data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y]|json_encode,
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': 'Acidente',
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}">
+    'uuid': alert.uuid,
+    'city': alert.city,
+    'street': alert.street,
+    'location': [alert.location_x, alert.location_y],
+    'timestamp': alert.pubMillis,
+    'type': alert.type,
+    'subtype': alert.subtype,
+    'confidence': alert.confidence,
+    'status': alert.status
+}|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
@@ -283,15 +284,16 @@
                                         <div class="btn-group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal" data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y]|json_encode,
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': 'Congestionamento',
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}">
+    'uuid': alert.uuid,
+    'city': alert.city,
+    'street': alert.street,
+    'location': [alert.location_x, alert.location_y],
+    'timestamp': alert.pubMillis,
+    'type': alert.type,
+    'subtype': alert.subtype,
+    'confidence': alert.confidence,
+    'status': alert.status
+}|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
@@ -358,15 +360,16 @@
                                         <div class="btn-group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal" data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y]|json_encode,
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': 'Buraco',
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}">
+    'uuid': alert.uuid,
+    'city': alert.city,
+    'street': alert.street,
+    'location': [alert.location_x, alert.location_y],
+    'timestamp': alert.pubMillis,
+    'type': alert.type,
+    'subtype': alert.subtype,
+    'confidence': alert.confidence,
+    'status': alert.status
+}|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
@@ -433,15 +436,16 @@
                                         <div class="btn-group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal" data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y]|json_encode,
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': 'Outro',
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}">
+    'uuid': alert.uuid,
+    'city': alert.city,
+    'street': alert.street,
+    'location': [alert.location_x, alert.location_y],
+    'timestamp': alert.pubMillis,
+    'type': alert.type,
+    'subtype': alert.subtype,
+    'confidence': alert.confidence,
+    'status': alert.status
+}|json_encode|e('html_attr') }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
