@@ -158,5 +158,10 @@
     </div>
 </div>
 
+<script>
+    let jamsData = {{ jams|json_encode|raw }};
+    console.log(jamsData);
+</script>
+
 <!-- Importar o script corrigido -->
 <script src="../js/scripts-jams.js"></script>
