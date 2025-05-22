@@ -73,7 +73,7 @@ function confirmarAlerta(uuid, km) {
 }
 
 
-async function buscarKmDnit(latitude, longitude, raio = 5) {
+async function buscarKmDnit(latitude, longitude, raio = 15) {
     const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
     const dataAtual = new Date().toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
     const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
