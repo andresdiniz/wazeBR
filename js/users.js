@@ -114,7 +114,11 @@ class UserManager {
                 this.showToast('success', `Usuário ${action === 'cadastrar' ? 'cadastrado' : 'atualizado'}!`);
                 this.modals[action].hide();
                 form.reset();
-                await this.refreshUserLists(); // Chama o refresh APÓS o sucesso
+                if (action === 'alterar') {
+                    console.log('Alteração bem-sucedida, chamando refreshUserLists');
+                    await this.refreshUserLists();
+                }
+                // Se você quiser fazer algo específico após o cadastro (sem ser o refresh da lista), faça aqui.
             }
         } catch (error) {
             this.showToast('danger', error.message);
