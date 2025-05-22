@@ -226,7 +226,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -302,7 +301,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -378,7 +376,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -454,7 +451,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                                {% include 'modal.twig' with {'alert': alert} %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -473,14 +469,108 @@
 {% endblock %}
 
 
+{# Remova todos os includes de modal das linhas #}
+
+<!-- Modal Único -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg rounded">
+            <div class="modal-header bg-primary text-white rounded-top">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.5rem;">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="bg-light p-3 rounded shadow-sm border">
+                            <h6><i class="fas fa-info-circle mr-2"></i> Informações Básicas</h6>
+                            <hr class="my-2">
+                            <p><strong><i class="fas fa-fingerprint mr-2"></i> UUID:</strong> <span
+                                    id="modalUuid"></span></p>
+                            <p><strong><i class="fas fa-city mr-2"></i> Cidade:</strong> <span id="modalCity"></span>
+                            </p>
+                            <p><strong><i class="fas fa-road mr-2"></i> Rua:</strong> <span id="modalStreet"></span></p>
+                            <p><strong><i class="fas fa-map-marker-alt mr-2"></i> Localização:</strong>
+                                Lat: <span id="modalLat"></span>, Lon: <span id="modalLon"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="bg-light p-3 rounded shadow-sm border">
+                            <h6><i class="fas fa-clock mr-2"></i> Detalhes Adicionais</h6>
+                            <hr class="my-2">
+                            <p><strong><i class="far fa-calendar-alt mr-2"></i> Data:</strong>
+                                <span id="modalDate"></span>
+                                <small class="text-muted">(UTC)</small>
+                            </p>
+                            <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
+                                <span id="modalKm" class="badge badge-info"></span>
+                            </p>
+                            <p><strong><i class="fas fa-check-double mr-2"></i> Confiança:</strong>
+                                <span id="modalConfidence" class="badge"></span>
+                            </p>
+                            <p><strong><i class="fas fa-traffic-light mr-2"></i> Status:</strong>
+                                <span id="modalStatus" class="badge"></span>
+                            </p>
+                            <p><strong><i class="fas fa-tags mr-2"></i> Tipo:</strong> <span id="modalType"></span></p>
+                            <p><strong><i class="fas fa-tag mr-2"></i> Subtipo:</strong> <span id="modalSubtype"></span>
+                            </p>
+                            <p><strong><i class="fas fa-link mr-2"></i> Waze Partner Hub:</strong>
+                                <a id="modalPartnerLink" class="badge badge-primary text-decoration-none"
+                                    target="_blank" rel="noopener noreferrer"
+                                    aria-label="Abrir alerta no Waze Partner Hub">
+                                    Ver Detalhes ↗
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+                <h6 class="text-center text-muted mb-3"><i class="fas fa-map-marked-alt mr-2"></i> Localização no Mapa
+                </h6>
+                <iframe id="modalMap" class="rounded shadow-sm border"
+                    style="width: 100%; height: 300px; border-color: #e0e0e0;" allow="geolocation *; fullscreen"
+                    title="Localização exata do alerta" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                    aria-describedby="map-description">
+                </iframe>
+                <small id="map-description" class="form-text text-muted text-center">
+                    Mapa interativo mostrando a localização precisa do alerta.
+                </small>
+
+                <hr class="my-3">
+                <h6 class="text-center text-muted mb-3"><i class="fas fa-street-view mr-2"></i> Street View</h6>
+                <iframe id="modalStreetView" width="100%" height="300" frameborder="0" style="border:0" allowfullscreen
+                    loading="lazy" class="rounded shadow-sm border">
+                </iframe>
+                <small class="form-text text-muted text-center">
+                    Visualização do Street View da localização (API Key do Google Maps é necessária).
+                </small>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-end">
+                <a id="modalWazeLink" class="btn btn-outline-primary" target="_blank">
+                    <i class="fab fa-waze mr-2"></i> Ver no Waze
+                </a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i> Fechar
+                </button>
+                <button type="button" class="btn btn-success ml-2" id="modalConfirmBtn">
+                    <i class="fas fa-check mr-2"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% block javascripts %}
-{# Ordem CORRETA de carregamento #}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    // Use noConflict para evitar conflitos com outras bibliotecas
-    var $j = jQuery.noConflict();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
@@ -489,30 +579,65 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-
 <script>
-// Configuração corrigida
-$j(document).ready(function () {
-    // Inicialização do DataTables
-    const tableConfig = {
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        pageLength: 10,
-        responsive: true,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-        }
-    };
+    document.addEventListener("DOMContentLoaded", function () {
+        // Configuração do modal
+        $('#alertModal').on('show.bs.modal', async function (event) {
+            const button = $(event.relatedTarget);
+            const alertData = JSON.parse(button.data('alert'));
 
-    $j('#accidentsTable, #jamsTable, #hazardsTable, #othersTable').DataTable(tableConfig);
+            // Preencher dados básicos
+            $('#modalUuid').text(alertData.uuid);
+            $('#modalCity').text(alertData.city);
+            $('#modalStreet').text(alertData.street);
+            $('#modalLat').text(alertData.location[1].toFixed(6));
+            $('#modalLon').text(alertData.location[0].toFixed(6));
+            $('#modalDate').text(new Date(alertData.timestamp).toLocaleString());
+            $('#modalType').text(alertData.type);
+            $('#modalSubtype').text(alertData.subtype || 'N/A');
 
-    // Controle de modais dinâmicos
-    $j(document).on('click', '.open-modal', function() {
-        const alertData = JSON.parse($j(this).data('alert'));
-        const modalId = `#alertModal${alertData.uuid}`;
-        console.log(modalId);        
-        // Mostrar o modal específico
-        $j(modalId).modal('show');
+            // Atualizar iframes
+            $('#modalMap').attr('src',
+                `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`
+            );
+
+            $('#modalStreetView').attr('src',
+                `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE_API&location=${alertData.location[1]},${alertData.location[0]}&fov=80&heading=70&pitch=0`
+            );
+
+            // Atualizar links
+            $('#modalPartnerLink').attr('href',
+                `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`
+            );
+
+            $('#modalWazeLink').attr('href',
+                `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`
+            );
+
+            // Status e Confiança
+            $('#modalStatus')
+                .text(alertData.status === 1 ? "Ativo" : "Inativo")
+                .removeClass()
+                .addClass(`badge badge-${alertData.status === 1 ? 'success' : 'danger'}`);
+
+            $('#modalConfidence')
+                .html(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`)
+                .removeClass()
+                .addClass(`badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`)
+                .tooltip({ title: "Nível de confiança na precisão do alerta", placement: "top" });
+
+            // Buscar KM
+            $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
+            const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
+            $('#modalKm').text(km !== null ? `KM ${km.toFixed(2)}` : 'Não encontrado');
+
+            // Configurar botão de confirmação
+            $('#modalConfirmBtn').off('click').click(() => confirmarAlerta(alertData.uuid));
+        });
+
+        // Inicializar tooltips
+        $('[data-toggle="tooltip"]').tooltip();
     });
-});
+    
 </script>
 {% endblock %}
