@@ -647,6 +647,7 @@
                     $('#modalKm').text(typeof km === 'number' ? `KM ${km.toFixed(2)}` : 'Não encontrado');
                 } catch (error) {
                     console.error("Erro ao buscar KM:", error);
+                    console.log("Resultado da busca KM:", km);
                     $('#modalKm').text('Erro na busca').addClass('text-danger');
                 }
 
