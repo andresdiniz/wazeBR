@@ -50,23 +50,25 @@ class UserManager {
                     console.error(`Endpoint not found: ${endpointKey}`);
                     throw new Error(`Endpoint não encontrado: ${endpointKey}`);
                 }
-                const url = new URL(globalConfig.apiBase);
-                url.searchParams.append('action', endpoint);
-                url.searchParams.append('id_parceiro', globalConfig.parceiroId);
-
-                const config = {
-                    method,
-                    headers: {}
-                };
-
-                if (method === 'GET' && data) {
-                    Object.keys(data).forEach(key => url.searchParams.append(key, data[key]));
-                } else if (data) {
-                    config.body = data instanceof FormData ? data : JSON.stringify(data);
-                    config.headers = data instanceof FormData ? {} : { 'Content-Type': 'application/json' };
-                }
-
                 try {
+                    const baseURL = new URL(globalConfig.apiBase, window.location.href);
+                    const url = new URL(baseURL); // Use the resolved absolute URL
+
+                    url.searchParams.append('action', endpoint);
+                    url.searchParams.append('id_parceiro', globalConfig.parceiroId);
+
+                    const config = {
+                        method,
+                        headers: {}
+                    };
+
+                    if (method === 'GET' && data) {
+                        Object.keys(data).forEach(key => url.searchParams.append(key, data[key]));
+                    } else if (data) {
+                        config.body = data instanceof FormData ? data : JSON.stringify(data);
+                        config.headers = data instanceof FormData ? {} : { 'Content-Type': 'application/json' };
+                    }
+
                     const res = await fetch(url, config);
                     if (!res.ok) {
                         const errorText = await res.text();
