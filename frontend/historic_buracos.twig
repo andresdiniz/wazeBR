@@ -168,32 +168,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for buraco in buracos %}
+                        {% for alert in buracos %}
                         <tr>
-                            <td>{{ buraco.city }}</td>
-                            <td>{{ buraco.street }}</td>
+                            <td>{{ alert.city }}</td>
+                            <td>{{ alert.street }}</td>
                             <td>
                                 <span class="badge badge-confidence
-                                    {% if buraco.confidence >= 4 %}badge-success
-                                    {% elseif buraco.confidence >= 2 %}badge-warning
+                                    {% if alert.confidence >= 4 %}badge-success
+                                    {% elseif alert.confidence >= 2 %}badge-warning
                                     {% else %}badge-danger{% endif %}">
-                                    {{ (buraco.confidence * 20)|round }}%
+                                    {{ (alert.confidence * 20)|round }}%
                                 </span>
                             </td>
-                            <td>{{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}</td>
+                            <td>{{ (alert.pubMillis / 1000)|date('d/m/Y H:i') }}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary" data-toggle="modal"
                                     data-target="#alertModal" data-alert="{{ {
-                'uuid': buraco.uuid,
-                'city': buraco.city,
-                'street': buraco.street,
-                'location': [buraco.location_x, buraco.location_y],
-                'timestamp': buraco.pubMillis,
-                'type': buraco.type,
-                'subtype': buraco.subtype,
-                'confidence': buraco.confidence,
-                'status': buraco.status
-            }|json_encode|e('html_attr') }}">
+                                        'uuid': alert.uuid,
+                                        'city': alert.city,
+                                        'street': alert.street,
+                                        'location': [alert.location_x, alert.location_y],
+                                        'timestamp': alert.pubMillis,
+                                        'type': alert.type,
+                                        'subtype': alert.subtype,
+                                        'confidence': alert.confidence,
+                                        'status': alert.status
+                                    }|json_encode|e('html_attr') }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </td>
