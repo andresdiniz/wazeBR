@@ -430,10 +430,16 @@
                     minute: '2-digit'
                 }) + ' ' + eventDate.toLocaleTimeString('pt-BR'));
 
-                // 4. Informações de status e confiança
-                $('#modalKm').html(alertData.estimated_km ?
-                    `KM ${parseFloat(alertData.estimated_km).toFixed(2)}` :
-                    '<span class="text-muted">Não disponível</span>');
+                // 4. Buscar KM do DNIT assincronamente
+                const km = await buscarKmDnit(
+                    parseFloat(alertData.location_y),  // Latitude
+                    parseFloat(alertData.location_x)   // Longitude
+                );
+
+                // 5. Atualizar KM após a busca
+                $('#modalKm').html(km !== null ?
+                    `KM ${km.toString().replace('.', ',')}` :
+                    '<span class="text-danger">Não disponível</span>');
 
                 const confidence = Math.round(alertData.confidence * 20);
                 $('#modalConfidence')
