@@ -10,7 +10,10 @@ if (!isset($_SESSION['usuario_id_parceiro'])) {
     header('Location: login.php');
     exit;
 }
-
+if (!isset($_SESSION['usuario_id'])) {
+    header('Location: login.php');
+    exit;
+}
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
 try {
@@ -121,6 +124,5 @@ try {
     die("Erro: " . $e->getMessage());
 }
 
-$loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../frontend');
-$twig = new \Twig\Environment($loader);
+
 ?>
