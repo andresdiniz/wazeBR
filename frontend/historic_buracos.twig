@@ -410,16 +410,11 @@
                         dataType: 'json',
                         success: function (data, textStatus, jqXHR) {
                             // Fechar todos os modais
-                            $('.modal').modal('hide');
-
-                            // Atualizar o status na tabela
-                            $(`tr:has(td:contains('${currentAlertUuid}')) .badge-status`)
-                                .removeClass('badge-success badge-danger badge-warning')
-                                .addClass(status === 'resolvido' ? 'badge-success' :
-                                    status === 'nao_existe' ? 'badge-danger' : 'badge-warning')
-                                .text(statusMap[status]);
-
                             alert('Status atualizado com sucesso!');
+                            $('#statusModal').modal('hide');
+                            $('#alertModal').modal('hide');
+                            $('#buracosTable').DataTable().ajax.reload(null, false); // Atualizar tabela
+                            $('#mapaBuracos').leafletMap('refresh'); // Atualizar mapa
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             console.error('Erro:', errorThrown);
