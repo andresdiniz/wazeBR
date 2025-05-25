@@ -260,7 +260,7 @@
                                 <hr class="my-2">
                                 <p><strong><i class="far fa-calendar-alt mr-2"></i> Data:</strong>
                                     <span id="modalDate"></span>
-                                    <small class="text-muted">(UTC)</small>
+                                    <small class="text-muted">(UTC-3)</small>
                                 </p>
                                 <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
                                     <span id="modalKm" class="badge badge-info"></span>
@@ -414,7 +414,6 @@
             $('#modalStreet').text(alertData.street);
             $('#modalLat').text(alertData.location_x.toFixed(6));
             $('#modalLon').text(alertData.location_y.toFixed(6));
-            console.log('Dados do Alerta:', alertData.pubMillis);
             $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR', {
                 timeZone: 'UTC',
                 year: 'numeric',
