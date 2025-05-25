@@ -16,6 +16,13 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
+$loader = new FilesystemLoader(__DIR__ . '/../frontend');
+$twig = new Environment($loader);
+
+
 try {
     $pdo = Database::getConnection();
 
