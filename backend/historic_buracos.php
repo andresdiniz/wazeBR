@@ -34,7 +34,7 @@ try {
 
     if (!empty($filters['period'])) {
         $baseSql .= " AND pubMillis >= :periodStart";
-        $daysAgo = (int)$filters['period'];
+        $daysAgo = (int) $filters['period'];
         $baseParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
     }
 
@@ -64,6 +64,33 @@ try {
     $stmtCidades = $pdo->prepare($sqlCidades);
     $stmtCidades->execute();
     $cidadesData = $stmtCidades->fetchAll(PDO::FETCH_ASSOC);
+
+    // No trecho onde faz as consultas SQL:
+    $sqlTemporal = "SELECT 
+                DATE(FROM_UNIXTIME(pubMillis/1000)) as data, 
+                COUNT(*) as total 
+            FROM alerts 
+            WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
+            GROUP BY data 
+            ORDER BY data DESC 
+            LIMIT 30";
+
+    $sqlRuas = "SELECT 
+            CONCAT(city, ' - ', street) as local,
+            COUNT(*) as total 
+        FROM alerts 
+        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
+        GROUP BY local 
+        ORDER BY total DESC 
+        LIMIT 10";
+
+    // Executar e fetch dos dados
+    $stmtRuas = $pdo->prepare($sqlRuas);
+    $stmtRuas->execute();
+    $ruasData = $stmtRuas->fetchAll(PDO::FETCH_ASSOC);
+
+    // Passar para o template
+    $data['ruas'] = $ruasData;
 
     // Executar query principal
     $stmtBuracos = $pdo->prepare($baseSql);
