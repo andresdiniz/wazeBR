@@ -399,7 +399,10 @@
                     // Mostrar loading
                     $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
-                    fetch('..api.php/?action="atualizaburaco"', {
+                    console.log('UUID:', currentAlertUuid);
+                    console.log('Status:', status);
+
+                    const response = await fetch('..api.php/?action="atualizaburaco"', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
