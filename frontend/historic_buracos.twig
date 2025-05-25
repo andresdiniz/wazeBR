@@ -400,7 +400,7 @@
                     $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
                     const response = await fetch('api.php', {
-                        method: 'POST',
+                        method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
                         },
