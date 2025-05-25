@@ -245,8 +245,11 @@
         // Ao clicar no botão "olho" na tabela
         $('.open-modal').on('click', function () {
             var alertData = $(this).data('alert');
-            $('#alertModal').modal('show'); // Tenta mostrar um modal com ID 'alertModal'
-
+            if ($('#alertModal').length) {
+                $('#alertModal').modal('show'); // Tenta mostrar o modal com ID 'alertModal' SE ele existir
+            } else {
+                console.log("O modal com ID #alertModal não foi encontrado no DOM.");
+            }
             // Aqui você pode preencher o conteúdo do modal com 'alertData'
             console.log(alertData);
         });
