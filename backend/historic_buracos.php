@@ -23,6 +23,43 @@ $twig = new \Twig\Environment($loader);
 try {
     $pdo = Database::getConnection();
 
+    // Nova ação para obter dados dos gráficos
+    if ($_GET['action'] == 'getChartData') {
+        header('Content-Type: application/json');
+
+        try {
+            $pdo = Database::getConnection();
+
+            // Dados para gráfico temporal
+            $sqlTemporal = "SELECT DATE(FROM_UNIXTIME(pubMillis/1000)) as data, COUNT(*) as total 
+                       FROM alerts 
+                       WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
+                       GROUP BY DATE(FROM_UNIXTIME(pubMillis/1000))
+                       ORDER BY data DESC LIMIT 30";
+
+            // Dados para gráfico de cidades
+            $sqlCidades = "SELECT city, COUNT(*) as total 
+                      FROM alerts 
+                      WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
+                      GROUP BY city 
+                      ORDER BY total DESC LIMIT 10";
+
+            // Executar queries
+            $temporal = $pdo->query($sqlTemporal)->fetchAll(PDO::FETCH_ASSOC);
+            $cidades = $pdo->query($sqlCidades)->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'temporal' => $temporal,
+                'cidades' => $cidades,
+                'heatmap' => $buracos // Já temos os dados dos buracos
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
     // --- Construção da Base da Query e Parâmetros ---
     // Esta base será usada para a query principal e para as queries de contagem filtradas
     $baseSql = "SELECT * FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
@@ -52,7 +89,7 @@ try {
 
     if (!empty($_GET['period'])) {
         $baseSql .= " AND pubMillis >= :periodStart";
-        $daysAgo = (int)$_GET['period'];
+        $daysAgo = (int) $_GET['period'];
         $baseParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
     }
 
@@ -76,8 +113,8 @@ try {
         if (array_key_exists($requestedStatus, $statusFilterMap)) {
             $dbStatus = $statusFilterMap[$requestedStatus];
             if ($dbStatus === 'NULL') {
-                 $mainSql .= " AND confirmado IS NULL";
-                 // Não adiciona parâmetro, pois IS NULL não usa placeholder
+                $mainSql .= " AND confirmado IS NULL";
+                // Não adiciona parâmetro, pois IS NULL não usa placeholder
             } else {
                 $mainSql .= " AND confirmado = :confirmado_filter";
                 $mainParams['confirmado_filter'] = $dbStatus;
@@ -96,9 +133,9 @@ try {
         if ($key === 'periodStart') {
             $stmt->bindValue(":$key", $value, PDO::PARAM_INT);
         } elseif ($key === 'date') {
-             $stmt->bindValue(":$key", $value, PDO::PARAM_STR); // Bind como string para datas
+            $stmt->bindValue(":$key", $value, PDO::PARAM_STR); // Bind como string para datas
         } else {
-             $stmt->bindValue(":$key", $value); // PDO::PARAM_STR é o default
+            $stmt->bindValue(":$key", $value); // PDO::PARAM_STR é o default
         }
     }
     $stmt->execute();
@@ -109,11 +146,11 @@ try {
     // --- Queries para Contagens (Usando a Base de Filtros) ---
 
     // Função auxiliar para executar queries de contagem
-    $executeCountQuery = function($pdo, $baseSql, $baseParams, $statusCondition = null) {
+    $executeCountQuery = function ($pdo, $baseSql, $baseParams, $statusCondition = null) {
         $countSql = "SELECT COUNT(*) FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
         $countParams = [];
 
-         // Adicionar filtro de parceiro à query de contagem
+        // Adicionar filtro de parceiro à query de contagem
         if ($_SESSION['usuario_id_parceiro'] != 99) { // Usar $_SESSION diretamente aqui
             $countSql .= " AND id_parceiro = :id_parceiro";
             $countParams['id_parceiro'] = $_SESSION['usuario_id_parceiro'];
@@ -138,30 +175,30 @@ try {
 
         if (!empty($_GET['period'])) {
             $countSql .= " AND pubMillis >= :periodStart";
-            $daysAgo = (int)$_GET['period'];
+            $daysAgo = (int) $_GET['period'];
             $countParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
         }
 
 
         // Adicionar condição de status específico se fornecida
         if ($statusCondition !== null) {
-             if ($statusCondition === 'IS NULL') {
-                 $countSql .= " AND confirmado IS NULL";
-             } else {
+            if ($statusCondition === 'IS NULL') {
+                $countSql .= " AND confirmado IS NULL";
+            } else {
                 $countSql .= " AND confirmado = :status_count";
                 $countParams['status_count'] = $statusCondition;
-             }
+            }
         }
 
 
         $stmtCount = $pdo->prepare($countSql);
         foreach ($countParams as $key => $value) {
-             if ($key === 'periodStart') {
+            if ($key === 'periodStart') {
                 $stmtCount->bindValue(":$key", $value, PDO::PARAM_INT);
             } elseif ($key === 'date') {
-                 $stmtCount->bindValue(":$key", $value, PDO::PARAM_STR);
+                $stmtCount->bindValue(":$key", $value, PDO::PARAM_STR);
             } else {
-                 $stmtCount->bindValue(":$key", $value);
+                $stmtCount->bindValue(":$key", $value);
             }
         }
         $stmtCount->execute();
@@ -171,14 +208,14 @@ try {
     // Contagem Total de Registros (Ignorando filtros de data/cidade/rua/período/status)
     $totalSqlBase = "SELECT COUNT(*) FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
     $totalParamsBase = [];
-     if ($id_parceiro != 99) {
+    if ($id_parceiro != 99) {
         $totalSqlBase .= " AND id_parceiro = :id_parceiro";
         $totalParamsBase['id_parceiro'] = $id_parceiro;
     }
     $stmtTotalBase = $pdo->prepare($totalSqlBase);
-     if ($id_parceiro != 99) {
-         $stmtTotalBase->bindParam(':id_parceiro', $id_parceiro);
-     }
+    if ($id_parceiro != 99) {
+        $stmtTotalBase->bindParam(':id_parceiro', $id_parceiro);
+    }
     $stmtTotalBase->execute();
     $countTotal = $stmtTotalBase->fetchColumn();
 
