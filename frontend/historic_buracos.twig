@@ -6,13 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Buracos</title>
 
-    <!-- Bootstrap 4 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 
@@ -65,7 +63,6 @@
 
 <body class="bg-light">
     <div class="container-fluid py-4">
-        <!-- Filtros -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-3">Filtrar Registros</h5>
@@ -91,7 +88,6 @@
             </div>
         </div>
 
-        <!-- Estatísticas -->
         <div class="row mb-4">
             <div class="col-md-3 col-6 mb-3">
                 <div class="card border-primary shadow-sm h-100">
@@ -131,7 +127,6 @@
             </div>
         </div>
 
-        <!-- Gráficos -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="chart-card">
@@ -147,14 +142,12 @@
             </div>
         </div>
 
-        <!-- Mapa -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body p-2">
                 <div id="mapaBuracos"></div>
             </div>
         </div>
 
-        <!-- Tabela -->
         <div class="card shadow-sm">
             <div class="card-body">
                 <table id="buracosTable" class="table table-sm table-hover" style="width:100%">
@@ -173,7 +166,7 @@
                             <td>{{ buraco.city }}</td>
                             <td>{{ buraco.street }}</td>
                             <td>
-                                <span class="badge badge-confidence 
+                                <span class="badge badge-confidence
                                     {% if buraco.confidence >= 4 %}badge-success
                                     {% elseif buraco.confidence >= 2 %}badge-warning
                                     {% else %}badge-danger{% endif %}">
@@ -197,10 +190,8 @@
 
     {% include "modal.twig" %}
 
+    
 
-
-    <!-- Scripts -->
-    <!--
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -228,55 +219,55 @@
                 type: 'line',
                 data: {
                     labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-            datasets: [{
-                label: 'Buracos por Dia',
-                data: {{ temporal| map(t => t.total) | json_encode | raw }},
-            borderColor: '#4e73df',
-            tension: 0.3
+                    datasets: [{
+                        label: 'Buracos por Dia',
+                        data: {{ temporal| map(t => t.total) | json_encode | raw }},
+                        borderColor: '#4e73df',
+                        tension: 0.3
                     }]
                 }
             });
 
-        new Chart(document.getElementById('ruasChart').getContext('2d'), {
-            type: 'horizontalBar',
-            data: {
-                labels: {{ ruas| map(r => r.local) | json_encode | raw }},
-            datasets: [{
-                label: 'Ocorrências',
-                data: {{ ruas| map(r => r.total) | json_encode | raw }},
-            backgroundColor: '#36b9cc'
+            new Chart(document.getElementById('ruasChart').getContext('2d'), {
+                type: 'horizontalBar',
+                data: {
+                    labels: {{ ruas| map(r => r.local) | json_encode | raw }},
+                    datasets: [{
+                        label: 'Ocorrências',
+                        data: {{ ruas| map(r => r.total) | json_encode | raw }},
+                        backgroundColor: '#36b9cc'
                     }]
                 },
-            options: {
-            indexAxis: 'y',
-            scales: {
-                x: { beginAtZero: true },
-                y: {
-                    ticks: {
-                        autoSkip: false,
-                        callback: function (value) {
-                            return value.substring(0, 30) + (value.length > 30 ? '...' : '');
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true },
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                callback: function (value) {
+                                    return value.substring(0, 30) + (value.length > 30 ? '...' : '');
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
             });
 
-        // Mapa
-        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            // Mapa
+            const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        const markers = L.markerClusterGroup();
-        {% for buraco in buracos %}
-        {% if buraco.location_y and buraco.location_x %}
-        markers.addLayer(
-            L.marker([{{ buraco.location_y }}, {{ buraco.location_x }}])
-                .bindPopup(`<b>${{% buraco.street | e('js') %}}</b><br>Confiança: ${{% buraco.confidence %}}`)
-        );
-        {% endif %}
-        {% endfor %}
-        map.addLayer(markers);
+            const markers = L.markerClusterGroup();
+            {% for buraco in buracos %}
+            {% if buraco.location_y and buraco.location_x %}
+            markers.addLayer(
+                L.marker([{{ buraco.location_y }}, {{ buraco.location_x }}])
+                    .bindPopup(`<b>{{ buraco.street|e('js') }}</b><br>Confiança: {{ buraco.confidence }}`)
+            );
+            {% endif %}
+            {% endfor %}
+            map.addLayer(markers);
         });
     </script>
 </body>
