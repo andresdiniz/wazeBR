@@ -84,12 +84,12 @@ try {
                      AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
     $sqlCountTotal = $addPartnerFilter($sqlCountTotal);
 
-
-    $sqlCountResolved = "SELECT COUNT(*) FROM alerts 
-                     WHERE type = 'HAZARD' 
-                     AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' 
-                     AND confirmado = 'RESOLVED'";
-    $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
+     // Query para contagem de resolvidos
+     $sqlCountResolved = "SELECT COUNT(*) FROM alerts
+                      WHERE type = 'HAZARD'
+                      AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
+                      AND confirmado = 'RESOLVED'";
+     $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
 
     // Preparar e executar todas as queries
     $executeQuery = function($sql, $params = []) use ($pdo, $id_parceiro) {
@@ -109,7 +109,7 @@ try {
     $cidadesData = $executeQuery($sqlCidades)->fetchAll(PDO::FETCH_ASSOC);
     $ruasData = $executeQuery($sqlRuas)->fetchAll(PDO::FETCH_ASSOC);
     $countTotal = $executeQuery($sqlCountTotal)->fetchColumn();
-    $countResolved = $executeQuery($sqlCountResolved)->fetchColumn(PDO::FETCH_ASSOC);
+    $countResolved = $executeQuery($sqlCountResolved)->fetchColumn();
 
     // Query principal com filtros
     $stmtBuracos = $executeQuery($baseSql, $baseParams);
