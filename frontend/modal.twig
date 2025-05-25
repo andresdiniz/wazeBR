@@ -131,6 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const latitude = parseFloat(modal.getAttribute("data-lat"));
             const longitude = parseFloat(modal.getAttribute("data-lon"));
 
+            console.log(`Modal ${uuid} aberto. Latitude: ${latitude}, Longitude: ${longitude}`);
+
             if (!isNaN(latitude) && !isNaN(longitude)) {
                 const kmSpan = document.getElementById(`km-value-${uuid}`);
                 if (kmSpan && kmSpan.textContent.includes('Calculando')) {
@@ -146,16 +148,6 @@ document.addEventListener("DOMContentLoaded", function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
 });
-
-// Placeholder para a função de buscar KM
-async function buscarKmDnit(longitude, latitude) {
-    // Simulação de chamada de API
-    console.log("Buscando KM para:", latitude, longitude);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Retorne o valor real do KM aqui
-    const randomKM = Math.random() * 100;
-    return randomKM;
-}
 
 // Placeholder para a função de confirmar alerta
 function confirmarAlerta(uuid) {
