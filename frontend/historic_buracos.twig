@@ -412,8 +412,8 @@
             $('#modalUuid').text(alertData.uuid);
             $('#modalCity').text(alertData.city);
             $('#modalStreet').text(alertData.street);
-            $('#modalLat').text(alertData.location[1].toFixed(6));
-            $('#modalLon').text(alertData.location[0].toFixed(6));
+            $('#modalLat').text(alertData.location_x.toFixed(6));
+            $('#modalLon').text(alertData.location_y.toFixed(6));
             
             // Atualizar iframes
             $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}`);
