@@ -421,7 +421,7 @@
                 $('#modalLon').text(parseFloat(alertData.location_x).toFixed(6));
 
                 // 3. Formatando data corretamente
-                const eventDate = new Date(alertData.timestamp);
+                const eventDate = new Date(alertData.pubMillis);
                 $('#modalDate').text(eventDate.toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: '2-digit',
