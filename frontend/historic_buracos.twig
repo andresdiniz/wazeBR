@@ -207,71 +207,61 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // Resolver conflitos de jQuery. Isso é útil se outras bibliotecas que também usam $ estão presentes.
+        // Resolver conflitos de jQuery
         var $j = jQuery.noConflict(true);
 
-        // Dados vindos do backend (PHP/Symfony/Twig) e convertidos para JavaScript via json_encode.
+        // Dados do PHP
         const buracos = {{ buracos| json_encode | raw }};
         const temporal = {{ temporal| json_encode | raw }};
         const ruas = {{ ruas| json_encode | raw }};
 
-        // Executa este código quando o DOM (Document Object Model) estiver completamente carregado.
         $j(document).ready(function ($) {
-            // Inicialização do DataTables na tabela com o ID 'buracosTable'.
+            // DataTable
             $('#buracosTable').DataTable({
-                // Configurações de idioma para Português do Brasil.
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
                 },
-                // Define a estrutura da interface do DataTables, incluindo botões de exportação e filtro.
-                // 'B' para Buttons, 'f' para filter (busca). 'r' para processing display, 't' para the table!,
-                // 'i' for information, 'p' for pagination.
                 dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-                // Define os botões de exportação (Copiar, Excel, PDF).
                 buttons: [
                     'copy', 'excel', 'pdf'
                 ]
             });
 
-            // Inicialização do gráfico de evolução temporal usando Chart.js.
+            // Gráfico Temporal
             new Chart(document.getElementById('temporalChart').getContext('2d'), {
-                type: 'line', // Tipo do gráfico: linha.
+                type: 'line',
                 data: {
-                    // Rótulos do eixo X (datas).
                     labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-            // Conjunto de dados.
             datasets: [{
-                label: 'Buracos por Dia', // Rótulo da linha.
-                data: {{ temporal| map(t => t.total) | json_encode | raw }}, // Dados do eixo Y (total de buracos).
-            borderColor: '#4e73df', // Cor da linha.
-            tension: 0.3 // Suavização da curva da linha.
+                label: 'Buracos por Dia',
+                data: {{ temporal| map(t => t.total) | json_encode | raw }},
+            borderColor: '#4e73df',
+            tension: 0.3
                 }]
             }
         });
 
-        // Inicialização do gráfico de barras horizontais para as ruas com mais ocorrências.
+        // Gráfico de Ruas (Corrigido)
         new Chart(document.getElementById('ruasChart').getContext('2d'), {
-            type: 'bar', // Tipo do gráfico: barras.
+            type: 'bar',
             data: {
-                // Rótulos do eixo Y (nomes das ruas).
                 labels: {{ ruas| map(r => r.local) | json_encode | raw }},
-            // Conjunto de dados.
             datasets: [{
-                label: 'Quantidade de Ocorrências', // Rótulo das barras.
-                data: {{ ruas| map(r => r.total) | json_encode | raw }}, // Dados do eixo X (quantidade de ocorrências).
-            backgroundColor: '#36b9cc', // Cor de fundo das barras.
-            borderColor: '#2c7a7b', // Cor da borda das barras.
-            borderWidth: 1, // Largura da borda das barras.
-            borderRadius: 4, // Arredondamento das bordas das barras.
-            hoverBackgroundColor: '#2c7a7b' // Cor de fundo ao passar o mouse.
+                label: 'Quantidade de Ocorrências',
+                data: {{ ruas| map(r => r.total) | json_encode | raw }},
+            backgroundColor: '#36b9cc',
+            borderColor: '#2c7a7b',
+            borderWidth: 1,
+            borderRadius: 4,
+            hoverBackgroundColor: '#2c7a7b'
                 }]
             },
             options: {
-            indexAxis: 'y', // Define o eixo Y como o eixo das barras (horizontal).
-            responsive: true, // Torna o gráfico responsivo.
-            maintainAspectRatio: false, // Permite que o gráfico não mantenha a proporção.
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
             layout: {
-                padding: { // Define o preenchimento ao redor do gráfico.
+                padding: {
                     left: 20,
                     right: 20,
                     top: 20,
@@ -279,24 +269,21 @@
                 }
             },
             scales: {
-                x: { // Configurações do eixo X.
-                    beginAtZero: true, // Começa do zero.
-                    grid: {
-                        display: false // Oculta as linhas de grade do eixo X.
-                    },
-                    title: { // Título do eixo X.
+                x: {
+                    beginAtZero: true,
+                    grid: { display: false },
+                    title: {
                         display: true,
                         text: 'Número de Ocorrências'
                     }
                 },
-                y: { // Configurações do eixo Y.
+                y: {
                     ticks: {
-                        autoSkip: false, // Não pula rótulos automaticamente.
-                        maxRotation: 45, // Rotação máxima dos rótulos.
-                        minRotation: 45, // Rotação mínima dos rótulos.
-                        padding: 10, // Espaçamento dos rótulos.
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        padding: 10,
                         callback: function (value) {
-                            // Trunca labels longos e armazena o valor completo para o tooltip.
                             const truncated = value.length > 25 ?
                                 value.substring(0, 25) + '...' :
                                 value;
@@ -304,53 +291,44 @@
                             return truncated;
                         }
                     },
-                    grid: {
-                        display: false // Oculta as linhas de grade do eixo Y.
-                    }
+                    grid: { display: false }
                 }
             },
             plugins: {
-                tooltip: { // Configurações do tooltip (ao passar o mouse nas barras).
+                tooltip: {
                     callbacks: {
                         title: function (context) {
-                            // Mostra o nome completo da rua no tooltip.
                             return {{ ruas | map(r => r.local) | json_encode | raw }
                         }[context[0].dataIndex];
-                    }
-                }
-            },
-            legend: { // Configurações da legenda.
-                position: 'top',
-                align: 'end',
-                labels: {
-                    boxWidth: 12,
-                    padding: 20
+                    }[context[0].dataIndex];
                 }
             }
+        },
+            legend: {
+            position: 'top',
+            align: 'end',
+            labels: {
+                boxWidth: 12,
+                padding: 20
+            }
+        }
         }
             }
         });
 
-        // Inicialização do mapa Leaflet.
-        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12); // Define o centro do mapa e o zoom.
-        // Adiciona a camada de tiles do OpenStreetMap.
+        // Mapa
+        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Cria um grupo de marcadores para o cluster (agrupar marcadores próximos).
         const markers = L.markerClusterGroup();
-        // Loop através dos dados de buracos para adicionar marcadores no mapa.
         {% for buraco in buracos %}
-        // Verifica se as coordenadas de latitude e longitude estão presentes.
         {% if buraco.location_y and buraco.location_x %}
-        // Cria um marcador Leaflet para cada buraco e o adiciona ao grupo de marcadores.
         markers.addLayer(
             L.marker([{{ buraco.location_y }}, {{ buraco.location_x }}])
-                // Define o conteúdo do popup que aparece ao clicar no marcador.
-                .bindPopup(`<b>{{ buraco.street|e('js') }}</b><br>Confiança: {{ buraco.confidence }}`)
+                .bindPopup(`<b>{{ buraco.street|e('js') }}</b><br>Confiança: {{ buraco.confidence|e('js') }}`)
         );
         {% endif %}
         {% endfor %}
-        // Adiciona o grupo de marcadores (com clustering) ao mapa.
         map.addLayer(markers);
     });
     </script>
