@@ -202,6 +202,21 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
+        const buracos = {{ buracos|json_encode|raw }};
+        const temporal = {{ temporal|json_encode|raw }};
+        const ruas = {{ ruas|json_encode|raw }};
+        const counts = {
+            total: {{ counts.total }},
+            filtered: {{ counts.filtered }}
+        };
+
+        consolest.log('Buracos:', buracos);
+        console.log('Temporal:', temporal);
+        console.log('Ruas:', ruas);
+        console.log('Counts:', counts);
+        console.log('Filters:', {{ filters|json_encode|raw }});
+
+
         $(document).ready(function () {
             // DataTable
             $('#buracosTable').DataTable({
