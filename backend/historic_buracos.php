@@ -23,7 +23,7 @@ try {
     $pdo = Database::getConnection();
 
     // Função para adicionar filtro de parceiro às queries
-    $addPartnerFilter = function($sql) use ($id_parceiro) {
+    $addPartnerFilter = function ($sql) use ($id_parceiro) {
         if ($id_parceiro != 99) {
             $sql .= " AND id_parceiro = :id_parceiro";
         }
@@ -44,7 +44,7 @@ try {
 
     if (!empty($filters['period'])) {
         $baseSql .= " AND pubMillis >= :periodStart";
-        $daysAgo = (int)$filters['period'];
+        $daysAgo = (int) $filters['period'];
         $baseParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
     }
 
@@ -82,17 +82,12 @@ try {
     $sqlCountTotal = "SELECT COUNT(*) FROM alerts 
                      WHERE type = 'HAZARD' 
                      AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
-    $sqlCountTotal = $addPartnerFilter($sqlCountTotal);
-
-     // Query para contagem de resolvidos
-     $sqlCountResolved = "SELECT COUNT(*) FROM alerts
-                      WHERE type = 'HAZARD'
-                      AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
-                      AND confirmado = 'RESOLVED'";
-     $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
+    $sqlCountTotal = $addPartnerFilter("SELECT COUNT(*) FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'");
+    $sqlCountResolved = "SELECT COUNT(*) FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND confirmado = 'RESOLVED'";
+    $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
 
     // Preparar e executar todas as queries
-    $executeQuery = function($sql, $params = []) use ($pdo, $id_parceiro) {
+    $executeQuery = function ($sql, $params = []) use ($pdo, $id_parceiro) {
         $stmt = $pdo->prepare($sql);
         if ($id_parceiro != 99) {
             $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
