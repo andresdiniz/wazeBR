@@ -410,6 +410,7 @@
                 if (!rawData) {
                     throw new Error('Dados do alerta não encontrados.');
                 }
+                console.log('Dados do Alerta:', rawData);
                 // Corrigido: Usar JSON.parse diretamente no valor do atributo data-alert
                 // const rawData = $(this).data('alert');
                 // const alertData = JSON.parse(rawData);
@@ -418,8 +419,6 @@
                 if (!alertData) {
                     throw new Error('Dados do alerta inválidos.');
                 }
-
-                console.log('Dados do Alerta:', alertData);
 
                 // 2. Preencher informações básicas
                 $('#modalUuid').text(alertData.uuid);
