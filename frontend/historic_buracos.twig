@@ -397,7 +397,8 @@
 
                 try {
                     // Mostrar loading
-                    $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
+                    const $btn = $(this);
+                    $btn.html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
                     $.ajax({
                         url: '../api.php/?action=atualizaburaco',
@@ -406,11 +407,10 @@
                             uuid: currentAlertUuid,
                             status: status
                         },
-                        dataType: 'json', // Esperamos uma resposta JSON
+                        dataType: 'json',
                         success: function (data, textStatus, jqXHR) {
-                            // Atualizar a interface
-                            $('#statusModal').modal('hide');
-                            $('#alertModal').modal('hide');
+                            // Fechar todos os modais
+                            $('.modal').modal('hide');
 
                             // Atualizar o status na tabela
                             $(`tr:has(td:contains('${currentAlertUuid}')) .badge-status`)
@@ -427,7 +427,7 @@
                         },
                         complete: function () {
                             // Restaurar botão
-                            $(this).html(`<i class="fas fa-check-circle mr-2"></i> ${$(this).text()}`);
+                            $btn.html(`<i class="fas fa-check-circle mr-2"></i> ${$btn.data('original-text') || 'Atualizar'}`);
                         }
                     });
 
