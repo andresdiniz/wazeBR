@@ -401,7 +401,11 @@
 
         // Modal Handler Corrigido
         $('.open-modal').on('click', function() {
-            const alertData = JSON.parse($(this).data('alert').replace(/&quot;/g, '"'));
+            const alertData = buracos.find(alert => alert.uuid === $(this).data('alert').uuid);
+            if (!alertData) {
+                console.error('Alerta não encontrado');
+                return;
+            }
             console.log('Dados do Alerta:', alertData);
 
             // Preencher Modal
