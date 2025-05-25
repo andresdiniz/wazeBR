@@ -414,6 +414,7 @@
             $('#modalStreet').text(alertData.street);
             $('#modalLat').text(alertData.location_x.toFixed(6));
             $('#modalLon').text(alertData.location_y.toFixed(6));
+            console.log('Dados do Alerta:', alertData.pubMillis);
             $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR', {
                 timeZone: 'UTC',
                 year: 'numeric',
