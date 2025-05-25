@@ -403,8 +403,13 @@
         $('.open-modal').on('click', function () {
             try {
                 // 1. Obter e parsear os dados do alerta
-                const rawData = $(this).data('alert');
-                const alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
+                const rawData = buracos.find(alert => alert.uuid === $(this).data('alert').uuid);
+                if (!rawData) {
+                    throw new Error('Dados do alerta não encontrados.');
+                }
+                // Corrigindo o JSON para evitar problemas de formatação
+                const rawDataString = JSON.stringify(rawData);
+                const alertData = JSON.parse(rawDataString.replace(/&quot;/g, '"'));
 
                 console.log('Dados do Alerta:', alertData);
 
