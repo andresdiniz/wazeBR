@@ -902,12 +902,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     switch ($action) {
+
         case 'atualizaburaco':
             $id = $_POST['uuid'] ?? null;
             $statusInput = $_POST['status'] ?? null;
 
+            // Verifica se o UUID e o status foram fornecidos                   
+
             // Verificação inicial
-            if (!$id || !$statusInput) {
+            if (!$id) {
                 http_response_code(400);
                 echo json_encode(['error' => 'UUID e status são obrigatórios.']);
                 exit;
