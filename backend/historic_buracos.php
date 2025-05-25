@@ -109,7 +109,7 @@ try {
     $cidadesData = $executeQuery($sqlCidades)->fetchAll(PDO::FETCH_ASSOC);
     $ruasData = $executeQuery($sqlRuas)->fetchAll(PDO::FETCH_ASSOC);
     $countTotal = $executeQuery($sqlCountTotal)->fetchColumn();
-    $countResolved = $executeQuery($sqlCountResolved)->fetchColumn();
+    //$countResolved = $executeQuery($sqlCountResolved)->fetchColumn();
 
     // Query principal com filtros
     $stmtBuracos = $executeQuery($baseSql, $baseParams);
@@ -124,8 +124,8 @@ try {
             'filtered' => count($buracos),
             'confirmed' => 0,
             'not_resolved' => 0,
-            'hidden' => 0,
-            'resolved' => $countResolved
+            'hidden' => 0//,
+            //'resolved' => $countResolved
         ],
         'temporal' => $temporalData,
         'cidades' => $cidadesData,
