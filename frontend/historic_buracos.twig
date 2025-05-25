@@ -399,40 +399,42 @@
                     // Mostrar loading
                     $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
-                    const url = `..api.php/?action=atualizaburaco&uuid=${currentAlertUuid}&status=${status}`;
-
-                    const response = await fetch(url, {
+                    $.ajax({
+                        url: '../api.php/?action=atualizaburaco',
                         method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json', // Você pode remover esta linha para GET
+                        data: {
+                            uuid: currentAlertUuid,
+                            status: status
+                        },
+                        dataType: 'json', // Esperamos uma resposta JSON
+                        success: function (data, textStatus, jqXHR) {
+                            // Atualizar a interface
+                            $('#statusModal').modal('hide');
+                            $('#alertModal').modal('hide');
+
+                            // Atualizar o status na tabela
+                            $(`tr:has(td:contains('${currentAlertUuid}')) .badge-status`)
+                                .removeClass('badge-success badge-danger badge-warning')
+                                .addClass(status === 'resolvido' ? 'badge-success' :
+                                    status === 'nao_existe' ? 'badge-danger' : 'badge-warning')
+                                .text(statusMap[status]);
+
+                            alert('Status atualizado com sucesso!');
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.error('Erro:', errorThrown);
+                            alert('Erro ao atualizar status: ' + errorThrown);
+                        },
+                        complete: function () {
+                            // Restaurar botão
+                            $(this).html(`<i class="fas fa-check-circle mr-2"></i> ${$(this).text()}`);
                         }
-                        // Não precisamos do 'body' para GET com parâmetros na URL
                     });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(data.error || 'Erro ao atualizar status');
-                    }
-
-                    // Atualizar a interface
-                    $('#statusModal').modal('hide');
-                    $('#alertModal').modal('hide');
-
-                    // Atualizar o status na tabela
-                    $(`tr:has(td:contains('${currentAlertUuid}')) .badge-status`)
-                        .removeClass('badge-success badge-danger badge-warning')
-                        .addClass(status === 'resolvido' ? 'badge-success' :
-                            status === 'nao_existe' ? 'badge-danger' : 'badge-warning')
-                        .text(statusMap[status]);
-
-                    alert('Status atualizado com sucesso!');
 
                 } catch (error) {
                     console.error('Erro:', error);
                     alert(error.message);
-                } finally {
-                    // Restaurar botão
+                    // Restaurar botão em caso de erro síncrono
                     $(this).html(`<i class="fas fa-check-circle mr-2"></i> ${$(this).text()}`);
                 }
             });
