@@ -7,6 +7,21 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 
 <style>
+    .leaflet-marker-icon.marker-cluster div {
+        background-color: rgba(255, 255, 255, 0.7);
+        /* Fundo branco semi-transparente */
+        border-radius: 10px;
+        /* Arredondamento para o fundo */
+        padding: 2px 5px;
+        /* Espaçamento interno para o número */
+        color: #333;
+        /* Cor do texto do número */
+        font-weight: bold;
+        /* Deixar o número em negrito */
+        border: 1px solid #ccc;
+        /* Adicionar uma borda sutil */
+    }
+
     .modal-content {
         border-radius: 15px;
         overflow: hidden;
@@ -226,6 +241,15 @@
         const buracos = {{ buracos| json_encode | raw }};
         const temporal = {{ temporal| json_encode | raw }};
         const ruas = {{ ruas| json_encode | raw }};
+
+        // Ao clicar no botão "olho" na tabela
+        $('.open-modal').on('click', function () {
+            var alertData = $(this).data('alert');
+            $('#alertModal').modal('show'); // Tenta mostrar um modal com ID 'alertModal'
+
+            // Aqui você pode preencher o conteúdo do modal com 'alertData'
+            console.log(alertData);
+        });
 
         $j(document).ready(function ($) {
             // DataTable
