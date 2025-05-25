@@ -414,7 +414,43 @@
             $('#modalStreet').text(alertData.street);
             $('#modalLat').text(alertData.location_x.toFixed(6));
             $('#modalLon').text(alertData.location_y.toFixed(6));
-            
+            $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR', {
+                timeZone: 'UTC',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }));    
+            $('#modalKm').text(alertData.estimated_km ? `KM ${alertData.estimated_km.toFixed(2)}` : 'Calculando...');
+            $('#modalConfidence').text(`${Math.round(alertData.confidence * 20)}%`);
+            $('#modalConfidence').removeClass('badge-success badge-warning badge-danger');
+            if (alertData.confidence >= 4) {
+                $('#modalConfidence').addClass('badge-success');
+            } else if (alertData.confidence >= 2) {
+                $('#modalConfidence').addClass('badge-warning');
+            } else {
+                $('#modalConfidence').addClass('badge-danger');
+            }
+            $('#modalStatus').text(alertData.status === 1 ? 'Ativo' : 'Inativo');
+            $('#modalStatus').removeClass('badge-success badge-danger');
+            $('#modalStatus').addClass(alertData.status === 1 ? 'badge-success' : 'badge-danger');
+            $('#modalType').text(alertData.type);
+            $('#modalSubtype').text(alertData.subtype);
+            $('#modalPartnerLink').attr('href', `https://partner.waze.com/pt-BR/alerts/${alertData.uuid}`);
+            $('#modalWazeLink').attr('href', `https://waze.com/ul?ll=${alertData.location_y},${alertData.location_x}&z=16&navigate=yes`);
+            $('#modalStreetView').attr('src', `https://www.google.com/maps/embed/v1/streetview?key=YOUR_API_KEY&location=${alertData.location_y},${alertData.location_x}&fov=90&heading=235&pitch=10`);
+            $('#modalStreetView').attr('title', `Street View - ${alertData.street || 'Sem nome'}`);
+            $('#modalStreetView').attr('aria-describedby', `Street View - ${alertData.street || 'Sem nome'}`);
+            $('#modalStreetView').attr('aria-label', `Street View - ${alertData.street || 'Sem nome'}`);
+            $('#modalStreetView').attr('loading', 'lazy');
+            $('#modalStreetView').attr('referrerpolicy', 'strict-origin-when-cross-origin');
+            $('#modalStreetView').attr('allowfullscreen', 'true');
+            $('#modalStreetView').attr('class', 'rounded shadow-sm border');
+            $('#modalStreetView').attr('style', 'width: 100%; height: 300px; border-color: #e0e0e0;');
+            $('#modalStreetView').attr('aria-describedby', 'map-description');
+            $('#modalStreetView').attr('aria-label', 'Visualização do Street View da localização (API Key do Google Maps é necessária).');
+            $('#modalStreetView').attr('allowfullscreen', 'true');  
             // Atualizar iframes
             $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}`);
         });
