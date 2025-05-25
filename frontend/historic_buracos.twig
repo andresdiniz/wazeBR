@@ -400,16 +400,21 @@
         map.addLayer(markers);
 
         // Modal Handler Corrigido
-        $('.open-modal').on('click', function () {
+        $('.open-modal').on('click', async function () { // Adicionado async
             try {
                 // 1. Obter e parsear os dados do alerta
-                const rawData = buracos.find(alert => alert.uuid === $(this).data('alert').uuid);
+                // Obter os dados do alerta a partir do atributo data-alert
+                // e parsear o JSON
+
+                const rawData = buracos.find(b => b.uuid === $(this).data('alert').uuid);
                 if (!rawData) {
                     throw new Error('Dados do alerta não encontrados.');
                 }
-                // Corrigindo o JSON para evitar problemas de formatação
-                const rawDataString = JSON.stringify(rawData);
-                const alertData = JSON.parse(rawDataString.replace(/&quot;/g, '"'));
+                // Corrigido: Usar JSON.parse diretamente no valor do atributo data-alert
+                // const rawData = $(this).data('alert');
+                // const alertData = JSON.parse(rawData);
+                // Corrigido: Usar JSON.parse diretamente no valor do atributo data-alert
+                const alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
 
                 console.log('Dados do Alerta:', alertData);
 
@@ -430,54 +435,75 @@
                     minute: '2-digit'
                 }) + ' ' + eventDate.toLocaleTimeString('pt-BR'));
 
-                // 4. Buscar KM do DNIT assincronamente
+                // 4. Iniciar carregamento do KM
+                $('#modalKm').html('<div class="spinner-border spinner-border-sm text-primary"></div> Carregando...');
+
+                // 5. Buscar KM do DNIT assincronamente (coordenadas invertidas!)
                 const km = await buscarKmDnit(
                     parseFloat(alertData.location_y),  // Latitude
-                    parseFloat(alertData.location_x)   // Longitude
+                    parseFloat(alertData.location_x)    // Longitude
                 );
 
-                // 5. Atualizar KM após a busca
+                // 6. Atualizar KM após a busca
                 $('#modalKm').html(km !== null ?
                     `KM ${km.toString().replace('.', ',')}` :
                     '<span class="text-danger">Não disponível</span>');
 
+                // 7. Atualizar confiança
                 const confidence = Math.round(alertData.confidence * 20);
                 $('#modalConfidence')
                     .text(`${confidence}%`)
                     .removeClass('badge-success badge-warning badge-danger')
                     .addClass(confidence >= 80 ? 'badge-success' : confidence >= 40 ? 'badge-warning' : 'badge-danger');
 
+                // 8. Atualizar status
                 $('#modalStatus')
                     .text(alertData.status === 1 ? 'Ativo' : 'Inativo')
                     .removeClass('badge-success badge-danger')
                     .addClass(alertData.status === 1 ? 'badge-success' : 'badge-danger');
 
-                // 5. Detalhes específicos
+                // 9. Detalhes específicos
                 $('#modalType').text(alertData.type || 'Não especificado');
                 $('#modalSubtype').text(alertData.subtype || 'Não aplicável');
 
-                // 6. Links e mapas
+                // 10. Atualizar mapas e links
                 const lat = alertData.location_y;
                 const lon = alertData.location_x;
-
-                // Mapa Waze
-                const wazeIframeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${lat}&lon=${lon}&pin=1`;
-                $('#modalMap').attr('src', wazeIframeSrc);
-
-                // Street View
-                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${lat},${lon}&fov=90&heading=235&pitch=10`;
-                $('#modalStreetView').attr('src', streetViewSrc);
-
-                // Links externos
+                $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${lat}&lon=${lon}&pin=1`);
+                $('#modalStreetView').attr('src', `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${lat},${lon}&fov=90&heading=235&pitch=10`);
                 $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
                 $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}`);
 
             } catch (error) {
                 console.error('Erro ao carregar dados do alerta:', error);
+                $('#modalKm').html('<span class="text-danger">Erro na consulta</span>');
                 $('#alertModal').modal('hide');
                 alert('Erro ao carregar detalhes do alerta. Por favor tente novamente.');
             }
         });
+
+        // Função de busca do KM corrigida
+        async function buscarKmDnit(latitude, longitude, raio = 15) {
+            const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
+            const dataAtual = new Date().toISOString().split('T')[0];
+            const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status} - ${await response.text()}`);
+
+                const data = await response.json();
+                if (!data?.length) return null;
+
+                // Encontrar primeiro item com KM válido
+                const kmItem = data.find(item => item.km && !isNaN(item.km));
+                return kmItem ? parseFloat(kmItem.km).toFixed(2) : null;
+
+            } catch (error) {
+                console.error("Erro na busca do KM:", error);
+                return null;
+            }
+        }
 
         // Ajuste de zoom do mapa
         setTimeout(() => {
