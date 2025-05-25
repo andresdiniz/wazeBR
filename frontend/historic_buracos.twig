@@ -337,192 +337,89 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // Resolver conflitos de jQuery
-        var $j = jQuery.noConflict(true);
+    // Resolver conflitos de jQuery
+    var $j = jQuery.noConflict(true);
 
-        // Dados do PHP
-        const buracos = {{ buracos| json_encode | raw }};
-        const temporal = {{ temporal| json_encode | raw }};
-        const ruas = {{ ruas| json_encode | raw }};
+    // Dados do PHP
+    const buracos = {{ buracos| json_encode | raw }};
+    const temporal = {{ temporal| json_encode | raw }};
+    const ruas = {{ ruas| json_encode | raw }};
 
-        // Ao clicar no botão "olho" na tabela
-        $('.open-modal').on('click', function () {
-            var alertData = $(this).data('alert');
-            try {
-                // 1. Corrigir o parse dos dados
-                // Correção definitiva para o parse dos dados
-                const rawData = button.data('alert');
-                let alertData;
-
-                if (typeof rawData === 'string') {
-                    alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
-                } else {
-                    alertData = rawData;
-                }
-
-                console.log('Dados do alerta:', alertData);
-
-                // 2. Preencher dados básicos
-                $('#modalUuid').text(alertData.uuid);
-                $('#modalCity').text(alertData.city);
-                $('#modalStreet').text(alertData.street);
-                $('#modalLat').text(alertData.location[1].toFixed(6));
-                $('#modalLon').text(alertData.location[0].toFixed(6));
-                $('#modalDate').text(new Date(alertData.timestamp).toLocaleString('pt-BR'));
-                $('#modalType').text(alertData.type);
-                $('#modalSubtype').text(alertData.subtype || 'N/A');
-
-                // 3. Atualizar iframes corretamente
-                const wazeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`;
-                $('#modalMap').attr('src', wazeSrc);
-
-                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${alertData.location[1]},${alertData.location[0]}`;
-                $('#modalStreetView').attr('src', streetViewSrc);
-
-                // 4. Atualizar links
-                $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
-                $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`);
-
-                // 5. Atualizar status e confiança
-                $('#modalStatus')
-                    .text(alertData.status === 1 ? "Ativo" : "Inativo")
-                    .removeClass()
-                    .addClass(`badge badge-${alertData.status === 1 ? 'success' : 'danger'}`);
-
-                $('#modalConfidence')
-                    .html(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`)
-                    .removeClass()
-                    .addClass(`badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`);
-
-                // 6. Buscar KM com tratamento de erro
-                $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
-
-                try {
-                    const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
-
-                    console.log("Resultado da busca KM:", km);
-                    const kmNumero = parseFloat(km);
-
-                    if (!isNaN(kmNumero)) {
-                        $('#modalKm').removeClass('text-danger').text(`KM ${kmNumero.toFixed(2)}`);
-                    } else {
-                        $('#modalKm').addClass('text-warning').text('KM não encontrado');
-                    }
-
-                } catch (error) {
-                    console.error("Erro ao buscar KM:", error);
-                    $('#modalKm').addClass('text-danger').text('Erro na busca');
-                }
-
-                // 7. Atualizar tooltips após carregamento
-                $('[data-toggle="tooltip"]').tooltip('dispose').tooltip();
-
-            } catch (error) {
-                console.error('Erro ao cargar dados do alerta:', error);
-                $('#alertModal').modal('hide');
-                alert('Erro ao carregar detalhes do alerta');
-            }
+    $j(document).ready(function ($) {
+        // DataTable
+        $('#buracosTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+            },
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+            buttons: [
+                'copy', 'excel', 'pdf'
+            ]
         });
 
-        $j(document).ready(function ($) {
-            // DataTable
-            $('#buracosTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
-                },
-                dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-                buttons: [
-                    'copy', 'excel', 'pdf'
-                ]
-            });
-
-            // Gráfico Temporal
-            new Chart(document.getElementById('temporalChart').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-            datasets: [{
-                label: 'Buracos por Dia',
-                data: {{ temporal| map(t => t.total) | json_encode | raw }},
-            borderColor: '#4e73df',
-            tension: 0.3
+        // Gráfico Temporal
+        new Chart(document.getElementById('temporalChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: {{ temporal| map(t => t.data) | json_encode | raw }},
+                datasets: [{
+                    label: 'Buracos por Dia',
+                    data: {{ temporal| map(t => t.total) | json_encode | raw }},
+                    borderColor: '#4e73df',
+                    tension: 0.3
                 }]
             }
         });
 
-        // Inicialização do Mapa
-        const map = L.map('mapaBuracos', {
-            preferCanvas: true,
-            zoomControl: false
-        }).setView([-23.5505, -46.6333], 12);
+        // Mapa
+        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Controle de Zoom
-        L.control.zoom({
-            position: 'topright'
-        }).addTo(map);
-
-        // Camada Base
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        // Cluster de Marcadores
-        const markers = L.markerClusterGroup({
-            chunkedLoading: true,
-            spiderfyOnMaxZoom: false,
-            showCoverageOnHover: false
-        });
-
-        // Adicionar Marcadores
+        const markers = L.markerClusterGroup();
+        
         buracos.forEach(buraco => {
             if (buraco.location_x && buraco.location_y) {
-                // Converter para números
                 const lat = parseFloat(buraco.location_y);
                 const lng = parseFloat(buraco.location_x);
-
-                // Validar coordenadas
-                if (isNaN(lat) || isNaN(lng)) return;
-                if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
-
-                // Criar marcador
-                const marker = L.marker([lat, lng], {
-                    title: buraco.street
-                }).bindPopup(`
-                    <div class="map-popup">
-                        <h6>${buraco.street || 'Sem nome'}</h6>
-                        <p>Cidade: ${buraco.city || 'Não informada'}</p>
-                        <p>Confiança: ${Math.round(buraco.confidence * 20)}%</p>
-                        <small>Registrado em: ${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
-                    </div>
-                `);
-
-                markers.addLayer(marker);
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    L.marker([lat, lng])
+                        .bindPopup(`
+                            <div class="map-popup">
+                                <h6>${buraco.street || 'Sem nome'}</h6>
+                                <p>Cidade: ${buraco.city || 'Não informada'}</p>
+                                <p>Confiança: ${Math.round(buraco.confidence * 20)}%</p>
+                                <small>${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
+                            </div>
+                        `)
+                        .addTo(markers);
+                }
             }
         });
-
-        // Adicionar cluster ao mapa
+        
         map.addLayer(markers);
 
-        // Ajustar visualização
+        // Modal Handler Corrigido
+        $('.open-modal').on('click', function() {
+            const alertData = JSON.parse($(this).data('alert').replace(/&quot;/g, '"'));
+            console.log('Dados do Alerta:', alertData);
+
+            // Preencher Modal
+            $('#modalUuid').text(alertData.uuid);
+            $('#modalCity').text(alertData.city);
+            $('#modalStreet').text(alertData.street);
+            $('#modalLat').text(alertData.location[1].toFixed(6));
+            $('#modalLon').text(alertData.location[0].toFixed(6));
+            
+            // Atualizar iframes
+            $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}`);
+        });
+
+        // Ajuste de zoom do mapa
         setTimeout(() => {
             if (markers.getLayers().length > 0) {
-                const bounds = markers.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds, {
-                        padding: [30, 30],
-                        maxZoom: 16
-                    });
-                }
-            } else {
-                map.setView([-23.5505, -46.6333], 12);
+                map.fitBounds(markers.getBounds(), { padding: [30, 30] });
             }
-        }, 100);
-
-        // Debug
-        console.log('Configuração do Mapa:');
-        console.log('- Centro inicial:', map.getCenter());
-        console.log('- Zoom inicial:', map.getZoom());
-        console.log('- Marcadores carregados:', markers.getLayers().length);
+        }, 500);
     });
-    </script>
+</script>
