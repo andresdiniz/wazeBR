@@ -218,7 +218,7 @@
         const ruas = {{ ruas| json_encode | raw }};
 
         $j(document).ready(function ($) {
-            // DataTable principal
+            // DataTable
             $('#buracosTable').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
@@ -243,42 +243,63 @@
             }
         });
 
-        // Mapa
-        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}/.png', {
-            attribution: '© OpenStreetMap contributors'
+        // Inicialização do Mapa
+        const map = L.map('mapaBuracos', {
+            preferCanvas: true,
+            zoomControl: false
+        }).setView([-23.5505, -46.6333], 12);
+
+        // Controle de Zoom
+        L.control.zoom({
+            position: 'topright'
         }).addTo(map);
 
+        // Camada Base
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Cluster de Marcadores
         const markers = L.markerClusterGroup({
-            spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true
+            chunkedLoading: true,
+            spiderfyOnMaxZoom: false,
+            showCoverageOnHover: false
         });
 
-        // Adicionar marcadores
+        // Adicionar Marcadores
         buracos.forEach(buraco => {
             if (buraco.location_x && buraco.location_y) {
-                const popupContent = `
-                    <div class="map-popup">
-                        <h6>${buraco.street}</h6>
-                        <p>Cidade: ${buraco.city}</p>
-                        <p>Confiança: ${(buraco.confidence * 20).toFixed(0)}%</p>
-                        <small>${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
-                    </div>
-                `;
+                // Converter para números
+                const lat = parseFloat(buraco.location_y);
+                const lng = parseFloat(buraco.location_x);
 
-                const marker = L.marker([buraco.location_y, buraco.location_x])
-                    .bindPopup(popupContent);
+                // Validar coordenadas
+                if (isNaN(lat) || isNaN(lng)) return;
+                if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
+
+                // Criar marcador
+                const marker = L.marker([lat, lng], {
+                    title: buraco.street
+                }).bindPopup(`
+                    <div class="map-popup">
+                        <h6>${buraco.street || 'Sem nome'}</h6>
+                        <p>Cidade: ${buraco.city || 'Não informada'}</p>
+                        <p>Confiança: ${Math.round(buraco.confidence * 20)}%</p>
+                        <small>Registrado em: ${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
+                    </div>
+                `);
 
                 markers.addLayer(marker);
             }
         });
 
+        // Adicionar cluster ao mapa
         map.addLayer(markers);
 
-        // Ajuste de zoom
-        if (buracos.length > 0) {
-            setTimeout(() => {
+        // Ajustar visualização
+        setTimeout(() => {
+            if (markers.getLayers().length > 0) {
                 const bounds = markers.getBounds();
                 if (bounds.isValid()) {
                     map.fitBounds(bounds, {
@@ -286,11 +307,15 @@
                         maxZoom: 16
                     });
                 }
-            }, 500);
-        }
+            } else {
+                map.setView([-23.5505, -46.6333], 12);
+            }
+        }, 100);
 
         // Debug
-        console.log('Total de buracos:', buracos.length);
-        console.log('Marcadores no mapa:', markers.getLayers().length);
+        console.log('Configuração do Mapa:');
+        console.log('- Centro inicial:', map.getCenter());
+        console.log('- Zoom inicial:', map.getZoom());
+        console.log('- Marcadores carregados:', markers.getLayers().length);
     });
     </script>
