@@ -233,19 +233,6 @@
             }
         });
 
-        new Chart(document.getElementById('temporalChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-            datasets: [{
-                label: 'Buracos por Dia',
-                data: {{ temporal| map(t => t.total) | json_encode | raw }},
-            borderColor: '#4e73df',
-            tension: 0.3
-        }]
-    }
-});
-
         new Chart(document.getElementById('ruasChart').getContext('2d'), {
             type: 'horizontalBar',
             data: {
@@ -254,8 +241,8 @@
                 label: 'Ocorrências',
                 data: {{ ruas| map(r => r.total) | json_encode | raw }},
             backgroundColor: '#36b9cc'
-        }]
-    },
+                }]
+            },
             options: {
             indexAxis: 'y',
             scales: {
@@ -263,7 +250,7 @@
                 y: { ticks: { autoSkip: false } }
             }
         }
-});
+        });
 
         // Mapa
         const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
