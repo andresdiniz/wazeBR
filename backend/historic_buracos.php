@@ -6,14 +6,11 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION['usuario_id_parceiro'])) {
+if (!isset($_SESSION['usuario_id_parceiro']) || !isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit;
 }
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
+
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 
 use Twig\Environment;
@@ -22,20 +19,23 @@ use Twig\Loader\FilesystemLoader;
 $loader = new FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new Environment($loader);
 
-
 try {
     $pdo = Database::getConnection();
 
+    // Função para adicionar filtro de parceiro às queries
+    $addPartnerFilter = function($sql) use ($id_parceiro) {
+        if ($id_parceiro != 99) {
+            $sql .= " AND id_parceiro = :id_parceiro";
+        }
+        return $sql;
+    };
+
     // Consulta principal para buracos
     $baseSql = "SELECT * FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $baseSql = $addPartnerFilter($baseSql);
     $baseParams = [];
 
-    if ($id_parceiro != 99) {
-        $baseSql .= " AND id_parceiro = :id_parceiro";
-        $baseParams['id_parceiro'] = $id_parceiro;
-    }
-
-    // Filtros
+    // Aplicar filtros adicionais
     $filters = $_GET;
     if (!empty($filters['date'])) {
         $baseSql .= " AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = :date";
@@ -44,90 +44,87 @@ try {
 
     if (!empty($filters['period'])) {
         $baseSql .= " AND pubMillis >= :periodStart";
-        $daysAgo = (int) $filters['period'];
+        $daysAgo = (int)$filters['period'];
         $baseParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
     }
 
-    // Dados para gráficos
+    // Query para dados temporais
     $sqlTemporal = "SELECT 
                     DATE(FROM_UNIXTIME(pubMillis/1000)) as data, 
                     COUNT(*) as total 
                 FROM alerts 
-                WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
-                GROUP BY data 
-                ORDER BY data DESC 
-                LIMIT 30";
+                WHERE type = 'HAZARD' 
+                AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlTemporal = $addPartnerFilter($sqlTemporal);
+    $sqlTemporal .= " GROUP BY data ORDER BY data DESC LIMIT 30";
 
+    // Query para cidades
     $sqlCidades = "SELECT 
                     city, 
                     COUNT(*) as total 
                 FROM alerts 
-                WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
-                GROUP BY city 
-                ORDER BY total DESC 
-                LIMIT 10";
+                WHERE type = 'HAZARD' 
+                AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlCidades = $addPartnerFilter($sqlCidades);
+    $sqlCidades .= " GROUP BY city ORDER BY total DESC LIMIT 10";
 
-    $stmtTemporal = $pdo->prepare($sqlTemporal);
-    $stmtTemporal->execute();
-    $temporalData = $stmtTemporal->fetchAll(PDO::FETCH_ASSOC);
-
-    $stmtCidades = $pdo->prepare($sqlCidades);
-    $stmtCidades->execute();
-    $cidadesData = $stmtCidades->fetchAll(PDO::FETCH_ASSOC);
-
-    // No trecho onde faz as consultas SQL:
-    $sqlTemporal = "SELECT 
-                DATE(FROM_UNIXTIME(pubMillis/1000)) as data, 
+    // Query para ruas
+    $sqlRuas = "SELECT 
+                CONCAT(city, ' - ', street) as local,
                 COUNT(*) as total 
             FROM alerts 
-            WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
-            GROUP BY data 
-            ORDER BY data DESC 
-            LIMIT 30";
+            WHERE type = 'HAZARD' 
+            AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlRuas = $addPartnerFilter($sqlRuas);
+    $sqlRuas .= " GROUP BY local ORDER BY total DESC LIMIT 10";
 
-    $sqlRuas = "SELECT 
-            CONCAT(city, ' - ', street) as local,
-            COUNT(*) as total 
-        FROM alerts 
-        WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'
-        GROUP BY local 
-        ORDER BY total DESC 
-        LIMIT 10";
+    // Query para contagem total
+    $sqlCountTotal = "SELECT COUNT(*) FROM alerts 
+                     WHERE type = 'HAZARD' 
+                     AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlCountTotal = $addPartnerFilter($sqlCountTotal);
 
-    // Executar e fetch dos dados
-    $stmtRuas = $pdo->prepare($sqlRuas);
-    $stmtRuas->execute();
-    $ruasData = $stmtRuas->fetchAll(PDO::FETCH_ASSOC);
+    // Preparar e executar todas as queries
+    $executeQuery = function($sql, $params = []) use ($pdo, $id_parceiro) {
+        $stmt = $pdo->prepare($sql);
+        if ($id_parceiro != 99) {
+            $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        }
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->execute();
+        return $stmt;
+    };
 
-    // Executar query principal
-    $stmtBuracos = $pdo->prepare($baseSql);
-    foreach ($baseParams as $key => $value) {
-        $stmtBuracos->bindValue(":$key", $value);
-    }
-    $stmtBuracos->execute();
+    // Executar queries
+    $temporalData = $executeQuery($sqlTemporal)->fetchAll(PDO::FETCH_ASSOC);
+    $cidadesData = $executeQuery($sqlCidades)->fetchAll(PDO::FETCH_ASSOC);
+    $ruasData = $executeQuery($sqlRuas)->fetchAll(PDO::FETCH_ASSOC);
+    $countTotal = $executeQuery($sqlCountTotal)->fetchColumn();
+
+    // Query principal com filtros
+    $stmtBuracos = $executeQuery($baseSql, $baseParams);
     $buracos = $stmtBuracos->fetchAll(PDO::FETCH_ASSOC);
 
-    // Contagens
-    $countTotal = $pdo->query("SELECT COUNT(*) FROM alerts WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'")->fetchColumn();
-
+    // Preparar dados para o template
     $data = [
         'buracos' => $buracos,
         'filters' => $filters,
         'counts' => [
             'total' => $countTotal,
             'filtered' => count($buracos),
-            'confirmed' => 0, // Implementar lógica real
+            'confirmed' => 0,
             'not_resolved' => 0,
             'hidden' => 0
         ],
         'temporal' => $temporalData,
         'cidades' => $cidadesData,
         'ruas' => $ruasData
-    ];  
+    ];
 
 } catch (Exception $e) {
     die("Erro: " . $e->getMessage());
 }
-
 
 ?>
