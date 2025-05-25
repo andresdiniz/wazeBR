@@ -318,8 +318,38 @@
                         <i class="fas fa-times mr-2"></i> Fechar
                     </button>
                     <button type="button" class="btn btn-success ml-2" id="modalConfirmBtn">
-                        <i class="fas fa-check mr-2"></i> Confirmar
+                        <i class="fas fa-check mr-2" data-target=""></i> Confirmar
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Status -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Atualizar Status</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="resolvido">
+                            <i class="fas fa-check-circle text-success mr-2"></i> Buraco Resolvido
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="nao_existe">
+                            <i class="fas fa-times-circle text-danger mr-2"></i> Buraco Não Existe
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="nao_resolvido">
+                            <i class="fas fa-exclamation-triangle text-warning mr-2"></i> Não Foi Resolvido
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,6 +376,69 @@
         const ruas = {{ ruas| json_encode | raw }};
 
         $j(document).ready(function ($) {
+
+            // Variável para armazenar o UUID atual
+            let currentAlertUuid = null;
+
+            // Handler para abrir o modal de status
+            $('#modalConfirmBtn').on('click', function () {
+                currentAlertUuid = $('#modalUuid').text();
+                $('#statusModal').modal('show');
+            });
+
+            // Handler para seleção de status
+            $('.status-option').on('click', async function () {
+                const status = $(this).data('status');
+                const statusMap = {
+                    'resolvido': 'RESOLVED',
+                    'nao_existe': 'NOT_EXIST',
+                    'nao_resolvido': 'NOT_RESOLVED'
+                };
+
+                try {
+                    // Mostrar loading
+                    $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
+
+                    const response = await fetch('api.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'atualizaburaco',
+                            uuid: currentAlertUuid,
+                            status: status
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Erro ao atualizar status');
+                    }
+
+                    // Atualizar a interface
+                    $('#statusModal').modal('hide');
+                    $('#alertModal').modal('hide');
+
+                    // Atualizar o status na tabela
+                    $(`tr:has(td:contains('${currentAlertUuid}')) .badge-status`)
+                        .removeClass('badge-success badge-danger badge-warning')
+                        .addClass(status === 'resolvido' ? 'badge-success' :
+                            status === 'nao_existe' ? 'badge-danger' : 'badge-warning')
+                        .text(statusMap[status]);
+
+                    alert('Status atualizado com sucesso!');
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert(error.message);
+                } finally {
+                    // Restaurar botão
+                    $(this).html(`<i class="fas fa-check-circle mr-2"></i> ${$(this).text()}`);
+                }
+            });
+
             // DataTable
             $('#buracosTable').DataTable({
                 language: {
