@@ -399,18 +399,14 @@
                     // Mostrar loading
                     $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
-                    console.log('UUID:', currentAlertUuid);
-                    console.log('Status:', status);
+                    const url = `..api.php/?action=atualizaburaco&uuid=${currentAlertUuid}&status=${status}`;
 
-                    const response = await fetch('..api.php/?action="atualizaburaco"', {
+                    const response = await fetch(url, {
                         method: 'GET',
                         headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            uuid: currentAlertUuid,
-                            status: status
-                        })
+                            'Content-Type': 'application/json', // Você pode remover esta linha para GET
+                        }
+                        // Não precisamos do 'body' para GET com parâmetros na URL
                     });
 
                     const data = await response.json();
