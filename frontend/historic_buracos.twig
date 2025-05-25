@@ -183,7 +183,17 @@
                             <td>{{ (buraco.pubMillis / 1000)|date('d/m/Y H:i') }}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-secondary" data-toggle="modal"
-                                    data-target="#alertModal{{ buraco.uuid }}">
+                                    data-target="#alertModal" data-alert="{{ {
+                'uuid': buraco.uuid,
+                'city': buraco.city,
+                'street': buraco.street,
+                'location': [buraco.location_x, buraco.location_y],
+                'timestamp': buraco.pubMillis,
+                'type': buraco.type,
+                'subtype': buraco.subtype,
+                'confidence': buraco.confidence,
+                'status': buraco.status
+            }|json_encode|e('html_attr') }}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </td>
