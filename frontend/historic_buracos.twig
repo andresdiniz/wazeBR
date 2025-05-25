@@ -337,36 +337,36 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <script>
-    // Resolver conflitos de jQuery
-    var $j = jQuery.noConflict(true);
+        // Resolver conflitos de jQuery
+        var $j = jQuery.noConflict(true);
 
-    // Dados do PHP
-    const buracos = {{ buracos| json_encode | raw }};
-    const temporal = {{ temporal| json_encode | raw }};
-    const ruas = {{ ruas| json_encode | raw }};
+        // Dados do PHP
+        const buracos = {{ buracos| json_encode | raw }};
+        const temporal = {{ temporal| json_encode | raw }};
+        const ruas = {{ ruas| json_encode | raw }};
 
-    $j(document).ready(function ($) {
-        // DataTable
-        $('#buracosTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
-            },
-            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
-            buttons: [
-                'copy', 'excel', 'pdf'
-            ]
-        });
+        $j(document).ready(function ($) {
+            // DataTable
+            $('#buracosTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+                },
+                dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+                buttons: [
+                    'copy', 'excel', 'pdf'
+                ]
+            });
 
-        // Gráfico Temporal
-        new Chart(document.getElementById('temporalChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-                datasets: [{
-                    label: 'Buracos por Dia',
-                    data: {{ temporal| map(t => t.total) | json_encode | raw }},
-                    borderColor: '#4e73df',
-                    tension: 0.3
+            // Gráfico Temporal
+            new Chart(document.getElementById('temporalChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: {{ temporal| map(t => t.data) | json_encode | raw }},
+            datasets: [{
+                label: 'Buracos por Dia',
+                data: {{ temporal| map(t => t.total) | json_encode | raw }},
+            borderColor: '#4e73df',
+            tension: 0.3
                 }]
             }
         });
@@ -376,12 +376,12 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         const markers = L.markerClusterGroup();
-        
+
         buracos.forEach(buraco => {
             if (buraco.location_x && buraco.location_y) {
                 const lat = parseFloat(buraco.location_y);
                 const lng = parseFloat(buraco.location_x);
-                
+
                 if (!isNaN(lat) && !isNaN(lng)) {
                     L.marker([lat, lng])
                         .bindPopup(`
@@ -396,63 +396,76 @@
                 }
             }
         });
-        
+
         map.addLayer(markers);
 
         // Modal Handler Corrigido
-        $('.open-modal').on('click', function() {
-            const alertData = buracos.find(alert => alert.uuid === $(this).data('alert').uuid);
-            if (!alertData) {
-                console.error('Alerta não encontrado');
-                return;
-            }
-            console.log('Dados do Alerta:', alertData);
+        $('.open-modal').on('click', function () {
+            try {
+                // 1. Obter e parsear os dados do alerta
+                const rawData = $(this).data('alert');
+                const alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
 
-            // Preencher Modal
-            $('#modalUuid').text(alertData.uuid);
-            $('#modalCity').text(alertData.city);
-            $('#modalStreet').text(alertData.street);
-            $('#modalLat').text(alertData.location_x.toFixed(6));
-            $('#modalLon').text(alertData.location_y.toFixed(6));
-            $('#modalDate').text(new Date(alertData.pubMillis).toLocaleString('pt-BR', {
-                timeZone: 'UTC',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }));    
-            $('#modalKm').text(alertData.estimated_km ? `KM ${alertData.estimated_km.toFixed(2)}` : 'Calculando...');
-            $('#modalConfidence').text(`${Math.round(alertData.confidence * 20)}%`);
-            $('#modalConfidence').removeClass('badge-success badge-warning badge-danger');
-            if (alertData.confidence >= 4) {
-                $('#modalConfidence').addClass('badge-success');
-            } else if (alertData.confidence >= 2) {
-                $('#modalConfidence').addClass('badge-warning');
-            } else {
-                $('#modalConfidence').addClass('badge-danger');
+                console.log('Dados do Alerta:', alertData);
+
+                // 2. Preencher informações básicas
+                $('#modalUuid').text(alertData.uuid);
+                $('#modalCity').text(alertData.city);
+                $('#modalStreet').text(alertData.street);
+                $('#modalLat').text(parseFloat(alertData.location_y).toFixed(6));
+                $('#modalLon').text(parseFloat(alertData.location_x).toFixed(6));
+
+                // 3. Formatando data corretamente
+                const eventDate = new Date(alertData.timestamp);
+                $('#modalDate').text(eventDate.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) + ' ' + eventDate.toLocaleTimeString('pt-BR'));
+
+                // 4. Informações de status e confiança
+                $('#modalKm').html(alertData.estimated_km ?
+                    `KM ${parseFloat(alertData.estimated_km).toFixed(2)}` :
+                    '<span class="text-muted">Não disponível</span>');
+
+                const confidence = Math.round(alertData.confidence * 20);
+                $('#modalConfidence')
+                    .text(`${confidence}%`)
+                    .removeClass('badge-success badge-warning badge-danger')
+                    .addClass(confidence >= 80 ? 'badge-success' : confidence >= 40 ? 'badge-warning' : 'badge-danger');
+
+                $('#modalStatus')
+                    .text(alertData.status === 1 ? 'Ativo' : 'Inativo')
+                    .removeClass('badge-success badge-danger')
+                    .addClass(alertData.status === 1 ? 'badge-success' : 'badge-danger');
+
+                // 5. Detalhes específicos
+                $('#modalType').text(alertData.type || 'Não especificado');
+                $('#modalSubtype').text(alertData.subtype || 'Não aplicável');
+
+                // 6. Links e mapas
+                const lat = alertData.location_y;
+                const lon = alertData.location_x;
+
+                // Mapa Waze
+                const wazeIframeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${lat}&lon=${lon}&pin=1`;
+                $('#modalMap').attr('src', wazeIframeSrc);
+
+                // Street View
+                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${lat},${lon}&fov=90&heading=235&pitch=10`;
+                $('#modalStreetView').attr('src', streetViewSrc);
+
+                // Links externos
+                $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
+                $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}`);
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do alerta:', error);
+                $('#alertModal').modal('hide');
+                alert('Erro ao carregar detalhes do alerta. Por favor tente novamente.');
             }
-            $('#modalStatus').text(alertData.status === 1 ? 'Ativo' : 'Inativo');
-            $('#modalStatus').removeClass('badge-success badge-danger');
-            $('#modalStatus').addClass(alertData.status === 1 ? 'badge-success' : 'badge-danger');
-            $('#modalType').text(alertData.type);
-            $('#modalSubtype').text(alertData.subtype);
-            $('#modalPartnerLink').attr('href', `https://partner.waze.com/pt-BR/alerts/${alertData.uuid}`);
-            $('#modalWazeLink').attr('href', `https://waze.com/ul?ll=${alertData.location_y},${alertData.location_x}&z=16&navigate=yes`);
-            $('#modalStreetView').attr('src', `https://www.google.com/maps/embed/v1/streetview?key=YOUR_API_KEY&location=${alertData.location_y},${alertData.location_x}&fov=90&heading=235&pitch=10`);
-            $('#modalStreetView').attr('title', `Street View - ${alertData.street || 'Sem nome'}`);
-            $('#modalStreetView').attr('aria-describedby', `Street View - ${alertData.street || 'Sem nome'}`);
-            $('#modalStreetView').attr('aria-label', `Street View - ${alertData.street || 'Sem nome'}`);
-            $('#modalStreetView').attr('loading', 'lazy');
-            $('#modalStreetView').attr('referrerpolicy', 'strict-origin-when-cross-origin');
-            $('#modalStreetView').attr('allowfullscreen', 'true');
-            $('#modalStreetView').attr('class', 'rounded shadow-sm border');
-            $('#modalStreetView').attr('style', 'width: 100%; height: 300px; border-color: #e0e0e0;');
-            $('#modalStreetView').attr('aria-describedby', 'map-description');
-            $('#modalStreetView').attr('aria-label', 'Visualização do Street View da localização (API Key do Google Maps é necessária).');
-            $('#modalStreetView').attr('allowfullscreen', 'true');  
-            // Atualizar iframes
-            $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}`);
         });
 
         // Ajuste de zoom do mapa
@@ -462,4 +475,4 @@
             }
         }, 500);
     });
-</script>
+    </script>
