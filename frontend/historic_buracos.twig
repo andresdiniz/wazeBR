@@ -348,13 +348,80 @@
         // Ao clicar no botão "olho" na tabela
         $('.open-modal').on('click', function () {
             var alertData = $(this).data('alert');
-            if ($('#alertModal').length) {
-                $('#alertModal').modal('show'); // Tenta mostrar o modal com ID 'alertModal' SE ele existir
-            } else {
-                console.log("O modal com ID #alertModal não foi encontrado no DOM.");
+            try {
+                // 1. Corrigir o parse dos dados
+                // Correção definitiva para o parse dos dados
+                const rawData = button.data('alert');
+                let alertData;
+
+                if (typeof rawData === 'string') {
+                    alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
+                } else {
+                    alertData = rawData;
+                }
+
+                console.log('Dados do alerta:', alertData);
+
+                // 2. Preencher dados básicos
+                $('#modalUuid').text(alertData.uuid);
+                $('#modalCity').text(alertData.city);
+                $('#modalStreet').text(alertData.street);
+                $('#modalLat').text(alertData.location[1].toFixed(6));
+                $('#modalLon').text(alertData.location[0].toFixed(6));
+                $('#modalDate').text(new Date(alertData.timestamp).toLocaleString('pt-BR'));
+                $('#modalType').text(alertData.type);
+                $('#modalSubtype').text(alertData.subtype || 'N/A');
+
+                // 3. Atualizar iframes corretamente
+                const wazeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`;
+                $('#modalMap').attr('src', wazeSrc);
+
+                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${alertData.location[1]},${alertData.location[0]}`;
+                $('#modalStreetView').attr('src', streetViewSrc);
+
+                // 4. Atualizar links
+                $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
+                $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`);
+
+                // 5. Atualizar status e confiança
+                $('#modalStatus')
+                    .text(alertData.status === 1 ? "Ativo" : "Inativo")
+                    .removeClass()
+                    .addClass(`badge badge-${alertData.status === 1 ? 'success' : 'danger'}`);
+
+                $('#modalConfidence')
+                    .html(`${alertData.confidence} - ${['Baixa', 'Média', 'Alta'][Math.floor(alertData.confidence / 2)]}`)
+                    .removeClass()
+                    .addClass(`badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`);
+
+                // 6. Buscar KM com tratamento de erro
+                $('#modalKm').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
+
+                try {
+                    const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
+
+                    console.log("Resultado da busca KM:", km);
+                    const kmNumero = parseFloat(km);
+
+                    if (!isNaN(kmNumero)) {
+                        $('#modalKm').removeClass('text-danger').text(`KM ${kmNumero.toFixed(2)}`);
+                    } else {
+                        $('#modalKm').addClass('text-warning').text('KM não encontrado');
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao buscar KM:", error);
+                    $('#modalKm').addClass('text-danger').text('Erro na busca');
+                }
+
+                // 7. Atualizar tooltips após carregamento
+                $('[data-toggle="tooltip"]').tooltip('dispose').tooltip();
+
+            } catch (error) {
+                console.error('Erro ao cargar dados do alerta:', error);
+                $('#alertModal').modal('hide');
+                alert('Erro ao carregar detalhes do alerta');
             }
-            // Aqui você pode preencher o conteúdo do modal com 'alertData'
-            console.log(alertData);
         });
 
         $j(document).ready(function ($) {
