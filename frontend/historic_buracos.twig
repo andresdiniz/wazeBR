@@ -1,65 +1,57 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Buracos</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap4.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
 
-    <style>
-        .modal-content {
-            border-radius: 15px;
-            overflow: hidden;
-        }
+    .modal-body {
+        padding: 1.5rem;
+    }
 
-        .modal-header {
-            padding: 1rem 1.5rem;
-        }
+    .chartjs-size-monitor {
+        position: initial !important;
+    }
 
-        .modal-body {
-            padding: 1.5rem;
-        }
+    .badge-confidence {
+        font-size: 0.9em;
+        min-width: 80px;
+    }
 
-        .chartjs-size-monitor {
-            position: initial !important;
-        }
+    #mapaBuracos {
+        height: 500px;
+        z-index: 1;
+    }
 
-        .badge-confidence {
-            font-size: 0.9em;
-            min-width: 80px;
-        }
+    .chart-card,
+    .table-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
 
-        #mapaBuracos {
-            height: 500px;
-            z-index: 1;
-        }
+    .dataTables_wrapper {
+        padding: 0;
+    }
 
-        .chart-card, .table-card {
-            background: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-        }
-
-        .dataTables_wrapper {
-            padding: 0;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            color: #6c757d;
-        }
-    </style>
-</head>
+    .card-title {
+        font-size: 1.1rem;
+        color: #6c757d;
+    }
+</style>
 
 <body class="bg-light">
     <div class="container-fluid py-4">
@@ -242,31 +234,63 @@
                 type: 'line',
                 data: {
                     labels: {{ temporal| map(t => t.data) | json_encode | raw }},
-                    datasets: [{
-                        label: 'Buracos por Dia',
-                        data: {{ temporal| map(t => t.total) | json_encode | raw }},
-                        borderColor: '#4e73df',
-                        tension: 0.3
-                    }]
-                }
-            });
-
-            // Mapa
-            const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-            const markers = L.markerClusterGroup();
-            {% for buraco in buracos %}
-            {% if buraco.location_y and buraco.location_x %}
-            markers.addLayer(
-                L.marker([{{ buraco.location_y }}, {{ buraco.location_x }}])
-                    .bindPopup(`<b>{{ buraco.street|e('js') }}</b><br>Confiança: {{ buraco.confidence|e('js') }}`)
-            );
-            {% endif %}
-            {% endfor %}
-            map.addLayer(markers);
+            datasets: [{
+                label: 'Buracos por Dia',
+                data: {{ temporal| map(t => t.total) | json_encode | raw }},
+            borderColor: '#4e73df',
+            tension: 0.3
+                }]
+            }
         });
-    </script>
-</body>
 
-</html>
+        // Mapa
+        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}/.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const markers = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true
+        });
+
+        // Adicionar marcadores
+        buracos.forEach(buraco => {
+            if (buraco.location_x && buraco.location_y) {
+                const popupContent = `
+                    <div class="map-popup">
+                        <h6>${buraco.street}</h6>
+                        <p>Cidade: ${buraco.city}</p>
+                        <p>Confiança: ${(buraco.confidence * 20).toFixed(0)}%</p>
+                        <small>${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
+                    </div>
+                `;
+
+                const marker = L.marker([buraco.location_y, buraco.location_x])
+                    .bindPopup(popupContent);
+
+                markers.addLayer(marker);
+            }
+        });
+
+        map.addLayer(markers);
+
+        // Ajuste de zoom
+        if (buracos.length > 0) {
+            setTimeout(() => {
+                const bounds = markers.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, {
+                        padding: [30, 30],
+                        maxZoom: 16
+                    });
+                }
+            }, 500);
+        }
+
+        // Debug
+        console.log('Total de buracos:', buracos.length);
+        console.log('Marcadores no mapa:', markers.getLayers().length);
+    });
+    </script>
