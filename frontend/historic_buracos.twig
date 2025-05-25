@@ -399,13 +399,12 @@
                     // Mostrar loading
                     $(this).html('<span class="spinner-border spinner-border-sm"></span> Processando...');
 
-                    const response = await fetch('api.php', {
+                    fetch('..api.php/?action="atualizaburaco"', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            action: 'atualizaburaco',
                             uuid: currentAlertUuid,
                             status: status
                         })
