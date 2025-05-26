@@ -454,6 +454,8 @@ document.addEventListener('DOMContentLoaded', function () {
             y: j.duration / 60
         }));
 
+        console.log("Dados de duração para o gráfico de dispersão:", rawData);
+
         new Chart(ctx, {
             type: 'scatter',
             data: {
