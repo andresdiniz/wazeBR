@@ -462,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const hour = receivedTime.getHours();
             const updatedTime = new Date(j.date_updated);
             const durationMinutes = (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
-
             if (!hourlyDurations[hour]) {
                 hourlyDurations[hour] = { sum: 0, count: 0 };
             }
@@ -480,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("Dados de média de duração por hora:", rawData);
 
         new Chart(ctx, {
-            type: 'scatter',
+            type: 'bar',
             data: {
                 datasets: [{
                     label: 'Média da Duração dos Congestionamentos por Hora',
