@@ -55,14 +55,10 @@ function getSitepages($pdo, $pageurl) {
         $stmt = $pdo->prepare("SELECT * FROM pages WHERE url = :url LIMIT 1");
         $stmt->bindParam(':url', $pageurl, PDO::PARAM_STR);  // Usando o parâmetro correto $pageurl
 
-        var_dump($pageurl); // Verifique o valor de $pageurl
-
         $stmt->execute();
 
         // Verifica se encontrou a página
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        var_dump($pageData); // Adicionado para depuração
 
         if ($pageData) {
             // Se encontrou, adiciona os dados da página ao array $data
