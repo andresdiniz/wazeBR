@@ -542,48 +542,49 @@ document.addEventListener('DOMContentLoaded', function () {
     function initRoadTypeRadar() {
         const ctx = document.getElementById('roadTypeRadarChart');
         const metrics = ['speedKMH', 'delay', 'length'];
-
-        // Extrai os tipos de via únicos da array 'jams'
-        const roadTypes = [...new Set(jams.map(jam => jam.roadType).filter(Boolean))];
+        const roadTypes = [...new Set(jams.map(jam => jam.roadType).filter(Boolean))].sort(); // Ordena os tipos de via
 
         if (!roadTypes || roadTypes.length === 0) {
-            console.warn("Nenhum tipo de via encontrado nos dados para o gráfico radar.");
+            console.warn("Nenhum tipo de via encontrado nos dados para o gráfico de barras.");
             return;
         }
 
-        const datasets = roadTypes.map(rt => ({
-            label: rt,
-            data: metrics.map(metric => avgByRoadType(rt, metric, jams)), // Passa 'jams' para a função de média
-            backgroundColor: `rgba(${randColor()},0.2)`,
-            borderColor: `rgba(${randColor()},1)`,
-            pointBackgroundColor: `rgba(${randColor()},1)`,
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: `rgba(${randColor()},1)`
+        const datasets = metrics.map(metric => ({
+            label: metric,
+            data: roadTypes.map(rt => avgByRoadType(rt, metric, jams)),
+            backgroundColor: colorPalette[metrics.indexOf(metric) % colorPalette.length]
         }));
 
         new Chart(ctx, {
-            type: 'radar',
+            type: 'bar',
             data: {
-                labels: metrics,
+                labels: roadTypes,
                 datasets: datasets
             },
             options: {
+                responsive: true,
                 scales: {
-                    r: {
+                    y: {
                         beginAtZero: true,
-                        angleLines: {
-                            display: true
-                        },
-                        grid: {
-                            circular: true
-                        },
-                        max: Math.max(...datasets.flatMap(d => d.data)) * 1.2 // Ajusta o máximo da escala
+                        title: {
+                            display: true,
+                            text: 'Valor' // Podemos personalizar isso por métrica se necessário
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tipo de Via'
+                        }
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Comparação por Tipo de Via'
                     }
                 }
             }
