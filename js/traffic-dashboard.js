@@ -615,20 +615,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
         }); // Duração em minutos
 
+        const histogramData = {
+            labels: ['0-5min', '5-15min', '15-30min', '30+min'],
+            datasets: [{
+                data: [
+                    durations.filter(d => d <= 5).length,
+                    durations.filter(d => d > 5 && d <= 15).length,
+                    durations.filter(d => d > 15 && d <= 30).length,
+                    durations.filter(d => d > 30).length
+                ],
+                backgroundColor: colorPalette
+            }]
+        };
+
+        console.log('Dados para o histograma:', histogramData);
+
         new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: ['0-5min', '5-15min', '15-30min', '30+min'],
-                datasets: [{
-                    data: [
-                        durations.filter(d => d <= 5).length,
-                        durations.filter(d => d > 5 && d <= 15).length,
-                        durations.filter(d => d > 15 && d <= 30).length,
-                        durations.filter(d => d > 30).length
-                    ],
-                    backgroundColor: colorPalette
-                }]
-            },
+            data: histogramData,
         });
     }
     initDurationHistogram();
