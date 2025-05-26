@@ -163,7 +163,7 @@ if (($settings['manutencao'] ?? false) && $_SERVER['REQUEST_URI'] !== '/manutenc
 // Determina a página atual baseada na URL
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $page = $uri ?: 'home'; // Define 'home' como padrão se a URI for vazia
-
+var_dump($page); // Para debug, remova em produção
 // Recupera dados específicos da página
 // Assumindo que getSitepages está definido em functions/scripts.php
 $pages = getSitepages($pdo, $page); // Este nome de variável 'pages' pode ser confuso com o plural
