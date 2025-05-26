@@ -97,6 +97,46 @@
         font-weight: bold;
     }
 </style>
+
+<style>
+    .sticky-top {
+        top: 60px;
+        /* Ajuste conforme altura do header */
+        backdrop-filter: blur(5px);
+        background-color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .cursor-pointer:hover {
+        background-color: #f8f9fa;
+    }
+
+    .table-hover tbody tr:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .badge {
+        min-width: 40px;
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 300px !important;
+        }
+
+        .table td,
+        .table th {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+</style>
 </head>
 
 <body>
@@ -227,35 +267,46 @@
 
             <!-- Segmentos -->
             <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
-                <div class="row">
+                <div class="row g-3">
                     <!-- Top Segmentos -->
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Segmentos Mais Congestionados</h5>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0 fs-6"><i class="bi bi-pin-map me-2"></i>Segmentos Críticos</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light sticky-top">
                                             <tr>
-                                                <th>ID Segmento</th>
-                                                <th>Rua</th>
-                                                <th>Contagem</th>
-                                                <th>Atraso Médio (min)</th>
-                                                <th>Comprimento Médio (m)</th>
-                                                <th>Atraso Máx (min)</th>
+                                                <th class="ps-3">Segmento</th>
+                                                <th class="d-none d-md-table-cell">Local</th>
+                                                <th>Ocorrências</th>
+                                                <th>Atraso Médio</th>
+                                                <th class="d-none d-md-table-cell">Comprimento</th>
+                                                <th>Máx. Atraso</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for segment in segmentos %}
-                                            <tr>
-                                                <td>{{ segment.segmento }}</td>
-                                                <td>{{ segment.rua }}</td>
-                                                <td>{{ segment.total }}</td>
-                                                <td>{{ (segment.atraso_medio_min) }}</td>
-                                                <td>{{ segment.comprimento_medio_m }}</td>
-                                                <td>{{ (segment.atraso_max_min) }}</td>
+                                            <tr class="cursor-pointer">
+                                                <td class="ps-3 fw-bold text-primary">#{{ segment.segmento }}</td>
+                                                <td class="d-none d-md-table-cell">{{ segment.rua|truncate(30) }}</td>
+                                                <td>
+                                                    <span class="badge bg-danger bg-opacity-25 text-danger">{{
+                                                        segment.total }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="me-2">{{ segment.atraso_medio_min }}</span>
+                                                        <i class="bi bi-clock-history text-muted small"></i>
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">{{
+                                                    segment.comprimento_medio_m|number_format(0) }}m</td>
+                                                <td>
+                                                    <span class="text-warning">{{ segment.atraso_max_min }}</span>
+                                                </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -266,31 +317,47 @@
                     </div>
 
                     <!-- Top Ruas -->
-                    <div class="col-md-12 mt-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Ruas Mais Problemáticas</h5>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0 fs-6"><i class="bi bi-signpost me-2"></i>Ruas Prioritárias</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light sticky-top">
                                             <tr>
-                                                <th>Rua</th>
-                                                <th>Contagem</th>
-                                                <th>Atraso Médio (min)</th>
-                                                <th>Comprimento Médio (m)</th>
-                                                <th>Atraso Máx (min)</th>
+                                                <th class="ps-3">Via</th>
+                                                <th>Ocorrências</th>
+                                                <th>Atraso Médio</th>
+                                                <th class="d-none d-md-table-cell">Comprimento</th>
+                                                <th>Máx. Atraso</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for street in ruas %}
-                                            <tr>
-                                                <td>{{ street.rua }}</td>
-                                                <td>{{ street.total }}</td>
-                                                <td>{{ street.atraso_medio_min }}</td>
-                                                <td>{{ street.comprimento_medio_m }}</td>
-                                                <td>{{ street.atraso_max_min }}</td>
+                                            <tr class="cursor-pointer">
+                                                <td class="ps-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-geo-alt me-2 text-muted"></i>
+                                                        {{ street.rua|truncate(25) }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-danger bg-opacity-25 text-danger">{{
+                                                        street.total }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="me-2">{{ street.atraso_medio_min }}</span>
+                                                        <i class="bi bi-speedometer2 text-muted small"></i>
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">{{
+                                                    street.comprimento_medio_m|number_format(0) }}m</td>
+                                                <td>
+                                                    <span class="text-warning">{{ street.atraso_max_min }}</span>
+                                                </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -301,96 +368,104 @@
                     </div>
 
                     <!-- Relação Tamanho vs Atraso -->
-                    <div class="col-md-12 mt-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Relação entre Comprimento e Atraso</h5>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0 fs-6"><i class="bi bi-bar-chart-line me-2"></i>Correlação Comprimento x
+                                    Atraso</h5>
                             </div>
                             <div class="card-body">
-                                <canvas id="lengthVsDelayChart"></canvas>
+                                <div class="chart-container"
+                                    style="position: relative; height: 400px; min-height: 300px">
+                                    <canvas id="lengthVsDelayChart"></canvas>
+                                </div>
+                                <div class="mt-3 small text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Cada ponto representa um congestionamento registrado
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Análise Temporal -->
-            <div class="tab-pane fade" id="time" role="tabpanel" aria-labelledby="time-tab">
-                <div class="row g-4">
-                    <!-- Tendência Mensal -->
-                    <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-3">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Tendência Mensal de Congestionamentos</h5>
+
+                <!-- Análise Temporal -->
+                <div class="tab-pane fade" id="time" role="tabpanel" aria-labelledby="time-tab">
+                    <div class="row g-4">
+                        <!-- Tendência Mensal -->
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0 rounded-3">
+                                <div class="card-header bg-white border-bottom">
+                                    <h5 class="mb-0">Tendência Mensal de Congestionamentos</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="monthlyChart" height="100"></canvas>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <canvas id="monthlyChart" height="100"></canvas>
+                        </div>
+
+                        <!-- Detalhes por Hora do Dia -->
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0 rounded-3">
+                                <div class="card-header bg-white border-bottom">
+                                    <h5 class="mb-0">Detalhes por Hora do Dia</h5>
+                                </div>
+                                <div class="card-body heat">
+                                    <canvas id="heatmapChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Detalhes por Hora do Dia -->
-                    <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-3">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Detalhes por Hora do Dia</h5>
-                            </div>
-                            <div class="card-body heat">
-                                <canvas id="heatmapChart"></canvas>
-                            </div>
-                        </div>
+                    <!-- Adicione isto no seu HTML onde deseja exibir os novos gráficos -->
+                    <div class="chart-card">
+                        <h3>Extensão Total por Hora</h3>
+                        <canvas id="totalKmHourlyChart"></canvas>
+                        <p class="insight"></p>
                     </div>
-                </div>
-                <!-- Adicione isto no seu HTML onde deseja exibir os novos gráficos -->
-                <div class="chart-card">
-                    <h3>Extensão Total por Hora</h3>
-                    <canvas id="totalKmHourlyChart"></canvas>
-                    <p class="insight"></p>
-                </div>
 
-                <div class="chart-card">
-                    <h3>Comparativo Diário</h3>
-                    <canvas id="weekdayComparisonChart"></canvas>
-                    <p class="insight"></p>
+                    <div class="chart-card">
+                        <h3>Comparativo Diário</h3>
+                        <canvas id="weekdayComparisonChart"></canvas>
+                        <p class="insight"></p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Bootstrap Bundle com Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Bootstrap Bundle com Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Adicione antes do fechamento do body -->
-    <script>
-        // Converta os dados para JSON no console
-        //console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
-    </script>
+        <!-- Adicione antes do fechamento do body -->
+        <script>
+            // Converta os dados para JSON no console
+            //console.log('Dados do Dashboard:', {{ resumo|json_encode|raw }});
+        </script>
 
-    <!-- Script para dashboard -->
-    <script>
-        // Dados para gráficos extraídos da variável PHp
-        const data = {{ horario| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const datasemana = {{ semanal| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const dadosnivel = {{ niveis| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const dadosatraso = {{ ruas| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const mensal = {{ mes| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const atrasocomprimento = {{ length_delay| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const diaxsemana = {{ dia_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const km_por_hora = {{ km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const km_por_dia_semana = {{ km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const media_km_por_hora = {{ media_km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
-        const media_km_por_dia_semana = {{ media_km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
+        <!-- Script para dashboard -->
+        <script>
+            // Dados para gráficos extraídos da variável PHp
+            const data = {{ horario| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const datasemana = {{ semanal| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const dadosnivel = {{ niveis| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const dadosatraso = {{ ruas| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const mensal = {{ mes| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const atrasocomprimento = {{ length_delay| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const diaxsemana = {{ dia_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const km_por_hora = {{ km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const km_por_dia_semana = {{ km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const media_km_por_hora = {{ media_km_por_hora| json_encode(constant('JSON_HEX_TAG')) | raw }};
+            const media_km_por_dia_semana = {{ media_km_por_dia_semana| json_encode(constant('JSON_HEX_TAG')) | raw }};
 
 
-        console.log('Dados do gráfico de horas:', data);
-        console.log('Dados do gráfico de dias da semana:', km_por_dia_semana);
-        console.log('Dados do gráfico de horas media:', media_km_por_hora);
-        console.log('Dados do gráfico de dias da semana media:', media_km_por_dia_semana);
+            console.log('Dados do gráfico de horas:', data);
+            console.log('Dados do gráfico de dias da semana:', km_por_dia_semana);
+            console.log('Dados do gráfico de horas media:', media_km_por_hora);
+            console.log('Dados do gráfico de dias da semana media:', media_km_por_dia_semana);
 
-    </script>
-    <script src="../js/traffic-dashboard.js"></script>
+        </script>
+        <script src="../js/traffic-dashboard.js"></script>
 </body>
 
 </html>
