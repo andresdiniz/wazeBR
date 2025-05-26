@@ -10,6 +10,21 @@
 
 
 <style>
+    .chart-container {
+        position: relative;
+        min-height: 300px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 250px !important;
+        }
+
+        #heatmapChart {
+            height: 300px !important;
+        }
+    }
+
     /* Ajustes adicionais */
     .summary-item {
         transition: transform 0.2s;
@@ -349,43 +364,61 @@
             </div>
 
             <!-- Análise Temporal -->
+            <!-- Análise Temporal -->
             <div class="tab-pane fade" id="time" role="tabpanel" aria-labelledby="time-tab">
-                <div class="row g-4">
+                <div class="row g-3">
                     <!-- Tendência Mensal -->
                     <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-3">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Tendência Mensal de Congestionamentos</h5>
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0">Evolução Mensal</h5>
                             </div>
                             <div class="card-body">
-                                <canvas id="monthlyChart" height="100"></canvas>
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Detalhes por Hora do Dia -->
+                    <!-- Heatmap por Hora/Dia -->
                     <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-3">
-                            <div class="card-header bg-white border-bottom">
-                                <h5 class="mb-0">Detalhes por Hora do Dia</h5>
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0">Intensidade por Hora e Dia</h5>
                             </div>
-                            <div class="card-body heat">
-                                <canvas id="heatmapChart"></canvas>
+                            <div class="card-body p-2">
+                                <div id="heatmapChart" style="height: 400px;"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Adicione isto no seu HTML onde deseja exibir os novos gráficos -->
-                <div class="chart-card">
-                    <h3>Extensão Total por Hora</h3>
-                    <canvas id="totalKmHourlyChart"></canvas>
-                    <p class="insight"></p>
-                </div>
 
-                <div class="chart-card">
-                    <h3>Comparativo Diário</h3>
-                    <canvas id="weekdayComparisonChart"></canvas>
-                    <p class="insight"></p>
+                    <!-- Novos Gráficos Integrados -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0">Extensão Horária</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="totalKmHourlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0">Comparativo Semanal</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="weekdayComparisonChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
