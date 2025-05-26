@@ -624,6 +624,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        console.log(counts);
+
         const histogramData = {
             labels: ['0-5min', '5-15min', '15-30min', '30+min'],
             datasets: [{
