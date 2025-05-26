@@ -47,6 +47,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    function isWeekday(dateString) {
+        const date = new Date(dateString);
+        const dayOfWeek = date.getDay(); // 0 para Domingo, 1 para Segunda, ..., 6 para Sábado
+        return dayOfWeek >= 1 && dayOfWeek <= 5; // Segunda a Sexta são dias úteis
+    }
+
     // --- Funções Utilitárias para Criação de Gráficos ---
     function createSingleAxisChartConfig(labels, [data, label, type, color]) {
         return {
