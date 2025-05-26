@@ -608,7 +608,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initDurationHistogram() {
         const ctx = document.getElementById('durationHistogram');
-        const durations = jams.map(j => j.duration / 60); // Em minutos
+
+        const durations = jams.map(j => {
+            const receivedTime = new Date(j.date_received);
+            const updatedTime = new Date(j.date_updated);
+            return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
+        }); // Duração em minutos
 
         new Chart(ctx, {
             type: 'bar',
@@ -623,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ],
                     backgroundColor: colorPalette
                 }]
-            }
+            },
         });
     }
     initDurationHistogram();
