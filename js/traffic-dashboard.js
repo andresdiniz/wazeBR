@@ -389,6 +389,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function initTotalKmHourlyChart() {
         const ctx = document.getElementById('totalKmHourlyChart');
         const chartData = km_por_hora;
+        // Calcula a média da extensão total (total_km)
+        const totalKmValues = chartData.map(d => d.total_km);
+        const mediaTotalKm = totalKmValues.reduce((a, b) => a + b, 0) / totalKmValues.length;
 
         new Chart(ctx, {
             type: 'bar',
@@ -397,14 +400,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Extensão Total (km)',
                     data: chartData.map(d => d.total_km),
-                    backgroundColor: colorPalette[1]
+                    backgroundColor: colorPalette[1],
+                    yAxisID: 'y-km' // Assign a specific y-axis ID
+                },
+                {
+                    type: 'line',
+                    label: `Média: ${mediaTotalKm.toFixed(2)} km`,
+                    data: chartData.map(() => mediaTotalKm), // Repete o valor da média para cada hora
+                    borderColor: colorPalette[0],
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y-km' // Use the same y-axis
                 }]
             },
             options: {
                 ...chartOptions,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { display: true } }, // Show legend to see the average line
                 scales: {
                     y: {
+                        id: 'y-km',
                         beginAtZero: true,
                         title: { display: true, text: 'Kilômetros' }
                     }
