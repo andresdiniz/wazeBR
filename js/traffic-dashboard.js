@@ -610,6 +610,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
         }); // Duração em minutos
 
+        console.log('Durações de todos os congestionamentos:', durations);
+
         const counts = [0, 0, 0, 0]; // Contadores para cada intervalo
 
         durations.forEach(duration => {
@@ -623,8 +625,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 counts[3]++;
             }
         });
-
-        console.log(counts);
 
         const histogramData = {
             labels: ['0-5min', '5-15min', '15-30min', '30+min'],
