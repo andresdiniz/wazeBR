@@ -507,23 +507,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initWeekendComparison() {
         const ctx = document.getElementById('weekendComparisonChart');
-        const data = {
-            labels: ['Dias Úteis', 'Fim de Semana'],
-            datasets: [{
-                label: 'Atraso (min)',
-                data: [
-                    jams.filter(j => isWeekday(j.date_received)).map(j => j.delay / 60),
-                    jams.filter(j => !isWeekday(j.date_received)).map(j => j.delay / 60)
-                ],
-                backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)']
-            }]
-        };
+
+        const weekdayDelays = jams.filter(j => isWeekday(j.date_received)).map(j => j.delay / 60);
+        const weekendDelays = jams.filter(j => !isWeekday(j.date_received)).map(j => j.delay / 60);
+
+        const avgWeekdayDelay = weekdayDelays.length > 0 ? weekdayDelays.reduce((a, b) => a + b, 0) / weekdayDelays.length : 0;
+        const avgWeekendDelay = weekendDelays.length > 0 ? weekendDelays.reduce((a, b) => a + b, 0) / weekendDelays.length : 0;
 
         new Chart(ctx, {
-            type: 'boxplot',
-            data: data,
+            type: 'bar',
+            data: {
+                labels: ['Dias Úteis', 'Fim de Semana'],
+                datasets: [{
+                    label: 'Média de Atraso (minutos)',
+                    data: [avgWeekdayDelay, avgWeekendDelay],
+                    backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)']
+                }]
+            },
             options: {
-                scales: { y: { title: { text: 'Minutos de Atraso' } } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Média de Atraso (minutos)'
+                        }
+                    }
+                }
             }
         });
     }
