@@ -10,6 +10,33 @@
 
 
 <style>
+    /* Ajustes adicionais */
+    .summary-item {
+        transition: transform 0.2s;
+    }
+
+    .summary-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .chart-container {
+        min-height: 250px;
+    }
+
+    @media (max-width: 768px) {
+        .summary-value {
+            font-size: 1.5rem !important;
+        }
+
+        .card-header h5 {
+            font-size: 0.9rem !important;
+        }
+
+        .chart-container {
+            height: 250px !important;
+        }
+    }
+
     .insight {
         background: #f8f9fa;
         border-left: 4px solid #0d6efd;
@@ -96,41 +123,41 @@
         <div class="tab-content" id="analysisTabContent">
             <!-- Visão Geral -->
             <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-                <div class="row">
+                <div class="row gy-3">
                     <!-- Cartões de resumo -->
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Resumo dos Congestionamentos</h5>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h5 class="mb-0 fs-6">Resumo dos Congestionamentos</h5>
                             </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="summary-item text-center">
-                                            <div class="summary-value">{{ resumo['total']|number_format(0, '', '') }}
-                                            </div>
-                                            <div class="summary-label">Congestionamentos Totais</div>
+                            <div class="card-body p-2">
+                                <div class="row row-cols-2 row-cols-lg-4 g-1 g-lg-3">
+                                    <div class="col">
+                                        <div class="summary-item bg-light rounded p-2 text-center h-100">
+                                            <div class="summary-value display-6 fw-bold text-primary">{{
+                                                resumo['total']|number_format(0, '', '') }}</div>
+                                            <div class="summary-label small text-muted">Total</div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (resumo['atraso_medio']/60)|number_format(1)
-                                                }}</div>
-                                            <div class="summary-label">Atraso Médio (minutos)</div>
+                                    <div class="col">
+                                        <div class="summary-item bg-light rounded p-2 text-center h-100">
+                                            <div class="summary-value display-6 fw-bold text-danger">{{
+                                                (resumo['atraso_medio']/60)|number_format(1) }}</div>
+                                            <div class="summary-label small text-muted">Atraso Médio (min)</div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="summary-item text-center">
-                                            <div class="summary-value">{{
+                                    <div class="col">
+                                        <div class="summary-item bg-light rounded p-2 text-center h-100">
+                                            <div class="summary-value display-6 fw-bold text-success">{{
                                                 (resumo['comprimento_medio']/1000)|number_format(2) }}</div>
-                                            <div class="summary-label">Comprimento Médio (km)</div>
+                                            <div class="summary-label small text-muted">Comprimento (km)</div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
-                                        <div class="summary-item text-center">
-                                            <div class="summary-value">{{ (resumo['max_atraso']/60)|number_format(1) }}
-                                            </div>
-                                            <div class="summary-label">Maior Atraso em Minutos</div>
+                                    <div class="col">
+                                        <div class="summary-item bg-light rounded p-2 text-center h-100">
+                                            <div class="summary-value display-6 fw-bold text-warning">{{
+                                                (resumo['max_atraso']/60)|number_format(1) }}</div>
+                                            <div class="summary-label small text-muted">Máx. Atraso (min)</div>
                                         </div>
                                     </div>
                                 </div>
@@ -138,56 +165,65 @@
                         </div>
                     </div>
 
-                    <!-- Gráfico de distribuição por hora -->
-                    <div class="col-md-6">
-                        <div class="card">
-
-                            <div class="card-header">
-                                <h5 class="mb-0">Distribuição por Hora do Dia</h5>
+                    <!-- Gráficos -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h5 class="mb-0 fs-6">Distribuição por Hora</h5>
                             </div>
-                            <div class="card-body">
-                                <canvas id="hourlyChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gráfico de distribuição por dia da semana -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Distribuição por Dia da Semana</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="weekdayChart"></canvas>
+                            <div class="card-body p-2">
+                                <div class="chart-container"
+                                    style="position: relative; height: 300px; min-height: 250px">
+                                    <canvas id="hourlyChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Gráfico de nível de congestionamento -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Congestionamentos por Nível</h5>
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h5 class="mb-0 fs-6">Distribuição por Dia</h5>
                             </div>
-                            <div class="card-body">
-                                <canvas id="levelChart"></canvas>
+                            <div class="card-body p-2">
+                                <div class="chart-container"
+                                    style="position: relative; height: 300px; min-height: 250px">
+                                    <canvas id="weekdayChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Distribuição de atrasos -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Ruas com mais Congestionamentos</h5>
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h5 class="mb-0 fs-6">Níveis de Congestionamento</h5>
                             </div>
-                            <div class="card-body">
-                                <canvas id="delayDistChart"></canvas>
+                            <div class="card-body p-2">
+                                <div class="chart-container"
+                                    style="position: relative; height: 300px; min-height: 250px">
+                                    <canvas id="levelChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h5 class="mb-0 fs-6">Ruas mais Afetadas</h5>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="chart-container"
+                                    style="position: relative; height: 300px; min-height: 250px">
+                                    <canvas id="delayDistChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- Segmentos -->
             <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
