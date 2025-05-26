@@ -169,7 +169,7 @@ $page = $uri ?: 'home'; // Define 'home' como padrão se a URI for vazia
 $pages = getSitepages($pdo, $page); // Este nome de variável 'pages' pode ser confuso com o plural
 $pageData = $pages['pageData'] ?? null; // Use null como padrão se a chave não existir
 $atualizacao = getLatestExecutionLogByStatus($pdo, 'success'); // Atualização dos dados do Waze
-echo $pageData;
+var_dump($pageData) ;
 
 // Prepara dados que serão passados para todos os templates fixos (header, sidebar, footer)
 $dados = [
