@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("Dados de média de duração por hora:", rawData);
 
         new Chart(ctx, {
-            type: 'bar',
+            type: 'scatter',
             data: {
                 datasets: [{
                     label: 'Média da Duração dos Congestionamentos por Hora',
