@@ -84,11 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         window.hourlyChartInstance = new Chart(ctx, createSingleAxisChartConfig(
             // Configuração responsiva dos gráficos
-            Chart.defaults.responsive = true;
-        Chart.defaults.maintainAspectRatio = false;
-        Chart.defaults.plugins.legend.display = true;
-        Chart.defaults.plugins.legend.position = 'bottom';
-        Chart.defaults.font.size = window.innerWidth < 768 ? 10 : 12;
         labels,
             [congestionamentos, 'Congestionamentos', 'bar', 'rgba(13, 110, 253, 0.7)'],
             [[], 'Atraso Médio (min)', 'line', 'rgba(220, 53, 69, 0.7)'] // Linha vazia, pois não há avg_delay
