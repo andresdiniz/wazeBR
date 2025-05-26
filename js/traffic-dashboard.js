@@ -657,23 +657,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initDurationHistogram();
-
-    function initTimeline() {
-        const timeline = document.getElementById('timelineChart');
-        const criticalEvents = jams.filter(j => j.level >= 4);
-        console.log("Eventos criticos:", criticalEvents);
-
-        new vis.Timeline(timeline, criticalEvents.map(e => ({
-            id: e.uuid,
-            content: `${e.city} - Nível ${e.level}`,
-            start: e.date_received,
-            type: 'point'
-        })), {
-            showCurrentTime: false,
-            zoomable: true
-        });
-    }
-    initTimeline();
 });
 
 // Funções auxiliares (presumivelmente definidas em outro lugar no seu código)
