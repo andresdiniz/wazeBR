@@ -59,7 +59,8 @@ class TrafficJamAnalyzer {
             'km_por_hora' => $this->getKmPorHora($id_parceiro),
             'km_por_dia_semana' => $this->getKmPorDiaSemana($id_parceiro),
             'media_km_por_hora' => $this->getMediaKmPorHora($id_parceiro),
-            'media_km_por_dia_semana' => $this->getMediaKmPorDiaSemana($id_parceiro)
+            'media_km_por_dia_semana' => $this->getMediaKmPorDiaSemana($id_parceiro),
+            'jams' => $this->getJams($id_parceiro)
         ];
     }
 
@@ -260,8 +261,19 @@ class TrafficJamAnalyzer {
         }
     }
 
-
-
+    private function getJams($id_parceiro) {
+        $query = "SELECT 
+                    *
+                FROM jams";
+        
+        $this->addPartnerFilter($query, $id_parceiro);
+        $query .= " ORDER BY date_received DESC LIMIT 1000";
+        
+        $stmt = $this->pdo->prepare($query);
+        if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     private function getNiveisCongestionamento($id_parceiro) {
         $query = "SELECT 
@@ -413,5 +425,6 @@ $data = array_merge($data, [
     'km_por_hora' => $data['km_por_hora'],
     'km_por_dia_semana' => $data['km_por_dia_semana'],
     'media_km_por_hora' => $data['media_km_por_hora'],
-    'media_km_por_dia_semana' => $data['media_km_por_dia_semana']
+    'media_km_por_dia_semana' => $data['media_km_por_dia_semana'],
+    'jams' => $data['jams']
 ]);
