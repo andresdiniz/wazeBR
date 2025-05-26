@@ -599,11 +599,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return 0;
     }
-
-    // Função placeholder para gerar uma cor aleatória
-    function randColor() {
-        return [Math.random() * 255, Math.random() * 255, Math.random() * 255].join(',');
-    }
     initRoadTypeRadar();
 
     function initDurationHistogram() {
@@ -615,24 +610,48 @@ document.addEventListener('DOMContentLoaded', function () {
             return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
         }); // Duração em minutos
 
+        const counts = [0, 0, 0, 0]; // Contadores para cada intervalo
+
+        durations.forEach(duration => {
+            if (duration <= 5) {
+                counts[0]++;
+            } else if (duration > 5 && duration <= 15) {
+                counts[1]++;
+            } else if (duration > 15 && duration <= 30) {
+                counts[2]++;
+            } else {
+                counts[3]++;
+            }
+        });
+
         const histogramData = {
             labels: ['0-5min', '5-15min', '15-30min', '30+min'],
             datasets: [{
-                data: [
-                    durations.filter(d => d <= 5).length,
-                    durations.filter(d => d > 5 && d <= 15).length,
-                    durations.filter(d => d > 15 && d <= 30).length,
-                    durations.filter(d => d > 30).length
-                ],
+                label: 'Frequência de Duração',
+                data: counts,
                 backgroundColor: colorPalette
             }]
         };
 
-        console.log('Dados para o histograma:', histogramData);
+        console.log('Dados para o histograma (frequência por duração):', histogramData);
 
         new Chart(ctx, {
             type: 'bar',
             data: histogramData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Frequência'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true }
+                }
+            }
         });
     }
     initDurationHistogram();
