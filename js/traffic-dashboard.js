@@ -543,20 +543,65 @@ document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('roadTypeRadarChart');
         const metrics = ['speedKMH', 'delay', 'length'];
 
+        // Extrai os tipos de via únicos da array 'jams'
+        const roadTypes = [...new Set(jams.map(jam => jam.roadType).filter(Boolean))];
+
+        if (!roadTypes || roadTypes.length === 0) {
+            console.warn("Nenhum tipo de via encontrado nos dados para o gráfico radar.");
+            return;
+        }
+
+        const datasets = roadTypes.map(rt => ({
+            label: rt,
+            data: metrics.map(metric => avgByRoadType(rt, metric, jams)), // Passa 'jams' para a função de média
+            backgroundColor: `rgba(${randColor()},0.2)`,
+            borderColor: `rgba(${randColor()},1)`,
+            pointBackgroundColor: `rgba(${randColor()},1)`,
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: `rgba(${randColor()},1)`
+        }));
+
         new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: metrics,
-                datasets: roadTypes.map(rt => ({
-                    label: rt,
-                    data: metrics.map(m => avgByRoadType(rt, m)),
-                    backgroundColor: `rgba(${randColor()},0.2)`
-                }))
+                datasets: datasets
             },
             options: {
-                scales: { r: { beginAtZero: true } }
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        angleLines: {
+                            display: true
+                        },
+                        grid: {
+                            circular: true
+                        },
+                        max: Math.max(...datasets.flatMap(d => d.data)) * 1.2 // Ajusta o máximo da escala
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
             }
         });
+    }
+
+    // Função placeholder para calcular a média por tipo de via e métrica
+    function avgByRoadType(roadType, metric, data) {
+        const filtered = data.filter(item => item.roadType === roadType && item[metric] !== undefined);
+        if (filtered.length > 0) {
+            return filtered.reduce((sum, item) => sum + item[metric], 0) / filtered.length;
+        }
+        return 0;
+    }
+
+    // Função placeholder para gerar uma cor aleatória
+    function randColor() {
+        return [Math.random() * 255, Math.random() * 255, Math.random() * 255].join(',');
     }
     initRoadTypeRadar();
 
