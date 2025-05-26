@@ -54,6 +54,9 @@ function getSitepages($pdo, $pageurl) {
         // Preparar a consulta SQL para buscar os dados da página com base na URL
         $stmt = $pdo->prepare("SELECT * FROM pages WHERE url = :url LIMIT 1");
         $stmt->bindParam(':url', $pageurl, PDO::PARAM_STR);  // Usando o parâmetro correto $pageurl
+
+        var_dump($pageurl); // Verifique o valor de $pageurl
+
         $stmt->execute();
 
         // Verifica se encontrou a página
