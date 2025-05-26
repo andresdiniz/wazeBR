@@ -455,32 +455,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initDurationTimeScatter() {
         const ctx = document.getElementById('durationTimeChart');
-        const rawData = jams.map(j => {
+        const hourlyDurations = {};
+
+        jams.forEach(j => {
             const receivedTime = new Date(j.date_received);
+            const hour = receivedTime.getHours();
             const updatedTime = new Date(j.date_updated);
-            // Calcula a diferença em milissegundos e converte para minutos
             const durationMinutes = (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
-            return {
-                x: receivedTime.getHours(),
-                y: durationMinutes
-            };
+
+            if (!hourlyDurations[hour]) {
+                hourlyDurations[hour] = { sum: 0, count: 0 };
+            }
+            hourlyDurations[hour].sum += durationMinutes;
+            hourlyDurations[hour].count++;
         });
 
-        console.log("Dados de duração (calculada) para o gráfico de dispersão:", rawData);
+        const rawData = Object.keys(hourlyDurations)
+            .sort((a, b) => parseInt(a) - parseInt(b)) // Ordena por hora
+            .map(hour => ({
+                x: parseInt(hour),
+                y: hourlyDurations[hour].sum / hourlyDurations[hour].count
+            }));
+
+        console.log("Dados de média de duração por hora:", rawData);
 
         new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: 'Duração dos Congestionamentos (calculada)',
+                    label: 'Média da Duração dos Congestionamentos por Hora',
                     data: rawData,
                     backgroundColor: 'rgba(255, 99, 132, 0.5)'
                 }]
             },
             options: {
                 scales: {
-                    x: { title: { display: true, text: 'Hora do Recebimento' } },
-                    y: { title: { display: true, text: 'Duração (minutos)' } }
+                    x: { title: { display: true, text: 'Hora do Recebimento' }, ticks: { stepSize: 1 } },
+                    y: { title: { display: true, text: 'Média da Duração (minutos)' } }
                 },
                 plugins: {
                     // @ts-ignore
