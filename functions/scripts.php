@@ -47,6 +47,7 @@ function getSiteUsers(PDO $pdo, $userId)
 }
 
 function getSitepages($pdo, $pageurl) {
+    var_dump($pageurl); // Adicionado para depuração
     // Inicia o array para armazenar os dados da página
     $data = [];
     // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
@@ -58,6 +59,7 @@ function getSitepages($pdo, $pageurl) {
 
         // Verifica se encontrou a página
         $pageData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
 
         if ($pageData) {
             // Se encontrou, adiciona os dados da página ao array $data
