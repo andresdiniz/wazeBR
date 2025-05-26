@@ -315,11 +315,11 @@ function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y
     };
 }
 
-// Atualizações no JavaScript
+
 function initMonthlyChart() {
     const ctx = document.getElementById('monthlyChart');
     const rawData = mensal; // Mantém a variável original
-    
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -363,11 +363,14 @@ function initMonthlyChart() {
 // Or by downloading the library and hosting it locally.
 
 function weeklyHourlyHeatmapPlotly() {
+    const container = document.getElementById('heatmapChart');
+    const rawData = diaxsemana; // Mantém a variável original
     var semanaldata = diaxsemana; // Dados de entrada, deve ser um array de objetos com {dia, hora, media_velocidade, quantidade, media_nivel, media_atraso}
     // Seleciona o contêiner onde o gráfico Plotly será renderizado.
     // Plotly geralmente renderiza em uma div, não diretamente em um canvas existente.
-    const container = document.querySelector('.heat');
-
+    // Certifique-se de que o contêiner exista no DOM antes de tentar renderizar o gráfico. 
+    // Se você estiver usando Twig, certifique-se de que a variável semanaldata esteja disponível no contexto.
+    // semanaldata deve ser um array de objetos com as propriedades: dia, hora, media_velocidade, quantidade, media_nivel, media_atraso 
     // Verifica se o contêiner e os dados existem
     if (!container || !semanaldata || semanaldata.length === 0) {
         console.error("Container do gráfico (.heat) ou dados não encontrados.");
@@ -484,50 +487,38 @@ function weeklyHourlyHeatmapPlotly() {
 
 function initTotalKmHourlyChart() {
     const ctx = document.getElementById('totalKmHourlyChart');
-    const data = [
-        { hora: 0, total_km: 21.23 }, { hora: 1, total_km: 14.74 },
-        { hora: 2, total_km: 12.72 }, //... restante dos dados
-    ];
-
+    const rawData = km_por_hora; // Usa a variável existente
+    
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
-            labels: data.map(d => `${d.hora}h`),
+            labels: rawData.map(d => `${d.hora}h`),
             datasets: [{
                 label: 'Extensão Total (km)',
-                data: data.map(d => d.total_km),
-                borderColor: '#dc3545',
-                tension: 0.4,
-                fill: true
+                data: rawData.map(d => d.total_km),
+                backgroundColor: 'rgba(220, 53, 69, 0.7)'
             }]
         },
         options: {
+            responsive: true,
             plugins: {
-                title: { display: true, text: 'Extensão Total de Congestionamento por Hora' }
+                legend: { display: false }
             },
-            scales: { y: { beginAtZero: true, title: { display: true, text: 'Kilômetros' } } }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Kilômetros' }
+                }
+            }
         }
     });
-
-    // Insight
-    const peakHour = data.reduce((max, curr) => curr.total_km > max.total_km ? curr : max);
-    const insight = `Pico de congestionamento às ${peakHour.hora}h com ${peakHour.total_km}km. 
-    Horário comercial (8h-18h) concentra 78% do total diário.`;
-    ctx.insertAdjacentHTML('afterend', `<p class="insight">🔍 ${insight}</p>`);
 }
 
 function initWeekdayComparisonChart() {
     const ctx = document.getElementById('weekdayComparisonChart');
-    const totalData = [
-        { dia_semana: "Sunday", total_km: 143.28 },
-        { dia_semana: "Monday", total_km: 431.29 }, //... outros dias
-    ];
-
-    const avgData = [
-        { dia_semana: "Sunday", media_km: 0.4 },
-        { dia_semana: "Monday", media_km: 0.43 }, //... outros dias
-    ];
-
+    const totalData = km_por_dia_semana; // Variável existente
+    const avgData = media_km_por_dia_semana; // Variável existente
+    
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -541,26 +532,24 @@ function initWeekdayComparisonChart() {
                 data: avgData.map(d => d.media_km),
                 backgroundColor: 'rgba(54, 162, 235, 0.7)',
                 type: 'line',
-                borderWidth: 3
+                borderWidth: 3,
+                tension: 0.3
             }]
         },
         options: {
-            scales: { y: { beginAtZero: true } },
+            responsive: true,
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    title: { display: true, text: 'Kilômetros' }
+                } 
+            },
             plugins: {
-                title: { display: true, text: 'Comparativo de Congestionamento por Dia' },
                 tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}km${ctx.datasetIndex === 1 ? ' por evento' : ''}`
-                    }
+                    mode: 'index',
+                    intersect: false
                 }
             }
         }
     });
-
-    // Insight
-    const maxDay = totalData.reduce((max, curr) => curr.total_km > max.total_km ? curr : max);
-    const insight = `Quarta-feira tem o maior volume total (${maxDay.total_km}km), enquanto Quintas-feiras 
-    têm os congestionamentos mais longos em média (0.45km/evento).`;
-    ctx.insertAdjacentHTML('afterend', `<p class="insight">🔍 ${insight}</p>`);
 }
-});
