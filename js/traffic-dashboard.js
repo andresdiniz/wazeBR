@@ -315,39 +315,46 @@ function createDualAxisChartConfig(labels, primaryData, secondaryData, yTitle, y
     };
 }
 
+// Atualizações no JavaScript
 function initMonthlyChart() {
-    const monthlyData = mensal;
-
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    const ctx = document.getElementById('monthlyChart');
+    const rawData = mensal; // Mantém a variável original
+    
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: monthlyData.map(d => d.mes),
+            labels: rawData.map(d => d.mes),
             datasets: [{
-                label: 'Total de Congestionamentos',
-                data: monthlyData.map(d => d.total),
-                fill: false,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.3)',
-                tension: 0.3
+                label: 'Total de Ocorrências',
+                data: rawData.map(d => d.total),
+                borderColor: 'rgba(13, 110, 253, 0.9)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.3,
+                fill: true
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Tendência Mensal de Congestionamentos'
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Ocorrências'
+                    }
                 }
             }
         }
     });
-} // Fechamento correto da função initMonthlyChart
+}
+
 
 
 // Assume you have Plotly.js included in your HTML file.
