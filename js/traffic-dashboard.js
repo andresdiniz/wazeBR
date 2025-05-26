@@ -470,93 +470,99 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 plugins: {
                     // @ts-ignore
-                    trendline: { lineStyle: 'dashed',
+                    trendline: {
+                        lineStyle: 'dashed',
                         width: 2,
-                    color: '#ff6384'
+                        color: '#ff6384'
+                    }
                 }
             }
-        }
-    });
-}
+        });
+    }
+    initDurationTimeScatter()
 
-function initWeekendComparison() {
-    const ctx = document.getElementById('weekendComparisonChart');
-    const data = {
-        labels: ['Dias Úteis', 'Fim de Semana'],
-        datasets: [{
-            label: 'Atraso (min)',
-            data: [
-                jams.filter(j => isWeekday(j.date_received)).map(j => j.delay / 60),
-                jams.filter(j => !isWeekday(j.date_received)).map(j => j.delay / 60)
-            ],
-            backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)']
-        }]
-    };
-
-    new Chart(ctx, {
-        type: 'boxplot',
-        data: data,
-        options: {
-            scales: { y: { title: { text: 'Minutos de Atraso' } } }
-        }
-    });
-}
-
-function initRoadTypeRadar() {
-    const ctx = document.getElementById('roadTypeRadarChart');
-    const metrics = ['speedKMH', 'delay', 'length'];
-
-    new Chart(ctx, {
-        type: 'radar',
-        data: {
-            labels: metrics,
-            datasets: roadTypes.map(rt => ({
-                label: rt,
-                data: metrics.map(m => avgByRoadType(rt, m)),
-                backgroundColor: `rgba(${randColor()},0.2)`
-            }))
-        },
-        options: {
-            scales: { r: { beginAtZero: true } }
-        }
-    });
-}
-
-function initDurationHistogram() {
-    const ctx = document.getElementById('durationHistogram');
-    const durations = jams.map(j => j.duration / 60); // Em minutos
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['0-5min', '5-15min', '15-30min', '30+min'],
+    function initWeekendComparison() {
+        const ctx = document.getElementById('weekendComparisonChart');
+        const data = {
+            labels: ['Dias Úteis', 'Fim de Semana'],
             datasets: [{
+                label: 'Atraso (min)',
                 data: [
-                    durations.filter(d => d <= 5).length,
-                    durations.filter(d => d > 5 && d <= 15).length,
-                    durations.filter(d => d > 15 && d <= 30).length,
-                    durations.filter(d => d > 30).length
+                    jams.filter(j => isWeekday(j.date_received)).map(j => j.delay / 60),
+                    jams.filter(j => !isWeekday(j.date_received)).map(j => j.delay / 60)
                 ],
-                backgroundColor: colorPalette
+                backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)']
             }]
-        }
-    });
-}
+        };
 
-function initTimeline() {
-    const timeline = document.getElementById('timelineChart');
-    const criticalEvents = jams.filter(j => j.level >= 4);
+        new Chart(ctx, {
+            type: 'boxplot',
+            data: data,
+            options: {
+                scales: { y: { title: { text: 'Minutos de Atraso' } } }
+            }
+        });
+    }
+    initWeekendComparison();
 
-    new vis.Timeline(timeline, criticalEvents.map(e => ({
-        id: e.uuid,
-        content: `${e.city} - Nível ${e.level}`,
-        start: e.date_received,
-        type: 'point'
-    })), {
-        showCurrentTime: false,
-        zoomable: true
-    });
-}
+    function initRoadTypeRadar() {
+        const ctx = document.getElementById('roadTypeRadarChart');
+        const metrics = ['speedKMH', 'delay', 'length'];
+
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: metrics,
+                datasets: roadTypes.map(rt => ({
+                    label: rt,
+                    data: metrics.map(m => avgByRoadType(rt, m)),
+                    backgroundColor: `rgba(${randColor()},0.2)`
+                }))
+            },
+            options: {
+                scales: { r: { beginAtZero: true } }
+            }
+        });
+    }
+    initRoadTypeRadar();
+
+    function initDurationHistogram() {
+        const ctx = document.getElementById('durationHistogram');
+        const durations = jams.map(j => j.duration / 60); // Em minutos
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['0-5min', '5-15min', '15-30min', '30+min'],
+                datasets: [{
+                    data: [
+                        durations.filter(d => d <= 5).length,
+                        durations.filter(d => d > 5 && d <= 15).length,
+                        durations.filter(d => d > 15 && d <= 30).length,
+                        durations.filter(d => d > 30).length
+                    ],
+                    backgroundColor: colorPalette
+                }]
+            }
+        });
+    }
+    initDurationHistogram();
+
+    function initTimeline() {
+        const timeline = document.getElementById('timelineChart');
+        const criticalEvents = jams.filter(j => j.level >= 4);
+
+        new vis.Timeline(timeline, criticalEvents.map(e => ({
+            id: e.uuid,
+            content: `${e.city} - Nível ${e.level}`,
+            start: e.date_received,
+            type: 'point'
+        })), {
+            showCurrentTime: false,
+            zoomable: true
+        });
+    }
+    initTimeline();
 });
 
 // Funções auxiliares (presumivelmente definidas em outro lugar no seu código)
