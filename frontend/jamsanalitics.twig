@@ -10,32 +10,33 @@
 
 
 <style>
-/* Ajustes adicionais */
-.summary-item {
-    transition: transform 0.2s;
-}
-
-.summary-item:hover {
-    transform: translateY(-2px);
-}
-
-.chart-container {
-    min-height: 250px;
-}
-
-@media (max-width: 768px) {
-    .summary-value {
-        font-size: 1.5rem !important;
+    /* Ajustes adicionais */
+    .summary-item {
+        transition: transform 0.2s;
     }
-    
-    .card-header h5 {
-        font-size: 0.9rem !important;
+
+    .summary-item:hover {
+        transform: translateY(-2px);
     }
-    
+
     .chart-container {
-        height: 250px !important;
+        min-height: 250px;
     }
-}
+
+    @media (max-width: 768px) {
+        .summary-value {
+            font-size: 1.5rem !important;
+        }
+
+        .card-header h5 {
+            font-size: 0.9rem !important;
+        }
+
+        .chart-container {
+            height: 250px !important;
+        }
+    }
+
     .insight {
         background: #f8f9fa;
         border-left: 4px solid #0d6efd;
@@ -94,6 +95,34 @@
 
     .nav-tabs .nav-link.active {
         font-weight: bold;
+    }
+
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+    }
+
+    .chart-container {
+        min-height: 300px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 300px !important;
+        }
+
+        .table td,
+        .table th {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
     }
 </style>
 </head>
@@ -226,17 +255,17 @@
 
             <!-- Segmentos -->
             <div class="tab-pane fade" id="segments" role="tabpanel" aria-labelledby="segments-tab">
-                <div class="row">
+                <div class="row g-3">
                     <!-- Top Segmentos -->
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
                                 <h5 class="mb-0">Segmentos Mais Congestionados</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>ID Segmento</th>
                                                 <th>Rua</th>
@@ -249,12 +278,14 @@
                                         <tbody>
                                             {% for segment in segmentos %}
                                             <tr>
-                                                <td>{{ segment.segmento }}</td>
+                                                <td class="fw-bold">{{ segment.segmento }}</td>
                                                 <td>{{ segment.rua }}</td>
-                                                <td>{{ segment.total }}</td>
-                                                <td>{{ (segment.atraso_medio_min) }}</td>
+                                                <td>
+                                                    <span class="badge bg-danger">{{ segment.total }}</span>
+                                                </td>
+                                                <td>{{ segment.atraso_medio_min }}</td>
                                                 <td>{{ segment.comprimento_medio_m }}</td>
-                                                <td>{{ (segment.atraso_max_min) }}</td>
+                                                <td>{{ segment.atraso_max_min }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -265,15 +296,15 @@
                     </div>
 
                     <!-- Top Ruas -->
-                    <div class="col-md-12 mt-4">
-                        <div class="card">
-                            <div class="card-header">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
                                 <h5 class="mb-0">Ruas Mais Problemáticas</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>Rua</th>
                                                 <th>Contagem</th>
@@ -286,7 +317,9 @@
                                             {% for street in ruas %}
                                             <tr>
                                                 <td>{{ street.rua }}</td>
-                                                <td>{{ street.total }}</td>
+                                                <td>
+                                                    <span class="badge bg-danger">{{ street.total }}</span>
+                                                </td>
                                                 <td>{{ street.atraso_medio_min }}</td>
                                                 <td>{{ street.comprimento_medio_m }}</td>
                                                 <td>{{ street.atraso_max_min }}</td>
@@ -300,13 +333,15 @@
                     </div>
 
                     <!-- Relação Tamanho vs Atraso -->
-                    <div class="col-md-12 mt-4">
-                        <div class="card">
-                            <div class="card-header">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white py-2">
                                 <h5 class="mb-0">Relação entre Comprimento e Atraso</h5>
                             </div>
                             <div class="card-body">
-                                <canvas id="lengthVsDelayChart"></canvas>
+                                <div class="chart-container" style="height: 400px;">
+                                    <canvas id="lengthVsDelayChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
