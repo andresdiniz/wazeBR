@@ -661,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function initTimeline() {
         const timeline = document.getElementById('timelineChart');
         const criticalEvents = jams.filter(j => j.level >= 4);
+        console.log("Eventos criticos:", criticalEvents);
 
         new vis.Timeline(timeline, criticalEvents.map(e => ({
             id: e.uuid,
