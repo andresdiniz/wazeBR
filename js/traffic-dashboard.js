@@ -455,25 +455,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initDurationTimeScatter() {
         const ctx = document.getElementById('durationTimeChart');
-        const rawData = jams.map(j => ({
-            x: new Date(j.date_received).getHours(),
-            y: j.duration / 60
-        }));
+        const rawData = jams.map(j => {
+            const receivedTime = new Date(j.date_received);
+            const updatedTime = new Date(j.date_updated);
+            // Calcula a diferença em milissegundos e converte para minutos
+            const durationMinutes = (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
+            return {
+                x: receivedTime.getHours(),
+                y: durationMinutes
+            };
+        });
 
-        console.log("Dados de duração para o gráfico de dispersão:", rawData);
+        console.log("Dados de duração (calculada) para o gráfico de dispersão:", rawData);
 
         new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: 'Duração dos Congestionamentos',
+                    label: 'Duração dos Congestionamentos (calculada)',
                     data: rawData,
                     backgroundColor: 'rgba(255, 99, 132, 0.5)'
                 }]
             },
             options: {
                 scales: {
-                    x: { title: { display: true, text: 'Hora do Dia' } },
+                    x: { title: { display: true, text: 'Hora do Recebimento' } },
                     y: { title: { display: true, text: 'Duração (minutos)' } }
                 },
                 plugins: {
