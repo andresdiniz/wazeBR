@@ -123,7 +123,7 @@ function getLive(PDO $pdo, ?int $id_parceiro = null): array
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
-    'jamLive' => getLive($pdo, $id_parceiro)
+    //'jamLive' => getLive($pdo, $id_parceiro)
 ];
 
 // Você pode passar $data para o seu template Twig aqui
