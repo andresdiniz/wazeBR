@@ -186,7 +186,13 @@ function getdrivers(PDO $pdo, ?int $id_parceiro = null): array
         }
 
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Filtra os resultados para remover aqueles onde total_wazers_impactados é zero
+        $filteredResults = array_filter($results, function($row) {
+            return $row['total_wazers_impactados'] > 0;
+        });
+
+        // Reindexa o array para garantir que ele seja um array numérico contínuo
+        return array_values($filteredResults);
     } catch (PDOException $e) {
         echo "Erro na função getdrivers: " . $e->getMessage() . "<br>";
         echo "Query: " . $query . "<br>";
