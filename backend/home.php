@@ -209,5 +209,5 @@ $data = [
 // echo $twig->render('dashboard.html.twig', $data);
 
 // Para fins de demonstração, vamos apenas imprimir o array de dados
-print_r($data['activeDrivers']);
+//print_r($data['activeDrivers']);
 ?>
