@@ -167,23 +167,16 @@ function getdrivers(PDO $pdo, ?int $id_parceiro = null): array
             id_parceiro
     ) AS ultimos_registros
     ON
-        u.id_parceiro = ultimos_registros.id_parceiro AND u.created_at = ultimos_registros.max_created_at
-    GROUP BY
-        u.id_parceiro, u.created_at
+        u.id_parceiro = ultimos_registros.id_parceiro AND u.created_at = ultimos_registros.max_created_at";
+
+    // Adiciona a condição WHERE antes do GROUP BY e ORDER BY
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
+        $query .= " WHERE u.id_parceiro = :id_parceiro";
+    }
+
+    $query .= " GROUP BY u.id_parceiro, u.created_at
     ORDER BY
         u.id_parceiro, u.created_at DESC";
-
-    if ($id_parceiro !== 99 && $id_parceiro !== null) {
-        // A query já agrupa por id_parceiro, então o filtro WHERE pode ser aplicado diretamente
-        // se quisermos apenas um id_parceiro específico.
-        // No entanto, a lógica da query já busca o MAX(created_at) por id_parceiro.
-        // Se a intenção é filtrar o resultado final para um único parceiro,
-        // o WHERE deve ser aplicado após a subquery ou no GROUP BY.
-        // Para esta função, que parece ser para um único parceiro ou todos,
-        // vamos adicionar a condição no WHERE principal, mas é importante notar
-        // que a subquery já garante a última leitura por parceiro.
-        $query .= " AND u.id_parceiro = :id_parceiro";
-    }
 
     try {
         $stmt = $pdo->prepare($query);
@@ -216,5 +209,5 @@ $data = [
 // echo $twig->render('dashboard.html.twig', $data);
 
 // Para fins de demonstração, vamos apenas imprimir o array de dados
-//print_r($data);
+print_r($data['activeDrivers']);
 ?>
