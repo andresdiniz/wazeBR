@@ -1,10 +1,18 @@
-<!-- Adicione no cabeçalho -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 
 <style>
+    #congestionMap {
+        height: 450px;
+        width: 100%;
+    }
+
     /* Melhorias mínimas para responsividade */
     @media (max-width: 767.98px) {
         .table-responsive {
@@ -245,7 +253,7 @@
                     <h5 class="mb-0">Mapa de Calor de Congestionamentos</h5>
                 </div>
                 <div class="card-body p-2">
-                    <div id="heatmap" style="height: 450px;"></div>
+                    <div id="congestionMap"></div>
                 </div>
             </div>
         </div>
@@ -316,61 +324,40 @@
         await new Promise(resolve => setTimeout(resolve, 500));
         return "KM Desconhecido";
     }
-    // Adicione no final do traffic-dashboard.js
-    const map = L.map('heatmap').setView([-20.66, -43.79], 13); // Coordenadas aproximadas de Conselheiro Lafaiete
-
+    // Inicialização do mapa de congestionamento
+    const congestionMap = L.map('congestionMap').setView([-20.66, -43.79], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(congestionMap);
 
-    const dadosjams = {{ jamLive| json_encode | raw }};
-    console.log("Dados de Jams recebidos:", dadosjams);
+    const jamsData = {{ jamLive| json_encode | raw }};
 
-    const congestionData = [];
+    function getColorForLevel(level) {
+        switch (level) {
+            case 5: return 'red';    // Tráfego parado
+            case 4: return 'orange'; // Tráfego muito lento
+            case 3: return 'yellow'; // Tráfego lento
+            case 2: return 'lime';   // Tráfego moderado
+            case 1: return 'blue';   // Tráfego leve
+            default: return 'gray';
+        }
+    }
 
-    if (Array.isArray(dadosjams)) {
-        dadosjams.forEach(jam => {
-            if (jam.lines && Array.isArray(jam.lines) && jam.level !== undefined) {
-                // Calcular uma intensidade baseada no nível do congestionamento (ajuste conforme necessário)
-                let intensity = 0;
-                switch (jam.level) {
-                    case 5: // Tráfego parado
-                        intensity = 1.0;
-                        break;
-                    case 4: // Tráfego muito lento
-                        intensity = 0.8;
-                        break;
-                    case 3: // Tráfego lento
-                        intensity = 0.6;
-                        break;
-                    case 2: // Tráfego moderado
-                        intensity = 0.4;
-                        break;
-                    case 1: // Tráfego leve
-                        intensity = 0.2;
-                        break;
-                    default:
-                        intensity = 0.1; // Sem congestionamento significativo
-                        break;
-                }
-
-                // Para cada ponto da linha da jam, adicionar ao array de dados de congestionamento
-                jam.lines.forEach(line => {
-                    congestionData.push([line.latitude, line.longitude, intensity * 100]);
-                });
+    if (Array.isArray(jamsData)) {
+        jamsData.forEach(jam => {
+            if (jam.lines && Array.isArray(jam.lines) && jam.lines.length > 0) {
+                const latlngs = jam.lines.map(line => [line.latitude, line.longitude]);
+                const color = getColorForLevel(jam.level);
+                L.polyline(latlngs, {
+                    color: color,
+                    weight: 5,
+                    opacity: 0.7
+                }).addTo(congestionMap).bindPopup(`Congestionamento: Nível ${jam.level}, Rua: ${jam.street}`);
             }
         });
     } else {
-        console.error("Os dados de jams não são um array:", dadosjams);
+        console.error("Os dados de congestionamento não são um array:", jamsData);
     }
-
-    console.log("Dados de congestionamento processados para heatmap:", congestionData);
-
-    const heatLayer = L.heatLayer(congestionData, {
-        radius: 25,
-        blur: 15,
-        gradient: { 0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red' }
-    }).addTo(map);
 </script>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
