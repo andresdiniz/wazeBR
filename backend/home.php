@@ -127,5 +127,5 @@ function getLive($pdo, $id_parceiro)
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
-    'jamLive' => getLive($pdo, $id_parceiro)
+    //'jamLive' => getLive($pdo, $id_parceiro)
 ];
