@@ -254,7 +254,28 @@
 <script>
     const dadosjams = {{ jamLive|json_encode|raw }};
     console.log("Dados de congestionamento:", dadosjams);
+    const dadosacidentes = {{ accidentLive|json_encode|raw }};
+    console.log("Dados de acidentes:", dadosacidentes);
+    const dados = [...dadosjams, ...dadosacidentes];
+    console.log("Dados combinados:", dados);
+    const totalAcidentes = dados.filter(d => d.type === 'accident').length;
+    const totalCongestionamentos = dados.filter(d => d.type === 'jam').length;
+    console.log("Total de acidentes:", totalAcidentes);
+    console.log("Total de congestionamentos:", totalCongestionamentos);
+    document.addEventListener("DOMContentLoaded", function () {
+        const totalAccidentsElement = document.getElementById("totalAccidents");
+        const totalJamsElement = document.getElementById("totalJams");
 
+        if (totalAccidentsElement) {
+            totalAccidentsElement.textContent = totalAcidentes;
+        }
+        if (totalJamsElement) {
+            totalJamsElement.textContent = totalCongestionamentos;
+        }
+    });
+</script>
+
+<script>
     document.addEventListener("DOMContentLoaded", function () {
         $(".open-modal").on("click", function () {
             let lat = $(this).data("lat");
@@ -340,7 +361,7 @@
 </script>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></scrip>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
