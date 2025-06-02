@@ -16,11 +16,12 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $irregularitiesFound = false;
 
-function saveHistoricRoutesData($pdo, $routeId, $avgSpeed, $avgTime) {
+function saveHistoricRoutesData($pdo, $routeId, $avgSpeed, $avgTime)
+{
     $currentDateTime = date('Y-m-d H:i:s');
     $sql = "INSERT INTO historic_routes (route_id, data, velocidade, tempo) 
             VALUES (:route_id, :data, :velocidade, :tempo)";
-    
+
     try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -38,20 +39,20 @@ function saveHistoricRoutesData($pdo, $routeId, $avgSpeed, $avgTime) {
 foreach ($results as $row) {
     $jsonUrl = $row['url'];
     $id_parceiro = $row['id_parceiro'];
-    
+
     echo "Carregando dados da URL: $jsonUrl\n";
 
     $ch = curl_init($jsonUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $jsonData = curl_exec($ch);
-    
-    if(curl_errno($ch)) {
+
+    if (curl_errno($ch)) {
         die("Erro ao carregar os dados JSON de $jsonUrl: " . curl_error($ch));
     }
-    
+
     curl_close($ch);
     $data = json_decode($jsonData, true);
-    
+
     if ($data === null) {
         die("Erro ao decodificar os dados JSON de $jsonUrl.");
     }
@@ -70,13 +71,13 @@ foreach ($results as $row) {
             $stmtUrl->execute([':url' => $jsonUrl]);
             $urlId = $pdo->lastInsertId();
         }
-        
+
         $currentTime = date('Y-m-d H:i:s'); // Pega a data e hora atual do PHP
 
         $stmtUsers = $pdo->prepare("
-            INSERT INTO users_on_jams (jam_level, wazers_count, url_id) 
-            VALUES (:jam_level, :wazers_count, :url_id :id_parceiro, :created_at)
-            ON DUPLICATE KEY UPDATE 
+            INSERT INTO users_on_jams (jam_level, wazers_count, url_id, id_parceiro, created_at)
+            VALUES (:jam_level, :wazers_count, :url_id, :id_parceiro, :created_at)
+            ON DUPLICATE KEY UPDATE
                 wazers_count = VALUES(wazers_count)
         ");
 
@@ -155,11 +156,11 @@ foreach ($results as $row) {
                     $stmtFetchExisting->execute([':route_id' => $routeId]);
                     $existingPoints = $stmtFetchExisting->fetchAll(PDO::FETCH_ASSOC);
 
-                    $existingFormatted = array_map(function($p) {
+                    $existingFormatted = array_map(function ($p) {
                         return number_format($p['x'], 6) . ',' . number_format($p['y'], 6);
                     }, $existingPoints);
 
-                    $newFormatted = array_map(function($p) {
+                    $newFormatted = array_map(function ($p) {
                         return number_format($p['x'], 6) . ',' . number_format($p['y'], 6);
                     }, $linePoints);
 
@@ -299,7 +300,7 @@ foreach ($results as $row) {
             $stmtDeactivateAll = $pdo->prepare("UPDATE irregularities SET is_active = 0 WHERE url_id = :url_id");
             $stmtDeactivateAll->execute([':url_id' => $urlId]);
 
-            foreach ($data['irregularities'] as $irregularity) {                
+            foreach ($data['irregularities'] as $irregularity) {
                 $irregularityId = generateUuid();
                 $avgSpeed = ($irregularity['time'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['time'] / 3600) : 0;
                 $historicSpeed = ($irregularity['historicTime'] > 0) ? ($irregularity['length'] / 1000) / ($irregularity['historicTime'] / 3600) : 0;
@@ -397,21 +398,21 @@ foreach ($results as $row) {
                             <div class="header">🚨 Alerta de Tráfego</div>
 
                             <div class="content">
-                                <div class="alert-badge">Congestionamento nível '.$irregularity['jamLevel'].'/5</div>
-                                <h2>'.$irregularity['name'].'</h2>
+                                <div class="alert-badge">Congestionamento nível ' . $irregularity['jamLevel'] . '/5</div>
+                                <h2>' . $irregularity['name'] . '</h2>
 
-                                <div class="info-box"><strong>Extensão:</strong> '.number_format($irregularity['length']/1000, 2).' km</div>
-                                <div class="info-box"><strong>Velocidade:</strong> '.number_format($avgSpeed, 1).' km/h</div>
-                                <div class="info-box"><strong>Local:</strong> '.$irregularity['fromName'].' → '.$irregularity['toName'].'</div>
-                                <div class="info-box"><strong>Tipo:</strong> '.$irregularity['type'].' ('.$subType.')</div>
-                                <div class="info-box"><strong>Última atualização:</strong> '.date('d/m/Y H:i').'</div>
+                                <div class="info-box"><strong>Extensão:</strong> ' . number_format($irregularity['length'] / 1000, 2) . ' km</div>
+                                <div class="info-box"><strong>Velocidade:</strong> ' . number_format($avgSpeed, 1) . ' km/h</div>
+                                <div class="info-box"><strong>Local:</strong> ' . $irregularity['fromName'] . ' → ' . $irregularity['toName'] . '</div>
+                                <div class="info-box"><strong>Tipo:</strong> ' . $irregularity['type'] . ' (' . $subType . ')</div>
+                                <div class="info-box"><strong>Última atualização:</strong> ' . date('d/m/Y H:i') . '</div>
 
                                 <div class="map-container">
-                                    <iframe src="'.$mapEmbedUrl.'" title="Mapa do Waze"></iframe>
+                                    <iframe src="' . $mapEmbedUrl . '" title="Mapa do Waze"></iframe>
                                 </div>
 
                                 <div style="text-align: center;">
-                                    <a href="'.$wazeUrl.'" class="button">🗺️ Abrir no Waze</a>
+                                    <a href="' . $wazeUrl . '" class="button">🗺️ Abrir no Waze</a>
                                 </div>
                             </div>
 
@@ -498,7 +499,7 @@ foreach ($results as $row) {
                     }
                 }
 
-            } 
+            }
         }
 
         if (!$irregularitiesFound) {
