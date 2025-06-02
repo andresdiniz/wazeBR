@@ -93,7 +93,7 @@ function getLive(PDO $pdo, ?int $id_parceiro = null): array
                     )
                     FROM jam_segments js
                     WHERE js.jam_uuid = jams.uuid),
-                    '[]' -- Garante que seja um JSON array vazio
+                    '[]'
                 ) AS segments,
                 COALESCE(
                     (SELECT JSON_ARRAYAGG(
@@ -106,8 +106,8 @@ function getLive(PDO $pdo, ?int $id_parceiro = null): array
                     )
                     FROM jam_lines jl
                     WHERE jl.jam_uuid = jams.uuid),
-                    '[]' -- Garante que seja um JSON array vazio
-                ) AS lines
+                    '[]'
+                ) AS jam_lines_data -- Alias alterado para evitar conflito com palavra reservada
             FROM jams
             WHERE jams.status = 1";
 
@@ -130,7 +130,11 @@ function getLive(PDO $pdo, ?int $id_parceiro = null): array
         // Decodifica os JSONs para arrays
         foreach ($results as &$row) {
             $row['segments'] = json_decode($row['segments'], true) ?: [];
-            $row['lines'] = json_decode($row['lines'], true) ?: [];
+            // Acesse os dados das linhas usando o novo alias
+            $row['jam_lines_data'] = json_decode($row['jam_lines_data'], true) ?: [];
+            // Para manter a compatibilidade com o código que espera 'lines', você pode fazer:
+            $row['lines'] = $row['jam_lines_data'];
+            unset($row['jam_lines_data']);
         }
 
         return $results;
