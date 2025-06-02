@@ -149,12 +149,67 @@ function getLive(PDO $pdo, ?int $id_parceiro = null): array
     }
 }
 
+function getdrivers(PDO $pdo, ?int $id_parceiro = null): array
+{
+    $query = "SELECT
+        u.id_parceiro,
+        SUM(u.wazers_count) AS total_wazers_impactados,
+        u.created_at AS ultima_coleta_dados
+    FROM
+        users_on_jams u
+    INNER JOIN (
+        SELECT
+            id_parceiro,
+            MAX(created_at) AS max_created_at
+        FROM
+            users_on_jams
+        GROUP BY
+            id_parceiro
+    ) AS ultimos_registros
+    ON
+        u.id_parceiro = ultimos_registros.id_parceiro AND u.created_at = ultimos_registros.max_created_at
+    GROUP BY
+        u.id_parceiro, u.created_at
+    ORDER BY
+        u.id_parceiro, u.created_at DESC";
+
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
+        // A query já agrupa por id_parceiro, então o filtro WHERE pode ser aplicado diretamente
+        // se quisermos apenas um id_parceiro específico.
+        // No entanto, a lógica da query já busca o MAX(created_at) por id_parceiro.
+        // Se a intenção é filtrar o resultado final para um único parceiro,
+        // o WHERE deve ser aplicado após a subquery ou no GROUP BY.
+        // Para esta função, que parece ser para um único parceiro ou todos,
+        // vamos adicionar a condição no WHERE principal, mas é importante notar
+        // que a subquery já garante a última leitura por parceiro.
+        $query .= " AND u.id_parceiro = :id_parceiro";
+    }
+
+    try {
+        $stmt = $pdo->prepare($query);
+
+        if ($id_parceiro !== 99 && $id_parceiro !== null) {
+            $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo "Erro na função getdrivers: " . $e->getMessage() . "<br>";
+        echo "Query: " . $query . "<br>";
+        if ($id_parceiro !== 99 && $id_parceiro !== null) {
+            echo "id_parceiro: " . $id_parceiro . "<br>";
+        }
+        return [];
+    }
+}
+
 // Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
     'jamLive' => getLive($pdo, $id_parceiro),
-    //'activeDrivers' => getdrivers($pdo, $id_parceiro), // Você pode implementar a lógica para buscar motoristas ativos aqui
+    'activeDrivers' => getdrivers($pdo, $id_parceiro), // Agora esta função utiliza a consulta para wazers impactados
 ];
 
 // Você pode passar $data para o seu template Twig aqui
