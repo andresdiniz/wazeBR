@@ -1,75 +1,78 @@
 <style>
-/* Melhorias mínimas para responsividade */
-@media (max-width: 767.98px) {
-    .table-responsive {
-        font-size: 0.85rem;
-    }
-    
-    .table th, .table td {
-        padding: 0.5rem 0.25rem;
-        vertical-align: middle;
-    }
-    
-    .btn-sm {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.75rem;
-    }
-    
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.4rem;
-    }
-    
-    /* Ocultar colunas menos importantes em mobile */
-    .d-none-mobile {
-        display: none !important;
-    }
-    
-    .card-header {
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-    }
-}
+    /* Melhorias mínimas para responsividade */
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            font-size: 0.85rem;
+        }
 
-@media (min-width: 768px) {
-    .d-none-mobile {
-        display: table-cell !important;
+        .table th,
+        .table td {
+            padding: 0.5rem 0.25rem;
+            vertical-align: middle;
+        }
+
+        .btn-sm {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        /* Ocultar colunas menos importantes em mobile */
+        .d-none-mobile {
+            display: none !important;
+        }
+
+        .card-header {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+        }
     }
-}
 
-/* Melhor aproveitamento da área */
-.container {
-    max-width: 100%;
-    padding-left: 15px;
-    padding-right: 15px;
-}
+    @media (min-width: 768px) {
+        .d-none-mobile {
+            display: table-cell !important;
+        }
+    }
 
-@media (min-width: 1200px) {
+    /* Melhor aproveitamento da área */
     .container {
-        max-width: 1400px;
+        max-width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
     }
-}
 
-/* Tabelas mais compactas */
-.table-sm th, .table-sm td {
-    padding: 0.5rem;
-}
+    @media (min-width: 1200px) {
+        .container {
+            max-width: 1400px;
+        }
+    }
 
-.card-body {
-    padding: 1rem;
-}
+    /* Tabelas mais compactas */
+    .table-sm th,
+    .table-sm td {
+        padding: 0.5rem;
+    }
 
-/* Melhorar legibilidade dos badges */
-.badge {
-    min-width: 45px;
-    padding: 0.375rem 0.5rem;
-}
+    .card-body {
+        padding: 1rem;
+    }
 
-/* Botões de ação mais compactos */
-.btn-group-sm > .btn, .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-}
+    /* Melhorar legibilidade dos badges */
+    .badge {
+        min-width: 45px;
+        padding: 0.375rem 0.5rem;
+    }
+
+    /* Botões de ação mais compactos */
+    .btn-group-sm>.btn,
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
 </style>
 
 <div class="container-fluid mt-3">
@@ -107,7 +110,8 @@
                                     </td>
                                     <td class="d-none-mobile">{{ alert.street }}</td>
                                     <td class="d-none d-md-table-cell">
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
+                                            target="_blank" class="btn btn-outline-primary btn-sm">
                                             <i class="fab fa-waze"></i>
                                         </a>
                                     </td>
@@ -116,7 +120,8 @@
                                         <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                        <span
+                                            class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
@@ -124,15 +129,12 @@
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal{{ alert.uuid }}"
-                                                data-lat="{{ alert.location_y }}"
-                                                data-lon="{{ alert.location_x }}"
+                                                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
                                                 title="Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
-                                               target="_blank" 
-                                               class="btn btn-primary btn-sm d-md-none"
-                                               title="Waze">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
+                                                target="_blank" class="btn btn-primary btn-sm d-md-none" title="Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -149,17 +151,6 @@
                         <p class="text-muted mb-0">Não há eventos de acidentes registrados no momento.</p>
                     </div>
                     {% endif %}
-                    <!-- Adicione na seção de visão geral -->
-                    <div class="col-12">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-info text-white py-2">
-                                <h5 class="mb-0">Mapa de Calor de Congestionamentos</h5>
-                            </div>
-                            <div class="card-body p-2">
-                                <div id="heatmap" style="height: 500px;"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -197,7 +188,8 @@
                                     </td>
                                     <td class="d-none-mobile">{{ alert.street }}</td>
                                     <td class="d-none d-md-table-cell">
-                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
+                                            target="_blank" class="btn btn-outline-primary btn-sm">
                                             <i class="fab fa-waze"></i>
                                         </a>
                                     </td>
@@ -206,7 +198,8 @@
                                         <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                        <span
+                                            class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
@@ -214,15 +207,12 @@
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
                                                 data-target="#alertModal{{ alert.uuid }}"
-                                                data-lat="{{ alert.location_y }}"
-                                                data-lon="{{ alert.location_x }}"
+                                                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
                                                 title="Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
-                                               target="_blank" 
-                                               class="btn btn-primary btn-sm d-md-none"
-                                               title="Waze">
+                                            <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
+                                                target="_blank" class="btn btn-primary btn-sm d-md-none" title="Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
                                         </div>
@@ -239,6 +229,17 @@
                         <p class="text-muted mb-0">Não há congestionamentos registrados no momento.</p>
                     </div>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Adicione na seção de visão geral -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white py-2">
+                    <h5 class="mb-0">Mapa de Calor de Congestionamentos</h5>
+                </div>
+                <div class="card-body p-2">
+                    <div id="heatmap" style="height: 500px;"></div>
                 </div>
             </div>
         </div>
@@ -267,7 +268,7 @@
                         .bindPopup("Localização do Alerta")
                         .openPopup();
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         map.invalidateSize();
                     }, 100);
                 }
@@ -291,8 +292,8 @@
                 { width: "10%", targets: [5] } // Largura da coluna ações
             ],
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                 '<"row"<"col-sm-12"tr>>' +
-                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+                '<"row"<"col-sm-12"tr>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
         };
 
         if ($('#accidentsTable').length) {
