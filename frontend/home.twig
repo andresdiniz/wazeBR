@@ -1,3 +1,8 @@
+<!-- Adicione no cabeçalho -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
 <style>
     /* Melhorias mínimas para responsividade */
     @media (max-width: 767.98px) {
@@ -249,7 +254,7 @@
 <script>
     const dadosjams = {{ jamLive|json_encode|raw }};
     console.log("Dados de congestionamento:", dadosjams);
-    
+
     document.addEventListener("DOMContentLoaded", function () {
         $(".open-modal").on("click", function () {
             let lat = $(this).data("lat");
