@@ -254,25 +254,6 @@
 <script>
     const dadosjams = {{ jamLive|json_encode|raw }};
     console.log("Dados de congestionamento:", dadosjams);
-    const dadosacidentes = {{ accidentLive|json_encode|raw }};
-    console.log("Dados de acidentes:", dadosacidentes);
-    const dados = [...dadosjams, ...dadosacidentes];
-    console.log("Dados combinados:", dados);
-    const totalAcidentes = dados.filter(d => d.type === 'accident').length;
-    const totalCongestionamentos = dados.filter(d => d.type === 'jam').length;
-    console.log("Total de acidentes:", totalAcidentes);
-    console.log("Total de congestionamentos:", totalCongestionamentos);
-    document.addEventListener("DOMContentLoaded", function () {
-        const totalAccidentsElement = document.getElementById("totalAccidents");
-        const totalJamsElement = document.getElementById("totalJams");
-
-        if (totalAccidentsElement) {
-            totalAccidentsElement.textContent = totalAcidentes;
-        }
-        if (totalJamsElement) {
-            totalJamsElement.textContent = totalCongestionamentos;
-        }
-    });
 </script>
 
 <script>
