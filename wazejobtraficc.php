@@ -79,7 +79,7 @@ foreach ($results as $row) {
         ");
 
         foreach ($data['usersOnJams'] as $userJam) {
-            print($userJam);
+            var_dump($userJam);
             $stmtUsers->execute([
                 ':jam_level' => $userJam['jamLevel'],
                 ':wazers_count' => $userJam['wazersCount'],
