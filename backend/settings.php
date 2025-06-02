@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_type'])) {
             ) {
                 // Dados do formulário
                 $title = $_POST['title'];
-                $url = 'wazeportal/' . $_POST['url'];
+                $url = $_POST['url'];
                 $description = $_POST['description'];
 
                 // Atribuindo valores aos campos opcionais (caso não estejam vazios)
