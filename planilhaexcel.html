@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro Pessoal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .feature h3 {
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+        
+        .feature ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .feature li {
+            margin-bottom: 8px;
+        }
+        
+        .download-section {
+            text-align: center;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .download-btn {
+            background: white;
+            color: #27ae60;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .download-section h2 {
+            color: white;
+            margin: 0 0 20px 0;
+            font-size: 1.8em;
+        }
+        
+        .download-section p {
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin: 0 0 15px 0;
+        }
+        
+        .tab-example {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .tab-example strong {
+            color: #e65100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Controle Financeiro Pessoal</h1>
+            <p>Planilha Excel completa para gestão das suas finanças pessoais</p>
+        </div>
+        
+        <div class="content">
+            <div class="features">
+                <div class="feature">
+                    <h3>📊 Dashboard Resumo</h3>
+                    <ul>
+                        <li>Visão geral mensal e anual</li>
+                        <li>Gráficos automáticos de receitas x despesas</li>
+                        <li>Indicadores de saúde financeira</li>
+                        <li>Resumo por categoria</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>💳 Receitas</h3>
+                    <ul>
+                        <li>Salário e renda principal</li>
+                        <li>Rendas extras e freelances</li>
+                        <li>Rendimentos de investimentos</li>
+                        <li>Outras fontes de renda</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>🛒 Despesas</h3>
+                    <ul>
+                        <li>Categorização automática</li>
+                        <li>Despesas fixas e variáveis</li>
+                        <li>Controle por forma de pagamento</li>
+                        <li>Tags personalizáveis</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>💳 Cartão de Crédito</h3>
+                    <ul>
+                        <li>Múltiplos cartões</li>
+                        <li>Controle de parcelas automático</li>
+                        <li>Datas de vencimento</li>
+                        <li>Limite disponível</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>🏦 Empréstimos</h3>
+                    <ul>
+                        <li>Controle de parcelas pagas/pendentes</li>
+                        <li>Cálculo de juros</li>
+                        <li>Simulação de quitação</li>
+                        <li>Cronograma de pagamentos</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>📈 Investimentos</h3>
+                    <ul>
+                        <li>Renda fixa e variável</li>
+                        <li>Controle de performance</li>
+                        <li>Diversificação da carteira</li>
+                        <li>Histórico de rentabilidade</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 Estrutura da Planilha</h3>
+                <p>A planilha contém 7 abas organizadas para facilitar seu controle financeiro:</p>
+                
+                <div class="tab-example">
+                    <strong>Dashboard:</strong> Painel principal com resumos, gráficos e indicadores
+                </div>
+                <div class="tab-example">
+                    <strong>Receitas:</strong> Registro de todas as entradas de dinheiro
+                </div>
+                <div class="tab-example">
+                    <strong>Despesas:</strong> Controle detalhado de todos os gastos
+                </div>
+                <div class="tab-example">
+                    <strong>Cartão de Crédito:</strong> Gestão de compras parceladas e faturas
+                </div>
+                <div class="tab-example">
+                    <strong>Empréstimos:</strong> Acompanhamento de financiamentos e parcelamentos
+                </div>
+                <div class="tab-example">
+                    <strong>Investimentos:</strong> Portfolio e performance dos investimentos
+                </div>
+                <div class="tab-example">
+                    <strong>Configurações:</strong> Categorias, bancos e configurações gerais
+                </div>
+            </div>
+            
+            <div class="download-section">
+                <h2>🚀 Baixar Planilha</h2>
+                <p>Clique no botão abaixo para gerar e baixar sua planilha de controle financeiro personalizada</p>
+                <button class="download-btn" onclick="generateExcel()">
+                    📥 Baixar Planilha Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateExcel() {
+            // Criar um novo workbook
+            const wb = XLSX.utils.book_new();
+            
+            // ABA 1: DASHBOARD
+            const dashboardData = [
+                ['CONTROLE FINANCEIRO PESSOAL - DASHBOARD', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', ''],
+                ['RESUMO MENSAL', '', '', 'INDICADORES', '', '', ''],
+                ['Total Receitas:', '=SUMIF(Receitas.B:B,">=1/1/2024",Receitas.D:D)', '', 'Saldo Atual:', '=B4-B5', '', ''],
+                ['Total Despesas:', '=SUMIF(Despesas.B:B,">=1/1/2024",Despesas.D:D)', '', 'Taxa Poupança:', '=IF(B4>0,(B4-B5)/B4,0)', '', ''],
+                ['Cartão de Crédito:', '=SUMIF(CartaoCredito.F:F,"Pendente",CartaoCredito.E:E)', '', 'Gastos por Dia:', '=B5/DAY(EOMONTH(TODAY(),0))', '', ''],
+                ['Empréstimos:', '=SUMIF(Emprestimos.G:G,"Pendente",Emprestimos.F:F)', '', '', '', '', ''],
+                ['', '', '', '', '', '', ''],
+                ['RECEITAS POR CATEGORIA', '', '', 'DESPESAS POR CATEGORIA', '', '', ''],
+                ['Salário', '=SUMIF(Receitas.C:C,"Salário",Receitas.D:D)', '', 'Alimentação', '=SUMIF(Despesas.C:C,"Alimentação",Despesas.D:D)', '', ''],
+                ['Freelance', '=SUMIF(Receitas.C:C,"Freelance",Receitas.D:D)', '', 'Transporte', '=SUMIF(Despesas.C:C,"Transporte",Despesas.D:D)', '', ''],
+                ['Investimentos', '=SUMIF(Receitas.C:C,"Investimentos",Receitas.D:D)', '', 'Moradia', '=SUMIF(Despesas.C:C,"Moradia",Despesas.D:D)', '', ''],
+                ['Outros', '=SUMIF(Receitas.C:C,"Outros",Receitas.D:D)', '', 'Lazer', '=SUMIF(Despesas.C:C,"Lazer",Despesas.D:D)', '', ''],
+                ['', '', '', '', '', '', ''],
+                ['INVESTIMENTOS', '', '', 'METAS FINANCEIRAS', '', '', ''],
+                ['Total Investido:', '=SUMIF(Investimentos.E:E,">0",Investimentos.E:E)', '', 'Meta Reserva:', '=B5*6', '', ''],
+                ['Renda Fixa:', '=SUMIF(Investimentos.C:C,"Renda Fixa",Investimentos.E:E)', '', 'Atual Reserva:', '=SUMIF(Investimentos.C:C,"Reserva",Investimentos.E:E)', '', ''],
+                ['Renda Variável:', '=SUMIF(Investimentos.C:C,"Renda Variável",Investimentos.E:E)', '', 'Falta para Meta:', '=B16-B17', '', ''],
+            ];
+            
+            // ABA 2: RECEITAS
+            const receitasData = [
+                ['DATA', 'DESCRIÇÃO', 'CATEGORIA', 'VALOR', 'CONTA', 'OBSERVAÇÕES'],
+                ['01/01/2024', 'Salário Janeiro', 'Salário', '5000.00', 'Conta Corrente', 'Salário mensal'],
+                ['15/01/2024', 'Freelance Design', 'Freelance', '800.00', 'Conta Corrente', 'Projeto site'],
+                ['20/01/2024', 'Dividendos ITUB4', 'Investimentos', '45.30', 'Corretora', 'Dividendos recebidos'],
+                ['', '', '', '', '', ''],
+                ['', 'CATEGORIAS DISPONÍVEIS:', '', '', '', ''],
+                ['', 'Salário, Freelance, Investimentos, Aluguel, Vendas, Outros', '', '', '', '']
+            ];
+            
+            // ABA 3: DESPESAS
+            const despesasData = [
+                ['DATA', 'DESCRIÇÃO', 'CATEGORIA', 'VALOR', 'FORMA PAGAMENTO', 'CONTA', 'STATUS', 'OBSERVAÇÕES'],
+                ['02/01/2024', 'Supermercado', 'Alimentação', '250.00', 'Débito', 'Conta Corrente', 'Pago', 'Compras mensais'],
+                ['03/01/2024', 'Combustível', 'Transporte', '180.00', 'Crédito', 'Cartão Nubank', 'Pago', 'Abastecimento'],
+                ['05/01/2024', 'Aluguel', 'Moradia', '1200.00', 'Transferência', 'Conta Corrente', 'Pago', 'Aluguel janeiro'],
+                ['10/01/2024', 'Netflix', 'Lazer', '29.90', 'Crédito', 'Cartão Itaú', 'Pago', 'Assinatura mensal'],
+                ['', '', '', '', '', '', '', ''],
+                ['', 'CATEGORIAS:', 'Alimentação, Transporte, Moradia, Saúde, Educação, Lazer, Roupas, Outros', '', '', '', '', '', ''],
+                ['', 'FORMAS PAGAMENTO:', 'Débito, Crédito, Dinheiro, PIX, Transferência, Boleto', '', '', '', '', '', '']
+            ];
+            
+            // ABA 4: CARTÃO DE CRÉDITO
+            const cartaoData = [
+                ['CARTÃO', 'DATA COMPRA', 'DESCRIÇÃO', 'VALOR TOTAL', 'VALOR PARCELA', 'PARCELAS', 'STATUS', 'VENCIMENTO'],
+                ['Nubank', '15/01/2024', 'Smartphone', '1200.00', '100.00', '12x', 'Ativo', '10/02/2024'],
+                ['Nubank', '15/01/2024', 'Smartphone', '1200.00', '100.00', '12x', 'Ativo', '10/03/2024'],
+                ['Itaú', '20/01/2024', 'Notebook', '2400.00', '200.00', '12x', 'Ativo', '15/02/2024'],
+                ['Itaú', '25/01/2024', 'Curso Online', '500.00', '125.00', '4x', 'Ativo', '15/02/2024'],
+                ['', '', '', '', '', '', '', ''],
+                ['RESUMO POR CARTÃO:', '', '', '', '', '', '', ''],
+                ['Nubank - Limite:', '3000', 'Usado:', '=SUMIF(A:A,"Nubank",E:E)', 'Disponível:', '=B8-C8', '', '', ''],
+                ['Itaú - Limite:', '5000', 'Usado:', '=SUMIF(A:A,"Itaú",E:E)', 'Disponível:', '=B9-C9', '', '', '']
+            ];
+            
+            // ABA 5: EMPRÉSTIMOS
+            const emprestimosData = [
+                ['DESCRIÇÃO', 'VALOR ORIGINAL', 'TAXA JUROS', 'PARCELAS TOTAL', 'PARCELAS PAGAS', 'VALOR PARCELA', 'STATUS', 'PRÓXIMO VENCTO'],
+                ['Financiamento Carro', '50000.00', '1.2%', '60', '12', '950.00', 'Ativo', '15/02/2024'],
+                ['Empréstimo Pessoal', '10000.00', '2.5%', '24', '6', '485.50', 'Ativo', '20/02/2024'],
+                ['Cartão Crediário', '3000.00', '3.8%', '10', '3', '350.00', 'Ativo', '25/02/2024'],
+                ['', '', '', '', '', '', '', ''],
+                ['RESUMO:', '', '', '', '', '', '', ''],
+                ['Total em Aberto:', '=SUMPRODUCT((G2:G4="Ativo")*(B2:B4-E2:E4*F2:F4))', '', '', '', '', '', ''],
+                ['Parcelas Mensais:', '=SUMIF(G:G,"Ativo",F:F)', '', '', '', '', '', '']
+            ];
+            
+            // ABA 6: INVESTIMENTOS
+            const investimentosData = [
+                ['DATA', 'DESCRIÇÃO', 'TIPO', 'QUANTIDADE', 'VALOR INVESTIDO', 'VALOR ATUAL', 'RENTABILIDADE', 'CORRETORA'],
+                ['10/01/2024', 'Tesouro Selic 2029', 'Renda Fixa', '1', '1000.00', '1015.30', '1.53%', 'Rico'],
+                ['15/01/2024', 'ITUB4', 'Renda Variável', '100', '2500.00', '2650.00', '6.00%', 'Rico'],
+                ['20/01/2024', 'PETR4', 'Renda Variável', '50', '1500.00', '1420.00', '-5.33%', 'Rico'],
+                ['25/01/2024', 'CDB Banco Inter', 'Renda Fixa', '1', '5000.00', '5050.00', '1.00%', 'Inter'],
+                ['30/01/2024', 'Reserva Emergência', 'Reserva', '1', '3000.00', '3030.00', '1.00%', 'Nubank'],
+                ['', '', '', '', '', '', '', ''],
+                ['RESUMO INVESTIMENTOS:', '', '', '', '', '', '', ''],
+                ['Total Investido:', '=SUM(E2:E6)', '', 'Valor Atual:', '=SUM(F2:F6)', '', 'Rentabilidade:', '=(F8-E8)/E8', ''],
+                ['Renda Fixa:', '=SUMIF(C:C,"Renda Fixa",F:F)', '', 'Renda Variável:', '=SUMIF(C:C,"Renda Variável",F:F)', '', 'Reserva:', '=SUMIF(C:C,"Reserva",F:F)', '']
+            ];
+            
+            // ABA 7: CONFIGURAÇÕES
+            const configData = [
+                ['CONFIGURAÇÕES DO SISTEMA', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', ''],
+                ['CATEGORIAS DE RECEITAS:', '', '', '', '', '', ''],
+                ['Salário', 'Freelance', 'Investimentos', 'Aluguel', 'Vendas', 'Outros', ''],
+                ['', '', '', '', '', '', ''],
+                ['CATEGORIAS DE DESPESAS:', '', '', '', '', '', ''],
+                ['Alimentação', 'Transporte', 'Moradia', 'Saúde', 'Educação', 'Lazer', 'Roupas'],
+                ['Eletrônicos', 'Seguros', 'Impostos', 'Internet', 'Celular', 'Academia', 'Outros'],
+                ['', '', '', '', '', '', ''],
+                ['CONTAS BANCÁRIAS:', '', '', '', '', '', ''],
+                ['Conta Corrente', 'Poupança', 'Cartão Nubank', 'Cartão Itaú', 'Corretora Rico', 'Nubank Reserva', ''],
+                ['', '', '', '', '', '', ''],
+                ['TIPOS DE INVESTIMENTO:', '', '', '', '', '', ''],
+                ['Renda Fixa', 'Renda Variável', 'Reserva', 'Previdência', 'Fundos', 'Criptomoedas', ''],
+                ['', '', '', '', '', '', ''],
+                ['INSTRUÇÕES DE USO:', '', '', '', '', '', ''],
+                ['1. Sempre preencha as datas no formato DD/MM/AAAA', '', '', '', '', '', ''],
+                ['2. Use as categorias listadas acima para manter consistência', '', '', '', '', '', ''],
+                ['3. O Dashboard é atualizado automaticamente com as fórmulas', '', '', '', '', '', ''],
+                ['4. Para cartão parcelado, crie uma linha para cada parcela', '', '', '', '', '', ''],
+                ['5. Atualize valores de investimentos mensalmente', '', '', '', '', '', '']
+            ];
+            
+            // Adicionar as abas ao workbook
+            const dashboardWs = XLSX.utils.aoa_to_sheet(dashboardData);
+            const receitasWs = XLSX.utils.aoa_to_sheet(receitasData);
+            const despesasWs = XLSX.utils.aoa_to_sheet(despesasData);
+            const cartaoWs = XLSX.utils.aoa_to_sheet(cartaoData);
+            const emprestimosWs = XLSX.utils.aoa_to_sheet(emprestimosData);
+            const investimentosWs = XLSX.utils.aoa_to_sheet(investimentosData);
+            const configWs = XLSX.utils.aoa_to_sheet(configData);
+            
+            // Adicionar formatação básica para as abas
+            // Dashboard
+            dashboardWs['!merges'] = [
+                {s: {r: 0, c: 0}, e: {r: 0, c: 6}}
+            ];
+            
+            // Adicionar as planilhas ao workbook
+            XLSX.utils.book_append_sheet(wb, dashboardWs, "Dashboard");
+            XLSX.utils.book_append_sheet(wb, receitasWs, "Receitas");
+            XLSX.utils.book_append_sheet(wb, despesasWs, "Despesas");
+            XLSX.utils.book_append_sheet(wb, cartaoWs, "CartaoCredito");
+            XLSX.utils.book_append_sheet(wb, emprestimosWs, "Emprestimos");
+            XLSX.utils.book_append_sheet(wb, investimentosWs, "Investimentos");
+            XLSX.utils.book_append_sheet(wb, configWs, "Configuracoes");
+            
+            // Gerar e baixar o arquivo
+            const fileName = `Controle_Financeiro_${new Date().getFullYear()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            // Mostrar mensagem de sucesso
+            alert('✅ Planilha gerada com sucesso!\n\nA planilha contém:\n• Dashboard com resumos automáticos\n• Controle de receitas e despesas\n• Gestão de cartão de crédito parcelado\n• Acompanhamento de empréstimos\n• Portfolio de investimentos\n• Configurações personalizáveis');
+        }
+    </script>
+</body>
+</html>
