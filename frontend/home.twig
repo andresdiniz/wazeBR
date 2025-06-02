@@ -250,13 +250,13 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
                     <span><i class="fas fa-users mr-2"></i>Motoristas Em Congestionamentos</span>
-                    {% if activeDrivers is defined %}
-                    <span class="badge badge-light">{{ activeDrivers.total_wazers_impactados }}</span>
+                    {% if activeDrivers is defined and activeDrivers is not empty %}
+                    <span class="badge badge-light">{{ activeDrivers[0].total_wazers_impactados }}</span>
                     {% endif %}
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    {% if activeDrivers is defined %}
-                    <h2 class="font-weight-bold">{{ activeDrivers.total_wazers_impactados }}</h2>
+                    {% if activeDrivers is defined and activeDrivers is not empty %}
+                    <h2 class="font-weight-bold">{{ activeDrivers[0].total_wazers_impactados }}</h2>
                     {% else %}
                     <p class="text-muted mb-0">Dados de motoristas não disponíveis.</p>
                     {% endif %}
