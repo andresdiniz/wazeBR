@@ -59,8 +59,96 @@ function getJamAlerts(PDO $pdo, $id_parceiro) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getLive($pdo, $id_parceiro) {
+    function getLive($pdo, $id_parceiro) {
+    // Inicia a query com o filtro de status
+    $query = "SELECT 
+                jams.*,
+                COALESCE(
+                    (SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', jam_segments.id,
+                            'fromNode', jam_segments.fromNode,
+                            'ID_segment', jam_segments.ID_segment,
+                            'toNode', jam_segments.toNode,
+                            'isForward', jam_segments.isForward
+                        )
+                    )
+                    FROM jam_segments 
+                    WHERE jam_segments.jam_uuid = jams.uuid),
+                    JSON_ARRAY()
+                ) AS segments,
+                
+                COALESCE(
+                    (SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'sequence', jam_lines.sequence,
+                            'latitude', jam_lines.y,
+                            'longitude', jam_lines.x
+                        ) 
+                        ORDER BY jam_lines.sequence
+                    )
+                    FROM jam_lines 
+                    WHERE jam_lines.jam_uuid = jams.uuid),
+                    JSON_ARRAY()
+                ) AS lines
+            FROM jams
+            WHERE jams.status = 1";  // Filtro principal
+
+    // Adiciona filtro de parceiro se necessário
+    if ($id_parceiro != 99) {
+        $query .= " AND jams.id_parceiro = :id_parceiro";
+    }
+    
+    $query .= " ORDER BY jams.date_received DESC LIMIT 1000";
+    
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
+    $stmt->execute();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Decodifica os JSONs para arrays
+    foreach ($results as &$row) {
+        $row['segments'] = json_decode($row['segments'], true) ?: [];
+        $row['lines'] = json_decode($row['lines'], true) ?: [];
+    }
+    
+    return $results;
+}
+
+    // Filtro por parceiro
+    if ($id_parceiro != 99) {
+        $query .= " WHERE jams.id_parceiro = :id_parceiro";
+    }
+    
+    $query .= " ORDER BY jams.date_received DESC LIMIT 1000";
+    
+    $stmt = $pdo->prepare($query);
+    
+    if ($id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+    
+    $stmt->execute();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Decodifica os JSONs para arrays
+    foreach ($results as &$row) {
+        $row['segments'] = json_decode($row['segments'], true);
+        $row['lines'] = json_decode($row['lines'], true);
+    }
+    
+    return $results;
+}
+
+
 // Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
-    'jamAlerts' => getJamAlerts($pdo, $id_parceiro)
+    'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
+    'jamLive' => getLive($pdo, $id_parceiro)
 ];
