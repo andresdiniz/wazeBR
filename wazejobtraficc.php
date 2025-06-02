@@ -75,10 +75,8 @@ foreach ($results as $row) {
         $currentTime = date('Y-m-d H:i:s'); // Pega a data e hora atual do PHP
 
         $stmtUsers = $pdo->prepare("
-            INSERT INTO users_on_jams (jam_level, wazers_count, url_id, id_parceiro, created_at)
+            INSERT IGNORE INTO users_on_jams (jam_level, wazers_count, url_id, id_parceiro, created_at)
             VALUES (:jam_level, :wazers_count, :url_id, :id_parceiro, :created_at)
-            ON DUPLICATE KEY UPDATE
-                wazers_count = VALUES(wazers_count)
         ");
 
         foreach ($data['usersOnJams'] as $userJam) {
