@@ -250,7 +250,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
                     <span><i class="fas fa-users mr-2"></i>Motoristas Em Congestionamentos</span>
-                    {% if activeDrivers.total_wazers_impactados is defined %}
+                    {% if activeDrivers is defined %}
                     <span class="badge badge-light">{{ activeDrivers.total_wazers_impactados }}</span>
                     {% endif %}
                 </div>
