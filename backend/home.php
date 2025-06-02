@@ -186,6 +186,7 @@ function getdrivers(PDO $pdo, ?int $id_parceiro = null): array
         }
 
         $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);   
         // Filtra os resultados para remover aqueles onde total_wazers_impactados é zero
         $filteredResults = array_filter($results, function($row) {
             return $row['total_wazers_impactados'] > 0;
@@ -215,5 +216,5 @@ $data = [
 // echo $twig->render('dashboard.html.twig', $data);
 
 // Para fins de demonstração, vamos apenas imprimir o array de dados
-print_r($data['activeDrivers']);
+//print_r($data['activeDrivers']);
 ?>
