@@ -254,9 +254,6 @@
 <script>
     const dadosjams = {{ jamLive| json_encode | raw }};
     console.log("Dados de congestionamento:", dadosjams);
-</script>
-
-<script>
     document.addEventListener("DOMContentLoaded", function () {
         $(".open-modal").on("click", function () {
             let lat = $(this).data("lat");
