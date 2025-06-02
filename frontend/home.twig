@@ -252,7 +252,7 @@
 </div>
 
 <script>
-    const dadosjams = {{ jamLive|json_encode|raw }};
+    const dadosjams = {{ jamLive| json_encode | raw }};
     console.log("Dados de congestionamento:", dadosjams);
 </script>
 
@@ -321,29 +321,65 @@
         return "KM Desconhecido";
     }
     // Adicione no final do traffic-dashboard.js
-    const map = L.map('heatmap').setView([-23.5505, -46.6333], 11); // Coordenadas de SP
+    const map = L.map('heatmap').setView([-20.66, -43.79], 13); // Coordenadas aproximadas de Conselheiro Lafaiete
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    // Dados de exemplo - substituir por dados reais
-    const congestionData = [
-        { lat: -23.55, lng: -46.63, intensity: 0.8 },
-        { lat: -23.56, lng: -46.65, intensity: 0.6 }
-    ];
+    const dadosjams = {{ jamLive| json_encode | raw }};
+    console.log("Dados de Jams recebidos:", dadosjams);
 
-    const heatLayer = L.heatLayer(congestionData.map(point =>
-        [point.lat, point.lng, point.intensity * 100]), {
+    const congestionData = [];
+
+    if (Array.isArray(dadosjams)) {
+        dadosjams.forEach(jam => {
+            if (jam.lines && Array.isArray(jam.lines) && jam.level !== undefined) {
+                // Calcular uma intensidade baseada no nível do congestionamento (ajuste conforme necessário)
+                let intensity = 0;
+                switch (jam.level) {
+                    case 5: // Tráfego parado
+                        intensity = 1.0;
+                        break;
+                    case 4: // Tráfego muito lento
+                        intensity = 0.8;
+                        break;
+                    case 3: // Tráfego lento
+                        intensity = 0.6;
+                        break;
+                    case 2: // Tráfego moderado
+                        intensity = 0.4;
+                        break;
+                    case 1: // Tráfego leve
+                        intensity = 0.2;
+                        break;
+                    default:
+                        intensity = 0.1; // Sem congestionamento significativo
+                        break;
+                }
+
+                // Para cada ponto da linha da jam, adicionar ao array de dados de congestionamento
+                jam.lines.forEach(line => {
+                    congestionData.push([line.latitude, line.longitude, intensity * 100]);
+                });
+            }
+        });
+    } else {
+        console.error("Os dados de jams não são um array:", dadosjams);
+    }
+
+    console.log("Dados de congestionamento processados para heatmap:", congestionData);
+
+    const heatLayer = L.heatLayer(congestionData, {
         radius: 25,
         blur: 15,
-        gradient: { 0.4: 'blue', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red' }
+        gradient: { 0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red' }
     }).addTo(map);
 </script>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></scrip>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></scrip >
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
