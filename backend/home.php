@@ -154,7 +154,7 @@ $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
     'jamLive' => getLive($pdo, $id_parceiro),
-    'activeDrivers' => getdrivers($pdo, $id_parceiro), // Você pode implementar a lógica para buscar motoristas ativos aqui
+    -//'activeDrivers' => getdrivers($pdo, $id_parceiro), // Você pode implementar a lógica para buscar motoristas ativos aqui
 ];
 
 // Você pode passar $data para o seu template Twig aqui
