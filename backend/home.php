@@ -17,27 +17,29 @@ $id_parceiro = $_SESSION['usuario_id_parceiro'];
 // Se id_parceiro for igual a 99, mostrar todos os alertas; caso contrário, mostrar apenas os alertas do parceiro
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getAccidentAlerts(PDO $pdo, $id_parceiro) { // Removido "ffunction" (erro de digitação)
+function getAccidentAlerts(PDO $pdo, $id_parceiro)
+{ // Removido "ffunction" (erro de digitação)
     $query = "SELECT * FROM alerts WHERE type = 'ACCIDENT' AND status = 1 ";
-    
+
     if ($id_parceiro != 99) {
         $query .= "AND id_parceiro = :id_parceiro ";
     }
-    
+
     $query .= "ORDER BY pubMillis DESC";
 
     $stmt = $pdo->prepare($query);
-    
+
     if ($id_parceiro != 99) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
-    
+
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Função para buscar alertas de congestionamento (ordenados pela confiabilidade do maior para o menor)
-function getJamAlerts(PDO $pdo, $id_parceiro) {
+function getJamAlerts(PDO $pdo, $id_parceiro)
+{
     $query = "
         SELECT uuid, country, city, reportRating, subtype, confidence, type, street, location_x, location_y, pubMillis, status, date_received
         FROM alerts 
@@ -50,17 +52,16 @@ function getJamAlerts(PDO $pdo, $id_parceiro) {
     $query .= "ORDER BY pubMillis DESC";
 
     $stmt = $pdo->prepare($query);
-    
+
     if ($id_parceiro != 99) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
-    
+
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-function getLive($pdo, $id_parceiro) {
-    function getLive($pdo, $id_parceiro) {
+function getLive($pdo, $id_parceiro)
+{
     // Inicia a query com o filtro de status
     $query = "SELECT 
                 jams.*,
@@ -99,51 +100,27 @@ function getLive($pdo, $id_parceiro) {
     if ($id_parceiro != 99) {
         $query .= " AND jams.id_parceiro = :id_parceiro";
     }
-    
+
     $query .= " ORDER BY jams.date_received DESC LIMIT 1000";
-    
+
     $stmt = $pdo->prepare($query);
-    
+
     if ($id_parceiro != 99) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
-    
+
     $stmt->execute();
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Decodifica os JSONs para arrays
     foreach ($results as &$row) {
         $row['segments'] = json_decode($row['segments'], true) ?: [];
         $row['lines'] = json_decode($row['lines'], true) ?: [];
     }
-    
+
     return $results;
 }
 
-    // Filtro por parceiro
-    if ($id_parceiro != 99) {
-        $query .= " WHERE jams.id_parceiro = :id_parceiro";
-    }
-    
-    $query .= " ORDER BY jams.date_received DESC LIMIT 1000";
-    
-    $stmt = $pdo->prepare($query);
-    
-    if ($id_parceiro != 99) {
-        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-    }
-    
-    $stmt->execute();
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Decodifica os JSONs para arrays
-    foreach ($results as &$row) {
-        $row['segments'] = json_decode($row['segments'], true);
-        $row['lines'] = json_decode($row['lines'], true);
-    }
-    
-    return $results;
-}
 
 
 // Exemplo em backend/dashboard.php
