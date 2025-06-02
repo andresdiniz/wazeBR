@@ -10,6 +10,10 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" type="text/css" />
 
+<!-- Adicione no cabeçalho -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 
 <style>
@@ -264,6 +268,17 @@
                                     style="position: relative; height: 300px; min-height: 250px">
                                     <canvas id="delayDistChart"></canvas>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Adicione na seção de visão geral -->
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-info text-white py-2">
+                                <h5 class="mb-0">Mapa de Calor de Congestionamentos</h5>
+                            </div>
+                            <div class="card-body p-2">
+                                <div id="heatmap" style="height: 500px;"></div>
                             </div>
                         </div>
                     </div>

@@ -671,6 +671,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initDurationHistogram();
+
+    // Adicione no final do traffic-dashboard.js
+    const map = L.map('heatmap').setView([-23.5505, -46.6333], 11); // Coordenadas de SP
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    // Dados de exemplo - substituir por dados reais
+    const congestionData = [
+        { lat: -23.55, lng: -46.63, intensity: 0.8 },
+        { lat: -23.56, lng: -46.65, intensity: 0.6 }
+    ];
+
+    const heatLayer = L.heatLayer(congestionData.map(point =>
+        [point.lat, point.lng, point.intensity * 100]), {
+        radius: 25,
+        blur: 15,
+        gradient: { 0.4: 'blue', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red' }
+    }).addTo(map);
 });
 
 // Funções auxiliares (presumivelmente definidas em outro lugar no seu código)
