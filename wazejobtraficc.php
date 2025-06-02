@@ -70,10 +70,12 @@ foreach ($results as $row) {
             $stmtUrl->execute([':url' => $jsonUrl]);
             $urlId = $pdo->lastInsertId();
         }
+        
+        $currentTime = date('Y-m-d H:i:s'); // Pega a data e hora atual do PHP
 
         $stmtUsers = $pdo->prepare("
             INSERT INTO users_on_jams (jam_level, wazers_count, url_id) 
-            VALUES (:jam_level, :wazers_count, :url_id)
+            VALUES (:jam_level, :wazers_count, :url_id :id_parceiro, :created_at)
             ON DUPLICATE KEY UPDATE 
                 wazers_count = VALUES(wazers_count)
         ");
@@ -84,6 +86,8 @@ foreach ($results as $row) {
                 ':jam_level' => $userJam['jamLevel'],
                 ':wazers_count' => $userJam['wazersCount'],
                 ':url_id' => $urlId,
+                ':id_parceiro' => $id_parceiro,
+                ':created_at' => $currentTime
             ]);
         }
 
