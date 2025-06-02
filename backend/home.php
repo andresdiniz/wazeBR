@@ -13,91 +13,89 @@ $twig = new Environment($loader);
 // Conexão com o banco de dados
 $pdo = Database::getConnection();
 
-$id_parceiro = $_SESSION['usuario_id_parceiro'];
-// Se id_parceiro for igual a 99, mostrar todos os alertas; caso contrário, mostrar apenas os alertas do parceiro
+// Recupera o ID do parceiro da sessão
+$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? null;
+$mostrar_todos = ($id_parceiro === 99);
+
+/**
+ * Busca alertas com base no tipo e filtro de parceiro.
+ *
+ * @param PDO $pdo Conexão PDO.
+ * @param string $type O tipo de alerta ('ACCIDENT' ou 'JAM').
+ * @param int|null $id_parceiro ID do parceiro, null para todos.
+ * @param string|null $orderBy Cláusula ORDER BY opcional.
+ * @return array Array associativo dos alertas encontrados.
+ */
+function getAlertsByType(PDO $pdo, string $type, ?int $id_parceiro = null, ?string $orderBy = null): array
+{
+    $query = "SELECT * FROM alerts WHERE type = :type AND status = 1 ";
+
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
+        $query .= "AND id_parceiro = :id_parceiro ";
+    }
+
+    if ($orderBy) {
+        $query .= "ORDER BY " . $orderBy;
+    }
+
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Função para buscar alertas de acidentes (ordenados pelos mais recentes)
-function getAccidentAlerts(PDO $pdo, $id_parceiro)
-{ // Removido "ffunction" (erro de digitação)
-    $query = "SELECT * FROM alerts WHERE type = 'ACCIDENT' AND status = 1 ";
-
-    if ($id_parceiro != 99) {
-        $query .= "AND id_parceiro = :id_parceiro ";
-    }
-
-    $query .= "ORDER BY pubMillis DESC";
-
-    $stmt = $pdo->prepare($query);
-
-    if ($id_parceiro != 99) {
-        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-    }
-
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+function getAccidentAlerts(PDO $pdo, ?int $id_parceiro = null): array
+{
+    return getAlertsByType($pdo, 'ACCIDENT', $id_parceiro, 'pubMillis DESC');
 }
 
-// Função para buscar alertas de congestionamento (ordenados pela confiabilidade do maior para o menor)
-function getJamAlerts(PDO $pdo, $id_parceiro)
+// Função para buscar alertas de congestionamento (ordenados pelos mais recentes)
+function getJamAlerts(PDO $pdo, ?int $id_parceiro = null): array
 {
-    $query = "
-        SELECT uuid, country, city, reportRating, subtype, confidence, type, street, location_x, location_y, pubMillis, status, date_received
-        FROM alerts 
-        WHERE type = 'JAM' AND status = 1 ";
-
-    if ($id_parceiro != 99) {
-        $query .= "AND id_parceiro = :id_parceiro ";
-    }
-
-    $query .= "ORDER BY pubMillis DESC";
-
-    $stmt = $pdo->prepare($query);
-
-    if ($id_parceiro != 99) {
-        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
-    }
-
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return getAlertsByType($pdo, 'JAM', $id_parceiro, 'pubMillis DESC');
 }
-function getLive($pdo, $id_parceiro)
+
+function getLive(PDO $pdo, ?int $id_parceiro = null): array
 {
-    // Inicia a query com o filtro de status
-    $query = "SELECT 
+    $query = "SELECT
                 jams.*,
                 COALESCE(
                     (SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'id', jam_segments.id,
-                            'fromNode', jam_segments.fromNode,
-                            'ID_segment', jam_segments.ID_segment,
-                            'toNode', jam_segments.toNode,
-                            'isForward', jam_segments.isForward
+                            'id', js.id,
+                            'fromNode', js.fromNode,
+                            'ID_segment', js.ID_segment,
+                            'toNode', js.toNode,
+                            'isForward', js.isForward
                         )
                     )
-                    FROM jam_segments 
-                    WHERE jam_segments.jam_uuid = jams.uuid),
+                    FROM jam_segments js
+                    WHERE js.jam_uuid = jams.uuid),
                     JSON_ARRAY()
                 ) AS segments,
-                
                 COALESCE(
                     (SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'sequence', jam_lines.sequence,
-                            'latitude', jam_lines.y,
-                            'longitude', jam_lines.x
-                        ) 
-                        ORDER BY jam_lines.sequence
+                            'sequence', jl.sequence,
+                            'latitude', jl.y,
+                            'longitude', jl.x
+                        )
+                        ORDER BY jl.sequence
                     )
-                    FROM jam_lines 
-                    WHERE jam_lines.jam_uuid = jams.uuid),
+                    FROM jam_lines jl
+                    WHERE jl.jam_uuid = jams.uuid),
                     JSON_ARRAY()
                 ) AS lines
             FROM jams
-            WHERE jams.status = 1";  // Filtro principal
+            WHERE jams.status = 1";
 
-    // Adiciona filtro de parceiro se necessário
-    if ($id_parceiro != 99) {
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
         $query .= " AND jams.id_parceiro = :id_parceiro";
     }
 
@@ -105,7 +103,7 @@ function getLive($pdo, $id_parceiro)
 
     $stmt = $pdo->prepare($query);
 
-    if ($id_parceiro != 99) {
+    if ($id_parceiro !== 99 && $id_parceiro !== null) {
         $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     }
 
@@ -121,11 +119,16 @@ function getLive($pdo, $id_parceiro)
     return $results;
 }
 
-
-
 // Exemplo em backend/dashboard.php
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
-    //'jamLive' => getLive($pdo, $id_parceiro)
+    'jamLive' => getLive($pdo, $id_parceiro)
 ];
+
+// Você pode passar $data para o seu template Twig aqui
+// echo $twig->render('dashboard.html.twig', $data);
+
+// Para fins de demonstração, vamos apenas imprimir o array de dados
+print_r($data);
+?>
