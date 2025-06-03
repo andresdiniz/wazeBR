@@ -2,49 +2,131 @@
 require_once './config/configbd.php';
 require_once './vendor/autoload.php';
 
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['usuario_id_parceiro']) || !isset($_SESSION['usuario_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 $loader = new FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new Environment($loader);
 
-// Conexão com o banco de dados
-$pdo = Database::getConnection();
+try {
+    $pdo = Database::getConnection();
 
-// Define valores padrão de datas
-$startDate = date('Y-m-01'); // Primeiro dia do mês atual
-$endDate = date('Y-m-d'); // Data de hoje
+    // Função para adicionar filtro de parceiro às queries
+    $addPartnerFilter = function ($sql) use ($id_parceiro) {
+        if ($id_parceiro != 99) {
+            $sql .= " AND id_parceiro = :id_parceiro";
+        }
+        return $sql;
+    };
 
-session_start();
+    // Consulta principal para acidentes
+    $baseSql = "SELECT * FROM alerts WHERE type = 'ACCIDENT'";
+    $baseSql = $addPartnerFilter($baseSql);
+    $baseParams = [];
 
-$id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Pega o valor ou usa um padrão (99)
+    // Aplicar filtros adicionais
+    $filters = $_GET;
+    if (!empty($filters['date'])) {
+        $baseSql .= " AND DATE(FROM_UNIXTIME(pubMillis / 1000)) = :date";
+        $baseParams['date'] = $filters['date'];
+    }
 
-// Verifica se os filtros foram enviados
-if (!empty($_GET['start_date'])) {
-    $startDate = $_GET['start_date'];
+    if (!empty($filters['period'])) {
+        $baseSql .= " AND pubMillis >= :periodStart";
+        $daysAgo = (int) $filters['period'];
+        $baseParams['periodStart'] = (time() - ($daysAgo * 86400)) * 1000;
+    }
+
+    // Query para dados temporais
+    $sqlTemporal = "SELECT 
+                    DATE(FROM_UNIXTIME(pubMillis/1000)) as data, 
+                    COUNT(*) as total 
+                FROM alerts 
+                WHERE type = 'HAZARD' 
+                AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlTemporal = $addPartnerFilter($sqlTemporal);
+    $sqlTemporal .= " GROUP BY data ORDER BY data DESC LIMIT 30";
+
+    // Query para cidades
+    $sqlCidades = "SELECT 
+                    city, 
+                    COUNT(*) as total 
+                FROM alerts 
+                WHERE type = 'aciddent'";
+    $sqlCidades = $addPartnerFilter($sqlCidades);
+    $sqlCidades .= " GROUP BY city ORDER BY total DESC LIMIT 10";
+
+    // Query para ruas
+    $sqlRuas = "SELECT 
+                CONCAT(city, ' - ', street) as local,
+                COUNT(*) as total 
+            FROM alerts 
+            WHERE type = 'aciddent'";
+    $sqlRuas = $addPartnerFilter($sqlRuas);
+    $sqlRuas .= " GROUP BY local ORDER BY total DESC LIMIT 10";
+
+    // Query para contagem total
+    $sqlCountTotal = "SELECT COUNT(*) FROM alerts 
+                     WHERE type = 'HAZARD' 
+                     AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+    $sqlCountTotal = $addPartnerFilter("SELECT COUNT(*) FROM alerts WHERE type = 'accident'");
+    $sqlCountResolved = "SELECT COUNT(*) FROM alerts WHERE type = 'aciddent' AND confirmado = 'RESOLVED'";
+    $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
+
+    // Preparar e executar todas as queries
+    $executeQuery = function ($sql, $params = []) use ($pdo, $id_parceiro) {
+        $stmt = $pdo->prepare($sql);
+        if ($id_parceiro != 99) {
+            $stmt->bindValue(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        }
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->execute();
+        return $stmt;
+    };
+
+    // Executar queries
+    $temporalData = $executeQuery($sqlTemporal)->fetchAll(PDO::FETCH_ASSOC);
+    $cidadesData = $executeQuery($sqlCidades)->fetchAll(PDO::FETCH_ASSOC);
+    $ruasData = $executeQuery($sqlRuas)->fetchAll(PDO::FETCH_ASSOC);
+    $countTotal = $executeQuery($sqlCountTotal)->fetchColumn();
+    $countResolved = $executeQuery($sqlCountResolved)->fetchColumn();
+
+    // Query principal com filtros
+    $stmtacidentes = $executeQuery($baseSql, $baseParams);
+    $acidentes = $stmtacidentes->fetchAll(PDO::FETCH_ASSOC);
+
+    // Preparar dados para o template
+    $data = [
+        'acidentes' => $acidentes,
+        'filters' => $filters,
+        'counts' => [
+            'total' => $countTotal,
+            'filtered' => count($acidentes),
+            'confirmed' => 0,
+            'not_resolved' => 0,
+            'hidden' => 0,
+            'resolved' => $countResolved
+        ],
+        'temporal' => $temporalData,
+        'cidades' => $cidadesData,
+        'ruas' => $ruasData
+    ];
+
+} catch (Exception $e) {
+    die("Erro: " . $e->getMessage());
 }
-if (!empty($_GET['end_date'])) {
-    $endDate = $_GET['end_date'];
-}
 
-// Busca os alertas com base no filtro de datas
-function getFilteredAccidentAlerts(PDO $pdo, $startDate, $endDate) {
-    $stmt = $pdo->prepare("
-        SELECT * 
-        FROM alerts 
-        WHERE type = 'ACCIDENT' 
-          AND date_received BETWEEN :start_date AND :end_date
-        ORDER BY pubMillis DESC
-    ");
-    $stmt->bindValue(':start_date', $startDate);
-    $stmt->bindValue(':end_date', $endDate);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-$data = [
-    'start_date' => $startDate,
-    'end_date' => $endDate,
-    'accidentAlerts' => getFilteredAccidentAlerts($pdo, $startDate, $endDate),
-    'id_parceiro' => $id_parceiro,
-];
+?>

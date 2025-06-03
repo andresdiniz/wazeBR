@@ -1,206 +1,605 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.0/css/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<style>
+    .leaflet-marker-icon.marker-cluster div {
+        background-color: rgba(81, 79, 79, 0.7);
+        /* Fundo branco semi-transparente */
+        border-radius: 10px;
+        /* Arredondamento para o fundo */
+        padding: 2px 5px;
+        /* Espaçamento interno para o número */
+        color: #333;
+        /* Cor do texto do número */
+        font-weight: bold;
+        /* Deixar o número em negrito */
+        border: 1px solid #ccc;
+        /* Adicionar uma borda sutil */
+    }
 
-<div class="container my-5">
-    <h1 class="text-center mb-4">Histórico de Acidentes</h1>
+    .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
 
-    <form id="filterForm" class="my-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date">
-            </div>
-            <div class="col-md-4">
-                <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date">
-            </div>
-            <div class="col-md-4">
-                <label for="group_by" class="form-label">Agrupar por:</label>
-                <select class="form-control" id="group_by" name="group_by">
-                    <option value="date">Data</option>
-                    <option value="hour">Hora</option>
-                    <option value="street">Rua</option>
-                </select>
-            </div>
-            <div>
-                <input type="hidden" id="id_parceiro" value="{{id_parceiro}}">
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .chartjs-size-monitor {
+        position: initial !important;
+    }
+
+    .badge-confidence {
+        font-size: 0.9em;
+        min-width: 80px;
+    }
+
+    #mapaBuracos {
+        height: 500px;
+        z-index: 1;
+    }
+
+    .chart-card,
+    .table-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .dataTables_wrapper {
+        padding: 0;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        color: #6c757d;
+    }
+</style>
+
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Filtrar Registros</h5>
+                <form method="GET" class="form-row">
+                    <div class="col-md-3 mb-2">
+                        <input type="date" name="date" class="form-control form-control-sm"
+                            value="{{ filters.date ?? '' }}">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select name="period" class="form-control form-control-sm">
+                            <option value="">Todos os períodos</option>
+                            <option value="7" {{ filters.period=='7' ? 'selected' : '' }}>Última semana</option>
+                            <option value="15" {{ filters.period=='15' ? 'selected' : '' }}>Últimos 15 dias</option>
+                            <option value="30" {{ filters.period=='30' ? 'selected' : '' }}>Último mês</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="bi bi-funnel"></i> Filtrar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary w-100 mt-3">Filtrar</button>
-    </form>
 
-    <div id="alertsTableContainer" class="my-5">
-        <table id="alertsTable" class="display table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Categoria</th>
-                    <th>Quantidade</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="2">Nenhum alerta carregado.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-primary shadow-sm h-100">
+                    <div class="card-body">
+                        <span class="small text-muted">Média Diária</span>
+                        <h3 class="mb-0">{{ counts.total > 0 ? (counts.total/30)|round(1) : 0 }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-info shadow-sm h-100">
+                    <div class="card-body">
+                        <span class="small text-muted">Rua Mais Afetada</span>
+                        <h3 class="mb-0">{{ ruas[0].local|default('N/D')|split(' - ')[1] }}</h3>
+                        <small class="text-muted">{{ ruas[0].local|default('')|split(' - ')[0] }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-success shadow-sm h-100">
+                    <div class="card-body">
+                        <span class="small text-muted">Total Registros</span>
+                        <h3 class="mb-0">{{ counts.total }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-warning shadow-sm h-100">
+                    <div class="card-body">
+                        <span class="small text-muted">Corrigidos</span>
+                        <h3 class="mb-0">{{ counts.resolved }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h6>Evolução Temporal (30 dias)</h6>
+                    <canvas id="temporalChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="table-card">
+                    <h6>Top Ruas</h6>
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Rua</th>
+                                <th class="text-right">Ocorrências</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rua in ruas %}
+                            <tr>
+                                <td>{{ rua.local }}</td>
+                                <td class="text-right">{{ rua.total }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body p-2">
+                <div id="mapaBuracos"></div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table id="buracosTable" class="table table-sm table-hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Cidade</th>
+                            <th>Rua</th>
+                            <th>Confiança</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in acidentes %}
+                        <tr>
+                            <td>{{ alert.city }}</td>
+                            <td>{{ alert.street }}</td>
+                            <td>
+                                <span class="badge badge-confidence
+                                    {% if alert.confidence >= 4 %}badge-success
+                                    {% elseif alert.confidence >= 2 %}badge-warning
+                                    {% else %}badge-danger{% endif %}">
+                                    {{ (alert.confidence * 20)|round }}%
+                                </span>
+                            </td>
+                            <td>{{ (alert.pubMillis / 1000)|date('d/m/Y H:i') }}</td>
+                            <td>
+                                {# Em cada botão nas tabelas - versão corrigida #}
+                                <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
+                                    data-target="#alertModal" data-alert="{{ {
+                                        'uuid': alert.uuid,
+                                        'city': alert.city,
+                                        'street': alert.street,
+                                        'location_x': alert.location_x,
+                                        'location_y': alert.location_y,
+                                        'pubMillis': alert.pubMillis,
+                                        'type': alert.type,
+                                        'subtype': alert.subtype,
+                                        'confidence': alert.confidence,
+                                        'status': alert.status
+                                    }|json_encode|e('html_attr') }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div id="alertsChartContainer" style="display: none;">
-        <canvas id="alertsChart" height="400"></canvas>
+
+    <!-- Modal Único -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg rounded">
+                <div class="modal-header bg-primary text-white rounded-top">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.5rem;">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="bg-light p-3 rounded shadow-sm border">
+                                <h6><i class="fas fa-info-circle mr-2"></i> Informações Básicas</h6>
+                                <hr class="my-2">
+                                <p><strong><i class="fas fa-fingerprint mr-2"></i> UUID:</strong> <span
+                                        id="modalUuid"></span></p>
+                                <p><strong><i class="fas fa-city mr-2"></i> Cidade:</strong> <span
+                                        id="modalCity"></span>
+                                </p>
+                                <p><strong><i class="fas fa-road mr-2"></i> Rua:</strong> <span id="modalStreet"></span>
+                                </p>
+                                <p><strong><i class="fas fa-map-marker-alt mr-2"></i> Localização:</strong>
+                                    Lat: <span id="modalLat"></span>, Lon: <span id="modalLon"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <div class="bg-light p-3 rounded shadow-sm border">
+                                <h6><i class="fas fa-clock mr-2"></i> Detalhes Adicionais</h6>
+                                <hr class="my-2">
+                                <p><strong><i class="far fa-calendar-alt mr-2"></i> Data:</strong>
+                                    <span id="modalDate"></span>
+                                    <small class="text-muted">(UTC-3)</small>
+                                </p>
+                                <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
+                                    <span id="modalKm" class="badge badge-info"></span>
+                                </p>
+                                <p><strong><i class="fas fa-check-double mr-2"></i> Confiança:</strong>
+                                    <span id="modalConfidence" class="badge"></span>
+                                </p>
+                                <p><strong><i class="fas fa-traffic-light mr-2"></i> Status:</strong>
+                                    <span id="modalStatus" class="badge"></span>
+                                </p>
+                                <p><strong><i class="fas fa-tags mr-2"></i> Tipo:</strong> <span id="modalType"></span>
+                                </p>
+                                <p><strong><i class="fas fa-tag mr-2"></i> Subtipo:</strong> <span
+                                        id="modalSubtype"></span>
+                                </p>
+                                <p><strong><i class="fas fa-link mr-2"></i> Waze Partner Hub:</strong>
+                                    <a id="modalPartnerLink" class="badge badge-primary text-decoration-none"
+                                        target="_blank" rel="noopener noreferrer"
+                                        aria-label="Abrir alerta no Waze Partner Hub">
+                                        Ver Detalhes ↗
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <h6 class="text-center text-muted mb-3"><i class="fas fa-map-marked-alt mr-2"></i> Localização no
+                        Mapa
+                    </h6>
+                    <iframe id="modalMap" class="rounded shadow-sm border"
+                        style="width: 100%; height: 300px; border-color: #e0e0e0;" allow="geolocation *; fullscreen"
+                        title="Localização exata do alerta" loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin" aria-describedby="map-description">
+                    </iframe>
+                    <small id="map-description" class="form-text text-muted text-center">
+                        Mapa interativo mostrando a localização precisa do alerta.
+                    </small>
+
+                    <hr class="my-3">
+                    <h6 class="text-center text-muted mb-3"><i class="fas fa-street-view mr-2"></i> Street View</h6>
+                    <iframe id="modalStreetView" width="100%" height="300" frameborder="0" style="border:0"
+                        allowfullscreen loading="lazy" class="rounded shadow-sm border">
+                    </iframe>
+                    <small class="form-text text-muted text-center">
+                        Visualização do Street View da localização (API Key do Google Maps é necessária).
+                    </small>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-end">
+                    <a id="modalWazeLink" class="btn btn-outline-primary" target="_blank">
+                        <i class="fab fa-waze mr-2"></i> Ver no Waze
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-2"></i> Fechar
+                    </button>
+                    <button type="button" class="btn btn-success ml-2" id="modalConfirmBtn">
+                        <i class="fas fa-check mr-2" data-target=""></i> Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    (function($) {
+    <!-- Modal de Confirmação de Status -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Atualizar Status</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="resolvido">
+                            <i class="fas fa-check-circle text-success mr-2"></i> Acidente Resolvido
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="nao_existe">
+                            <i class="fas fa-times-circle text-danger mr-2"></i> Acidente Não Existe
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action status-option"
+                            data-status="nao_resolvido">
+                            <i class="fas fa-exclamation-triangle text-warning mr-2"></i> Não Foi Resolvido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        async function fetchAccidentAlerts(startDate, endDate, groupBy) {
-            try {
-                let id_parceiro = $('#id_parceiro').val();
-                const response = await fetch(`../api.php?action=get_alerts&start_date=${startDate}&end_date=${endDate}&group_by=${groupBy}&id_parceiro=${id_parceiro}`);
-                const data = await response.json();
-    
-                if (data.error) {
-                    console.error(data.error);
-                    $('#alertsTable').html(`<p>${data.error}</p>`);
-                    return;
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.0/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        // Resolver conflitos de jQuery
+        var $j = jQuery.noConflict(true);
+
+        // Dados do PHP
+        const buracos = {{ acidentes| json_encode | raw }};
+        const temporal = {{ temporal| json_encode | raw }};
+        const ruas = {{ ruas| json_encode | raw }};
+
+        $j(document).ready(function ($) {
+
+            // Variável para armazenar o UUID atual
+            let currentAlertUuid = null;
+
+            // Handler para abrir o modal de status
+            $('#modalConfirmBtn').on('click', function () {
+                currentAlertUuid = $('#modalUuid').text();
+                $('#statusModal').modal('show');
+            });
+
+            // Handler para seleção de status
+            $('.status-option').on('click', async function () {
+                const status = $(this).data('status');
+                const statusMap = {
+                    'resolvido': 'RESOLVED',
+                    'nao_existe': 'NOT_EXIST',
+                    'nao_resolvido': 'NOT_RESOLVED'
+                };
+
+                try {
+                    // Mostrar loading
+                    const $btn = $(this);
+                    $btn.html('<span class="spinner-border spinner-border-sm"></span> Processando...');
+
+                    $.ajax({
+                        url: '../api.php/?action=atualizaburaco',
+                        method: 'POST',
+                        data: {
+                            uuid: currentAlertUuid,
+                            status: status
+                        },
+                        dataType: 'json',
+                        success: function (data, textStatus, jqXHR) {
+                            // Fechar todos os modais
+                            alert('Status atualizado com sucesso!');
+                            $('#statusModal').modal('hide');
+                            $('#alertModal').modal('hide');
+                            $('#buracosTable').DataTable().ajax.reload(null, false); // Atualizar tabela
+                            $('#mapaBuracos').leafletMap('refresh'); // Atualizar mapa
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.error('Erro:', errorThrown);
+                            alert('Erro ao atualizar status: ' + errorThrown);
+                        },
+                        complete: function () {
+                            // Restaurar botão
+                            $btn.html(`<i class="fas fa-check-circle mr-2"></i> ${$btn.data('original-text') || 'Atualizar'}`);
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert(error.message);
+                    // Restaurar botão em caso de erro síncrono
+                    $(this).html(`<i class="fas fa-check-circle mr-2"></i> ${$(this).text()}`);
                 }
-    
-                updateTable(data.alerts, groupBy);
-                if (data.alerts.length > 0) {
-                    $('#alertsChartContainer').show();
-                    updateChart(data.labels, data.data_counts, groupBy);
-                } else {
-                    $('#alertsChartContainer').hide();
-                }
-            } catch (error) {
-                console.error('Erro ao buscar dados:', error);
-                $('#alertsTable').html(`<p>Erro ao carregar os dados.</p>`);
-            }
-        }
-    
-        function updateChart(labels, dataCounts, groupBy) {
-            const dataValues = dataCounts.map(count => parseInt(count, 10));
-    
-            const ctx = document.getElementById('alertsChart').getContext('2d');
-            if (window.alertsChartInstance) window.alertsChartInstance.destroy();
-    
-            const chartType = groupBy === 'date' ? 'line' : groupBy === 'street' ? 'pie' : 'bar';
-            const chartData = {
-                labels,
-                datasets: [{
-                    label: 'Número de Alertas',
-                    backgroundColor: chartType === 'pie' ?
-                        labels.map(() => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`) :
-                        'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    data: dataValues
+            });
+
+            // DataTable
+            $('#buracosTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
+                },
+                dom: '<"row"<"col-md-6"B><"col-md-6"f>>rtip',
+                buttons: [
+                    'copy', 'excel', 'pdf'
+                ]
+            });
+
+            // Gráfico Temporal
+            new Chart(document.getElementById('temporalChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: {{ temporal| map(t => t.data) | json_encode | raw }},
+            datasets: [{
+                label: 'Buracos por Dia',
+                data: {{ temporal| map(t => t.total) | json_encode | raw }},
+            borderColor: '#4e73df',
+            tension: 0.3
                 }]
-            };
-    
-            const config = {
-                type: chartType,
-                data: chartData,
-                plugins: [ChartDataLabels],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        },
-                        title: {
-                            display: true,
-                            text: `Histórico de Acidentes (${groupBy})`
-                        },
-                        datalabels: {
-                            color: 'black',
-                            formatter: value => value > 0 ? value : ''
-                        }
-                    },
-                    scales: chartType !== 'pie' ? {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Categorias'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Quantidade'
-                            },
-                            beginAtZero: true
-                        }
-                    } : {}
-                }
-            };
-    
-            window.alertsChartInstance = new Chart(ctx, config);
-        }
-    
-        function updateTable(alerts, groupBy) {
-            let data = alerts.map(alert => {
-                let label = groupBy === 'date' ? alert.alert_date :
-                    groupBy === 'hour' ? `${String(alert.alert_hour).padStart(2, '0')}:00` :
-                    alert.street || 'Rua não disponível';
-                return [label, alert.count];
-            });
-        
-            // Destruir a DataTable existente se já foi inicializada
-            if ($.fn.DataTable.isDataTable('#alertsTable')) {
-                $('#alertsTable').DataTable().destroy();
             }
-        
-            // Limpar o corpo da tabela manualmente
-            $('#alertsTable tbody').empty();
-        
-            // Inicializar a DataTable com os novos dados
-            let table = $('#alertsTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: ['copy', 'csv', 'excel', 'pdf'],
-                data: data,
-                columns: [
-                    { title: "Categoria" },
-                    { title: "Quantidade" }
-                ],
-                autoWidth: false,
-                destroy: true // Garantir que qualquer instância anterior seja limpa
-            });
-        }
-    
-        $('#filterForm').on('submit', function(event) {
-            event.preventDefault();
-            const startDate = $('#start_date').val();
-            const endDate = $('#end_date').val();
-            const groupBy = $('#group_by').val();
-            fetchAccidentAlerts(startDate, endDate, groupBy);
         });
-    
-        $(document).ready(function() {
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    
-            const startDate = startOfMonth.toISOString().split('T')[0];
-            const endDate = endOfDay.toISOString().split('T')[0];
-    
-            $('#start_date').val(startDate);
-            $('#end_date').val(endDate);
-    
-            const groupBy = 'date';
-            fetchAccidentAlerts(startDate, endDate, groupBy);
-        });
-    
-    })(jQuery);
 
-</script>
+        // Mapa
+        const map = L.map('mapaBuracos').setView([-23.5505, -46.6333], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const markers = L.markerClusterGroup();
+
+        buracos.forEach(buraco => {
+            if (buraco.location_x && buraco.location_y) {
+                const lat = parseFloat(buraco.location_y);
+                const lng = parseFloat(buraco.location_x);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    L.marker([lat, lng])
+                        .bindPopup(`
+                            <div class="map-popup">
+                                <h6>${buraco.street || 'Sem nome'}</h6>
+                                <p>Cidade: ${buraco.city || 'Não informada'}</p>
+                                <p>Confiança: ${Math.round(buraco.confidence * 20)}%</p>
+                                <small>${new Date(buraco.pubMillis).toLocaleDateString('pt-BR')}</small>
+                            </div>
+                        `)
+                        .addTo(markers);
+                }
+            }
+        });
+
+        map.addLayer(markers);
+
+        // Modal Handler Corrigido
+        $('.open-modal').on('click', async function () { // Adicionado async
+            try {
+                // 1. Obter e parsear os dados do alerta
+                // Obter os dados do alerta a partir do atributo data-alert
+                // e parsear o JSON
+
+                const rawData = buracos.find(b => b.uuid === $(this).data('alert').uuid);
+                if (!rawData) {
+                    throw new Error('Dados do alerta não encontrados.');
+                }
+                console.log('Dados do Alerta:', rawData);
+                // Corrigido: Usar JSON.parse diretamente no valor do atributo data-alert
+                // const rawData = $(this).data('alert');
+                // const alertData = JSON.parse(rawData);
+                // Corrigido: Usar JSON.parse diretamente no valor do atributo data-alert
+                const alertData = rawData;
+                if (!alertData) {
+                    throw new Error('Dados do alerta inválidos.');
+                }
+
+                // 2. Preencher informações básicas
+                $('#modalUuid').text(alertData.uuid);
+                $('#modalCity').text(alertData.city);
+                $('#modalStreet').text(alertData.street);
+                $('#modalLat').text(parseFloat(alertData.location_y).toFixed(6));
+                $('#modalLon').text(parseFloat(alertData.location_x).toFixed(6));
+
+                // 3. Formatando data corretamente
+                const eventDate = new Date(alertData.pubMillis);
+                $('#modalDate').text(eventDate.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) + ' ' + eventDate.toLocaleTimeString('pt-BR'));
+
+                // 4. Iniciar carregamento do KM
+                $('#modalKm').html('<div class="spinner-border spinner-border-sm text-primary"></div> Carregando...');
+
+                // 5. Buscar KM do DNIT assincronamente (coordenadas invertidas!)
+                const km = await buscarKmDnit(
+                    parseFloat(alertData.location_y),  // Latitude
+                    parseFloat(alertData.location_x)    // Longitude
+                );
+
+                // 6. Atualizar KM após a busca
+                $('#modalKm').html(km !== null ?
+                    `KM ${km.toString().replace('.', ',')}` :
+                    '<span class="text-danger">Não disponível</span>');
+
+                // 7. Atualizar confiança
+                const confidence = Math.round(alertData.confidence * 20);
+                $('#modalConfidence')
+                    .text(`${confidence}%`)
+                    .removeClass('badge-success badge-warning badge-danger')
+                    .addClass(confidence >= 80 ? 'badge-success' : confidence >= 40 ? 'badge-warning' : 'badge-danger');
+
+                // 8. Atualizar status
+                $('#modalStatus')
+                    .text(alertData.status === 1 ? 'Ativo' : 'Inativo')
+                    .removeClass('badge-success badge-danger')
+                    .addClass(alertData.status === 1 ? 'badge-success' : 'badge-danger');
+
+                // 9. Detalhes específicos
+                $('#modalType').text(alertData.type || 'Não especificado');
+                $('#modalSubtype').text(alertData.subtype || 'Não aplicável');
+
+                // 10. Atualizar mapas e links
+                const lat = alertData.location_y;
+                const lon = alertData.location_x;
+                $('#modalMap').attr('src', `https://embed.waze.com/iframe?zoom=16&lat=${lat}&lon=${lon}&pin=1`);
+                $('#modalStreetView').attr('src', `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${lat},${lon}&fov=90&heading=235&pitch=10`);
+                $('#modalPartnerLink').attr('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
+                $('#modalWazeLink').attr('href', `https://www.waze.com/ul?ll=${lat},${lon}`);
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do alerta:', error);
+                $('#modalKm').html('<span class="text-danger">Erro na consulta</span>');
+                $('#alertModal').modal('hide');
+                alert('Erro ao carregar detalhes do alerta. Por favor tente novamente.');
+            }
+        });
+
+        // Função de busca do KM corrigida
+        async function buscarKmDnit(latitude, longitude, raio = 15) {
+            const urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
+            const dataAtual = new Date().toISOString().split('T')[0];
+            const url = `${urlBase}?lng=${longitude}&lat=${latitude}&r=${raio}&data=${dataAtual}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status} - ${await response.text()}`);
+
+                const data = await response.json();
+                if (!data?.length) return null;
+
+                // Encontrar primeiro item com KM válido
+                const kmItem = data.find(item => item.km && !isNaN(item.km));
+                return kmItem ? parseFloat(kmItem.km).toFixed(2) : null;
+
+            } catch (error) {
+                console.error("Erro na busca do KM:", error);
+                return null;
+            }
+        }
+
+        // Ajuste de zoom do mapa
+        setTimeout(() => {
+            if (markers.getLayers().length > 0) {
+                map.fitBounds(markers.getBounds(), { padding: [30, 30] });
+            }
+        }, 500);
+    });
+    </script>
