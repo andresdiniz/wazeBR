@@ -183,7 +183,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for alert in acidentes %}
+                        {% for alert in obras %}
                         <tr>
                             <td>{{ alert.city }}</td>
                             <td>{{ alert.street }}</td>
@@ -371,7 +371,7 @@
         var $j = jQuery.noConflict(true);
 
         // Dados do PHP
-        const buracos = {{ acidentes| json_encode | raw }};
+        const buracos = {{ obras| json_encode | raw }};
         const temporal = {{ temporal| json_encode | raw }};
         const ruas = {{ ruas| json_encode | raw }};
 
