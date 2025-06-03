@@ -53,8 +53,7 @@ try {
                     DATE(FROM_UNIXTIME(pubMillis/1000)) as data, 
                     COUNT(*) as total 
                 FROM alerts 
-                WHERE type = 'HAZARD' 
-                AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
+                WHERE type = 'ACCIDENT'";
     $sqlTemporal = $addPartnerFilter($sqlTemporal);
     $sqlTemporal .= " GROUP BY data ORDER BY data DESC LIMIT 30";
 
@@ -63,7 +62,7 @@ try {
                     city, 
                     COUNT(*) as total 
                 FROM alerts 
-                WHERE type = 'aciddent'";
+                WHERE type = 'ACCIDENT'";
     $sqlCidades = $addPartnerFilter($sqlCidades);
     $sqlCidades .= " GROUP BY city ORDER BY total DESC LIMIT 10";
 
@@ -72,7 +71,7 @@ try {
                 CONCAT(city, ' - ', street) as local,
                 COUNT(*) as total 
             FROM alerts 
-            WHERE type = 'aciddent'";
+            WHERE type = 'ACCIDENT'";
     $sqlRuas = $addPartnerFilter($sqlRuas);
     $sqlRuas .= " GROUP BY local ORDER BY total DESC LIMIT 10";
 
@@ -80,10 +79,9 @@ try {
 
     // Query para contagem total
     $sqlCountTotal = "SELECT COUNT(*) FROM alerts 
-                     WHERE type = 'HAZARD' 
-                     AND subtype = 'HAZARD_ON_ROAD_POT_HOLE'";
-    $sqlCountTotal = $addPartnerFilter("SELECT COUNT(*) FROM alerts WHERE type = 'accident'");
-    $sqlCountResolved = "SELECT COUNT(*) FROM alerts WHERE type = 'aciddent' AND confirmado = 'RESOLVED'";
+                     WHERE type = 'ACCIDENT' ";
+    $sqlCountTotal = $addPartnerFilter("SELECT COUNT(*) FROM alerts WHERE type = 'ACCIDENT'");
+    $sqlCountResolved = "SELECT COUNT(*) FROM alerts WHERE type = 'ACCIDENT' AND confirmado = 'RESOLVED'";
     $sqlCountResolved = $addPartnerFilter($sqlCountResolved);
 
     // Preparar e executar todas as queries
