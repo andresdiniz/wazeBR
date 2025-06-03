@@ -129,4 +129,5 @@ try {
     die("Erro: " . $e->getMessage());
 }
 
+print_r($data['ruas']);
 ?>
