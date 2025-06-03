@@ -76,6 +76,8 @@ try {
     $sqlRuas = $addPartnerFilter($sqlRuas);
     $sqlRuas .= " GROUP BY local ORDER BY total DESC LIMIT 10";
 
+    print_r($sqlRuas);
+
     // Query para contagem total
     $sqlCountTotal = "SELECT COUNT(*) FROM alerts 
                      WHERE type = 'HAZARD' 
