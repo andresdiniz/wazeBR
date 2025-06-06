@@ -327,7 +327,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 SET status = 0, date_updated = NOW()
                 WHERE uuid IN ($placeholders) 
                   AND source_url = ?
-                  AND status = 1  // CRÍTICO: Atualiza apenas jams ativos
+                  AND status = 1  
             ");
 
             $params = array_merge($uuidsToDeactivate, [$url]);
