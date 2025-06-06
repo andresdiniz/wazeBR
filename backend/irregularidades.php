@@ -3,6 +3,17 @@
 require_once './config/configbd.php'; // Conexão ao banco de dados
 require_once './vendor/autoload.php'; // Autoloader do Composer
 
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['usuario_id_parceiro']) || !isset($_SESSION['usuario_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -14,7 +25,7 @@ $twig = new Environment($loader);
 $pdo = Database::getConnection();
 
 // Função para buscar as irregularidades
-function getIrregularities(PDO $pdo) {
+function getIrregularities(PDO $pdo, $id_parceiro) {
     $stmt = $pdo->prepare("
         SELECT 
             ir.id, 
@@ -34,9 +45,11 @@ function getIrregularities(PDO $pdo) {
             ir.city
         FROM irregularities ir
         LEFT JOIN route_lines rl ON rl.route_id = ir.id
-        WHERE ir.is_active = 1
+        WHERE ir.is_active = 1 AND ir.id_parceiro = :id_parceiro
         ORDER BY ir.name ASC
     ");
+    // Adiciona o filtro de parceiro
+    $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
     $stmt->execute();
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -79,7 +92,7 @@ function getIrregularities(PDO $pdo) {
 }
 
 // Obter dados de irregularidades
-$irregularities = getIrregularities($pdo);
+$irregularities = getIrregularities($pdo, $id_parceiro);
 
 // Dados a serem passados para o Twig
 $data = [
