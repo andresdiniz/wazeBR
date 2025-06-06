@@ -662,8 +662,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
         }); // Duração em minutos
 
-        console.log('Durações de todos os congestionamentos:', receivedTime);
-        
+        console.log('Durações de todos os congestionamentos:', durations);
+
 
         const counts = [0, 0, 0, 0]; // Contadores para cada intervalo
 
