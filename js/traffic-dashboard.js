@@ -337,21 +337,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        const z = Array(7).fill(null).map(() => Array(24).fill(null));
+        const z = Array(7).fill(null).map(() => Array(24).fill(0)); // Agora preenchido com quantidade
         const textMatrix = Array(7).fill(null).map(() => Array(24).fill(''));
-        const speeds = [];
+        const quantities = [];
 
         chartData.forEach(d => {
             if (d.dia >= 0 && d.dia < 7 && d.hora >= 0 && d.hora < 24) {
-                const speed = d.media_velocidade;
-                z[d.dia][d.hora] = speed;
-                speeds.push(speed);
-                textMatrix[d.dia][d.hora] = `Quantidade: ${d.quantidade}<br>Nível Médio: ${parseFloat(d.media_nivel).toFixed(2)}<br>Velocidade Média: ${speed.toFixed(2)} km/h<br>Atraso Médio: ${parseFloat(d.media_atraso).toFixed(2)}`;
+                const quantidade = d.quantidade;
+                z[d.dia][d.hora] = quantidade;
+                quantities.push(quantidade);
+                textMatrix[d.dia][d.hora] = `Quantidade: ${quantidade}<br>Nível Médio: ${parseFloat(d.media_nivel).toFixed(2)}<br>Velocidade Média: ${parseFloat(d.media_velocidade).toFixed(2)} km/h<br>Atraso Médio: ${parseFloat(d.media_atraso).toFixed(2)}`;
             }
         });
 
-        const minSpeed = speeds.length > 0 ? Math.min(...speeds) : 0;
-        const maxSpeed = speeds.length > 0 ? Math.max(...speeds) : 100;
+        const minQ = quantities.length > 0 ? Math.min(...quantities) : 0;
+        const maxQ = quantities.length > 0 ? Math.max(...quantities) : 100;
 
         const xLabels = Array.from({ length: 24 }, (_, i) => i);
         const yLabels = dias;
@@ -361,17 +361,17 @@ document.addEventListener('DOMContentLoaded', function () {
             x: xLabels,
             y: yLabels,
             type: 'heatmap',
-            colorscale: 'Viridis',
+            colorscale: 'YlOrRd',
             showscale: true,
-            colorbar: { title: { text: 'Velocidade Média (km/h)', side: 'right' } },
+            colorbar: { title: { text: 'Quantidade', side: 'right' } },
             text: textMatrix,
             hoverinfo: 'text',
-            zmin: minSpeed,
-            zmax: maxSpeed
+            zmin: minQ,
+            zmax: maxQ
         }];
 
         const layout = {
-            title: 'Velocidade Média por Dia da Semana e Hora',
+            title: 'Quantidade por Dia da Semana e Hora',
             xaxis: { title: 'Hora do Dia', tickvals: xLabels, ticktext: xLabels.map(h => `${h}`), side: 'bottom', type: 'category', tickmode: 'array', showgrid: false },
             yaxis: { title: 'Dia da Semana', tickvals: Array.from({ length: 7 }, (_, i) => i), ticktext: yLabels, autorange: 'reversed', type: 'category', tickmode: 'array', showgrid: false },
             margin: { l: 70, r: 20, b: 60, t: 60 },
