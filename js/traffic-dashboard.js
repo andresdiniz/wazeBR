@@ -680,6 +680,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        console.log('Contagem de durações por intervalo:', counts);
+        
         const histogramData = {
             labels: ['0–15min', '15–30min', '30–45min', '45+min'],
             datasets: [{
