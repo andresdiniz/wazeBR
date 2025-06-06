@@ -393,71 +393,75 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 8. Gráfico de extensão horária
     function initTotalKmHourlyChart() {
-        const ctx = document.getElementById('totalKmHourlyChart');
-        const chartData = km_por_hora;
+    const ctx = document.getElementById('totalKmHourlyChart');
+    const chartData = km_por_hora;
 
-        console.log("Dados para o gráfico de extensão média por hora:", chartData);
+    if (!ctx || !chartData?.length) {
+        console.error("Dados ou canvas não encontrados.");
+        return;
+    }
 
-        if (!ctx || !chartData || chartData.length === 0) {
-            console.error("Dados ou canvas não encontrados.");
-            return;
-        }
+    const colorPalette = ['#FF6384', '#36A2EB', '#4BC0C0']; // extra para destaque
+    const chartOptions = {}; // customize conforme necessário
 
-        // Agrupar por hora
-        const agrupado = {};
-        chartData.forEach(d => {
-            if (!agrupado[d.hora]) {
-                agrupado[d.hora] = [];
-            }
-            agrupado[d.hora].push(d.total_km);
-        });
+    const horas = chartData.map(d => d.hora);
+    const mediasPorHora = chartData.map(d => d.total_km);
+    const mediaTotal = mediasPorHora.reduce((a, b) => a + b, 0) / mediasPorHora.length;
 
-        // Calcular média por hora
-        const horas = Object.keys(agrupado).sort((a, b) => a - b);
-        const mediasPorHora = horas.map(hora => {
-            const valores = agrupado[hora];
-            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-            return media;
-        });
+    // Identificar o índice da maior média (pico)
+    const maxIndex = mediasPorHora.indexOf(Math.max(...mediasPorHora));
 
-        // Cálculo da média geral opcional (linha horizontal)
-        const mediaTotal = mediasPorHora.reduce((a, b) => a + b, 0) / mediasPorHora.length;
+    // Aplicar cor personalizada: todas normais, exceto o pico
+    const barColors = mediasPorHora.map((_, i) =>
+        i === maxIndex ? colorPalette[0] : colorPalette[1]
+    );
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: horas.map(h => `${h}h`),
-                datasets: [
-                    {
-                        label: 'Extensão Média por Hora (km)',
-                        data: mediasPorHora,
-                        backgroundColor: colorPalette[1],
-                        yAxisID: 'y-km'
-                    },
-                    {
-                        type: 'line',
-                        label: `Média Geral: ${mediaTotal.toFixed(2)} km`,
-                        data: mediasPorHora.map(() => mediaTotal),
-                        borderColor: colorPalette[0],
-                        borderWidth: 2,
-                        fill: false,
-                        yAxisID: 'y-km'
-                    }
-                ]
-            },
-            options: {
-                ...chartOptions,
-                plugins: { legend: { display: true } },
-                scales: {
-                    y: {
-                        id: 'y-km',
-                        beginAtZero: true,
-                        title: { display: true, text: 'Kilômetros' }
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: horas.map(h => `${String(h).padStart(2, '0')}h`),
+            datasets: [
+                {
+                    label: 'Extensão Média por Hora (km)',
+                    data: mediasPorHora,
+                    backgroundColor: barColors,
+                    yAxisID: 'y-km'
+                },
+                {
+                    type: 'line',
+                    label: `Média Geral: ${mediaTotal.toFixed(2)} km`,
+                    data: mediasPorHora.map(() => mediaTotal),
+                    borderColor: colorPalette[2],
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y-km'
+                }
+            ]
+        },
+        options: {
+            ...chartOptions,
+            plugins: {
+                legend: { display: true },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const valor = context.raw.toFixed(2);
+                            return `${context.dataset.label}: ${valor} km`;
+                        }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    id: 'y-km',
+                    beginAtZero: true,
+                    title: { display: true, text: 'Kilômetros' }
+                }
             }
-        });
-    }
+        }
+    });
+}
+
     initTotalKmHourlyChart();
 
     // 9. Comparativo diário
