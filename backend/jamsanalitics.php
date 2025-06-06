@@ -267,7 +267,7 @@ class TrafficJamAnalyzer {
                 FROM jams";
         
         $this->addPartnerFilter($query, $id_parceiro);
-        $query .= " ORDER BY date_received DESC LIMIT 1000";
+        $query .= " ORDER BY date_received DESC";
         
         $stmt = $this->pdo->prepare($query);
         if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
@@ -312,7 +312,7 @@ class TrafficJamAnalyzer {
                 JOIN jam_lines jl ON j.uuid = jl.jam_uuid";
         
         $this->addPartnerFilter($query, $id_parceiro);
-        $query .= " ORDER BY j.date_received DESC LIMIT 1000";
+        $query .= " ORDER BY j.date_received DESC";
         
         $stmt = $this->pdo->prepare($query);
         if ($id_parceiro != 99) $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
