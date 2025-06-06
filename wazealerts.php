@@ -318,14 +318,16 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
             }
         }
 
-        // 3. Desativa jams que não foram recebidos (mas existiam antes)
+        // 3. Desativa APENAS jams ATIVOS que não foram recebidos
         $uuidsToDeactivate = array_diff($existingUuids, $processedUuids);
         if (!empty($uuidsToDeactivate)) {
             $placeholders = implode(',', array_fill(0, count($uuidsToDeactivate), '?'));
             $stmtDeactivate = $pdo->prepare("
                 UPDATE jams 
                 SET status = 0, date_updated = NOW()
-                WHERE uuid IN ($placeholders) AND source_url = ?
+                WHERE uuid IN ($placeholders) 
+                  AND source_url = ?
+                  AND status = 1  // CRÍTICO: Atualiza apenas jams ativos
             ");
 
             $params = array_merge($uuidsToDeactivate, [$url]);
