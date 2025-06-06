@@ -668,11 +668,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const counts = [0, 0, 0, 0]; // Contadores para cada intervalo
 
         durations.forEach(duration => {
-            if (duration <= 5) {
+            if (duration <= 15) {
                 counts[0]++;
-            } else if (duration > 5 && duration <= 15) {
-                counts[1]++;
             } else if (duration > 15 && duration <= 30) {
+                counts[1]++;
+            } else if (duration > 30 && duration <= 45) {
                 counts[2]++;
             } else {
                 counts[3]++;
