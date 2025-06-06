@@ -396,6 +396,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('totalKmHourlyChart');
         const chartData = km_por_hora;
 
+        console.log("Dados para o gráfico de extensão média por hora:", chartData);
+
         if (!ctx || !chartData || chartData.length === 0) {
             console.error("Dados ou canvas não encontrados.");
             return;
@@ -496,7 +498,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initWeekdayComparisonChart();
 
     // --- Gráficos Adicionais (parecem não estar sendo chamados no fluxo principal) ---
-
     function initDurationTimeScatter() {
         const ctx = document.getElementById('durationTimeChart');
         const hourlyDurations = {};
