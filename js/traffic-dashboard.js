@@ -655,17 +655,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initDurationHistogram() {
         const ctx = document.getElementById('durationHistogram');
+        const colorPalette = ['#4CAF50', '#FFC107', '#FF9800', '#F44336'];
 
         const durations = jams.map(j => {
             const receivedTime = new Date(j.date_received);
             const updatedTime = new Date(j.date_updated);
-            return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60);
-        }); // Duração em minutos
+            return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60); // duração em minutos
+        });
 
         console.log('Durações de todos os congestionamentos:', durations);
 
-
-        const counts = [0, 0, 0, 0]; // Contadores para cada intervalo
+        // Inicializa os contadores para os intervalos corretos
+        const counts = [0, 0, 0, 0]; // [0–15, 15–30, 30–45, >45]
 
         durations.forEach(duration => {
             if (duration <= 15) {
@@ -680,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const histogramData = {
-            labels: ['0-5min', '5-15min', '15-30min', '30+min'],
+            labels: ['0–15min', '15–30min', '30–45min', '45+min'],
             datasets: [{
                 label: 'Frequência de Duração',
                 data: counts,
