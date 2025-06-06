@@ -228,12 +228,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             label: (context) => {
                                 const label = context.label || '';
                                 const value = context.raw;
-                                const total = values.reduce((a, b) => a + b, 0);
+                                const dataset = context.chart.data.datasets[context.datasetIndex];
+                                const total = dataset.data.reduce((sum, val) => sum + val, 0);
                                 const percent = ((value / total) * 100).toFixed(1);
-                                return `${label}: <span class="math-inline">\{value\} \(</span>{percent}%)`;
+                                return `${label}: ${value} (${percent}%)`;
                             }
                         }
                     }
+
                 }
             }
         });
