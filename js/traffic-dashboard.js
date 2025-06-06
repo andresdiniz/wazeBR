@@ -660,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const durations = jams.map(j => {
             const receivedTime = new Date(j.date_received);
             const updatedTime = new Date(j.date_updated);
+            console.log(`Recebido: ${receivedTime}, Atualizado: ${updatedTime}`);
             return (updatedTime.getTime() - receivedTime.getTime()) / (1000 * 60); // duração em minutos
         });
 
@@ -681,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         console.log('Contagem de durações por intervalo:', counts);
-        
+
         const histogramData = {
             labels: ['0–15min', '15–30min', '30–45min', '45+min'],
             datasets: [{
