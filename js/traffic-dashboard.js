@@ -361,7 +361,11 @@ document.addEventListener('DOMContentLoaded', function () {
             x: xLabels,
             y: yLabels,
             type: 'heatmap',
-            colorscale: 'YlOrRd',
+            colorscale: [
+                [0, 'green'],
+                [0.5, 'yellow'],
+                [1, 'red']
+            ],
             showscale: true,
             colorbar: { title: { text: 'Quantidade', side: 'right' } },
             text: textMatrix,
