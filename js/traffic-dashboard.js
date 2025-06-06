@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 [1, 'red']
             ],
             showscale: true,
-            colorbar: { title: { text: 'Quantidade', side: 'right' } },
+            colorbar: { title: { text: 'Quantidade (KMs)', side: 'right' } },
             text: textMatrix,
             hoverinfo: 'text',
             zmin: minQ,
@@ -395,33 +395,57 @@ document.addEventListener('DOMContentLoaded', function () {
     function initTotalKmHourlyChart() {
         const ctx = document.getElementById('totalKmHourlyChart');
         const chartData = km_por_hora;
-        // Calcula a média da extensão total (total_km)
-        const totalKmValues = chartData.map(d => d.total_km);
-        const mediaTotalKm = totalKmValues.reduce((a, b) => a + b, 0) / totalKmValues.length;
+
+        if (!ctx || !chartData || chartData.length === 0) {
+            console.error("Dados ou canvas não encontrados.");
+            return;
+        }
+
+        // Agrupar por hora
+        const agrupado = {};
+        chartData.forEach(d => {
+            if (!agrupado[d.hora]) {
+                agrupado[d.hora] = [];
+            }
+            agrupado[d.hora].push(d.total_km);
+        });
+
+        // Calcular média por hora
+        const horas = Object.keys(agrupado).sort((a, b) => a - b);
+        const mediasPorHora = horas.map(hora => {
+            const valores = agrupado[hora];
+            const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+            return media;
+        });
+
+        // Cálculo da média geral opcional (linha horizontal)
+        const mediaTotal = mediasPorHora.reduce((a, b) => a + b, 0) / mediasPorHora.length;
 
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: chartData.map(d => `${d.hora}h`),
-                datasets: [{
-                    label: 'Extensão Total (km)',
-                    data: chartData.map(d => d.total_km),
-                    backgroundColor: colorPalette[1],
-                    yAxisID: 'y-km' // Assign a specific y-axis ID
-                },
-                {
-                    type: 'line',
-                    label: `Média: ${mediaTotalKm.toFixed(2)} km`,
-                    data: chartData.map(() => mediaTotalKm), // Repete o valor da média para cada hora
-                    borderColor: colorPalette[0],
-                    borderWidth: 2,
-                    fill: false,
-                    yAxisID: 'y-km' // Use the same y-axis
-                }]
+                labels: horas.map(h => `${h}h`),
+                datasets: [
+                    {
+                        label: 'Extensão Média por Hora (km)',
+                        data: mediasPorHora,
+                        backgroundColor: colorPalette[1],
+                        yAxisID: 'y-km'
+                    },
+                    {
+                        type: 'line',
+                        label: `Média Geral: ${mediaTotal.toFixed(2)} km`,
+                        data: mediasPorHora.map(() => mediaTotal),
+                        borderColor: colorPalette[0],
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y-km'
+                    }
+                ]
             },
             options: {
                 ...chartOptions,
-                plugins: { legend: { display: true } }, // Show legend to see the average line
+                plugins: { legend: { display: true } },
                 scales: {
                     y: {
                         id: 'y-km',
