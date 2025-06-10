@@ -186,7 +186,6 @@ class UserManager {
                 console.log('User data for edit:', response.user);
                 this.populateEditForm(response.user);
                 console.log(`Handling action: ${action} for user ID: ${userId}`);
-                this.modals.alterar.hide();
                 this.modals.alterarfinal.show();
             }
             else if (action === 'apagar') {
