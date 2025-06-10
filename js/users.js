@@ -10,6 +10,7 @@ class UserManager {
         this.modals = {
             cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
             alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
+            alterarfinal: new bootstrap.Modal(document.getElementById('modalAlterarFinal')),
             resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
             apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
         };
@@ -185,7 +186,7 @@ class UserManager {
                 console.log('User data for edit:', response.user);
                 this.populateEditForm(response.user);
                 console.log(`Handling action: ${action} for user ID: ${userId}`);
-                this.modals.alterar.show();
+                this.modals.alterarfinal.show();
             }
             else if (action === 'apagar') {
                 this.selectedUser = userId;
