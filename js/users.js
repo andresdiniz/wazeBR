@@ -178,6 +178,7 @@ class UserManager {
     async handleUserAction(button) {
         const action = button.dataset.action;
         const userId = button.dataset.id;
+        console.log(`Handling action: ${action} for user ID: ${userId}`);
 
         try {
             if (action === 'alterar') {
