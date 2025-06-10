@@ -33,6 +33,7 @@ class UserManager {
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-action');
             if (btn) this.handleUserAction(btn);
+            console.log('Button clicked:', btn);
         });
 
         // Reset de Senha
