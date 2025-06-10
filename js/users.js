@@ -309,7 +309,7 @@ const globalConfig = {
         users: 'cadastrar_usuario',
         updateUser: 'atualizar_usuario',
         deleteUser: 'apagar_usuario',
-        searchUsers: 'buscar_usuarios',
+        searchUsers: 'get_users',
         listUsers: 'listar_usuarios',
         getUser: 'obter_usuario',
         resetPassword: 'resetar_senha'
