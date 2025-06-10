@@ -9,7 +9,7 @@ class UserManager {
     initModals() {
         this.modals = {
             cadastrar: new bootstrap.Modal(document.getElementById('modalCadastrar')),
-            alterar: new bootstrap.Modal(document.getElementById('modalAlterarmodalAlterarFinal')),
+            alterar: new bootstrap.Modal(document.getElementById('modalAlterar')),
             resetSenha: new bootstrap.Modal(document.getElementById('modalResetSenha')),
             apagar: new bootstrap.Modal(document.getElementById('modalApagar'))
         };
