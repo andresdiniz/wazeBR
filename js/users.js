@@ -34,8 +34,6 @@ class UserManager {
             const btn = e.target.closest('.btn-action');
             if (btn) this.handleUserAction(btn);
             console.log('Button clicked:', btn);
-            this.populateEditForm(response.user); // <-- Aqui ele popula o formulário
-            this.modals.alterar.show();          // <-- Aqui ele abre o modal
         });
 
         // Reset de Senha
