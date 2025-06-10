@@ -186,10 +186,6 @@ class UserManager {
                 console.log('User data for edit:', response.user);
                 this.populateEditForm(response.user);
                 console.log(`Handling action: ${action} for user ID: ${userId}`);
-
-                const myModalEl = document.getElementById('modalAlterarFinal');
-                console.log(myModalEl); // Should show the HTML element, not null
-
                 this.modals.alterar.hide();
                 this.modals.alterarfinal.show();
             }
