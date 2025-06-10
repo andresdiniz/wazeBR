@@ -56,8 +56,10 @@ class UserManager {
                 try {
                     const baseURL = new URL(globalConfig.apiBase, window.location.href);
                     const url = new URL(baseURL);
-
-                    url.searchParams.append('action', endpoint);
+                    console.log(`Making API request to ${url.href} with method ${method} and data:`, data);
+                    
+                    // Adiciona parâmetros de consulta
+                                        url.searchParams.append('action', endpoint);
                     url.searchParams.append('id_parceiro', globalConfig.parceiroId);
 
                     const config = {
