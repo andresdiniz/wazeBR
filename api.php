@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $pdo = Database::getConnection();
 
                 $sql = "
-                    SELECT id, username, email 
+                    SELECT id, nome, username, email 
                     FROM users 
                     WHERE id_parceiro = :id_parceiro 
                     AND (username LIKE :search1 OR email LIKE :search2) 
