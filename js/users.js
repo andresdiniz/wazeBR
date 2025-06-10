@@ -306,7 +306,7 @@ class UserManager {
 // Configuração Global
 const globalConfig = {
     apiBase: '../api.php',
-    parceiroId: {{ session.usuario_id_parceiro }},
+    parceiroId: id_parceiro, // Variável global definida no PHP
     endpoints: {
         users: 'cadastrar_usuario',
         updateUser: 'atualizar_usuario',
