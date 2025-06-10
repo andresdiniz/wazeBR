@@ -87,58 +87,62 @@
 
 <!-- Modal Alterar (Corrigido) -->
 <div class="modal fade" id="modalAlterar" tabindex="-1" aria-labelledby="modalAlterarLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Usuário</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAlterarLabel">Alterar Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="input-group mb-3">
-                    <input type="text" id="searchAlterar" class="form-control" placeholder="Buscar usuário...">
-                    <button class="btn btn-outline-secondary" type="button">
-                        <i class="fas fa-search"></i>
+                <form id="formAlterar" novalidate> <input type="hidden" id="editarIdUsuario" name="id">
+
+                    <div class="mb-3">
+                        <label for="editarNomeUsuario" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="editarNomeUsuario" name="nome" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira o nome do usuário.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarEmailUsuario" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editarEmailUsuario" name="email" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira um email válido.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="editarUsername" name="username" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira o username.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarType" class="form-label">Tipo</label>
+                        <select class="form-select" id="editarType" name="type" required>
+                            <option value="">Selecione o Tipo</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Editor</option>
+                            <option value="3">Visualizador</option>
+                            </select>
+                        <div class="invalid-feedback">
+                            Por favor, selecione o tipo de usuário.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarParceiro" class="form-label">ID Parceiro</label>
+                        <input type="number" class="form-control" id="editarParceiro" name="id_parceiro" required>
+                        <div class="invalid-feedback">
+                            Por favor, insira o ID do parceiro.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Salvar Alterações
                     </button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nome</th>
-                                <th>Usuário</th>
-                                <th>E-mail</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultAlterar">
-                            <!-- Resultados aqui -->
-                        </tbody>
-                    </table>
-                </div>
+                </form>
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
-            <form id="formAlterar" novalidate>
-                <input type="hidden" name="id" id="editarIdUsuario">
-
-                <div class="mb-3">
-                    <label for="editarNomeUsuario" class="form-label">Nome</label>
-                    <input type="text" class="form-control" id="editarNomeUsuario" name="nome" required>
-                </div>
-                <div class="mb-3">
-                    <label for="editarEmailUsuario" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="editarEmailUsuario" name="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="editarUsername" class="form-label">Usuário</label>
-                    <input type="text" class="form-control" id="editarUsername" name="username" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-            </form>
-
         </div>
     </div>
 </div>

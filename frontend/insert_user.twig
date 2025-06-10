@@ -81,69 +81,6 @@
 <!-- Modals -->
 {% include 'users_modals.twig' %}
 
-<!--Modal Alterar -->
-
-<div class="modal fade" id="modalAlterar" tabindex="-1" aria-labelledby="modalAlterarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalAlterarLabel">Alterar Usuário</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formAlterar" novalidate> <input type="hidden" id="editarIdUsuario" name="id">
-
-                    <div class="mb-3">
-                        <label for="editarNomeUsuario" class="form-label">Nome</label>
-                        <input type="text" class="form-control" id="editarNomeUsuario" name="nome" required>
-                        <div class="invalid-feedback">
-                            Por favor, insira o nome do usuário.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editarEmailUsuario" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editarEmailUsuario" name="email" required>
-                        <div class="invalid-feedback">
-                            Por favor, insira um email válido.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editarUsername" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editarUsername" name="username" required>
-                        <div class="invalid-feedback">
-                            Por favor, insira o username.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editarType" class="form-label">Tipo</label>
-                        <select class="form-select" id="editarType" name="type" required>
-                            <option value="">Selecione o Tipo</option>
-                            <option value="1">Administrador</option>
-                            <option value="2">Editor</option>
-                            <option value="3">Visualizador</option>
-                        </select>
-                        <div class="invalid-feedback">
-                            Por favor, selecione o tipo de usuário.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editarParceiro" class="form-label">ID Parceiro</label>
-                        <input type="number" class="form-control" id="editarParceiro" name="id_parceiro" required>
-                        <div class="invalid-feedback">
-                            Por favor, insira o ID do parceiro.
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                        Salvar Alterações
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Estilos Adicionais -->
 <style>
     .hover-scale {
