@@ -178,13 +178,13 @@ class UserManager {
     async handleUserAction(button) {
         const action = button.dataset.action;
         const userId = button.dataset.id;
-        console.log(`Handling action: ${action} for user ID: ${userId}`);
 
         try {
             if (action === 'alterar') {
                 const response = await this.api.request('getUser', 'GET', { id: userId });
                 console.log('User data for edit:', response.user);
                 this.populateEditForm(response.user);
+                console.log(`Handling action: ${action} for user ID: ${userId}`);
                 this.modals.alterar.show();
             }
             else if (action === 'apagar') {
