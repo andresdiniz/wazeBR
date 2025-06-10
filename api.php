@@ -50,6 +50,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     switch ($action) {
 
+        case 'obter_usuario':
+            session_start();
+
+            // Verifica se o ID do usuário foi fornecido
+            if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+                echo json_encode(['success' => false, 'message' => 'ID do usuário inválido.']);
+                exit;
+            }
+
+            $userId = $_GET['id'];
+
+            try {
+                $pdo = Database::getConnection();
+                $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+                $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+                $stmt->execute();
+
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($user) {
+                    echo json_encode(['success' => true, 'user' => $user]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Usuário não encontrado.']);
+                }
+            } catch (PDOException $e) {
+                // Logar o erro em vez de mostrá-lo
+                error_log("Erro no banco de dados: " . $e->getMessage());
+                echo json_encode(['success' => false, 'message' => 'Erro interno. Por favor, tente novamente.']);
+            }
+
+            break;
+
         case 'get_users':
             session_start();
 
