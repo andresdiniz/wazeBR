@@ -34,6 +34,8 @@ class UserManager {
             const btn = e.target.closest('.btn-action');
             if (btn) this.handleUserAction(btn);
             console.log('Button clicked:', btn);
+            this.populateEditForm(response.user); // <-- Aqui ele popula o formulário
+            this.modals.alterar.show();          // <-- Aqui ele abre o modal
         });
 
         // Reset de Senha
@@ -60,7 +62,7 @@ class UserManager {
                     console.log(`Making API request to ${url.href} with method ${method} and data:`, data);
 
                     // Adiciona parâmetros de consulta
-                                        url.searchParams.append('action', endpoint);
+                    url.searchParams.append('action', endpoint);
                     url.searchParams.append('id_parceiro', globalConfig.parceiroId);
 
                     const config = {
