@@ -57,7 +57,7 @@ class UserManager {
                     const baseURL = new URL(globalConfig.apiBase, window.location.href);
                     const url = new URL(baseURL);
                     console.log(`Making API request to ${url.href} with method ${method} and data:`, data);
-                    
+
                     // Adiciona parâmetros de consulta
                                         url.searchParams.append('action', endpoint);
                     url.searchParams.append('id_parceiro', globalConfig.parceiroId);
@@ -306,7 +306,7 @@ class UserManager {
 // Configuração Global
 const globalConfig = {
     apiBase: '../api.php',
-    parceiroId: '{{ session.usuario_id_parceiro }}',
+    parceiroId: {{ session.usuario_id_parceiro }},
     endpoints: {
         users: 'cadastrar_usuario',
         updateUser: 'atualizar_usuario',
