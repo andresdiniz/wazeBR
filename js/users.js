@@ -184,9 +184,9 @@ class UserManager {
             if (action === 'alterar') {
                 const response = await this.api.request('getUser', 'GET', { id: userId });
                 console.log('User data for edit:', response.user);
-                this.populateEditForm(response.user);
                 console.log(`Handling action: ${action} for user ID: ${userId}`);
                 this.modals.alterarfinal.show();
+                this.populateEditForm(response.user);
             }
             else if (action === 'apagar') {
                 this.selectedUser = userId;
