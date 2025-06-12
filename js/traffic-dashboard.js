@@ -715,6 +715,78 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initDurationHistogram();
+
+    function averageDelayBoxPlot() {
+        const container = document.getElementById('delayBoxPlotChart'); // Novo ID para o container do gráfico
+        const chartData = diaxsemana; // Reutilizamos os mesmos dados
+
+        if (!container || !chartData || chartData.length === 0) {
+            console.error("Container do gráfico (delayBoxPlotChart) ou dados não encontrados para o Box Plot.");
+            return;
+        }
+
+        // Preparar os dados para o Box Plot
+        // Vamos agrupar as médias de atraso por hora
+        const delaysByHour = {};
+        for (let i = 0; i < 24; i++) {
+            delaysByHour[i] = []; // Inicializa um array vazio para cada hora
+        }
+
+        chartData.forEach(d => {
+            if (d.hora >= 0 && d.hora < 24) {
+                // Garante que o valor é um número
+                const mediaAtraso = parseFloat(d.media_atraso);
+                if (!isNaN(mediaAtraso)) {
+                    delaysByHour[d.hora].push(mediaAtraso);
+                }
+            }
+        });
+
+        // Criar as traces do Plotly para cada hora
+        const data = [];
+        for (let i = 0; i < 24; i++) {
+            if (delaysByHour[i].length > 0) {
+                data.push({
+                    y: delaysByHour[i],
+                    name: `${i}h`, // Nome da caixa (ex: "8h")
+                    type: 'box',
+                    boxpoints: 'Outliers', // Mostra apenas os outliers
+                    marker: {
+                        color: 'rgba(50,171,96,0.7)', // Cor das caixas
+                    },
+                    line: {
+                        color: 'rgba(50,171,96,1.0)', // Cor das linhas dos bigodes
+                    },
+                    hoverinfo: 'y', // Mostra apenas os valores do eixo Y no hover
+                    hovertemplate: `Hora: ${i}<br>Média Atraso: %{y}<extra></extra>` // Personaliza o tooltip
+                });
+            }
+        }
+
+        const layout = {
+            title: 'Distribuição da Média de Atraso por Hora do Dia',
+            yaxis: {
+                title: 'Média de Atraso (minutos)',
+                zeroline: false
+            },
+            xaxis: {
+                title: 'Hora do Dia',
+                tickvals: Array.from({ length: 24 }, (_, i) => i), // Mostra todos os ticks de hora
+                ticktext: Array.from({ length: 24 }, (_, i) => `${i}h`) // Label para cada tick
+            },
+            margin: { t: 50, b: 50, l: 60, r: 20 },
+            showlegend: false, // Não precisamos de legenda para cada hora individual
+            width: container.offsetWidth,
+            height: container.offsetWidth / 2, // Mantém a proporção
+        };
+
+        const config = { responsive: true };
+
+        // Limpa o container antes de plotar
+        container.innerHTML = '';
+        Plotly.newPlot(container, data, layout, config);
+    }
+    averageDelayBoxPlot();
 });
 
 // Funções auxiliares (presumivelmente definidas em outro lugar no seu código)
