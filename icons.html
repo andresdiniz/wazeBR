@@ -2,10 +2,32 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exemplo Waze Icons</title>
+    <!-- Viewport ajustado para edge-to-edge -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Exemplo Waze Icons Edge-to-Edge</title>
     <link rel="stylesheet" href="https://web-assets.waze.com/waze-web-icons/v13.34.0/waze-web-icons.css">
     <style>
+        /* Safe area para iPhones e Androids com notch */
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            margin: 0; /* Remover margem padrão */
+            background-color: #f0f0f0; /* Cor de fundo para preencher toda a tela */
+            min-height: 100vh; /* Garante que o body ocupe toda a altura da tela */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
         i {
             font-size: 48px;
             margin: 10px;
@@ -17,7 +39,7 @@
 
     <h1>Exemplo de Ícones do Waze</h1>
 
-    <div class="w-icon-sm"> teste</div>
+    <div class="w-icon-sm">teste</div>
     <i class="w-icon-traffic"></i>
     <i class="w-icon-gas-station"></i>
     <i class="w-icon-home"></i>
