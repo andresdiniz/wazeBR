@@ -652,15 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             meta.data.forEach((bar, index) => {
                                 const data = dataset.data[index];
                                 const value = Math.round(data * 100) / 100;
-                                // Calculate offset based on dataset index
-                                // Assuming two datasets, 0 for speedKMH, 1 for delay
-                                let offsetX = 0;
-                                if (i === 0) { // speedKMH
-                                    offsetX = -bar.width / 4; // Shift left
-                                } else if (i === 1) { // delay
-                                    offsetX = bar.width / 4; // Shift right
-                                }
-                                ctx.fillText(value, bar.x + offsetX, bar.y - 5);
+                                ctx.fillText(value, bar.x, bar.y - 5);
                             });
                         });
                     }
