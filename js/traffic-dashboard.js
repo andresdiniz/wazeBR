@@ -641,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     datalabels: {
                         anchor: 'end',
-                        align: 'end',
+                        align: 'top',
                         offset: 4,
                         formatter: function (value, context) {
                             // Formatar o valor para exibir apenas 2 casas decimais
