@@ -330,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function weeklyHourlyHeatmapPlotly() {
         const container = document.getElementById('heatmapChart');
         const chartData = diaxsemana;
+        console.log("Dados do heatmap:", chartData);
 
         if (!container || !chartData || chartData.length === 0) {
             console.error("Container do gráfico (.heat) ou dados não encontrados para o heatmap.");
