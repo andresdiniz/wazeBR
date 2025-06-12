@@ -638,9 +638,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: {
                         display: true,
                         text: 'Comparação por Tipo de Via'
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: function (value, context) {
+                            // Formatar o valor para exibir apenas 2 casas decimais
+                            return Math.round(value * 100) / 100;
+                        },
+                        font: {
+                            size: 10,
+                            weight: 'bold'
+                        },
+                        color: '#333'
                     }
                 }
-            }
+            },
+            plugins: [ChartDataLabels] // Adiciona o plugin de rótulos de dados
         });
     }
 
@@ -719,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function averageDelayBoxPlot() {
         const container = document.getElementById('delayBoxPlotChart'); // Novo ID para o container do gráfico
         const chartData = diaxsemana; // Reutilizamos os mesmos dados
-        
+
 
         if (!container || !chartData || chartData.length === 0) {
             console.error("Container do gráfico (delayBoxPlotChart) ou dados não encontrados para o Box Plot.");
