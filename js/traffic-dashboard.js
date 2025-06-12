@@ -641,7 +641,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     datalabels: {
                         anchor: 'end',
-                        align: 'top',
+                        align: 'end',
+                        offset: 4,
                         formatter: function (value, context) {
                             // Formatar o valor para exibir apenas 2 casas decimais
                             return Math.round(value * 100) / 100;
