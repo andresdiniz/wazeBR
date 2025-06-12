@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Valor'
+                            text: 'Valor' // Podemos personalizar isso por métrica se necessário
                         }
                     },
                     x: {
@@ -645,15 +645,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         const ctx = this.chart.ctx;
                         ctx.font = "bold 10px Arial";
                         ctx.fillStyle = "#333";
-                        ctx.textAlign = "center"; // Keep text alignment centered
+                        ctx.textAlign = "center";
 
                         this.data.datasets.forEach((dataset, i) => {
                             const meta = this.chart.getDatasetMeta(i);
                             meta.data.forEach((bar, index) => {
                                 const data = dataset.data[index];
                                 const value = Math.round(data * 100) / 100;
-                                // Use bar.x directly, as it represents the center of the individual bar
-                                ctx.fillText(value, bar.x, bar.y - 5);
+                                // Calculate offset based on dataset index
+                                // Assuming two datasets, 0 for speedKMH, 1 for delay
+                                let offsetX = 0;
+                                if (i === 0) { // speedKMH
+                                    offsetX = -bar.width / 4; // Shift left
+                                } else if (i === 1) { // delay
+                                    offsetX = bar.width / 4; // Shift right
+                                }
+                                ctx.fillText(value, bar.x + offsetX, bar.y - 5);
                             });
                         });
                     }
