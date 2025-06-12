@@ -719,6 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function averageDelayBoxPlot() {
         const container = document.getElementById('delayBoxPlotChart'); // Novo ID para o container do gráfico
         const chartData = diaxsemana; // Reutilizamos os mesmos dados
+        console.log("Dados do Box Plot:", chartData);
 
         if (!container || !chartData || chartData.length === 0) {
             console.error("Container do gráfico (delayBoxPlotChart) ou dados não encontrados para o Box Plot.");
