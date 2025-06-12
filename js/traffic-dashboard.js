@@ -592,109 +592,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     initWeekendComparison();
 
-    // Função para calcular a média por tipo de via e métrica (já existente)
-    function avgByRoadType(roadType, metric, data) {
-        const filtered = data.filter(item => item.roadType === roadType && item[metric] !== undefined);
-        if (filtered.length > 0) {
-            return filtered.reduce((sum, item) => sum + item[metric], 0) / filtered.length;
-        }
-        return 0;
-    }
-
-    function initMultiAxisRoadTypeChart() {
-        const ctx = document.getElementById('multiAxisRoadTypeChart');
-        // Certifique-se que 'jams' (seus dados) esteja disponível globalmente ou seja passado para esta função.
-        // Exemplo: const jams = [ ... seus dados aqui ... ];
+    function initRoadTypeRadar() {
+        const ctx = document.getElementById('roadTypeRadarChart');
         const metrics = ['speedKMH', 'delay', 'length'];
         const roadTypes = [...new Set(jams.map(jam => jam.roadType).filter(Boolean))].sort(); // Ordena os tipos de via
 
         if (!roadTypes || roadTypes.length === 0) {
-            console.warn("Nenhum tipo de via encontrado nos dados para o gráfico multi-eixos.");
+            console.warn("Nenhum tipo de via encontrado nos dados para o gráfico de barras.");
             return;
         }
 
-        const datasets = [
-            {
-                label: 'Média de Velocidade (KM/H)',
-                data: roadTypes.map(rt => avgByRoadType(rt, 'speedKMH', jams)),
-                backgroundColor: 'rgba(75, 192, 192, 0.7)', // Ciano
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-                yAxisID: 'y-speed' // Associa ao eixo Y de velocidade
-            },
-            {
-                label: 'Média de Atraso (min)',
-                data: roadTypes.map(rt => avgByRoadType(rt, 'delay', jams)),
-                backgroundColor: 'rgba(255, 99, 132, 0.7)', // Vermelho
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-                yAxisID: 'y-delay' // Associa ao eixo Y de atraso
-            },
-            {
-                label: 'Média de Comprimento (metros)',
-                data: roadTypes.map(rt => avgByRoadType(rt, 'length', jams)),
-                backgroundColor: 'rgba(153, 102, 255, 0.7)', // Roxo
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1,
-                yAxisID: 'y-length' // Associa ao eixo Y de comprimento
-            }
-        ];
+        const datasets = metrics.map(metric => ({
+            label: metric,
+            data: roadTypes.map(rt => avgByRoadType(rt, metric, jams)),
+            backgroundColor: colorPalette[metrics.indexOf(metric) % colorPalette.length]
+        }));
 
         new Chart(ctx, {
-            type: 'bar', // Pode ser um 'bar' ou 'line' combinado, mas 'bar' é mais comum para essa comparação
+            type: 'bar',
             data: {
                 labels: roadTypes,
                 datasets: datasets
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // Importante para o chart-container ter controle
                 scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Valor' // Podemos personalizar isso por métrica se necessário
+                        }
+                    },
                     x: {
                         title: {
                             display: true,
                             text: 'Tipo de Via'
-                        }
-                    },
-                    'y-speed': { // Eixo Y para velocidade
-                        type: 'linear',
-                        position: 'left', // Posição à esquerda
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Velocidade Média (KM/H)',
-                            color: 'rgba(75, 192, 192, 1)'
-                        },
-                        grid: {
-                            drawOnChartArea: false, // Não desenha as linhas de grade para este eixo no corpo do gráfico
-                        }
-                    },
-                    'y-delay': { // Eixo Y para atraso
-                        type: 'linear',
-                        position: 'right', // Posição à direita
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Atraso Médio (min)',
-                            color: 'rgba(255, 99, 132, 1)'
-                        },
-                        grid: {
-                            drawOnChartArea: false, // Não desenha as linhas de grade para este eixo no corpo do gráfico
-                        }
-                    },
-                    'y-length': { // Eixo Y para comprimento
-                        type: 'linear',
-                        position: 'right', // Posição à direita, pode ser ajustada para 'left' se for mais claro
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Comprimento Médio (metros)',
-                            color: 'rgba(153, 102, 255, 1)'
-                        },
-                        // Ajuste a 'offset' se os rótulos estiverem sobrepondo
-                        offset: true,
-                        grid: {
-                            drawOnChartArea: false, // Não desenha as linhas de grade para este eixo no corpo do gráfico
                         }
                     }
                 },
@@ -704,17 +637,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     title: {
                         display: true,
-                        text: 'Comparação Múltipla por Tipo de Via'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
+                        text: 'Comparação por Tipo de Via'
                     }
                 }
             }
         });
     }
-    initMultiAxisRoadTypeChart();
+
+    // Função placeholder para calcular a média por tipo de via e métrica
+    function avgByRoadType(roadType, metric, data) {
+        const filtered = data.filter(item => item.roadType === roadType && item[metric] !== undefined);
+        if (filtered.length > 0) {
+            return filtered.reduce((sum, item) => sum + item[metric], 0) / filtered.length;
+        }
+        return 0;
+    }
+    initRoadTypeRadar();
 
     function initDurationHistogram() {
         const ctx = document.getElementById('durationHistogram');
@@ -781,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function averageDelayBoxPlot() {
         const container = document.getElementById('delayBoxPlotChart'); // Novo ID para o container do gráfico
         const chartData = diaxsemana; // Reutilizamos os mesmos dados
-        console.log("Dados do Box Plot:", chartData);
+        
 
         if (!container || !chartData || chartData.length === 0) {
             console.error("Container do gráfico (delayBoxPlotChart) ou dados não encontrados para o Box Plot.");
