@@ -638,24 +638,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: {
                         display: true,
                         text: 'Comparação por Tipo de Via'
-                    },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        offset: 4,
-                        formatter: function (value, context) {
-                            // Formatar o valor para exibir apenas 2 casas decimais
-                            return Math.round(value * 100) / 100;
-                        },
-                        font: {
-                            size: 10,
-                            weight: 'bold'
-                        },
-                        color: '#333'
+                    }
+                },
+                animation: {
+                    onComplete: function () {
+                        const ctx = this.chart.ctx;
+                        ctx.font = "bold 10px Arial";
+                        ctx.fillStyle = "#333";
+                        ctx.textAlign = "center";
+
+                        this.data.datasets.forEach((dataset, i) => {
+                            const meta = this.chart.getDatasetMeta(i);
+                            meta.data.forEach((bar, index) => {
+                                const data = dataset.data[index];
+                                const value = Math.round(data * 100) / 100;
+                                ctx.fillText(value, bar.x, bar.y - 5);
+                            });
+                        });
                     }
                 }
-            },
-            plugins: [ChartDataLabels] // Adiciona o plugin de rótulos de dados
+            }
         });
     }
 
