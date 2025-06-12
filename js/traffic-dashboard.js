@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initRoadTypeRadar() {
         const ctx = document.getElementById('roadTypeRadarChart');
-        const metrics = ['speedKMH', 'delay', 'length'];
+        const metrics = ['speedKMH', 'delay'];
         const roadTypes = [...new Set(jams.map(jam => jam.roadType).filter(Boolean))].sort(); // Ordena os tipos de via
 
         if (!roadTypes || roadTypes.length === 0) {
