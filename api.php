@@ -981,46 +981,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
+        // Sua lógica do switch case
         case 'cadastrar_usuario':
             // Lógica para cadastrar usuário
-            $email = $_POST['email'] ?? null;
-            $nome = $_POST['nome'] ?? null;
-            $username = $_POST['usuario'] ?? null;
-            $id_parceiro = $_POST['id_parceiro'] ?? null;
-            $password = $_POST['senha'] ?? null;
-            $type = $_POST['type'] ?? null;
+            // Use trim() para remover espaços em branco no início/fim de strings
+            // Use intval() para id_parceiro, pois é um número
+
+            $email = trim($_POST['email'] ?? '');
+            $nome = trim($_POST['nome'] ?? '');
+            $username = trim($_POST['usuario'] ?? '');
+            $id_parceiro = isset($_POST['id_parceiro']) ? intval($_POST['id_parceiro']) : null; // Converte para int e trata o null
+            $password = $_POST['senha'] ?? ''; // Não use trim() em senha se o espaço for parte da senha
+            $type = trim($_POST['type'] ?? '');
 
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
-            // --- Validação Aprimorada ---
-            $required_fields = [
-                'email',
-                'nome',
-                'usuario', // Usando o nome da variável POST para clareza no erro
-                'id_parceiro',
-                'senha',   // Usando o nome da variável POST
-                'type'
-            ];
+            // --- Validação Aprimorada e Mais Robusta ---
             $missing_fields = [];
 
-            foreach ($required_fields as $field) {
-                // Verifica se a variável correspondente ao campo está vazia ou nula
-                // Usamos ${$field} para acessar a variável dinamicamente
-                if (empty(${$field})) {
-                    $missing_fields[] = $field;
-                }
+            // Validar campos de texto (não podem ser vazios após trim)
+            if (empty($email)) {
+                $missing_fields[] = 'email';
             }
+            if (empty($nome)) {
+                $missing_fields[] = 'nome';
+            }
+            if (empty($username)) {
+                $missing_fields[] = 'usuario';
+            }
+            if (empty($password)) { // Para senha, apenas verificar se está vazia, não se é 0
+                $missing_fields[] = 'senha';
+            }
+            if (empty($type)) {
+                $missing_fields[] = 'type';
+            }
+
+            // Validação específica para id_parceiro
+            // Não podemos usar empty() para 0, pois 0 é um valor válido para um ID
+            // Verificamos se foi enviado E se é um número inteiro válido maior ou igual a 0
+            if ($id_parceiro === null || !is_int($id_parceiro) || $id_parceiro < 0) { // Pode ser 0, mas não pode ser null ou não-int
+                $missing_fields[] = 'id_parceiro';
+            }
+            // Ou, se id_parceiro 0 NÃO FOR VÁLIDO e DEVE SER MAIOR QUE 0:
+            // if ($id_parceiro === null || !is_int($id_parceiro) || $id_parceiro <= 0) {
+            //     $missing_fields[] = 'id_parceiro';
+            // }
+
 
             if (!empty($missing_fields)) {
                 http_response_code(400);
                 echo json_encode([
-                    'error' => 'Os seguintes campos são obrigatórios e não foram fornecidos:',
+                    'error' => 'Os seguintes campos são obrigatórios e não foram fornecidos ou são inválidos:',
                     'missing_fields' => $missing_fields
                 ]);
                 exit;
             }
-            // --- Fim da Validação Aprimorada ---
+            // --- Fim da Validação Aprimorada e Mais Robusta ---
+
 
             // Cadastrar no banco de dados
             try {
@@ -1039,9 +1057,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
                 // Prosseguir com a inserção do usuário
                 $sql = "
-                    INSERT INTO users (email, nome, username, id_parceiro, password, photo, type)
-                    VALUES (:email, :nome, :username, :id_parceiro, :password, :photo, :type)
-                ";
+            INSERT INTO users (email, nome, username, id_parceiro, password, photo, type)
+            VALUES (:email, :nome, :username, :id_parceiro, :password, :photo, :type)
+        ";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(':email', $email, PDO::PARAM_STR);
                 $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
@@ -1053,98 +1071,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
                 if ($stmt->execute()) {
                     // E-mail enviado após a criação do usuário
-                    $userEmail = $email; // E-mail do usuário
+                    $userEmail = $email;
                     $userName = $nome;
-                    $userPassword = $password;
+                    $userPassword = $password; // ATENÇÃO: Ver observação de segurança sobre isso!
                     $loginLink = "https://wfcbrasil.com.br/";
 
                     $message = "
-                        <html>
-                        <head>
-                            <title>Conta Criada com Sucesso</title>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    color: #333;
-                                    background-color: #f7f7f7;
-                                    margin: 0;
-                                    padding: 0;
-                                }
-                                .email-container {
-                                    width: 100%;
-                                    max-width: 600px;
-                                    margin: 0 auto;
-                                    background-color: #ffffff;
-                                    padding: 20px;
-                                    border-radius: 8px;
-                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                                }
-                                h2 {
-                                    color: #4CAF50;
-                                }
-                                p {
-                                    font-size: 16px;
-                                    line-height: 1.6;
-                                }
-                                a {
-                                    color: #4CAF50;
-                                    text-decoration: none;
-                                    font-weight: bold;
-                                }
-                                .button {
-                                    background-color: #4CAF50;
-                                    color: #ffffff;
-                                    padding: 10px 20px;
-                                    text-align: center;
-                                    border-radius: 5px;
-                                    text-decoration: none;
-                                    display: inline-block;
-                                }
-                                ul {
-                                    list-style-type: none;
-                                    padding: 0;
-                                }
-                                ul li {
-                                    margin-bottom: 8px;
-                                }
-                                footer {
-                                    margin-top: 20px;
-                                    font-size: 14px;
-                                    text-align: center;
-                                    color: #888;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class='email-container'>
-                                <h2>Olá, $userName!</h2>
-                                <p>Sua conta foi criada com sucesso! Agora você pode acessar a sua conta através do seguinte link:</p>
-                                <p><a href='$loginLink' class='button'>Clique aqui para acessar sua conta</a></p>
-                                <p><strong>Seus dados de login são:</strong></p>
-                                <ul>
-                                    <li><strong>Email:</strong> $userEmail</li>
-                                    <li><strong>Senha:</strong> $userPassword</li>
-                                </ul>
-                                <p>Por favor, mantenha suas credenciais seguras.</p>
-                                <p>Obrigado por se cadastrar conosco!</p>
-                                <footer>
-                                    <p>&copy; " . date('Y') . " Sua Empresa. Todos os direitos reservados.</p>
-                                </footer>
-                            </div>
-                        </body>
-                        </html>
-                        ";
+                <html>
+                <head>
+                    <title>Conta Criada com Sucesso</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            color: #333;
+                            background-color: #f7f7f7;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .email-container {
+                            width: 100%;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #ffffff;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        }
+                        h2 {
+                            color: #4CAF50;
+                        }
+                        p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        a {
+                            color: #4CAF50;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                        .button {
+                            background-color: #4CAF50;
+                            color: #ffffff;
+                            padding: 10px 20px;
+                            text-align: center;
+                            border-radius: 5px;
+                            text-decoration: none;
+                            display: inline-block;
+                        }
+                        ul {
+                            list-style-type: none;
+                            padding: 0;
+                        }
+                        ul li {
+                            margin-bottom: 8px;
+                        }
+                        footer {
+                            margin-top: 20px;
+                            font-size: 14px;
+                            text-align: center;
+                            color: #888;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class='email-container'>
+                        <h2>Olá, $userName!</h2>
+                        <p>Sua conta foi criada com sucesso! Agora você pode acessar a sua conta através do seguinte link:</p>
+                        <p><a href='$loginLink' class='button'>Clique aqui para acessar sua conta</a></p>
+                        <p><strong>Seus dados de login são:</strong></p>
+                        <ul>
+                            <li><strong>Email:</strong> $userEmail</li>
+                            <li><strong>Senha:</strong> $userPassword</li>
+                        </ul>
+                        <p>Por favor, mantenha suas credenciais seguras.</p>
+                        <p>Obrigado por se cadastrar conosco!</p>
+                        <footer>
+                            <p>&copy; " . date('Y') . " Sua Empresa. Todos os direitos reservados.</p>
+                        </footer>
+                    </div>
+                </body>
+                </html>
+                ";
                     $subject = "Bem vindo!";
-                    // Chama a função para enviar o e-mail
                     sendEmail($userEmail, $message, $subject);
 
                     http_response_code(200);
                     echo json_encode([
                         'success' => true,
-                        'message' => 'Usuário cadastrado com sucesso.',
+                        'message' => 'Usuário cadastrado com sucesso. Um e-mail de boas-vindas foi enviado.',
                     ]);
                 } else {
-                    throw new Exception('Erro ao executar a inserção.');
+                    throw new Exception('Erro ao executar a inserção no banco de dados.');
                 }
             } catch (Exception $e) {
                 http_response_code(500);
