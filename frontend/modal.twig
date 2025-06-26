@@ -35,13 +35,7 @@
                                 <small class="text-muted">(UTC)</small>
                             </p>
                             <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
-                                <span id="km-value-{{ alert.uuid }}" class="badge badge-info">
-                                    {% if alert.estimated_km %}
-                                        KM {{ alert.estimated_km|number_format(2, ',') }}
-                                    {% else %}
-                                        <span class="spinner-border spinner-border-sm" role="status"></span> Calculando...
-                                    {% endif %}
-                                </span>
+                                <span id="modalKm" class="badge badge-info"></span>
                             </p>
                             <p><strong><i class="fas fa-check-double mr-2"></i> Confiança:</strong>
                                 <span class="badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
