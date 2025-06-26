@@ -936,50 +936,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     switch ($action) {
 
         case 'atualizaburaco':
-        $id = $_POST['uuid'] ?? null;
-        $statusInput = $_POST['status'] ?? null;
+            $id = $_POST['uuid'] ?? null;
+            $statusInput = $_POST['status'] ?? null;
 
-        // Verificação inicial
-        if (!$id || !$statusInput) {
-            http_response_code(400);
-            echo json_encode(['error' => 'UUID e status são obrigatórios.']);
-            exit;
-        }
-
-        // Validação de status permitido
-        $statusMap = [
-            'resolvido' => 'RESOLVED',
-            'nao_existe' => 'NOT_EXIST',
-            'nao_resolvido' => 'NOT_RESOLVED'
-        ];
-
-        if (!array_key_exists($statusInput, $statusMap)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Status inválido.']);
-            exit;
-        }
-
-        $status = $statusMap[$statusInput];
-
-        try {
-            $pdo = Database::getConnection();
-            $updateQuery = "UPDATE alerts SET confirmado = :status WHERE uuid = :uuid"; // Query corrigida
-            $stmt = $pdo->prepare($updateQuery);
-            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-            $stmt->bindParam(':uuid', $id, PDO::PARAM_STR);
-            $stmt->execute();
-
-            if ($stmt->rowCount() > 0) {
-                echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso.']);
-            } else {
-                http_response_code(404);
-                echo json_encode(['error' => 'Nenhum alerta encontrado com o UUID fornecido.']);
+            // Verificação inicial
+            if (!$id || !$statusInput) {
+                http_response_code(400);
+                echo json_encode(['error' => 'UUID e status são obrigatórios.']);
+                exit;
             }
-        } catch (PDOException $e) {
-            http_response_code(500);
-            echo json_encode(['error' => 'Erro no banco de dados.', 'details' => $e->getMessage()]);
-        }
-        break;
+
+            // Validação de status permitido
+            $statusMap = [
+                'resolvido' => 'RESOLVED',
+                'nao_existe' => 'NOT_EXIST',
+                'nao_resolvido' => 'NOT_RESOLVED'
+            ];
+
+            if (!array_key_exists($statusInput, $statusMap)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Status inválido.']);
+                exit;
+            }
+
+            $status = $statusMap[$statusInput];
+
+            try {
+                $pdo = Database::getConnection();
+                $updateQuery = "UPDATE alerts SET confirmado = :status WHERE uuid = :uuid"; // Query corrigida
+                $stmt = $pdo->prepare($updateQuery);
+                $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+                $stmt->bindParam(':uuid', $id, PDO::PARAM_STR);
+                $stmt->execute();
+
+                if ($stmt->rowCount() > 0) {
+                    echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso.']);
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Nenhum alerta encontrado com o UUID fornecido.']);
+                }
+            } catch (PDOException $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Erro no banco de dados.', 'details' => $e->getMessage()]);
+            }
+            break;
 
         case 'cadastrar_usuario':
             // Lógica para cadastrar usuário
@@ -993,12 +993,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // Define uma imagem padrão para o campo 'photo'
             $photo = 'https://via.placeholder.com/32'; // URL de imagem padrão
 
-            // Validação básica
-            if (!$email || !$nome || !$username || !$id_parceiro || !$password || !$type) {
+            // --- Validação Aprimorada ---
+            $required_fields = [
+                'email',
+                'nome',
+                'usuario', // Usando o nome da variável POST para clareza no erro
+                'id_parceiro',
+                'senha',   // Usando o nome da variável POST
+                'type'
+            ];
+            $missing_fields = [];
+
+            foreach ($required_fields as $field) {
+                // Verifica se a variável correspondente ao campo está vazia ou nula
+                // Usamos ${$field} para acessar a variável dinamicamente
+                if (empty(${$field})) {
+                    $missing_fields[] = $field;
+                }
+            }
+
+            if (!empty($missing_fields)) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
+                echo json_encode([
+                    'error' => 'Os seguintes campos são obrigatórios e não foram fornecidos:',
+                    'missing_fields' => $missing_fields
+                ]);
                 exit;
             }
+            // --- Fim da Validação Aprimorada ---
 
             // Cadastrar no banco de dados
             try {
