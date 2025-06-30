@@ -130,8 +130,8 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 // Assumindo que 'login.html' é a página de login
 //echo $_SESSION['usuario_id'] ?? 'não logado'; // Para debug, remova em produção
 if (empty($_SESSION['usuario_id'])) {
-    header("Location: /transito"); // Redireciona para a página de login
-    exit(); // Encerra o script após o redirecionamento
+    header("Location: /");
+    exit();
 }
 
 // Conexão com o banco de dados
