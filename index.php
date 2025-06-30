@@ -129,19 +129,9 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 // Verifica se o usuário está logado
 // Assumindo que 'login.html' é a página de login
 //echo $_SESSION['usuario_id'] ?? 'não logado'; // Para debug, remova em produção
-if (!empty($_SESSION['usuario_id'])) {
-    // Se o usuário estiver logado, verifique se ele já não está em uma página de login ou dashboard
-    // para evitar loops de redirecionamento.
-    $current_path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
-    // Defina as páginas que um usuário logado PODE acessar sem ser redirecionado para o dashboard
-    // Por exemplo, uma página de logout, ou o próprio dashboard.
-    $allowed_logged_in_paths = ['dashboard', 'logout', 'admin']; // Ajuste conforme suas rotas
-
-    if (!in_array($current_path, $allowed_logged_in_paths)) {
-        header("Location: /dashboard"); // Redireciona para o dashboard ou área de usuário logado
-        exit(); // Encerra o script após o redirecionamento
-    }
+if (empty($_SESSION['usuario_id'])) {
+    header("Location: /");
+    exit();
 }
 
 // Conexão com o banco de dados
