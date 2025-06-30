@@ -130,7 +130,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true') {
 // Assumindo que 'login.html' é a página de login
 //echo $_SESSION['usuario_id'] ?? 'não logado'; // Para debug, remova em produção
 if (empty($_SESSION['usuario_id'])) {
-    header("Location: /");
+    header("Location: /transito");
     exit();
 }
 
