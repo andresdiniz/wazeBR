@@ -169,7 +169,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 echo $isNew ? "Novo alerta: $uuid\n" : "Atualizado alerta: $uuid\n";
             }
 
-            if ($isNew && $flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2) {
+            if ($isNew && ($flatAlert['type'] === 'ACCIDENT'|| $flatAlert['type'] === 'HAZARD') && $id_parceiro == 2) {
                 enviarNotificacaoPush($deviceToken, $authToken, $numero, $alert);
             }
         }
