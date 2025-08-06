@@ -7,7 +7,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
 
 require_once __DIR__ . '/vendor/autoload.php';
-require_once './class/class.php';
+require_once '/class/class.php';
 
 use Dotenv\Dotenv;
 
@@ -37,7 +37,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     }
 }
 
-set_time_limit(1200);
+set_time_limit(30); // Define o tempo máximo de execução do script
 
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
