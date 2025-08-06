@@ -191,7 +191,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $numero = '5531971408208'; // Número com DDI + DDD
             $mensagem = 'Olá! Esta é uma mensagem automática. Teste de envio via API Brasil WhatsApp.';
 
-            if ($isNewAlert && $alert['type'] == 'HAZARD' && $id_parceiro == 2) {
+            if ($isNewAlert && $alert['type'] == 'ACCIDENT' && $id_parceiro == 2) {
                 enviarNotificacaoPush($deviceToken, $authToken, $numero, $alert);
             }
 
