@@ -1,5 +1,7 @@
 <?php
 
+$startTime = microtime(true);
+
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
@@ -187,18 +189,34 @@ function processAlerts() {
     foreach ($urls as $entry) {
         $url = $entry['url'];
         $id_parceiro = $entry['id_parceiro'];
+
+        echo PHP_EOL . "Processando URL: $url" . PHP_EOL;
+        $startUrl = microtime(true);
+
         $jsonData = fetchAlertsFromApi($url);
 
         if ($jsonData && !empty($jsonData['alerts'])) {
             try {
+                $startAlerts = microtime(true);
                 saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+                $endAlerts = microtime(true);
+                echo "Tempo salvar alertas: " . round($endAlerts - $startAlerts, 2) . " segundos" . PHP_EOL;
             } catch (Exception $e) {
                 echo "Erro ao processar alertas: " . $e->getMessage() . PHP_EOL;
             }
         }
+
+        $endUrl = microtime(true);
+        echo "Tempo total da URL: " . round($endUrl - $startUrl, 2) . " segundos" . PHP_EOL;
     }
 }
+
 
 echo "Iniciando o processo de atualização dos alertas..." . PHP_EOL;
 processAlerts();
 echo "Processamento concluído!" . PHP_EOL;
+
+$endTime = microtime(true);
+$totalTime = $endTime - $startTime;
+echo "Tempo total de execução: " . round($totalTime, 2) . " segundos" . PHP_EOL;
+
