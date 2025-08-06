@@ -8,6 +8,7 @@ ini_set('error_log', __DIR__ . '/../logs/debug.log');
 $envPath = __DIR__ . '/.env';  // Corrigido o caminho
 
 require_once __DIR__ . '/vendor/autoload.php';
+require_once './class/class.php'; // Aqui deve estar a ApiBrasilWhatsApp
 
 use Dotenv\Dotenv;
 
@@ -38,7 +39,6 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
         mkdir(__DIR__ . '/../logs', 0777, true);
     }
 }
-
 
 set_time_limit(1200);
 
@@ -84,7 +84,6 @@ function fetchAlertsFromApi($url)
         return null;
     }
 }
-
 
 // Função para salvar os alertas no banco de dados
 function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
@@ -365,7 +364,6 @@ function saveJamsToDbEmpty(PDO $pdo, $id_parceiro)
     }
 }
 
-
 // Função principal para processar os alertas
 function processAlerts()
 {
@@ -382,7 +380,28 @@ function processAlerts()
                 // Processa Alertas
                 if (!empty($jsonData['alerts'])) {
                     saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
-                    
+                    // Dados de autenticação e destino
+                    $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
+                    $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
+                    $numero = '5531971408208'; // Número com DDI + DDD
+                    $mensagem = 'Olá! Esta é uma mensagem automática. Teste de envio via API Brasil WhatsApp.';
+
+                    if ($jsonData['alerts'][0]['type'] == 'HAZARD' && $id_parceiro == 2) {
+                        $street = $jsonData['alerts'][0]['street'] ?? 'Nome da via desconhecida';
+                        $lat = $jsonData['alerts'][0]['location']['x'] ?? 'LATITUDE_INDEFINIDA';
+                        $lng = $jsonData['alerts'][0]['location']['y'] ?? 'LONGITUDE_INDEFINIDA';
+
+                        $timestampMs = $jsonData['alerts'][0]['pubMillis'] ?? null;
+                        $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
+
+                        $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lat},{$lng} às {$horaFormatada}. Por favor, dirija com cautela.";
+
+                        // Instancia a classe corretamente com os tokens
+                        $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
+
+                        // Envia a mensagem de texto
+                        $resposta = $api->enviarTexto($numero, $mensagem);
+                    }
                 }
 
                 // Processa Jams

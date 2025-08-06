@@ -8,6 +8,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
+
+
 // Configurações de ambiente
 $envPath = __DIR__ . '/.env';
 
