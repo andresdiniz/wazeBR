@@ -1,27 +1,35 @@
 <?php
 
-class EvolutionAPI
+class ApiBrasilWhatsApp
 {
-    private $baseUrl = 'https://cluster.apigratis.com/api/v2/evolution/';
+    private $baseUrl = 'https://gateway.apibrasil.io/api/v2/whatsapp/';
+    private $deviceToken;
+    private $authToken;
+    private $timeout;
 
-    private function request($endpoint, $method, $deviceToken, $authToken, $payload = null)
+    public function __construct($deviceToken, $authToken, $timeout = 120)
+    {
+        $this->deviceToken = $deviceToken;
+        $this->authToken = $authToken;
+        $this->timeout = $timeout;
+    }
+
+    private function request($endpoint, $method, $payload = null)
     {
         $curl = curl_init();
+
+        $headers = [
+            'Content-Type: application/json',
+            'DeviceToken: ' . $this->deviceToken,
+            'Authorization: Bearer ' . $this->authToken
+        ];
 
         $options = [
             CURLOPT_URL => $this->baseUrl . $endpoint,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'DeviceToken: ' . $deviceToken,
-                'Authorization: Bearer ' . $authToken
-            ]
+            CURLOPT_TIMEOUT => $this->timeout,
+            CURLOPT_CUSTOMREQUEST => strtoupper($method),
+            CURLOPT_HTTPHEADER => $headers,
         ];
 
         if ($payload !== null) {
@@ -35,73 +43,28 @@ class EvolutionAPI
         curl_close($curl);
 
         if ($err) {
-            return json_encode(['error' => $err]);
+            return json_encode(['success' => false, 'error' => $err]);
         }
 
         return $response;
     }
 
-    public function criarInstancia($deviceToken, $authToken, $instanceName, $qrcode, $number)
+    /**
+     * Envia uma mensagem de texto via WhatsApp
+     *
+     * @param string $number Número de destino no formato 55 + DDD + número
+     * @param string $text Texto da mensagem
+     * @param int $time_typing Tempo de digitação em milissegundos (opcional)
+     * @return string JSON da resposta
+     */
+    public function enviarTexto($number, $text, $time_typing = 1000)
     {
-        $payload = [
-            'instanceName' => $instanceName,
-            'qrcode' => $qrcode,
-            'number' => $number
-        ];
-        return $this->request('instance/create', 'POST', $deviceToken, $authToken, $payload);
-    }
-
-    public function statusConexao($deviceToken, $authToken)
-    {
-        return $this->request('instance/connectionState', 'GET', $deviceToken, $authToken);
-    }
-
-    public function enviarTexto($deviceToken, $authToken, $number, $text, $delay = 1200, $presence = 'composing')
-    {
-        $payload = [
+        $payload = [ 
             'number' => $number,
-            'options' => [
-                'delay' => $delay,
-                'presence' => $presence
-            ],
-            'textMessage' => [
-                'text' => $text
-            ]
+            'text' => $text,
+            'time_typing' => $time_typing
         ];
-        return $this->request('message/sendText', 'POST', $deviceToken, $authToken, $payload);
-    }
 
-    public function enviarMidia($deviceToken, $authToken, $number, $mediaBase64, $caption = '', $mediaType = 'image', $delay = 1200, $presence = 'composing')
-    {
-        $payload = [
-            'number' => $number,
-            'options' => [
-                'delay' => $delay,
-                'presence' => $presence
-            ],
-            'mediaMessage' => [
-                'mediatype' => $mediaType,
-                'caption' => $caption,
-                'media' => $mediaBase64
-            ]
-        ];
-        return $this->request('message/sendMedia', 'POST', $deviceToken, $authToken, $payload);
-    }
-
-    public function enviarEnquete($deviceToken, $authToken, $number, $pergunta, $opcoes = [], $selectableCount = 1, $delay = 1200, $presence = 'composing')
-    {
-        $payload = [
-            'number' => $number,
-            'options' => [
-                'delay' => $delay,
-                'presence' => $presence
-            ],
-            'pollMessage' => [
-                'name' => $pergunta,
-                'selectableCount' => $selectableCount,
-                'values' => $opcoes
-            ]
-        ];
-        return $this->request('message/sendPoll', 'POST', $deviceToken, $authToken, $payload);
+        return $this->request('sendText', 'POST', $payload);
     }
 }
