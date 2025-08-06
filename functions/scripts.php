@@ -11,7 +11,7 @@ if (!file_exists($envPath)) {
 }
 
 try {
-    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
     $dotenv->load();
 } catch (Exception $e) {
     die("Erro ao carregar o .env: " . $e->getMessage());
@@ -23,7 +23,7 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
-    
+
     // Cria o diretório de logs se não existir
     if (!is_dir(__DIR__ . '/../logs')) {
         mkdir(__DIR__ . '/../logs', 0777, true);
@@ -46,7 +46,8 @@ function getSiteUsers(PDO $pdo, $userId)
     return $result ? $result[0] : null;
 }
 
-function getSitepages($pdo, $pageurl) {
+function getSitepages($pdo, $pageurl)
+{
     // Inicia o array para armazenar os dados da página
     $data = [];
     // Consulta na tabela 'pages' com o parâmetro 'url' para pegar os dados da página
@@ -110,7 +111,8 @@ function selectFromDatabase(PDO $pdo, string $table, array $where = [])
 }
 
 
-function insertIntoDatabase(PDO $pdo, string $table, array $data) {
+function insertIntoDatabase(PDO $pdo, string $table, array $data)
+{
     try {
         if (empty($data)) {
             throw new Exception("Nenhum dado fornecido para inserção.");
@@ -128,7 +130,7 @@ function insertIntoDatabase(PDO $pdo, string $table, array $data) {
         // Garante que não haja transação ativa antes de iniciar uma nova
         if (!$pdo->inTransaction()) {
             $pdo->beginTransaction();
-        }else{
+        } else {
             logToFile('info', "Transação ativa antes da inserção. Iniciando Inserção...");
         }
 
@@ -211,7 +213,8 @@ function getSiteSettings(PDO $pdo)
  */
 
 // Função para registrar log de execução e atualizar a última execução
-function logExecution($scriptName, $status, $message, $pdo) {
+function logExecution($scriptName, $status, $message, $pdo)
+{
     try {
         // Obtém o tempo de execução
         $executionTime = (new DateTime("now", new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d H:i:s');
@@ -222,10 +225,10 @@ function logExecution($scriptName, $status, $message, $pdo) {
 
         // Inserção na tabela execution_log
         $insertLog = insertIntoDatabase($pdo, 'execution_log', [
-            'script_name'    => $scriptName,
+            'script_name' => $scriptName,
             'execution_time' => $executionTime,
-            'status'         => $status,
-            'message'        => $message
+            'status' => $status,
+            'message' => $message
         ]);
 
         if (!$insertLog) {
@@ -271,20 +274,20 @@ function shouldRunScript($scriptName, $pdo)
         if (isset($result['active']) && $result['active'] === '1') {
             // Obtém a data da última execução do script e a converte para o fuso horário correto
             $lastExecution = new DateTime($result['last_execution'], new DateTimeZone('America/Sao_Paulo'));
-            
+
             // Obtém a data e hora atuais no fuso horário correto
             $currentDateTime = new DateTime("now", new DateTimeZone('America/Sao_Paulo'));
-            
+
             // Obtém o intervalo de execução em minutos a partir do banco de dados
-            $executionInterval = isset($result['execution_interval']) ? (int)$result['execution_interval'] : 0;
-            
+            $executionInterval = isset($result['execution_interval']) ? (int) $result['execution_interval'] : 0;
+
             // Cria o intervalo em minutos (DateInterval precisa de um formato específico)
             $interval = new DateInterval("PT{$executionInterval}M");
-            
+
             // Calcula o próximo horário de execução
             $nextExecutionTime = clone $lastExecution;
             $nextExecutionTime->add($interval);
-            
+
             // Registra o horário da próxima execução no log
             logToFile('info', "Próxima execução do script '$scriptName': " . $nextExecutionTime->format('Y-m-d H:i:s'), ['scriptName' => $scriptName]);
 
@@ -315,7 +318,7 @@ function shouldRunScript($scriptName, $pdo)
 function executeScript($scriptName, $scriptFile, $pdo)
 {
     echo "Verificando se é para executar o script: $scriptName\n";
-    
+
     if (shouldRunScript($scriptName, $pdo)) {
         try {
             // Marca o tempo de início da execução
@@ -343,7 +346,7 @@ function executeScript($scriptName, $scriptFile, $pdo)
             $logMessage = "Script '$scriptName' executado com sucesso. Tempo de execução: " . number_format($executionTime, 4) . " segundos.";
 
             // Registra logs
-            logToFile('info', $logMessage); 
+            logToFile('info', $logMessage);
             logExecution($scriptName, 'success', $logMessage, $pdo);
             error_log($logMessage);
         } catch (Exception $e) {
@@ -396,7 +399,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->AltBody = strip_tags($emailBody);  // Converter para texto puro
 
         // Envia o e-mail
-        if ($mail->send() ){ // Utiliza o Sendmail do PHP (sem SMTP) {
+        if ($mail->send()) { // Utiliza o Sendmail do PHP (sem SMTP) {
             // Log de sucesso do envio
             $logMessage = "ID do E-mail: $emailId | Horário: $sendTime | Destinatário: $userEmail | Status: Enviado com sucesso";
             logToFile('success', $logMessage);
@@ -421,7 +424,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
  * @param string $type Tipo de log (error ou email)
  * @param string $message Mensagem a ser registrada
  */
-    
+
 function logEmail($type, $message)
 {
     $logFile = __DIR__ . '/logs/' . ($type == 'error' ? 'error_log.txt' : 'email_log.txt');
@@ -435,9 +438,10 @@ function logEmail($type, $message)
     file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] - $message" . PHP_EOL, FILE_APPEND);
 }
 
- 
+
 // Função para obter o endereço IP real do usuário
-function getIp() {
+function getIp()
+{
     // Verifica se o IP está no cabeçalho HTTP_CLIENT_IP (usado por proxies)
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
@@ -458,7 +462,7 @@ function consultarLocalizacaoKm($longitude, $latitude, $raio = 150, $data = null
     $urlBase = "https://servicos.dnit.gov.br/sgplan/apigeo/rotas/localizarkm";
     $data = $data ?? date('Y-m-d');
     $url = sprintf("%s?lng=%s&lat=%s&r=%d&data=%s", $urlBase, $longitude, $latitude, $raio, $data);
-// Consulta localização por longitude e latitude
+    // Consulta localização por longitude e latitude
 // Função para consultar localização geográfica via API do DNIT
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
@@ -475,10 +479,11 @@ function writeLog($logFilePath, $message)
     file_put_contents($logFilePath, $logMessage, FILE_APPEND);
 }
 
-function logToFile($level, $message, $context = []) {
+function logToFile($level, $message, $context = [])
+{
     // Define o caminho do log
     $logDirectory = __DIR__ . '/logs/';
-    
+
     // Verifica se o diretório "logs" existe, caso contrário, cria o diretório
     if (!is_dir($logDirectory)) {
         mkdir($logDirectory, 0777, true);  // Cria o diretório com permissões adequadas
@@ -486,16 +491,16 @@ function logToFile($level, $message, $context = []) {
 
     // Exibe o nível do log e a mensagem para depuração
     //echo $level . ' ' . $message . PHP_EOL;
-    
+
     // Define o caminho completo do arquivo de log
-    $logFile = $logDirectory . 'logs.log'; 
+    $logFile = $logDirectory . 'logs.log';
 
     // Formata a mensagem de log com data, nível e contexto
     $logMessage = sprintf(
-        "[%s] [%s] %s %s\n", 
-        date('Y-m-d H:i:s'), 
-        strtoupper($level), 
-        $message, 
+        "[%s] [%s] %s %s\n",
+        date('Y-m-d H:i:s'),
+        strtoupper($level),
+        $message,
         json_encode($context)
     );
 
@@ -503,19 +508,20 @@ function logToFile($level, $message, $context = []) {
     error_log($logMessage, 3, $logFile);
 }
 
-function traduzirAlerta($tipo, $subtipo) {
+function traduzirAlerta($tipo, $subtipo)
+{
     try {
         $pdo = Database::getConnection();
         $sql = "SELECT alert_type.name AS tipo, alert_subtype.name AS subtipo
                 FROM alert_type
                 JOIN alert_subtype ON alert_type.id = alert_subtype.alert_type_id
                 WHERE alert_type.value = :tipo AND alert_subtype.subtype_value = :subtipo";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':tipo', $tipo, PDO::PARAM_STR);
         $stmt->bindParam(':subtipo', $subtipo, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
         return $resultado ?: ["tipo" => $tipo, "subtipo" => $subtipo]; // Retorna original caso não encontre
     } catch (PDOException $e) {
@@ -524,14 +530,15 @@ function traduzirAlerta($tipo, $subtipo) {
     }
 }
 
-function getParceiros(PDO $pdo, $id_parceiro = null) {
+function getParceiros(PDO $pdo, $id_parceiro = null)
+{
     $query = "SELECT * FROM parceiros";
-    
+
     // Se o ID do parceiro for passado e não for o administrador (99), aplica o filtro
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
         $query .= " WHERE id = :id_parceiro";
     }
-    
+
     $stmt = $pdo->prepare($query);
 
     // Se necessário, vincula o parâmetro do parceiro
@@ -542,7 +549,8 @@ function getParceiros(PDO $pdo, $id_parceiro = null) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function generateUuid() {
+function generateUuid()
+{
     $data = random_bytes(16);
     // Ajustando os bits de versão para que seja um UUID v4 (aleatório)
     $data[6] = chr(ord($data[6]) & 0x0f | 0x40);  // Versão 4
@@ -550,7 +558,8 @@ function generateUuid() {
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
-function measurePerformance(callable $function, &$metric) {
+function measurePerformance(callable $function, &$metric)
+{
     $start = microtime(true);
     $memoryStart = memory_get_usage();
 
@@ -561,8 +570,8 @@ function measurePerformance(callable $function, &$metric) {
     ];
 
     if (function_exists('exec')) {
-        $networkStart['bytes_sent'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
-        $networkStart['bytes_recv'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
+        $networkStart['bytes_sent'] = (int) trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
+        $networkStart['bytes_recv'] = (int) trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
     }
 
     // Banco de dados
@@ -580,8 +589,8 @@ function measurePerformance(callable $function, &$metric) {
     ];
 
     if (function_exists('exec')) {
-        $networkEnd['bytes_sent'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
-        $networkEnd['bytes_recv'] = (int)trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
+        $networkEnd['bytes_sent'] = (int) trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $10}\''));
+        $networkEnd['bytes_recv'] = (int) trim(@exec('cat /proc/net/dev | grep eth0 | awk \'{print $2}\''));
     }
 
     $networkMetrics = [
@@ -606,7 +615,8 @@ function measurePerformance(callable $function, &$metric) {
     return $result;
 }
 
-function savePerformanceMetrics($metrics, $startTime) {
+function savePerformanceMetrics($metrics, $startTime)
+{
     $logData = [
         'timestamp' => date('c'),
         'total_time' => round((microtime(true) - $startTime) * 1000, 2) . ' ms',
@@ -617,9 +627,9 @@ function savePerformanceMetrics($metrics, $startTime) {
         'detailed_metrics' => $metrics
     ];
     $logDir = $_SERVER['DOCUMENT_ROOT'] . '/desempenho';
-        if (!is_dir($logDir)) {
-            mkdir($logDir, 0775, true);
-        }
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0775, true);
+    }
 
     file_put_contents(
         $_SERVER['DOCUMENT_ROOT'] . '/desempenho/metrics-' . date('Y-m-d') . '.log',
@@ -628,7 +638,8 @@ function savePerformanceMetrics($metrics, $startTime) {
     );
 }
 
-function getPublicPosts($pdo) {
+function getPublicPosts($pdo)
+{
     $stmt = $pdo->prepare("
         SELECT * FROM posts 
         WHERE publicado = 1 
@@ -639,7 +650,8 @@ function getPublicPosts($pdo) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getFeaturedPosts($pdo, $limit = 3) {
+function getFeaturedPosts($pdo, $limit = 3)
+{
     $stmt = $pdo->prepare("
         SELECT * FROM posts 
         WHERE destaque = 1 
@@ -651,13 +663,15 @@ function getFeaturedPosts($pdo, $limit = 3) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function sendErrorResponse($message, $statusCode = 500) {
+function sendErrorResponse($message, $statusCode = 500)
+{
     http_response_code($statusCode);
     echo json_encode(['error' => $message]);
     exit;
 }
 
-function sendSuccessResponse($data, $statusCode = 200) {
+function sendSuccessResponse($data, $statusCode = 200)
+{
     http_response_code($statusCode);
     header('Content-Type: application/json');
     echo json_encode([
@@ -692,10 +706,10 @@ function getLatestExecutionLogByStatus(PDO $pdo, string $status): array|false //
         // Executa a consulta
         // Verifica se a execução falhou
         if ($stmt->execute() === false) {
-             // Registra informações detalhadas do erro de execução, se disponíveis
-             $errorInfo = $stmt->errorInfo();
-             error_log("PDO execute failed: " . $errorInfo[2]); // errorInfo[2] geralmente contém a mensagem de erro do driver
-             // Dependendo da sua configuração, execute pode lançar exceção aqui.
+            // Registra informações detalhadas do erro de execução, se disponíveis
+            $errorInfo = $stmt->errorInfo();
+            error_log("PDO execute failed: " . $errorInfo[2]); // errorInfo[2] geralmente contém a mensagem de erro do driver
+            // Dependendo da sua configuração, execute pode lançar exceção aqui.
             return false; // Retorna false para indicar falha na execução
         }
 
@@ -721,4 +735,22 @@ function getCredenciais(PDO $pdo, int $userId): ?array
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     return $result ?: null;
+}
+
+function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
+{
+    $street = $jsonData['alerts'][0]['street'] ?? 'Nome da via desconhecida';
+    $lat = $jsonData['alerts'][0]['location']['x'] ?? 'LATITUDE_INDEFINIDA';
+    $lng = $jsonData['alerts'][0]['location']['y'] ?? 'LONGITUDE_INDEFINIDA';
+    $timestampMs = $jsonData['alerts'][0]['pubMillis'] ?? null;
+    $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
+
+    $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, dirija com cautela.";
+
+    // Instancia a classe corretamente com os tokens
+    $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
+
+    // Envia a mensagem de texto
+    $resposta = $api->enviarTexto($numero, $mensagem);
+    var_dump(json_decode($resposta, true));
 }

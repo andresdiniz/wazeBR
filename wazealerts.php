@@ -387,20 +387,7 @@ function processAlerts()
                     $mensagem = 'Olá! Esta é uma mensagem automática. Teste de envio via API Brasil WhatsApp.';
 
                     if ($jsonData['alerts'][0]['type'] == 'HAZARD' && $id_parceiro == 2) {
-                        $street = $jsonData['alerts'][0]['street'] ?? 'Nome da via desconhecida';
-                        $lat = $jsonData['alerts'][0]['location']['x'] ?? 'LATITUDE_INDEFINIDA';
-                        $lng = $jsonData['alerts'][0]['location']['y'] ?? 'LONGITUDE_INDEFINIDA';
-
-                        $timestampMs = $jsonData['alerts'][0]['pubMillis'] ?? null;
-                        $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
-
-                        $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lat},{$lng} às {$horaFormatada}. Por favor, dirija com cautela.";
-
-                        // Instancia a classe corretamente com os tokens
-                        $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
-
-                        // Envia a mensagem de texto
-                        $resposta = $api->enviarTexto($numero, $mensagem);
+                        enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData);
                     }
                 }
 
