@@ -84,3 +84,71 @@ function sendEmail($to, $body, $subject)
 
     return mail($to, $subject, $body, $headers);
 }
+
+function processUsersOnJams($pdo, $usersOnJams, $urlId, $id_parceiro, $currentTime)
+{
+    $stmt = $pdo->prepare("INSERT INTO users_on_jams (user_id, jam_id, url_id, id_parceiro, created_at)
+                            VALUES (?, ?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE created_at = VALUES(created_at)");
+
+    foreach ($usersOnJams as $userJam) {
+        $stmt->execute([
+            $userJam['userID'],
+            $userJam['jamID'],
+            $urlId,
+            $id_parceiro,
+            $currentTime
+        ]);
+    }
+}
+
+function processRoutes($pdo, $routes, $urlId, $id_parceiro)
+{
+    $stmt = $pdo->prepare("INSERT INTO route_updates (route_id, status, eta, url_id, id_parceiro, updated_at)
+                            VALUES (?, ?, ?, ?, ?, NOW())
+                            ON DUPLICATE KEY UPDATE status = VALUES(status), eta = VALUES(eta), updated_at = NOW()");
+
+    foreach ($routes as $route) {
+        $stmt->execute([
+            $route['routeID'],
+            $route['status'],
+            $route['eta'],
+            $urlId,
+            $id_parceiro
+        ]);
+    }
+}
+
+function processIrregularities($pdo, $irregularities, $urlId, $id_parceiro)
+{
+    $stmt = $pdo->prepare("INSERT INTO irregularities (irregularity_id, name, type, sub_type, length, jamLevel, fromName, toName, bbox, url_id, id_parceiro, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                            ON DUPLICATE KEY UPDATE 
+                                name = VALUES(name), type = VALUES(type), sub_type = VALUES(sub_type),
+                                length = VALUES(length), jamLevel = VALUES(jamLevel), fromName = VALUES(fromName),
+                                toName = VALUES(toName), bbox = VALUES(bbox), updated_at = NOW()");
+
+    foreach ($irregularities as $item) {
+        $bbox = json_encode($item['bbox']);
+
+        $stmt->execute([
+            $item['irregularityID'],
+            $item['name'],
+            $item['type'],
+            $item['subtype'],
+            $item['length'],
+            $item['jamLevel'],
+            $item['fromName'],
+            $item['toName'],
+            $bbox,
+            $urlId,
+            $id_parceiro
+        ]);
+    }
+}
+
+function deactivateAllIrregularities($pdo, $urlId)
+{
+    $stmt = $pdo->prepare("UPDATE irregularities SET active = 0 WHERE url_id = ?");
+    $stmt->execute([$urlId]);
+}
