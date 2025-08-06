@@ -7,6 +7,7 @@ ini_set('error_log', __DIR__ . '/../logs/debug.log');
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
+require_once __DIR__ . '/class/class.php'; // Aqui deve estar a ApiBrasilWhatsApp
 
 
 
