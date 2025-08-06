@@ -365,8 +365,7 @@ function executeScript($scriptName, $scriptFile, $pdo)
  */
 
 // Função personalizada para enviar e-mails
-/*
- * function sendEmail($userEmail, $emailBody, $titleEmail)
+function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     try {
         $mail = new PHPMailer(true);  // Cria a instância do PHPMailer
@@ -419,7 +418,7 @@ function executeScript($scriptName, $scriptFile, $pdo)
         return false;
     }
 }
-**/
+
 /**
  * Função para registrar logs de e-mail
  * @param string $type Tipo de log (error ou email)
