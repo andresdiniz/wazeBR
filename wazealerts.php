@@ -178,6 +178,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             ]);
 
             echo "Alerta processado: {$alert['uuid']} da URL: {$url}" . PHP_EOL;
+
         }
 
         // Desativa alertas não recebidos
@@ -381,6 +382,7 @@ function processAlerts()
                 // Processa Alertas
                 if (!empty($jsonData['alerts'])) {
                     saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
+                    
                 }
 
                 // Processa Jams
