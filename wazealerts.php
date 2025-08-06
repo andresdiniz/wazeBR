@@ -193,8 +193,9 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             if ($isNewAlert && $alert['type'] == 'ACCIDENT' && $id_parceiro == 2) {
                 enviarNotificacaoPush($deviceToken, $authToken, $numero, $alert);
             }
-            if ($isNewAlert ) {
+            if ($isNewAlert) {
                 echo "Alerta novo detectado: {$alert['uuid']} da URL: {$url}" . PHP_EOL;
+            }
         }
 
         // Desativa alertas não recebidos
