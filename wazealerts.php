@@ -25,6 +25,10 @@ try {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
+date_default_timezone_set('America/Sao_Paulo');
+$currentDateTime = date('Y-m-d H:i:s');
+echo "Horário de referência: $currentDateTime" . PHP_EOL;
+
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
@@ -39,12 +43,14 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 require_once __DIR__ . '/config/configs.php';
 
-function getUrlsFromDb(PDO $pdo) {
+function getUrlsFromDb(PDO $pdo)
+{
     $stmt = $pdo->query("SELECT url, id_parceiro FROM urls_alerts");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function fetchAlertsFromApi($url) {
+function fetchAlertsFromApi($url)
+{
     try {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -63,19 +69,21 @@ function fetchAlertsFromApi($url) {
     }
 }
 
-function alertChanged($existing, $new) {
+function alertChanged($existing, $new)
+{
     $fields = ['country', 'city', 'reportRating', 'reportByMunicipalityUser', 'confidence', 'reliability', 'type', 'roadType', 'magvar', 'subtype', 'street', 'location_x', 'location_y', 'pubMillis'];
     foreach ($fields as $field) {
         $dbVal = $existing[$field] ?? null;
         $newVal = $new[$field] ?? null;
-        if ($dbVal != $newVal) return true;
+        if ($dbVal != $newVal)
+            return true;
     }
     return false;
 }
 
-function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
-    date_default_timezone_set('America/Sao_Paulo');
-    $currentDateTime = date('Y-m-d H:i:s');
+function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
+{
+    global $currentDateTime;
     $pdo->beginTransaction();
 
     try {
@@ -100,7 +108,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
             reliability = VALUES(reliability), type = VALUES(type), roadType = VALUES(roadType),
             magvar = VALUES(magvar), subtype = VALUES(subtype), street = VALUES(street),
             location_x = VALUES(location_x), location_y = VALUES(location_y), pubMillis = VALUES(pubMillis),
-            status = 1, date_updated = NOW(), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
+            status = 1, date_updated = VALUES(date_updated), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
 
         $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
         $authToken = 'your-auth-token';
@@ -109,11 +117,12 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
         $incomingUuids = [];
 
         foreach ($alerts as $alert) {
-            if (!isset($alert['location']['x'], $alert['location']['y'])) continue;
+            if (!isset($alert['location']['x'], $alert['location']['y']))
+                continue;
 
             $uuid = $alert['uuid'];
             $incomingUuids[] = $uuid;
-            $km = null; // ou calcular se necessário
+            $km = null;
 
             $flatAlert = [
                 'uuid' => $uuid,
@@ -167,10 +176,10 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
             }
         }
 
-        $stmtDeactivate = $pdo->prepare("UPDATE alerts SET status = 0, date_updated = NOW() WHERE uuid = ? AND source_url = ?");
+        $stmtDeactivate = $pdo->prepare("UPDATE alerts SET status = 0, date_updated = ? WHERE uuid = ? AND source_url = ?");
         foreach (array_keys($existingAlerts) as $uuid) {
             if (!in_array($uuid, $incomingUuids)) {
-                $stmtDeactivate->execute([$uuid, $url]);
+                $stmtDeactivate->execute([$currentDateTime, $uuid, $url]);
                 echo "Alerta desativado: $uuid\n";
             }
         }
@@ -182,7 +191,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro) {
     }
 }
 
-function processAlerts() {
+function processAlerts()
+{
     $pdo = Database::getConnection();
     $urls = getUrlsFromDb($pdo);
 
@@ -211,7 +221,6 @@ function processAlerts() {
     }
 }
 
-
 echo "Iniciando o processo de atualização dos alertas..." . PHP_EOL;
 processAlerts();
 echo "Processamento concluído!" . PHP_EOL;
@@ -219,4 +228,3 @@ echo "Processamento concluído!" . PHP_EOL;
 $endTime = microtime(true);
 $totalTime = $endTime - $startTime;
 echo "Tempo total de execução: " . round($totalTime, 2) . " segundos" . PHP_EOL;
-
