@@ -365,7 +365,8 @@ function executeScript($scriptName, $scriptFile, $pdo)
  */
 
 // Função personalizada para enviar e-mails
-function sendEmail($userEmail, $emailBody, $titleEmail)
+/*
+ * function sendEmail($userEmail, $emailBody, $titleEmail)
 {
     try {
         $mail = new PHPMailer(true);  // Cria a instância do PHPMailer
@@ -395,7 +396,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         $mail->Encoding = 'base64';                       // Melhor codificação para caracteres especiais
         /*$mail->SMTPDebug = 2;  // Mostra detalhes de depuração
         $mail->Debugoutput = 'html';  // Saída de depuração em formato HTML
-        */
+
         $mail->AltBody = strip_tags($emailBody);  // Converter para texto puro
 
         // Envia o e-mail
@@ -418,7 +419,7 @@ function sendEmail($userEmail, $emailBody, $titleEmail)
         return false;
     }
 }
-
+**/
 /**
  * Função para registrar logs de e-mail
  * @param string $type Tipo de log (error ou email)
