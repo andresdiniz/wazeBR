@@ -1,24 +1,27 @@
 <?php
 
-$globalStartTime = microtime(true);
-
+/*ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/debug.log');
+*/
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 
+
+
+// Configurações de ambiente
+$envPath = __DIR__ . '/.env';
+
 use Dotenv\Dotenv;
 
-date_default_timezone_set('America/Sao_Paulo');
-$currentDateTime = date('Y-m-d H:i:s');
-
-// Carrega variáveis de ambiente
-$envPath = __DIR__ . '/.env';
 if (!file_exists($envPath)) {
-    logToFile('error', "Arquivo .env não encontrado: $envPath");
+    logToFile('error', "Arquivo .env não encontrado no caminho: $envPath");
     die("Arquivo .env não encontrado.");
 }
 
 try {
+    // Carrega o .env
     $dotenv = Dotenv::createImmutable(__DIR__);
     $dotenv->load();
     logToFile('info', '.env carregado com sucesso');
@@ -27,65 +30,48 @@ try {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-// Debug
-if ($_ENV['DEBUG'] === 'true') {
+// Configuração de debug
+if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('display_errors', 1);
     ini_set('log_errors', 1);
     ini_set('error_log', __DIR__ . '/../logs/debug.log');
-    if (!is_dir(__DIR__ . '/../logs')) {
-        mkdir(__DIR__ . '/../logs', 0777, true);
+}else{
+    ini_set('display_errors', 1);
+}
+
+// Conexão com o banco de dados
+$pdo = Database::getConnection();
+
+/**
+ * Executa um script e registra logs antes e depois da execução
+ */
+function executeScriptWithLogging(string $scriptName, string $path, PDO $pdo)
+{
+    try {
+        logToFile('info', "Iniciando script: $scriptName", ['path' => $path]);
+        executeScript($scriptName, $path, $pdo);
+        logToFile('info', "Finalizando script: $scriptName", ['path' => $path]);
+    } catch (Exception $e) {
+        logToFile('error', "Erro ao executar $scriptName", [
+            'message' => $e->getMessage(),
+            'path' => $path
+        ]);
+        error_log("Erro em $scriptName: " . $e->getMessage());
     }
 }
 
-set_time_limit(1200); // 20 minutos
-
-echo "Horário de início: $currentDateTime\n";
-echo "Iniciando execução dos scripts...\n";
-
-// Lista de scripts
+// Lista de scripts a serem executados
 $scripts = [
-    'wazealerts.php',
-    'wazejobtraficc.php',
-    'dadoscemadem.php',
-    'hidrologicocemadem.php',
-    'gerar_xml.php',
-    'alerts_por_email.php'
+    'wazealerts.php'        => '/wazealerts.php',
+    'wazejobtraficc.php'    => '/wazejobtraficc.php',
+    'dadoscemadem.php'      => '/dadoscemadem.php',
+    'hidrologicocemadem.php'=> '/hidrologicocemadem.php',
+    'gerar_xml.php'         => '/gerar_xml.php',
+    'alerts_por_email.php'  => '/alerts_por_email.php'
 ];
 
-// Contadores
-$totalScripts = count($scripts);
-$successCount = 0;
-$errorCount = 0;
-
-foreach ($scripts as $scriptName) {
-    $start = microtime(true);
-    $scriptPath = __DIR__ . $scriptName;
-
-    echo "\n🔄 Iniciando: $scriptName\n";
-
-    try {
-        executeScript($scriptName, $scriptPath, $pdo);
-        $successCount++;
-        echo "✅ Finalizado com sucesso: $scriptName\n";
-    } catch (Exception $e) {
-        $errorCount++;
-        logToFile('error', "Erro ao executar $scriptName: " . $e->getMessage());
-        echo "❌ Erro ao executar $scriptName: " . $e->getMessage() . "\n";
-    }
-
-    $end = microtime(true);
-    echo "⏱️ Tempo de execução: " . round($end - $start, 2) . " segundos\n";
+// Executa cada script da lista
+foreach ($scripts as $scriptName => $path) {
+    executeScriptWithLogging($scriptName, $path, $pdo);
 }
-
-// Tempo total
-$globalEndTime = microtime(true);
-$totalTime = round($globalEndTime - $globalStartTime, 2);
-
-echo "\n📊 Resumo da execução:\n";
-echo "Total de scripts: $totalScripts\n";
-echo "Sucesso: $successCount\n";
-echo "Erros: $errorCount\n";
-echo "⏱️ Tempo total: $totalTime segundos\n";
-echo "Horário de término: " . date('Y-m-d H:i:s') . "\n";
-
 ?>
