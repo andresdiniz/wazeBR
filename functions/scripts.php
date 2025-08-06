@@ -708,3 +708,17 @@ function getLatestExecutionLogByStatus(PDO $pdo, string $status): array|false //
         return false; // Retorna false em caso de exceção
     }
 }
+function getCredenciais(PDO $pdo, int $userId): ?array
+{
+    $sql = "SELECT device_token, auth_token, instance_name, phone_number
+            FROM evolution_config
+            WHERE user_id = :user_id
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['user_id' => $userId]);
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $result ?: null;
+}
