@@ -147,8 +147,3 @@ function processIrregularities($pdo, $irregularities, $urlId, $id_parceiro)
     }
 }
 
-function deactivateAllIrregularities($pdo, $urlId)
-{
-    $stmt = $pdo->prepare("UPDATE irregularities SET active = 0 WHERE url_id = ?");
-    $stmt->execute([$urlId]);
-}
