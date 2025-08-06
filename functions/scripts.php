@@ -745,7 +745,7 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
     $timestampMs = $jsonData['alerts'][0]['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
 
-    $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, dirija com cautela.";
+    $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
 
     // Instancia a classe corretamente com os tokens
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
