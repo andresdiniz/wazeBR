@@ -1,626 +1,325 @@
-<!-- Configurações de Notificação - Layout Melhorado -->
 <div class="container-fluid px-4 py-3">
-    <!-- Header da Página -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1 fw-bold text-dark">
-                <i class="fas fa-bell me-2 text-warning"></i>Configurações de Notificação
-            </h4>
-            <p class="text-muted mb-0 small">Gerencie seus canais de notificação e alertas personalizados</p>
-        </div>
-        <button class="btn btn-warning btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#notificationModal" id="addNotificationBtn">
-            <i class="fas fa-plus me-2"></i>Nova Notificação
-        </button>
-    </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold text-dark">
+                <i class="fas fa-bell me-2 text-warning"></i>Configurações de Notificação
+            </h4>
+            <p class="text-muted mb-0 small">Gerencie seus canais de notificação e alertas personalizados</p>
+        </div>
+        <button class="btn btn-warning btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#notificationModal" id="addNotificationBtn">
+            <i class="fas fa-plus me-2"></i>Nova Notificação
+        </button>
+    </div>
 
-    <!-- Card Principal -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <!-- Stats Cards -->
-            <div class="row g-3 p-4 pb-3 bg-light bg-opacity-50">
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-bell text-secondary fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">
-                                {% if notification_settings %}
-                                    {{ notification_settings|length }}
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </div>
-                            <small class="text-muted">Total de Configurações</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-toggle-on text-success fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-success">
-                                {% set active_count = 0 %}
-                                {% for notif in notification_settings %}
-                                    {% if notif.enabled %}
-                                        {% set active_count = active_count + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ active_count }}
-                            </div>
-                            <small class="text-muted">Ativas</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
-                        <div class="flex-shrink-0">
-                            <i class="fab fa-whatsapp text-success fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">
-                                {% set whatsapp_count = 0 %}
-                                {% for notif in notification_settings %}
-                                    {% if notif.type == 'whatsapp' %}
-                                        {% set whatsapp_count = whatsapp_count + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ whatsapp_count }}
-                            </div>
-                            <small class="text-muted">WhatsApp</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-envelope text-primary fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">
-                                {% set email_count = 0 %}
-                                {% for notif in notification_settings %}
-                                    {% if notif.type == 'email' %}
-                                        {% set email_count = email_count + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ email_count }}
-                            </div>
-                            <small class="text-muted">E-mail</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+                        <div class="row g-3 p-4 pb-3 bg-light bg-opacity-50">
+                {% set stats = [
+                    {'icon': 'fas fa-bell', 'color': 'secondary', 'title': 'Total de Configurações', 'count': notification_settings|length if notification_settings else 0},
+                    {'icon': 'fas fa-toggle-on', 'color': 'success', 'title': 'Ativas', 'count': (notification_settings|selectattr('enabled')|list|length) if notification_settings else 0},
+                    {'icon': 'fab fa-whatsapp', 'color': 'success', 'title': 'WhatsApp', 'count': (notification_settings|selectattr('type', 'equalto', 'whatsapp')|list|length) if notification_settings else 0},
+                    {'icon': 'fas fa-envelope', 'color': 'primary', 'title': 'E-mail', 'count': (notification_settings|selectattr('type', 'equalto', 'email')|list|length) if notification_settings else 0}
+                ] %}
 
-            <!-- Tabela de Notificações -->
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center fw-semibold" style="width: 60px;">
-                                <i class="fas fa-hashtag text-muted"></i>
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-broadcast-tower me-2 text-muted"></i>Canal
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-info-circle me-2 text-muted"></i>Descrição
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>Destino
-                            </th>
-                            <th class="text-center fw-semibold">
-                                <i class="fas fa-power-off me-2 text-muted"></i>Status
-                            </th>
-                            <th class="text-center fw-semibold" style="width: 140px;">
-                                <i class="fas fa-cogs me-2 text-muted"></i>Ações
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for notif in notification_settings %}
-                        <tr class="border-bottom">
-                            <td class="text-center">
-                                <span class="badge bg-light text-dark border">{{ notif.id }}</span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% if notif.type == 'whatsapp' %}
-                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="fab fa-whatsapp text-success"></i>
-                                        </div>
-                                    {% else %}
-                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="fas fa-envelope text-primary"></i>
-                                        </div>
-                                    {% endif %}
-                                    <span class="fw-medium">{{ notif.type|capitalize }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="text-dark">{{ notif.description }}</span>
-                            </td>
-                            <td>
-                                <code class="bg-light text-dark p-1 rounded small">{{ notif.destination }}</code>
-                            </td>
-                            <td class="text-center">
-                                {% if notif.enabled %}
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                                        <i class="fas fa-check-circle me-1"></i>Ativo
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2">
-                                        <i class="fas fa-pause-circle me-1"></i>Inativo
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-primary btn-sm btn-edit-notification"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#notificationModal"
-                                        data-all='{{ notif|json_encode }}'
-                                        data-action="edit"
-                                        data-bs-toggle="tooltip"
-                                        title="Editar notificação">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm"
-                                        data-bs-toggle="tooltip"
-                                        title="Testar notificação">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm"
-                                        data-bs-toggle="tooltip"
-                                        title="Excluir notificação">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-bell-slash fs-1 mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Nenhuma configuração encontrada</h5>
-                                    <p class="mb-3">Comece criando sua primeira notificação personalizada</p>
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#notificationModal">
-                                        <i class="fas fa-plus me-2"></i>Criar primeira notificação
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+                {% for stat in stats %}
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
+                        <div class="flex-shrink-0">
+                            <i class="{{ stat.icon }} text-{{ stat.color }} fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="fw-bold text-dark">{{ stat.count }}</div>
+                            <small class="text-muted">{{ stat.title }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+                        <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center fw-semibold" style="width: 60px;">
+                                <i class="fas fa-hashtag text-muted"></i>
+                            </th>
+                            <th class="fw-semibold">
+                                <i class="fas fa-broadcast-tower me-2 text-muted"></i>Canal
+                            </th>
+                            <th class="fw-semibold">
+                                <i class="fas fa-info-circle me-2 text-muted"></i>Descrição
+                            </th>
+                            <th class="fw-semibold">
+                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>Destino
+                            </th>
+                            <th class="text-center fw-semibold">
+                                <i class="fas fa-power-off me-2 text-muted"></i>Status
+                            </th>
+                            <th class="text-center fw-semibold" style="width: 140px;">
+                                <i class="fas fa-cogs me-2 text-muted"></i>Ações
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notif in notification_settings %}
+                        <tr class="border-bottom">
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border">{{ notif.id }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if notif.type == 'whatsapp' %}
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="fab fa-whatsapp text-success"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                            <i class="fas fa-envelope text-primary"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="fw-medium">{{ notif.type|capitalize }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-dark">{{ notif.description }}</span>
+                            </td>
+                            <td>
+                                <code class="bg-light text-dark p-1 rounded small">{{ notif.destination }}</code>
+                            </td>
+                            <td class="text-center">
+                                {% if notif.enabled %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i>Ativo
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2">
+                                        <i class="fas fa-pause-circle me-1"></i>Inativo
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-primary btn-sm btn-edit-notification"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#notificationModal"
+                                        data-all='{{ notif|json_encode }}'
+                                        data-action="edit"
+                                        data-bs-toggle="tooltip"
+                                        title="Editar notificação">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                        data-bs-toggle="tooltip"
+                                        title="Testar notificação">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm"
+                                        data-bs-toggle="tooltip"
+                                        title="Excluir notificação">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-bell-slash fs-1 mb-3 opacity-25"></i>
+                                    <h5 class="mb-2">Nenhuma configuração encontrada</h5>
+                                    <p class="mb-3">Comece criando sua primeira notificação personalizada</p>
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                                        <i class="fas fa-plus me-2"></i>Criar primeira notificação
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Modal Melhorado -->
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <!-- Header do Modal -->
-            <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);">
-                <div>
-                    <h5 class="modal-title mb-1">
-                        <i class="fas fa-cog me-2"></i>Configurar Notificação
-                    </h5>
-                    <small class="opacity-75">Configure os alertas e canais de comunicação</small>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);">
+                <div>
+                    <h5 class="modal-title mb-1">
+                        <i class="fas fa-cog me-2"></i>Configurar Notificação
+                    </h5>
+                    <small class="opacity-75">Configure os alertas e canais de comunicação</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-            <form method="POST" id="notificationForm">
-                <input type="hidden" name="form_type" value="configure_notification">
-                <input type="hidden" name="id" id="notif_id">
-                
-                <div class="modal-body p-0">
-                    <!-- Configurações Básicas -->
-                    <div class="bg-light bg-opacity-50 p-4 border-bottom">
-                        <h6 class="fw-bold mb-3">
-                            <i class="fas fa-sliders-h me-2 text-warning"></i>Configurações Básicas
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="notif_type" class="form-label fw-medium">
-                                    <i class="fas fa-broadcast-tower me-1"></i>Canal de Notificação
-                                </label>
-                                <select class="form-select form-select-lg" name="type" id="notif_type" required>
-                                    <option value="">Selecione um canal...</option>
-                                    <option value="email">
-                                        📧 E-mail
-                                    </option>
-                                    <option value="whatsapp">
-                                        📱 WhatsApp
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="notif_destination" class="form-label fw-medium">
-                                    <i class="fas fa-map-marker-alt me-1"></i>Destino
-                                </label>
-                                <input type="text" class="form-control form-control-lg" name="destination" id="notif_destination" 
-                                    placeholder="Ex: email@exemplo.com ou +5511999999999" required>
-                                <div class="form-text">
-                                    <small><i class="fas fa-info-circle me-1"></i>Para WhatsApp, inclua o código do país</small>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <label for="notif_description" class="form-label fw-medium">
-                                    <i class="fas fa-tag me-1"></i>Descrição
-                                </label>
-                                <input type="text" class="form-control form-control-lg" name="description" id="notif_description" 
-                                    placeholder="Ex: Alertas de Trânsito - Centro" maxlength="100" required>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <div class="form-check form-switch form-check-lg">
-                                    <input class="form-check-input" type="checkbox" id="notif_enabled" name="enabled">
-                                    <label class="form-check-label fw-medium" for="notif_enabled">
-                                        <i class="fas fa-power-off me-1"></i>Ativar
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Seleção de Alertas -->
-                    <div class="p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold mb-0">
-                                <i class="fas fa-bell me-2 text-warning"></i>Tipos de Alertas
-                            </h6>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-secondary" id="selectAllAlerts">
-                                    <i class="fas fa-check-square me-1"></i>Marcar Todos
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" id="unselectAllAlerts">
-                                    <i class="fas fa-square me-1"></i>Desmarcar Todos
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="accordion accordion-flush" id="alertsAccordion">
-                            <!-- Acidentes -->
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="headingACCIDENT">
-                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapseACCIDENT" aria-expanded="false" aria-controls="collapseACCIDENT">
-                                        <div class="d-flex align-items-center w-100">
-                                            <i class="fas fa-car-crash text-danger me-3 fs-5"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">Acidentes</div>
-                                                <small class="text-muted">3 tipos disponíveis</small>
-                                            </div>
-                                            <span class="badge bg-danger-subtle text-danger me-2">3</span>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapseACCIDENT" class="accordion-collapse collapse" 
-                                    aria-labelledby="headingACCIDENT" data-bs-parent="#alertsAccordion">
-                                    <div class="accordion-body bg-light bg-opacity-25">
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ACCIDENT_ACCIDENT_MINOR" 
-                                                        id="alert_cb_ACCIDENT_ACCIDENT_MINOR">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ACCIDENT_ACCIDENT_MINOR">
-                                                        Acidente Menor
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ACCIDENT_ACCIDENT_MAJOR" 
-                                                        id="alert_cb_ACCIDENT_ACCIDENT_MAJOR">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ACCIDENT_ACCIDENT_MAJOR">
-                                                        Acidente Grave
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ACCIDENT_NO_SUBTYPE" 
-                                                        id="alert_cb_ACCIDENT_NO_SUBTYPE">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ACCIDENT_NO_SUBTYPE">
-                                                        Acidente Geral
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <form method="POST" id="notificationForm">
+                <input type="hidden" name="form_type" value="configure_notification">
+                <input type="hidden" name="id" id="notif_id">
+                
+                <div class="modal-body p-0">
+                                        <div class="bg-light bg-opacity-50 p-4 border-bottom">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-sliders-h me-2 text-warning"></i>Configurações Básicas
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="notif_type" class="form-label fw-medium">
+                                    <i class="fas fa-broadcast-tower me-1"></i>Canal de Notificação
+                                </label>
+                                <select class="form-select form-select-lg" name="type" id="notif_type" required>
+                                    <option value="">Selecione um canal...</option>
+                                    <option value="email">
+                                        📧 E-mail
+                                    </option>
+                                    <option value="whatsapp">
+                                        📱 WhatsApp
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="notif_destination" class="form-label fw-medium">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Destino
+                                </label>
+                                <input type="text" class="form-control form-control-lg" name="destination" id="notif_destination" 
+                                    placeholder="Ex: email@exemplo.com ou +5511999999999" required>
+                                <div class="form-text">
+                                    <small><i class="fas fa-info-circle me-1"></i>Para WhatsApp, inclua o código do país</small>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="notif_description" class="form-label fw-medium">
+                                    <i class="fas fa-tag me-1"></i>Descrição
+                                </label>
+                                <input type="text" class="form-control form-control-lg" name="description" id="notif_description" 
+                                    placeholder="Ex: Alertas de Trânsito - Centro" maxlength="100" required>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check form-switch form-check-lg">
+                                    <input class="form-check-input" type="checkbox" id="notif_enabled" name="enabled">
+                                    <label class="form-check-label fw-medium" for="notif_enabled">
+                                        <i class="fas fa-power-off me-1"></i>Ativar
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                                        <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">
+                                <i class="fas fa-bell me-2 text-warning"></i>Tipos de Alertas
+                            </h6>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-secondary" id="selectAllAlerts">
+                                    <i class="fas fa-check-square me-1"></i>Marcar Todos
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="unselectAllAlerts">
+                                    <i class="fas fa-square me-1"></i>Desmarcar Todos
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion accordion-flush" id="alertsAccordion">
+                            {% set alert_groups = [
+                                {
+                                    'id': 'ACCIDENT', 
+                                    'icon': 'fas fa-car-crash text-danger', 
+                                    'title': 'Acidentes', 
+                                    'subtitle': '3 tipos disponíveis',
+                                    'badge_class': 'bg-danger-subtle text-danger',
+                                    'alerts': [
+                                        {'value': 'ACCIDENT_ACCIDENT_MINOR', 'label': 'Acidente Menor'},
+                                        {'value': 'ACCIDENT_ACCIDENT_MAJOR', 'label': 'Acidente Grave'},
+                                        {'value': 'ACCIDENT_NO_SUBTYPE', 'label': 'Acidente Geral'}
+                                    ]
+                                },
+                                {
+                                    'id': 'JAM', 
+                                    'icon': 'fas fa-traffic-light text-warning', 
+                                    'title': 'Congestionamentos', 
+                                    'subtitle': '5 tipos disponíveis',
+                                    'badge_class': 'bg-warning-subtle text-warning',
+                                    'alerts': [
+                                        {'value': 'JAM_JAM_MODERATE_TRAFFIC', 'label': 'Tráfego Moderado'},
+                                        {'value': 'JAM_JAM_HEAVY_TRAFFIC', 'label': 'Tráfego Pesado'},
+                                        {'value': 'JAM_JAM_STAND_STILL_TRAFFIC', 'label': 'Tráfego Parado'},
+                                        {'value': 'JAM_JAM_LIGHT_TRAFFIC', 'label': 'Tráfego Leve'},
+                                        {'value': 'JAM_NO_SUBTYPE', 'label': 'Congestionamento Geral'}
+                                    ]
+                                },
+                                {
+                                    'id': 'WEATHERHAZARD', 
+                                    'icon': 'fas fa-exclamation-triangle text-warning', 
+                                    'title': 'Perigos e Hazards', 
+                                    'subtitle': 'Perigos na via, clima e acostamento',
+                                    'badge_class': 'bg-warning-subtle text-warning',
+                                    'alerts': [
+                                        {'value': 'WEATHERHAZARD_HAZARD_ON_ROAD', 'label': 'Perigo na Via'},
+                                        {'value': 'WEATHERHAZARD_HAZARD_ON_SHOULDER', 'label': 'Perigo no Acostamento'},
+                                        {'value': 'WEATHERHAZARD_HAZARD_WEATHER', 'label': 'Perigo Climático'},
+                                        {'value': 'WEATHERHAZARD_HAZARD_ON_ROAD_OBJECT', 'label': 'Objeto na Via'}
+                                    ]
+                                }
+                            ] %}
 
-                            <!-- Congestionamentos -->
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="headingJAM">
-                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapseJAM" aria-expanded="false" aria-controls="collapseJAM">
-                                        <div class="d-flex align-items-center w-100">
-                                            <i class="fas fa-traffic-light text-warning me-3 fs-5"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">Congestionamentos</div>
-                                                <small class="text-muted">5 tipos disponíveis</small>
-                                            </div>
-                                            <span class="badge bg-warning-subtle text-warning me-2">5</span>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapseJAM" class="accordion-collapse collapse" 
-                                    aria-labelledby="headingJAM" data-bs-parent="#alertsAccordion">
-                                    <div class="accordion-body bg-light bg-opacity-25">
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="JAM_JAM_MODERATE_TRAFFIC" 
-                                                        id="alert_cb_JAM_JAM_MODERATE_TRAFFIC">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_JAM_JAM_MODERATE_TRAFFIC">
-                                                        Tráfego Moderado
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="JAM_JAM_HEAVY_TRAFFIC" 
-                                                        id="alert_cb_JAM_JAM_HEAVY_TRAFFIC">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_JAM_JAM_HEAVY_TRAFFIC">
-                                                        Tráfego Pesado
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="JAM_JAM_STAND_STILL_TRAFFIC" 
-                                                        id="alert_cb_JAM_JAM_STAND_STILL_TRAFFIC">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_JAM_JAM_STAND_STILL_TRAFFIC">
-                                                        Tráfego Parado
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="JAM_JAM_LIGHT_TRAFFIC" 
-                                                        id="alert_cb_JAM_JAM_LIGHT_TRAFFIC">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_JAM_JAM_LIGHT_TRAFFIC">
-                                                        Tráfego Leve
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="JAM_NO_SUBTYPE" 
-                                                        id="alert_cb_JAM_NO_SUBTYPE">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_JAM_NO_SUBTYPE">
-                                                        Congestionamento Geral
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            {% for group in alert_groups %}
+                            <div class="accordion-item border rounded mb-2">
+                                <h2 class="accordion-header" id="heading{{ group.id }}">
+                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ group.id }}" aria-expanded="false" aria-controls="collapse{{ group.id }}">
+                                        <div class="d-flex align-items-center w-100">
+                                            <i class="{{ group.icon }} me-3 fs-5"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold">{{ group.title }}</div>
+                                                <small class="text-muted">{{ group.subtitle }}</small>
+                                            </div>
+                                            <span class="badge {{ group.badge_class }} me-2">{{ group.alerts|length }}</span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ group.id }}" class="accordion-collapse collapse" 
+                                    aria-labelledby="heading{{ group.id }}" data-bs-parent="#alertsAccordion">
+                                    <div class="accordion-body bg-light bg-opacity-25">
+                                        <div class="row g-2">
+                                            {% for alert in group.alerts %}
+                                            <div class="col-md-6">
+                                                <div class="form-check p-2 border rounded bg-white">
+                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
+                                                        name="alerts[]" value="{{ alert.value }}" 
+                                                        id="alert_cb_{{ alert.value|replace(' ', '_')|upper }}">
+                                                    <label class="form-check-label fw-medium" for="alert_cb_{{ alert.value|replace(' ', '_')|upper }}">
+                                                        {{ alert.label }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Perigos Climáticos e na Via -->
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="headingWEATHERHAZARD">
-                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapseWEATHERHAZARD" aria-expanded="false" aria-controls="collapseWEATHERHAZARD">
-                                        <div class="d-flex align-items-center w-100">
-                                            <i class="fas fa-exclamation-triangle text-warning me-3 fs-5"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">Perigos e Hazards</div>
-                                                <small class="text-muted">Perigos na via, clima e acostamento</small>
-                                            </div>
-                                            <span class="badge bg-warning-subtle text-warning me-2">25+</span>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapseWEATHERHAZARD" class="accordion-collapse collapse" 
-                                    aria-labelledby="headingWEATHERHAZARD" data-bs-parent="#alertsAccordion">
-                                    <div class="accordion-body bg-light bg-opacity-25">
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_ON_ROAD" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD">
-                                                        Perigo na Via
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_ON_SHOULDER" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_ON_SHOULDER">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_ON_SHOULDER">
-                                                        Perigo no Acostamento
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_WEATHER" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_WEATHER">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_WEATHER">
-                                                        Perigo Climático
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_ON_ROAD_OBJECT" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_OBJECT">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_OBJECT">
-                                                        Objeto na Via
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_ON_ROAD_POT_HOLE" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_POT_HOLE">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_POT_HOLE">
-                                                        Buraco na Via
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_WEATHER_FOG" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_FOG">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_FOG">
-                                                        Névoa
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_WEATHER_HEAVY_RAIN" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_HEAVY_RAIN">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_HEAVY_RAIN">
-                                                        Chuva Forte
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_WEATHER_FLOOD" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_FLOOD">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_WEATHER_FLOOD">
-                                                        Inundação
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_HAZARD_ON_ROAD_CONSTRUCTION" 
-                                                        id="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_CONSTRUCTION">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_HAZARD_ON_ROAD_CONSTRUCTION">
-                                                        Construção na Via
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="WEATHERHAZARD_NO_SUBTYPE" 
-                                                        id="alert_cb_WEATHERHAZARD_NO_SUBTYPE">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_WEATHERHAZARD_NO_SUBTYPE">
-                                                        Perigo Geral
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Vias Fechadas -->
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="headingROAD_CLOSED">
-                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapseROAD_CLOSED" aria-expanded="false" aria-controls="collapseROAD_CLOSED">
-                                        <div class="d-flex align-items-center w-100">
-                                            <i class="fas fa-road text-secondary me-3 fs-5"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">Vias Fechadas</div>
-                                                <small class="text-muted">4 tipos disponíveis</small>
-                                            </div>
-                                            <span class="badge bg-secondary-subtle text-secondary me-2">4</span>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapseROAD_CLOSED" class="accordion-collapse collapse" 
-                                    aria-labelledby="headingROAD_CLOSED" data-bs-parent="#alertsAccordion">
-                                    <div class="accordion-body bg-light bg-opacity-25">
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ROAD_CLOSED_ROAD_CLOSED_HAZARD" 
-                                                        id="alert_cb_ROAD_CLOSED_ROAD_CLOSED_HAZARD">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ROAD_CLOSED_ROAD_CLOSED_HAZARD">
-                                                        Via Fechada por Perigo
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ROAD_CLOSED_ROAD_CLOSED_CONSTRUCTION" 
-                                                        id="alert_cb_ROAD_CLOSED_ROAD_CLOSED_CONSTRUCTION">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ROAD_CLOSED_ROAD_CLOSED_CONSTRUCTION">
-                                                        Via Fechada por Construção
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ROAD_CLOSED_ROAD_CLOSED_EVENT" 
-                                                        id="alert_cb_ROAD_CLOSED_ROAD_CLOSED_EVENT">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ROAD_CLOSED_ROAD_CLOSED_EVENT">
-                                                        Via Fechada por Evento
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="ROAD_CLOSED_NO_SUBTYPE" 
-                                                        id="alert_cb_ROAD_CLOSED_NO_SUBTYPE">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_ROAD_CLOSED_NO_SUBTYPE">
-                                                        Via Fechada Geral
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Construção -->
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="headingCONSTRUCTION">
-                                    <button class="
-                    </div>
-                </div>
-
-                <!-- Footer do Modal -->
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-warning btn-lg text-white" id="saveBtn">
-                        <i class="fas fa-save me-2"></i>Salvar Configuração
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+                                <div class="modal-footer p-3 bg-light d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-warning" id="saveNotificationBtn">
+                            <i class="fas fa-save me-2"></i>Salvar Configuração
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
