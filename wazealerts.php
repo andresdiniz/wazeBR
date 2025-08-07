@@ -89,7 +89,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
         $stmt->execute([$url]);
         $existingAlerts = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            echo $row;
+            var_dump($row);
             $existingAlerts[$row['uuid']] = $row;
         }
 
