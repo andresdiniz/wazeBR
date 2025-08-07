@@ -169,7 +169,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 echo $isNew ? "Novo alerta: $uuid\n" : "Atualizado alerta: $uuid\n";
             }
 
-            if ($isNew && ($flatAlert['type'] === 'ACCIDENT'|| $flatAlert['type'] === 'HAZARD') && $id_parceiro == 2) {
+            if ($isNew && ($flatAlert['type'] === 'ACCIDENT' || $flatAlert['type'] === 'HAZARD') && $id_parceiro == 2) {
                 enviarNotificacaoPush($deviceToken, $authToken, $numero, $alert);
             }
         }
@@ -186,6 +186,169 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
     } catch (Exception $e) {
         $pdo->rollBack();
         throw $e;
+    }
+}
+
+function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
+{
+    $currentDateTime = date('Y-m-d H:i:s');
+
+    $pdo->beginTransaction();
+
+    try {
+        // 1. Busca jams existentes para esta URL
+        $stmt = $pdo->prepare("SELECT uuid FROM jams WHERE source_url = ?");
+        $stmt->execute([$url]);
+        $existingUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // 2. Processa cada jam recebido
+        $processedUuids = [];
+
+        // Query para inserir/atualizar jams
+        $stmtJam = $pdo->prepare("
+            INSERT INTO jams (
+                uuid, country, city, level, speedKMH, length, turnType, endNode, speed,
+                roadType, delay, street, pubMillis, id_parceiro, source_url, status,
+                date_received, date_updated
+            ) VALUES (
+                :uuid, :country, :city, :level, :speedKMH, :length, :turnType, :endNode, :speed,
+                :roadType, :delay, :street, :pubMillis, :id_parceiro, :source_url, 1,
+                :date_received, :date_updated
+            )
+            ON DUPLICATE KEY UPDATE
+                country = VALUES(country),
+                city = VALUES(city),
+                level = VALUES(level),
+                speedKMH = VALUES(speedKMH),
+                length = VALUES(length),
+                turnType = VALUES(turnType),
+                endNode = VALUES(endNode),
+                speed = VALUES(speed),
+                roadType = VALUES(roadType),
+                delay = VALUES(delay),
+                street = VALUES(street),
+                pubMillis = VALUES(pubMillis),
+                status = 1,
+                date_updated = NOW()
+        ");
+
+        // Query para limpar e inserir linhas (coordenadas)
+        $stmtDeleteLines = $pdo->prepare("DELETE FROM jam_lines WHERE jam_uuid = ?");
+        $stmtInsertLine = $pdo->prepare("
+            INSERT INTO jam_lines (jam_uuid, sequence, x, y)
+            VALUES (:jam_uuid, :sequence, :x, :y)
+        ");
+
+        // Query para limpar e inserir segmentos
+        $stmtDeleteSegments = $pdo->prepare("DELETE FROM jam_segments WHERE jam_uuid = ?");
+        $stmtInsertSegment = $pdo->prepare("
+            INSERT INTO jam_segments (jam_uuid, fromNode, ID_segment, toNode, isForward)
+            VALUES (:jam_uuid, :fromNode, :ID_segment, :toNode, :isForward)
+        ");
+
+        foreach ($jams as $jam) {
+            $uuid = $jam['uuid'];
+            $processedUuids[] = $uuid;
+
+            // Insere/Atualiza o jam principal
+            $stmtJam->execute([
+                ':uuid' => $uuid,
+                ':country' => $jam['country'] ?? null,
+                ':city' => $jam['city'] ?? null,
+                ':level' => $jam['level'] ?? null,
+                ':speedKMH' => $jam['speedKMH'] ?? null,
+                ':length' => $jam['length'] ?? null,
+                ':turnType' => $jam['turnType'] ?? null,
+                ':endNode' => $jam['endNode'] ?? null,
+                ':speed' => $jam['speed'] ?? null,
+                ':roadType' => $jam['roadType'] ?? null,
+                ':delay' => $jam['delay'] ?? null,
+                ':street' => $jam['street'] ?? null,
+                ':pubMillis' => $jam['pubMillis'] ?? null,
+                ':id_parceiro' => $id_parceiro,
+                ':source_url' => $url,
+                ':date_received' => $currentDateTime,
+                ':date_updated' => $currentDateTime
+            ]);
+
+            // Processa linhas (coordenadas)
+            if (!empty($jam['line'])) {
+                // Remove linhas antigas
+                $stmtDeleteLines->execute([$uuid]);
+
+                // Insere novas linhas com sequência
+                $sequence = 0;
+                foreach ($jam['line'] as $point) {
+                    $stmtInsertLine->execute([
+                        ':jam_uuid' => $uuid,
+                        ':sequence' => $sequence++,
+                        ':x' => $point['x'],
+                        ':y' => $point['y']
+                    ]);
+                }
+            }
+
+            // Processa segmentos
+            if (!empty($jam['segments'])) {
+                // Remove segmentos antigos
+                $stmtDeleteSegments->execute([$uuid]);
+
+                // Insere novos segmentos
+                foreach ($jam['segments'] as $segment) {
+                    $stmtInsertSegment->execute([
+                        ':jam_uuid' => $uuid,
+                        ':fromNode' => $segment['fromNode'] ?? null,
+                        ':ID_segment' => $segment['ID'] ?? null,
+                        ':toNode' => $segment['toNode'] ?? null,
+                        ':isForward' => $segment['isForward'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // 3. Desativa APENAS jams ATIVOS que não foram recebidos
+        $uuidsToDeactivate = array_diff($existingUuids, $processedUuids);
+        if (!empty($uuidsToDeactivate)) {
+            $placeholders = implode(',', array_fill(0, count($uuidsToDeactivate), '?'));
+            $stmtDeactivate = $pdo->prepare("
+                UPDATE jams 
+                SET status = 0, date_updated = NOW()
+                WHERE uuid IN ($placeholders) 
+                  AND source_url = ?
+                  AND status = 1  
+            ");
+
+            $params = array_merge($uuidsToDeactivate, [$url]);
+            $stmtDeactivate->execute($params);
+        }
+
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw new Exception("Erro ao salvar jams: " . $e->getMessage());
+    }
+}
+
+function saveJamsToDbEmpty(PDO $pdo, $id_parceiro)
+{
+    $currentDateTime = date('Y-m-d H:i:s');
+
+    $pdo->beginTransaction();
+
+    try {
+        // Desativa todos os jams para o parceiro
+        $stmtDeactivate = $pdo->prepare("
+            UPDATE jams 
+            SET status = 0, date_updated = NOW()
+            WHERE id_parceiro = ?
+        ");
+        $stmtDeactivate->execute([$id_parceiro]);
+
+        // Confirma a transação
+        $pdo->commit();
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw new Exception("Erro ao desativar jams: " . $e->getMessage());
     }
 }
 
@@ -212,6 +375,19 @@ function processAlerts()
             } catch (Exception $e) {
                 echo "Erro ao processar alertas: " . $e->getMessage() . PHP_EOL;
             }
+        }
+
+        // Processa Jams
+        if (array_key_exists('jams', $jsonData)) {
+            saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
+        } else {
+            // Se não veio a chave 'jams', considera como array vazio para desativar os existentes
+            echo "Desativando alertas para o parceiro: $id_parceiro" . PHP_EOL;
+            saveJamsToDbEmpty($pdo, $id_parceiro);
+        }
+        if (empty($jsonData['jams'])) {
+            echo "Nenhum  jam encontrado na URL: $url" . PHP_EOL;
+            saveJamsToDbEmpty($pdo, $id_parceiro);
         }
 
         $endUrl = microtime(true);
