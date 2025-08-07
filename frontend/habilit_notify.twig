@@ -21,10 +21,16 @@
                 <div class="col-md-3">
                     <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-bell-slash text-secondary fs-4"></i>
+                            <i class="fas fa-bell text-secondary fs-4"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">{{ notification_settings|length }}</div>
+                            <div class="fw-bold text-dark">
+                                {% if notification_settings %}
+                                    {{ notification_settings|length }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </div>
                             <small class="text-muted">Total de Configurações</small>
                         </div>
                     </div>
@@ -35,7 +41,15 @@
                             <i class="fas fa-toggle-on text-success fs-4"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-success">{{ notification_settings|selectattr('enabled')|list|length }}</div>
+                            <div class="fw-bold text-success">
+                                {% set active_count = 0 %}
+                                {% for notif in notification_settings %}
+                                    {% if notif.enabled %}
+                                        {% set active_count = active_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ active_count }}
+                            </div>
                             <small class="text-muted">Ativas</small>
                         </div>
                     </div>
@@ -46,18 +60,34 @@
                             <i class="fab fa-whatsapp text-success fs-4"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">{{ notification_settings|selectattr('type', 'equalto', 'whatsapp')|list|length }}</div>
+                            <div class="fw-bold text-dark">
+                                {% set whatsapp_count = 0 %}
+                                {% for notif in notification_settings %}
+                                    {% if notif.type == 'whatsapp' %}
+                                        {% set whatsapp_count = whatsapp_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ whatsapp_count }}
+                            </div>
                             <small class="text-muted">WhatsApp</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
                         <div class="flex-shrink-0">
                             <i class="fas fa-envelope text-primary fs-4"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">{{ notification_settings|selectattr('type', 'equalto', 'email')|list|length }}</div>
+                            <div class="fw-bold text-dark">
+                                {% set email_count = 0 %}
+                                {% for notif in notification_settings %}
+                                    {% if notif.type == 'email' %}
+                                        {% set email_count = email_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ email_count }}
+                            </div>
                             <small class="text-muted">E-mail</small>
                         </div>
                     </div>
