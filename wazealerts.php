@@ -168,7 +168,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     ':km' => $km,
                     ':id_parceiro' => $id_parceiro
                 ]);
-
+                $isNewAlert = [];
                 $rows = $stmtInsertUpdate->rowCount();
 
                 if ($rows === 0) {
