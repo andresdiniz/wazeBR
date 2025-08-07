@@ -139,13 +139,11 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
             $isNew = !isset($existingAlerts[$uuid]);
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
-            echo "Alerta $uuid já existe? " . (isset($existingAlerts[$uuid]) ? 'sim' : 'não') . PHP_EOL;
+            /*echo "Alerta $uuid já existe? " . (isset($existingAlerts[$uuid]) ? 'sim' : 'não') . PHP_EOL;
             echo "Deve atualizar? " . ($shouldUpdate ? 'sim' : 'não') . PHP_EOL;
             if ($isNew) {
                 var_dump($flatAlert);
-            }
-
-
+            }*/
 
             if ($shouldUpdate) {
                 $stmtInsertUpdate->execute([
@@ -170,6 +168,18 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     ':km' => $km,
                     ':id_parceiro' => $id_parceiro
                 ]);
+
+                $rows = $stmtInsertUpdate->rowCount();
+
+                if ($isNew) {
+                    echo "Inserido: $uuid\n";
+                } else {
+                    if ($rows >= 1) {
+                        echo "Atualizado: $uuid\n";
+                    } else {
+                        echo "Sem alterações (dados idênticos): $uuid\n";
+                    }
+                }
                 echo $isNew ? "Novo alerta: $uuid\n" : "Atualizado alerta: $uuid\n";
             }
 
