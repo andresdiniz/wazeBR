@@ -746,7 +746,7 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
         return false; // Retorna falso se as credenciais não estiverem disponíveis
     }
 
-    $mensagem = "🚨 Alerta recebido: Tipo: {$type} e subtipo {$subtype} Um alerta foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
+    $mensagem = "🚨 Alerta recebido: Tipo: {$type} e subtipo {$subtype} foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
 
     // Instancia a classe corretamente com os tokens
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
