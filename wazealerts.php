@@ -86,10 +86,10 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
     try {
         $stmt = $pdo->prepare("SELECT * FROM alerts WHERE source_url = ? AND status = 1");
-        $stmt->execute([$url]);
+        $cleanUrl = strtolower(trim($url));
+        $stmt->execute([$cleanUrl]);
         $existingAlerts = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            var_dump($row);
             $existingAlerts[$row['uuid']] = $row;
         }
 
@@ -139,6 +139,9 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
             $isNew = !isset($existingAlerts[$uuid]);
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
+            echo "Alerta $uuid já existe? " . (isset($existingAlerts[$uuid]) ? 'sim' : 'não') . PHP_EOL;
+            echo "Deve atualizar? " . ($shouldUpdate ? 'sim' : 'não') . PHP_EOL;
+
 
             if ($shouldUpdate) {
                 $stmtInsertUpdate->execute([
