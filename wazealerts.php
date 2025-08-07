@@ -171,11 +171,16 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
                 $rows = $stmtInsertUpdate->rowCount();
 
+                if ($rows == 0) {
+                    echo "Sem alterações (dados idênticos): $uuid\n";
+                }
+
                 if ($rows >= 1) {
                     echo "Atualizado: $uuid\n";
                 } else {
                     echo "Sem alterações (dados idênticos): $uuid\n";
                 }
+
                 echo $isNew ? "Novo alerta: $uuid\n" : "Atualizado alerta: $uuid\n";
             }
 
