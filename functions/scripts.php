@@ -737,8 +737,15 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
     $lng = $jsonData['location_y'] ?? 'LONGITUDE_INDEFINIDA';
     $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
+    $uuid = $jsonData['uuid'] ?? 'UUID_INDEFINIDO';
 
-    $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
+    // Verifica se as credenciais foram obtidas corretamente
+    if (empty($deviceToken) || empty($authToken)) {
+        error_log("Credenciais de notificação não encontradas para o usuário com ID: {$numero}");
+        return false; // Retorna falso se as credenciais não estiverem disponíveis
+    }
+
+    $mensagem = "🚨 Alerta de Acidente: UUID: {$uuid} Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
 
     // Instancia a classe corretamente com os tokens
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
