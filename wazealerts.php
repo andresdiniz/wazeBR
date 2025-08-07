@@ -141,7 +141,10 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
             echo "Alerta $uuid já existe? " . (isset($existingAlerts[$uuid]) ? 'sim' : 'não') . PHP_EOL;
             echo "Deve atualizar? " . ($shouldUpdate ? 'sim' : 'não') . PHP_EOL;
-            echo "\n";
+            if ($isNew) {
+                var_dump($flatAlert);
+            }
+
 
 
             if ($shouldUpdate) {
