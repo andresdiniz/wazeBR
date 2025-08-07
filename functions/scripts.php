@@ -739,7 +739,6 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
     $subtype = $jsonData['subtype'] ?? '';
     $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
-    $uuid = $jsonData['uuid'] ?? 'UUID_INDEFINIDO';
 
     // Verifica se as credenciais foram obtidas corretamente
     if (empty($deviceToken) || empty($authToken)) {
@@ -754,5 +753,5 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
 
     // Envia a mensagem de texto
     $resposta = $api->enviarTexto($numero, $mensagem);
-    var_dump(json_decode($resposta, true));
+    //var_dump(json_decode($resposta, true));
 }
