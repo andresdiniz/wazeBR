@@ -1,11 +1,10 @@
-<!-- Seção de Notificações do Sistema -->
-<div class="card shadow mb-4 border-warning">
-    <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
-        <h5 class="m-0">
-            <i class="fas fa-bell me-2"></i>Sistemas de Notificação
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="m-0 text-dark">
+            <i class="fas fa-bell me-2 text-warning"></i>Configurações de Notificação
         </h5>
-        <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#notificationModal">
-            <i class="fas fa-sliders-h me-2"></i>Configurar Notificações
+        <button class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#notificationModal" id="addNotificationBtn">
+            <i class="fas fa-plus me-2"></i>Adicionar Notificação
         </button>
     </div>
     <div class="card-body p-0">
@@ -16,37 +15,45 @@
                         <th class="text-center" style="width: 80px;">ID</th>
                         <th>Canal</th>
                         <th>Descrição</th>
-                        <th class="text-center" style="width: 150px;">Status</th>
-                        <th class="text-center" style="width: 100px;">Ações</th>
+                        <th>Destino</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center" style="width: 120px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for notif in notification_settings %}
                     <tr class="align-middle">
-                        <td class="text-center fw-bold text-warning">{{ notif.id }}</td>
+                        <td class="text-center text-muted">{{ notif.id }}</td>
                         <td>
-                            <i class="fab fa-{{ notif.type == 'whatsapp' ? 'whatsapp' : 'envelope' }} me-2"></i>
+                            <i class="fab fa-{{ notif.type == 'whatsapp' ? 'whatsapp text-success' : 'envelope-open-text text-primary' }} me-2"></i>
                             {{ notif.type|capitalize }}
                         </td>
                         <td>{{ notif.description }}</td>
+                        <td>{{ notif.destination }}</td>
                         <td class="text-center">
-                            <span class="badge bg-{{ notif.enabled ? 'success' : 'secondary' }}">
-                                {{ notif.enabled ? 'Ativado' : 'Desativado' }}
+                            <span class="badge bg-{{ notif.enabled ? 'success' : 'secondary' }} text-white p-2">
+                                {{ notif.enabled ? 'Ativo' : 'Inativo' }}
                             </span>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-warning btn-configure-notification"
-                                data-bs-toggle="modal"
-                                data-bs-target="#notificationModal"
-                                data-all='{{ notif|json_encode }}'>
-                                <i class="fas fa-cog"></i>
-                            </button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-secondary me-1 btn-edit-notification"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#notificationModal"
+                                    data-all='{{ notif|json_encode }}'
+                                    data-action="edit">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">
-                            <i class="fas fa-exclamation-circle me-2"></i>Nenhuma configuração de notificação encontrada
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="fas fa-exclamation-circle me-2"></i>Nenhuma configuração de notificação encontrada.
                         </td>
                     </tr>
                     {% endfor %}
@@ -56,51 +63,51 @@
     </div>
 </div>
 
-<!-- Modal de Configuração de Notificações -->
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-warning text-dark">
                 <h5 class="modal-title">
-                    <i class="fas fa-bell me-2"></i>Configuração de Notificações
+                    <i class="fas fa-cog me-2"></i>Configurar Notificação
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form method="POST">
+            <form method="POST" id="notificationForm">
                 <input type="hidden" name="form_type" value="configure_notification">
+                <input type="hidden" name="id" id="notif_id">
                 <div class="modal-body p-4">
-                    <input type="hidden" name="id" id="notif_id">
-                    <div class="mb-3">
-                        <label class="form-label">Canal</label>
-                        <select class="form-select" name="type" id="notif_type" disabled>
-                            <option value="email">E-mail</option>
-                            <option value="whatsapp">WhatsApp</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Descrição</label>
-                        <input type="text" class="form-control" name="description" id="notif_description" maxlength="100">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Destino</label>
-                        <input type="text" class="form-control" name="destination" id="notif_destination" placeholder="Ex: email@email.com ou +5511999999999">
-                    </div>
-
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="notif_enabled" name="enabled">
-                        <label class="form-check-label" for="notif_enabled">Ativar Notificações</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="notif_type" class="form-label">Canal</label>
+                            <select class="form-select" name="type" id="notif_type" required>
+                                <option value="email">E-mail</option>
+                                <option value="whatsapp">WhatsApp</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="notif_destination" class="form-label">Destino</label>
+                            <input type="text" class="form-control" name="destination" id="notif_destination" placeholder="Ex: email@email.com ou +5511999999999" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="notif_description" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" name="description" id="notif_description" placeholder="Ex: Notificações de Vendas" maxlength="100" required>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="notif_enabled" name="enabled">
+                                <label class="form-check-label" for="notif_enabled">Ativar Notificações</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer bg-light justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>Cancelar
                     </button>
-                    <button type="submit" class="btn btn-warning text-white">
-                        <i class="fas fa-save me-2"></i>Salvar Configuração
+                    <button type="submit" class="btn btn-warning text-white" id="saveBtn">
+                        <i class="fas fa-save me-2"></i>Salvar
                     </button>
                 </div>
             </form>
@@ -110,20 +117,45 @@
 
 <script>
 $(document).ready(function () {
-    $('#notificationModal').on('show.bs.modal', function (e) {
-        const button = $(e.relatedTarget);
-        const data = button.data('all');
-        const modal = $(this);
+    const notificationModal = $('#notificationModal');
+    const notificationForm = $('#notificationForm');
+    const notifId = $('#notif_id');
+    const notifType = $('#notif_type');
+    const notifDescription = $('#notif_description');
+    const notifDestination = $('#notif_destination');
+    const notifEnabled = $('#notif_enabled');
+    const modalTitle = notificationModal.find('.modal-title');
+    const saveBtn = $('#saveBtn');
 
-        if (data) {
-            modal.find('#notif_id').val(data.id);
-            modal.find('#notif_type').val(data.type);
-            modal.find('#notif_description').val(data.description);
-            modal.find('#notif_destination').val(data.destination);
-            modal.find('#notif_enabled').prop('checked', data.enabled == 1);
-        } else {
-            modal.find('form')[0].reset();
-        }
+    // Função para resetar o formulário
+    function resetForm() {
+        notificationForm[0].reset();
+        notifId.val('');
+        notifType.prop('disabled', false); // Habilita o campo de tipo
+        modalTitle.html('<i class="fas fa-plus me-2"></i> Adicionar Notificação');
+        saveBtn.html('<i class="fas fa-plus me-2"></i> Adicionar');
+    }
+
+    // Configura o modal para edição
+    $('.btn-edit-notification').on('click', function () {
+        const data = $(this).data('all');
+        notifId.val(data.id);
+        notifType.val(data.type).prop('disabled', true); // Desabilita o campo para edição
+        notifDescription.val(data.description);
+        notifDestination.val(data.destination);
+        notifEnabled.prop('checked', data.enabled == 1);
+        modalTitle.html('<i class="fas fa-cog me-2"></i> Editar Notificação');
+        saveBtn.html('<i class="fas fa-save me-2"></i> Salvar');
+    });
+
+    // Configura o modal para adicionar nova notificação
+    $('#addNotificationBtn').on('click', function () {
+        resetForm();
+    });
+
+    // Resetar o formulário ao fechar o modal
+    notificationModal.on('hidden.bs.modal', function () {
+        resetForm();
     });
 });
 </script>
