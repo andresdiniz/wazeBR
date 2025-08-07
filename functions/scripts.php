@@ -733,8 +733,8 @@ function getCredenciais(PDO $pdo, int $userId): ?array
 function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
 {
     $street = $jsonData['street'] ?? 'Nome da via desconhecida';
-    $lat = $jsonData[['location_x']] ?? 'LATITUDE_INDEFINIDA';
-    $lng = $jsonData[['location_y']] ?? 'LONGITUDE_INDEFINIDA';
+    $lat = $jsonData['location_x'] ?? 'LATITUDE_INDEFINIDA';
+    $lng = $jsonData['location_y'] ?? 'LONGITUDE_INDEFINIDA';
     $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
 
