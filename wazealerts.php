@@ -175,6 +175,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     echo "[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)\n";
                 } elseif ($rows === 1) {
                     echo "[INSERIDO] UUID: $uuid\n";
+                    $isNewAlert = true;
                 } elseif ($rows === 2) {
                     echo "[ATUALIZADO] UUID: $uuid\n";
                 } else {
@@ -186,12 +187,12 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             }
 
             // Envia notificação push se for um novo alerta de acidente ou perigo
-            if ($isNew && $flatAlert['type'] === 'HAZARD' && $id_parceiro == 2) {
+            if ($isNewAlert && $flatAlert['type'] === 'HAZARD' && $id_parceiro == 2) {
                 // Dados de autenticação e destino
                 $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                 $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
                 $numero = '5531971408208'; // Número com DDI + DDD
-                //enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
+                enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
             }
         }
 
