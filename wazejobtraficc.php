@@ -238,7 +238,7 @@ foreach ($results as $row) {
                         if ($length <= 1) {
                             $length = 1; // Evita divisão por zero
                         } 
-                        if ($historicTime <= 0) {
+                        if ($historicTime <= 1) {
                             $historicTime = 1; // Evita divisão por zero
                         }  
                         $avgSpeedSubRoute = ($length / 1000) / ($time / 3600);
