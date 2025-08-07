@@ -732,10 +732,10 @@ function getCredenciais(PDO $pdo, int $userId): ?array
 
 function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
 {
-    $street = $jsonData['alerts'][0]['street'] ?? 'Nome da via desconhecida';
-    $lat = $jsonData['alerts'][0]['location']['x'] ?? 'LATITUDE_INDEFINIDA';
-    $lng = $jsonData['alerts'][0]['location']['y'] ?? 'LONGITUDE_INDEFINIDA';
-    $timestampMs = $jsonData['alerts'][0]['pubMillis'] ?? null;
+    $street = $jsonData['street'] ?? 'Nome da via desconhecida';
+    $lat = $jsonData[['location_x']] ?? 'LATITUDE_INDEFINIDA';
+    $lng = $jsonData[['location_y']] ?? 'LONGITUDE_INDEFINIDA';
+    $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i', intval($timestampMs / 1000)) : 'horário desconhecido';
 
     $mensagem = "🚨 Alerta de Acidente: Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
