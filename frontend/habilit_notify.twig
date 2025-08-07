@@ -1,424 +1,885 @@
-<div class="container-fluid px-4 py-3">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1 fw-bold text-dark">
-                <i class="fas fa-bell me-2 text-warning"></i>Configurações de Notificação
-            </h4>
-            <p class="text-muted mb-0 small">Gerencie seus canais de notificação e alertas personalizados</p>
-        </div>
-        <button class="btn btn-warning btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#notificationModal" id="addNotificationBtn">
-            <i class="fas fa-plus me-2"></i>Nova Notificação
-        </button>
-    </div>
-
-        <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-                        <div class="row g-3 p-4 pb-3 bg-light bg-opacity-50">
-                {% set stats = [
-                    {'icon': 'fas fa-bell', 'color': 'secondary', 'title': 'Total de Configurações', 'count': notification_settings|length if notification_settings else 0},
-                    {'icon': 'fas fa-toggle-on', 'color': 'success', 'title': 'Ativas', 'count': (notification_settings|selectattr('enabled')|list|length) if notification_settings else 0},
-                    {'icon': 'fab fa-whatsapp', 'color': 'success', 'title': 'WhatsApp', 'count': (notification_settings|selectattr('type', 'equalto', 'whatsapp')|list|length) if notification_settings else 0},
-                    {'icon': 'fas fa-envelope', 'color': 'primary', 'title': 'E-mail', 'count': (notification_settings|selectattr('type', 'equalto', 'email')|list|length) if notification_settings else 0}
-                ] %}
-
-                {% for stat in stats %}
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center p-3 bg-white rounded shadow-sm">
-                        <div class="flex-shrink-0">
-                            <i class="{{ stat.icon }} text-{{ stat.color }} fs-4"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold text-dark">{{ stat.count }}</div>
-                            <small class="text-muted">{{ stat.title }}</small>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-                        <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center fw-semibold" style="width: 60px;">
-                                <i class="fas fa-hashtag text-muted"></i>
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-broadcast-tower me-2 text-muted"></i>Canal
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-info-circle me-2 text-muted"></i>Descrição
-                            </th>
-                            <th class="fw-semibold">
-                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>Destino
-                            </th>
-                            <th class="text-center fw-semibold">
-                                <i class="fas fa-power-off me-2 text-muted"></i>Status
-                            </th>
-                            <th class="text-center fw-semibold" style="width: 140px;">
-                                <i class="fas fa-cogs me-2 text-muted"></i>Ações
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for notif in notification_settings %}
-                        <tr class="border-bottom">
-                            <td class="text-center">
-                                <span class="badge bg-light text-dark border">{{ notif.id }}</span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% if notif.type == 'whatsapp' %}
-                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="fab fa-whatsapp text-success"></i>
-                                        </div>
-                                    {% else %}
-                                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="fas fa-envelope text-primary"></i>
-                                        </div>
-                                    {% endif %}
-                                    <span class="fw-medium">{{ notif.type|capitalize }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="text-dark">{{ notif.description }}</span>
-                            </td>
-                            <td>
-                                <code class="bg-light text-dark p-1 rounded small">{{ notif.destination }}</code>
-                            </td>
-                            <td class="text-center">
-                                {% if notif.enabled %}
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                                        <i class="fas fa-check-circle me-1"></i>Ativo
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2">
-                                        <i class="fas fa-pause-circle me-1"></i>Inativo
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-primary btn-sm btn-edit-notification"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#notificationModal"
-                                        data-all='{{ notif|json_encode }}'
-                                        data-action="edit"
-                                        data-bs-toggle="tooltip"
-                                        title="Editar notificação">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm"
-                                        data-bs-toggle="tooltip"
-                                        title="Testar notificação">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm"
-                                        data-bs-toggle="tooltip"
-                                        title="Excluir notificação">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-bell-slash fs-1 mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Nenhuma configuração encontrada</h5>
-                                    <p class="mb-3">Comece criando sua primeira notificação personalizada</p>
-                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#notificationModal">
-                                        <i class="fas fa-plus me-2"></i>Criar primeira notificação
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);">
-                <div>
-                    <h5 class="modal-title mb-1">
-                        <i class="fas fa-cog me-2"></i>Configurar Notificação
-                    </h5>
-                    <small class="opacity-75">Configure os alertas e canais de comunicação</small>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form method="POST" id="notificationForm">
-                <input type="hidden" name="form_type" value="configure_notification">
-                <input type="hidden" name="id" id="notif_id">
-                
-                <div class="modal-body p-0">
-                                        <div class="bg-light bg-opacity-50 p-4 border-bottom">
-                        <h6 class="fw-bold mb-3">
-                            <i class="fas fa-sliders-h me-2 text-warning"></i>Configurações Básicas
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="notif_type" class="form-label fw-medium">
-                                    <i class="fas fa-broadcast-tower me-1"></i>Canal de Notificação
-                                </label>
-                                <select class="form-select form-select-lg" name="type" id="notif_type" required>
-                                    <option value="">Selecione um canal...</option>
-                                    <option value="email">
-                                        📧 E-mail
-                                    </option>
-                                    <option value="whatsapp">
-                                        📱 WhatsApp
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="notif_destination" class="form-label fw-medium">
-                                    <i class="fas fa-map-marker-alt me-1"></i>Destino
-                                </label>
-                                <input type="text" class="form-control form-control-lg" name="destination" id="notif_destination" 
-                                    placeholder="Ex: email@exemplo.com ou +5511999999999" required>
-                                <div class="form-text">
-                                    <small><i class="fas fa-info-circle me-1"></i>Para WhatsApp, inclua o código do país</small>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <label for="notif_description" class="form-label fw-medium">
-                                    <i class="fas fa-tag me-1"></i>Descrição
-                                </label>
-                                <input type="text" class="form-control form-control-lg" name="description" id="notif_description" 
-                                    placeholder="Ex: Alertas de Trânsito - Centro" maxlength="100" required>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <div class="form-check form-switch form-check-lg">
-                                    <input class="form-check-input" type="checkbox" id="notif_enabled" name="enabled">
-                                    <label class="form-check-label fw-medium" for="notif_enabled">
-                                        <i class="fas fa-power-off me-1"></i>Ativar
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                                        <div class="p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold mb-0">
-                                <i class="fas fa-bell me-2 text-warning"></i>Tipos de Alertas
-                            </h6>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-secondary" id="selectAllAlerts">
-                                    <i class="fas fa-check-square me-1"></i>Marcar Todos
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" id="unselectAllAlerts">
-                                    <i class="fas fa-square me-1"></i>Desmarcar Todos
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="accordion accordion-flush" id="alertsAccordion">
-                            {% set alert_groups = [
-                                {
-                                    'id': 'ACCIDENT', 
-                                    'icon': 'fas fa-car-crash text-danger', 
-                                    'title': 'Acidentes', 
-                                    'subtitle': '3 tipos disponíveis',
-                                    'badge_class': 'bg-danger-subtle text-danger',
-                                    'alerts': [
-                                        {'value': 'ACCIDENT_ACCIDENT_MINOR', 'label': 'Acidente Menor'},
-                                        {'value': 'ACCIDENT_ACCIDENT_MAJOR', 'label': 'Acidente Grave'},
-                                        {'value': 'ACCIDENT_NO_SUBTYPE', 'label': 'Acidente Geral'}
-                                    ]
-                                },
-                                {
-                                    'id': 'JAM', 
-                                    'icon': 'fas fa-traffic-light text-warning', 
-                                    'title': 'Congestionamentos', 
-                                    'subtitle': '5 tipos disponíveis',
-                                    'badge_class': 'bg-warning-subtle text-warning',
-                                    'alerts': [
-                                        {'value': 'JAM_JAM_MODERATE_TRAFFIC', 'label': 'Tráfego Moderado'},
-                                        {'value': 'JAM_JAM_HEAVY_TRAFFIC', 'label': 'Tráfego Pesado'},
-                                        {'value': 'JAM_JAM_STAND_STILL_TRAFFIC', 'label': 'Tráfego Parado'},
-                                        {'value': 'JAM_JAM_LIGHT_TRAFFIC', 'label': 'Tráfego Leve'},
-                                        {'value': 'JAM_NO_SUBTYPE', 'label': 'Congestionamento Geral'}
-                                    ]
-                                },
-                                {
-                                    'id': 'WEATHERHAZARD', 
-                                    'icon': 'fas fa-exclamation-triangle text-warning', 
-                                    'title': 'Perigos e Hazards', 
-                                    'subtitle': 'Perigos na via, clima e acostamento',
-                                    'badge_class': 'bg-warning-subtle text-warning',
-                                    'alerts': [
-                                        {'value': 'WEATHERHAZARD_HAZARD_ON_ROAD', 'label': 'Perigo na Via'},
-                                        {'value': 'WEATHERHAZARD_HAZARD_ON_SHOULDER', 'label': 'Perigo no Acostamento'},
-                                        {'value': 'WEATHERHAZARD_HAZARD_WEATHER', 'label': 'Perigo Climático'},
-                                        {'value': 'WEATHERHAZARD_HAZARD_ON_ROAD_OBJECT', 'label': 'Objeto na Via'}
-                                    ]
-                                }
-                            ] %}
-
-                            {% for group in alert_groups %}
-                            <div class="accordion-item border rounded mb-2">
-                                <h2 class="accordion-header" id="heading{{ group.id }}">
-                                    <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapse{{ group.id }}" aria-expanded="false" aria-controls="collapse{{ group.id }}">
-                                        <div class="d-flex align-items-center w-100">
-                                            <i class="{{ group.icon }} me-3 fs-5"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">{{ group.title }}</div>
-                                                <small class="text-muted">{{ group.subtitle }}</small>
-                                            </div>
-                                            <span class="badge {{ group.badge_class }} me-2">{{ group.alerts|length }}</span>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ group.id }}" class="accordion-collapse collapse" 
-                                    aria-labelledby="heading{{ group.id }}" data-bs-parent="#alertsAccordion">
-                                    <div class="accordion-body bg-light bg-opacity-25">
-                                        <div class="row g-2">
-                                            {% for alert in group.alerts %}
-                                            <div class="col-md-6">
-                                                <div class="form-check p-2 border rounded bg-white">
-                                                    <input class="form-check-input alert-checkbox" type="checkbox" 
-                                                        name="alerts[]" value="{{ alert.value }}" 
-                                                        id="alert_cb_{{ alert.value|replace(' ', '_')|upper }}">
-                                                    <label class="form-check-label fw-medium" for="alert_cb_{{ alert.value|replace(' ', '_')|upper }}">
-                                                        {{ alert.label }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                                <div class="modal-footer p-3 bg-light d-flex justify-content-between">
-                    <div>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            Cancelar
-                        </button>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-warning" id="saveNotificationBtn">
-                            <i class="fas fa-save me-2"></i>Salvar Configuração
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-$(document).ready(function () {
-    const notificationModal = $('#notificationModal');
-    const notificationForm = $('#notificationForm');
-    const notifId = $('#notif_id');
-    const notifType = $('#notif_type');
-    const notifDescription = $('#notif_description');
-    const notifDestination = $('#notif_destination');
-    const notifEnabled = $('#notif_enabled');
-    const modalTitle = notificationModal.find('.modal-title');
-    const saveBtn = $('#saveBtn');
-    const alertCheckboxes = $('.alert-checkbox');
-
-    // Inicializar tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Função para resetar o formulário
-    function resetForm() {
-        notificationForm[0].reset();
-        notifId.val('');
-        notifType.prop('disabled', false);
-        modalTitle.html('<i class="fas fa-plus me-2"></i>Nova Notificação');
-        saveBtn.html('<i class="fas fa-plus me-2"></i>Criar Notificação');
-        alertCheckboxes.prop('checked', false);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações de Notificação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
         
-        // Fechar todos os acordeões
-        $('.accordion-collapse').removeClass('show');
-    }
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            padding: 1.5rem 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            height: 100%;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .notification-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .notification-table thead {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+        }
+        
+        .notification-table th {
+            padding: 1rem;
+            font-weight: 500;
+        }
+        
+        .notification-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .notification-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .notification-table tr:hover td {
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+        
+        .channel-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .channel-icon.email {
+            background-color: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+        }
+        
+        .channel-icon.whatsapp {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background-color: rgba(46, 204, 113, 0.15);
+            color: #27ae60;
+        }
+        
+        .status-badge.inactive {
+            background-color: rgba(149, 165, 166, 0.15);
+            color: #7f8c8d;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 0 3px;
+            transition: var(--transition);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1.5rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .alert-category {
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-category-header {
+            background-color: rgba(67, 97, 238, 0.05);
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .alert-category-body {
+            padding: 1rem;
+            background-color: rgba(67, 97, 238, 0.02);
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .alert-item:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .search-container input {
+            padding-left: 45px;
+            border-radius: 50px;
+            border: 1px solid var(--light-gray);
+            height: 45px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            color: #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .badge-pill {
+            border-radius: 20px;
+            padding: 0.4em 0.8em;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .notification-tag {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+            
+            .table-responsive {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            
+            .action-btns {
+                display: flex;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="mb-3 mb-md-0">
+                    <h1 class="mb-1 fw-bold">
+                        <i class="fas fa-bell me-2"></i>Configurações de Notificação
+                    </h1>
+                    <p class="mb-0 opacity-75">Gerencie seus canais de notificação e alertas personalizados</p>
+                </div>
+                <button class="btn btn-light btn-lg shadow-sm fw-medium" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                    <i class="fas fa-plus me-2"></i>Nova Notificação
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // Marcar/Desmarcar todos os alertas
-    $('#selectAllAlerts').on('click', function() {
-        alertCheckboxes.prop('checked', true);
-        $(this).addClass('btn-success').removeClass('btn-outline-secondary');
-        setTimeout(() => {
-            $(this).removeClass('btn-success').addClass('btn-outline-secondary');
-        }, 1000);
-    });
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row mb-4 g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold h4 mb-0">12</div>
+                            <small class="text-muted">Total de Configurações</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-toggle-on"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold h4 mb-0">8</div>
+                            <small class="text-muted">Ativas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon bg-info bg-opacity-10 text-info me-3">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold h4 mb-0">5</div>
+                            <small class="text-muted">WhatsApp</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold h4 mb-0">7</div>
+                            <small class="text-muted">E-mail</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    $('#unselectAllAlerts').on('click', function() {
-        alertCheckboxes.prop('checked', false);
-        $(this).addClass('btn-danger').removeClass('btn-outline-secondary');
-        setTimeout(() => {
-            $(this).removeClass('btn-danger').addClass('btn-outline-secondary');
-        }, 1000);
-    });
+        <!-- Main Card -->
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0">Minhas Notificações</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table notification-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Canal</th>
+                                <th>Descrição</th>
+                                <th>Destino</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="channel-icon whatsapp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </div>
+                                        <span class="fw-medium">WhatsApp</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>Alertas de Trânsito - Centro</span>
+                                </td>
+                                <td>
+                                    <span class="notification-tag">+55 11 98765-4321</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle me-1"></i>Ativo
+                                    </span>
+                                </td>
+                                <td class="text-center action-btns">
+                                    <button class="btn btn-sm btn-outline-primary action-btn" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary action-btn" title="Testar">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger action-btn" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">2</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="channel-icon email">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <span class="fw-medium">E-mail</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>Alertas de Construção</span>
+                                </td>
+                                <td>
+                                    <span class="notification-tag">usuario@exemplo.com</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle me-1"></i>Ativo
+                                    </span>
+                                </td>
+                                <td class="text-center action-btns">
+                                    <button class="btn btn-sm btn-outline-primary action-btn" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary action-btn" title="Testar">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger action-btn" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">3</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="channel-icon whatsapp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </div>
+                                        <span class="fw-medium">WhatsApp</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>Alertas de Acidentes</span>
+                                </td>
+                                <td>
+                                    <span class="notification-tag">+55 11 91234-5678</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge inactive">
+                                        <i class="fas fa-pause-circle me-1"></i>Inativo
+                                    </span>
+                                </td>
+                                <td class="text-center action-btns">
+                                    <button class="btn btn-sm btn-outline-primary action-btn" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary action-btn" title="Testar">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger action-btn" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">4</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="channel-icon email">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <span class="fw-medium">E-mail</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span>Alertas de Perigo na Via</span>
+                                </td>
+                                <td>
+                                    <span class="notification-tag">gerente@empresa.com</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle me-1"></i>Ativo
+                                    </span>
+                                </td>
+                                <td class="text-center action-btns">
+                                    <button class="btn btn-sm btn-outline-primary action-btn" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary action-btn" title="Testar">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger action-btn" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // Configura o modal para edição
-    $('.btn-edit-notification').on('click', function () {
-        const data = $(this).data('all');
-        notifId.val(data.id);
-        notifType.val(data.type).prop('disabled', true);
-        notifDescription.val(data.description);
-        notifDestination.val(data.destination);
-        notifEnabled.prop('checked', data.enabled == 1);
-        modalTitle.html('<i class="fas fa-edit me-2"></i>Editar Notificação');
-        saveBtn.html('<i class="fas fa-save me-2"></i>Salvar Alterações');
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-cog me-2"></i>Configurar Notificação
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="notificationForm">
+                        <input type="hidden" name="id" id="notificationId">
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-sliders-h me-2 text-primary"></i>Configurações Básicas
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="channel" class="form-label fw-medium">Canal de Notificação</label>
+                                    <select class="form-select" name="channel" id="channel" required>
+                                        <option value="">Selecione um canal...</option>
+                                        <option value="email">📧 E-mail</option>
+                                        <option value="whatsapp">📱 WhatsApp</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="destination" class="form-label fw-medium">Destino</label>
+                                    <input type="text" class="form-control" name="destination" id="destination" 
+                                        placeholder="Ex: email@exemplo.com ou +5511999999999" required>
+                                    <div class="form-text">
+                                        <small><i class="fas fa-info-circle me-1"></i>Para WhatsApp, inclua o código do país</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="description" class="form-label fw-medium">Descrição</label>
+                                    <input type="text" class="form-control" name="description" id="description" 
+                                        placeholder="Ex: Alertas de Trânsito - Centro" maxlength="100" required>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="status" name="status" checked>
+                                        <label class="form-check-label fw-medium" for="status">
+                                            <i class="fas fa-power-off me-1"></i>Ativar
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">
+                                    <i class="fas fa-bell me-2 text-primary"></i>Tipos de Alertas
+                                </h6>
+                                <div class="d-flex">
+                                    <div class="search-container me-2">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" class="form-control" placeholder="Pesquisar alertas..." id="alertSearch">
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllAlerts">
+                                            <i class="fas fa-check-square me-1"></i>Marcar Todos
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="deselectAllAlerts">
+                                            <i class="fas fa-square me-1"></i>Desmarcar Todos
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-category">
+                                <div class="alert-category-header" data-bs-toggle="collapse" href="#accidentsCollapse">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-car-crash text-danger me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">Acidentes</div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger badge-pill">3</span>
+                                </div>
+                                <div class="collapse show" id="accidentsCollapse">
+                                    <div class="alert-category-body">
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="accidentMinor" checked>
+                                            <label class="form-check-label fw-medium" for="accidentMinor">Acidente Menor</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="accidentMajor" checked>
+                                            <label class="form-check-label fw-medium" for="accidentMajor">Acidente Grave</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="accidentGeneral">
+                                            <label class="form-check-label fw-medium" for="accidentGeneral">Acidente Geral</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-category">
+                                <div class="alert-category-header" data-bs-toggle="collapse" href="#congestionCollapse">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-traffic-light text-warning me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">Congestionamentos</div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning badge-pill">5</span>
+                                </div>
+                                <div class="collapse show" id="congestionCollapse">
+                                    <div class="alert-category-body">
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="trafficModerate" checked>
+                                            <label class="form-check-label fw-medium" for="trafficModerate">Tráfego Moderado</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="trafficHeavy" checked>
+                                            <label class="form-check-label fw-medium" for="trafficHeavy">Tráfego Pesado</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="trafficStopped">
+                                            <label class="form-check-label fw-medium" for="trafficStopped">Tráfego Parado</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="trafficLight">
+                                            <label class="form-check-label fw-medium" for="trafficLight">Tráfego Leve</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="congestionGeneral">
+                                            <label class="form-check-label fw-medium" for="congestionGeneral">Congestionamento Geral</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-category">
+                                <div class="alert-category-header" data-bs-toggle="collapse" href="#hazardsCollapse">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle text-danger me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">Perigos e Hazards</div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger badge-pill">10</span>
+                                </div>
+                                <div class="collapse" id="hazardsCollapse">
+                                    <div class="alert-category-body">
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="roadHazard">
+                                            <label class="form-check-label fw-medium" for="roadHazard">Perigo na Via</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="shoulderHazard" checked>
+                                            <label class="form-check-label fw-medium" for="shoulderHazard">Perigo no Acostamento</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="weatherHazard">
+                                            <label class="form-check-label fw-medium" for="weatherHazard">Perigo Climático</label>
+                                        </div>
+                                        <div class="alert-item">
+                                            <input class="form-check-input me-3" type="checkbox" id="objectOnRoad">
+                                            <label class="form-check-label fw-medium" for="objectOnRoad">Objeto na Via</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveNotification">Salvar Configuração</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Preenche os checkboxes com base nos alertas salvos
-        alertCheckboxes.prop('checked', false);
-        if (data.alerts && data.alerts.length > 0) {
-            data.alerts.forEach(alertValue => {
-                $(`input[name="alerts[]"][value="${alertValue}"]`).prop('checked', true);
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta configuração de notificação? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                });
             });
-        }
-    });
-
-    // Configura o modal para adicionar nova notificação
-    $('#addNotificationBtn, .btn:contains("Criar primeira notificação")').on('click', function () {
-        resetForm();
-    });
-
-    // Resetar o formulário ao fechar o modal
-    notificationModal.on('hidden.bs.modal', function () {
-        resetForm();
-    });
-
-    // Feedback visual no formulário
-    notificationForm.on('submit', function(e) {
-        saveBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Salvando...');
-        saveBtn.prop('disabled', true);
-    });
-
-    // Validação dinâmica do destino baseado no tipo
-    notifType.on('change', function() {
-        const type = $(this).val();
-        const destinationInput = $('#notif_destination');
-        
-        if (type === 'email') {
-            destinationInput.attr('type', 'email');
-            destinationInput.attr('placeholder', 'Ex: usuario@exemplo.com');
-        } else if (type === 'whatsapp') {
-            destinationInput.attr('type', 'tel');
-            destinationInput.attr('placeholder', 'Ex: +5511999999999');
-        }
-    });
-});
-</script>
+            
+            // Alert search functionality
+            const alertSearch = document.getElementById('alertSearch');
+            if (alertSearch) {
+                alertSearch.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const alertItems = document.querySelectorAll('.alert-item');
+                    
+                    alertItems.forEach(item => {
+                        const label = item.querySelector('.form-check-label').textContent.toLowerCase();
+                        if (label.includes(searchTerm)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Select/Deselect all alerts
+            const selectAllBtn = document.getElementById('selectAllAlerts');
+            const deselectAllBtn = document.getElementById('deselectAllAlerts');
+            const alertCheckboxes = document.querySelectorAll('.alert-item input[type="checkbox"]');
+            
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', function() {
+                    alertCheckboxes.forEach(checkbox => {
+                        checkbox.checked = true;
+                    });
+                    this.classList.add('btn-primary');
+                    setTimeout(() => this.classList.remove('btn-primary'), 300);
+                });
+            }
+            
+            if (deselectAllBtn) {
+                deselectAllBtn.addEventListener('click', function() {
+                    alertCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    this.classList.add('btn-primary');
+                    setTimeout(() => this.classList.remove('btn-primary'), 300);
+                });
+            }
+            
+            // Modal handling
+            const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            
+            // Edit button handling
+            const editButtons = document.querySelectorAll('.action-btn.btn-outline-primary');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // In a real app, this would load existing data
+                    document.getElementById('notificationId').value = this.closest('tr').querySelector('td:first-child').textContent;
+                    document.getElementById('channel').value = 'whatsapp';
+                    document.getElementById('destination').value = '+55 11 98765-4321';
+                    document.getElementById('description').value = 'Alertas de Trânsito - Centro';
+                    document.getElementById('status').checked = true;
+                    
+                    notificationModal.show();
+                });
+            });
+            
+            // Test button handling
+            const testButtons = document.querySelectorAll('.action-btn.btn-outline-secondary');
+            testButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const channel = row.querySelector('td:nth-child(2) .fw-medium').textContent;
+                    const destination = row.querySelector('td:nth-child(4) .notification-tag').textContent;
+                    
+                    alert(`Enviando notificação de teste via ${channel} para ${destination}`);
+                    
+                    // Visual feedback
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                        this.disabled = false;
+                        alert('Notificação de teste enviada com sucesso!');
+                    }, 1500);
+                });
+            });
+            
+            // Delete button handling
+            const deleteButtons = document.querySelectorAll('.action-btn.btn-outline-danger');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const notificationId = row.querySelector('td:first-child').textContent;
+                    
+                    document.getElementById('confirmDelete').onclick = function() {
+                        // In a real app, this would make an API call to delete
+                        row.style.opacity = '0.5';
+                        row.style.backgroundColor = '#ffebee';
+                        
+                        setTimeout(() => {
+                            row.remove();
+                            alert(`Notificação #${notificationId} excluída com sucesso!`);
+                        }, 500);
+                        
+                        deleteModal.hide();
+                    };
+                    
+                    deleteModal.show();
+                });
+            });
+            
+            // Save notification
+            const saveBtn = document.getElementById('saveNotification');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    const form = document.getElementById('notificationForm');
+                    const formData = new FormData(form);
+                    
+                    // Basic validation
+                    if (!formData.get('channel')) {
+                        alert('Por favor, selecione um canal de notificação.');
+                        return;
+                    }
+                    
+                    if (!formData.get('destination')) {
+                        alert('Por favor, informe o destino da notificação.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+                    this.disabled = true;
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        // Reset button
+                        this.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Configuração';
+                        this.disabled = false;
+                        
+                        // Close modal
+                        notificationModal.hide();
+                        
+                        // Show success message
+                        alert('Configuração de notificação salva com sucesso!');
+                    }, 1500);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
