@@ -735,6 +735,8 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
     $street = $jsonData['street'] ?? 'Nome da via desconhecida';
     $lat = $jsonData['location_x'] ?? 'LATITUDE_INDEFINIDA';
     $lng = $jsonData['location_y'] ?? 'LONGITUDE_INDEFINIDA';
+    $type = $jsonData['type'] ?? ' ';
+    $subtype = $jsonData['subtype'] ?? '';
     $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
     $uuid = $jsonData['uuid'] ?? 'UUID_INDEFINIDO';
@@ -745,7 +747,7 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
         return false; // Retorna falso se as credenciais não estiverem disponíveis
     }
 
-    $mensagem = "🚨 Alerta de Acidente: UUID: {$uuid} Um acidente foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
+    $mensagem = "🚨 Alerta recebido: Tipo: {$type} e subtipo {$subtype} Um alerta foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
 
     // Instancia a classe corretamente com os tokens
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
