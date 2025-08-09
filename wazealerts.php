@@ -264,7 +264,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
         $stmt = $pdo->prepare("SELECT uuid FROM jams WHERE source_url = ?");
         $stmt->execute([$url]);
         $existingUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        var_dump($existingUuids);
+        //var_dump($existingUuids);
 
         // 2. Processa cada jam recebido
         $processedUuids = [];
