@@ -37,6 +37,22 @@ date_default_timezone_set('America/Sao_Paulo');
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+function generateUuid(): string
+{
+    // UUID v4 é gerado com 32 caracteres hexadecimais e 4 hífens
+    return sprintf(
+        '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0x0fff) | 0x4000, // Versão 4
+        mt_rand(0, 0x3fff) | 0x8000, // Bits 6 e 7 de 10
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff)
+    );
+}
+
 // Função para realizar consultas SELECT no banco de dados
 function getSiteUsers(PDO $pdo, $userId)
 {
@@ -180,7 +196,7 @@ function is_assoc(array $array): bool
 }
 
 // Função para obter informações dos usuários
-/*function getSiteUsers(PDO $pdo, $userId)
+function getSiteUsers(PDO $pdo, $userId)
 {
     // Consulta SQL para buscar informações do usuário
     $sql = "SELECT * FROM users WHERE id = :id";
@@ -197,7 +213,7 @@ function is_assoc(array $array): bool
     // Retorna as informações do usuário como um array associativo
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-*/
+
 
 // Obtém configurações do site
 function getSiteSettings(PDO $pdo)
