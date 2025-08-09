@@ -41,6 +41,32 @@ require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 require_once __DIR__ . '/config/configs.php';
 
+/**
+ * Calcula a distância entre duas coordenadas usando a Fórmula de Haversine.
+ * @param float $latitudeFrom Latitude do ponto de origem.
+ * @param float $longitudeFrom Longitude do ponto de origem.
+ * @param float $latitudeTo Latitude do ponto de destino.
+ * @param float $longitudeTo Longitude do ponto de destino.
+ * @param int $earthRadius Raio da Terra em metros (padrão 6371000).
+ * @return float Distância em metros.
+ */
+function haversineGreatCircleDistance(
+  $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
+{
+  // Converter para radianos
+  $latFrom = deg2rad($latitudeFrom);
+  $lonFrom = deg2rad($longitudeFrom);
+  $latTo = deg2rad($latitudeTo);
+  $lonTo = deg2rad($longitudeTo);
+
+  $latDelta = $latTo - $latFrom;
+  $lonDelta = $lonTo - $lonFrom;
+
+  $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+    cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+  return $angle * $earthRadius;
+}
+
 function getUrlsFromDb(PDO $pdo)
 {
     $stmt = $pdo->query("SELECT url, id_parceiro FROM urls_alerts");
@@ -85,6 +111,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
     $pdo->beginTransaction();
 
     try {
+        // 1. Busca todos os alertas ATIVOS para esta URL.
         $stmt = $pdo->prepare("SELECT * FROM alerts WHERE source_url = ? AND status = 1");
         $cleanUrl = strtolower(trim($url));
         $stmt->execute([$cleanUrl]);
@@ -93,6 +120,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $existingAlerts[$row['uuid']] = $row;
         }
 
+        // 2. Prepara a query de inserção/atualização.
         $stmtInsertUpdate = $pdo->prepare("INSERT INTO alerts (
             uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
             reliability, type, roadType, magvar, subtype, street, location_x, location_y, pubMillis,
@@ -110,10 +138,12 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             status = 1, date_updated = VALUES(date_updated), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
 
         $incomingUuids = [];
+        $DUPLICATE_DISTANCE_THRESHOLD = 500; // Distância em metros para considerar um alerta como duplicado
 
         foreach ($alerts as $alert) {
-            if (!isset($alert['location']['x'], $alert['location']['y']))
+            if (!isset($alert['location']['x'], $alert['location']['y'])) {
                 continue;
+            }
 
             $uuid = $alert['uuid'];
             $incomingUuids[] = $uuid;
@@ -139,13 +169,29 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
             $isNew = !isset($existingAlerts[$uuid]);
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
-            /*echo "Alerta $uuid já existe? " . (isset($existingAlerts[$uuid]) ? 'sim' : 'não') . PHP_EOL;
-            echo "Deve atualizar? " . ($shouldUpdate ? 'sim' : 'não') . PHP_EOL;
-            if ($isNew) {
-                var_dump($flatAlert);
-            }*/
 
-            if ($shouldUpdate) {
+            // AQUI ESTÁ A NOVA LÓGICA
+            $isDuplicate = false;
+            if ($isNew) {
+                foreach ($existingAlerts as $existingUuid => $existingAlert) {
+                    $distance = haversineGreatCircleDistance(
+                        $flatAlert['location_y'], // latitude
+                        $flatAlert['location_x'], // longitude
+                        $existingAlert['location_y'],
+                        $existingAlert['location_x']
+                    );
+                    
+                    // Se o novo alerta for do mesmo tipo e estiver muito próximo de um alerta ativo, ignore-o.
+                    if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
+                        echo "[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)\n";
+                        $isDuplicate = true;
+                        break; // Não precisa checar os outros alertas
+                    }
+                }
+            }
+            
+            // Só executa a inserção/atualização se não for um duplicado e houver mudança
+            if (!$isDuplicate && $shouldUpdate) {
                 $stmtInsertUpdate->execute([
                     ':uuid' => $flatAlert['uuid'],
                     ':country' => $flatAlert['country'],
@@ -168,34 +214,30 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     ':km' => $km,
                     ':id_parceiro' => $id_parceiro
                 ]);
-                $isNewAlert = [];
                 $rows = $stmtInsertUpdate->rowCount();
 
                 if ($rows === 0) {
                     echo "[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)\n";
                 } elseif ($rows === 1) {
                     echo "[INSERIDO] UUID: $uuid\n";
-                    $isNewAlert = true;
+                    // Envia notificação push se for um novo alerta de acidente ou perigo (e não duplicado)
+                    if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2)  {
+                        // Dados de autenticação e destino
+                        $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
+                        $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
+                        $numero = '5531991903533'; // Número com DDI + DDD
+                        enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
+                    }
                 } elseif ($rows === 2) {
                     echo "[ATUALIZADO] UUID: $uuid\n";
                 } else {
                     echo "[???] UUID: $uuid – Valor inesperado de rowCount(): $rows\n";
                 }
-
-
-                echo $isNew ? "Novo alerta: $uuid\n" : "Atualizado alerta: $uuid\n";
             }
 
-            // Envia notificação push se for um novo alerta de acidente ou perigo
-            if ($isNewAlert && $flatAlert['type'] === 'ACCIDENT' &&$id_parceiro == 2)  {
-                // Dados de autenticação e destino
-                $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
-                $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
-                $numero = '5531991903533'; // Número com DDI + DDD
-                enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
-            }
         }
 
+        // 3. Desativa alertas que não foram recebidos na última atualização
         $stmtDeactivate = $pdo->prepare("UPDATE alerts SET status = 0, date_updated = ? WHERE uuid = ? AND source_url = ?");
         foreach (array_keys($existingAlerts) as $uuid) {
             if (!in_array($uuid, $incomingUuids)) {
@@ -425,3 +467,5 @@ echo "Processamento concluído!" . PHP_EOL;
 $endTime = microtime(true);
 $totalTime = $endTime - $startTime;
 echo "Tempo total de execução: " . round($totalTime, 2) . " segundos" . PHP_EOL;
+
+?>
