@@ -454,7 +454,7 @@ $totalTime = $endTime - $startTime;
 logToJson("Tempo total de execução: " . round($totalTime, 2) . " segundos");
 
 // Salva o log completo no arquivo
-$logFilePath = __DIR__ . '/../logs/log_' . date('Y-m-d_H-i-s') . '.json';
+$logFilePath = __DIR__ . './logs/log_' . date('Y-m-d_H-i-s') . '.json';
 echo "Salvando log em: $logFilePath" . PHP_EOL;
 saveLogFile($logFilePath);
 
