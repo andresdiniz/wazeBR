@@ -25,7 +25,37 @@ try {
 
 date_default_timezone_set('America/Sao_Paulo');
 $currentDateTime = date('Y-m-d H:i:s');
-echo "Horário de referência: $currentDateTime" . PHP_EOL;
+$logMessages = []; // Variável global para armazenar as mensagens de log
+
+/**
+ * Adiciona uma mensagem ao array de log global.
+ * @param string $message A mensagem de log.
+ * @param string $level O nível do log (ex: "info", "error", "warning").
+ */
+function logToJson($message, $level = 'info')
+{
+    global $logMessages;
+    $logMessages[] = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'level' => $level,
+        'message' => $message
+    ];
+    // Opcional: exibe a mensagem no console também
+    echo "[" . strtoupper($level) . "] " . $message . PHP_EOL;
+}
+
+/**
+ * Salva o array de logs em um arquivo JSON.
+ * @param string $filePath O caminho completo para o arquivo.
+ */
+function saveLogFile($filePath)
+{
+    global $logMessages;
+    $jsonContent = json_encode($logMessages, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    file_put_contents($filePath, $jsonContent);
+}
+
+logToJson("Horário de referência: $currentDateTime");
 
 if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     ini_set('log_errors', 1);
@@ -35,25 +65,15 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
     }
 }
 
-set_time_limit(30); // Define o tempo máximo de execução do script
+set_time_limit(30);
 
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
 require_once __DIR__ . '/config/configs.php';
 
-/**
- * Calcula a distância entre duas coordenadas usando a Fórmula de Haversine.
- * @param float $latitudeFrom Latitude do ponto de origem.
- * @param float $longitudeFrom Longitude do ponto de origem.
- * @param float $latitudeTo Latitude do ponto de destino.
- * @param float $longitudeTo Longitude do ponto de destino.
- * @param int $earthRadius Raio da Terra em metros (padrão 6371000).
- * @return float Distância em metros.
- */
 function haversineGreatCircleDistance(
   $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
 {
-  // Converter para radianos
   $latFrom = deg2rad($latitudeFrom);
   $lonFrom = deg2rad($longitudeFrom);
   $latTo = deg2rad($latitudeTo);
@@ -88,7 +108,7 @@ function fetchAlertsFromApi($url)
         curl_close($ch);
         return json_decode($response, true);
     } catch (Exception $e) {
-        echo "Erro ao buscar dados da API ($url): " . $e->getMessage() . PHP_EOL;
+        logToJson("Erro ao buscar dados da API ($url): " . $e->getMessage(), 'error');
         return null;
     }
 }
@@ -111,7 +131,6 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
     $pdo->beginTransaction();
 
     try {
-        // 1. Busca todos os alertas ATIVOS para esta URL.
         $stmt = $pdo->prepare("SELECT * FROM alerts WHERE source_url = ? AND status = 1");
         $cleanUrl = strtolower(trim($url));
         $stmt->execute([$cleanUrl]);
@@ -120,7 +139,6 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $existingAlerts[$row['uuid']] = $row;
         }
 
-        // 2. Prepara a query de inserção/atualização.
         $stmtInsertUpdate = $pdo->prepare("INSERT INTO alerts (
             uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
             reliability, type, roadType, magvar, subtype, street, location_x, location_y, pubMillis,
@@ -138,7 +156,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             status = 1, date_updated = VALUES(date_updated), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
 
         $incomingUuids = [];
-        $DUPLICATE_DISTANCE_THRESHOLD = 500; // Distância em metros para considerar um alerta como duplicado
+        $DUPLICATE_DISTANCE_THRESHOLD = 500;
 
         foreach ($alerts as $alert) {
             if (!isset($alert['location']['x'], $alert['location']['y'])) {
@@ -169,28 +187,25 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
             $isNew = !isset($existingAlerts[$uuid]);
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
-
-            // AQUI ESTÁ A NOVA LÓGICA
             $isDuplicate = false;
+
             if ($isNew) {
                 foreach ($existingAlerts as $existingUuid => $existingAlert) {
                     $distance = haversineGreatCircleDistance(
-                        $flatAlert['location_y'], // latitude
-                        $flatAlert['location_x'], // longitude
+                        $flatAlert['location_y'],
+                        $flatAlert['location_x'],
                         $existingAlert['location_y'],
                         $existingAlert['location_x']
                     );
                     
-                    // Se o novo alerta for do mesmo tipo e estiver muito próximo de um alerta ativo, ignore-o.
                     if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
-                        echo "[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)\n";
+                        logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
                         $isDuplicate = true;
-                        break; // Não precisa checar os outros alertas
+                        break;
                     }
                 }
             }
             
-            // Só executa a inserção/atualização se não for um duplicado e houver mudança
             if (!$isDuplicate && $shouldUpdate) {
                 $stmtInsertUpdate->execute([
                     ':uuid' => $flatAlert['uuid'],
@@ -217,35 +232,30 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 $rows = $stmtInsertUpdate->rowCount();
 
                 if ($rows === 0) {
-                    echo "[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)\n";
+                    logToJson("[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)");
                 } elseif ($rows === 1) {
-                    echo "[INSERIDO] UUID: $uuid\n";
-                    // Envia notificação push se for um novo alerta de acidente ou perigo (e não duplicado)
+                    logToJson("[INSERIDO] UUID: $uuid");
                     if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2)  {
-                        // Dados de autenticação e destino
                         $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                         $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
-                        $numero = '5531991903533'; // Número com DDI + DDD
+                        $numero = '5531991903533';
                         enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
                     }
                 } elseif ($rows === 2) {
-                    echo "[ATUALIZADO] UUID: $uuid\n";
+                    logToJson("[ATUALIZADO] UUID: $uuid");
                 } else {
-                    echo "[???] UUID: $uuid – Valor inesperado de rowCount(): $rows\n";
+                    logToJson("[???] UUID: $uuid – Valor inesperado de rowCount(): $rows", 'warning');
                 }
             }
-
         }
 
-        // 3. Desativa alertas que não foram recebidos na última atualização
         $stmtDeactivate = $pdo->prepare("UPDATE alerts SET status = 0, date_updated = ? WHERE uuid = ? AND source_url = ?");
         foreach (array_keys($existingAlerts) as $uuid) {
             if (!in_array($uuid, $incomingUuids)) {
                 $stmtDeactivate->execute([$currentDateTime, $uuid, $url]);
-                echo "Alerta desativado: $uuid\n";
+                logToJson("Alerta desativado: $uuid");
             }
         }
-
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -256,20 +266,14 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
 {
     $currentDateTime = date('Y-m-d H:i:s');
-
     $pdo->beginTransaction();
 
     try {
-        // 1. Busca jams existentes para esta URL
         $stmt = $pdo->prepare("SELECT uuid FROM jams WHERE source_url = ?");
         $stmt->execute([$url]);
         $existingUuids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        //var_dump($existingUuids);
 
-        // 2. Processa cada jam recebido
         $processedUuids = [];
-
-        // Query para inserir/atualizar jams
         $stmtJam = $pdo->prepare("
             INSERT INTO jams (
                 uuid, country, city, level, speedKMH, length, turnType, endNode, speed,
@@ -297,14 +301,12 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 date_updated = NOW()
         ");
 
-        // Query para limpar e inserir linhas (coordenadas)
         $stmtDeleteLines = $pdo->prepare("DELETE FROM jam_lines WHERE jam_uuid = ?");
         $stmtInsertLine = $pdo->prepare("
             INSERT INTO jam_lines (jam_uuid, sequence, x, y)
             VALUES (:jam_uuid, :sequence, :x, :y)
         ");
 
-        // Query para limpar e inserir segmentos
         $stmtDeleteSegments = $pdo->prepare("DELETE FROM jam_segments WHERE jam_uuid = ?");
         $stmtInsertSegment = $pdo->prepare("
             INSERT INTO jam_segments (jam_uuid, fromNode, ID_segment, toNode, isForward)
@@ -315,7 +317,6 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
             $uuid = $jam['uuid'];
             $processedUuids[] = $uuid;
 
-            // Insere/Atualiza o jam principal
             $stmtJam->execute([
                 ':uuid' => $uuid,
                 ':country' => $jam['country'] ?? null,
@@ -336,12 +337,8 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 ':date_updated' => $currentDateTime
             ]);
 
-            // Processa linhas (coordenadas)
             if (!empty($jam['line'])) {
-                // Remove linhas antigas
                 $stmtDeleteLines->execute([$uuid]);
-
-                // Insere novas linhas com sequência
                 $sequence = 0;
                 foreach ($jam['line'] as $point) {
                     $stmtInsertLine->execute([
@@ -353,12 +350,8 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 }
             }
 
-            // Processa segmentos
             if (!empty($jam['segments'])) {
-                // Remove segmentos antigos
                 $stmtDeleteSegments->execute([$uuid]);
-
-                // Insere novos segmentos
                 foreach ($jam['segments'] as $segment) {
                     $stmtInsertSegment->execute([
                         ':jam_uuid' => $uuid,
@@ -370,8 +363,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 }
             }
         }
-
-        // 3. Desativa APENAS jams ATIVOS que não foram recebidos
+        
         $uuidsToDeactivate = array_diff($existingUuids, $processedUuids);
         if (!empty($uuidsToDeactivate)) {
             $placeholders = implode(',', array_fill(0, count($uuidsToDeactivate), '?'));
@@ -380,13 +372,11 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 SET status = 0, date_updated = NOW()
                 WHERE uuid IN ($placeholders) 
                   AND source_url = ?
-                  AND status = 1  
+                  AND status = 1
             ");
-
             $params = array_merge($uuidsToDeactivate, [$url]);
             $stmtDeactivate->execute($params);
         }
-
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -397,11 +387,9 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
 function saveJamsToDbEmpty(PDO $pdo, $id_parceiro)
 {
     $currentDateTime = date('Y-m-d H:i:s');
-
     $pdo->beginTransaction();
 
     try {
-        // Desativa todos os jams para o parceiro
         $stmtDeactivate = $pdo->prepare("
             UPDATE jams 
             SET status = 0, date_updated = NOW()
@@ -409,7 +397,6 @@ function saveJamsToDbEmpty(PDO $pdo, $id_parceiro)
         ");
         $stmtDeactivate->execute([$id_parceiro]);
 
-        // Confirma a transação
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -426,7 +413,7 @@ function processAlerts()
         $url = $entry['url'];
         $id_parceiro = $entry['id_parceiro'];
 
-        echo PHP_EOL . "Processando URL: $url" . PHP_EOL;
+        logToJson("Processando URL: $url");
         $startUrl = microtime(true);
 
         $jsonData = fetchAlertsFromApi($url);
@@ -436,36 +423,39 @@ function processAlerts()
                 $startAlerts = microtime(true);
                 saveAlertsToDb($pdo, $jsonData['alerts'], $url, $id_parceiro);
                 $endAlerts = microtime(true);
-                echo "Tempo salvar alertas: " . round($endAlerts - $startAlerts, 2) . " segundos" . PHP_EOL;
+                logToJson("Tempo salvar alertas: " . round($endAlerts - $startAlerts, 2) . " segundos");
             } catch (Exception $e) {
-                echo "Erro ao processar alertas: " . $e->getMessage() . PHP_EOL;
+                logToJson("Erro ao processar alertas: " . $e->getMessage(), 'error');
             }
         }
 
-        // Processa Jams
         if (array_key_exists('jams', $jsonData)) {
             saveJamsToDb($pdo, $jsonData['jams'], $url, $id_parceiro);
         } else {
-            // Se não veio a chave 'jams', considera como array vazio para desativar os existentes
-            echo "Desativando alertas para o parceiro: $id_parceiro" . PHP_EOL;
+            logToJson("Desativando alertas para o parceiro: $id_parceiro");
             saveJamsToDbEmpty($pdo, $id_parceiro);
         }
         if (empty($jsonData['jams'])) {
-            echo "Nenhum  jam encontrado na URL: $url" . PHP_EOL;
+            logToJson("Nenhum jam encontrado na URL: $url");
             saveJamsToDbEmpty($pdo, $id_parceiro);
         }
 
         $endUrl = microtime(true);
-        echo "Tempo total da URL: " . round($endUrl - $startUrl, 2) . " segundos" . PHP_EOL;
+        logToJson("Tempo total da URL: " . round($endUrl - $startUrl, 2) . " segundos");
     }
 }
 
-echo "Iniciando o processo de atualização dos alertas..." . PHP_EOL;
+logToJson("Iniciando o processo de atualização dos alertas...");
 processAlerts();
-echo "Processamento concluído!" . PHP_EOL;
+logToJson("Processamento concluído!");
 
 $endTime = microtime(true);
 $totalTime = $endTime - $startTime;
-echo "Tempo total de execução: " . round($totalTime, 2) . " segundos" . PHP_EOL;
+logToJson("Tempo total de execução: " . round($totalTime, 2) . " segundos");
+
+// Salva o log completo no arquivo
+$logFilePath = __DIR__ . '/../logs/log_' . date('Y-m-d_H-i-s') . '.json';
+echo "Salvando log em: $logFilePath" . PHP_EOL;
+saveLogFile($logFilePath);
 
 ?>
