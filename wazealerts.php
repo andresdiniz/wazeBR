@@ -32,17 +32,7 @@ $logMessages = []; // Variável global para armazenar as mensagens de log
  * @param string $message A mensagem de log.
  * @param string $level O nível do log (ex: "info", "error", "warning").
  */
-function logToJson($message, $level = 'info')
-{
-    global $logMessages;
-    $logMessages[] = [
-        'timestamp' => date('Y-m-d H:i:s'),
-        'level' => $level,
-        'message' => $message
-    ];
-    // Opcional: exibe a mensagem no console também
-    echo "[" . strtoupper($level) . "] " . $message . PHP_EOL;
-}
+
 
 /**
  * Salva o array de logs em um arquivo JSON.
@@ -240,6 +230,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                         $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
                         $numero = '5531991903533';
                         enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
+                        logToJson("Mensagem enviada UUID: $uuid");
                     }
                 } elseif ($rows === 2) {
                     logToJson("[ATUALIZADO] UUID: $uuid");

@@ -769,5 +769,17 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
 
     // Envia a mensagem de texto
     $resposta = $api->enviarTexto($numero, $mensagem);
-    //var_dump(json_decode($resposta, true));
+    logToJson(json_decode($resposta, true));
+}
+
+function logToJson($message, $level = 'info')
+{
+    global $logMessages;
+    $logMessages[] = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'level' => $level,
+        'message' => $message
+    ];
+    // Opcional: exibe a mensagem no console também
+    echo "[" . strtoupper($level) . "] " . $message . PHP_EOL;
 }
