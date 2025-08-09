@@ -7,8 +7,9 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
 
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
+require_once __DIR__ . '/config/configs.php';
 
 use Dotenv\Dotenv;
 
@@ -59,10 +60,6 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 }
 
 set_time_limit(30);
-
-require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ . '/functions/scripts.php';
-require_once __DIR__ . '/config/configs.php';
 
 function haversineGreatCircleDistance(
   $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
