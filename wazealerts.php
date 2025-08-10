@@ -192,21 +192,28 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     );
 
                     if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
-                        // Registra o log do alerta duplicado
+                        // Loga a duplicidade
                         logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
 
-                        // Prepara e executa a inserção na tabela de alertas duplicados
-                        $stmtInsertDuplicate = $pdo->prepare("INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update) VALUES (?, ?, ?)");
-                        $stmtInsertDuplicate->execute([
-                            $uuid,
-                            $existingUuid,
-                            $currentDateTime
-                        ]); // <- O fechamento correto está aqui
+                        // Prepara a consulta para verificar se a duplicidade já existe
+                        $stmtCheckDuplicate = $pdo->prepare("SELECT COUNT(*) FROM duplicate_alerts WHERE uuid = ? AND uuid_corresp = ?");
+                        $stmtCheckDuplicate->execute([$uuid, $existingUuid]);
+                        $isAlreadyRegistered = $stmtCheckDuplicate->fetchColumn() > 0;
 
-                        // Marca o alerta como duplicado para ser ignorado no loop
+                        if ($isAlreadyRegistered) {
+                            // Se já existe, apenas atualiza a data
+                            $stmtUpdateDuplicate = $pdo->prepare("UPDATE duplicate_alerts SET last_update = ? WHERE uuid = ? AND uuid_corresp = ?");
+                            $stmtUpdateDuplicate->execute([$currentDateTime, $uuid, $existingUuid]);
+                            logToJson("[DUPLICADO ATUALIZADO] O registro de duplicidade para $uuid já existia e foi atualizado.");
+                        } else {
+                            // Se não existe, insere um novo registro
+                            $stmtInsertDuplicate = $pdo->prepare("INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update) VALUES (?, ?, ?)");
+                            $stmtInsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
+                            logToJson("[DUPLICADO INSERIDO] Novo registro de duplicidade criado para $uuid.");
+                        }
+
+                        // Marca o alerta como duplicado e sai do loop
                         $isDuplicate = true;
-
-                        // Sai do loop interno para não checar outros alertas existentes
                         break;
                     }
                 }
