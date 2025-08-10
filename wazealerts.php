@@ -182,7 +182,21 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
             $isDuplicate = false;
 
+            $checkseduplicado = false;
+
+            // Verifica se o alerta é novo e se já existe um alerta próximo
+            $alertsduplicados = = $pdo->prepare("SELECT * FROM  duplicate_alerts WHERE uuid = ?");
+            $alertsduplicados->execute([$uuid]);
+            $existingDuplicate = $alertsduplicados->fetch(PDO::FETCH_ASSOC);
+            if ($existingDuplicate) {
+                $checkseduplicado = true;
+                logToJson("[DUPLICADO] Alerta $uuid já existe na tabela de duplicados.");
+            }
+
+
+            // Verifique se o alerta é novo. Se sim, inicie a verificação de duplicidade por proximidade.
             if ($isNew) {
+                // Itere sobre os alertas existentes (ativos)
                 foreach ($existingAlerts as $existingUuid => $existingAlert) {
                     $distance = haversineGreatCircleDistance(
                         $flatAlert['location_y'],
@@ -191,22 +205,30 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                         $existingAlert['location_x']
                     );
 
+                    // Se o novo alerta for do mesmo tipo e estiver dentro da distância limite
                     if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
-                        // Registra o log do alerta duplicado
+                        // Loga a duplicidade para o arquivo JSON
                         logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
 
-                        // Prepara e executa a inserção na tabela de alertas duplicados
-                        $stmtInsertDuplicate = $pdo->prepare("INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update) VALUES (?, ?, ?)");
-                        $stmtInsertDuplicate->execute([
-                            $uuid,
-                            $existingUuid,
-                            $currentDateTime
-                        ]); // <- O fechamento correto está aqui
+                        // Prepara a consulta para inserir ou atualizar o registro de duplicidade
+                        // O ON DUPLICATE KEY UPDATE garante que não haverá duplicidade na tabela
+                        $stmtUpsertDuplicate = $pdo->prepare("
+                            INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update)
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE last_update = VALUES(last_update)
+                        ");
+                        
+                        try {
+                            $stmtUpsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
+                            logToJson("[DUPLICADO REGISTRADO] Registro de duplicidade para $uuid inserido ou atualizado.");
+                        } catch (PDOException $e) {
+                            logToJson("Erro ao inserir/atualizar duplicata: " . $e->getMessage(), 'error');
+                        }
 
-                        // Marca o alerta como duplicado para ser ignorado no loop
+                        // Marca o alerta como duplicado para ignorar a inserção principal
                         $isDuplicate = true;
 
-                        // Sai do loop interno para não checar outros alertas existentes
+                        // Sai do loop interno, pois já encontramos uma duplicata
                         break;
                     }
                 }
