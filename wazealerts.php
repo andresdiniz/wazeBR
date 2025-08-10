@@ -149,7 +149,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             status = 1, date_updated = VALUES(date_updated), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
 
         $incomingUuids = [];
-        $DUPLICATE_DISTANCE_THRESHOLD = 500;
+        $DUPLICATE_DISTANCE_THRESHOLD = 800;
 
         foreach ($alerts as $alert) {
             if (!isset($alert['location']['x'], $alert['location']['y'])) {
