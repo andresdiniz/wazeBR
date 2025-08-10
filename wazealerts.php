@@ -37,7 +37,6 @@ $logMessages = []; // Variável global para armazenar as mensagens de log
  * @param string $level O nível do log (ex: "info", "error", "warning").
  */
 
-
 /**
  * Salva o array de logs em um arquivo JSON.
  * @param string $filePath O caminho completo para o arquivo.
@@ -62,19 +61,23 @@ if (isset($_ENV['DEBUG']) && $_ENV['DEBUG'] == 'true') {
 set_time_limit(30);
 
 function haversineGreatCircleDistance(
-  $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
-{
-  $latFrom = deg2rad($latitudeFrom);
-  $lonFrom = deg2rad($longitudeFrom);
-  $latTo = deg2rad($latitudeTo);
-  $lonTo = deg2rad($longitudeTo);
+    $latitudeFrom,
+    $longitudeFrom,
+    $latitudeTo,
+    $longitudeTo,
+    $earthRadius = 6371000
+) {
+    $latFrom = deg2rad($latitudeFrom);
+    $lonFrom = deg2rad($longitudeFrom);
+    $latTo = deg2rad($latitudeTo);
+    $lonTo = deg2rad($longitudeTo);
 
-  $latDelta = $latTo - $latFrom;
-  $lonDelta = $lonTo - $lonFrom;
+    $latDelta = $latTo - $latFrom;
+    $lonDelta = $lonTo - $lonFrom;
 
-  $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-    cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-  return $angle * $earthRadius;
+    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+        cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+    return $angle * $earthRadius;
 }
 
 function getUrlsFromDb(PDO $pdo)
@@ -187,15 +190,28 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                         $existingAlert['location_y'],
                         $existingAlert['location_x']
                     );
-                    
+
                     if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
+                        // Registra o log do alerta duplicado
                         logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
+
+                        // Prepara e executa a inserção na tabela de alertas duplicados
+                        $stmtInsertDuplicate = $pdo->prepare("INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update) VALUES (?, ?, ?)");
+                        $stmtInsertDuplicate->execute([
+                            $uuid,
+                            $existingUuid,
+                            $currentDateTime
+                        ]); // <- O fechamento correto está aqui
+
+                        // Marca o alerta como duplicado para ser ignorado no loop
                         $isDuplicate = true;
+
+                        // Sai do loop interno para não checar outros alertas existentes
                         break;
                     }
                 }
             }
-            
+
             if (!$isDuplicate && $shouldUpdate) {
                 $stmtInsertUpdate->execute([
                     ':uuid' => $flatAlert['uuid'],
@@ -225,7 +241,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     logToJson("[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)");
                 } elseif ($rows === 1) {
                     logToJson("[INSERIDO] UUID: $uuid");
-                    if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2)  {
+                    if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2) {
                         $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                         $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
                         $numero = '5531991903533';
@@ -354,7 +370,7 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
                 }
             }
         }
-        
+
         $uuidsToDeactivate = array_diff($existingUuids, $processedUuids);
         if (!empty($uuidsToDeactivate)) {
             $placeholders = implode(',', array_fill(0, count($uuidsToDeactivate), '?'));
