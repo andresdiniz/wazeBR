@@ -755,6 +755,7 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
     $subtype = $jsonData['subtype'] ?? '';
     $timestampMs = $jsonData['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
+    $cidade = $jsonData['city'] ?? null;
 
     // Verifica se as credenciais foram obtidas corretamente
     if (empty($deviceToken) || empty($authToken)) {
@@ -762,7 +763,36 @@ function enviarNotificacaoPush($deviceToken, $authToken, $numero, $jsonData)
         return false; // Retorna falso se as credenciais não estiverem disponíveis
     }
 
-    $mensagem = "🚨 Alerta recebido: Tipo: {$type} e subtipo {$subtype} foi reportado em {$street} no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}. Por favor, verifique envie equipe especilizada.";
+    $partes = [];
+
+$partes[] = "🚨 Alerta recebido:";
+$partes[] = "Tipo: {$type}";
+
+// Adiciona subtipo se existir
+if (!empty($subtype)) {
+    $partes[] = "e subtipo {$subtype}";
+}
+
+// Adiciona localização se existir
+if (!empty($street) || !empty($cidade)) {
+    $localizacao = [];
+
+    if (!empty($street)) {
+        $localizacao[] = $street;
+    }
+
+    if (!empty($cidade)) {
+        $localizacao[] = "cidade de {$cidade}";
+    }
+
+    $partes[] = "foi reportado em " . implode(" na ", $localizacao);
+}
+
+// Adiciona link e hora
+$partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}.";
+$partes[] = "Por favor, verifique e envie equipe especializada.";
+
+$mensagem = implode(" ", $partes);
 
     // Instancia a classe corretamente com os tokens
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
