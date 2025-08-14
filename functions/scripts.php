@@ -844,7 +844,7 @@ function logToJsonNotify(
     ];
 
     file_put_contents(
-        __DIR__ . '/logs/logs_notifications/notification_log.json', 
+        __DIR__ . '/../logs/logs_notifications/notification_log.json', 
         json_encode($logEntry, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n", 
         FILE_APPEND
     );
