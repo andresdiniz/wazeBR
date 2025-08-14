@@ -33,6 +33,7 @@ $currentDateTime = date('Y-m-d H:i:s');
 // 1. Buscar todos os alertas pendentes e ativos
 try {
     $pdo = Database::getConnection();
+    $pdo->beginTransaction();
     $sqlFila = "
         SELECT f.id AS fila_id, f.uuid_alerta, f.id_parceiro, a.type AS alert_type, a.subtype AS alert_subtype,
                a.street, a.city, a.country
