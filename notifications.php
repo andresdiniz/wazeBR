@@ -69,8 +69,10 @@ try {
 
     $pdo->commit();
 } catch (\Exception $e) {
-    $pdo->rollBack();
-    die("Erro ao buscar alertas ou usuários: ".$e->getMessage());
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    die("Erro: " . $e->getMessage());
 }
 
 // 3. Preparar inserções de fila em lote
