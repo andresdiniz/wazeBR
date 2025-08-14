@@ -815,16 +815,37 @@ function logToJson($message, $level = 'info')
 }
 
 // Função de log
-function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTime, $message = '') {
+function logToJsonNotify(
+    $alertId, 
+    $userId, 
+    $method, 
+    $status, 
+    $startTime, 
+    $endTime, 
+    $message = '', 
+    $duration_ms = null
+) {
+    // Calcula duração apenas se não foi fornecida
+    if ($duration_ms === null) {
+        $duration_ms = (is_numeric($endTime) && is_numeric($startTime))
+            ? round(($endTime - $startTime) * 1000, 2)
+            : 0;
+    }
+
     $logEntry = [
-        'alert_id' => $alertId,
-        'user_id'  => $userId,
-        'method'   => $method,
-        'status'   => $status,
-        'start_time' => $startTime,
-        'end_time'   => $endTime,
-        'duration_ms'=> round(($endTime - $startTime) * 1000, 2),
-        'message'  => $message
+        'alert_id'    => $alertId,
+        'user_id'     => $userId,
+        'method'      => $method,
+        'status'      => $status,
+        'start_time'  => $startTime,
+        'end_time'    => $endTime,
+        'duration_ms' => $duration_ms,
+        'message'     => $message
     ];
-    file_put_contents('notification_log.json', json_encode($logEntry, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)."\n", FILE_APPEND);
+
+    file_put_contents(
+        __DIR__ . '/../logs/notification_log.json', 
+        json_encode($logEntry, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n", 
+        FILE_APPEND
+    );
 }
