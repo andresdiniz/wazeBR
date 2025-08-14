@@ -263,6 +263,14 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     logToJson("[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)");
                 } elseif ($rows === 1) {
                     logToJson("[INSERIDO] UUID: $uuid");
+                    $stmtFila = $pdo->prepare("INSERT INTO fila_envio (uuid_alerta, type, subtype, id_parceiro, data_criacao, enviado) VALUES (?, ?, ?, ?, NOW(), 0)");
+                    $stmtFila->execute([$uuid, $flatAlert['type'], $flatAlert['subtype'] ?? null, $id_parceiro]);
+
+                    logToJson("Alerta $uuid adicionado à fila de envio.");
+
+                    // Envio de notificação push para parceiros específicos sera desativado
+                    // Se o alerta for do tipo 'ACCIDENT' e o id_parceiro for 2, envia notificação push
+                    // Isso é específico para o parceiro 2, conforme solicitado
                     if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2) {
                         $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                         $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
