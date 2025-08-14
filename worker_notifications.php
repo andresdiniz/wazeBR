@@ -91,7 +91,7 @@ foreach ($pendentes as $envio) {
     ]);
 
     // Log do envio
-    logToJsonNotifyNotify($envio['id'], $method, $status, $startTime, $endTime, $message);
+    logToJsonNotify($envio['id'], $method, $status, $startTime, $endTime, $message);
 }
 
 echo "Processamento do lote concluído.\n";

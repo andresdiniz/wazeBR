@@ -815,7 +815,7 @@ function logToJson($message, $level = 'info')
 }
 
 // Função de log
-function logToJsonNotifify($alertId, $userId, $method, $status, $startTime, $endTime, $message = '') {
+function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTime, $message = '') {
     $logEntry = [
         'alert_id' => $alertId,
         'user_id'  => $userId,
