@@ -195,44 +195,44 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
 
             // Verifique se o alerta é novo. Se sim, inicie a verificação de duplicidade por proximidade.
-if ($isNew) {
-    // Itere sobre os alertas existentes (ativos)
-    foreach ($existingAlerts as $existingUuid => $existingAlert) {
-        $distance = haversineGreatCircleDistance(
-            $flatAlert['location_y'],
-            $flatAlert['location_x'],
-            $existingAlert['location_y'],
-            $existingAlert['location_x']
-        );
+            if ($isNew) {
+                // Itere sobre os alertas existentes (ativos)
+                foreach ($existingAlerts as $existingUuid => $existingAlert) {
+                    $distance = haversineGreatCircleDistance(
+                        $flatAlert['location_y'],
+                        $flatAlert['location_x'],
+                        $existingAlert['location_y'],
+                        $existingAlert['location_x']
+                    );
 
-        // Se o novo alerta for do mesmo tipo e estiver dentro da distância limite
-        if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
-            // Loga a duplicidade para o arquivo JSON
-            logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
+                    // Se o novo alerta for do mesmo tipo e estiver dentro da distância limite
+                    if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
+                        // Loga a duplicidade para o arquivo JSON
+                        logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
 
-            // Prepara a consulta para inserir ou atualizar o registro de duplicidade
-            // O ON DUPLICATE KEY UPDATE garante que não haverá duplicidade na tabela
-            $stmtUpsertDuplicate = $pdo->prepare("
+                        // Prepara a consulta para inserir ou atualizar o registro de duplicidade
+                        // O ON DUPLICATE KEY UPDATE garante que não haverá duplicidade na tabela
+                        $stmtUpsertDuplicate = $pdo->prepare("
                 INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update)
                 VALUES (?, ?, ?)
                 ON DUPLICATE KEY UPDATE last_update = VALUES(last_update)
             ");
-            
-            try {
-                $stmtUpsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
-                logToJson("[DUPLICADO REGISTRADO] Registro de duplicidade para $uuid inserido ou atualizado.");
-            } catch (PDOException $e) {
-                logToJson("Erro ao inserir/atualizar duplicata: " . $e->getMessage(), 'error');
+
+                        try {
+                            $stmtUpsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
+                            logToJson("[DUPLICADO REGISTRADO] Registro de duplicidade para $uuid inserido ou atualizado.");
+                        } catch (PDOException $e) {
+                            logToJson("Erro ao inserir/atualizar duplicata: " . $e->getMessage(), 'error');
+                        }
+
+                        // Marca o alerta como duplicado para ignorar a inserção principal
+                        $isDuplicate = true;
+
+                        // Sai do loop interno, pois já encontramos uma duplicata
+                        break;
+                    }
+                }
             }
-
-            // Marca o alerta como duplicado para ignorar a inserção principal
-            $isDuplicate = true;
-
-            // Sai do loop interno, pois já encontramos uma duplicata
-            break;
-        }
-    }
-}
 
             if (!$isDuplicate && $shouldUpdate) {
                 $stmtInsertUpdate->execute([
@@ -266,9 +266,17 @@ if ($isNew) {
                     if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2) {
                         $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                         $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
-                        $numero = '5531991903533';
-                        enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
-                        logToJson("Mensagem enviada UUID: $uuid");
+                        // Lista de números para enviar
+                        $numeros = [
+                            '5531991903533',
+                            '5531971145316'
+                        ];
+
+                        foreach ($numeros as $numero) {
+                            enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
+                            logToJson("Mensagem enviada para $numero - UUID: $uuid");
+                        }
+
                     }
                 } elseif ($rows === 2) {
                     logToJson("[ATUALIZADO] UUID: $uuid");
