@@ -93,7 +93,8 @@ foreach ($filaPendentes as $alerta) {
             'fila_id' => $alerta['fila_id'],
             'user_id' => $usuario['user_id'],
             'email'   => $usuario['receive_email'] ? $usuario['email'] : null,
-            'phone'   => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null
+            'phone'   => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null,
+            'data_criacao' => $currentDateTime  // <-- data/hora do PHP
         ];
     }
 }
@@ -102,11 +103,17 @@ foreach ($filaPendentes as $alerta) {
 try {
     $pdo->beginTransaction();
 
-    $sqlInsert = "INSERT INTO fila_envio_detalhes (fila_id, user_id, email, phone, status_envio) VALUES (?, ?, ?, ?, 'PENDENTE')";
+    $sqlInsert = "INSERT INTO fila_envio_detalhes (fila_id, user_id, email, phone, status_envio, data_criacao) VALUES (?, ?, ?, ?, 'PENDENTE', ?)";
     $stmtInsert = $pdo->prepare($sqlInsert);
 
     foreach ($insertsFilaEnvio as $insert) {
-        $stmtInsert->execute([$insert['fila_id'], $insert['user_id'], $insert['email'], $insert['phone']]);
+        $stmtInsert->execute([
+            $insert['fila_id'], 
+            $insert['user_id'], 
+            $insert['email'], 
+            $insert['phone'], 
+            $insert['data_criacao']
+        ]);
     }
 
     $pdo->commit();
@@ -115,5 +122,4 @@ try {
     die("Erro ao inserir filas de envio: ".$e->getMessage());
 }
 
-// 5. Processamento assíncrono de envio (pode chamar outro worker/processo)
 echo "Fila de envios criada com sucesso. Agora processe os envios via worker separado.\n";

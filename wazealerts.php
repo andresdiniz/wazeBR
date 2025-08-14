@@ -193,7 +193,6 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 logToJson("[DUPLICADO] Alerta $uuid já existe na tabela de duplicados.");
             }
 
-
             // Verifique se o alerta é novo. Se sim, inicie a verificação de duplicidade por proximidade.
             if ($isNew) {
                 // Itere sobre os alertas existentes (ativos)
@@ -263,8 +262,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     logToJson("[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)");
                 } elseif ($rows === 1) {
                     logToJson("[INSERIDO] UUID: $uuid");
-                    $stmtFila = $pdo->prepare("INSERT INTO fila_envio (uuid_alerta, type, subtype, id_parceiro, data_criacao, enviado) VALUES (?, ?, ?, ?, NOW(), 0)");
-                    $stmtFila->execute([$uuid, $flatAlert['type'], $flatAlert['subtype'] ?? null, $id_parceiro]);
+                    $stmtFila = $pdo->prepare("INSERT INTO fila_envio (uuid_alerta, type, subtype, id_parceiro, data_criacao, enviado) VALUES (?, ?, ?, ?, ?, 0)");
+                    $stmtFila->execute([$uuid, $flatAlert['type'], $flatAlert['subtype'] ?? null, $id_parceiro, $currentDateTime]);
 
                     logToJson("Alerta $uuid adicionado à fila de envio.");
 
