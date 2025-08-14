@@ -1,35 +1,37 @@
 <?php
-// Conexão PDO (mesma configuração do script anterior)
-$host = '127.0.0.1';
-$db   = 'u335174317_wazeportal';
-$user = 'SEU_USUARIO';
-$pass = 'SUA_SENHA';
-$charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
+$startTime = microtime(true);
+
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/debug.log');
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config/configbd.php';
+require_once __DIR__ . '/functions/scripts.php';
+require_once __DIR__ . '/config/configs.php';
+
+use Dotenv\Dotenv;
+
+$envPath = __DIR__ . '/.env';
+if (!file_exists($envPath)) {
+    die("Arquivo .env não encontrado no caminho: $envPath");
+}
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-    die("Erro na conexão: " . $e->getMessage());
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+} catch (Exception $e) {
+    error_log("Erro ao carregar o .env: " . $e->getMessage());
+    logEmail("error", "Erro ao carregar o .env: " . $e->getMessage());
+    die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-function logToJsonNotify($filaDetalheId, $method, $status, $startTime, $endTime, $message = '') {
-    $logEntry = [
-        'fila_detalhe_id' => $filaDetalheId,
-        'method'   => $method,
-        'status'   => $status,
-        'start_time' => $startTime,
-        'end_time'   => $endTime,
-        'duration_ms'=> round(($endTime - $startTime) * 1000, 2),
-        'message'  => $message
-    ];
-    file_put_contents('worker_log.json', json_encode($logEntry, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)."\n", FILE_APPEND);
-}
+date_default_timezone_set('America/Sao_Paulo');
+$currentDateTime = date('Y-m-d H:i:s');
+
+$pdo = Database::getConnection();
+$pdo->beginTransaction();
 
 // Configuração: quantidade de envios simultâneos
 $batchSize = 5;
@@ -57,11 +59,11 @@ foreach ($pendentes as $envio) {
         if (!empty($envio['email'])) {
             $method = 'EMAIL';
             // Aqui você chamaria a função real de envio de email
-            $message = "Email enviado para ".$envio['email'];
+            $message = "Email enviado para " . $envio['email'];
         } elseif (!empty($envio['phone'])) {
             $method = 'WHATSAPP'; // ou SMS
             // Aqui você chamaria a API de WhatsApp/SMS
-            $message = "Mensagem enviada para ".$envio['phone'];
+            $message = "Mensagem enviada para " . $envio['phone'];
         } else {
             $method = null;
             $message = "Nenhum contato disponível";
@@ -85,7 +87,7 @@ foreach ($pendentes as $envio) {
     $stmtUpdate->execute([
         ':status' => $status,
         ':metodo' => $method,
-        ':id'     => $envio['id']
+        ':id' => $envio['id']
     ]);
 
     // Log do envio
