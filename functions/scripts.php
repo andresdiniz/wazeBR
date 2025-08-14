@@ -813,3 +813,18 @@ function logToJson($message, $level = 'info')
     // Opcional: exibe a mensagem no console também
     echo "[" . strtoupper($level) . "] " . $message . PHP_EOL;
 }
+
+// Função de log
+function logToJsonNotifify($alertId, $userId, $method, $status, $startTime, $endTime, $message = '') {
+    $logEntry = [
+        'alert_id' => $alertId,
+        'user_id'  => $userId,
+        'method'   => $method,
+        'status'   => $status,
+        'start_time' => $startTime,
+        'end_time'   => $endTime,
+        'duration_ms'=> round(($endTime - $startTime) * 1000, 2),
+        'message'  => $message
+    ];
+    file_put_contents('notification_log.json', json_encode($logEntry, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)."\n", FILE_APPEND);
+}
