@@ -50,7 +50,7 @@ try {
     // 2. Processar cada envio
     foreach ($pendentes as $envio) {
         $startTime = microtime(true);
-        $status = 'FALHA';
+        $status = 'ERRO';
         $message = '';
         $method = null;
 
@@ -58,36 +58,58 @@ try {
             // Determinar qual método
             if (!empty($envio['email'])) {
                 $method = 'EMAIL';
-                // Aqui você chamaria a função real de envio de email
                 $message = "Email enviado para " . $envio['email'];
             } elseif (!empty($envio['phone'])) {
-                $method = 'WHATSAPP'; // ou SMS
-                // Aqui você chamaria a API de WhatsApp/SMS
+                $method = 'WHATSAPP';
                 $message = "Mensagem enviada para " . $envio['phone'];
             } else {
                 $message = "Nenhum contato disponível";
             }
 
-            // Simular envio (remover em produção)
-            usleep(500000); // 0,5 segundos para simular delay
-
+            // Simular envio
+            usleep(500000);
             $status = 'ENVIADO';
         } catch (\Exception $e) {
             $message = $e->getMessage();
-            $status = 'FALHA';
+            $status = 'ERRO';
         }
 
         $endTime = microtime(true);
 
-        // Atualizar status no banco
-        $sqlUpdate = "UPDATE fila_envio_detalhes 
-                      SET status_envio = :status, metodo = :metodo, data_atualizacao = NOW() 
-                      WHERE id = :id";
-        $stmtUpdate = $pdo->prepare($sqlUpdate);
-        $stmtUpdate->execute([
+        // Data/hora PHP
+        $dataAtualizacao = date('Y-m-d H:i:s');
+
+        // Atualizar fila_envio_detalhes
+        $stmtUpdateDetalhes = $pdo->prepare("
+        UPDATE fila_envio_detalhes 
+        SET status_envio = :status, 
+            metodo = :metodo, 
+            data_atualizacao = :data_atualizacao 
+        WHERE id = :id
+    ");
+        $stmtUpdateDetalhes->execute([
             ':status' => $status,
             ':metodo' => $method,
+            ':data_atualizacao' => $dataAtualizacao,
             ':id' => $envio['id']
+        ]);
+
+        // Atualizar fila_envio principal
+        $stmtUpdateFila = $pdo->prepare("
+        UPDATE fila_envio
+        SET status_envio = :status,
+            data_envio = :data_envio,
+            mensagem_erro = :mensagem_erro,
+            enviado = :enviado
+        WHERE uuid_alerta = :uuid_alerta
+    ");
+
+        $stmtUpdateFila->execute([
+            ':status' => $status,
+            ':data_envio' => $dataAtualizacao,
+            ':mensagem_erro' => ($status === 'ERRO') ? $message : null,
+            ':enviado' => ($status === 'ENVIADO') ? 1 : 0,
+            ':uuid_alerta' => $envio['uuid_alerta']
         ]);
 
         // Log do envio
@@ -103,7 +125,7 @@ try {
             $startTime,           // startTime
             $endTime,             // endTime
             $message,             // message
-            $duration_ms          // duration_ms opcional se quiser adicionar no log
+            $duration_ms          // duration_ms
         );
     }
 
