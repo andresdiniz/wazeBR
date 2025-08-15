@@ -849,3 +849,59 @@ function logToJsonNotify(
         FILE_APPEND
     );
 }
+
+function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uuid_alerta)
+{
+    // 1. Buscar dados do alerta na tabela alerts
+    $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE uuid = :uuid LIMIT 1");
+    $stmtAlert->execute([':uuid' => $uuid_alerta]);
+    $alerta = $stmtAlert->fetch(PDO::FETCH_ASSOC);
+
+    if (!$alerta) {
+        error_log("Alerta com UUID $uuid_alerta não encontrado.");
+        return false;
+    }
+
+    // 2. Extrair informações do alerta
+    $street = $alerta['street'] ?? 'Nome da via desconhecida';
+    $lat = $alerta['location_x'] ?? 'LATITUDE_INDEFINIDA';
+    $lng = $alerta['location_y'] ?? 'LONGITUDE_INDEFINIDA';
+    $type = $alerta['type'] ?? '';
+    $subtype = $alerta['subtype'] ?? '';
+    $timestampMs = $alerta['pubMillis'] ?? null;
+    $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
+    $cidade = $alerta['city'] ?? null;
+
+    // 3. Montar a mensagem
+    $partes = [];
+    $partes[] = "🚨 Alerta recebido:";
+    $partes[] = "Tipo: {$type}";
+    if (!empty($subtype)) {
+        $partes[] = "e subtipo {$subtype}";
+    }
+    if (!empty($street) || !empty($cidade)) {
+        $localizacao = [];
+        if (!empty($street)) $localizacao[] = $street;
+        if (!empty($cidade)) $localizacao[] = "cidade de {$cidade}";
+        $partes[] = "foi reportado em " . implode(" na ", $localizacao);
+    }
+    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}.";
+    $partes[] = "Por favor, verifique e envie equipe especializada.";
+
+    $mensagem = implode(" ", $partes);
+
+    // 4. Verificar credenciais
+    if (empty($deviceToken) || empty($authToken)) {
+        error_log("Credenciais de notificação não encontradas para o usuário com ID: {$numero}");
+        return false;
+    }
+
+    // 5. Instanciar a classe e enviar
+    $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
+    $resposta = $api->enviarTexto($numero, $mensagem);
+
+    // 6. Log da resposta
+    logToJson(json_decode($resposta, true));
+
+    return true;
+}
