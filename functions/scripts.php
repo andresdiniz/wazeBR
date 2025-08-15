@@ -865,6 +865,22 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
     $cidade = $alerta['city'] ?? null;
 
+    /* Traduzir tipo e subtipo
+    $traducao = traduzirAlerta($type, $subtype);
+    $type = $traducao['tipo'];
+    $subtype = $traducao['subtipo'];*/
+
+    logToJsonNotify(
+            $alerta['uuid'],         // alertId
+            $numero,    // userId
+            "WhatsAPP",              // method
+            "Cheguei aqui",              // status
+            100,           // startTime
+            100,             // endTime
+            $alerta,             // message
+            100          // duration_ms
+        );
+
     // 3. Montar a mensagem
     $partes = [];
     $partes[] = "🚨 Alerta recebido:";
@@ -882,6 +898,18 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $partes[] = "Por favor, verifique e envie equipe especializada.";
 
     $mensagem = implode(" ", $partes);
+
+    echo "Mensagem a ser enviada: " . $mensagem . PHP_EOL;
+    logToJsonNotify(
+            $alerta['uuid'],         // alertId
+            $numero,    // userId
+            "WhatsAPP",              // method
+            "prepare",              // status
+            100,           // startTime
+            100,             // endTime
+            $mensagem,             // message
+            100          // duration_ms
+        );
 
     // 4. Verificar credenciais
     if (empty($deviceToken) || empty($authToken)) {
