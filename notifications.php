@@ -39,7 +39,7 @@ try {
                a.street, a.city, a.country
         FROM fila_envio f
         JOIN alerts a ON f.uuid_alerta = a.uuid
-        WHERE f.enviado = 0 AND a.status = 1
+        WHERE f.enviado = 1 AND f.status_envio = 'PENDENTE' AND a.status = 1
         FOR UPDATE
     ";
     $stmtFila = $pdo->query($sqlFila);
@@ -127,7 +127,7 @@ try {
     $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_allert'));
     $sqlUpdate = "
         UPDATE fila_envio 
-        SET status_envio = 'FILA', enviado = 0
+        SET status_envio = 'FILA', enviado = 1
         WHERE uuid_alerta = ?
     ";
     $stmtUpdate = $pdo->prepare($sqlUpdate);
