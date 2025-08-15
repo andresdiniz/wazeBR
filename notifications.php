@@ -91,6 +91,7 @@ foreach ($filaPendentes as $alerta) {
     foreach ($usuariosAlvo as $usuario) {
         $insertsFilaEnvio[] = [
             'fila_id' => $alerta['fila_id'],
+            'uuid_allert' => $alerta['uuid_alerta'],// uuid_allert pode ser nulo se não for usado
             'user_id' => $usuario['user_id'],
             'email'   => $usuario['receive_email'] ? $usuario['email'] : null,
             'phone'   => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null,
@@ -103,12 +104,13 @@ foreach ($filaPendentes as $alerta) {
 try {
     $pdo->beginTransaction();
 
-    $sqlInsert = "INSERT INTO fila_envio_detalhes (fila_id, user_id, email, phone, status_envio, data_criacao) VALUES (?, ?, ?, ?, 'PENDENTE', ?)";
+    $sqlInsert = "INSERT INTO fila_envio_detalhes (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao) VALUES (?,?, ?, ?, ?, 'PENDENTE', ?)";
     $stmtInsert = $pdo->prepare($sqlInsert);
 
     foreach ($insertsFilaEnvio as $insert) {
         $stmtInsert->execute([
             $insert['fila_id'], 
+            $insert['uuid_allert'], // uuid_allert pode ser nulo se não for usado
             $insert['user_id'], 
             $insert['email'], 
             $insert['phone'], 

@@ -853,6 +853,8 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
         return false;
     }
 
+    echo "Alerta encontrado: " . json_encode($alerta) . PHP_EOL;
+
     // 2. Extrair informações do alerta
     $street = $alerta['street'] ?? 'Nome da via desconhecida';
     $lat = $alerta['location_x'] ?? 'LATITUDE_INDEFINIDA';
