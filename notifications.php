@@ -64,7 +64,7 @@ try {
     // Agrupar usuários por parceiro e tipo/subtipo
     $usuariosPorChave = [];
     foreach ($usuariosTodos as $u) {
-        $key = $u['id_parceiro'].'|'.$u['type'].'|'.($u['subtype'] ?? '');
+        $key = $u['id_parceiro'] . '|' . $u['type'] . '|' . ($u['subtype'] ?? '');
         $usuariosPorChave[$key][] = $u;
     }
 
@@ -80,8 +80,8 @@ try {
 $insertsFilaEnvio = [];
 
 foreach ($filaPendentes as $alerta) {
-    $keyExato = $alerta['id_parceiro'].'|'.$alerta['alert_type'].'|'.($alerta['alert_subtype'] ?? '');
-    $keyGenerico = $alerta['id_parceiro'].'|'.$alerta['alert_type'].'|';
+    $keyExato = $alerta['id_parceiro'] . '|' . $alerta['alert_type'] . '|' . ($alerta['alert_subtype'] ?? '');
+    $keyGenerico = $alerta['id_parceiro'] . '|' . $alerta['alert_type'] . '|';
 
     $usuariosAlvo = array_merge(
         $usuariosPorChave[$keyExato] ?? [],
@@ -93,8 +93,8 @@ foreach ($filaPendentes as $alerta) {
             'fila_id' => $alerta['fila_id'],
             'uuid_allert' => $alerta['uuid_alerta'],// uuid_allert pode ser nulo se não for usado
             'user_id' => $usuario['user_id'],
-            'email'   => $usuario['receive_email'] ? $usuario['email'] : null,
-            'phone'   => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null,
+            'email' => $usuario['receive_email'] ? $usuario['email'] : null,
+            'phone' => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null,
             'data_criacao' => $currentDateTime  // <-- data/hora do PHP
         ];
     }
@@ -104,24 +104,43 @@ foreach ($filaPendentes as $alerta) {
 try {
     $pdo->beginTransaction();
 
-    $sqlInsert = "INSERT INTO fila_envio_detalhes (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao) VALUES (?,?, ?, ?, ?, 'PENDENTE', ?)";
+    // Inserir detalhes
+    $sqlInsert = "
+        INSERT INTO fila_envio_detalhes 
+            (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao) 
+        VALUES (?, ?, ?, ?, ?, 'PENDENTE', ?)
+    ";
     $stmtInsert = $pdo->prepare($sqlInsert);
 
     foreach ($insertsFilaEnvio as $insert) {
         $stmtInsert->execute([
-            $insert['fila_id'], 
-            $insert['uuid_allert'], // uuid_allert pode ser nulo se não for usado
-            $insert['user_id'], 
-            $insert['email'], 
-            $insert['phone'], 
+            $insert['fila_id'],
+            $insert['uuid_allert'],
+            $insert['user_id'],
+            $insert['email'],
+            $insert['phone'],
             $insert['data_criacao']
         ]);
+    }
+
+    // Atualizar status da fila_envio para FILA por uuid_alerta
+    $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_allert'));
+    $sqlUpdate = "
+        UPDATE fila_envio 
+        SET status_envio = 'FILA', enviado = 0
+        WHERE uuid_alerta = ?
+    ";
+    $stmtUpdate = $pdo->prepare($sqlUpdate);
+
+    foreach ($uuidsAlertas as $uuid) {
+        $stmtUpdate->execute([$uuid]);
     }
 
     $pdo->commit();
 } catch (\Exception $e) {
     $pdo->rollBack();
-    die("Erro ao inserir filas de envio: ".$e->getMessage());
+    die("Erro ao inserir filas de envio: " . $e->getMessage());
 }
+
 
 echo "Fila de envios criada com sucesso. Agora processe os envios via worker separado.\n";
