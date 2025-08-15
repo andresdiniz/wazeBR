@@ -843,7 +843,7 @@ function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTi
 
 function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uuid_alerta)
 {
-    echo "Iniciando envio de notificação WhatsApp para o número: {$numero} com UUID do alerta: {$uuid_alerta}" . PHP_EOL;
+    var_dump("Iniciando envio de notificação WhatsApp para o número: {$numero} com UUID do alerta: {$uuid_alerta}" . PHP_EOL);
     // 1. Buscar dados do alerta na tabela alerts
     $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE uuid = :uuid LIMIT 1");
     $stmtAlert->execute([':uuid' => $uuid_alerta]);
