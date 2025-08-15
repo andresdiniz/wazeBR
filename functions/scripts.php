@@ -815,16 +815,7 @@ function logToJson($message, $level = 'info')
 }
 
 // Função de log
-function logToJsonNotify(
-    $alertId, 
-    $userId, 
-    $method, 
-    $status, 
-    $startTime, 
-    $endTime, 
-    $message = '', 
-    $duration_ms = null
-) {
+function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTime, $message = '', $duration_ms = null) {
     // Calcula duração apenas se não foi fornecida
     if ($duration_ms === null) {
         $duration_ms = (is_numeric($endTime) && is_numeric($startTime))
@@ -902,6 +893,17 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
 
     // 6. Log da resposta
     logToJson(json_decode($resposta, true));
+
+    logToJsonNotify(
+            $alerta['uuid'],         // alertId
+            $numero,    // userId
+            "WhatsAPP",              // method
+            "send",              // status
+            100,           // startTime
+            100,             // endTime
+            $resposta,             // message
+            100          // duration_ms
+        );
 
     return true;
 }
