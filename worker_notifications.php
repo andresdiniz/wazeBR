@@ -50,7 +50,7 @@ try {
     // 2. Processar cada envio
     foreach ($pendentes as $envio) {
         $startTime = microtime(true);
-        $status = 'ERRO';
+        $status = 'FALHA';
         $message = '';
         $method = null;
 
