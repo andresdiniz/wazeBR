@@ -51,6 +51,7 @@ try {
         exit;
     }
 
+    var_dump(("Fila de alertas pendentes: " . count($filaPendentes)));
     // 2. Buscar usuários relevantes de uma vez
     $sqlUsuarios = "
         SELECT u.id AS user_id, u.email, u.phone_number, p.id_parceiro, p.type, p.subtype,
