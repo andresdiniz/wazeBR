@@ -39,7 +39,7 @@ try {
                a.street, a.city, a.country
         FROM fila_envio f
         JOIN alerts a ON f.uuid_alerta = a.uuid
-        WHERE f.enviado = 1 AND f.status_envio = 'PENDENTE' AND a.status = 1
+        WHERE f.enviado = 0 AND f.status_envio = 'PENDENTE' AND a.status = 1
         FOR UPDATE
     ";
     $stmtFila = $pdo->query($sqlFila);
