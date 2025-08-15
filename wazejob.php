@@ -76,7 +76,7 @@ $scripts = [
     'gerar_xml.php'         => '/gerar_xml.php',
     'alerts_por_email.php'  => '/alerts_por_email.php',
     'notifications.php' => '/notifications.php',
-    'worker_notifications.php' => '/worker_notifications.php'
+    'worker_notifications.php' => '/worker_notifications.php',
 ];
 
 echo "🟡 Iniciando execução de scripts...\n";
