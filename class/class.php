@@ -49,15 +49,52 @@ class ApiBrasilWhatsApp
         return $response;
     }
 
-    // Funções de Envio
+    // Funções de Gerenciamento da Instância
 
     /**
-     * Envia uma mensagem de texto via WhatsApp
+     * Inicia a instância do WhatsApp.
      *
-     * @param string $number Número de destino no formato 55 + DDD + número
-     * @param string $text Texto da mensagem
-     * @param int $time_typing Tempo de digitação em milissegundos (opcional)
-     * @return string JSON da resposta
+     * @return string JSON da resposta.
+     */
+    public function startInstance()
+    {
+        return $this->request('start', 'POST');
+    }
+
+    /**
+     * Obtém o QR Code para conectar a instância do WhatsApp.
+     *
+     * @param string $device_password Senha do dispositivo (opcional).
+     * @return string JSON da resposta.
+     */
+    public function getQRCode($device_password = null)
+    {
+        $payload = null;
+        if ($device_password) {
+            $payload = ['device_password' => $device_password];
+        }
+        return $this->request('qrcode', 'POST', $payload);
+    }
+    
+    /**
+     * Obtém o status da fila de mensagens.
+     *
+     * @return string JSON da resposta.
+     */
+    public function getQueueStatus()
+    {
+        return $this->request('fila', 'POST');
+    }
+    
+    // Funções de Mensagens
+
+    /**
+     * Envia uma mensagem de texto via WhatsApp.
+     *
+     * @param string $number Número de destino no formato 55 + DDD + número.
+     * @param string $text Texto da mensagem.
+     * @param int $time_typing Tempo de digitação em milissegundos (opcional).
+     * @return string JSON da resposta.
      */
     public function enviarTexto($number, $text, $time_typing = 500)
     {
@@ -71,119 +108,60 @@ class ApiBrasilWhatsApp
     }
 
     /**
-     * Envia uma mídia (imagem, vídeo, áudio, documento) via WhatsApp
+     * Responde a uma mensagem específica.
      *
-     * @param string $number Número de destino
-     * @param string $caption Legenda da mídia (opcional)
-     * @param string $media_url URL da mídia a ser enviada
-     * @param string $media_type Tipo de mídia ('image', 'video', 'audio', 'document')
-     * @return string JSON da resposta
+     * @param string $number Número de destino.
+     * @param string $messageid ID da mensagem original a ser respondida.
+     * @param string $text Texto da resposta.
+     * @return string JSON da resposta.
      */
-    public function enviarMidia($number, $caption, $media_url, $media_type)
+    public function replyMessage($number, $messageid, $text)
     {
         $payload = [
             'number' => $number,
-            'caption' => $caption,
-            'media_url' => $media_url,
-            'type' => $media_type
+            'messageid' => $messageid,
+            'text' => $text
         ];
-
-        return $this->request('sendMedia', 'POST', $payload);
+        return $this->request('reply', 'POST', $payload);
     }
-
+    
     /**
-     * Envia uma mensagem com botões de resposta
+     * Envia um arquivo (imagem, documento, etc.) codificado em Base64.
      *
-     * @param string $number Número de destino
-     * @param string $text Texto principal da mensagem
-     * @param string $footer Texto do rodapé da mensagem
-     * @param array $buttons Array de objetos de botões. Cada objeto deve ter 'id' e 'text'.
-     * @return string JSON da resposta
+     * @param string $number Número de destino.
+     * @param string $base64_data Dados do arquivo em Base64, incluindo o tipo (ex: 'data:image/png;base64,...').
+     * @param string $caption Legenda da mídia (opcional).
+     * @return string JSON da resposta.
      */
-    public function enviarBotoes($number, $text, $footer, $buttons)
+    public function sendFileBase64($number, $base64_data, $caption = null)
     {
         $payload = [
             'number' => $number,
-            'text' => $text,
-            'footer' => $footer,
-            'buttons' => $buttons
+            'path' => $base64_data,
+            'caption' => $caption
         ];
-
-        return $this->request('sendButtons', 'POST', $payload);
+        return $this->request('sendFile64', 'POST', $payload);
     }
 
-    /**
-     * Envia uma mensagem de lista
-     *
-     * @param string $number Número de destino
-     * @param string $text Texto principal da mensagem
-     * @param string $button_text Texto do botão que exibe a lista
-     * @param string $title Título da lista
-     * @param string $footer Texto do rodapé da lista
-     * @param array $sections Array de seções, cada uma contendo um título e uma lista de opções
-     * @return string JSON da resposta
-     */
-    public function enviarLista($number, $text, $button_text, $title, $footer, $sections)
-    {
-        $payload = [
-            'number' => $number,
-            'text' => $text,
-            'button_text' => $button_text,
-            'title' => $title,
-            'footer' => $footer,
-            'sections' => $sections
-        ];
+    // Funções de Grupos
 
-        return $this->request('sendList', 'POST', $payload);
+    /**
+     * Obtém uma lista de todos os grupos dos quais a instância faz parte.
+     *
+     * @return string JSON da resposta.
+     */
+    public function getAllGroups()
+    {
+        return $this->request('getAllGroups', 'POST');
     }
-
+    
     /**
-     * Envia uma mensagem de template (modelo)
+     * Obtém uma lista detalhada de todos os grupos, incluindo membros.
      *
-     * @param string $number Número de destino
-     * @param string $template_name Nome do template registrado
-     * @param string $language_code Código do idioma do template (ex: 'pt_BR')
-     * @param array $components Componentes do template (headers, body, etc.)
-     * @return string JSON da resposta
+     * @return string JSON da resposta.
      */
-    public function enviarTemplate($number, $template_name, $language_code, $components)
+    public function getAllGroupsFull()
     {
-        $payload = [
-            'number' => $number,
-            'template_name' => $template_name,
-            'language_code' => $language_code,
-            'components' => $components
-        ];
-
-        return $this->request('sendTemplate', 'POST', $payload);
-    }
-
-    /**
-     * Envia as informações de um contato
-     *
-     * @param string $number Número de destino
-     * @param array $contact_info Array com as informações do contato
-     * @return string JSON da resposta
-     */
-    public function enviarContato($number, $contact_info)
-    {
-        $payload = [
-            'number' => $number,
-            'contacts' => [$contact_info]
-        ];
-
-        return $this->request('sendContact', 'POST', $payload);
-    }
-
-    // Funções de Status
-
-    /**
-     * Obtém o status da instância
-     *
-     * @return string JSON da resposta
-     */
-    public function getStatus()
-    {
-        return $this->request('status', 'GET');
+        return $this->request('getAllGroupsFull', 'POST');
     }
 }
