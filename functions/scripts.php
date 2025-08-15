@@ -845,8 +845,8 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
 {
     var_dump("Iniciando envio de notificação WhatsApp para o número: {$numero} com UUID do alerta: {$uuid_alerta}" . PHP_EOL);
     // 1. Buscar dados do alerta na tabela alerts
-    $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE uuid = :uuid LIMIT 1");
-    $stmtAlert->execute([':uuid' => $uuid_alerta]);
+    $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE id = :uuid LIMIT 1");
+    $stmtAlert->execute([':id' => $uuid_alerta]);
     $alerta = $stmtAlert->fetch(PDO::FETCH_ASSOC);
     var_dump($alerta);
     if (!$alerta) {
