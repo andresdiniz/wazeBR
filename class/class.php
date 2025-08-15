@@ -57,7 +57,7 @@ class ApiBrasilWhatsApp
      * @param int $time_typing Tempo de digitação em milissegundos (opcional)
      * @return string JSON da resposta
      */
-    public function enviarTexto($number, $text, $time_typing = 1000)
+    public function enviarTexto($number, $text, $time_typing = 500)
     {
         $payload = [ 
             'number' => $number,
