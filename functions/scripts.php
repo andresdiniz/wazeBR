@@ -870,17 +870,6 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $type = $traducao['tipo'];
     $subtype = $traducao['subtipo'];*/
 
-    logToJsonNotify(
-            $alerta['uuid'],         // alertId
-            $numero,    // userId
-            "WhatsAPP",              // method
-            "Cheguei aqui",              // status
-            100,           // startTime
-            100,             // endTime
-            $alerta,             // message
-            100          // duration_ms
-        );
-
     // 3. Montar a mensagem
     $partes = [];
     $partes[] = "🚨 Alerta recebido:";
@@ -924,16 +913,5 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     // 6. Log da resposta
     logToJson(json_decode($resposta, true));
 
-    logToJsonNotify(
-            $alerta['uuid'],         // alertId
-            $numero,    // userId
-            "WhatsAPP",              // method
-            "send",              // status
-            100,           // startTime
-            100,             // endTime
-            $resposta,             // message
-            100          // duration_ms
-        );
-
-    return true;
+    return $resposta;
 }
