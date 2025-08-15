@@ -9,7 +9,7 @@ set_time_limit(1800); // 30 minutos
 define('MIN_HISTORIC_RECORDS', 5);
 define('MAX_ALERTS_PER_EMAIL', 15);
 define('LOCK_FILE', __DIR__ . '/lock/route_monitor.lock');
-define('LOG_FILE', __DIR__ . '/logs/route_monitor.log');
+define('LOG_FILE1', __DIR__ . '/logs/route_monitor.log');
 
 // Inclusões necessárias
 require_once __DIR__ . '/config/configbd.php';
@@ -52,15 +52,15 @@ function releaseExecutionLock() {
  * Registra mensagens no log
  */
 function logMessage($message) {
-    if (!file_exists(dirname(LOG_FILE))) {
-        mkdir(dirname(LOG_FILE), 0755, true);
+    if (!file_exists(dirname(LOG_FILE1))) {
+        mkdir(dirname(LOG_FILE1), 0755, true);
     }
     
     $timestamp = date('Y-m-d H:i:s');
     $memory = memory_get_usage() / 1024 / 1024;
     $formattedMessage = sprintf("[%s] [%.2fMB] %s\n", $timestamp, $memory, $message);
     
-    file_put_contents(LOG_FILE, $formattedMessage, FILE_APPEND);
+    file_put_contents(LOG_FILE1, $formattedMessage, FILE_APPEND);
     echo $formattedMessage;
 }
 
