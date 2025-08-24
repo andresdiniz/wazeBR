@@ -64,6 +64,13 @@ try {
                 $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
                 $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
                 // Lista de números para enviar
+                $apiWhatsApp = new ApiBrasilWhatsApp($deviceToken, $authToken);
+                $statusInstancia = json_decode($apiWhatsApp->getQueueStatus(), true);
+                
+                if (empty($statusInstancia['success']) || $statusInstancia['success'] !== true) {
+                    throw new Exception("Instância do WhatsApp não está conectada ou houve erro na verificação.");
+                }
+
                 echo "Enviando notificação WhatsApp para o número: {$envio['phone']} com UUID do alerta: {$envio['uuid_allert']}" . PHP_EOL;
                 $status = enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $envio['phone'], $envio['uuid_allert']);
                 $message = "Mensagem enviada para " . $envio['phone']. " via WhatsApp". "com o seguinte status: ". $status;
