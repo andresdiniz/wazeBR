@@ -37,5 +37,5 @@ $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZ
 $apiWhatsApp = new ApiBrasilWhatsApp($deviceToken, $authToken);
 $statusInstancia = json_decode($apiWhatsApp->getQueueStatus(), true);
 
-var_dump(statusInstancia);
+var_dump($statusInstancia);
 
