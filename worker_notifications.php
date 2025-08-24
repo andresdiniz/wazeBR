@@ -68,6 +68,7 @@ try {
                 $statusInstancia = json_decode($apiWhatsApp->getQueueStatus(), true);
                 
                 if (empty($statusInstancia['success']) || $statusInstancia['success'] !== true) {
+                    echo("Instância do WhatsApp não está conectada ou houve erro na verificação.");
                     throw new Exception("Instância do WhatsApp não está conectada ou houve erro na verificação.");
                 }
 
