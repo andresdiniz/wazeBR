@@ -39,3 +39,14 @@ $statusInstancia = json_decode($apiWhatsApp->getQueueStatus(), true);
 
 var_dump($statusInstancia);
 
+
+if (
+    isset($statusInstancia['device']['status']) &&
+    $statusInstancia['device']['status'] === 'inChat'
+) {
+    echo "Conectado";
+} else {
+    echo "Não conectado ou erro na instância.";
+}
+
+
