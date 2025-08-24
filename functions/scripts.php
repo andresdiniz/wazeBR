@@ -916,3 +916,28 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
 
     return $resposta;
 }
+
+/**
+ * Verifica se a instância do WhatsApp está conectada (status 'inChat').
+ *
+ * @param string $deviceToken
+ * @param string $authToken
+ * @return bool Retorna true se estiver conectado, false caso contrário.
+ */
+function verificarConexaoWhatsApp($deviceToken, $authToken)
+{
+    $apiWhatsApp = new ApiBrasilWhatsApp($deviceToken, $authToken);
+    $statusInstancia = json_decode($apiWhatsApp->getQueueStatus(), true);
+
+    if (
+        isset($statusInstancia['device']['status']) &&
+        $statusInstancia['device']['status'] === 'inChat'
+    ) {
+        return true;
+    }
+
+    // Opcional: log de erro ou status
+    error_log("Instância WhatsApp não conectada. Status retornado: " . json_encode($statusInstancia));
+    return false;
+}
+
