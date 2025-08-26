@@ -13,7 +13,7 @@ require_once __DIR__ . '/config/configs.php';
 
 use Dotenv\Dotenv;
 
-// Carrega .env
+// Carrega variáveis de ambiente
 $envPath = __DIR__ . '/.env';
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
@@ -43,7 +43,7 @@ try {
 
     $totalAtualizados = 0;
 
-    // Prepara o update uma vez
+    // Prepara o update apenas uma vez
     $updateStmt = $pdo->prepare("UPDATE alerts SET km = :km WHERE uuid = :uuid");
 
     // Processamento linha a linha
@@ -51,16 +51,20 @@ try {
         $startTimeAlerta = microtime(true);
 
         $limiteKm = 2;
+
+        // Calcula o km a partir das coordenadas
         $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
 
-        // Debug
+        // Debug: exibe KM calculado
         echo "UUID: {$alert['uuid']} | KM calculado: " . ($km ?? 'NULL') . "\n";
 
         if ($km !== null) {
             try {
-                $updateStmt->bindValue(':km', (float)$km, PDO::PARAM_STR);
-                $updateStmt->bindValue(':uuid', $alert['uuid'], PDO::PARAM_STR);
-                $updateStmt->execute();
+                // Atualiza o banco, passando float direto
+                $updateStmt->execute([
+                    ':km'   => (float)$km,
+                    ':uuid' => $alert['uuid']
+                ]);
 
                 if ($updateStmt->rowCount() > 0) {
                     $totalAtualizados++;
@@ -78,6 +82,7 @@ try {
         echo "Tempo do alerta: " . round($tempoAlerta, 4) . " segundos\n";
     }
 
+    // Confirma alterações no banco
     $pdo->commit();
 
     $tempoTotal = microtime(true) - $startTimeTotal;
@@ -92,3 +97,4 @@ try {
     error_log("Erro no processamento: " . $e->getMessage());
     die("Erro: " . $e->getMessage());
 }
+
