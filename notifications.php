@@ -117,7 +117,7 @@ if (!empty($insertsFilaEnvio)) {
         foreach ($insertsFilaEnvio as $insert) {
             $placeholders[] = "(?, ?, ?, ?, ?, 'PENDENTE', ?)";
             $values[] = $insert['fila_id'];
-            $values[] = $insert['uuid_alerta'];
+            $values[] = $insert['uuid_allert'];
             $values[] = $insert['user_id'];
             $values[] = $insert['email'];
             $values[] = $insert['phone'];
