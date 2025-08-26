@@ -97,7 +97,7 @@ foreach ($filaPendentes as $alerta) {
 
         $insertsFilaEnvio[] = [
             'fila_id' => $alerta['fila_id'],
-            'uuid_alerta' => $alerta['uuid_alerta'],
+            'uuid_allert' => $alerta['uuid_alerta'],
             'user_id' => $usuario['user_id'],
             'email' => $email,
             'phone' => $phone,
@@ -126,7 +126,7 @@ if (!empty($insertsFilaEnvio)) {
 
         $sqlInsert = "
             INSERT INTO fila_envio_detalhes
-                (fila_id, uuid_alerta, user_id, email, phone, status_envio, data_criacao)
+                (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao)
             VALUES " . implode(', ', $placeholders);
 
         $stmtInsert = $pdo->prepare($sqlInsert);
