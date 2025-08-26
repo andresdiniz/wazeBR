@@ -889,9 +889,9 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $partes[] = "🚨 Alerta recebido:";
 
     if (!empty($subtype)) {
-        $partes[] = "Subtipo: {$nomeSubtipo}";
+        $partes[] = "{$nomeSubtipo}";
     } else {
-        $partes[] = "Tipo: {$nomeTipo}";
+        $partes[] = "{$nomeTipo}";
     }
 
     if (!empty($street) || !empty($cidade)) {
