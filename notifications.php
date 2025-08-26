@@ -30,10 +30,11 @@ try {
 date_default_timezone_set('America/Sao_Paulo');
 $currentDateTime = date('Y-m-d H:i:s');
 
-// 1. Buscar todos os alertas pendentes e ativos
 try {
     $pdo = Database::getConnection();
     $pdo->beginTransaction();
+
+    // 1. Buscar todos os alertas pendentes e ativos
     $sqlFila = "
         SELECT f.id AS fila_id, f.uuid_alerta, f.id_parceiro, a.type AS alert_type, a.subtype AS alert_subtype,
                a.street, a.city, a.country
@@ -51,9 +52,7 @@ try {
         exit;
     }
 
-    //var_dump(("Fila de alertas pendentes: " . count($filaPendentes)));// 1. Buscar todos os alertas pendentes e ativos
-
-    // 2. Buscar usuários relevantes de uma vez
+    // 2. Buscar usuários relevantes
     $sqlUsuarios = "
         SELECT u.id AS user_id, u.email, u.phone_number, p.id_parceiro, p.type, p.subtype,
                p.receive_email, p.receive_sms, p.receive_whatsapp
@@ -63,7 +62,7 @@ try {
     $stmtUsuarios = $pdo->query($sqlUsuarios);
     $usuariosTodos = $stmtUsuarios->fetchAll();
 
-    // Agrupar usuários por parceiro e tipo/subtipo
+    // Agrupar usuários por parceiro, type e subtype
     $usuariosPorChave = [];
     foreach ($usuariosTodos as $u) {
         $key = $u['id_parceiro'] . '|' . $u['type'] . '|' . ($u['subtype'] ?? '');
@@ -72,13 +71,11 @@ try {
 
     $pdo->commit();
 } catch (\Exception $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
+    if ($pdo->inTransaction()) $pdo->rollBack();
     die("Erro: " . $e->getMessage());
 }
 
-// 3. Preparar inserções de fila em lote
+// 3. Preparar array de inserção na fila detalhada
 $insertsFilaEnvio = [];
 
 foreach ($filaPendentes as $alerta) {
@@ -91,74 +88,75 @@ foreach ($filaPendentes as $alerta) {
     );
 
     foreach ($usuariosAlvo as $usuario) {
-    $phone = ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null;
-    $email = $usuario['receive_email'] ? $usuario['email'] : null;
+        $phone = ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null;
+        $email = $usuario['receive_email'] ? $usuario['email'] : null;
 
-    // Verifica se algum campo obrigatório está nulo
-    if ($usuario['user_id'] === null) {
-        logToJson("[AVISO] Usuário sem ID definido, ignorando...");
-        continue; // pula este usuário
+        // Ignorar usuários inválidos
+        if ($usuario['user_id'] === null) continue;
+        if ($phone === null && $email === null) continue;
+
+        $insertsFilaEnvio[] = [
+            'fila_id' => $alerta['fila_id'],
+            'uuid_alerta' => $alerta['uuid_alerta'],
+            'user_id' => $usuario['user_id'],
+            'email' => $email,
+            'phone' => $phone,
+            'data_criacao' => $currentDateTime
+        ];
     }
-
-    if ($phone === null && $email === null) {
-        logToJson("[AVISO] Usuário {$usuario['user_id']} sem telefone ou e-mail, ignorando...");
-        echo "[AVISO] Usuário {$usuario['user_id']} sem telefone ou e-mail, ignorando..." . PHP_EOL;
-        continue; // pula este usuário
-    }
-
-    $insertsFilaEnvio[] = [
-        'fila_id' => $alerta['fila_id'],
-        'uuid_allert' => $alerta['uuid_alerta'], // uuid_allert pode ser nulo
-        'user_id' => $usuario['user_id'],
-        'email' => $email,
-        'phone' => $phone,
-        'data_criacao' => $currentDateTime
-    ];
 }
 
+// 4. Inserção em bulk na tabela fila_envio_detalhes
+if (!empty($insertsFilaEnvio)) {
+    try {
+        $pdo->beginTransaction();
+
+        $values = [];
+        $placeholders = [];
+
+        foreach ($insertsFilaEnvio as $insert) {
+            $placeholders[] = "(?, ?, ?, ?, ?, 'PENDENTE', ?)";
+            $values[] = $insert['fila_id'];
+            $values[] = $insert['uuid_alerta'];
+            $values[] = $insert['user_id'];
+            $values[] = $insert['email'];
+            $values[] = $insert['phone'];
+            $values[] = $insert['data_criacao'];
+        }
+
+        $sqlInsert = "
+            INSERT INTO fila_envio_detalhes
+                (fila_id, uuid_alerta, user_id, email, phone, status_envio, data_criacao)
+            VALUES " . implode(', ', $placeholders);
+
+        $stmtInsert = $pdo->prepare($sqlInsert);
+        $stmtInsert->execute($values);
+
+        // 5. Atualizar status da fila_envio para FILA
+        $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_alerta'));
+
+        $sqlUpdate = "
+            UPDATE fila_envio
+            SET status_envio = 'FILA', enviado = 1
+            WHERE uuid_alerta = ?
+        ";
+        $stmtUpdate = $pdo->prepare($sqlUpdate);
+
+        foreach ($uuidsAlertas as $uuid) {
+            $stmtUpdate->execute([$uuid]);
+        }
+
+        $pdo->commit();
+
+        echo "Fila de envios criada com sucesso para " . count($insertsFilaEnvio) . " usuários.\n";
+    } catch (\Exception $e) {
+        $pdo->rollBack();
+        die("Erro ao inserir filas de envio: " . $e->getMessage());
+    }
+} else {
+    echo "Nenhum usuário válido encontrado para enviar os alertas.\n";
 }
 
-// 4. Inserir todas as filas de envio de uma vez
-try {
-    $pdo->beginTransaction();
-
-    // Inserir detalhes
-    $sqlInsert = "
-        INSERT INTO fila_envio_detalhes 
-            (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao) 
-        VALUES (?, ?, ?, ?, ?, 'PENDENTE', ?)
-    ";
-    $stmtInsert = $pdo->prepare($sqlInsert);
-
-    foreach ($insertsFilaEnvio as $insert) {
-        $stmtInsert->execute([
-            $insert['fila_id'],
-            $insert['uuid_allert'],
-            $insert['user_id'],
-            $insert['email'],
-            $insert['phone'],
-            $insert['data_criacao']
-        ]);
-    }
-
-    // Atualizar status da fila_envio para FILA por uuid_alerta
-    $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_allert'));
-    $sqlUpdate = "
-        UPDATE fila_envio 
-        SET status_envio = 'FILA', enviado = 1
-        WHERE uuid_alerta = ?
-    ";
-    $stmtUpdate = $pdo->prepare($sqlUpdate);
-
-    foreach ($uuidsAlertas as $uuid) {
-        $stmtUpdate->execute([$uuid]);
-    }
-
-    $pdo->commit();
-} catch (\Exception $e) {
-    $pdo->rollBack();
-    die("Erro ao inserir filas de envio: " . $e->getMessage());
-}
-
-
-echo "Fila de envios criada com sucesso. Agora processe os envios via worker separado.\n";
+$endTime = microtime(true);
+$duration = round($endTime - $startTime, 2);
+echo "Processamento finalizado em {$duration} segundos.\n";
