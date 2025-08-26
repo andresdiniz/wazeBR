@@ -170,7 +170,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 if ($id_parceiro === 1 || $id_parceiro === 2) { // exemplo de regra de parceiro
                     $kmlPath = __DIR__ . '/kmls/eprviamineira/doc.kml';
                     $limiteKm = 2; // limite em km
-                    $kmCalculado = encontrarKmPorCoordenadasEPR($lat, $lng, $kmlPath, $limiteKm);
+                    $kmCalculado = encontrarKmPorCoordenadasEPR($lat, $lng, $limiteKm);
                     if ($kmCalculado !== null) {
                         $km = $kmCalculado;
                     }

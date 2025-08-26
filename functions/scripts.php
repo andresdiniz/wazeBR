@@ -907,7 +907,7 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     // 3.1 Calcular KM usando KML
     $kmlPath = __DIR__ . '/kmls/eprviamineira/doc.kml';
     echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
-    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $kmlPath, 2);
+    $km = encontrarKmPorCoordenadasEPR($lng, $lat, 2);
 
     // 3.2 Direção cardinal
     $magvarText = '';
@@ -991,9 +991,20 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
     return false;
 }
 
-function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml, $limiteKm) {
-    $kml = simplexml_load_file($kml);
-    $ns = $kml->getNamespaces(true);
+function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm) {
+   $kmlPath = __DIR__ . '/kmls/eprviamineira/doc.kml';
+   echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
+    if (!file_exists($kmlPath)) {
+        throw new Exception("Arquivo KML não encontrado: $kmlPath");
+    }
+
+    $xml = simplexml_load_file($kmlPath);
+    if (!$xml) {
+        throw new Exception("Erro ao carregar o KML: $kmlPath");
+    }
+
+    // Agora é seguro usar getNamespaces()
+    $ns = $xml->getNamespaces(true);
     
     $menorDistancia = PHP_FLOAT_MAX;
     $kmEncontrado = null;
