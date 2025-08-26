@@ -91,15 +91,31 @@ foreach ($filaPendentes as $alerta) {
     );
 
     foreach ($usuariosAlvo as $usuario) {
-        $insertsFilaEnvio[] = [
-            'fila_id' => $alerta['fila_id'],
-            'uuid_allert' => $alerta['uuid_alerta'],// uuid_allert pode ser nulo se não for usado
-            'user_id' => $usuario['user_id'],
-            'email' => $usuario['receive_email'] ? $usuario['email'] : null,
-            'phone' => ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null,
-            'data_criacao' => $currentDateTime  // <-- data/hora do PHP
-        ];
+    $phone = ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null;
+    $email = $usuario['receive_email'] ? $usuario['email'] : null;
+
+    // Verifica se algum campo obrigatório está nulo
+    if ($usuario['user_id'] === null) {
+        logToJson("[AVISO] Usuário sem ID definido, ignorando...");
+        continue; // pula este usuário
     }
+
+    if ($phone === null && $email === null) {
+        logToJson("[AVISO] Usuário {$usuario['user_id']} sem telefone ou e-mail, ignorando...");
+        echo "[AVISO] Usuário {$usuario['user_id']} sem telefone ou e-mail, ignorando..." . PHP_EOL;
+        continue; // pula este usuário
+    }
+
+    $insertsFilaEnvio[] = [
+        'fila_id' => $alerta['fila_id'],
+        'uuid_allert' => $alerta['uuid_alerta'], // uuid_allert pode ser nulo
+        'user_id' => $usuario['user_id'],
+        'email' => $email,
+        'phone' => $phone,
+        'data_criacao' => $currentDateTime
+    ];
+}
+
 }
 
 // 4. Inserir todas as filas de envio de uma vez
