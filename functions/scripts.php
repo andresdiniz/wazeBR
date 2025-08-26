@@ -992,15 +992,15 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
 }
 
 function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm) {
-    $kmlPath = __DIR__ . '/../kmls/eprviamineira/doc.kml';
-    echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
-    if (!file_exists($kmlPath)) {
-        throw new Exception("Arquivo KML não encontrado: $kmlPath");
+    $kml = __DIR__ . '/../kmls/eprviamineira/doc.kml';
+    echo "Caminho do KML: " . realpath($kml) . PHP_EOL;
+    if (!file_exists($kml)) {
+        throw new Exception("Arquivo KML não encontrado: $kml");
     }
 
-    $xml = simplexml_load_file($kmlPath);
+    $xml = simplexml_load_file($kml);
     if (!$xml) {
-        throw new Exception("Erro ao carregar o KML: $kmlPath");
+        throw new Exception("Erro ao carregar o KML: $kml");
     }
 
     // Agora é seguro usar getNamespaces()
