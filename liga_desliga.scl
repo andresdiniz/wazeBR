@@ -1,0 +1,55 @@
+FUNCTION_BLOCK MediaMovel
+VAR_INPUT
+    ValorAtual : REAL; // Valor atual do sensor
+    N_Periodos : INT; // Número de períodos para calcular a média móvel
+    Tempo_Amostragem : TIME; // Tempo de amostragem
+    Trigger : BOOL; // Sinal de disparo para calcular a média
+END_VAR_INPUT
+
+VAR_OUTPUT
+    Media : REAL; // Resultado da média móvel
+END_VAR_OUTPUT
+
+VAR
+    Valores : ARRAY[1..100] OF REAL; // Array para armazenar os valores
+    Indice : INT := 1; // Índice do próximo valor a ser armazenado
+    Soma : REAL := 0.0; // Soma dos valores para calcular a média
+    Contador : INT := 0; // Contador de períodos
+    TempoUltimoTrigger : TIME := T#0s; // Tempo do último trigger
+    UltimoTrigger : BOOL := FALSE; // Estado do último trigger
+END_VAR
+
+// Logica para calcular a média móvel
+IF Trigger AND NOT UltimoTrigger THEN
+    // Atualiza o tempo do último trigger
+    TempoUltimoTrigger := TIME();
+    
+    // Armazena o valor atual no array
+    Valores[Indice] := ValorAtual;
+    
+    // Atualiza a soma
+    Soma := Soma + ValorAtual;
+    
+    // Incrementa o contador
+    Contador := Contador + 1;
+    
+    // Verifica se atingiu o número de períodos
+    IF Contador > N_Periodos THEN
+        // Remove o valor mais antigo da soma
+        Soma := Soma - Valores[Indice];
+        Indice := Indice MOD N_Periodos + 1; // Atualiza o índice circular
+    END_IF
+    
+    // Calcula a média
+    Media := Soma / MIN(Contador, N_Periodos);
+    UltimoTrigger := TRUE; // Atualiza o estado do trigger
+ELSE
+    // Reseta o estado do trigger se não houver disparo
+    UltimoTrigger := FALSE;
+    // Se não houver trigger, mantém a média anterior
+    Media := Media; // Não altera a média
+END_IF
+
+
+
+
