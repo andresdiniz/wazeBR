@@ -97,6 +97,7 @@ function atualizarKm(array $alerts, PDO $pdo) {
                 // Verifica se a atualização afetou alguma linha
                 if ($updateStmt->rowCount() > 0) {
                     $atualizados++;
+                    echo "Atualizado UUID: {$alert['uuid']} com KM: $km\n";
                 } else {
                     echo "Nenhuma linha afetada para UUID: {$alert['uuid']}\n";
                 }
