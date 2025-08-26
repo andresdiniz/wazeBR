@@ -26,9 +26,6 @@ try {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
-<?php
-// ... (código anterior mantido)
-
 try {
     $pdo = Database::getConnection();
     $pdo->beginTransaction();
