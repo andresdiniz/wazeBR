@@ -900,8 +900,9 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
         if (!empty($cidade)) $localizacao[] = "cidade de {$cidade}";
         $partes[] = "foi reportado em " . implode(" na ", $localizacao);
     }
-
-    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}.";
+    $caminhoKml = '../kmls/eprviamineira/doc.kml';
+    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml);
+    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}, KM ";
     $partes[] = "Por favor, verifique e envie equipe especializada.";
 
     $mensagem = implode(" ", $partes);
@@ -961,3 +962,44 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
     return false;
 }
 
+function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml) {
+    // Carrega o conteúdo do KML
+    $kml = simplexml_load_file('doc.kml');
+    
+    // Namespace do KML
+    $ns = $kml->getNamespaces(true);
+    
+    // Inicializa variáveis para busca
+    $menorDistancia = PHP_FLOAT_MAX;
+    $kmEncontrado = null;
+    
+    // Itera sobre todos os Placemarks
+    foreach ($kml->Document->Folder->Placemark as $placemark) {
+        // Obtém as coordenadas do Placemark
+        $coordenadas = trim((string)$placemark->Point->coordinates);
+        list($lon, $lat, $alt) = explode(',', $coordenadas);
+        
+        // Calcula a distância usando a fórmula de Haversine
+        $theta = $longitude - (float)$lon;
+        $dist = sin(deg2rad($latitude)) * sin(deg2rad((float)$lat)) + 
+                cos(deg2rad($latitude)) * cos(deg2rad((float)$lat)) * 
+                cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $km = $dist * 60 * 1.853159616;
+        
+        // Verifica se é a menor distância
+        if ($km < $menorDistancia) {
+            $menorDistancia = $km;
+            $kmEncontrado = (string)$placemark->name;
+        }
+    }
+    
+    return $kmEncontrado;
+}
+
+// Exemplo de uso:
+// $km = encontrarKmPorCoordenadas(-21.6406382, -43.438023);
+// echo "KM: " . $km;
+
+?>
