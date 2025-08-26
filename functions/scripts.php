@@ -964,7 +964,7 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
 
 function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml) {
     // Carrega o conteúdo do KML
-    $kml = simplexml_load_file('doc.kml');
+    $kml = simplexml_load_file($kml);
     
     // Namespace do KML
     $ns = $kml->getNamespaces(true);
