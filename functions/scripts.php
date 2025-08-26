@@ -905,9 +905,9 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     }
 
     // 3.1 Calcular KM usando KML
-    $caminhoKml = './kmls/eprviamineira/doc.kml';
-    echo "Caminho do KML: " . realpath($caminhoKml) . PHP_EOL;
-    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml, 2);
+    $kmlPath = __DIR__ . '/kmls/eprviamineira/doc.kml';
+    echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
+    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $kmlPath, 2);
 
     // 3.2 Direção cardinal
     $magvarText = '';
