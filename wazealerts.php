@@ -392,17 +392,23 @@ function saveJamsToDb(PDO $pdo, array $jams, $url, $id_parceiro)
         }
 
         $uuidsToDeactivate = array_diff($existingUuids, $processedUuids);
+        $batchSize = 1000;
+
         if (!empty($uuidsToDeactivate)) {
-            $placeholders = implode(',', array_fill(0, count($uuidsToDeactivate), '?'));
-            $stmtDeactivate = $pdo->prepare("
-                UPDATE jams 
-                SET status = 0, date_updated = NOW()
-                WHERE uuid IN ($placeholders) 
-                  AND source_url = ?
-                  AND status = 1
-            ");
-            $params = array_merge($uuidsToDeactivate, [$url]);
-            $stmtDeactivate->execute($params);
+            $batches = array_chunk($uuidsToDeactivate, $batchSize);
+
+            foreach ($batches as $batch) {
+                $placeholders = implode(',', array_fill(0, count($batch), '?'));
+                $stmtDeactivate = $pdo->prepare("
+                    UPDATE jams 
+                    SET status = 0, date_updated = NOW()
+                    WHERE uuid IN ($placeholders) 
+                    AND source_url = ?
+                    AND status = 1
+                ");
+                $params = array_merge($batch, [$url]);
+                $stmtDeactivate->execute($params);
+            }
         }
         $pdo->commit();
     } catch (Exception $e) {
