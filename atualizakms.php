@@ -30,6 +30,8 @@ try {
 
 try {
     $pdo = Database::getConnection();
+    // Ativa exceções em erros do PDO
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->beginTransaction();
 
     // Seleciona todos os alerts sem km do parceiro 2
@@ -55,16 +57,23 @@ try {
         // Calcula o km a partir das coordenadas
         $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
 
-        // Debug: exibe KM calculado
-        echo "UUID: {$alert['uuid']} | KM calculado: " . ($km ?? 'NULL') . "\n";
+        // Debug: exibe valores usados
+        echo "\n--- DEBUG ALERT ---\n";
+        echo "UUID: " . var_export($alert['uuid'], true) . "\n";
+        echo "location_x: " . var_export($alert['location_x'], true) . "\n";
+        echo "location_y: " . var_export($alert['location_y'], true) . "\n";
+        echo "KM calculado: " . var_export($km, true) . "\n";
 
-        if ($km !== null) {
+        if ($km !== null && $alert['uuid']) {
             try {
-                // Atualiza o banco, passando float direto
-                $updateStmt->execute([
+                // Atualiza o banco, passando float diretamente
+                $executou = $updateStmt->execute([
                     ':km'   => (float)$km,
                     ':uuid' => $alert['uuid']
                 ]);
+
+                echo "Execute retornou: " . var_export($executou, true) . "\n";
+                echo "RowCount: " . $updateStmt->rowCount() . "\n";
 
                 if ($updateStmt->rowCount() > 0) {
                     $totalAtualizados++;
@@ -76,13 +85,14 @@ try {
                 error_log("Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage());
                 echo "Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage() . "\n";
             }
+        } else {
+            echo "Alerta ignorado (KM nulo ou UUID inválido)\n";
         }
 
         $tempoAlerta = microtime(true) - $startTimeAlerta;
         echo "Tempo do alerta: " . round($tempoAlerta, 4) . " segundos\n";
     }
 
-    // Confirma alterações no banco
     $pdo->commit();
 
     $tempoTotal = microtime(true) - $startTimeTotal;
@@ -97,4 +107,3 @@ try {
     error_log("Erro no processamento: " . $e->getMessage());
     die("Erro: " . $e->getMessage());
 }
-
