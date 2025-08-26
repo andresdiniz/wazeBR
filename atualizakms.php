@@ -26,11 +26,13 @@ try {
     die("Erro ao carregar o .env: " . $e->getMessage());
 }
 
+<?php
+// ... (código anterior mantido)
+
 try {
     $pdo = Database::getConnection();
     $pdo->beginTransaction();
 
-    // Consulta inicial para pegar alerts com km null e id_parceiro = 2
     $stmt = $pdo->prepare("
         SELECT uuid, location_x, location_y 
         FROM alerts 
@@ -58,7 +60,7 @@ try {
         $totalAtualizados += $atualizados;
     }
 
-    $pdo->commit();
+    $pdo->commit(); // Confirma as alterações no banco
 
     $tempoTotal = microtime(true) - $startTimeTotal;
     echo "Processo finalizado com sucesso.\n";
@@ -66,32 +68,41 @@ try {
     echo "Tempo total de execução: " . round($tempoTotal, 2) . " segundos\n";
 
 } catch (Exception $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log("Erro no processamento: " . $e->getMessage());
     die("Erro: " . $e->getMessage());
 }
 
 /**
  * Função para atualizar km no banco
- * Retorna quantidade de alertas atualizados
  */
 function atualizarKm(array $alerts, PDO $pdo) {
     $updateStmt = $pdo->prepare("UPDATE alerts SET km = :km WHERE uuid = :uuid");
     $atualizados = 0;
 
     foreach ($alerts as $alert) {
-        $startTime = microtime(true); // tempo individual do alerta
+        $startTime = microtime(true);
 
-        $limiteKm = 2; // limite em km
+        $limiteKm = 2;
         $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
-        echo $km;
+
+        // Debug: Verifique se o KM está sendo calculado
+        echo "UUID: {$alert['uuid']} | KM: " . ($km ?? 'NULL') . "\n";
+
         if ($km !== null) {
             try {
-                $updateStmt->execute([
-                    ':km' => $km,
-                    ':uuid' => $alert['uuid']
-                ]);
-                $atualizados++;
+                $updateStmt->bindValue(':km', $km, PDO::PARAM_STR);
+                $updateStmt->bindValue(':uuid', $alert['uuid'], PDO::PARAM_STR);
+                $updateStmt->execute();
+
+                // Verifica se a atualização afetou alguma linha
+                if ($updateStmt->rowCount() > 0) {
+                    $atualizados++;
+                } else {
+                    echo "Nenhuma linha afetada para UUID: {$alert['uuid']}\n";
+                }
             } catch (Exception $e) {
                 error_log("Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage());
                 echo "Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage() . "\n";
@@ -99,9 +110,10 @@ function atualizarKm(array $alerts, PDO $pdo) {
         }
 
         $tempoAlerta = microtime(true) - $startTime;
-        echo "UUID {$alert['uuid']} atualizado em " . round($tempoAlerta, 4) . " segundos\n";
+        echo "Tempo do alerta: " . round($tempoAlerta, 4) . " segundos\n";
     }
 
     return $atualizados;
 }
 
+?>
