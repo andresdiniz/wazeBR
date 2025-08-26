@@ -149,7 +149,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             status = 1, date_updated = VALUES(date_updated), km = VALUES(km), id_parceiro = VALUES(id_parceiro)");
 
         $incomingUuids = [];
-        $DUPLICATE_DISTANCE_THRESHOLD = 1200;
+        $DUPLICATE_DISTANCE_THRESHOLD = 1500;
 
         foreach ($alerts as $alert) {
             if (!isset($alert['location']['x'], $alert['location']['y'])) {
@@ -266,6 +266,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     $stmtFila->execute([$uuid, $flatAlert['type'], $flatAlert['subtype'] ?? null, $id_parceiro, $currentDateTime]);
 
                     logToJson("Alerta $uuid adicionado à fila de envio.");
+                    /*
 
                     // Envio de notificação push para parceiros específicos sera desativado
                     // Se o alerta for do tipo 'ACCIDENT' e o id_parceiro for 2, envia notificação push
@@ -284,7 +285,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                             logToJson("Mensagem enviada para $numero - UUID: $uuid");
                         }
 
-                    }
+                    }*/
                 } elseif ($rows === 2) {
                     logToJson("[ATUALIZADO] UUID: $uuid");
                 } else {
