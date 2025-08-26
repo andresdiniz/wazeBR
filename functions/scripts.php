@@ -965,7 +965,6 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
 
 function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml, $limiteKm) {
     $kml = simplexml_load_file($kml);
-    
     $ns = $kml->getNamespaces(true);
     
     $menorDistancia = PHP_FLOAT_MAX;
