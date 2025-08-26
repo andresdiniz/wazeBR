@@ -27,6 +27,7 @@ try {
 }
 
 try {
+    $pdo = Database::getConnection();
     $pdo->beginTransaction();
 
     // Consulta inicial para pegar alerts com km null e id_parceiro = 2
