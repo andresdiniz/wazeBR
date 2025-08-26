@@ -83,7 +83,7 @@ function atualizarKm(array $alerts, PDO $pdo) {
         $startTime = microtime(true); // tempo individual do alerta
 
         $limiteKm = 2; // limite em km
-        $km = encontrarKmPorCoordenadasEPR($alert['location_x'], $alert['location_y'], $limiteKm);
+        $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
 
         if ($km !== null) {
             try {
