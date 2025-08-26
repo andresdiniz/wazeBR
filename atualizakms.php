@@ -1,9 +1,10 @@
 <?php
-$startTimeTotal = microtime(true);
-
+error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/debug.log');
+
+$startTimeTotal = microtime(true);
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/configbd.php';
@@ -12,6 +13,7 @@ require_once __DIR__ . '/config/configs.php';
 
 use Dotenv\Dotenv;
 
+// Carrega .env
 $envPath = __DIR__ . '/.env';
 if (!file_exists($envPath)) {
     die("Arquivo .env não encontrado no caminho: $envPath");
@@ -30,6 +32,7 @@ try {
     $pdo = Database::getConnection();
     $pdo->beginTransaction();
 
+    // Seleciona todos os alerts sem km do parceiro 2
     $stmt = $pdo->prepare("
         SELECT uuid, location_x, location_y 
         FROM alerts 
@@ -38,65 +41,29 @@ try {
     ");
     $stmt->execute();
 
-    $batchSize = 1000;
-    $alerts = [];
     $totalAtualizados = 0;
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $alerts[] = $row;
-
-        if (count($alerts) >= $batchSize) {
-            $atualizados = atualizarKm($alerts, $pdo);
-            $totalAtualizados += $atualizados;
-            $alerts = [];
-        }
-    }
-
-    if (!empty($alerts)) {
-        $atualizados = atualizarKm($alerts, $pdo);
-        $totalAtualizados += $atualizados;
-    }
-
-    $pdo->commit(); // Confirma as alterações no banco
-
-    $tempoTotal = microtime(true) - $startTimeTotal;
-    echo "Processo finalizado com sucesso.\n";
-    echo "Total de alertas atualizados: $totalAtualizados\n";
-    echo "Tempo total de execução: " . round($tempoTotal, 2) . " segundos\n";
-
-} catch (Exception $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    error_log("Erro no processamento: " . $e->getMessage());
-    die("Erro: " . $e->getMessage());
-}
-
-/**
- * Função para atualizar km no banco
- */
-function atualizarKm(array $alerts, PDO $pdo) {
+    // Prepara o update uma vez
     $updateStmt = $pdo->prepare("UPDATE alerts SET km = :km WHERE uuid = :uuid");
-    $atualizados = 0;
 
-    foreach ($alerts as $alert) {
-        $startTime = microtime(true);
+    // Processamento linha a linha
+    while ($alert = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $startTimeAlerta = microtime(true);
 
         $limiteKm = 2;
-        $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
+        $km = encontrarKmPorCoordenadasEPR($alert['location_x'], $alert['location_y'], $limiteKm);
 
-        // Debug: Verifique se o KM está sendo calculado
-        echo "UUID: {$alert['uuid']} | KM: " . ($km ?? 'NULL') . "\n";
+        // Debug
+        echo "UUID: {$alert['uuid']} | KM calculado: " . ($km ?? 'NULL') . "\n";
 
         if ($km !== null) {
             try {
-                $updateStmt->bindValue(':km', $km, PDO::PARAM_STR);
+                $updateStmt->bindValue(':km', (float)$km, PDO::PARAM_STR);
                 $updateStmt->bindValue(':uuid', $alert['uuid'], PDO::PARAM_STR);
                 $updateStmt->execute();
 
-                // Verifica se a atualização afetou alguma linha
                 if ($updateStmt->rowCount() > 0) {
-                    $atualizados++;
+                    $totalAtualizados++;
                     echo "Atualizado UUID: {$alert['uuid']} com KM: $km\n";
                 } else {
                     echo "Nenhuma linha afetada para UUID: {$alert['uuid']}\n";
@@ -107,11 +74,21 @@ function atualizarKm(array $alerts, PDO $pdo) {
             }
         }
 
-        $tempoAlerta = microtime(true) - $startTime;
+        $tempoAlerta = microtime(true) - $startTimeAlerta;
         echo "Tempo do alerta: " . round($tempoAlerta, 4) . " segundos\n";
     }
 
-    return $atualizados;
-}
+    $pdo->commit();
 
-?>
+    $tempoTotal = microtime(true) - $startTimeTotal;
+    echo "\nProcesso finalizado com sucesso.\n";
+    echo "Total de alertas atualizados: $totalAtualizados\n";
+    echo "Tempo total de execução: " . round($tempoTotal, 2) . " segundos\n";
+
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log("Erro no processamento: " . $e->getMessage());
+    die("Erro: " . $e->getMessage());
+}
