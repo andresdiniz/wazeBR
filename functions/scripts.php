@@ -903,7 +903,7 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $caminhoKml = './kmls/eprviamineira/doc.kml';
     echo "Caminho do KML: " . realpath($caminhoKml) . PHP_EOL;
     $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml);
-    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}, KM {$km}."; ";
+    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}, KM {$km}.";
     $partes[] = "Por favor, verifique e envie equipe especializada.";
 
     $mensagem = implode(" ", $partes);
