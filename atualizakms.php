@@ -83,7 +83,7 @@ function atualizarKm(array $alerts, PDO $pdo) {
         $startTime = microtime(true); // tempo individual do alerta
 
         $limiteKm = 2; // limite em km
-        $km = encontrarKmPorCoordenadasEPRatualiza($alert['location_x'], $alert['location_y'], $limiteKm);
+        $km = encontrarKmPorCoordenadasEPR($alert['location_x'], $alert['location_y'], $limiteKm);
 
         if ($km !== null) {
             try {
@@ -104,60 +104,3 @@ function atualizarKm(array $alerts, PDO $pdo) {
     return $atualizados;
 }
 
-function encontrarKmPorCoordenadasEPRatualiza($latitude, $longitude, $limiteKm = null) {
-    $kmlPath = __DIR__ . '/kmls/eprviamineira/doc.kml';
-    echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
-
-    if (!file_exists($kmlPath)) {
-        throw new Exception("Arquivo KML não encontrado: $kmlPath");
-    }
-
-    $xml = simplexml_load_file($kmlPath);
-    if (!$xml) {
-        throw new Exception("Erro ao carregar o KML: $kmlPath");
-    }
-
-    // Captura namespaces do KML
-    $ns = $xml->getNamespaces(true);
-
-    // Se houver namespace, registra para poder acessar os elementos
-    $xml->registerXPathNamespace('k', $ns[''] ?? '');
-
-    $placemarks = $xml->xpath('//k:Placemark');
-
-    if (!$placemarks) {
-        throw new Exception("Nenhum Placemark encontrado no KML.");
-    }
-
-    $menorDistancia = PHP_FLOAT_MAX;
-    $kmEncontrado = null;
-
-    foreach ($placemarks as $placemark) {
-        // Obtém as coordenadas
-        $coords = trim((string)$placemark->Point->coordinates);
-        if (!$coords) continue;
-
-        list($lon, $lat, $alt) = explode(',', $coords);
-
-        // Calcula distância Haversine
-        $theta = $longitude - (float)$lon;
-        $dist = sin(deg2rad($latitude)) * sin(deg2rad((float)$lat)) +
-                cos(deg2rad($latitude)) * cos(deg2rad((float)$lat)) *
-                cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $km = $dist * 60 * 1.853159616;
-
-        if ($km < $menorDistancia) {
-            $menorDistancia = $km;
-            $kmEncontrado = (string)$placemark->name;
-        }
-    }
-
-    // Só retorna se estiver dentro do limite (se definido)
-    if ($limiteKm !== null && $menorDistancia > $limiteKm) {
-        return null;
-    }
-
-    return $kmEncontrado;
-}
