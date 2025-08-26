@@ -51,7 +51,7 @@ try {
         $startTimeAlerta = microtime(true);
 
         $limiteKm = 2;
-        $km = encontrarKmPorCoordenadasEPR($alert['location_x'], $alert['location_y'], $limiteKm);
+        $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
 
         // Debug
         echo "UUID: {$alert['uuid']} | KM calculado: " . ($km ?? 'NULL') . "\n";
