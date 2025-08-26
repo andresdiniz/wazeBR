@@ -124,6 +124,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
     $pdo->beginTransaction();
 
     try {
+        // Busca alertas ativos do mesmo source_url
         $stmt = $pdo->prepare("SELECT * FROM alerts WHERE source_url = ? AND status = 1");
         $cleanUrl = strtolower(trim($url));
         $stmt->execute([$cleanUrl]);
@@ -132,6 +133,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $existingAlerts[$row['uuid']] = $row;
         }
 
+        // Prepared statement para INSERT / UPDATE
         $stmtInsertUpdate = $pdo->prepare("INSERT INTO alerts (
             uuid, country, city, reportRating, reportByMunicipalityUser, confidence,
             reliability, type, roadType, magvar, subtype, street, location_x, location_y, pubMillis,
@@ -158,7 +160,22 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
 
             $uuid = $alert['uuid'];
             $incomingUuids[] = $uuid;
+
+            // Calcula km apenas se aplicável (dependendo do parceiro e da distância)
             $km = null;
+            $lat = $alert['location']['y'];
+            $lng = $alert['location']['x'];
+            if ($lat && $lng) {
+                // Somente alguns parceiros ou alertas podem gerar km
+                if ($id_parceiro === 1 || $id_parceiro === 2) { // exemplo de regra de parceiro
+                    $caminhoKml = './kmls/eprviamineira/doc.kml';
+                    $limiteKm = 2; // limite em km
+                    $kmCalculado = encontrarKmPorCoordenadasEPR($lat, $lng, $caminhoKml, $limiteKm);
+                    if ($kmCalculado !== null) {
+                        $km = $kmCalculado;
+                    }
+                }
+            }
 
             $flatAlert = [
                 'uuid' => $uuid,
@@ -173,8 +190,8 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 'magvar' => $alert['magvar'] ?? null,
                 'subtype' => $alert['subtype'] ?? null,
                 'street' => $alert['street'] ?? null,
-                'location_x' => $alert['location']['x'],
-                'location_y' => $alert['location']['y'],
+                'location_x' => $lng,
+                'location_y' => $lat,
                 'pubMillis' => $alert['pubMillis'] ?? null
             ];
 
@@ -182,20 +199,17 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
             $shouldUpdate = $isNew || alertChanged($existingAlerts[$uuid], $flatAlert);
             $isDuplicate = false;
 
-            $checkseduplicado = false;
-
-            // Verifica se o alerta é novo e se já existe um alerta próximo
-            $alertsduplicados = $pdo->prepare("SELECT * FROM  duplicate_alerts WHERE uuid = ?");
-            $alertsduplicados->execute([$uuid]);
-            $existingDuplicate = $alertsduplicados->fetch(PDO::FETCH_ASSOC);
+            // Verifica duplicidade na tabela de duplicados
+            $alertsDuplicadosStmt = $pdo->prepare("SELECT * FROM duplicate_alerts WHERE uuid = ?");
+            $alertsDuplicadosStmt->execute([$uuid]);
+            $existingDuplicate = $alertsDuplicadosStmt->fetch(PDO::FETCH_ASSOC);
             if ($existingDuplicate) {
-                $checkseduplicado = true;
                 logToJson("[DUPLICADO] Alerta $uuid já existe na tabela de duplicados.");
+                $isDuplicate = true;
             }
 
-            // Verifique se o alerta é novo. Se sim, inicie a verificação de duplicidade por proximidade.
-            if ($isNew) {
-                // Itere sobre os alertas existentes (ativos)
+            // Verifica duplicidade por proximidade
+            if ($isNew && !$isDuplicate) {
                 foreach ($existingAlerts as $existingUuid => $existingAlert) {
                     $distance = haversineGreatCircleDistance(
                         $flatAlert['location_y'],
@@ -204,35 +218,24 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                         $existingAlert['location_x']
                     );
 
-                    // Se o novo alerta for do mesmo tipo e estiver dentro da distância limite
                     if ($distance < $DUPLICATE_DISTANCE_THRESHOLD && $flatAlert['type'] === $existingAlert['type']) {
-                        // Loga a duplicidade para o arquivo JSON
                         logToJson("[DUPLICADO] Alerta $uuid ignorado. Muito próximo do alerta ativo $existingUuid (distância: " . round($distance, 2) . "m)");
 
-                        // Prepara a consulta para inserir ou atualizar o registro de duplicidade
-                        // O ON DUPLICATE KEY UPDATE garante que não haverá duplicidade na tabela
                         $stmtUpsertDuplicate = $pdo->prepare("
-                INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update)
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE last_update = VALUES(last_update)
-            ");
+                            INSERT INTO duplicate_alerts (uuid, uuid_corresp, last_update)
+                            VALUES (?, ?, ?)
+                            ON DUPLICATE KEY UPDATE last_update = VALUES(last_update)
+                        ");
+                        $stmtUpsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
+                        logToJson("[DUPLICADO REGISTRADO] Registro de duplicidade para $uuid inserido ou atualizado.");
 
-                        try {
-                            $stmtUpsertDuplicate->execute([$uuid, $existingUuid, $currentDateTime]);
-                            logToJson("[DUPLICADO REGISTRADO] Registro de duplicidade para $uuid inserido ou atualizado.");
-                        } catch (PDOException $e) {
-                            logToJson("Erro ao inserir/atualizar duplicata: " . $e->getMessage(), 'error');
-                        }
-
-                        // Marca o alerta como duplicado para ignorar a inserção principal
                         $isDuplicate = true;
-
-                        // Sai do loop interno, pois já encontramos uma duplicata
                         break;
                     }
                 }
             }
 
+            // Insere ou atualiza alerta
             if (!$isDuplicate && $shouldUpdate) {
                 $stmtInsertUpdate->execute([
                     ':uuid' => $flatAlert['uuid'],
@@ -256,44 +259,22 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                     ':km' => $km,
                     ':id_parceiro' => $id_parceiro
                 ]);
-                $rows = $stmtInsertUpdate->rowCount();
 
-                if ($rows === 0) {
-                    logToJson("[SEM ALTERAÇÃO] UUID: $uuid (dados idênticos)");
-                } elseif ($rows === 1) {
+                $rows = $stmtInsertUpdate->rowCount();
+                if ($rows === 1) {
                     logToJson("[INSERIDO] UUID: $uuid");
                     $stmtFila = $pdo->prepare("INSERT INTO fila_envio (uuid_alerta, type, subtype, id_parceiro, data_criacao, enviado) VALUES (?, ?, ?, ?, ?, 0)");
                     $stmtFila->execute([$uuid, $flatAlert['type'], $flatAlert['subtype'] ?? null, $id_parceiro, $currentDateTime]);
-
                     logToJson("Alerta $uuid adicionado à fila de envio.");
-                    /*
-
-                    // Envio de notificação push para parceiros específicos sera desativado
-                    // Se o alerta for do tipo 'ACCIDENT' e o id_parceiro for 2, envia notificação push
-                    // Isso é específico para o parceiro 2, conforme solicitado
-                    if ($flatAlert['type'] === 'ACCIDENT' && $id_parceiro == 2) {
-                        $deviceToken = 'fec20e76-c481-4316-966d-c09798ae0d95';
-                        $authToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2NhbGxiYWNrIiwiaWF0IjoxNzUzMTczMzE4LCJleHAiOjE3ODQ3MDkzMTgsIm5iZiI6MTc1MzE3MzMxOCwianRpIjoia1pUMFBrWEJoRHA1Q0NPbSIsInN1YiI6Ijg1MiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.opUGRf8f1unfjS_oJtChpoUv8Q0yYGNJChyQ8xoD5Bs';
-                        // Lista de números para enviar
-                        $numeros = [
-                            '5531991903533',
-                            '5531971145316'
-                        ];
-
-                        foreach ($numeros as $numero) {
-                            enviarNotificacaoPush($deviceToken, $authToken, $numero, $flatAlert);
-                            logToJson("Mensagem enviada para $numero - UUID: $uuid");
-                        }
-
-                    }*/
                 } elseif ($rows === 2) {
                     logToJson("[ATUALIZADO] UUID: $uuid");
                 } else {
-                    logToJson("[???] UUID: $uuid – Valor inesperado de rowCount(): $rows", 'warning');
+                    logToJson("[SEM ALTERAÇÃO] UUID: $uuid ou valor inesperado rowCount(): $rows", 'warning');
                 }
             }
         }
 
+        // Desativa alertas antigos não enviados
         $stmtDeactivate = $pdo->prepare("UPDATE alerts SET status = 0, date_updated = ? WHERE uuid = ? AND source_url = ?");
         foreach (array_keys($existingAlerts) as $uuid) {
             if (!in_array($uuid, $incomingUuids)) {
@@ -301,6 +282,7 @@ function saveAlertsToDb(PDO $pdo, array $alerts, $url, $id_parceiro)
                 logToJson("Alerta desativado: $uuid");
             }
         }
+
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();

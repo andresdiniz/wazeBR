@@ -902,7 +902,7 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     }
     $caminhoKml = './kmls/eprviamineira/doc.kml';
     echo "Caminho do KML: " . realpath($caminhoKml) . PHP_EOL;
-    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml);
+    $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml, 2);
     $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}, KM {$km}.";
     $partes[] = "Por favor, verifique e envie equipe especializada.";
 
@@ -963,41 +963,40 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
     return false;
 }
 
-function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml) {
-    // Carrega o conteúdo do KML
+function encontrarKmPorCoordenadasEPR($latitude, $longitude, $kml, $limiteKm) {
     $kml = simplexml_load_file($kml);
     
-    // Namespace do KML
     $ns = $kml->getNamespaces(true);
     
-    // Inicializa variáveis para busca
     $menorDistancia = PHP_FLOAT_MAX;
     $kmEncontrado = null;
     
-    // Itera sobre todos os Placemarks
     foreach ($kml->Document->Folder->Placemark as $placemark) {
-        // Obtém as coordenadas do Placemark
         $coordenadas = trim((string)$placemark->Point->coordinates);
         list($lon, $lat, $alt) = explode(',', $coordenadas);
         
-        // Calcula a distância usando a fórmula de Haversine
         $theta = $longitude - (float)$lon;
         $dist = sin(deg2rad($latitude)) * sin(deg2rad((float)$lat)) + 
                 cos(deg2rad($latitude)) * cos(deg2rad((float)$lat)) * 
                 cos(deg2rad($theta));
         $dist = acos($dist);
         $dist = rad2deg($dist);
-        $km = $dist * 60 * 1.853159616;
+        $km = $dist * 60 * 1.853159616; // km
         
-        // Verifica se é a menor distância
         if ($km < $menorDistancia) {
             $menorDistancia = $km;
             $kmEncontrado = (string)$placemark->name;
         }
     }
     
+    // Só retorna se estiver dentro do limite (se definido)
+    if ($limiteKm !== null && $menorDistancia > $limiteKm) {
+        return null;
+    }
+
     return $kmEncontrado;
 }
+
 
 // Exemplo de uso:
 // $km = encontrarKmPorCoordenadas(-21.6406382, -43.438023);
