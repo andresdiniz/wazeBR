@@ -844,11 +844,11 @@ function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTi
 function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uuid_alerta)
 {
     var_dump("Iniciando envio de notificação WhatsApp para o número: {$numero} com UUID do alerta: {$uuid_alerta}" . PHP_EOL);
+
     // 1. Buscar dados do alerta na tabela alerts
     $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE uuid = :uuid LIMIT 1");
     $stmtAlert->execute([':uuid' => $uuid_alerta]);
     $alerta = $stmtAlert->fetch(PDO::FETCH_ASSOC);
-    var_dump($alerta);
     if (!$alerta) {
         error_log("Alerta com UUID $uuid_alerta não encontrado.");
         return false;
@@ -866,40 +866,58 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
     $cidade = $alerta['city'] ?? null;
 
-    /* Traduzir tipo e subtipo
-    $traducao = traduzirAlerta($type, $subtype);
-    $type = $traducao['tipo'];
-    $subtype = $traducao['subtipo'];*/
+    // 2.1 Buscar tradução do tipo/subtipo
+    $nomeTipo = '';
+    $nomeSubtipo = '';
+
+    if (!empty($subtype)) {
+        // Buscar subtipo na tabela alert_subtype
+        $stmtSub = $pdo->prepare("SELECT name FROM alert_subtype WHERE subtype_value = :subtype LIMIT 1");
+        $stmtSub->execute([':subtype' => $subtype]);
+        $sub = $stmtSub->fetch(PDO::FETCH_ASSOC);
+        $nomeSubtipo = $sub['name'] ?? $subtype; // fallback: mostra código caso não encontre
+    } else {
+        // Buscar tipo na tabela alert_type
+        $stmtType = $pdo->prepare("SELECT name FROM alert_type WHERE value = :type LIMIT 1");
+        $stmtType->execute([':type' => $type]);
+        $t = $stmtType->fetch(PDO::FETCH_ASSOC);
+        $nomeTipo = $t['name'] ?? $type;
+    }
 
     // 3. Montar a mensagem
     $partes = [];
     $partes[] = "🚨 Alerta recebido:";
-    $partes[] = "Tipo: {$type}";
+
     if (!empty($subtype)) {
-        $partes[] = "e subtipo {$subtype}";
+        $partes[] = "Subtipo: {$nomeSubtipo}";
+    } else {
+        $partes[] = "Tipo: {$nomeTipo}";
     }
+
     if (!empty($street) || !empty($cidade)) {
         $localizacao = [];
         if (!empty($street)) $localizacao[] = $street;
         if (!empty($cidade)) $localizacao[] = "cidade de {$cidade}";
         $partes[] = "foi reportado em " . implode(" na ", $localizacao);
     }
+
     $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}.";
     $partes[] = "Por favor, verifique e envie equipe especializada.";
 
     $mensagem = implode(" ", $partes);
 
     echo "Mensagem a ser enviada: " . $mensagem . PHP_EOL;
+
     logToJsonNotify(
-            $alerta['uuid'],         // alertId
-            $numero,    // userId
-            "WhatsAPP",              // method
-            "prepare",              // status
-            100,           // startTime
-            100,             // endTime
-            $mensagem,             // message
-            100          // duration_ms
-        );
+        $alerta['uuid'],   // alertId
+        $numero,           // userId
+        "WhatsAPP",        // method
+        "prepare",         // status
+        100,               // startTime
+        100,               // endTime
+        $mensagem,         // message
+        100                // duration_ms
+    );
 
     // 4. Verificar credenciais
     if (empty($deviceToken) || empty($authToken)) {
@@ -911,11 +929,13 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
     $resposta = $api->enviarTexto($numero, $mensagem);
     var_dump($resposta); // Exibe a resposta para depuração
+
     // 6. Log da resposta
     logToJson(json_decode($resposta, true));
 
     return $resposta;
 }
+
 
 /**
  * Verifica se a instância do WhatsApp está conectada (status 'inChat').
