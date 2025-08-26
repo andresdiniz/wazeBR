@@ -843,9 +843,13 @@ function logToJsonNotify($alertId, $userId, $method, $status, $startTime, $endTi
 
 function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uuid_alerta)
 {
-    var_dump("Iniciando envio de notificação WhatsApp para o número: {$numero} com UUID do alerta: {$uuid_alerta}" . PHP_EOL);
+    echo "============================" . PHP_EOL;
+    echo "Iniciando envio de notificação WhatsApp" . PHP_EOL;
+    echo "Número: {$numero}" . PHP_EOL;
+    echo "UUID do alerta: {$uuid_alerta}" . PHP_EOL;
+    echo "============================" . PHP_EOL;
 
-    // 1. Buscar dados do alerta na tabela alerts
+    // 1. Buscar dados do alerta
     $stmtAlert = $pdo->prepare("SELECT * FROM alerts WHERE uuid = :uuid LIMIT 1");
     $stmtAlert->execute([':uuid' => $uuid_alerta]);
     $alerta = $stmtAlert->fetch(PDO::FETCH_ASSOC);
@@ -854,9 +858,10 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
         return false;
     }
 
-    echo "Alerta encontrado: " . json_encode($alerta) . PHP_EOL;
+    echo "Alerta encontrado:" . PHP_EOL;
+    print_r($alerta);
 
-    // 2. Extrair informações do alerta
+    // 2. Extrair informações
     $street = $alerta['street'] ?? 'Nome da via desconhecida';
     $lat = $alerta['location_x'] ?? 'LATITUDE_INDEFINIDA';
     $lng = $alerta['location_y'] ?? 'LONGITUDE_INDEFINIDA';
@@ -865,78 +870,101 @@ function enviarNotificacaoWhatsApp($pdo, $deviceToken, $authToken, $numero, $uui
     $timestampMs = $alerta['pubMillis'] ?? null;
     $horaFormatada = $timestampMs ? date('d/m/Y H:i:s', intval($timestampMs / 1000)) : 'horário desconhecido';
     $cidade = $alerta['city'] ?? null;
+    $magvar = $alerta['magvar'] ?? null;
 
-    // 2.1 Buscar tradução do tipo/subtipo
+    // 2.1 Tradução tipo/subtipo
     $nomeTipo = '';
     $nomeSubtipo = '';
-
     if (!empty($subtype)) {
-        // Buscar subtipo na tabela alert_subtype
         $stmtSub = $pdo->prepare("SELECT name FROM alert_subtype WHERE subtype_value = :subtype LIMIT 1");
         $stmtSub->execute([':subtype' => $subtype]);
         $sub = $stmtSub->fetch(PDO::FETCH_ASSOC);
-        $nomeSubtipo = $sub['name'] ?? $subtype; // fallback: mostra código caso não encontre
+        $nomeSubtipo = $sub['name'] ?? $subtype;
     } else {
-        // Buscar tipo na tabela alert_type
         $stmtType = $pdo->prepare("SELECT name FROM alert_type WHERE value = :type LIMIT 1");
         $stmtType->execute([':type' => $type]);
         $t = $stmtType->fetch(PDO::FETCH_ASSOC);
         $nomeTipo = $t['name'] ?? $type;
     }
 
-    // 3. Montar a mensagem
+    // 3. Montar mensagem
     $partes = [];
-    $partes[] = "🚨 Alerta recebido:";
+    $partes[] = "🚨 *Alerta recebido!*";
 
     if (!empty($subtype)) {
-        $partes[] = "{$nomeSubtipo}";
+        $partes[] = "*{$nomeSubtipo}*";
     } else {
-        $partes[] = "{$nomeTipo}";
+        $partes[] = "*{$nomeTipo}*";
     }
 
     if (!empty($street) || !empty($cidade)) {
         $localizacao = [];
         if (!empty($street)) $localizacao[] = $street;
         if (!empty($cidade)) $localizacao[] = "cidade de {$cidade}";
-        $partes[] = "foi reportado em " . implode(" na ", $localizacao);
+        $partes[] = "📍 Local: " . implode(" na ", $localizacao);
     }
+
+    // 3.1 Calcular KM usando KML
     $caminhoKml = './kmls/eprviamineira/doc.kml';
     echo "Caminho do KML: " . realpath($caminhoKml) . PHP_EOL;
     $km = encontrarKmPorCoordenadasEPR($lng, $lat, $caminhoKml, 2);
-    $partes[] = "no seguinte local: https://www.waze.com/ul?ll={$lng},{$lat} às {$horaFormatada}, *KM {$km}*.";
-    $partes[] = "Por favor, verifique e envie equipe especializada.";
 
-    $mensagem = implode(" ", $partes);
+    // 3.2 Direção cardinal
+    $magvarText = '';
+    if (is_numeric($magvar)) {
+        $magvarDeg = floatval($magvar);
+        if (($magvarDeg >= 0 && $magvarDeg < 45) || ($magvarDeg >= 315 && $magvarDeg <= 360)) {
+            $sentido = "Norte";
+        } elseif ($magvarDeg >= 45 && $magvarDeg < 135) {
+            $sentido = "Leste";
+        } elseif ($magvarDeg >= 135 && $magvarDeg < 225) {
+            $sentido = "Sul";
+        } else {
+            $sentido = "Oeste";
+        }
+        $magvarText = "🧭 Direção da bússola: {$magvarDeg}° ({$sentido})";
+    }
 
-    echo "Mensagem a ser enviada: " . $mensagem . PHP_EOL;
+    $partes[] = "🕒 Reportado em: {$horaFormatada}";
+    $partes[] = "📌 KM aproximado: {$km}";
+    if (!empty($magvarText)) $partes[] = $magvarText;
+    $partes[] = "⚠️ Por favor, verifique e envie equipe especializada.";
+    $partes[] = "🔗 Waze: https://www.waze.com/ul?ll={$lng},{$lat}";
+
+    $mensagem = implode(PHP_EOL, $partes);
+
+    echo "Mensagem a ser enviada:" . PHP_EOL;
+    echo $mensagem . PHP_EOL;
 
     logToJsonNotify(
-        $alerta['uuid'],   // alertId
-        $numero,           // userId
-        "WhatsAPP",        // method
-        "prepare",         // status
-        100,               // startTime
-        100,               // endTime
-        $mensagem,         // message
-        100                // duration_ms
+        $alerta['uuid'],
+        $numero,
+        "WhatsAPP",
+        "prepare",
+        100,
+        100,
+        $mensagem,
+        100
     );
 
     // 4. Verificar credenciais
     if (empty($deviceToken) || empty($authToken)) {
-        error_log("Credenciais de notificação não encontradas para o usuário com ID: {$numero}");
+        error_log("Credenciais não encontradas para o usuário: {$numero}");
         return false;
     }
 
-    // 5. Instanciar a classe e enviar
+    // 5. Enviar via API
     $api = new ApiBrasilWhatsApp($deviceToken, $authToken);
     $resposta = $api->enviarTexto($numero, $mensagem);
-    var_dump($resposta); // Exibe a resposta para depuração
 
-    // 6. Log da resposta
+    echo "Resposta da API:" . PHP_EOL;
+    print_r(json_decode($resposta, true));
+
     logToJson(json_decode($resposta, true));
 
     return $resposta;
 }
+
 
 
 /**
