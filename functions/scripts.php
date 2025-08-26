@@ -992,7 +992,7 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
 }
 
 function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm) {
-   $kmlPath = __DIR__ . './kmls/eprviamineira/doc.kml';
+   $kmlPath = __DIR__ . '../kmls/eprviamineira/doc.kml';
    echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
     if (!file_exists($kmlPath)) {
         throw new Exception("Arquivo KML não encontrado: $kmlPath");
