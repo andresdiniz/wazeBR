@@ -991,42 +991,56 @@ function verificarConexaoWhatsApp($deviceToken, $authToken)
     return false;
 }
 
-function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm) {
-    $kml = __DIR__ . '/../kmls/eprviamineira/doc.kml';
-    echo "Caminho do KML: " . realpath($kml) . PHP_EOL;
-    if (!file_exists($kml)) {
-        throw new Exception("Arquivo KML não encontrado: $kml");
+function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm = null) {
+    $kmlPath = __DIR__ . '/../kmls/eprviamineira/doc.kml';
+    echo "Caminho do KML: " . realpath($kmlPath) . PHP_EOL;
+
+    if (!file_exists($kmlPath)) {
+        throw new Exception("Arquivo KML não encontrado: $kmlPath");
     }
 
-    $xml = simplexml_load_file($kml);
+    $xml = simplexml_load_file($kmlPath);
     if (!$xml) {
-        throw new Exception("Erro ao carregar o KML: $kml");
+        throw new Exception("Erro ao carregar o KML: $kmlPath");
     }
 
-    // Agora é seguro usar getNamespaces()
+    // Captura namespaces do KML
     $ns = $xml->getNamespaces(true);
-    
+
+    // Se houver namespace, registra para poder acessar os elementos
+    $xml->registerXPathNamespace('k', $ns[''] ?? '');
+
+    $placemarks = $xml->xpath('//k:Placemark');
+
+    if (!$placemarks) {
+        throw new Exception("Nenhum Placemark encontrado no KML.");
+    }
+
     $menorDistancia = PHP_FLOAT_MAX;
     $kmEncontrado = null;
-    
-    foreach ($kml->Document->Folder->Placemark as $placemark) {
-        $coordenadas = trim((string)$placemark->Point->coordinates);
-        list($lon, $lat, $alt) = explode(',', $coordenadas);
-        
+
+    foreach ($placemarks as $placemark) {
+        // Obtém as coordenadas
+        $coords = trim((string)$placemark->Point->coordinates);
+        if (!$coords) continue;
+
+        list($lon, $lat, $alt) = explode(',', $coords);
+
+        // Calcula distância Haversine
         $theta = $longitude - (float)$lon;
-        $dist = sin(deg2rad($latitude)) * sin(deg2rad((float)$lat)) + 
-                cos(deg2rad($latitude)) * cos(deg2rad((float)$lat)) * 
+        $dist = sin(deg2rad($latitude)) * sin(deg2rad((float)$lat)) +
+                cos(deg2rad($latitude)) * cos(deg2rad((float)$lat)) *
                 cos(deg2rad($theta));
         $dist = acos($dist);
         $dist = rad2deg($dist);
-        $km = $dist * 60 * 1.853159616; // km
-        
+        $km = $dist * 60 * 1.853159616;
+
         if ($km < $menorDistancia) {
             $menorDistancia = $km;
             $kmEncontrado = (string)$placemark->name;
         }
     }
-    
+
     // Só retorna se estiver dentro do limite (se definido)
     if ($limiteKm !== null && $menorDistancia > $limiteKm) {
         return null;
@@ -1034,6 +1048,7 @@ function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm) {
 
     return $kmEncontrado;
 }
+
 
 
 // Exemplo de uso:
