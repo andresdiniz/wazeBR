@@ -94,7 +94,7 @@ function atualizarKm(array $alerts, PDO $pdo) {
                 $atualizados++;
             } catch (Exception $e) {
                 error_log("Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage());
-                echo "Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage());
+                echo "Erro ao atualizar uuid {$alert['uuid']}: " . $e->getMessage() . "\n";
             }
         }
 
