@@ -69,6 +69,13 @@ try {
         $usuariosPorChave[$key][] = $u;
     }
 
+    // 2.1 Buscar pares já existentes na fila_envio_detalhes
+    $stmtExistentes = $pdo->query("SELECT uuid_allert, user_id FROM fila_envio_detalhes");
+    $paresExistentes = [];
+    foreach ($stmtExistentes->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $paresExistentes[$row['uuid_allert']][$row['user_id']] = true;
+    }
+
     $pdo->commit();
 } catch (\Exception $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
@@ -95,6 +102,9 @@ foreach ($filaPendentes as $alerta) {
         if ($usuario['user_id'] === null) continue;
         if ($phone === null && $email === null) continue;
 
+        // Evitar duplicados: se já existir, não inserir
+        if (isset($paresExistentes[$alerta['uuid_alerta']][$usuario['user_id']])) continue;
+
         $insertsFilaEnvio[] = [
             'fila_id' => $alerta['fila_id'],
             'uuid_allert' => $alerta['uuid_alerta'],
@@ -103,6 +113,9 @@ foreach ($filaPendentes as $alerta) {
             'phone' => $phone,
             'data_criacao' => $currentDateTime
         ];
+
+        // Marcar como existente para evitar duplicação múltipla no mesmo batch
+        $paresExistentes[$alerta['uuid_alerta']][$usuario['user_id']] = true;
     }
 }
 
@@ -133,7 +146,7 @@ if (!empty($insertsFilaEnvio)) {
         $stmtInsert->execute($values);
 
         // 5. Atualizar status da fila_envio para FILA
-        $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_alerta'));
+        $uuidsAlertas = array_unique(array_column($insertsFilaEnvio, 'uuid_allert'));
 
         $sqlUpdate = "
             UPDATE fila_envio
