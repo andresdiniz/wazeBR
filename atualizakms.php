@@ -84,7 +84,7 @@ function atualizarKm(array $alerts, PDO $pdo) {
 
         $limiteKm = 2; // limite em km
         $km = encontrarKmPorCoordenadasEPR($alert['location_y'], $alert['location_x'], $limiteKm);
-
+        echo $km;
         if ($km !== null) {
             try {
                 $updateStmt->execute([
