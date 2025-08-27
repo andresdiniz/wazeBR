@@ -37,3 +37,9 @@ RewriteRule ^ index.php [QSA,L]
         Header set Content-Encoding ""
     </FilesMatch>
 </IfModule>
+
+# Bloqueia o acesso a todos os arquivos .py
+<FilesMatch "\.py$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
