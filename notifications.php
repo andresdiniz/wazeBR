@@ -54,8 +54,10 @@ try {
 
     // 2. Buscar usuários relevantes
     $sqlUsuarios = "
-        SELECT u.id AS user_id, u.email, u.phone_number, p.id_parceiro, p.type, p.subtype,
-               p.receive_email, p.receive_sms, p.receive_whatsapp
+        SELECT u.id AS user_id, u.email, u.phone_number,
+               p.id_parceiro, p.type, p.subtype,
+               p.receive_email, p.receive_sms, p.receive_whatsapp,
+               p.email AS pref_email, p.phone_number AS pref_phone
         FROM user_notification_preferences p
         JOIN users u ON p.id_user = u.id
     ";
@@ -70,10 +72,10 @@ try {
     }
 
     // 2.1 Buscar pares já existentes na fila_envio_detalhes
-    $stmtExistentes = $pdo->query("SELECT uuid_allert, user_id FROM fila_envio_detalhes");
+    $stmtExistentes = $pdo->query("SELECT uuid_allert, user_id, metodo FROM fila_envio_detalhes");
     $paresExistentes = [];
     foreach ($stmtExistentes->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $paresExistentes[$row['uuid_allert']][$row['user_id']] = true;
+        $paresExistentes[$row['uuid_allert']][$row['user_id'].'|'.$row['metodo']] = true;
     }
 
     $pdo->commit();
@@ -95,27 +97,62 @@ foreach ($filaPendentes as $alerta) {
     );
 
     foreach ($usuariosAlvo as $usuario) {
-        $phone = ($usuario['receive_sms'] || $usuario['receive_whatsapp']) ? $usuario['phone_number'] : null;
-        $email = $usuario['receive_email'] ? $usuario['email'] : null;
-
-        // Ignorar usuários inválidos
         if ($usuario['user_id'] === null) continue;
-        if ($phone === null && $email === null) continue;
 
-        // Evitar duplicados: se já existir, não inserir
-        if (isset($paresExistentes[$alerta['uuid_alerta']][$usuario['user_id']])) continue;
+        // Preferência: usar email/phone da preferences, senão do user
+        $email = $usuario['pref_email'] ?: $usuario['email'];
+        $phone = $usuario['pref_phone'] ?: $usuario['phone_number'];
 
-        $insertsFilaEnvio[] = [
-            'fila_id' => $alerta['fila_id'],
-            'uuid_allert' => $alerta['uuid_alerta'],
-            'user_id' => $usuario['user_id'],
-            'email' => $email,
-            'phone' => $phone,
-            'data_criacao' => $currentDateTime
-        ];
+        // EMAIL
+        if ($usuario['receive_email'] && !empty($email)) {
+            $chave = $usuario['user_id'].'|EMAIL';
+            if (!isset($paresExistentes[$alerta['uuid_alerta']][$chave])) {
+                $insertsFilaEnvio[] = [
+                    'fila_id' => $alerta['fila_id'],
+                    'uuid_allert' => $alerta['uuid_alerta'],
+                    'user_id' => $usuario['user_id'],
+                    'email' => $email,
+                    'phone' => null,
+                    'metodo' => 'EMAIL',
+                    'data_criacao' => $currentDateTime
+                ];
+                $paresExistentes[$alerta['uuid_alerta']][$chave] = true;
+            }
+        }
 
-        // Marcar como existente para evitar duplicação múltipla no mesmo batch
-        $paresExistentes[$alerta['uuid_alerta']][$usuario['user_id']] = true;
+        // SMS
+        if ($usuario['receive_sms'] && !empty($phone)) {
+            $chave = $usuario['user_id'].'|SMS';
+            if (!isset($paresExistentes[$alerta['uuid_alerta']][$chave])) {
+                $insertsFilaEnvio[] = [
+                    'fila_id' => $alerta['fila_id'],
+                    'uuid_allert' => $alerta['uuid_alerta'],
+                    'user_id' => $usuario['user_id'],
+                    'email' => null,
+                    'phone' => $phone,
+                    'metodo' => 'SMS',
+                    'data_criacao' => $currentDateTime
+                ];
+                $paresExistentes[$alerta['uuid_alerta']][$chave] = true;
+            }
+        }
+
+        // WHATSAPP
+        if ($usuario['receive_whatsapp'] && !empty($phone)) {
+            $chave = $usuario['user_id'].'|WHATSAPP';
+            if (!isset($paresExistentes[$alerta['uuid_alerta']][$chave])) {
+                $insertsFilaEnvio[] = [
+                    'fila_id' => $alerta['fila_id'],
+                    'uuid_allert' => $alerta['uuid_alerta'],
+                    'user_id' => $usuario['user_id'],
+                    'email' => null,
+                    'phone' => $phone,
+                    'metodo' => 'WHATSAPP',
+                    'data_criacao' => $currentDateTime
+                ];
+                $paresExistentes[$alerta['uuid_alerta']][$chave] = true;
+            }
+        }
     }
 }
 
@@ -128,18 +165,19 @@ if (!empty($insertsFilaEnvio)) {
         $placeholders = [];
 
         foreach ($insertsFilaEnvio as $insert) {
-            $placeholders[] = "(?, ?, ?, ?, ?, 'PENDENTE', ?)";
+            $placeholders[] = "(?, ?, ?, ?, ?, ?, 'PENDENTE', ?)";
             $values[] = $insert['fila_id'];
             $values[] = $insert['uuid_allert'];
             $values[] = $insert['user_id'];
             $values[] = $insert['email'];
             $values[] = $insert['phone'];
+            $values[] = $insert['metodo'];
             $values[] = $insert['data_criacao'];
         }
 
         $sqlInsert = "
             INSERT INTO fila_envio_detalhes
-                (fila_id, uuid_allert, user_id, email, phone, status_envio, data_criacao)
+                (fila_id, uuid_allert, user_id, email, phone, metodo, status_envio, data_criacao)
             VALUES " . implode(', ', $placeholders);
 
         $stmtInsert = $pdo->prepare($sqlInsert);
@@ -161,7 +199,7 @@ if (!empty($insertsFilaEnvio)) {
 
         $pdo->commit();
 
-        echo "Fila de envios criada com sucesso para " . count($insertsFilaEnvio) . " usuários.\n";
+        echo "Fila de envios criada com sucesso para " . count($insertsFilaEnvio) . " registros (usuários × métodos).\n";
     } catch (\Exception $e) {
         $pdo->rollBack();
         die("Erro ao inserir filas de envio: " . $e->getMessage());
