@@ -54,6 +54,8 @@ try {
     // Obtém os dados da API
     $dados = obterDadosCemaden($url);
 
+    var_dump($dados);
+
     // Prepara a inserção no banco de dados
     $stmt = $pdo->prepare(" 
         INSERT INTO leituras_cemaden 
