@@ -55,7 +55,7 @@ try {
     $dados = obterDadosCemaden($url);
 
     var_dump($dados);
-    //echo "o nivel atual é $dados['nivel_atual'];
+    echo "O nivel atual é $item['valor'];
 
     // Prepara a inserção no banco de dados
     $stmt = $pdo->prepare(" 
