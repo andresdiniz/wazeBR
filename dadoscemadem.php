@@ -54,8 +54,7 @@ try {
     // Obtém os dados da API
     $dados = obterDadosCemaden($url);
 
-    var_dump($dados);
-    echo "O nivel atual é $item['valor'];
+    var_dump($item['valor']);
 
     // Prepara a inserção no banco de dados
     $stmt = $pdo->prepare(" 
