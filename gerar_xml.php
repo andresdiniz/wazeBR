@@ -236,7 +236,5 @@ $updateStmt = $pdo->prepare($updateQuery);
 $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
 $updateStmt->execute();
 
-require "gerar_json.php";
-echo "Arquivos JSON atualizados.\n";
 
 ?>

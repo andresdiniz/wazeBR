@@ -90,6 +90,9 @@ foreach ($scripts as $scriptName => $path) {
 $endTime = microtime(true);
 $totalTime = round($endTime - $startTime, 2);
 
+require "gerar_json.php";
+echo "Arquivos JSON atualizados.\n";
+
 echo "\n✅ Todos os scripts concluídos.\n";
 echo "⏱️ Tempo total de execução: $totalTime segundos\n";
 logToFile('info', 'Tempo total de execução do master script', ['totalTime' => $totalTime]);
