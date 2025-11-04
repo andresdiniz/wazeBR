@@ -775,6 +775,14 @@
     #map {
         border-radius: 8px;
         transition: box-shadow 0.3s ease;
+        height: 400px; /* Altura padrão */
+    }
+
+    /* Em dispositivos móveis, reduzir a altura do mapa */
+    @media (max-width: 768px) {
+        #map {
+            height: 300px;
+        }
     }
 
     #map:hover {
@@ -800,5 +808,13 @@
     /* Estilo para o novo painel de seleção */
     #segmentSelectionContainer {
         border-left: 5px solid #ffc107 !important; /* Cor de destaque */
+    }
+
+    /* Ajustes de responsividade para os cards de horários */
+    @media (max-width: 576px) {
+        .card .row .col-md-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
     }
 </style>
