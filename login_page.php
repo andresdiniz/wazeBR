@@ -1,3 +1,20 @@
+<?php
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => true,
+    'samesite' => 'Strict',
+    'lifetime' => 0
+]);
+
+session_start();
+
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+$csrfToken = $_SESSION['csrf_token'];
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -490,8 +507,7 @@
 
                             <!-- Formulário de Login -->
                             <form id="loginForm" action="login.php" method="POST" novalidate>
-                                <input type="hidden" name="csrf_token" id="csrfToken">
-
+                                <input type="hidden" name="csrf_token" id="csrfToken" value="<?php echo htmlspecialchars($csrfToken); ?>">
                                 <div class="form-floating">
                                     <input type="email" 
                                            class="form-control" 
@@ -588,23 +604,29 @@
         const successMessage = document.getElementById('successMessage');
         const successText = document.getElementById('successText');
 
-        // Geração do Token CSRF
-        function generateCSRFToken() {
-            const randomValues = new Uint32Array(2);
-            crypto.getRandomValues(randomValues);
-            return randomValues[0].toString(36) + randomValues[1].toString(36);
-        }
-
-        // Inicialização do CSRF Token
-        document.addEventListener('DOMContentLoaded', () => {
-            let token = sessionStorage.getItem('csrf_token');
-            
-            if (!token) {
-                token = generateCSRFToken();
-                sessionStorage.setItem('csrf_token', token);
+        /* Geração do Token CSRF
+        async function loadCSRFToken() {
+            try {
+                const response = await fetch('get_csrf.php');
+                const data = await response.json();
+                
+                if (data.csrf_token) {
+                    document.getElementById('csrfToken').value = data.csrf_token;
+                } else {
+                    console.error('Token CSRF não recebido');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar token CSRF:', error);
             }
+        }*/
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Carrega o token CSRF do servidor
+            //loadCSRFToken();
             
-            document.getElementById('csrfToken').value = token;
+            // Corrige a action do form
+            loginForm.action = 'login.php';
 
             // Auto-foco no email
             emailInput.focus();

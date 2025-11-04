@@ -30,7 +30,7 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Se não for POST, redireciona para login.html
+// Se não for POST, redireciona para login_page.php
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // Se já está logado, vai para dashboard
     if (isset($_SESSION['usuario_id'])) {
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         exit();
     }
     // Senão, mostra o formulário
-    header("Location: /login.html");
+    header("Location: /login_page.php");
     exit();
 }
 
