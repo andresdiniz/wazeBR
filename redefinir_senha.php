@@ -1,209 +1,209 @@
 <?php
-// redefinir_senha.php
+// save_password.php
 require_once __DIR__ . '/config/configbd.php';
 
-// --- Validação Inicial do Token (GET) ---
-
-if (!isset($_GET['token']) || empty($_GET['token'])) {
-    die("Token de redefinição de senha não fornecido.");
+// Processa APENAS requisições POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: login.html');
+    exit;
 }
 
-$token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-$email = null;
-$maskedEmail = null;
+// Valida se todos os campos obrigatórios foram enviados
+if (!isset($_POST['password1'], $_POST['password2'], $_POST['email'], $_POST['token'])) {
+    die("Dados incompletos. Por favor, tente novamente.");
+}
+
+$password1 = $_POST['password1'];
+$password2 = $_POST['password2'];
+$email = $_POST['email'];
+$token = $_POST['token'];
+
+// Validação das senhas
+if ($password1 !== $password2) {
+    die("As senhas não coincidem. Por favor, volte e tente novamente.");
+}
+
+// Validação de força da senha (redundância com frontend)
+if (strlen($password1) < 8 || 
+    !preg_match('/[A-Z]/', $password1) || 
+    !preg_match('/[0-9]/', $password1) || 
+    !preg_match('/[\W_]/', $password1)) {
+    die("A senha não atende aos requisitos mínimos de segurança.");
+}
 
 try {
     $pdo = Database::getConnection();
+    $pdo->beginTransaction();
 
-    // Consulta APENAS para verificar a validade (usado = 0)
-    $stmt = $pdo->prepare("
+    // PASSO 1: Verifica novamente se o token ainda é válido e NÃO foi usado
+    $stmtCheck = $pdo->prepare("
         SELECT email 
         FROM recuperar_senha 
         WHERE token = :token 
+        AND email = :email 
         AND valid >= NOW() 
         AND used = 0
+        FOR UPDATE
     ");
-    $stmt->bindParam(':token', $token, PDO::PARAM_STR);
-    $stmt->execute();
+    $stmtCheck->bindParam(':token', $token, PDO::PARAM_STR);
+    $stmtCheck->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmtCheck->execute();
 
-    if ($stmt->rowCount() > 0) {
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email = $result['email'];
-
-        // Função para mascarar o email para UX
-        function maskEmail($email) {
-            $parts = explode('@', $email);
-            $name = $parts[0];
-            $domain = $parts[1];
-            $maskedName = (strlen($name) > 3) 
-                          ? substr($name, 0, 2) . str_repeat('*', strlen($name) - 2)
-                          : substr($name, 0, 1) . str_repeat('*', strlen($name) - 1);
-            return $maskedName . '@' . $domain;
-        }
-        $maskedEmail = maskEmail($email);
-
-    } else {
-        // Token inválido, expirado ou já usado
-        echo "<script>
-            alert('Token inválido, expirado ou já utilizado. Você será redirecionado para a página de login.');
-            window.location.href = 'login.html';
-        </script>";
+    if ($stmtCheck->rowCount() === 0) {
+        $pdo->rollBack();
+        echo "<!DOCTYPE html>
+        <html lang='pt-br'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Token Inválido</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #e9ecef;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }
+                .error-box {
+                    background: #fff;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                    text-align: center;
+                    max-width: 400px;
+                }
+                .error-box h2 {
+                    color: #dc3545;
+                    margin-bottom: 20px;
+                }
+                .error-box p {
+                    color: #343a40;
+                    margin-bottom: 25px;
+                    line-height: 1.6;
+                }
+                .error-box a {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    background: #007bff;
+                    color: #fff;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    transition: background 0.3s;
+                }
+                .error-box a:hover {
+                    background: #0056b3;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='error-box'>
+                <h2>⚠️ Token Inválido ou Expirado</h2>
+                <p>O link de redefinição já foi usado ou não é mais válido.</p>
+                <p>Por favor, solicite um novo link de recuperação.</p>
+                <a href='login.html'>Voltar ao Login</a>
+            </div>
+        </body>
+        </html>";
         exit;
     }
+
+    // PASSO 2: Atualiza a senha do usuário
+    $hashedPassword = password_hash($password1, PASSWORD_DEFAULT);
+    $stmtUpdate = $pdo->prepare("
+        UPDATE users 
+        SET password = :password 
+        WHERE email = :email
+    ");
+    $stmtUpdate->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmtUpdate->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmtUpdate->execute();
+
+    // PASSO 3: Marca o token como USADO (aqui é onde deve ser marcado!)
+    $stmtMarkUsed = $pdo->prepare("
+        UPDATE recuperar_senha 
+        SET used = 1 
+        WHERE token = :token
+    ");
+    $stmtMarkUsed->bindParam(':token', $token, PDO::PARAM_STR);
+    $stmtMarkUsed->execute();
+
+    // Confirma todas as operações
+    $pdo->commit();
+
+    // Sucesso! Redireciona para o login
+    echo "<!DOCTYPE html>
+    <html lang='pt-br'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Senha Redefinida com Sucesso</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #e9ecef;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+            }
+            .success-box {
+                background: #fff;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                text-align: center;
+                max-width: 400px;
+            }
+            .success-box h2 {
+                color: #28a745;
+                margin-bottom: 20px;
+            }
+            .success-box p {
+                color: #343a40;
+                margin-bottom: 25px;
+                line-height: 1.6;
+            }
+            .success-box a {
+                display: inline-block;
+                padding: 12px 30px;
+                background: #28a745;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: bold;
+                transition: background 0.3s;
+            }
+            .success-box a:hover {
+                background: #218838;
+            }
+        </style>
+        <script>
+            // Redireciona automaticamente após 3 segundos
+            setTimeout(function() {
+                window.location.href = 'login.html';
+            }, 3000);
+        </script>
+    </head>
+    <body>
+        <div class='success-box'>
+            <h2>✓ Senha Redefinida com Sucesso!</h2>
+            <p>Sua senha foi alterada com sucesso.</p>
+            <p>Você será redirecionado para a página de login em 3 segundos...</p>
+            <a href='login.html'>Ir para o Login Agora</a>
+        </div>
+    </body>
+    </html>";
+    exit;
+
 } catch (PDOException $e) {
-    die("Erro ao conectar ou consultar o banco de dados: " . $e->getMessage());
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    die("Erro ao processar a solicitação: " . $e->getMessage());
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waze Portal - Redefinição de Senha</title>
-    <style>
-        /* Estilos Modernizados */
-        body, h2, form, ul, li, input, button {
-            margin: 0; padding: 0; box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9ecef; 
-            color: #343a40;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
-        }
-        form {
-            background: #fff;
-            padding: 35px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
-            width: 100%;
-            max-width: 450px; 
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 10px; 
-            color: #28a745; 
-        }
-        .info-box {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ffc107; 
-            background-color: #fff3cd;
-            border-radius: 5px;
-            color: #856404;
-            font-size: 14px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px; 
-            font-weight: 600;
-        }
-        input {
-            width: 100%;
-            padding: 12px; 
-            margin-bottom: 15px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        input:focus {
-            border-color: #28a745;
-            outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-        }
-        ul {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 25px; 
-        }
-        li {
-            font-size: 14px;
-            padding-left: 20px; 
-            position: relative;
-            margin: 7px 0;
-        }
-        .error::before { content: '✗'; position: absolute; left: 0; color: #dc3545; font-weight: bold; }
-        .success::before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }
-        .error, .success { color: #343a40; }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover:not(:disabled) { background: #218838; }
-        button:disabled { background: #adb5bd; cursor: not-allowed; }
-    </style>
-</head>
-<body>
-    <form action="save_password.php" method="POST" id="passwordForm">
-        <h2>Redefinir Senha</h2>
-        
-        <div class="info-box">
-            Você está definindo uma nova senha para: **<?php echo htmlspecialchars($maskedEmail, ENT_QUOTES, 'UTF-8'); ?>**
-        </div>
-        
-        <label for="password1">Nova Senha:</label>
-        <input type="password" id="password1" name="password1" placeholder="Mínimo 8 caracteres" required>
-        
-        <label for="password2">Confirmar Nova Senha:</label>
-        <input type="password" id="password2" name="password2" placeholder="Confirme a nova senha" required>
-
-        <input type="hidden" name="email" value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
-        <input type="hidden" name="token" value="<?php echo $token; ?>">
-        
-        <ul id="requirements">
-            <li id="length">Mínimo de 8 caracteres</li>
-            <li id="uppercase">Pelo menos uma letra maiúscula</li>
-            <li id="number">Pelo menos um número</li>
-            <li id="symbol">Pelo menos um símbolo/caractere especial</li>
-            <li id="match">As senhas devem ser iguais</li>
-        </ul>
-        
-        <button type="submit" id="submitButton" disabled>Salvar Nova Senha</button>
-    </form>
-
-    <script>
-        // JavaScript de validação (Mantido)
-        const password1 = document.getElementById('password1');
-        const password2 = document.getElementById('password2');
-        const requirements = {
-            length: document.getElementById('length'),
-            uppercase: document.getElementById('uppercase'),
-            number: document.getElementById('number'),
-            symbol: document.getElementById('symbol'),
-            match: document.getElementById('match'),
-        };
-        const submitButton = document.getElementById('submitButton');
-
-        function validatePasswords() {
-            const pwd1 = password1.value;
-            const pwd2 = password2.value;
-
-            requirements.length.className = pwd1.length >= 8 ? 'success' : 'error';
-            requirements.uppercase.className = /[A-Z]/.test(pwd1) ? 'success' : 'error';
-            requirements.number.className = /[0-9]/.test(pwd1) ? 'success' : 'error';
-            requirements.symbol.className = /[\W_]/.test(pwd1) ? 'success' : 'error';
-            requirements.match.className = pwd1 === pwd2 ? 'success' : 'error';
-
-            const allValid = Object.values(requirements).every(req => req.className === 'success');
-            
-            submitButton.disabled = !allValid;
-        }
-
-        password1.addEventListener('input', validatePasswords);
-        password2.addEventListener('input', validatePasswords);
-        
-        validatePasswords();
-    </script>
-</body>
-</html>
