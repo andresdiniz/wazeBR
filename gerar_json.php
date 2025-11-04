@@ -16,6 +16,8 @@ try {
     $pdo = Database::getConnection();
 } catch (PDOException $e) {
     // Em caso de falha de conexão, exibe o erro e encerra o script
+    error_log("Erro de conexão: " . $e->getMessage());
+    http_response_code(500);
     die("Erro ao conectar ao banco de dados: " . $e->getMessage());
 }
 
@@ -31,8 +33,6 @@ $currentDateTime = date('Y-m-d H:i:s');
  * @return string
  */
 function generateWazeLikeUuid(): string {
-    // Usa hash SHA-256 de um ID único para simular um UUID longo e não-nulo
-    // Adicionar microtime aumenta a unicidade em chamadas rápidas
     return hash('sha256', uniqid(true) . microtime()); 
 }
 
@@ -45,6 +45,11 @@ function generateWazeLikeUuid(): string {
 function invertPolyline(string $polylineString): string {
     // Divide a string em coordenadas individuais, removendo espaços
     $coords = array_map('trim', explode(',', $polylineString));
+    
+    // Verifica se temos um número par de coordenadas
+    if (count($coords) % 2 !== 0) {
+        throw new Exception("Número ímpar de coordenadas na polyline: " . $polylineString);
+    }
     
     // Agrupa em pares de (lat, lon)
     $pairs = [];
@@ -72,41 +77,52 @@ function invertPolyline(string $polylineString): string {
 // FIM DAS FUNÇÕES AUXILIARES
 // ====================================================================
 
-
 // 🔴 Buscar parceiros distintos
-$parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
-$parceiroStmt = $pdo->prepare($parceiroQuery);
-$parceiroStmt->execute();
-$parceiros = $parceiroStmt->fetchAll(PDO::FETCH_COLUMN);
+try {
+    $parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
+    $parceiroStmt = $pdo->prepare($parceiroQuery);
+    $parceiroStmt->execute();
+    $parceiros = $parceiroStmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    error_log("Erro ao buscar parceiros: " . $e->getMessage());
+    http_response_code(500);
+    die("Erro ao buscar parceiros: " . $e->getMessage());
+}
 
 // 🔴 Buscar eventos ativos e não expirados
-$query = "
-    SELECT 
-        e.uuid AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
-        e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
-        e.starttime, e.endtime, e.id_parceiro, 
-        s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
-        l.id AS lane_impact_id, l.total_closed_lanes, l.roadside,
-        sc.day_of_week, sc.start_time AS schedule_start_time, sc.end_time AS schedule_end_time
-    FROM 
-        events e
-    LEFT JOIN 
-        sources s ON e.id = s.event_id
-    LEFT JOIN 
-        lane_impacts l ON e.id = l.event_id
-    LEFT JOIN 
-        schedules sc ON e.id = sc.event_id
-    WHERE 
-        e.is_active = 1
-        AND e.endtime >= :currentDateTime
-    ORDER BY 
-        e.id_parceiro, e.uuid, s.id, l.id, sc.id
-";
+try {
+    $query = "
+        SELECT 
+            e.uuid AS event_uuid, e.id, e.parent_event_id, e.creationtime, e.updatetime,
+            e.type, e.subtype, e.description, e.street, e.polyline, e.direction,
+            e.starttime, e.endtime, e.id_parceiro, 
+            s.id AS source_id, s.reference, s.name AS source_name, s.url AS source_url,
+            l.id AS lane_impact_id, l.total_closed_lanes, l.roadside,
+            sc.day_of_week, sc.start_time AS schedule_start_time, sc.end_time AS schedule_end_time
+        FROM 
+            events e
+        LEFT JOIN 
+            sources s ON e.id = s.event_id
+        LEFT JOIN 
+            lane_impacts l ON e.id = l.event_id
+        LEFT JOIN 
+            schedules sc ON e.id = sc.event_id
+        WHERE 
+            e.is_active = 1
+            AND e.endtime >= :currentDateTime
+        ORDER BY 
+            e.id_parceiro, e.uuid, s.id, l.id, sc.id
+    ";
 
-$statement = $pdo->prepare($query);
-$statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
-$statement->execute();
-$rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+    $statement = $pdo->prepare($query);
+    $statement->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+    $statement->execute();
+    $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Erro ao buscar eventos: " . $e->getMessage());
+    http_response_code(500);
+    die("Erro ao buscar eventos: " . $e->getMessage());
+}
 
 // 🔴 Organizar eventos por parceiro
 $eventosPorParceiro = [];
@@ -143,7 +159,7 @@ foreach ($rows as $row) {
             'lane_impacts' => [],
             'schedules' => [],
         ];
-    }    
+    }    
 
     // Agrupa dados relacionados (Sources, Lane Impacts, Schedules)
     if ($row['source_id']) {
@@ -236,7 +252,7 @@ foreach ($parceiros as $idParceiro) {
                     // Adiciona o incidente reverso à lista JSON (SEM INSERÇÃO NO DB)
                     $incidents[] = $invertedIncident;
 
-                } catch (\Throwable $e) {
+                } catch (Exception $e) {
                     // Loga se houver algum erro na função de inversão
                     error_log("ERRO FATAL NA INVERSÃO: UUID {$event['uuid']}. Mensagem: " . $e->getMessage(), 0);
                 }
@@ -250,17 +266,25 @@ foreach ($parceiros as $idParceiro) {
     ];
 
     $jsonPath = __DIR__ . "/events_parceiro_{$idParceiro}.json";
-    file_put_contents($jsonPath, json_encode($json, JSON_PRETTY_PRINT));
-    echo "Arquivo JSON atualizado para parceiro {$idParceiro}: {$jsonPath}\n";
+    if (file_put_contents($jsonPath, json_encode($json, JSON_PRETTY_PRINT)) === false) {
+        error_log("Erro ao escrever o arquivo JSON para o parceiro {$idParceiro} no caminho: {$jsonPath}");
+    } else {
+        echo "Arquivo JSON atualizado para parceiro {$idParceiro}: {$jsonPath}\n";
+    }
 }
 
 // 🔴 Atualizar eventos expirados para is_active = 2
-$updateQuery = "
-    UPDATE events 
-    SET is_active = 2 
-    WHERE endtime < :currentDateTime AND is_active = 1
-";
-$updateStmt = $pdo->prepare($updateQuery);
-$updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
-$updateStmt->execute();
+try {
+    $updateQuery = "
+        UPDATE events 
+        SET is_active = 2 
+        WHERE endtime < :currentDateTime AND is_active = 1
+    ";
+    $updateStmt = $pdo->prepare($updateQuery);
+    $updateStmt->bindParam(':currentDateTime', $currentDateTime, PDO::PARAM_STR);
+    $updateStmt->execute();
+} catch (PDOException $e) {
+    error_log("Erro ao atualizar eventos expirados: " . $e->getMessage());
+}
+
 ?>
