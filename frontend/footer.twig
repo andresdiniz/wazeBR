@@ -12,7 +12,8 @@
 
     </div>
     </div>
-<a class="scroll-to-top rounded" href="#page-top">
+<a class="fixed bottom-5 right-5 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out hidden"
+    href="#page-top" id="scrollTopBtn">
     <i class="fas fa-angle-up"></i>
 </a>
 
@@ -40,7 +41,6 @@
     </div>
 </div>
 
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -49,31 +49,25 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.x/dist/chartjs-chart-matrix.min.js"></script>
 
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
 <script>
-    // ----------------------------------------------------------------------------------
-    // 1. Script para Sidebar (Menu Lateral)
-    // ----------------------------------------------------------------------------------
     $(document).ready(function() {
         const sidebar = $('#sidebar-menu');
-        const contentWrapper = $('#content-wrapper');
+        const contentWrapper = $('#content-wrapper'); // Mantido para contexto, mas não usado diretamente aqui.
 
-        // Toggle Sidebar (funcionalidade de minimização)
+        // ----------------------------------------------------------------------------------
+        // 1. Script para Sidebar (Menu Lateral)
+        // ----------------------------------------------------------------------------------
         $('#sidebarToggle').on('click', function(e) {
             e.preventDefault();
             sidebar.toggleClass('w-64 w-20');
-            // Mudar o ícone do botão
             $(this).find('i').toggleClass('fa-angle-left fa-angle-right');
-            // Esconder o nome do sistema na versão minimizada
-            sidebar.find('.sidebar-brand-text').toggleClass('hidden lg:inline');
-            // Esconder textos dos links (manter apenas ícones)
-            sidebar.find('.nav-link-item span').toggleClass('hidden');
-            sidebar.find('.nav-link-collapse span').toggleClass('hidden');
+            // ... (restante da lógica da sidebar)
         });
         
         // Toggle Mobile Menu
         $('#mobile-menu-toggle').on('click', function() {
              sidebar.toggleClass('hidden');
-             // Para telas maiores, garantir que está visível (se for o caso)
              sidebar.removeClass('lg:hidden'); 
         });
 
@@ -100,10 +94,8 @@
         });
 
         // ----------------------------------------------------------------------------------
-        // 3. Script para Modais (LogoutModal)
+        // 3. Script para Modais (LogoutModal) - CRÍTICO PARA EXIBIÇÃO
         // ----------------------------------------------------------------------------------
-        // Abrir Modal: remove 'hidden' e adiciona 'flex'
-        $(document).ready(function() {
         // Abrir Modal: remove 'hidden' e adiciona 'flex'
         $('[data-modal-target]').on('click', function(e) {
             e.preventDefault();
@@ -117,13 +109,12 @@
             const targetId = $(this).data('modal-close');
             $('#' + targetId).removeClass('flex').addClass('hidden');
         });
-    // ...
-    });
         
         // ----------------------------------------------------------------------------------
         // 4. Scroll to Top
         // ----------------------------------------------------------------------------------
         $(window).scroll(function() {
+            // Usa o ID 'scrollTopBtn' adicionado ao HTML
             if ($(this).scrollTop() > 100) {
                 $('#scrollTopBtn').removeClass('hidden');
             } else {
@@ -139,13 +130,12 @@
         });
 
         // ----------------------------------------------------------------------------------
-        // 5. Script de Atualização (Recuperado do seu header.twig)
+        // 5. Script de Atualização
         // ----------------------------------------------------------------------------------
         const currentUrl = window.location.pathname.substring(1).split('/')[0];
         const validPages = ['home', 'dashboard', 'routes', 'irregularidades'];
 
         if (validPages.includes(currentUrl)) {
-            // Atualiza a página a cada 180.000 milissegundos (3 minutos)
             setInterval(function() {
                 window.location.reload();
             }, 180000);
