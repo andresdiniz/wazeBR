@@ -163,7 +163,6 @@
     
     // ===== Funções de Inicialização e Localização =====
     function initializeMap() {
-        // Inicializa o mapa e o armazena na variável global 'map'
         map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -183,14 +182,12 @@
         const radius = e.accuracy / 2;
         L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
         L.circle(e.latlng, radius).addTo(map);
-        console.log('Localização atual encontrada:', e.latlng);
     }
     
-    // 💡 Função de clique no mapa
+    // Função de clique no mapa
     function handleMapClick(e) {
         const { lat, lng } = e.latlng;
         
-        // 1. Limpa marcadores e camadas anteriores
         if (clickMarker) {
             map.removeLayer(clickMarker);
         }
@@ -199,30 +196,23 @@
             currentSegmentLayer = null;
         }
 
-        // 2. Adiciona novo marcador de clique
         clickMarker = L.marker([lat, lng]).addTo(map);
-        
-        // 3. Atualiza coordenadas iniciais
         document.getElementById('coordenadas').value = `${lat}, ${lng}`;
 
-        // 4. Busca o segmento e inicia a seleção
         getStreetSegment(map, lat, lng);
     }
 
 
-    // ===== Consulta de Rua e Segmento (Core da Lógica) =====
+    // ===== Consulta de Rua e Segmento (CORE da Lógica) =====
     
-    /**
-    * Consulta um segmento de rua próximo às coordenadas informadas (Overpass API).
-    */
     async function getStreetSegment(map, lat, lon) {
-        const radiusValues = [10, 20, 50, 100]; // Diminuí o raio para ser mais preciso
+        const radiusValues = [10, 20, 50, 100]; 
         let streetName = 'Nome da Rua Desconhecido';
         
-        // Limpa o seletor de rua
         const ruaSelect = document.getElementById('ruaSelect');
         ruaSelect.innerHTML = '<option value="">Buscando rua...</option>';
         document.getElementById('segmentSelectionContainer').style.display = 'none';
+        esconderBotaoReverso();
 
         for (let radius of radiusValues) {
             const query = `
@@ -244,7 +234,6 @@
                     const ways = [];
 
                     data.elements.forEach(el => {
-                        // Filtra apenas ways com tag 'highway' e que possuam um 'name'
                         if (el.type === 'way' && el.tags && el.tags.name) {
                             ways.push(el);
                         }
@@ -253,9 +242,10 @@
                     let closestWay = null;
                     let minDistance = Infinity;
 
-                    // Itera sobre as ways para encontrar a mais próxima usando Turf.js
+                    // Encontra a via mais próxima usando Turf.js
                     ways.forEach(way => {
-                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
+                        // A geometria do Overpass vem como [lon, lat]
+                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); 
                         if (wayCoords.length < 2) return;
                         
                         // Calcula a distância do ponto de clique para a via (em metros)
@@ -271,45 +261,36 @@
                         const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
                         streetName = closestWay.tags.name || 'Nome da Rua Desconhecido';
                         
-                        // 1. Tenta encontrar nós de intersecção (nós que são compartilhados por outras ways)
+                        // 1. Tenta encontrar nós de intersecção
+                        // Interseções são nós que fazem parte desta way E de qualquer outra way no resultado da consulta.
                         const intersections = closestWay.nodes.filter(nodeId => 
                             data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes && el.nodes.includes(nodeId))
                         );
 
+                        // O ponto clicado deve estar dentro do segmento (lógica não é trivial em Overpass)
+                        // Para simplificar, vamos encontrar a intersecção mais próxima do clique,
+                        // mas vamos nos ater à lógica de encontrar o segmento mais longo entre todas as interseções
+                        // que contenham o ponto clicado.
+                        
                         if (intersections.length >= 2) {
-                            // Mapeia os IDs dos nós para os índices na lista de nós da via.
                             const nodeIds = closestWay.nodes;
-                            const intersectionIndices = intersections
-                                .map(id => nodeIds.indexOf(id))
-                                .filter(index => index !== -1);
-                                
-                            intersectionIndices.sort((a, b) => a - b);
                             
-                            // Seleciona o segmento entre a primeira e a última intersecção.
-                            const startNodeId = intersections[0];
-                            const endNodeId = intersections[intersections.length-1];
+                            // Encontra o índice da primeira e da última intersecção na lista de nós da via.
+                            const firstIntersectionIndex = nodeIds.indexOf(intersections[0]);
+                            const lastIntersectionIndex = nodeIds.lastIndexOf(intersections[intersections.length - 1]);
                             
-                            // Encontra a geometria (lon, lat) para o segmento entre os nós de intersecção.
-                            // Isso é complexo. Uma simplificação é achar o índice dos nós de intersecção
-                            // na geometria completa, mas não é garantido 1:1. 
-                            
-                            // Usamos um algoritmo mais robusto para encontrar o segmento que inclui o ponto clicado
-                            // e que está delimitado por intersecções, se possível.
-
-                            // Vamos usar a lógica mais simples do seu snippet, baseada nos índices da lista de 'nodes' do Overpass:
-                            const startIndexInGeometry = closestWay.geometry.findIndex(g => g.id === startNodeId);
-                            const endIndexInGeometry = closestWay.geometry.findIndex(g => g.id === endNodeId);
-
                             let segmentNodes = [];
-                            if (startIndexInGeometry !== -1 && endIndexInGeometry !== -1 && startIndexInGeometry < endIndexInGeometry) {
-                                segmentNodes = fullWayGeometry.slice(startIndexInGeometry, endIndexInGeometry + 1);
+                            
+                            // *** CORREÇÃO APLICADA AQUI: Utiliza os índices da lista 'nodes' para fatiar 'geometry' ***
+                            if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
+                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção (incluindo as interseções)
+                                segmentNodes = fullWayGeometry.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
                             }
 
                             if (segmentNodes.length > 1) {
-                                console.log(`Segmento de intersecção encontrado com raio de ${radius} metros.`);
                                 
                                 promptSegmentSelection(map, { 
-                                    segment: segmentNodes, 
+                                    segment: segmentNodes, // Segmento de intersecção a intersecção
                                     fullWay: fullWayGeometry,
                                     type: 'intersection',
                                     streetName: streetName
@@ -318,10 +299,9 @@
                             }
                         }
                         
-                        // Se não houver interseções suficientes ou a lógica falhar, oferece a via completa
-                        console.log(`Via completa oferecida com raio de ${radius} metros.`);
+                        // Se falhar a segmentação por intersecção, oferece a via completa
                         promptSegmentSelection(map, { 
-                            segment: fullWayGeometry, // [lon, lat]
+                            segment: fullWayGeometry, 
                             fullWay: fullWayGeometry, 
                             type: 'full',
                             streetName: streetName
@@ -339,7 +319,7 @@
         showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
     }
 
-    // ===== Funções de Desenho e Estado (Mantidas) =====
+    // ===== Funções de Desenho e Estado (Mantidas/Revisadas) =====
 
     function drawSegment(segmentNodes, direction = 'both') {
         try {
@@ -362,14 +342,11 @@
                 lineJoin: 'round'
             };
 
-            // Cria a linha principal
             const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
             
             let arrowDecorator = null;
             if (direction !== 'both') {
-                // Inverte a linha se a direção for 'reversed' para que as setas apontem corretamente
                 if (direction === 'reversed') {
-                    // Cuidado: segmentNodes é o array original, só inverte a linha para o desenho
                     segmentLine.setLatLngs([...latLngs].reverse()); 
                 }
 
@@ -429,15 +406,12 @@
     }
     
     function inverterCoordenadas(segmentNodes, map, currentDirection) {
-        // Inverte os nós reais (segmentNodes é [lon, lat])
         const reversedSegment = [...segmentNodes].reverse(); 
         const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
         
-        // Desenha o segmento invertido com a nova direção
         drawSegment(reversedSegment, newDirection); 
         
-        // Atualiza o estado global e local storage
-        currentSegmentNodes = reversedSegment; // Atualiza a variável global
+        window.currentSegmentNodes = reversedSegment; 
         saveSegmentState(reversedSegment, newDirection); 
         document.getElementById('directionSelect').value = newDirection; 
         
@@ -452,10 +426,7 @@
         alert.style.right = '10px';
         alert.style.zIndex = '1050';
 
-        alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
+        alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
         document.body.appendChild(alert);
 
         setTimeout(() => alert.remove(), 5000);
@@ -500,13 +471,11 @@
         }
     }
     
-    // Simulação da função calcularDiasSemana (se for relevante no seu sistema)
     function calcularDiasSemana() {
-        // Implementação da lógica de cálculo de dias da semana (não incluída, mas necessária se você usa o id="horarios_dia")
         console.log("Calculando dias da semana com base nas datas selecionadas...");
     }
 
-    // Função de gerenciamento do painel de seleção de segmento
+    // Gerenciamento do Painel de Seleção de Segmento
     function promptSegmentSelection(map, segmentData, lat, lon) {
         const container = document.getElementById('segmentSelectionContainer');
         const optionsSelect = document.getElementById('segmentOptions');
@@ -522,6 +491,7 @@
 
         let options = [];
 
+        // Opção 1: Trecho entre Interseções
         if (segmentData.type === 'intersection' && intersectionSegmentNodes.length > 1) {
             const startCoord = `${intersectionSegmentNodes[0][1].toFixed(5)}, ${intersectionSegmentNodes[0][0].toFixed(5)}`;
             const endCoord = `${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][1].toFixed(5)}, ${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][0].toFixed(5)}`;
@@ -533,6 +503,7 @@
             });
         }
 
+        // Opção 2: Via Completa
         options.push({ value: 'full', text: `Via Completa: ${streetName}`, nodes: fullSegmentNodes });
 
         options.forEach(opt => {
@@ -564,15 +535,13 @@
             }
         }
         
-        // 1. Desenho inicial
         handleSegmentSelection(optionsSelect.value);
 
-        // 2. Listener para o dropdown: Desenha imediatamente ao mudar a opção
         optionsSelect.onchange = (e) => {
             handleSegmentSelection(e.target.value);
         };
         
-        // 3. Listener de Confirmação: Salva o estado e remove o painel
+        // Listener de Confirmação: Salva o estado e preenche os campos finais
         confirmBtn.onclick = () => {
             const nodesToDraw = JSON.parse(container.dataset.tempSegmentJson);
             const selectedDirection = container.dataset.tempSegmentDirection;
@@ -581,18 +550,18 @@
                 currentSegmentNodes = nodesToDraw; 
                 saveSegmentState(nodesToDraw, selectedDirection);
                 
-                // Formato Waze: lat,lon,lat,lon,... (converte [lon, lat] para [lat, lon] e une)
+                // Formato Waze/final: lat,lon,lat,lon,... 
                 const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(','); 
                 
-                // Salva nos campos de submissão
+                // Salva nos campos de submissão (hidden fields)
                 document.getElementById('finalPolylineInput').value = polylineWazeFormat;
                 document.getElementById('finalStreetNameInput').value = streetName;
                 
-                // Atualizar o campo de rua selecionada (simular seleção)
+                // *** AÇÃO DE PREENCHIMENTO DO CAMPO 'SELECIONE A RUA' ***
+                // Preenche o dropdown simulando a seleção do nome da rua
                 const ruaSelect = document.getElementById('ruaSelect');
                 ruaSelect.innerHTML = `<option value="${streetName}" selected>${streetName}</option>`;
                 
-                // Ocultar o seletor após confirmação
                 container.style.display = 'none';
                 showAlert(`Segmento confirmado para a rua **${streetName}**. Sentido: **${selectedDirection.toUpperCase()}**`, 'success');
 
@@ -601,7 +570,7 @@
             }
         };
         
-        // 4. Listener de Cancelamento: Limpa o mapa e o localstorage
+        // Listener de Cancelamento
         cancelBtn.onclick = () => {
             if (currentSegmentLayer) {
                 map.removeLayer(currentSegmentLayer);
@@ -628,13 +597,10 @@
         const myMap = initializeMap();
         locateUser(myMap);
         
-        // Adiciona o listener de clique no mapa (chama handleMapClick -> getStreetSegment)
         myMap.on('click', handleMapClick);
 
-        // Atualiza a lista de direção
         atualizarDirecoes(document.getElementById('directionSelect'));
         
-        // Listener para mudança de sentido (redesenha o segmento)
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const newDirection = e.target.value;
             const savedSegment = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
@@ -643,20 +609,13 @@
                 const segmentNodes = JSON.parse(savedSegment);
                 drawSegment(segmentNodes, newDirection);
                 saveSegmentState(segmentNodes, newDirection);
-                // Atualiza o dado temporário no painel de seleção se estiver aberto
                 const container = document.getElementById('segmentSelectionContainer');
                 container.dataset.tempSegmentDirection = newDirection;
             }
         });
         
-        // Listener para datas (recalcula dias da semana)
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
-        
-        // Lógica de Subtipos:
-        // Nota: A lógica de subtipos (subtipo.js no seu código original) não está aqui,
-        // mas você deve garantir que o dropdown #tipo tenha um listener para carregar
-        // os subtipos dinamicamente.
     });
 </script>
 <style>
