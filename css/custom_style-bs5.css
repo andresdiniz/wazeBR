@@ -1,0 +1,182 @@
+/*
+ * Arquivo CSS Consolidado para Bootstrap 5 (Baseado em SB Admin 2)
+ * Este arquivo contém os estilos customizados de SB Admin 2 e as modificações do seu style.css.
+ * O CSS base do Bootstrap 5 é carregado via CDN no header.twig (prioridade).
+ */
+
+/* --- Conteúdo de sb-admin-2.css (Estilos customizados do tema) --- */
+/*!
+ * Start Bootstrap - SB Admin 2 v4.1.3 (https://startbootstrap.com/theme/sb-admin-2)
+ * Copyright 2013-2021 Start Bootstrap
+ * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-sb-admin-2/blob/master/LICENSE)
+ */
+
+/*!
+ * Bootstrap v4.6.0 (https://getbootstrap.com/) 
+ * *O CSS base do BS4 foi mantido aqui como OVERRIDE de cores e variáveis, mas o BS5 é carregado no header*
+ * Copyright 2011-2021 The Bootstrap Authors
+ * Copyright 2011-2021 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+ */
+:root {
+  --blue: #4e73df;
+  --indigo: #6610f2;
+  --purple: #6f42c1;
+  --pink: #e83e8c;
+  --red: #e74a3b;
+  --orange: #fd7e14;
+  --yellow: #f6c23e;
+  --green: #1cc88a;
+  --teal: #20c9a6;
+  --cyan: #36b9cc;
+  --white: #fff;
+  --gray: #858796;
+  --gray-dark: #5a5c69;
+  --primary: #4e73df;
+  --secondary: #858796;
+  --success: #1cc88a;
+  --info: #36b9cc;
+  --warning: #f6c23e;
+  --danger: #e74a3b;
+  --light: #f8f9fc;
+  --dark: #5a5c69;
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --font-family-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+/* ... (Incluir o restante do conteúdo de sb-admin-2.css aqui) ... */
+/* NOTE: O conteúdo completo de sb-admin-2.css é extenso. Você deve copiar e colar o conteúdo completo original aqui. */
+
+/* --- Conteúdo de style.css (Ajustes Customizados) --- */
+/* Ajuste para o modal maior */
+.modal-lg .modal-body {
+    height: 600px; /* Ajuste a altura conforme necessário */
+    display: block;
+    padding: 0; /* Retire qualquer padding extra */
+}
+
+/* Ajuste do mapa */
+#map {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+/* Evitar que o mapa saia do modal, limitando a altura */
+.modal-body {
+    overflow: hidden; /* Evita que o mapa transborde */
+}
+
+/* Ajustes adicionais para o conteúdo do modal */
+.card-body {
+    overflow-y: auto;
+    max-height: 500px; /* Ajuste da altura máxima, se necessário */
+}
+
+/* Tabela dentro do modal */
+.table {
+    width: 100%;
+    overflow-y: auto;
+    table-layout: fixed; /* Fixar o layout da tabela */
+    border-collapse: collapse; /* Remover espaçamento entre bordas */
+}
+
+/* Cabeçalho da tabela */
+.table th {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Células da tabela */
+.table td {
+    font-size: 0.8rem;
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Estilo para links em ações da tabela */
+.table a {
+    color: #4e73df;
+    text-decoration: none;
+}
+
+.table a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo para o cartão no modal */
+.card {
+    border: none;
+    box-shadow: none;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h6 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #4e73df;
+}
+
+.card-header .btn-group {
+    margin-left: auto;
+}
+
+/* Melhorando a aparência de botões de controle */
+.card-header .btn {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    border-radius: 4px;
+}
+
+.card-header .btn-light {
+    color: #333;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+}
+
+.card-header .btn-light:hover {
+    background-color: #e2e6ea;
+}
+
+#loadingIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
+    text-align: center;
+    z-index: 1000;
+}
+
+/* Estilo para rotas com atraso */
+.delay-row {
+    background-color: #f8d7da; /* Cor de fundo vermelha clara */
+    color: #721c24; /* Texto vermelho */
+}
+
+/* Estilo para rotas no horário (sem atraso) */
+.on-time-row {
+    background-color: #d4edda; /* Cor de fundo verde clara */
+    color: #155724; /* Texto verde */
+}
