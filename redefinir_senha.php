@@ -62,7 +62,7 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
 $token = $_GET['token'];
 
 // Validação básica do formato do token (assumindo token hex de 64 caracteres)
-if (!preg_match('/^[a-f0-9]{64}$/i', $token)) {
+if (!preg_match('/^[a-f0-9]{32}$/i', $token)) {
     error_log("Formato de token inválido - IP: " . $ip);
     echo "<script>
         alert('Token inválido. Você será redirecionado para a página de login.');
