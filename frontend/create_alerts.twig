@@ -121,6 +121,8 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
+
 <script>
     // ===== Variáveis Globais =====
     let map;
@@ -200,11 +202,11 @@
     }
 
 
-    // ===== Consulta de Rua e Segmento (CORE da Lógica) - CORRIGIDA =====
+    // ===== Consulta de Rua e Segmento (CORE da Lógica) - OTIMIZADA =====
     
     async function getStreetSegment(map, lat, lon) {
-        // Raio maior é necessário para pegar as vias de cruzamento
-        const radiusValues = [50, 100, 150]; 
+        // Raios ajustados para 100m, 200m e 300m para cobrir quarteirões mais longos
+        const radiusValues = [100, 200, 300]; 
         let streetName = 'Nome da Rua Desconhecido';
         
         const ruaSelect = document.getElementById('ruaSelect');
@@ -213,7 +215,7 @@
         esconderBotaoReverso();
 
         for (let radius of radiusValues) {
-            // *** CORREÇÃO: Busca por todas as vias e nós na área para garantir cruzamentos ***
+            // Consulta Overpass para todas as vias e nós na área para garantir cruzamentos
             const query = `
             [out:json];
             (
@@ -230,12 +232,13 @@
                 const data = await response.json();
 
                 if (data.elements && data.elements.length > 0) {
+                    // Filtra apenas vias válidas
                     const allWays = data.elements.filter(el => el.type === 'way' && el.tags && el.tags.highway);
                     
                     let closestWay = null;
                     let minDistance = Infinity;
 
-                    // 1. Encontra a via mais próxima do clique
+                    // 1. Encontra a via mais próxima do clique (usando Turf.js)
                     allWays.forEach(way => {
                         if (!way.tags.name || !way.geometry || way.geometry.length < 2) return;
                         
@@ -256,11 +259,11 @@
                         const intersectionNodeIds = [];
                         const wayNodesSet = new Set(closestWay.nodes);
                         
+                        // Itera sobre todas as outras vias para encontrar nós compartilhados
                         allWays.forEach(otherWay => {
-                            // Não compara a via consigo mesma
                             if (otherWay.id === closestWay.id) return; 
+                            if (!otherWay.nodes) return;
 
-                            // Encontra nós compartilhados (intersecção)
                             otherWay.nodes.forEach(nodeId => {
                                 if (wayNodesSet.has(nodeId)) {
                                     intersectionNodeIds.push(nodeId);
@@ -268,21 +271,22 @@
                             });
                         });
 
-                        // Remove duplicatas e garante ordem correta na via
+                        // Remove duplicatas e filtra para ter apenas IDs que realmente pertencem à via principal
                         const uniqueIntersectionIds = Array.from(new Set(intersectionNodeIds));
                         const orderedIntersections = uniqueIntersectionIds.filter(id => closestWay.nodes.includes(id));
 
                         
                         if (orderedIntersections.length >= 2) {
                             const nodeIds = closestWay.nodes;
-                            // Pega o índice da primeira intersecção encontrada e da última
+                            // Pega o índice da primeira intersecção (mais próxima do início da via) 
+                            // e da última intersecção (mais próxima do fim da via)
                             const firstIntersectionIndex = nodeIds.indexOf(orderedIntersections[0]);
                             const lastIntersectionIndex = nodeIds.lastIndexOf(orderedIntersections[orderedIntersections.length - 1]);
                             
                             let segmentNodes = [];
                             
                             if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
-                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção (CORRIGIDO)
+                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção (incluindo as intersecções)
                                 segmentNodes = fullWayGeometry.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
                             }
 
@@ -298,7 +302,7 @@
                             }
                         }
                         
-                        // 3. Se falhar a segmentação por intersecção (ex: rua sem cruzamentos próximos ou erro na lógica), oferece a via completa
+                        // 3. Se falhar a segmentação por intersecção, oferece a via completa
                         promptSegmentSelection(map, { 
                             segment: fullWayGeometry, 
                             fullWay: fullWayGeometry, 
