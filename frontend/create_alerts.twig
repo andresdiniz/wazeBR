@@ -121,6 +121,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
+
 <script>
     // ===== Variáveis Globais (Adicionadas/Ajustadas) =====
     let map; // Objeto mapa Leaflet
@@ -128,7 +129,7 @@
     let currentSegmentLayer = null; // Armazena a camada (polyline e setas) do segmento atual
     let clickMarker = null; // Marcador do clique inicial
 
-    // ===== Limpa localstorage =====
+    // ===== Limpa localstorage (Garante um estado limpo a cada carregamento) =====
     localStorage.clear();
     
     // ===== Configurações Globais =====
@@ -173,8 +174,9 @@
     function locateUser(map) {
         map.locate({ setView: true, maxZoom: 12 });
         map.on('locationerror', function (e) {
-            alert('Não foi possível localizar a sua posição.');
+            showAlert('Não foi possível localizar a sua posição.', 'warning');
         });
+        map.on('locationfound', function(e) { handleLocationFound(e, map); });
     }
 
     function handleLocationFound(e, map) {
@@ -184,7 +186,7 @@
         console.log('Localização atual encontrada:', e.latlng);
     }
     
-    // 💡 NOVO: Função para o clique no mapa
+    // 💡 Função de clique no mapa
     function handleMapClick(e) {
         const { lat, lng } = e.latlng;
         
@@ -208,9 +210,7 @@
     }
 
 
-    // ===== Consulta de Rua e Segmento (Melhorada para passar o nome da rua) =====
-    // A função consultarRuaWaze foi mantida mas não é usada neste novo fluxo de Overpass. 
-    // O nome da rua agora vem da resposta do Overpass.
+    // ===== Consulta de Rua e Segmento (Core da Lógica) =====
     
     /**
     * Consulta um segmento de rua próximo às coordenadas informadas (Overpass API).
@@ -222,6 +222,7 @@
         // Limpa o seletor de rua
         const ruaSelect = document.getElementById('ruaSelect');
         ruaSelect.innerHTML = '<option value="">Buscando rua...</option>';
+        document.getElementById('segmentSelectionContainer').style.display = 'none';
 
         for (let radius of radiusValues) {
             const query = `
@@ -240,13 +241,11 @@
                 const data = await response.json();
 
                 if (data.elements && data.elements.length > 0) {
-                    const nodes = {};
                     const ways = [];
 
                     data.elements.forEach(el => {
-                        if (el.type === 'node') {
-                            nodes[el.id] = [el.lon, el.lat];
-                        } else if (el.type === 'way' && el.tags && el.tags.name) {
+                        // Filtra apenas ways com tag 'highway' e que possuam um 'name'
+                        if (el.type === 'way' && el.tags && el.tags.name) {
                             ways.push(el);
                         }
                     });
@@ -254,12 +253,14 @@
                     let closestWay = null;
                     let minDistance = Infinity;
 
+                    // Itera sobre as ways para encontrar a mais próxima usando Turf.js
                     ways.forEach(way => {
-                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); // Usa a geometria para cálculo
+                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
                         if (wayCoords.length < 2) return;
                         
-                        // Calcula a distância do ponto de clique para a via
+                        // Calcula a distância do ponto de clique para a via (em metros)
                         const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayCoords), { units: 'meters' });
+                        
                         if (distance < minDistance) {
                             minDistance = distance;
                             closestWay = way;
@@ -267,11 +268,10 @@
                     });
                     
                     if (closestWay) {
-                        const wayNodes = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
+                        const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
                         streetName = closestWay.tags.name || 'Nome da Rua Desconhecido';
                         
-                        // Encontrando nós que são pontos de interseção (pelo menos dois para definir um segmento)
-                        // A lógica de intersecção pode ser complexa. Vamos usar a abordagem de nodes que aparecem em múltiplas ways.
+                        // 1. Tenta encontrar nós de intersecção (nós que são compartilhados por outras ways)
                         const intersections = closestWay.nodes.filter(nodeId => 
                             data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes && el.nodes.includes(nodeId))
                         );
@@ -283,26 +283,29 @@
                                 .map(id => nodeIds.indexOf(id))
                                 .filter(index => index !== -1);
                                 
-                            // Ordena os índices para pegar o primeiro e o último
                             intersectionIndices.sort((a, b) => a - b);
-                            const firstIntersectionIndex = intersectionIndices[0];
-                            const lastIntersectionIndex = intersectionIndices[intersectionIndices.length - 1];
                             
-                            // Mapeia o array wayNodes de [lon, lat] com base nos índices dos nós do Overpass.
-                            // OBS: A geometria do Overpass e a lista de 'nodes' podem não ter 1:1, 
-                            // mas vamos usar a geometria que é mais garantida para polylines.
+                            // Seleciona o segmento entre a primeira e a última intersecção.
+                            const startNodeId = intersections[0];
+                            const endNodeId = intersections[intersections.length-1];
                             
-                            // Para simplificar, vamos encontrar a geometria da Way que corresponde aos nós entre as interseções.
-                            // Isso requer um algoritmo mais complexo de path-finding, mas para o seu caso, 
-                            // vamos usar uma solução mais direta baseada na geometria da Way:
+                            // Encontra a geometria (lon, lat) para o segmento entre os nós de intersecção.
+                            // Isso é complexo. Uma simplificação é achar o índice dos nós de intersecção
+                            // na geometria completa, mas não é garantido 1:1. 
                             
-                            const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
-                            const startNodeIndex = closestWay.nodes.indexOf(intersections[0]);
-                            const endNodeIndex = closestWay.nodes.indexOf(intersections[intersections.length-1]);
-                            
+                            // Usamos um algoritmo mais robusto para encontrar o segmento que inclui o ponto clicado
+                            // e que está delimitado por intersecções, se possível.
+
+                            // Vamos usar a lógica mais simples do seu snippet, baseada nos índices da lista de 'nodes' do Overpass:
+                            const startIndexInGeometry = closestWay.geometry.findIndex(g => g.id === startNodeId);
+                            const endIndexInGeometry = closestWay.geometry.findIndex(g => g.id === endNodeId);
+
                             let segmentNodes = [];
-                            if (startNodeIndex !== -1 && endNodeIndex !== -1 && startNodeIndex < endNodeIndex) {
-                                segmentNodes = fullWayGeometry.slice(startNodeIndex, endNodeIndex + 1);
+                            if (startIndexInGeometry !== -1 && endIndexInGeometry !== -1 && startIndexInGeometry < endIndexInGeometry) {
+                                segmentNodes = fullWayGeometry.slice(startIndexInGeometry, endIndexInGeometry + 1);
+                            }
+
+                            if (segmentNodes.length > 1) {
                                 console.log(`Segmento de intersecção encontrado com raio de ${radius} metros.`);
                                 
                                 promptSegmentSelection(map, { 
@@ -318,8 +321,8 @@
                         // Se não houver interseções suficientes ou a lógica falhar, oferece a via completa
                         console.log(`Via completa oferecida com raio de ${radius} metros.`);
                         promptSegmentSelection(map, { 
-                            segment: wayNodes, // wayNodes agora é a geometria completa [lon, lat]
-                            fullWay: wayNodes, 
+                            segment: fullWayGeometry, // [lon, lat]
+                            fullWay: fullWayGeometry, 
                             type: 'full',
                             streetName: streetName
                         }, lat, lon);
@@ -336,25 +339,20 @@
         showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
     }
 
-    // ===== Desenho do Segmento e Controle de Sentido (Mantido) =====
-    // ... drawSegment, updateDirectionControls, updateDirectionIndicator, saveSegmentState, loadSavedSegment, inverterCoordenadas
-    // (Mantidas as funções auxiliares que não tiveram alteração significativa)
+    // ===== Funções de Desenho e Estado (Mantidas) =====
 
     function drawSegment(segmentNodes, direction = 'both') {
-        // ... (Corpo da função mantido como no seu snippet)
         try {
-            // Remove segmento anterior
             if (currentSegmentLayer) {
                 map.removeLayer(currentSegmentLayer);
             }
 
             // Converte coordenadas para [lat, lng] (assume que segmentNodes é [lon, lat])
-            const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
+            let latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
             
-            // Define estilo baseado na direção
             const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
-                          direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
-                          MAP_CONFIG.SEGMENT_COLORS.both;
+                            direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
+                            MAP_CONFIG.SEGMENT_COLORS.both;
             
             const lineStyle = { 
                 color: color, 
@@ -367,12 +365,12 @@
             // Cria a linha principal
             const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
             
-            // Adiciona setas de direção apenas se a direção não for 'both'
             let arrowDecorator = null;
             if (direction !== 'both') {
                 // Inverte a linha se a direção for 'reversed' para que as setas apontem corretamente
                 if (direction === 'reversed') {
-                    segmentLine.setLatLngs([...latLngs].reverse()); // Clona e reverte
+                    // Cuidado: segmentNodes é o array original, só inverte a linha para o desenho
+                    segmentLine.setLatLngs([...latLngs].reverse()); 
                 }
 
                 const arrowOptions = {
@@ -395,19 +393,16 @@
                 arrowDecorator = L.polylineDecorator(segmentLine, arrowOptions).addTo(map);
             }
 
-            // Agrupa as layers
             const layersToAdd = [segmentLine];
             if (arrowDecorator) {
                 layersToAdd.push(arrowDecorator);
             }
             currentSegmentLayer = L.layerGroup(layersToAdd).addTo(map);
             
-            // Ajusta o viewport para mostrar o segmento
             map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
             
-            // Salva estado
             saveSegmentState(segmentNodes, direction);
-            updateDirectionControls(direction); // Atualiza o select de direção
+            updateDirectionControls(direction);
             
             return currentSegmentLayer;
         } catch (error) {
@@ -419,51 +414,55 @@
     function updateDirectionControls(direction) {
         const directionSelect = document.getElementById('directionSelect');
         if (directionSelect) {
-            // Garante que as opções estão carregadas
             atualizarDirecoes(directionSelect); 
             directionSelect.value = direction;
         }
-        // Exibe ou oculta o botão de reversão conforme o sentido
         const reverseBtn = document.getElementById('reverseBtn');
         if (reverseBtn) {
-            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ?
-            'block' : 'none';
+            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ? 'block' : 'none';
         }
     }
 
-    // ... (Outras funções auxiliares de estado/direção/horário mantidas)
     function saveSegmentState(segment, direction) {
         localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segment));
         localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
     }
     
     function inverterCoordenadas(segmentNodes, map, currentDirection) {
-        const reversedSegment = [...segmentNodes].reverse();
-        // Se o sentido atual for 'original', a reversão se torna 'reversed', e vice-versa.
+        // Inverte os nós reais (segmentNodes é [lon, lat])
+        const reversedSegment = [...segmentNodes].reverse(); 
         const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
-        drawSegment(reversedSegment, newDirection);
-        saveSegmentState(reversedSegment, newDirection);
-        document.getElementById('directionSelect').value = newDirection; // Atualiza o select
+        
+        // Desenha o segmento invertido com a nova direção
+        drawSegment(reversedSegment, newDirection); 
+        
+        // Atualiza o estado global e local storage
+        currentSegmentNodes = reversedSegment; // Atualiza a variável global
+        saveSegmentState(reversedSegment, newDirection); 
+        document.getElementById('directionSelect').value = newDirection; 
+        
         return reversedSegment;
     }
 
-    // ... Funções auxiliares de Alerta, Horários e Subtipos (Mantidas)
     function showAlert(message, type = 'info') {
-        // ... (Corpo da função)
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.style.position = 'fixed';
+        alert.style.top = '10px';
+        alert.style.right = '10px';
+        alert.style.zIndex = '1050';
+
         alert.innerHTML = `
         ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
-        document.body.prepend(alert);
+        document.body.appendChild(alert);
 
         setTimeout(() => alert.remove(), 5000);
     }
     
     function atualizarDirecoes(selectElement) {
         selectElement.innerHTML = '';
-        // Limpar opções existentes
         const options = [
             { value: 'both', text: 'Ambos os sentidos' },
             { value: 'original', text: 'Sentido original' },
@@ -480,7 +479,6 @@
     function mostrarBotaoReverso(segmentNodes, map) {
         let reverseBtn = document.getElementById('reverseBtn');
         if (!reverseBtn) {
-            // Cria o botão se não existir
             reverseBtn = document.createElement('button');
             reverseBtn.id = 'reverseBtn';
             reverseBtn.className = 'btn btn-warning mt-2';
@@ -490,10 +488,8 @@
         reverseBtn.style.display = 'block';
         reverseBtn.type = "button";
         reverseBtn.onclick = () => {
-            // Obtém o sentido atual salvo (se não existir, assume "original")
             const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
-            // Inverte o segmento e desenha com a direção oposta
-            inverterCoordenadas(currentSegmentNodes, map, currentDirection);
+            inverterCoordenadas(window.currentSegmentNodes, map, currentDirection);
         };
     }
 
@@ -503,32 +499,31 @@
             reverseBtn.style.display = 'none';
         }
     }
+    
+    // Simulação da função calcularDiasSemana (se for relevante no seu sistema)
+    function calcularDiasSemana() {
+        // Implementação da lógica de cálculo de dias da semana (não incluída, mas necessária se você usa o id="horarios_dia")
+        console.log("Calculando dias da semana com base nas datas selecionadas...");
+    }
 
-
-    // ===== Gerenciamento do Painel de Seleção de Segmento (FINALIZADO) =====
+    // Função de gerenciamento do painel de seleção de segmento
     function promptSegmentSelection(map, segmentData, lat, lon) {
         const container = document.getElementById('segmentSelectionContainer');
         const optionsSelect = document.getElementById('segmentOptions');
         const confirmBtn = document.getElementById('confirmSegmentBtn');
         const cancelBtn = document.getElementById('cancelSegmentBtn');
 
-        // Dados de Geometria
         const intersectionSegmentNodes = segmentData.type === 'intersection' ? segmentData.segment : []; 
         const fullSegmentNodes = segmentData.fullWay || segmentData.segment;
-        const streetName = segmentData.streetName; // Nome da rua
+        const streetName = segmentData.streetName; 
         
-        // Limpar e preparar
         optionsSelect.innerHTML = '';
         container.style.display = 'block';
 
-        // Adicionar Opções
         let options = [];
 
-        // Opção 1: Trecho entre Interseções
         if (segmentData.type === 'intersection' && intersectionSegmentNodes.length > 1) {
-            // A coordenada inicial é a primeira coordenada do segmento
             const startCoord = `${intersectionSegmentNodes[0][1].toFixed(5)}, ${intersectionSegmentNodes[0][0].toFixed(5)}`;
-            // A coordenada final é a última coordenada do segmento
             const endCoord = `${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][1].toFixed(5)}, ${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][0].toFixed(5)}`;
             
             options.push({ 
@@ -538,7 +533,6 @@
             });
         }
 
-        // Opção 2: Via Completa
         options.push({ value: 'full', text: `Via Completa: ${streetName}`, nodes: fullSegmentNodes });
 
         options.forEach(opt => {
@@ -548,26 +542,20 @@
             optionsSelect.appendChild(option);
         });
 
-        optionsSelect.value = segmentData.type; // Define o padrão
+        optionsSelect.value = segmentData.type;
 
-        // Função de Desenho e Armazenamento Temporário
         function handleSegmentSelection(selectedType) {
             const selectedOption = options.find(opt => opt.value === selectedType);
             if (selectedOption && selectedOption.nodes && selectedOption.nodes.length > 1) {
-                // Pega a direção atual selecionada no dropdown principal
                 const direction = document.getElementById('directionSelect').value || 'both'; 
                 
-                // Desenha o segmento selecionado
                 window.currentSegmentLayer = drawSegment(selectedOption.nodes, direction);
                 
-                // Armazena temporariamente (para ser usado na confirmação)
                 container.dataset.tempSegmentJson = JSON.stringify(selectedOption.nodes);
                 container.dataset.tempSegmentDirection = direction;
 
-                // Atualiza a variável global currentSegmentNodes para que o botão de reverter funcione no preview
                 window.currentSegmentNodes = selectedOption.nodes; 
                 
-                // Atualiza o botão de reverter
                 if (direction === 'original' || direction === 'reversed') {
                     mostrarBotaoReverso(window.currentSegmentNodes, map);
                 } else {
@@ -593,9 +581,8 @@
                 currentSegmentNodes = nodesToDraw; 
                 saveSegmentState(nodesToDraw, selectedDirection);
                 
-                // --- AÇÃO FINAL: FORMATAR E SALVAR A POLYLINE ---
-                // nodesToDraw é [lon, lat], mas polyline precisa ser lat, lon, lat, lon
-                const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(',');
+                // Formato Waze: lat,lon,lat,lon,... (converte [lon, lat] para [lat, lon] e une)
+                const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(','); 
                 
                 // Salva nos campos de submissão
                 document.getElementById('finalPolylineInput').value = polylineWazeFormat;
@@ -636,12 +623,12 @@
         };
     }
 
-    // ===== Inicialização dos Event Listeners =====
+    // ===== Inicialização dos Event Listeners (Gatilho inicial) =====
     document.addEventListener('DOMContentLoaded', () => {
         const myMap = initializeMap();
         locateUser(myMap);
         
-        // Adiciona o listener de clique no mapa
+        // Adiciona o listener de clique no mapa (chama handleMapClick -> getStreetSegment)
         myMap.on('click', handleMapClick);
 
         // Atualiza a lista de direção
@@ -654,10 +641,9 @@
             
             if (savedSegment) {
                 const segmentNodes = JSON.parse(savedSegment);
-                // Desenha o novo sentido
                 drawSegment(segmentNodes, newDirection);
-                // Salva o novo sentido no estado e no tempSegmentDirection se o painel estiver aberto
                 saveSegmentState(segmentNodes, newDirection);
+                // Atualiza o dado temporário no painel de seleção se estiver aberto
                 const container = document.getElementById('segmentSelectionContainer');
                 container.dataset.tempSegmentDirection = newDirection;
             }
@@ -667,7 +653,10 @@
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
         
-        // A lógica de subtipos deve estar aqui ou vir do backend via AJAX (foi mantida a estrutura original)
+        // Lógica de Subtipos:
+        // Nota: A lógica de subtipos (subtipo.js no seu código original) não está aqui,
+        // mas você deve garantir que o dropdown #tipo tenha um listener para carregar
+        // os subtipos dinamicamente.
     });
 </script>
 <style>
