@@ -287,59 +287,55 @@
 
 
     // ===== Desenho do Segmento e Controle de Sentido =====
-    function drawSegment(map, segmentNodes, direction = 'both') {
-        // Remove camada anterior, se existir
-        if (window.currentSegmentLayer) {
-            map.removeLayer(window.currentSegmentLayer);
+    function drawSegment(segmentNodes, direction = 'both') {
+    try {
+        // Remove segmento anterior
+        if (currentSegmentLayer) {
+            map.removeLayer(currentSegmentLayer);
         }
-        // Converter as coordenadas para o formato [lat, lng]
+
+        // Converte coordenadas para [lat, lng]
         const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
 
-        // Configurar o estilo da linha conforme o sentido
-        let color;
-        if (direction === 'single' || direction === 'reversed') {
-            color = (direction === 'reversed') ? MAP_CONFIG.SEGMENT_COLORS.reversed : MAP_CONFIG.SEGMENT_COLORS.original;
-        } else {
-            color = MAP_CONFIG.SEGMENT_COLORS.both;
-        }
+        // Define estilo baseado na direção
+        const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
+                     direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
+                     MAP_CONFIG.SEGMENT_COLORS.both;
 
-        const lineStyle = {
-            color: color,
-            weight: 4
-        };
+        const lineStyle = { color, weight: 5, opacity: 0.8 };
 
-        // Criar a camada do segmento (linha)
-        const segmentLayer = L.polyline(latLngs, lineStyle);
+        // Cria a linha principal
+        const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
 
-        // Adicionar setas indicando a direção
-        const arrowLayer = L.polylineDecorator(segmentLayer, {
+        // Adiciona setas de direção
+        const arrowDecorator = L.polylineDecorator(segmentLine, {
             patterns: [{
                 offset: '50%',
                 repeat: '100px',
                 symbol: L.Symbol.arrowHead({
-                    ...MAP_CONFIG.ARROW_OPTIONS,
+                    pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
+                    polygon: false,
                     pathOptions: lineStyle
                 })
             }]
-        });
+        }).addTo(map);
 
-        // Salvar o estado do segmento no localStorage
-        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segmentNodes));
-        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
+        // Agrupa as layers
+        currentSegmentLayer = L.layerGroup([segmentLine, arrowDecorator]).addTo(map);
+        
+        // Ajusta o viewport para mostrar o segmento
+        map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
 
-        // Atualizar indicador e controles de direção
+        // Salva estado
+        saveSegmentState(segmentNodes, direction);
         updateDirectionIndicator(direction);
-        updateDirectionControls(direction);
-
-        const directionSelect = document.getElementById('directionSelect');
-        if (directionSelect) {
-            directionSelect.value = direction; // Restaura o valor original
-        }
-
-        // Agrupar as camadas e adicioná-las ao mapa
-        window.currentSegmentLayer = L.layerGroup([segmentLayer, arrowLayer]).addTo(map);
-        return window.currentSegmentLayer;
+        
+        return currentSegmentLayer;
+    } catch (error) {
+        console.error('Erro ao desenhar segmento:', error);
+        showAlert('Erro ao desenhar o segmento no mapa.', 'error');
     }
+}
 
     function updateDirectionControls(direction) {
         const directionSelect = document.getElementById('directionSelect');
