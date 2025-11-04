@@ -2,9 +2,12 @@
 require_once __DIR__ . '/config/configbd.php';
 
 // 1. Validação Básica de Dados Recebidos
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['email'], $_POST['password1'], $_POST['password2'], $_POST['token'])) {
-    die("Acesso inválido.");
+if (!isset($_GET['token']) || empty($_GET['token'])) {
+    die("Token de redefinição de senha não fornecido.");
 }
+echo "DEBUG: Token lido com sucesso: " . $_GET['token'] . "<br>"; // Adicione esta linha
+
+$token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
 
 $email = $_POST['email'];
 $token = $_POST['token'];
