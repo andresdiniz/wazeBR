@@ -119,7 +119,6 @@
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
 <script>
@@ -206,7 +205,8 @@
     // ===== Consulta de Rua e Segmento (CORE da Lógica) =====
     
     async function getStreetSegment(map, lat, lon) {
-        const radiusValues = [10, 20, 50, 100]; 
+        // Raio reduzido, pois a consulta 'way(around)' é mais precisa
+        const radiusValues = [10, 20, 50]; 
         let streetName = 'Nome da Rua Desconhecido';
         
         const ruaSelect = document.getElementById('ruaSelect');
@@ -215,15 +215,15 @@
         esconderBotaoReverso();
 
         for (let radius of radiusValues) {
+            // CORREÇÃO: Usando way(around) para buscar segmentos de linha diretamente, aumentando a estabilidade.
             const query = `
             [out:json];
             (
-                node(around:${radius}, ${lat}, ${lon});
-                way(bn)["highway"];
-                >;
+                way(around:${radius}, ${lat}, ${lon})["highway"]; 
             );
             out geom;
             `;
+            
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
             try {
@@ -234,7 +234,8 @@
                     const ways = [];
 
                     data.elements.forEach(el => {
-                        if (el.type === 'way' && el.tags && el.tags.name) {
+                        // Filtra apenas ways com tag 'highway', 'name' e geometria
+                        if (el.type === 'way' && el.tags && el.tags.name && el.geometry && el.geometry.length > 1) {
                             ways.push(el);
                         }
                     });
@@ -242,13 +243,11 @@
                     let closestWay = null;
                     let minDistance = Infinity;
 
-                    // Encontra a via mais próxima usando Turf.js
+                    // Encontra a via mais próxima usando Turf.js (calculando a distância ponto-linha)
                     ways.forEach(way => {
-                        // A geometria do Overpass vem como [lon, lat]
-                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); 
-                        if (wayCoords.length < 2) return;
+                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
                         
-                        // Calcula a distância do ponto de clique para a via (em metros)
+                        // Calcula a distância do ponto de clique para a VIA (linha)
                         const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayCoords), { units: 'meters' });
                         
                         if (distance < minDistance) {
@@ -262,28 +261,19 @@
                         streetName = closestWay.tags.name || 'Nome da Rua Desconhecido';
                         
                         // 1. Tenta encontrar nós de intersecção
-                        // Interseções são nós que fazem parte desta way E de qualquer outra way no resultado da consulta.
                         const intersections = closestWay.nodes.filter(nodeId => 
                             data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes && el.nodes.includes(nodeId))
                         );
 
-                        // O ponto clicado deve estar dentro do segmento (lógica não é trivial em Overpass)
-                        // Para simplificar, vamos encontrar a intersecção mais próxima do clique,
-                        // mas vamos nos ater à lógica de encontrar o segmento mais longo entre todas as interseções
-                        // que contenham o ponto clicado.
-                        
                         if (intersections.length >= 2) {
                             const nodeIds = closestWay.nodes;
-                            
-                            // Encontra o índice da primeira e da última intersecção na lista de nós da via.
                             const firstIntersectionIndex = nodeIds.indexOf(intersections[0]);
                             const lastIntersectionIndex = nodeIds.lastIndexOf(intersections[intersections.length - 1]);
                             
                             let segmentNodes = [];
                             
-                            // *** CORREÇÃO APLICADA AQUI: Utiliza os índices da lista 'nodes' para fatiar 'geometry' ***
                             if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
-                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção (incluindo as interseções)
+                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção
                                 segmentNodes = fullWayGeometry.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
                             }
 
@@ -318,6 +308,45 @@
         ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
         showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
     }
+    
+    // Função para carregar subtipos via Fetch (API)
+    async function loadSubtypes(tipoId) {
+        const subtipoSelect = document.getElementById('subtipo');
+        subtipoSelect.innerHTML = '<option value="">Carregando Subtipos...</option>';
+        subtipoSelect.disabled = true;
+
+        if (!tipoId) {
+            subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+            return;
+        }
+
+        // Endpoint para buscar subtipos - Ajuste se necessário!
+        const url = `api.php?action=get_subtipos&id=${tipoId}`; 
+
+        try {
+            const response = await fetch(url);
+            const subtypes = await response.json(); // Assumindo que a API retorna um array de { id: ..., name: ... }
+
+            subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+
+            if (subtypes && subtypes.length > 0) {
+                subtypes.forEach(subtipo => {
+                    const option = document.createElement('option');
+                    option.value = subtipo.id;
+                    option.textContent = subtipo.name;
+                    subtipoSelect.appendChild(option);
+                });
+                subtipoSelect.disabled = false;
+            } else {
+                subtipoSelect.innerHTML = '<option value="">Nenhum Subtipo Encontrado</option>';
+            }
+
+        } catch (error) {
+            console.error('Erro ao buscar subtipos:', error);
+            subtipoSelect.innerHTML = '<option value="">Erro ao Carregar Subtipos</option>';
+        }
+    }
+
 
     // ===== Funções de Desenho e Estado (Mantidas/Revisadas) =====
 
@@ -347,7 +376,7 @@
             let arrowDecorator = null;
             if (direction !== 'both') {
                 if (direction === 'reversed') {
-                    segmentLine.setLatLngs([...latLngs].reverse()); 
+                    segmentLine.setLatLngs([...latLngs].reverse());
                 }
 
                 const arrowOptions = {
@@ -391,7 +420,7 @@
     function updateDirectionControls(direction) {
         const directionSelect = document.getElementById('directionSelect');
         if (directionSelect) {
-            atualizarDirecoes(directionSelect); 
+            atualizarDirecoes(directionSelect);
             directionSelect.value = direction;
         }
         const reverseBtn = document.getElementById('reverseBtn');
@@ -406,14 +435,14 @@
     }
     
     function inverterCoordenadas(segmentNodes, map, currentDirection) {
-        const reversedSegment = [...segmentNodes].reverse(); 
+        const reversedSegment = [...segmentNodes].reverse();
         const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
         
-        drawSegment(reversedSegment, newDirection); 
+        drawSegment(reversedSegment, newDirection);
         
-        window.currentSegmentNodes = reversedSegment; 
-        saveSegmentState(reversedSegment, newDirection); 
-        document.getElementById('directionSelect').value = newDirection; 
+        window.currentSegmentNodes = reversedSegment;
+        saveSegmentState(reversedSegment, newDirection);
+        document.getElementById('directionSelect').value = newDirection;
         
         return reversedSegment;
     }
@@ -425,7 +454,6 @@
         alert.style.top = '10px';
         alert.style.right = '10px';
         alert.style.zIndex = '1050';
-
         alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
         document.body.appendChild(alert);
 
@@ -453,7 +481,7 @@
             reverseBtn = document.createElement('button');
             reverseBtn.id = 'reverseBtn';
             reverseBtn.className = 'btn btn-warning mt-2';
-            reverseBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Inverter Sentido'; 
+            reverseBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Inverter Sentido';
             document.getElementById('buttonContainer').appendChild(reverseBtn);
         }
         reverseBtn.style.display = 'block';
@@ -482,9 +510,9 @@
         const confirmBtn = document.getElementById('confirmSegmentBtn');
         const cancelBtn = document.getElementById('cancelSegmentBtn');
 
-        const intersectionSegmentNodes = segmentData.type === 'intersection' ? segmentData.segment : []; 
+        const intersectionSegmentNodes = segmentData.type === 'intersection' ? segmentData.segment : [];
         const fullSegmentNodes = segmentData.fullWay || segmentData.segment;
-        const streetName = segmentData.streetName; 
+        const streetName = segmentData.streetName;
         
         optionsSelect.innerHTML = '';
         container.style.display = 'block';
@@ -518,14 +546,14 @@
         function handleSegmentSelection(selectedType) {
             const selectedOption = options.find(opt => opt.value === selectedType);
             if (selectedOption && selectedOption.nodes && selectedOption.nodes.length > 1) {
-                const direction = document.getElementById('directionSelect').value || 'both'; 
+                const direction = document.getElementById('directionSelect').value || 'both';
                 
                 window.currentSegmentLayer = drawSegment(selectedOption.nodes, direction);
                 
                 container.dataset.tempSegmentJson = JSON.stringify(selectedOption.nodes);
                 container.dataset.tempSegmentDirection = direction;
 
-                window.currentSegmentNodes = selectedOption.nodes; 
+                window.currentSegmentNodes = selectedOption.nodes;
                 
                 if (direction === 'original' || direction === 'reversed') {
                     mostrarBotaoReverso(window.currentSegmentNodes, map);
@@ -547,18 +575,17 @@
             const selectedDirection = container.dataset.tempSegmentDirection;
 
             if (nodesToDraw && nodesToDraw.length > 1) {
-                currentSegmentNodes = nodesToDraw; 
+                currentSegmentNodes = nodesToDraw;
                 saveSegmentState(nodesToDraw, selectedDirection);
                 
                 // Formato Waze/final: lat,lon,lat,lon,... 
-                const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(','); 
+                const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(',');
                 
                 // Salva nos campos de submissão (hidden fields)
                 document.getElementById('finalPolylineInput').value = polylineWazeFormat;
                 document.getElementById('finalStreetNameInput').value = streetName;
                 
-                // *** AÇÃO DE PREENCHIMENTO DO CAMPO 'SELECIONE A RUA' ***
-                // Preenche o dropdown simulando a seleção do nome da rua
+                // AÇÃO DE PREENCHIMENTO DO CAMPO 'SELECIONE A RUA'
                 const ruaSelect = document.getElementById('ruaSelect');
                 ruaSelect.innerHTML = `<option value="${streetName}" selected>${streetName}</option>`;
                 
@@ -580,12 +607,12 @@
                 map.removeLayer(clickMarker);
                 clickMarker = null;
             }
-            localStorage.clear(); 
-            currentSegmentNodes = []; 
-            document.getElementById('coordenadas').value = ''; 
+            localStorage.clear();
+            currentSegmentNodes = [];
+            document.getElementById('coordenadas').value = '';
             document.getElementById('ruaSelect').innerHTML = '<option value="">Selecione uma rua</option>';
-            document.getElementById('finalPolylineInput').value = ''; 
-            document.getElementById('finalStreetNameInput').value = ''; 
+            document.getElementById('finalPolylineInput').value = '';
+            document.getElementById('finalStreetNameInput').value = '';
             container.style.display = 'none';
             showAlert('Seleção de segmento cancelada. Clique no mapa para recomeçar.', 'info');
             esconderBotaoReverso();
@@ -616,6 +643,12 @@
         
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
+        
+        // NOVO: Listener para carregar subtipos
+        document.getElementById('tipo').addEventListener('change', (e) => {
+            const tipoId = e.target.value;
+            loadSubtypes(tipoId);
+        });
     });
 </script>
 <style>
@@ -623,7 +656,7 @@
     #map {
         border-radius: 8px;
         transition: box-shadow 0.3s ease;
-        height: 400px; /* Altura padrão */
+        height: 500px; /* Altura padrão para o desktop */
     }
 
     /* Em dispositivos móveis, reduzir a altura do mapa */
