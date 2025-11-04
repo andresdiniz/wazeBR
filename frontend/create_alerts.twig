@@ -122,21 +122,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
 <script>
-    // ===== Variáveis Globais (Adicionadas/Ajustadas) =====
-    let map; // Objeto mapa Leaflet
-    let currentSegmentNodes = []; // Armazena os nós (coordenadas) do segmento atual
-    let currentSegmentLayer = null; // Armazena a camada (polyline e setas) do segmento atual
-    let clickMarker = null; // Marcador do clique inicial
+    // ===== Variáveis Globais =====
+    let map;
+    let currentSegmentNodes = [];
+    let currentSegmentLayer = null;
+    let clickMarker = null;
 
-    // ===== Limpa localstorage (Garante um estado limpo a cada carregamento) =====
     localStorage.clear();
     
     // ===== Configurações Globais =====
     const MAP_CONFIG = {
         SEGMENT_COLORS: {
-            original: '#0000ff', // Azul (Sentido original)
-            reversed: '#ff0000', // Vermelho (Sentido reverso)
-            both: '#00ff00' // Verde (Ambos os sentidos / Via Completa)
+            original: '#0000ff',
+            reversed: '#ff0000',
+            both: '#00ff00'
         },
         ARROW_OPTIONS: {
             pixelSize: 15,
@@ -162,7 +161,7 @@
     
     // ===== Funções de Inicialização e Localização =====
     function initializeMap() {
-        map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
+        map = L.map('map').setView([-23.55052, -46.633308], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -183,7 +182,6 @@
         L.circle(e.latlng, radius).addTo(map);
     }
     
-    // Função de clique no mapa
     function handleMapClick(e) {
         const { lat, lng } = e.latlng;
         
@@ -202,11 +200,11 @@
     }
 
 
-    // ===== Consulta de Rua e Segmento (CORE da Lógica) =====
+    // ===== Consulta de Rua e Segmento (CORE da Lógica) - CORRIGIDA =====
     
     async function getStreetSegment(map, lat, lon) {
-        // Raio reduzido, pois a consulta 'way(around)' é mais precisa
-        const radiusValues = [10, 20, 50]; 
+        // Raio maior é necessário para pegar as vias de cruzamento
+        const radiusValues = [50, 100, 150]; 
         let streetName = 'Nome da Rua Desconhecido';
         
         const ruaSelect = document.getElementById('ruaSelect');
@@ -215,11 +213,12 @@
         esconderBotaoReverso();
 
         for (let radius of radiusValues) {
-            // CORREÇÃO: Usando way(around) para buscar segmentos de linha diretamente, aumentando a estabilidade.
+            // *** CORREÇÃO: Busca por todas as vias e nós na área para garantir cruzamentos ***
             const query = `
             [out:json];
             (
-                way(around:${radius}, ${lat}, ${lon})["highway"]; 
+                way(around:${radius}, ${lat}, ${lon})["highway"];
+                node(w);
             );
             out geom;
             `;
@@ -231,23 +230,16 @@
                 const data = await response.json();
 
                 if (data.elements && data.elements.length > 0) {
-                    const ways = [];
-
-                    data.elements.forEach(el => {
-                        // Filtra apenas ways com tag 'highway', 'name' e geometria
-                        if (el.type === 'way' && el.tags && el.tags.name && el.geometry && el.geometry.length > 1) {
-                            ways.push(el);
-                        }
-                    });
+                    const allWays = data.elements.filter(el => el.type === 'way' && el.tags && el.tags.highway);
                     
                     let closestWay = null;
                     let minDistance = Infinity;
 
-                    // Encontra a via mais próxima usando Turf.js (calculando a distância ponto-linha)
-                    ways.forEach(way => {
-                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
+                    // 1. Encontra a via mais próxima do clique
+                    allWays.forEach(way => {
+                        if (!way.tags.name || !way.geometry || way.geometry.length < 2) return;
                         
-                        // Calcula a distância do ponto de clique para a VIA (linha)
+                        const wayCoords = way.geometry.map(g => [g.lon, g.lat]);
                         const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayCoords), { units: 'meters' });
                         
                         if (distance < minDistance) {
@@ -260,20 +252,37 @@
                         const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
                         streetName = closestWay.tags.name || 'Nome da Rua Desconhecido';
                         
-                        // 1. Tenta encontrar nós de intersecção
-                        const intersections = closestWay.nodes.filter(nodeId => 
-                            data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes && el.nodes.includes(nodeId))
-                        );
+                        // 2. Identifica todos os nós de intersecção na via principal
+                        const intersectionNodeIds = [];
+                        const wayNodesSet = new Set(closestWay.nodes);
+                        
+                        allWays.forEach(otherWay => {
+                            // Não compara a via consigo mesma
+                            if (otherWay.id === closestWay.id) return; 
 
-                        if (intersections.length >= 2) {
+                            // Encontra nós compartilhados (intersecção)
+                            otherWay.nodes.forEach(nodeId => {
+                                if (wayNodesSet.has(nodeId)) {
+                                    intersectionNodeIds.push(nodeId);
+                                }
+                            });
+                        });
+
+                        // Remove duplicatas e garante ordem correta na via
+                        const uniqueIntersectionIds = Array.from(new Set(intersectionNodeIds));
+                        const orderedIntersections = uniqueIntersectionIds.filter(id => closestWay.nodes.includes(id));
+
+                        
+                        if (orderedIntersections.length >= 2) {
                             const nodeIds = closestWay.nodes;
-                            const firstIntersectionIndex = nodeIds.indexOf(intersections[0]);
-                            const lastIntersectionIndex = nodeIds.lastIndexOf(intersections[intersections.length - 1]);
+                            // Pega o índice da primeira intersecção encontrada e da última
+                            const firstIntersectionIndex = nodeIds.indexOf(orderedIntersections[0]);
+                            const lastIntersectionIndex = nodeIds.lastIndexOf(orderedIntersections[orderedIntersections.length - 1]);
                             
                             let segmentNodes = [];
                             
                             if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
-                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção
+                                // Obtém o segmento [lon, lat] entre a primeira e a última intersecção (CORRIGIDO)
                                 segmentNodes = fullWayGeometry.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
                             }
 
@@ -289,7 +298,7 @@
                             }
                         }
                         
-                        // Se falhar a segmentação por intersecção, oferece a via completa
+                        // 3. Se falhar a segmentação por intersecção (ex: rua sem cruzamentos próximos ou erro na lógica), oferece a via completa
                         promptSegmentSelection(map, { 
                             segment: fullWayGeometry, 
                             fullWay: fullWayGeometry, 
@@ -348,7 +357,7 @@
     }
 
 
-    // ===== Funções de Desenho e Estado (Mantidas/Revisadas) =====
+    // ===== Funções de Desenho e Estado (Mantidas) =====
 
     function drawSegment(segmentNodes, direction = 'both') {
         try {
@@ -356,7 +365,6 @@
                 map.removeLayer(currentSegmentLayer);
             }
 
-            // Converte coordenadas para [lat, lng] (assume que segmentNodes é [lon, lat])
             let latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
             
             const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
@@ -538,7 +546,7 @@
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.text;
-            optionsSelect.appendChild(option);
+            selectOptions(option);
         });
 
         optionsSelect.value = segmentData.type;
@@ -618,6 +626,15 @@
             esconderBotaoReverso();
         };
     }
+
+    // Função auxiliar para evitar 'optionsSelect' ser indefinido no loop
+    function selectOptions(option) {
+        const optionsSelect = document.getElementById('segmentOptions');
+        if (optionsSelect) {
+            optionsSelect.appendChild(option);
+        }
+    }
+
 
     // ===== Inicialização dos Event Listeners (Gatilho inicial) =====
     document.addEventListener('DOMContentLoaded', () => {
