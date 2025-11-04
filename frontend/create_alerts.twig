@@ -28,7 +28,7 @@
                             <select class="form-select" id="tipo" name="tipo" required>
                                 <option value="">Selecione um Tipo</option>
                                 {% for tipo in tipos %}
-                                <option value="{{ tipo.id }}">{{ tipo.name }}</option>
+                                    <option value="{{ tipo.id }}">{{ tipo.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                     <div id="horarios_dia" class="mb-3">
-                        </div>
+                    </div>
 
                     <div class="mb-3">
                         <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
@@ -72,7 +72,7 @@
                         <div class="mb-3">
                             <label for="segmentOptions" class="form-label">Escolha o trecho:</label>
                             <select class="form-select" id="segmentOptions" required>
-                                </select>
+                            </select>
                         </div>
                         <button type="button" id="confirmSegmentBtn" class="btn btn-success mb-2">✅ Confirmar Seleção</button>
                         <button type="button" id="cancelSegmentBtn" class="btn btn-secondary btn-sm">Cancelar e Clicar Novamente</button>
@@ -82,11 +82,12 @@
                         <div class="col-md-6">
                             <div class="mb-2">
                                 <label for="directionSelect" class="form-label">Escolha o Sentido</label>
-                                <select id="directionSelect" class="form-select" name="directionSelect">
-                                    </select>
+                                <select id="directionSelect" 
+                                    class="form-select" name="directionSelect">
+                                </select>
                             </div>
                             <div id="buttonContainer" class="mt-2">
-                                </div>
+                            </div>
 
                             {% if id_parceiro == 99 %}
                             <div class="mb-3">
@@ -111,21 +112,28 @@
         </div>
 
         <div class="col-lg-4 mt-4 mt-lg-0">
-            <div id="map" class="card shadow-sm" style="height: 500px;"></div>
+            <div id="map" class="card 
+                shadow-sm" style="height: 500px;"></div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 <script>
+    // ===== Variáveis Globais (Adicionadas/Ajustadas) =====
+    let map; // Objeto mapa Leaflet
+    let currentSegmentNodes = []; // Armazena os nós (coordenadas) do segmento atual
+    let currentSegmentLayer = null; // Armazena a camada (polyline e setas) do segmento atual
+
     // ===== Limpa localstorage =====
     localStorage.clear();
+    
     // ===== Configurações Globais =====
     const MAP_CONFIG = {
         SEGMENT_COLORS: {
-            original: '#0000ff',
-            reversed: '#ff0000',
-            both: '#00ff00'
+            original: '#0000ff', // Azul (Sentido original)
+            reversed: '#ff0000', // Vermelho (Sentido reverso)
+            both: '#00ff00' // Verde (Ambos os sentidos / Via Completa)
         },
         ARROW_OPTIONS: {
             pixelSize: 15,
@@ -136,7 +144,7 @@
             DIRECTION: 'segmentDirection'
         }
     };
-
+    
     // Inicializa calendarios
     flatpickr("#starttime", {
         enableTime: true,
@@ -151,7 +159,8 @@
     
     // ===== Funções de Inicialização e Localização =====
     function initializeMap() {
-        const map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
+        // Inicializa o mapa e o armazena na variável global 'map'
+        map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -191,9 +200,8 @@
     /**
     * Consulta um segmento de rua próximo às coordenadas informadas.
     */
-    async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
-        const radiusValues = [50, 100, 200, 300, 500]; 
-
+    async function getStreetSegment(map, lat, lon) { // Removida a callback de segmento (agora usa o prompt)
+        const radiusValues = [50, 100, 200, 300, 500];
         for (let radius of radiusValues) {
             const query = `
             [out:json];
@@ -221,7 +229,7 @@
                             ways.push(el);
                         }
                     });
-
+                    
                     let closestWay = null;
                     let minDistance = Infinity;
 
@@ -229,13 +237,14 @@
                         const wayNodes = way.nodes.map(id => nodes[id]).filter(n => n !== undefined);
                         if (wayNodes.length < 2) return;
                         
+                        // Calcula a distância do ponto de clique para a via
                         const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
                         if (distance < minDistance) {
                             minDistance = distance;
                             closestWay = way;
                         }
                     });
-
+                    
                     if (closestWay) {
                         const wayNodes = closestWay.nodes.map(id => nodes[id]).filter(n => n !== undefined);
                         if (wayNodes.length < 2) continue;
@@ -247,10 +256,6 @@
 
                         if (intersections.length >= 2) {
                             const intersectionCoords = intersections.map(id => nodes[id]);
-                            const nodeMap = wayNodes.reduce((acc, coord, index) => {
-                                acc[coord.toString()] = index;
-                                return acc;
-                            }, {});
                             
                             // Ordenar as interseções baseadas na sua posição na way
                             intersections.sort((idA, idB) => {
@@ -258,21 +263,32 @@
                                 const indexB = closestWay.nodes.indexOf(idB);
                                 return indexA - indexB;
                             });
-
+                            
                             const firstIntersectionIndex = closestWay.nodes.indexOf(intersections[0]);
                             const lastIntersectionIndex = closestWay.nodes.indexOf(intersections[intersections.length - 1]);
-
+                            
                             if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
+                                // Segmento entre a primeira e a última interseção
                                 const segmentNodes = wayNodes.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
                                 console.log(`Segmento de intersecção encontrado com raio de ${radius} metros.`);
-                                promptSegmentSelection(map, { segment: segmentNodes, type: 'intersection' }, lat, lon);
+                                
+                                // Chama o prompt de seleção, passando a via completa e o segmento filtrado
+                                promptSegmentSelection(map, { 
+                                    segment: segmentNodes, // Segmento filtrado
+                                    fullWay: wayNodes, // Via completa (para ser opção)
+                                    type: 'intersection' 
+                                }, lat, lon);
                                 return; // Pausa a busca e chama o prompt
                             }
                         }
                         
                         // Se não houver interseções suficientes, oferece a via completa
                         console.log(`Via completa oferecida com raio de ${radius} metros.`);
-                        promptSegmentSelection(map, { segment: wayNodes, type: 'full' }, lat, lon);
+                        promptSegmentSelection(map, { 
+                            segment: wayNodes, // Via completa
+                            fullWay: wayNodes, // É a mesma
+                            type: 'full' 
+                        }, lat, lon);
                         return;
                     }
                 }
@@ -285,57 +301,81 @@
         showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
     }
 
-
     // ===== Desenho do Segmento e Controle de Sentido =====
     function drawSegment(segmentNodes, direction = 'both') {
-    try {
-        // Remove segmento anterior
-        if (currentSegmentLayer) {
-            map.removeLayer(currentSegmentLayer);
+        try {
+            // Remove segmento anterior
+            if (currentSegmentLayer) {
+                map.removeLayer(currentSegmentLayer);
+            }
+
+            // Converte coordenadas para [lat, lng] (assume que segmentNodes é [lon, lat])
+            const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
+            
+            // Define estilo baseado na direção
+            const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
+                         direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
+                         MAP_CONFIG.SEGMENT_COLORS.both;
+            
+            const lineStyle = { 
+                color: color, 
+                weight: 5, 
+                opacity: 0.8,
+                lineCap: 'round',
+                lineJoin: 'round'
+            };
+
+            // Cria a linha principal
+            const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
+            
+            // Adiciona setas de direção apenas se a direção não for 'both'
+            let arrowDecorator = null;
+            if (direction !== 'both') {
+                // Inverte a linha se a direção for 'reversed' para que as setas apontem corretamente
+                if (direction === 'reversed') {
+                    segmentLine.setLatLngs([...latLngs].reverse()); // Clona e reverte
+                }
+
+                const arrowOptions = {
+                    patterns: [
+                        {
+                            offset: '50%',
+                            repeat: '100px',
+                            symbol: L.Symbol.arrowHead({
+                                pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
+                                polygon: false,
+                                pathOptions: {
+                                    color: color,
+                                    weight: MAP_CONFIG.ARROW_OPTIONS.weight,
+                                    opacity: 0.8
+                                }
+                            })
+                        }
+                    ]
+                };
+                arrowDecorator = L.polylineDecorator(segmentLine, arrowOptions).addTo(map);
+            }
+
+            // Agrupa as layers
+            const layersToAdd = [segmentLine];
+            if (arrowDecorator) {
+                layersToAdd.push(arrowDecorator);
+            }
+            currentSegmentLayer = L.layerGroup(layersToAdd).addTo(map);
+            
+            // Ajusta o viewport para mostrar o segmento
+            map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
+            
+            // Salva estado
+            saveSegmentState(segmentNodes, direction);
+            updateDirectionIndicator(direction);
+            
+            return currentSegmentLayer;
+        } catch (error) {
+            console.error('Erro ao desenhar segmento:', error);
+            showAlert('Erro ao desenhar o segmento no mapa.', 'error');
         }
-
-        // Converte coordenadas para [lat, lng]
-        const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
-
-        // Define estilo baseado na direção
-        const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
-                     direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
-                     MAP_CONFIG.SEGMENT_COLORS.both;
-
-        const lineStyle = { color, weight: 5, opacity: 0.8 };
-
-        // Cria a linha principal
-        const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
-
-        // Adiciona setas de direção
-        const arrowDecorator = L.polylineDecorator(segmentLine, {
-            patterns: [{
-                offset: '50%',
-                repeat: '100px',
-                symbol: L.Symbol.arrowHead({
-                    pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
-                    polygon: false,
-                    pathOptions: lineStyle
-                })
-            }]
-        }).addTo(map);
-
-        // Agrupa as layers
-        currentSegmentLayer = L.layerGroup([segmentLine, arrowDecorator]).addTo(map);
-        
-        // Ajusta o viewport para mostrar o segmento
-        map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
-
-        // Salva estado
-        saveSegmentState(segmentNodes, direction);
-        updateDirectionIndicator(direction);
-        
-        return currentSegmentLayer;
-    } catch (error) {
-        console.error('Erro ao desenhar segmento:', error);
-        showAlert('Erro ao desenhar o segmento no mapa.', 'error');
     }
-}
 
     function updateDirectionControls(direction) {
         const directionSelect = document.getElementById('directionSelect');
@@ -345,12 +385,14 @@
         // Exibe ou oculta o botão de reversão conforme o sentido
         const reverseBtn = document.getElementById('reverseBtn');
         if (reverseBtn) {
-            // O botão de reverter só faz sentido se o sentido for 'original' ou se for o ponto de partida
-            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ? 'block' : 'none';
+            // O botão de reverter só faz sentido se o sentido for 'original' ou 'reversed'
+            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ?
+            'block' : 'none';
         }
     }
 
     function updateDirectionIndicator(direction) {
+        // Esta função não é mais usada, mas mantida para referência
         const indicator = document.getElementById('directionIndicator');
         if (indicator) {
             indicator.innerHTML = `
@@ -371,7 +413,9 @@
         const savedDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION);
 
         if (savedSegment && savedDirection) {
-            drawSegment(map, JSON.parse(savedSegment), savedDirection);
+            const segmentNodes = JSON.parse(savedSegment);
+            currentSegmentNodes = segmentNodes;
+            drawSegment(segmentNodes, savedDirection);
             updateDirectionControls(savedDirection);
         }
     }
@@ -381,7 +425,7 @@
         const reversedSegment = [...segmentNodes].reverse();
         // Se o sentido atual for 'original', a reversão se torna 'reversed', e vice-versa.
         const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
-        drawSegment(map, reversedSegment, newDirection);
+        drawSegment(reversedSegment, newDirection);
         saveSegmentState(reversedSegment, newDirection);
         return reversedSegment;
     }
@@ -400,7 +444,6 @@
     }
 
     function calcularDiasSemana() {
-        // ... (Função de cálculo de dias mantida como estava) ...
         const startDateStr = document.getElementById('starttime').value;
         const endDateStr = document.getElementById('endtime').value;
 
@@ -410,7 +453,6 @@
 
         const start = new Date(startDateStr);
         const end = new Date(endDateStr);
-
         if (start > end) {
             showAlert('A data de início deve ser anterior ou igual à data de término.', 'warning');
             return;
@@ -418,7 +460,6 @@
 
         const diasSemana = new Set();
         const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             diasSemana.add(dias[d.getDay()]);
         }
@@ -427,13 +468,11 @@
     }
 
     function atualizarHorarios(diasSelecionados) {
-        // ... (Função de atualização de horários mantida como estava) ...
         const horariosDiv = document.getElementById('horarios_dia');
         horariosDiv.innerHTML = '';
 
         const container = document.createElement('div');
         container.className = 'row';
-
         diasSelecionados.forEach(dia => {
             const col = document.createElement('div');
             col.className = 'col-md-4 mb-3';
@@ -470,7 +509,6 @@
     }
 
     function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
-        // ... (Função de carregamento de subtipos mantida como estava) ...
         subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
         const selectedTipoId = tipoSelect.value;
         if (selectedTipoId && subtiposPorTipo[selectedTipoId]) {
@@ -489,12 +527,12 @@
 
     // ===== Atualização de Direções =====
     function atualizarDirecoes(selectElement) {
-        // ... (Função de atualização de direções mantida como estava) ...
-        selectElement.innerHTML = ''; // Limpar opções existentes
+        selectElement.innerHTML = '';
+        // Limpar opções existentes
         const options = [
             { value: 'both', text: 'Ambos os sentidos' },
             { value: 'original', text: 'Sentido original' },
-            { value: 'single', text: 'Sentido único' },
+            { value: 'reversed', text: 'Sentido reverso' },
         ];
         options.forEach(optionData => {
             const option = document.createElement('option');
@@ -522,7 +560,7 @@
             // Obtém o sentido atual salvo (se não existir, assume "original")
             const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
             // Inverte o segmento e desenha com a direção oposta
-            inverterCoordenadas(segmentNodes, map, currentDirection);
+            inverterCoordenadas(currentSegmentNodes, map, currentDirection);
         };
     }
 
@@ -533,103 +571,143 @@
         }
     }
 
-    // ===== NOVO: Gerenciamento do Painel de Seleção de Segmento =====
+    // ===== Gerenciamento do Painel de Seleção de Segmento (ATUALIZADO) =====
     function promptSegmentSelection(map, segmentData, lat, lon) {
         const container = document.getElementById('segmentSelectionContainer');
         const optionsSelect = document.getElementById('segmentOptions');
         const confirmBtn = document.getElementById('confirmSegmentBtn');
         const cancelBtn = document.getElementById('cancelSegmentBtn');
 
+        // Dados de Geometria
+        const intersectionSegmentNodes = segmentData.type === 'intersection' ? segmentData.segment : []; 
+        const fullSegmentNodes = segmentData.fullWay || segmentData.segment;
+        
         // Limpar e preparar
         optionsSelect.innerHTML = '';
-        container.style.display = 'block'; // Mostrar o contêiner
+        container.style.display = 'block';
 
-        // Salvar dados temporariamente para uso posterior
-        container.dataset.lat = lat;
-        container.dataset.lon = lon;
-        container.dataset.segmentJson = JSON.stringify(segmentData.segment);
-        container.dataset.segmentType = segmentData.type;
+        // Adicionar Opções
+        let options = [];
 
-        // Opção 1: Segmento encontrado (entre interseções)
+        // Opção de Trecho entre Interseções
         if (segmentData.type === 'intersection') {
-            const opt1 = document.createElement('option');
-            opt1.value = 'intersection';
-            opt1.textContent = 'Trecho entre Interseções (Recomendado)';
-            optionsSelect.appendChild(opt1);
+            options.push({ value: 'intersection', text: 'Trecho entre Interseções (Recomendado)', nodes: intersectionSegmentNodes });
         }
 
-        // Opção 2: Via Completa
-        const opt2 = document.createElement('option');
-        opt2.value = 'full';
-        opt2.textContent = 'Via Completa (Todos os nós encontrados)';
-        optionsSelect.appendChild(opt2);
-        
-        optionsSelect.value = segmentData.type; // Define o padrão para o que a API retornou
+        // Opção de Via Completa
+        options.push({ value: 'full', text: 'Via Completa', nodes: fullSegmentNodes });
 
-        // Remover listeners antigos para evitar duplicação
-        const confirmHandler = confirmBtn.onclick;
-        if (confirmHandler) confirmBtn.onclick = null; // Desvincula o anterior, se houver
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.text;
+            optionsSelect.appendChild(option);
+        });
 
-        // Adicionar novo listener de confirmação
-        confirmBtn.onclick = () => {
-            const selectedType = optionsSelect.value;
-            let nodesToDraw;
+        optionsSelect.value = segmentData.type; // Define o padrão
 
-            if (selectedType === 'intersection' && segmentData.type === 'intersection') {
-                nodesToDraw = segmentData.segment;
-            } else {
-                // Usar a geometria completa se a opção 'full' for escolhida
-                nodesToDraw = segmentData.segment; 
+        // Função de Desenho e Armazenamento Temporário
+        function handleSegmentSelection(selectedType) {
+            const selectedOption = options.find(opt => opt.value === selectedType);
+            if (selectedOption && selectedOption.nodes && selectedOption.nodes.length > 1) {
+                const direction = document.getElementById('directionSelect').value || 'both'; // Assume 'both' se não houver seleção
+                
+                // Desenha o segmento selecionado
+                window.currentSegmentLayer = drawSegment(selectedOption.nodes, direction);
+                
+                // Armazena temporariamente (para ser usado na confirmação)
+                container.dataset.tempSegmentJson = JSON.stringify(selectedOption.nodes);
+                container.dataset.tempSegmentDirection = direction;
+
+                // Atualiza a variável global currentSegmentNodes para que o botão de reverter funcione no preview
+                window.currentSegmentNodes = selectedOption.nodes; 
+                
+                // Atualiza o botão de reverter
+                if (direction === 'original' || direction === 'reversed') {
+                    mostrarBotaoReverso(window.currentSegmentNodes, map);
+                } else {
+                    esconderBotaoReverso();
+                }
             }
+        }
+        
+        // 1. Desenho inicial
+        handleSegmentSelection(optionsSelect.value);
+
+        // 2. Listener para o dropdown: Desenha imediatamente ao mudar a opção
+        optionsSelect.onchange = (e) => {
+            handleSegmentSelection(e.target.value);
+        };
+        
+        // 3. Listener de Confirmação: Salva o estado e remove o painel
+        confirmBtn.onclick = () => {
+            const nodesToDraw = JSON.parse(container.dataset.tempSegmentJson);
+            const selectedDirection = container.dataset.tempSegmentDirection;
 
             if (nodesToDraw && nodesToDraw.length > 1) {
-                currentSegmentNodes = nodesToDraw;
-                const selectedDirection = document.getElementById('directionSelect').value;
-                currentSegmentLayer = drawSegment(map, nodesToDraw, selectedDirection);
+                // currentSegmentNodes já foi atualizado em handleSegmentSelection, mas reforçamos.
+                currentSegmentNodes = nodesToDraw; 
                 saveSegmentState(nodesToDraw, selectedDirection);
                 
                 // Ocultar o seletor após confirmação
                 container.style.display = 'none';
-                showAlert(`Segmento confirmado com ${nodesToDraw.length} nós.`, 'success');
+                showAlert(`Segmento confirmado. Sentido: ${selectedDirection.toUpperCase()}`, 'success');
             } else {
                 showAlert('Não foi possível confirmar o segmento.', 'danger');
             }
         };
-        
-        // Listener para cancelar e forçar um novo clique
+
+        // 4. Listener de Cancelamento: Limpa e remove o painel
         cancelBtn.onclick = () => {
             container.style.display = 'none';
             showAlert('Selecione novamente clicando no mapa.', 'info');
+            
             // Limpa a camada anterior para que o usuário possa clicar de novo
             if (window.currentSegmentLayer) {
                 map.removeLayer(window.currentSegmentLayer);
                 window.currentSegmentLayer = null;
                 currentSegmentNodes = [];
+                esconderBotaoReverso();
             }
         };
     }
 
     // ===== Execução Principal =====
     document.addEventListener('DOMContentLoaded', function () {
-        const map = initializeMap();
-        let currentSegmentNodes = []; // Armazena os nós do segmento atual
-        let currentSegmentLayer = null; // Armazena a camada atual do segmento
+        // Inicialização de variáveis globais
+        window.map = initializeMap();
         const directionSelect = document.getElementById('directionSelect');
 
         // Carregar segmento salvo (se houver)
-        loadSavedSegment(map);
+        loadSavedSegment(window.map);
 
         // Localização do usuário
-        map.on('locationfound', (e) => handleLocationFound(e, map));
-        locateUser(map);
+        window.map.on('locationfound', (e) => handleLocationFound(e, window.map));
+        locateUser(window.map);
 
-        // Evento de clique no mapa: captura coordenadas, consulta rua e SEGMENTO (agora chama prompt)
-        map.on('click', (e) => {
+        // Evento de clique no mapa: captura coordenadas, consulta rua e SEGMENTO
+        window.map.on('click', (e) => {
             // Se o painel de seleção estiver aberto, ignora o clique do mapa
             if (document.getElementById('segmentSelectionContainer').style.display === 'block') {
-                return; 
+                return;
             }
             
+            // Verifica se já existe um segmento selecionado
+            const hasExistingSegment = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
+            if (hasExistingSegment) {
+                if (!confirm('Já existe um segmento selecionado. Deseja substituir?')) {
+                    return; // Usuário cancelou, não faz nada
+                }
+            }
+            
+            // Remove a camada anterior, preparando para um novo clique
+            if (currentSegmentLayer) {
+                window.map.removeLayer(currentSegmentLayer);
+                currentSegmentLayer = null;
+            }
+            // Garante que o botão de reverter desapareça
+            esconderBotaoReverso();
+
             const lat = e.latlng.lat;
             const lon = e.latlng.lng;
             console.log(`Latitude: ${lat}, Longitude: ${lon}`);
@@ -645,7 +723,7 @@
                 if (nomeRuaWaze) {
                     const ruaSelect = document.getElementById('ruaSelect');
                     if (ruaSelect) {
-                        ruaSelect.innerHTML = ''; 
+                        ruaSelect.innerHTML = '';
                         const option = document.createElement('option');
                         option.value = nomeRuaWaze;
                         option.textContent = nomeRuaWaze;
@@ -656,16 +734,7 @@
             });
 
             // Consulta o segmento de rua próximo e chama o prompt de seleção
-            getStreetSegment(map, lat, lon, (segmentNodes) => {
-                // O desenho agora é feito dentro de promptSegmentSelection/confirmar
-                // Este callback apenas garante que currentSegmentNodes seja atualizado antes da seleção final, se necessário.
-                if (segmentNodes && segmentNodes.length > 1) {
-                    currentSegmentNodes = segmentNodes;
-                    // Se o desenho fosse imediato, seria: drawSegment(map, segmentNodes, directionSelect.value);
-                } else {
-                    console.warn('Nenhum segmento válido retornado pela consulta.');
-                }
-            });
+            getStreetSegment(window.map, lat, lon); // A lógica de desenho está dentro de getStreetSegment/promptSegmentSelection
         });
 
         // Atualiza o select de sentido
@@ -678,13 +747,15 @@
             directionSelect.addEventListener('change', (e) => {
                 const selectedDirection = e.target.value;
                 console.log('Direção selecionada:', selectedDirection);
+                
+                // Redesenha o segmento apenas se houver nós selecionados
                 if (currentSegmentNodes && currentSegmentNodes.length > 1) {
-                    currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
+                    currentSegmentLayer = drawSegment(currentSegmentNodes, selectedDirection);
                     saveSegmentState(currentSegmentNodes, selectedDirection);
                     
                     // Mostra ou esconde o botão de reversão conforme o sentido
-                    if (selectedDirection === 'single') {
-                        mostrarBotaoReverso(currentSegmentNodes, map);
+                    if (selectedDirection === 'original' || selectedDirection === 'reversed') {
+                        mostrarBotaoReverso(currentSegmentNodes, window.map);
                     } else {
                         esconderBotaoReverso();
                     }
@@ -703,14 +774,15 @@
         // Carregamento de subtipos conforme o tipo selecionado
         const tipoSelect = document.getElementById('tipo');
         const subtipoSelect = document.getElementById('subtipo');
-        // A variável {{ subtiposPorTipo | json_encode | raw }} é esperada aqui
-        const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }}; 
+        // A variável 'subtiposPorTipo' deve ser injetada pelo seu backend Twig:
+        // Ex: const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }}; 
+        // Assumindo que você tem acesso a ela.
+        const subtiposPorTipo = {}; // Substitua por sua injeção de dados real
         if (tipoSelect && subtipoSelect) {
             tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
         }
-    });
 
-    document.addEventListener('DOMContentLoaded', function (event) {
+        // Evento de submissão do formulário
         const eventoForm = document.getElementById('eventoForm');
         const submitBtn = document.querySelector('button[type="submit"]');
 
@@ -724,12 +796,10 @@
 
                 if (!segment || !direction) {
                     showAlert('Por favor, clique no mapa para selecionar e confirmar o trecho da via antes de enviar.', 'error');
-                    // Opcional: Focar o mapa ou rolar até ele
                     return; 
                 }
 
                 const formData = new FormData(eventoForm);
-
                 // Adiciona os dados do localStorage ao FormData
                 formData.append('streetSegment', segment);
                 formData.append('segmentDirection', direction);
@@ -739,33 +809,33 @@
                     method: 'POST',
                     body: formData
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Erro na requisição: ' + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Resposta do servidor:", data);
-                        if (data.success) {
-                            // Limpa o estado do mapa após sucesso para evitar confusão em um novo cadastro
-                            localStorage.clear(); 
-                            window.location.href = "https://wfcbrasil.com.br/create_alerts"; // Redireciona
-                        } else {
-                            showAlert(data.message || "Ocorreu um erro no envio dos dados.", 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Erro ao enviar os dados:", error);
-                        showAlert("Falha na comunicação com o servidor.", 'danger');
-                    });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na requisição: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Resposta do servidor:", data);
+                    if (data.success) {
+                        showAlert("Evento criado com sucesso!", 'success');
+                        // Limpa o estado do mapa após sucesso para evitar confusão em um novo cadastro
+                        localStorage.clear();
+                        // Opcional: window.location.href = "sua_pagina_de_redirecionamento"; 
+                    } else {
+                        showAlert(data.message || "Ocorreu um erro no envio dos dados.", 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao enviar os dados:", error);
+                    showAlert("Falha na comunicação com o servidor.", 'danger');
+                });
             });
         } else {
             console.error("Formulário ou botão de envio não encontrado.");
         }
     });
 </script>
-
 
 <style>
     /* Estilos Aprimorados */
@@ -804,7 +874,7 @@
 
     /* Estilo para o novo painel de seleção */
     #segmentSelectionContainer {
-        border-left: 5px solid #ffc107 !important; /* Cor de destaque */
+        border-left: 5px solid #ffc107 !important;
     }
 
     /* Ajustes de responsividade para os cards de horários */
