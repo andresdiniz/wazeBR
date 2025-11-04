@@ -17,7 +17,10 @@
     <i class="fas fa-angle-up"></i>
 </a>
 
-<div id="logoutModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+<div id="logoutModal" 
+     class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 items-center justify-center z-50"> 
+    {# ^^^^^^^ MANTENHA O HIDDEN NO INÍCIO #}
+     
     <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-auto p-6">
         <div class="flex justify-between items-start">
             <h5 class="text-xl font-semibold text-gray-900" id="exampleModalLabel">Pronto para sair?</h5>
@@ -38,7 +41,6 @@
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -100,17 +102,19 @@
         // ----------------------------------------------------------------------------------
         // 3. Script para Modais (LogoutModal)
         // ----------------------------------------------------------------------------------
-        // Abrir Modal
+        // Abrir Modal: remove 'hidden' e adiciona 'flex'
         $('[data-modal-target]').on('click', function(e) {
             e.preventDefault();
             const targetId = $(this).data('modal-target');
+            // Faz a troca de classes para exibir o modal
             $('#' + targetId).removeClass('hidden').addClass('flex');
         });
 
-        // Fechar Modal
+        // Fechar Modal: remove 'flex' e adiciona 'hidden'
         $('[data-modal-close]').on('click', function(e) {
             e.preventDefault();
             const targetId = $(this).data('modal-close');
+            // Faz a troca de classes para esconder o modal
             $('#' + targetId).removeClass('flex').addClass('hidden');
         });
         
