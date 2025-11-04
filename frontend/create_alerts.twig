@@ -181,18 +181,42 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
     
     function handleMapClick(e) {
         const { lat, lng } = e.latlng;
-        // Limpa camadas anteriores
+// // Limpa camadas anteriores
         if (clickMarker) {
             map.removeLayer(clickMarker);
-        }
+// }
         if (currentSegmentLayer) {
             map.removeLayer(currentSegmentLayer);
-            currentSegmentLayer = null;
+// currentSegmentLayer = null;
         }
 
         clickMarker = L.marker([lat, lng]).addTo(map);
         document.getElementById('coordenadas').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        getStreetSegment(map, lat, lng);
+
+        // NOVO: Verifica o tipo de evento (Somente interdição '6' usa seleção de segmento)
+        const tipoSelect = document.getElementById('tipo');
+        const selectedTipoId = tipoSelect ? tipoSelect.value : '';
+        
+        if (selectedTipoId === '6') {
+            // Lógica original: Continua com a busca de segmento para 'Interdição'
+            getStreetSegment(map, lat, lng); 
+        } else {
+            // Outros tipos (pontos fixos): Apenas define o ponto, limpa e esconde o estado de segmento
+            document.getElementById('segmentSelectionContainer').style.display = 'none';
+            esconderBotaoReverso();
+            
+            // Limpa os dados de segmento nos campos hidden
+            document.getElementById('finalPolylineInput').value = '';
+            document.getElementById('finalStreetNameInput').value = '';
+            
+            // Limpa o select de rua (assumindo que ele exista, conforme referenciado em outras funções)
+            const ruaSelect = document.getElementById('ruaSelect');
+            if (ruaSelect) {
+                ruaSelect.innerHTML = '<option value="">Ponto Fixo Selecionado</option>';
+            }
+            
+            showAlert('Localização definida como ponto fixo (Coordenadas).', 'info');
+        }
     }
 
 
