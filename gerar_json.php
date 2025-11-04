@@ -16,76 +16,57 @@ try {
 
 $currentDateTime = date('Y-m-d H:i:s');
 
+// ====================================================================
+// NOVAS FUNÇÕES AUXILIARES
+// ====================================================================
+
 /**
- * Função para atualizar o UUID de eventos ativos a cada 5 minutos
+ * Gera um ID único longo (UUID) para o JSON.
+ * Usado para o evento duplicado, garantindo que o 'id' nunca seja vazio.
+ * @return string
  */
-/*
-function atualizarUUIDsSeNecessario($pdo) {
-    // Buscar a última atualização do banco de dados (UTC)
-    $checkQuery = "SELECT MAX(ultima_atualizacao) AS ultima FROM events WHERE is_active = 1";
-    $stmt = $pdo->query($checkQuery);
-    $ultimaAtualizacaoUTC = $stmt->fetch(PDO::FETCH_ASSOC)['ultima'];
-
-    if (!$ultimaAtualizacaoUTC) {
-        // Se não houver última atualização, força uma atualização agora
-        atualizarUUIDs($pdo);
-        return;
-    }
-
-    // Converter UTC para UTC-3 (São Paulo)
-    $ultimaAtualizacao = new DateTime($ultimaAtualizacaoUTC, new DateTimeZone('UTC'));
-    $ultimaAtualizacao->setTimezone(new DateTimeZone('America/Sao_Paulo'));
-
-    // Tempo atual em UTC-3
-    $agora = new DateTime();
-
-    // Diferença entre o tempo atual e a última atualização
-    $diferencaMinutos = ($agora->getTimestamp() - $ultimaAtualizacao->getTimestamp()) / 60;
-
-    // Só atualiza se passaram pelo menos 10 minutos
-    if ($diferencaMinutos >= 10) {
-        atualizarUUIDs($pdo);
-    }
-    echo number_format($diferencaMinutos, 2) . " minutos desde a última atualização\n";
+function generateWazeLikeUuid(): string {
+    // Usa hash SHA-256 de um ID único para simular um UUID longo e não-nulo
+    return hash('sha256', uniqid(true) . microtime()); 
 }
 
 /**
- * Atualiza os UUIDs no banco de dados
+ * Inverte a string da polyline.
+ * Ex: 'lat1, lon1, lat2, lon2' se torna 'lat2, lon2, lat1, lon1'.
+ * * @param string $polylineString A polyline no formato 'lat, lon, lat, lon...'
+ * @return string A polyline invertida.
  */
-/*
-function atualizarUUIDs($pdo) {
-    $agora = new DateTime();
-    $agoraFormatado = $agora->format('Y-m-d H:i:s');
-
-    // Buscar todos os eventos ativos que precisam de um novo UUID
-    $query = "SELECT id FROM events WHERE is_active = 1 AND endtime >= :agora";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':agora', $agoraFormatado, PDO::PARAM_STR);
-    $stmt->execute();
-    $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if ($eventos) {
-        foreach ($eventos as $evento) {
-            // Gerar um UUID único no PHP
-            $novoUUID = bin2hex(random_bytes(16));
-
-            // Atualizar cada evento com um UUID único
-            $updateQuery = "UPDATE events SET uuid = :uuid, ultima_atualizacao = :agora WHERE id = :id";
-            $updateStmt = $pdo->prepare($updateQuery);
-            $updateStmt->bindParam(':uuid', $novoUUID, PDO::PARAM_STR);
-            $updateStmt->bindParam(':agora', $agoraFormatado, PDO::PARAM_STR);
-            $updateStmt->bindParam(':id', $evento['id'], PDO::PARAM_INT);
-            $updateStmt->execute();
+function invertPolyline(string $polylineString): string {
+    // Divide a string em coordenadas individuais
+    $coords = array_map('trim', explode(',', $polylineString));
+    
+    // Agrupa em pares de (lat, lon)
+    $pairs = [];
+    for ($i = 0; $i < count($coords); $i += 2) {
+        // Garante que o par completo existe
+        if (isset($coords[$i + 1])) {
+            $pairs[] = [$coords[$i], $coords[$i + 1]];
         }
-        echo "UUIDs atualizados em " . $agoraFormatado . " (UTC-3)\n";
-    } else {
-        echo "Nenhum evento para atualizar.\n";
     }
+    
+    // Inverte a ordem dos pares
+    $reversedPairs = array_reverse($pairs);
+    
+    // Reconstrói a string no formato 'lat, lon, lat, lon...'
+    $invertedCoords = [];
+    foreach ($reversedPairs as $pair) {
+        $invertedCoords[] = $pair[0]; // lat
+        $invertedCoords[] = $pair[1]; // lon
+    }
+    
+    return implode(', ', $invertedCoords);
 }
 
-// 🔴 Chamar a função no início do script
-atualizarUUIDsSeNecessario($pdo);
-*/
+// ====================================================================
+// FIM DAS FUNÇÕES AUXILIARES
+// ====================================================================
+
+
 // 🔴 Buscar parceiros distintos
 $parceiroQuery = "SELECT DISTINCT id_parceiro FROM events";
 $parceiroStmt = $pdo->prepare($parceiroQuery);
@@ -132,6 +113,16 @@ foreach ($rows as $row) {
 
     $eventUuid = $row['event_uuid'];
 
+    // Se o UUID estiver vazio por algum erro no DB, geramos um temporário para evitar falha no JSON
+    if (empty($eventUuid)) {
+        // ATENÇÃO: Se o UUID for null aqui, o problema é na INSERÇÃO.
+        // Gerar um UUID temporário para a exportação
+        $eventUuid = generateWazeLikeUuid(); 
+        // Associa-o temporariamente ao evento (apenas no array PHP)
+        $row['event_uuid'] = $eventUuid;
+    }
+
+
     if (!isset($eventosPorParceiro[$idParceiro][$eventUuid])) {
         $eventosPorParceiro[$idParceiro][$eventUuid] = [
             'uuid' => $eventUuid,
@@ -150,38 +141,52 @@ foreach ($rows as $row) {
             'lane_impacts' => [],
             'schedules' => [],
         ];
-    }    
+    }    
 
     if ($row['source_id']) {
-        $eventosPorParceiro[$idParceiro][$eventUuid]['sources'][] = [
+        // Evita duplicatas se o JOIN retornar várias linhas
+        $sourceData = [
             'reference' => $row['reference'],
             'name' => $row['source_name'],
             'url' => $row['source_url'],
         ];
+        if (!in_array($sourceData, $eventosPorParceiro[$idParceiro][$eventUuid]['sources'])) {
+            $eventosPorParceiro[$idParceiro][$eventUuid]['sources'][] = $sourceData;
+        }
     }
 
     if ($row['lane_impact_id']) {
-        $eventosPorParceiro[$idParceiro][$eventUuid]['lane_impacts'][] = [
+        // Evita duplicatas se o JOIN retornar várias linhas
+        $impactData = [
             'total_closed_lanes' => $row['total_closed_lanes'],
             'roadside' => $row['roadside'],
         ];
+        if (!in_array($impactData, $eventosPorParceiro[$idParceiro][$eventUuid]['lane_impacts'])) {
+             $eventosPorParceiro[$idParceiro][$eventUuid]['lane_impacts'][] = $impactData;
+        }
     }
 
     if ($row['day_of_week']) {
-        $eventosPorParceiro[$idParceiro][$eventUuid]['schedules'][] = [
+        // Evita duplicatas se o JOIN retornar várias linhas
+        $scheduleData = [
             'day_of_week' => $row['day_of_week'],
             'start_time' => $row['schedule_start_time'],
             'end_time' => $row['schedule_end_time'],
         ];
+        if (!in_array($scheduleData, $eventosPorParceiro[$idParceiro][$eventUuid]['schedules'])) {
+            $eventosPorParceiro[$idParceiro][$eventUuid]['schedules'][] = $scheduleData;
+        }
     }
 }
 
-// 🔴 Garantir que todos os parceiros tenham arquivos JSON, mesmo sem eventos
+// 🔴 Lógica de Geração de JSON e Duplicação Condicional
 foreach ($parceiros as $idParceiro) {
     $incidents = [];
 
     if (!empty($eventosPorParceiro[$idParceiro])) {
         foreach ($eventosPorParceiro[$idParceiro] as $event) {
+            
+            // 1. Incidente Principal (Direto do DB)
             $incident = [
                 'id' => $event['uuid'],
                 'creationtime' => $event['creationtime'],
@@ -195,44 +200,44 @@ foreach ($parceiros as $idParceiro) {
                 'type' => $event['type'],
             ];
 
+            // Adiciona campos opcionais/detalhes
             if (!empty($event['subtype'])) {
                 $incident['subtype'] = $event['subtype'];
             }
-
-            // Adicionar sources, lane_impacts e schedules ao incidente
             if (!empty($event['sources'])) {
-                $incident['sources'] = [];
-                foreach ($event['sources'] as $source) {
-                    $incident['sources'][] = [
-                        'reference' => $source['reference'],
-                        'name' => $source['name'],
-                        'url' => $source['url'],
-                    ];
-                }
+                $incident['sources'] = $event['sources'];
             }
-
             if (!empty($event['lane_impacts'])) {
-                $incident['lane_impacts'] = [];
-                foreach ($event['lane_impacts'] as $impact) {
-                    $incident['lane_impacts'][] = [
-                        'total_closed_lanes' => $impact['total_closed_lanes'],
-                        'roadside' => $impact['roadside'],
-                    ];
-                }
+                $incident['lane_impacts'] = $event['lane_impacts'];
             }
-
             if (!empty($event['schedules'])) {
-                $incident['schedules'] = [];
-                foreach ($event['schedules'] as $schedule) {
-                    $incident['schedules'][] = [
-                        'day_of_week' => $schedule['day_of_week'],
-                        'start_time' => $schedule['start_time'],
-                        'end_time' => $schedule['end_time'],
-                    ];
-                }
+                $incident['schedules'] = $event['schedules'];
             }
-
+            
+            // Adiciona o incidente principal
             $incidents[] = $incident;
+
+
+            // 2. Lógica de Duplicação Condicional
+            if ($event['type'] === 'ROAD_CLOSED' && $event['direction'] === 'BOTH_DIRECTION') {
+                
+                // Inverter a polyline
+                $invertedPolyline = invertPolyline($event['polyline']);
+                
+                // Clona o incidente original
+                $invertedIncident = $incident; 
+                
+                // Aplica as modificações para o evento reverso:
+                // a) NOVO UUID: Garante que é único e não-nulo
+                $invertedIncident['id'] = generateWazeLikeUuid(); 
+                // b) DIREÇÃO: O evento reverso é SEMPRE 'ONE_DIRECTION'
+                $invertedIncident['direction'] = 'ONE_DIRECTION'; 
+                // c) POLYLINE: Coordenadas invertidas
+                $invertedIncident['polyline'] = $invertedPolyline; 
+                
+                // Adiciona o incidente reverso à lista JSON (SEM INSERÇÃO NO DB)
+                $incidents[] = $invertedIncident;
+            }
         }
     }
 
