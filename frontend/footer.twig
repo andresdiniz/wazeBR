@@ -12,15 +12,13 @@
 
     </div>
     </div>
-<a class="fixed bottom-5 right-5 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out hidden"
-    href="#page-top" id="scrollTopBtn">
+<a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
 </a>
 
 <div id="logoutModal" 
      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 items-center justify-center z-50"> 
-    {# ^^^^^^^ MANTENHA O HIDDEN NO INÍCIO #}
-     
+    
     <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-auto p-6">
         <div class="flex justify-between items-start">
             <h5 class="text-xl font-semibold text-gray-900" id="exampleModalLabel">Pronto para sair?</h5>
@@ -41,6 +39,8 @@
         </div>
     </div>
 </div>
+
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -103,10 +103,11 @@
         // 3. Script para Modais (LogoutModal)
         // ----------------------------------------------------------------------------------
         // Abrir Modal: remove 'hidden' e adiciona 'flex'
+        $(document).ready(function() {
+        // Abrir Modal: remove 'hidden' e adiciona 'flex'
         $('[data-modal-target]').on('click', function(e) {
             e.preventDefault();
             const targetId = $(this).data('modal-target');
-            // Faz a troca de classes para exibir o modal
             $('#' + targetId).removeClass('hidden').addClass('flex');
         });
 
@@ -114,9 +115,10 @@
         $('[data-modal-close]').on('click', function(e) {
             e.preventDefault();
             const targetId = $(this).data('modal-close');
-            // Faz a troca de classes para esconder o modal
             $('#' + targetId).removeClass('flex').addClass('hidden');
         });
+    // ...
+    });
         
         // ----------------------------------------------------------------------------------
         // 4. Scroll to Top
