@@ -118,309 +118,652 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 <script>
-/* ======================================================
-   CONFIGURAÇÃO GLOBAL E VARIÁVEIS
-====================================================== */
-window.MAP_CONFIG = {
-    SEGMENT_COLORS: {
-        original: '#0000ff',
-        reversed: '#ff0000',
-        both: '#00ff00'
-    },
-    ARROW_OPTIONS: {
-        pixelSize: 15,
-        weight: 2
-    },
-    LOCAL_STORAGE_KEYS: {
-        SEGMENT: 'streetSegment',
-        DIRECTION: 'segmentDirection'
+    // ===== Limpa localstorage =====
+    localStorage.clear();
+    // ===== Configurações Globais =====
+    const MAP_CONFIG = {
+        SEGMENT_COLORS: {
+            original: '#0000ff',
+            reversed: '#ff0000',
+            both: '#00ff00'
+        },
+        ARROW_OPTIONS: {
+            pixelSize: 15,
+            weight: 2
+        },
+        LOCAL_STORAGE_KEYS: {
+            SEGMENT: 'streetSegment',
+            DIRECTION: 'segmentDirection'
+        }
+    };
+
+    // Inicializa calendarios
+    flatpickr("#starttime", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i", 
+        time_24hr: true 
+    });
+    flatpickr("#endtime", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i", 
+        time_24hr: true 
+    });
+    
+    // ===== Funções de Inicialização e Localização =====
+    function initializeMap() {
+        const map = L.map('map').setView([-23.55052, -46.633308], 15); // Exemplo: São Paulo
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        return map;
     }
-};
 
-window.appState = {
-    map: null,
-    currentSegmentNodes: null,
-    currentSegmentLayer: null,
-    candidateSegments: []
-};
-
-/* ======================================================
-   FUNÇÃO: DESENHAR SEGMENTO
-====================================================== */
-function drawSegment(segmentNodes, direction = 'both', color = null) {
-    try {
-        const state = window.appState;
-        const map = state.map;
-        if (state.currentSegmentLayer) {
-            map.removeLayer(state.currentSegmentLayer);
-            state.currentSegmentLayer = null;
-        }
-
-        if (!segmentNodes || segmentNodes.length < 2) return null;
-
-        const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
-        const usedColor = color || (
-            direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
-            direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
-            MAP_CONFIG.SEGMENT_COLORS.both
-        );
-
-        const segmentLine = L.polyline(latLngs, {
-            color: usedColor,
-            weight: 5,
-            opacity: 0.9,
-            lineCap: 'round',
-            lineJoin: 'round'
+    function locateUser(map) {
+        map.locate({ setView: true, maxZoom: 12 });
+        map.on('locationerror', function (e) {
+            alert('Não foi possível localizar a sua posição.');
         });
+    }
 
-        let arrowDecorator = null;
-        if (direction !== 'both') {
-            const arrowLatLngs = direction === 'reversed' ? [...latLngs].reverse() : latLngs;
-            segmentLine.setLatLngs(arrowLatLngs);
+    function handleLocationFound(e, map) {
+        const radius = e.accuracy / 2;
+        L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+        L.circle(e.latlng, radius).addTo(map);
+        console.log('Localização atual encontrada:', e.latlng);
+    }
 
-            arrowDecorator = L.polylineDecorator(segmentLine, {
-                patterns: [{
-                    offset: '50%',
-                    repeat: '100px',
-                    symbol: L.Symbol.arrowHead({
-                        pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
-                        polygon: false,
-                        pathOptions: {
-                            color: usedColor,
-                            weight: MAP_CONFIG.ARROW_OPTIONS.weight,
-                            opacity: 0.8
+    // ===== Consulta de Rua e Segmento =====
+    function consultarRuaWaze(lat, lon) {
+        const url = `api.php?action=get_street&lat_inicio=${lat}&lon_inicio=${lon}`;
+        return fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.result && data.result.length > 0) {
+                    data.result.sort((a, b) => a.distance - b.distance);
+                    return data.result[0].names[0]; // Retorna o nome da rua mais próxima
+                } else {
+                    return null;
+                }
+            })
+            .catch(() => null);
+    }
+
+    /**
+    * Consulta um segmento de rua próximo às coordenadas informadas.
+    */
+    async function getStreetSegment(map, lat, lon, drawSegmentCallback) {
+        const radiusValues = [50, 100, 200, 300, 500]; 
+
+        for (let radius of radiusValues) {
+            const query = `
+            [out:json];
+            (
+                node(around:${radius}, ${lat}, ${lon});
+                way(bn)["highway"];
+                >;
+            );
+            out geom;
+            `;
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.elements && data.elements.length > 0) {
+                    const nodes = {};
+                    const ways = [];
+
+                    data.elements.forEach(el => {
+                        if (el.type === 'node') {
+                            nodes[el.id] = [el.lon, el.lat];
+                        } else if (el.type === 'way') {
+                            ways.push(el);
                         }
-                    })
-                }]
-            });
+                    });
+
+                    let closestWay = null;
+                    let minDistance = Infinity;
+
+                    ways.forEach(way => {
+                        const wayNodes = way.nodes.map(id => nodes[id]).filter(n => n !== undefined);
+                        if (wayNodes.length < 2) return;
+                        
+                        const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayNodes), { units: 'meters' });
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestWay = way;
+                        }
+                    });
+
+                    if (closestWay) {
+                        const wayNodes = closestWay.nodes.map(id => nodes[id]).filter(n => n !== undefined);
+                        if (wayNodes.length < 2) continue;
+
+                        // Encontrando nós que são pontos de interseção com outras vias
+                        const intersections = closestWay.nodes.filter(nodeId => 
+                            data.elements.some(el => el.type === 'way' && el.id !== closestWay.id && el.nodes && el.nodes.includes(nodeId))
+                        );
+
+                        if (intersections.length >= 2) {
+                            const intersectionCoords = intersections.map(id => nodes[id]);
+                            const nodeMap = wayNodes.reduce((acc, coord, index) => {
+                                acc[coord.toString()] = index;
+                                return acc;
+                            }, {});
+                            
+                            // Ordenar as interseções baseadas na sua posição na way
+                            intersections.sort((idA, idB) => {
+                                const indexA = closestWay.nodes.indexOf(idA);
+                                const indexB = closestWay.nodes.indexOf(idB);
+                                return indexA - indexB;
+                            });
+
+                            const firstIntersectionIndex = closestWay.nodes.indexOf(intersections[0]);
+                            const lastIntersectionIndex = closestWay.nodes.indexOf(intersections[intersections.length - 1]);
+
+                            if (firstIntersectionIndex !== -1 && lastIntersectionIndex !== -1 && firstIntersectionIndex < lastIntersectionIndex) {
+                                const segmentNodes = wayNodes.slice(firstIntersectionIndex, lastIntersectionIndex + 1);
+                                console.log(`Segmento de intersecção encontrado com raio de ${radius} metros.`);
+                                promptSegmentSelection(map, { segment: segmentNodes, type: 'intersection' }, lat, lon);
+                                return; // Pausa a busca e chama o prompt
+                            }
+                        }
+                        
+                        // Se não houver interseções suficientes, oferece a via completa
+                        console.log(`Via completa oferecida com raio de ${radius} metros.`);
+                        promptSegmentSelection(map, { segment: wayNodes, type: 'full' }, lat, lon);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error(`Erro na consulta com raio ${radius}:`, error);
+            }
+        }
+        
+        console.warn('Nenhum segmento adequado foi encontrado para os raios testados.');
+        showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
+    }
+
+
+    // ===== Desenho do Segmento e Controle de Sentido =====
+    function drawSegment(segmentNodes, direction = 'both') {
+    try {
+        // Remove segmento anterior
+        if (currentSegmentLayer) {
+            map.removeLayer(currentSegmentLayer);
         }
 
-        const layers = [segmentLine];
-        if (arrowDecorator) layers.push(arrowDecorator);
-        state.currentSegmentLayer = L.layerGroup(layers).addTo(map);
+        // Converte coordenadas para [lat, lng]
+        const latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
 
+        // Define estilo baseado na direção
+        const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
+                     direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
+                     MAP_CONFIG.SEGMENT_COLORS.both;
+
+        const lineStyle = { color, weight: 5, opacity: 0.8 };
+
+        // Cria a linha principal
+        const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
+
+        // Adiciona setas de direção
+        const arrowDecorator = L.polylineDecorator(segmentLine, {
+            patterns: [{
+                offset: '50%',
+                repeat: '100px',
+                symbol: L.Symbol.arrowHead({
+                    pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
+                    polygon: false,
+                    pathOptions: lineStyle
+                })
+            }]
+        }).addTo(map);
+
+        // Agrupa as layers
+        currentSegmentLayer = L.layerGroup([segmentLine, arrowDecorator]).addTo(map);
+        
+        // Ajusta o viewport para mostrar o segmento
         map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
 
-        state.currentSegmentNodes = segmentNodes;
-        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segmentNodes));
-        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
-
-        updateDirectionControls(direction);
+        // Salva estado
+        saveSegmentState(segmentNodes, direction);
         updateDirectionIndicator(direction);
-
-        return state.currentSegmentLayer;
-    } catch (err) {
-        console.error('drawSegment error', err);
+        
+        return currentSegmentLayer;
+    } catch (error) {
+        console.error('Erro ao desenhar segmento:', error);
+        showAlert('Erro ao desenhar o segmento no mapa.', 'error');
     }
 }
 
-/* ======================================================
-   FUNÇÃO: BUSCAR SEGMENTOS PRÓXIMOS (Overpass)
-====================================================== */
-async function getStreetSegment(map, lat, lon) {
-    const radiusValues = [50, 100, 200, 300, 500];
-    const allCandidates = [];
+    function updateDirectionControls(direction) {
+        const directionSelect = document.getElementById('directionSelect');
+        if (directionSelect) {
+            directionSelect.value = direction;
+        }
+        // Exibe ou oculta o botão de reversão conforme o sentido
+        const reverseBtn = document.getElementById('reverseBtn');
+        if (reverseBtn) {
+            // O botão de reverter só faz sentido se o sentido for 'original' ou se for o ponto de partida
+            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ? 'block' : 'none';
+        }
+    }
 
-    for (let radius of radiusValues) {
-        const query = `
-        [out:json];
-        (
-            node(around:${radius}, ${lat}, ${lon});
-            way(bn)["highway"];
-            >;
-        );
-        out geom;
+    function updateDirectionIndicator(direction) {
+        const indicator = document.getElementById('directionIndicator');
+        if (indicator) {
+            indicator.innerHTML = `
+            <span class="badge bg-${direction === 'both' ? 'success' : 'primary'}">
+                Sentido selecionado: ${direction.toUpperCase()}
+            </span>
         `;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
-        try {
-            const resp = await fetch(url);
-            const data = await resp.json();
-            if (!data.elements || data.elements.length === 0) continue;
-
-            const nodes = {};
-            const ways = [];
-            data.elements.forEach(el => {
-                if (el.type === 'node') nodes[el.id] = [el.lon, el.lat];
-                if (el.type === 'way') ways.push(el);
-            });
-
-            for (let way of ways) {
-                const wayNodes = way.nodes.map(id => nodes[id]).filter(Boolean);
-                if (wayNodes.length < 2) continue;
-
-                const distance = turf.pointToLineDistance(
-                    turf.point([lon, lat]),
-                    turf.lineString(wayNodes),
-                    { units: 'meters' }
-                );
-
-                allCandidates.push({
-                    wayId: way.id,
-                    nodes: wayNodes,
-                    distance,
-                    label: way.tags?.name || way.tags?.ref || `Way ${way.id}`
-                });
-            }
-
-            if (allCandidates.length > 0) break;
-        } catch (err) {
-            console.error(`Erro Overpass raio ${radius}`, err);
         }
     }
 
-    if (allCandidates.length === 0) {
-        showAlert('Nenhum segmento encontrado próximo ao clique.', 'warning');
-        return;
+    function saveSegmentState(segment, direction) {
+        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segment));
+        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
     }
 
-    allCandidates.sort((a, b) => a.distance - b.distance);
-    allCandidates.forEach((c, i) => {
-        const hue = (i * 55) % 360;
-        c.color = `hsl(${hue}, 80%, 45%)`;
-        c.optionLabel = `${c.label} — ${Math.round(c.distance)}m`;
-    });
+    function loadSavedSegment(map) {
+        const savedSegment = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
+        const savedDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION);
 
-    window.appState.candidateSegments = allCandidates;
-    promptSegmentSelection(map, allCandidates, lat, lon);
-}
-
-/* ======================================================
-   FUNÇÃO: CAIXA DE SELEÇÃO DE TRECHOS
-====================================================== */
-function promptSegmentSelection(map, candidates, lat, lon) {
-    const container = document.getElementById('segmentSelectionContainer');
-    const optionsSelect = document.getElementById('segmentOptions');
-    const confirmBtn = document.getElementById('confirmSegmentBtn');
-    const cancelBtn = document.getElementById('cancelSegmentBtn');
-
-    optionsSelect.innerHTML = '';
-    container.style.display = 'block';
-
-    candidates.forEach((cand, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = cand.optionLabel;
-        opt.dataset.color = cand.color;
-        optionsSelect.appendChild(opt);
-    });
-
-    optionsSelect.selectedIndex = 0;
-
-    let previewLayer = null;
-    function showPreviewForIndex(i) {
-        if (previewLayer) {
-            map.removeLayer(previewLayer);
-            previewLayer = null;
+        if (savedSegment && savedDirection) {
+            drawSegment(map, JSON.parse(savedSegment), savedDirection);
+            updateDirectionControls(savedDirection);
         }
-        const cand = candidates[i];
-        if (!cand) return;
-        const latlngs = cand.nodes.map(c => [c[1], c[0]]);
-        previewLayer = L.polyline(latlngs, { color: cand.color, weight: 4, opacity: 0.7 }).addTo(map);
     }
 
-    showPreviewForIndex(0);
+    // ===== Funções para Inverter Coordenadas =====
+    function inverterCoordenadas(segmentNodes, map, currentDirection) {
+        const reversedSegment = [...segmentNodes].reverse();
+        // Se o sentido atual for 'original', a reversão se torna 'reversed', e vice-versa.
+        const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
+        drawSegment(map, reversedSegment, newDirection);
+        saveSegmentState(reversedSegment, newDirection);
+        return reversedSegment;
+    }
 
-    optionsSelect.onchange = () => {
-        showPreviewForIndex(parseInt(optionsSelect.value, 10));
-    };
+    // ===== Funções Auxiliares =====
+    function showAlert(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+        document.body.prepend(alert);
 
-    confirmBtn.onclick = () => {
-        const idx = parseInt(optionsSelect.value, 10);
-        const selected = candidates[idx];
-        if (!selected) {
-            showAlert('Selecione um trecho válido.', 'danger');
+        setTimeout(() => alert.remove(), 5000);
+    }
+
+    function calcularDiasSemana() {
+        // ... (Função de cálculo de dias mantida como estava) ...
+        const startDateStr = document.getElementById('starttime').value;
+        const endDateStr = document.getElementById('endtime').value;
+
+        if (!startDateStr || !endDateStr) {
             return;
         }
-        drawSegment(selected.nodes, 'both', selected.color);
-        localStorage.setItem('streetSegment_meta', JSON.stringify({
-            wayId: selected.wayId,
-            label: selected.label,
-            color: selected.color
-        }));
-        container.style.display = 'none';
-        if (previewLayer) { map.removeLayer(previewLayer); previewLayer = null; }
-        showAlert(`Trecho "${selected.optionLabel}" selecionado.`, 'success');
-        mostrarBotaoReverso(window.appState.currentSegmentNodes || selected.nodes, map);
-    };
 
-    cancelBtn.onclick = () => {
-        container.style.display = 'none';
-        if (previewLayer) { map.removeLayer(previewLayer); previewLayer = null; }
-        showAlert('Seleção cancelada. Clique novamente no mapa para tentar outra via.', 'info');
-    };
-}
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
 
-/* ======================================================
-   FUNÇÕES AUXILIARES
-====================================================== */
-function inverterCoordenadas(segmentNodes, map, currentDirection) {
-    const reversed = [...segmentNodes].reverse();
-    const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
-    drawSegment(reversed, newDirection);
-    return reversed;
-}
+        if (start > end) {
+            showAlert('A data de início deve ser anterior ou igual à data de término.', 'warning');
+            return;
+        }
 
-function updateDirectionControls(direction) {
-    const directionSelect = document.getElementById('directionSelect');
-    if (directionSelect) directionSelect.value = direction;
-    const reverseBtn = document.getElementById('reverseBtn');
-    if (reverseBtn) reverseBtn.style.display =
-        (direction === 'original' || direction === 'reversed') ? 'block' : 'none';
-}
+        const diasSemana = new Set();
+        const dias = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
-/* ======================================================
-   INICIALIZAÇÃO PRINCIPAL
-====================================================== */
-document.addEventListener('DOMContentLoaded', function () {
-    const map = initializeMap();
-    window.appState.map = map;
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            diasSemana.add(dias[d.getDay()]);
+        }
 
-    window.map = map;
-    loadSavedSegment(map);
+        atualizarHorarios([...diasSemana]);
+    }
 
-    map.on('click', async (e) => {
-        if (document.getElementById('segmentSelectionContainer').style.display === 'block') return;
+    function atualizarHorarios(diasSelecionados) {
+        // ... (Função de atualização de horários mantida como estava) ...
+        const horariosDiv = document.getElementById('horarios_dia');
+        horariosDiv.innerHTML = '';
 
-        const hasExisting = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
-        if (hasExisting && !confirm('Já existe um segmento selecionado. Deseja substituir?')) return;
+        const container = document.createElement('div');
+        container.className = 'row';
 
-        const lat = e.latlng.lat;
-        const lon = e.latlng.lng;
-        const coordInput = document.getElementById('coordenadas');
-        if (coordInput) coordInput.value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        diasSelecionados.forEach(dia => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 mb-3';
 
-        consultarRuaWaze(lat, lon).then(nomeRua => {
-            if (nomeRua) {
-                const ruaSelect = document.getElementById('ruaSelect');
-                if (ruaSelect) {
-                    ruaSelect.innerHTML = '';
-                    const opt = document.createElement('option');
-                    opt.value = nomeRua;
-                    opt.textContent = nomeRua;
-                    ruaSelect.appendChild(opt);
-                    ruaSelect.value = nomeRua;
-                }
-            }
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const label = document.createElement('h5');
+            label.className = 'card-title';
+            label.innerText = dia;
+
+            const inputInicio = document.createElement('input');
+            inputInicio.type = 'time';
+            inputInicio.name = `${dia.toLowerCase()}_inicio`;
+            inputInicio.className = 'form-control mb-2';
+
+            const inputFim = document.createElement('input');
+            inputFim.type = 'time';
+            inputFim.name = `${dia.toLowerCase()}_fim`;
+            inputFim.className = 'form-control';
+
+            cardBody.appendChild(label);
+            cardBody.appendChild(inputInicio);
+            cardBody.appendChild(inputFim);
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            container.appendChild(col);
         });
 
-        getStreetSegment(map, lat, lon);
-    });
+        horariosDiv.appendChild(container);
+    }
 
-    const directionSelect = document.getElementById('directionSelect');
-    if (directionSelect) {
-        atualizarDirecoes(directionSelect);
-        directionSelect.addEventListener('change', (e) => {
-            const dir = e.target.value;
-            const nodes = window.appState.currentSegmentNodes;
-            if (nodes && nodes.length > 1) {
-                drawSegment(nodes, dir);
-                if (dir === 'single') mostrarBotaoReverso(nodes, map);
-                else esconderBotaoReverso();
-            }
+    function carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo) {
+        // ... (Função de carregamento de subtipos mantida como estava) ...
+        subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
+        const selectedTipoId = tipoSelect.value;
+        if (selectedTipoId && subtiposPorTipo[selectedTipoId]) {
+            subtipoSelect.disabled = false;
+            subtipoSelect.value = ""; // Reset
+            subtiposPorTipo[selectedTipoId].forEach(subtipo => {
+                const option = document.createElement('option');
+                option.value = subtipo.subtype_value;
+                option.textContent = subtipo.name;
+                subtipoSelect.appendChild(option);
+            });
+        } else {
+            subtipoSelect.disabled = true;
+        }
+    }
+
+    // ===== Atualização de Direções =====
+    function atualizarDirecoes(selectElement) {
+        // ... (Função de atualização de direções mantida como estava) ...
+        selectElement.innerHTML = ''; // Limpar opções existentes
+        const options = [
+            { value: 'both', text: 'Ambos os sentidos' },
+            { value: 'original', text: 'Sentido original' },
+            { value: 'single', text: 'Sentido único' },
+        ];
+        options.forEach(optionData => {
+            const option = document.createElement('option');
+            option.value = optionData.value;
+            option.textContent = optionData.text;
+            selectElement.appendChild(option);
         });
     }
-});
+
+    // ===== Gerenciamento do Botão de Reversão =====
+    function mostrarBotaoReverso(segmentNodes, map) {
+        let reverseBtn = document.getElementById('reverseBtn');
+        if (!reverseBtn) {
+            // Cria o botão se não existir
+            reverseBtn = document.createElement('button');
+            reverseBtn.id = 'reverseBtn';
+            reverseBtn.className = 'btn btn-warning mt-2';
+            // Usa ícone Font Awesome, verifique se a biblioteca está carregada no seu HTML!
+            reverseBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Inverter Sentido'; 
+            document.getElementById('buttonContainer').appendChild(reverseBtn);
+        }
+        reverseBtn.style.display = 'block';
+        reverseBtn.type = "button";
+        reverseBtn.onclick = () => {
+            // Obtém o sentido atual salvo (se não existir, assume "original")
+            const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
+            // Inverte o segmento e desenha com a direção oposta
+            inverterCoordenadas(segmentNodes, map, currentDirection);
+        };
+    }
+
+    function esconderBotaoReverso() {
+        const reverseBtn = document.getElementById('reverseBtn');
+        if (reverseBtn) {
+            reverseBtn.style.display = 'none';
+        }
+    }
+
+    // ===== NOVO: Gerenciamento do Painel de Seleção de Segmento =====
+    function promptSegmentSelection(map, segmentData, lat, lon) {
+        const container = document.getElementById('segmentSelectionContainer');
+        const optionsSelect = document.getElementById('segmentOptions');
+        const confirmBtn = document.getElementById('confirmSegmentBtn');
+        const cancelBtn = document.getElementById('cancelSegmentBtn');
+
+        // Limpar e preparar
+        optionsSelect.innerHTML = '';
+        container.style.display = 'block'; // Mostrar o contêiner
+
+        // Salvar dados temporariamente para uso posterior
+        container.dataset.lat = lat;
+        container.dataset.lon = lon;
+        container.dataset.segmentJson = JSON.stringify(segmentData.segment);
+        container.dataset.segmentType = segmentData.type;
+
+        // Opção 1: Segmento encontrado (entre interseções)
+        if (segmentData.type === 'intersection') {
+            const opt1 = document.createElement('option');
+            opt1.value = 'intersection';
+            opt1.textContent = 'Trecho entre Interseções (Recomendado)';
+            optionsSelect.appendChild(opt1);
+        }
+
+        // Opção 2: Via Completa
+        const opt2 = document.createElement('option');
+        opt2.value = 'full';
+        opt2.textContent = 'Via Completa (Todos os nós encontrados)';
+        optionsSelect.appendChild(opt2);
+        
+        optionsSelect.value = segmentData.type; // Define o padrão para o que a API retornou
+
+        // Remover listeners antigos para evitar duplicação
+        const confirmHandler = confirmBtn.onclick;
+        if (confirmHandler) confirmBtn.onclick = null; // Desvincula o anterior, se houver
+
+        // Adicionar novo listener de confirmação
+        confirmBtn.onclick = () => {
+            const selectedType = optionsSelect.value;
+            let nodesToDraw;
+
+            if (selectedType === 'intersection' && segmentData.type === 'intersection') {
+                nodesToDraw = segmentData.segment;
+            } else {
+                // Usar a geometria completa se a opção 'full' for escolhida
+                nodesToDraw = segmentData.segment; 
+            }
+
+            if (nodesToDraw && nodesToDraw.length > 1) {
+                currentSegmentNodes = nodesToDraw;
+                const selectedDirection = document.getElementById('directionSelect').value;
+                currentSegmentLayer = drawSegment(map, nodesToDraw, selectedDirection);
+                saveSegmentState(nodesToDraw, selectedDirection);
+                
+                // Ocultar o seletor após confirmação
+                container.style.display = 'none';
+                showAlert(`Segmento confirmado com ${nodesToDraw.length} nós.`, 'success');
+            } else {
+                showAlert('Não foi possível confirmar o segmento.', 'danger');
+            }
+        };
+        
+        // Listener para cancelar e forçar um novo clique
+        cancelBtn.onclick = () => {
+            container.style.display = 'none';
+            showAlert('Selecione novamente clicando no mapa.', 'info');
+            // Limpa a camada anterior para que o usuário possa clicar de novo
+            if (window.currentSegmentLayer) {
+                map.removeLayer(window.currentSegmentLayer);
+                window.currentSegmentLayer = null;
+                currentSegmentNodes = [];
+            }
+        };
+    }
+
+    // ===== Execução Principal =====
+    document.addEventListener('DOMContentLoaded', function () {
+        const map = initializeMap();
+        let currentSegmentNodes = []; // Armazena os nós do segmento atual
+        let currentSegmentLayer = null; // Armazena a camada atual do segmento
+        const directionSelect = document.getElementById('directionSelect');
+
+        // Carregar segmento salvo (se houver)
+        loadSavedSegment(map);
+
+        // Localização do usuário
+        map.on('locationfound', (e) => handleLocationFound(e, map));
+        locateUser(map);
+
+        // Evento de clique no mapa: captura coordenadas, consulta rua e SEGMENTO (agora chama prompt)
+        map.on('click', (e) => {
+            // Se o painel de seleção estiver aberto, ignora o clique do mapa
+            if (document.getElementById('segmentSelectionContainer').style.display === 'block') {
+                return; 
+            }
+            
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+            console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+
+            // Atualiza campo de coordenadas (se existir)
+            const coordenadasInput = document.getElementById('coordenadas');
+            if (coordenadasInput) {
+                coordenadasInput.value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+            }
+
+            // Consulta o nome da rua via Waze (se aplicável)
+            consultarRuaWaze(lat, lon).then(nomeRuaWaze => {
+                if (nomeRuaWaze) {
+                    const ruaSelect = document.getElementById('ruaSelect');
+                    if (ruaSelect) {
+                        ruaSelect.innerHTML = ''; 
+                        const option = document.createElement('option');
+                        option.value = nomeRuaWaze;
+                        option.textContent = nomeRuaWaze;
+                        ruaSelect.appendChild(option);
+                        ruaSelect.value = nomeRuaWaze; // Seleciona automaticamente
+                    }
+                }
+            });
+
+            // Consulta o segmento de rua próximo e chama o prompt de seleção
+            getStreetSegment(map, lat, lon, (segmentNodes) => {
+                // O desenho agora é feito dentro de promptSegmentSelection/confirmar
+                // Este callback apenas garante que currentSegmentNodes seja atualizado antes da seleção final, se necessário.
+                if (segmentNodes && segmentNodes.length > 1) {
+                    currentSegmentNodes = segmentNodes;
+                    // Se o desenho fosse imediato, seria: drawSegment(map, segmentNodes, directionSelect.value);
+                } else {
+                    console.warn('Nenhum segmento válido retornado pela consulta.');
+                }
+            });
+        });
+
+        // Atualiza o select de sentido
+        if (directionSelect) {
+            atualizarDirecoes(directionSelect);
+        }
+
+        // Evento para alteração do sentido via select
+        if (directionSelect) {
+            directionSelect.addEventListener('change', (e) => {
+                const selectedDirection = e.target.value;
+                console.log('Direção selecionada:', selectedDirection);
+                if (currentSegmentNodes && currentSegmentNodes.length > 1) {
+                    currentSegmentLayer = drawSegment(map, currentSegmentNodes, selectedDirection);
+                    saveSegmentState(currentSegmentNodes, selectedDirection);
+                    
+                    // Mostra ou esconde o botão de reversão conforme o sentido
+                    if (selectedDirection === 'single') {
+                        mostrarBotaoReverso(currentSegmentNodes, map);
+                    } else {
+                        esconderBotaoReverso();
+                    }
+                }
+            });
+        }
+
+        // Eventos para agendamento
+        const starttimeInput = document.getElementById('starttime');
+        const endtimeInput = document.getElementById('endtime');
+        if (starttimeInput && endtimeInput) {
+            starttimeInput.addEventListener('change', calcularDiasSemana);
+            endtimeInput.addEventListener('change', calcularDiasSemana);
+        }
+
+        // Carregamento de subtipos conforme o tipo selecionado
+        const tipoSelect = document.getElementById('tipo');
+        const subtipoSelect = document.getElementById('subtipo');
+        // A variável {{ subtiposPorTipo | json_encode | raw }} é esperada aqui
+        const subtiposPorTipo = {{ subtiposPorTipo | json_encode | raw }}; 
+        if (tipoSelect && subtipoSelect) {
+            tipoSelect.addEventListener('change', () => carregarSubtiposPorTipo(tipoSelect, subtipoSelect, subtiposPorTipo));
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function (event) {
+        const eventoForm = document.getElementById('eventoForm');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        if (eventoForm && submitBtn) {
+            eventoForm.addEventListener('submit', function (e) {
+                e.preventDefault(); // Interrompe o envio padrão
+
+                // Verifica se um segmento foi selecionado antes de enviar
+                const segment = localStorage.getItem('streetSegment');
+                const direction = localStorage.getItem('segmentDirection');
+
+                if (!segment || !direction) {
+                    showAlert('Por favor, clique no mapa para selecionar e confirmar o trecho da via antes de enviar.', 'error');
+                    // Opcional: Focar o mapa ou rolar até ele
+                    return; 
+                }
+
+                const formData = new FormData(eventoForm);
+
+                // Adiciona os dados do localStorage ao FormData
+                formData.append('streetSegment', segment);
+                formData.append('segmentDirection', direction);
+                
+                // Envia os dados usando fetch.
+                fetch(eventoForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro na requisição: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Resposta do servidor:", data);
+                        if (data.success) {
+                            // Limpa o estado do mapa após sucesso para evitar confusão em um novo cadastro
+                            localStorage.clear(); 
+                            window.location.href = "https://wfcbrasil.com.br/create_alerts"; // Redireciona
+                        } else {
+                            showAlert(data.message || "Ocorreu um erro no envio dos dados.", 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao enviar os dados:", error);
+                        showAlert("Falha na comunicação com o servidor.", 'danger');
+                    });
+            });
+        } else {
+            console.error("Formulário ou botão de envio não encontrado.");
+        }
+    });
 </script>
 
 
