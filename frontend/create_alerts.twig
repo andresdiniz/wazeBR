@@ -201,7 +201,7 @@
     * Consulta um segmento de rua próximo às coordenadas informadas.
     */
     async function getStreetSegment(map, lat, lon) { // Removida a callback de segmento (agora usa o prompt)
-        const radiusValues = [20,50, 100, 200, 300, 500];
+        const radiusValues = [10,20,50, 100, 200, 300, 500];
         for (let radius of radiusValues) {
             const query = `
             [out:json];
