@@ -1,90 +1,58 @@
 <?php
+// redefinir_senha.php
 require_once __DIR__ . '/config/configbd.php';
 
-// 1. Validação Básica de Dados Recebidos
+// --- Validação Inicial do Token (GET) ---
+
 if (!isset($_GET['token']) || empty($_GET['token'])) {
     die("Token de redefinição de senha não fornecido.");
 }
-echo "DEBUG: Token lido com sucesso: " . $_GET['token'] . "<br>"; // Adicione esta linha
 
 $token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-
-$email = $_POST['email'];
-$token = $_POST['token'];
-$password1 = $_POST['password1'];
-$password2 = $_POST['password2'];
-
-// **Validação Lado do Servidor (Fallback)**
-if (strlen($password1) < 8 || !preg_match('/[A-Z]/', $password1) || !preg_match('/[0-9]/', $password1) || !preg_match('/[\W_]/', $password1) || $password1 !== $password2) {
-    die("A senha submetida não atende aos requisitos de segurança.");
-}
+$email = null;
+$maskedEmail = null;
 
 try {
     $pdo = Database::getConnection();
-    $pdo->beginTransaction(); // 👈 Inicia a transação para proteger o uso do token
 
-    // 2. RE-VALIDAÇÃO E BLOQUEIO ATÔMICO
-    // Verifica se o token ainda é válido E não foi usado (used = 0) E BLOQUEIA a linha
-    $stmtCheck = $pdo->prepare("
+    // Consulta APENAS para verificar a validade (usado = 0)
+    $stmt = $pdo->prepare("
         SELECT email 
         FROM recuperar_senha 
         WHERE token = :token 
         AND valid >= NOW() 
-        AND used = 0 
-        FOR UPDATE
+        AND used = 0
     ");
-    $stmtCheck->bindParam(':token', $token, PDO::PARAM_STR);
-    $stmtCheck->execute();
+    $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+    $stmt->execute();
 
-    if ($stmtCheck->rowCount() > 0) {
-        $dbEmail = $stmtCheck->fetchColumn();
-        
-        // Confirma que o email vindo do formulário POST bate com o email do token
-        if ($dbEmail !== $email) {
-             $pdo->rollBack();
-             die("Erro de segurança: Email associado ao token não corresponde.");
+    if ($stmt->rowCount() > 0) {
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $email = $result['email'];
+
+        // Função para mascarar o email para UX
+        function maskEmail($email) {
+            $parts = explode('@', $email);
+            $name = $parts[0];
+            $domain = $parts[1];
+            $maskedName = (strlen($name) > 3) 
+                          ? substr($name, 0, 2) . str_repeat('*', strlen($name) - 2)
+                          : substr($name, 0, 1) . str_repeat('*', strlen($name) - 1);
+            return $maskedName . '@' . $domain;
         }
+        $maskedEmail = maskEmail($email);
 
-        // 3. ATUALIZAÇÃO: Marca como usado E armazena a nova senha (usando hash)
-        $newHashedPassword = password_hash($password1, PASSWORD_DEFAULT);
-        
-        $stmtUpdateUser = $pdo->prepare("
-            UPDATE usuarios 
-            SET senha = :senha_hash 
-            WHERE email = :email
-        ");
-        $stmtUpdateUser->bindParam(':senha_hash', $newHashedPassword);
-        $stmtUpdateUser->bindParam(':email', $email);
-        $stmtUpdateUser->execute();
-
-        // 4. CONSUMO DO TOKEN (Marcando como usado)
-        $stmtInvalidate = $pdo->prepare("
-            UPDATE recuperar_senha 
-            SET used = 1, valid = NOW() 
-            WHERE token = :token
-        ");
-        $stmtInvalidate->bindParam(':token', $token, PDO::PARAM_STR);
-        $stmtInvalidate->execute();
-
-        $pdo->commit(); // **SUCESSO**: Todas as alterações são salvas
-
-        // Redirecionamento para sucesso
+    } else {
+        // Token inválido, expirado ou já usado
         echo "<script>
-            alert('Senha redefinida com sucesso! Você será redirecionado para o login.');
+            alert('Token inválido, expirado ou já utilizado. Você será redirecionado para a página de login.');
             window.location.href = 'login.html';
         </script>";
-        
-    } else {
-        $pdo->rollBack(); // Falhou a revalidação (token expirado ou usado)
-        die("O link de redefinição expirou ou já foi utilizado. Por favor, solicite um novo.");
+        exit;
     }
 } catch (PDOException $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    die("Erro fatal ao salvar a senha: " . $e->getMessage());
+    die("Erro ao conectar ou consultar o banco de dados: " . $e->getMessage());
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -94,23 +62,16 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waze Portal - Redefinição de Senha</title>
     <style>
-        /* Estilos mantidos da versão anterior (Layout melhorado) */
+        /* Estilos Modernizados */
         body, h2, form, ul, li, input, button {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e9ecef; 
             color: #343a40;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
-
         form {
             background: #fff;
             padding: 35px; 
@@ -119,13 +80,11 @@ try {
             width: 100%;
             max-width: 450px; 
         }
-
         h2 {
             text-align: center;
             margin-bottom: 10px; 
             color: #28a745; 
         }
-        
         .info-box {
             text-align: center;
             margin-bottom: 20px;
@@ -136,13 +95,11 @@ try {
             color: #856404;
             font-size: 14px;
         }
-
         label {
             display: block;
             margin-bottom: 8px; 
             font-weight: 600;
         }
-
         input {
             width: 100%;
             padding: 12px; 
@@ -151,45 +108,25 @@ try {
             border-radius: 6px;
             font-size: 16px;
         }
-
         input:focus {
             border-color: #28a745;
             outline: 0;
             box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
         }
-
         ul {
             list-style: none;
             padding-left: 0;
             margin-bottom: 25px; 
         }
-
         li {
             font-size: 14px;
             padding-left: 20px; 
             position: relative;
             margin: 7px 0;
         }
-
-        .error::before {
-            content: '✗'; 
-            position: absolute;
-            left: 0;
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .success::before {
-            content: '✓'; 
-            position: absolute;
-            left: 0;
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .error, .success {
-            color: #343a40; 
-        }
+        .error::before { content: '✗'; position: absolute; left: 0; color: #dc3545; font-weight: bold; }
+        .success::before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }
+        .error, .success { color: #343a40; }
 
         button {
             width: 100%;
@@ -203,15 +140,8 @@ try {
             cursor: pointer;
             transition: background 0.3s ease;
         }
-
-        button:hover:not(:disabled) {
-            background: #218838;
-        }
-
-        button:disabled {
-            background: #adb5bd;
-            cursor: not-allowed;
-        }
+        button:hover:not(:disabled) { background: #218838; }
+        button:disabled { background: #adb5bd; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -219,7 +149,7 @@ try {
         <h2>Redefinir Senha</h2>
         
         <div class="info-box">
-            Você está definindo uma nova senha para: **<?php echo $maskedEmail; ?>**
+            Você está definindo uma nova senha para: **<?php echo htmlspecialchars($maskedEmail, ENT_QUOTES, 'UTF-8'); ?>**
         </div>
         
         <label for="password1">Nova Senha:</label>
@@ -243,7 +173,7 @@ try {
     </form>
 
     <script>
-        // Script de validação de senha (Mantido)
+        // JavaScript de validação (Mantido)
         const password1 = document.getElementById('password1');
         const password2 = document.getElementById('password2');
         const requirements = {
