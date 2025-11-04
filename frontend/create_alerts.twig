@@ -12,93 +12,117 @@
             <div class="card shadow-sm p-4">
                 <form action="api.php?action=cadastrar_evento" method="post" id="eventoForm">
 
+    
                     <div>
                         <input type="hidden" name="id_parceiro" value="{{ id_parceiro }}">
                         <input type="hidden" id="finalPolylineInput" name="polyline" required>
-                        <input type="hidden" id="finalStreetNameInput" name="streetName" required>
+                        <input type="hidden" id="finalStreetNameInput" 
+name="streetName" required>
                     </div>
 
                     <div class="mb-3">
                         <label for="nome" class="form-label">Descrição do Evento</label>
                         <input type="text" class="form-control" id="nome" name="nome" required
-                            placeholder="Escreva uma descrição breve do Evento" maxlength="250">
+ 
+                           placeholder="Escreva uma descrição breve do Evento" maxlength="250">
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div 
+class="col-md-6">
                             <label for="tipo" class="form-label">Tipo</label>
                             <select class="form-select" id="tipo" name="tipo" required>
                                 <option value="">Selecione um Tipo</option>
-                                {% for tipo in tipos %}
+   
+                             {% for tipo in tipos %}
                                     <option value="{{ tipo.id }}">{{ tipo.name }}</option>
-                                {% endfor %}
+                         
+        {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="subtipo" class="form-label">Subtipo</label>
+              
+               <label for="subtipo" class="form-label">Subtipo</label>
                             <select class="form-select" id="subtipo" name="subtipo" required disabled>
                                 <option value="">Selecione um Subtipo</option>
-                            </select>
+                
+             </select>
                         </div>
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                      
+    <div class="col-md-6">
                             <label for="starttime" class="form-label">Data de Início</label>
                             <input type="date" id="starttime" class="form-control" name="starttime">
                         </div>
-                        <div class="col-md-6">
+         
+                <div class="col-md-6">
                             <label for="endtime" class="form-label">Data de Término</label>
                             <input type="date" id="endtime" class="form-control" name="endtime">
-                        </div>
+                    
+     </div>
                     </div>
                     <div id="horarios_dia" class="mb-3">
                     </div>
 
                     <div class="mb-3">
-                        <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
+             
+               <label for="coordenadas" class="form-label">Coordenadas do Evento (lat, lon)</label>
                         <input type="text" class="form-control" id="coordenadas" name="coordenadas_inicial" required
                             placeholder="Clique no mapa para definir as coordenadas" readonly>
-                    </div>
+                   
+ </div>
 
                     <div id="segmentSelectionContainer" class="card shadow-sm p-3 mb-3 border-warning" style="display: none;">
                         <h5 class="text-warning">📢 Defina o Segmento da Via</h5>
-                        <p class="text-muted small">Clique no mapa para definir a localização. Selecione abaixo o trecho exato que deseja marcar:</p>
+                        <p class="text-muted small">Clique no mapa para definir a localização.
+ Selecione abaixo o trecho exato que deseja marcar:</p>
                         <div class="mb-3">
                             <label for="segmentOptions" class="form-label">Escolha o trecho:</label>
                             <select class="form-select" id="segmentOptions" required>
-                            </select>
+     
+                         </select>
                         </div>
                         <button type="button" id="confirmSegmentBtn" class="btn btn-success mb-2">✅ Confirmar Seleção</button>
-                        <button type="button" id="cancelSegmentBtn" class="btn btn-secondary btn-sm">Cancelar e Clicar Novamente</button>
+                      
+    <button type="button" id="cancelSegmentBtn" class="btn btn-secondary btn-sm">Cancelar e Clicar Novamente</button>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="mb-2">
+   
+                             <div class="mb-2">
                                 <label for="directionSelect" class="form-label">Escolha o Sentido</label>
                                 <select id="directionSelect" 
-                                    class="form-select" name="directionSelect">
+    
+                                 class="form-select" name="directionSelect">
                                 </select>
                             </div>
-                            <div id="buttonContainer" class="mt-2">
+       
+                         <div id="buttonContainer" class="mt-2">
                             </div>
 
                             {% if id_parceiro == 99 %}
-                            <div class="mb-3">
+                
+             <div class="mb-3">
                                 <label for="parceiro" class="form-label">Selecione um Parceiro</label>
                                 <select class="form-select" id="parceiro" name="id_parceiro_alert" required>
-                                    <option value="">Selecione um Parceiro</option>
+               
+                      <option value="">Selecione um Parceiro</option>
                                     {% for parceiro in parceiros %}
-                                    <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
+                                   
+    <option value="{{ parceiro.id }}">{{ parceiro.Nome }}</option>
                                     {% endfor %}
                                 </select>
-                            </div>
+                        
+     </div>
                             {% endif %}
 
                         </div>
                         <div class="col-md-6 d-flex align-items-end justify-content-end">
-                            <button type="submit" class="btn btn-primary">Criar Evento</button>
+              
+               <button type="submit" class="btn btn-primary">Criar Evento</button>
                         </div>
                     </div>
 
@@ -106,6 +130,7 @@
             </div>
         </div>
 
+  
         <div class="col-lg-4 mt-4 mt-lg-0">
             <div id="map" class="card 
                 shadow-sm" style="height: 500px;"></div>
@@ -115,18 +140,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
 <script>
-const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
+const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo |
+json_encode() | raw }};
     // ===== Variáveis Globais =====
     let map;
     let currentSegmentNodes = [];
-    let currentSegmentLayer = null;
+let currentSegmentLayer = null;
     let clickMarker = null;
 
 
     // Limpa o localStorage para evitar dados de sessões anteriores
     localStorage.clear();
-
-    // ===== Configurações Globais =====
+// ===== Configurações Globais =====
     const MAP_CONFIG = {
         SEGMENT_COLORS: {
             original: '#0000ff',
@@ -135,47 +160,46 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
         },
         ARROW_OPTIONS: {
             pixelSize: 15,
-            weight: 2
+           
+ weight: 2
         },
         LOCAL_STORAGE_KEYS: {
             SEGMENT: 'streetSegment',
             DIRECTION: 'segmentDirection'
         }
     };
-
-    // Inicializa calendarios (Flatpickr)
+// Inicializa calendarios (Flatpickr)
     flatpickr("#starttime", {
         enableTime: true,
         dateFormat: "Y-m-d H:i", 
         time_24hr: true 
     });
-    flatpickr("#endtime", {
+flatpickr("#endtime", {
         enableTime: true,
         dateFormat: "Y-m-d H:i", 
         time_24hr: true 
     });
-
-    // ===== Funções de Inicialização e Localização =====
+// ===== Funções de Inicialização e Localização =====
     function initializeMap() {
         // Coordenadas padrão para o Brasil se a localização falhar
-        map = L.map('map').setView([-23.55052, -46.633308], 15); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        map = L.map('map').setView([-23.55052, -46.633308], 15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        return map;
+return map;
     }
 
     function locateUser(map) {
         map.locate({ setView: true, maxZoom: 12 });
-        map.on('locationerror', function (e) {
+map.on('locationerror', function (e) {
             showAlert('Não foi possível localizar a sua posição.', 'warning');
         });
-        map.on('locationfound', function(e) { handleLocationFound(e, map); });
+map.on('locationfound', function(e) { handleLocationFound(e, map); });
     }
 
     function handleLocationFound(e, map) {
         const radius = e.accuracy / 2;
-        L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
+L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
         L.circle(e.latlng, radius).addTo(map);
     }
     
@@ -192,31 +216,30 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
 
         clickMarker = L.marker([lat, lng]).addTo(map);
         document.getElementById('coordenadas').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-        // NOVO: Verifica o tipo de evento (Somente interdição '6' usa seleção de segmento)
+// NOVO: Verifica o tipo de evento (Somente interdição '6' usa seleção de segmento)
         const tipoSelect = document.getElementById('tipo');
-        const selectedTipoId = tipoSelect ? tipoSelect.value : '';
+const selectedTipoId = tipoSelect ? tipoSelect.value : '';
         
         if (selectedTipoId === '6') {
             // Lógica original: Continua com a busca de segmento para 'Interdição'
-            getStreetSegment(map, lat, lng); 
-        } else {
+            getStreetSegment(map, lat, lng);
+} else {
             // Outros tipos (pontos fixos): Apenas define o ponto, limpa e esconde o estado de segmento
             document.getElementById('segmentSelectionContainer').style.display = 'none';
-            esconderBotaoReverso();
+esconderBotaoReverso();
             
             // Limpa os dados de segmento nos campos hidden
             document.getElementById('finalPolylineInput').value = '';
-            document.getElementById('finalStreetNameInput').value = '';
+document.getElementById('finalStreetNameInput').value = '';
             
             // Limpa o select de rua (assumindo que ele exista, conforme referenciado em outras funções)
             const ruaSelect = document.getElementById('ruaSelect');
-            if (ruaSelect) {
+if (ruaSelect) {
                 ruaSelect.innerHTML = '<option value="">Ponto Fixo Selecionado</option>';
-            }
+}
             
             showAlert('Localização definida como ponto fixo (Coordenadas).', 'info');
-        }
+}
     }
 
 
@@ -224,182 +247,193 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
     
     async function getStreetSegment(map, lat, lon) {
         // Raio de busca crescente para encontrar vias menores primeiro
-        const radiusValues = [50, 100, 200, 400, 800, 1200, 2000]; 
-        let streetName = 'Nome da Rua Desconhecido';
+        const radiusValues = [50, 100, 200, 400, 800, 1200, 2000];
+let streetName = 'Nome da Rua Desconhecido';
         
         const ruaSelect = document.getElementById('ruaSelect');
         ruaSelect.innerHTML = '<option value="">Buscando rua...</option>';
         document.getElementById('segmentSelectionContainer').style.display = 'none';
         esconderBotaoReverso();
-
-        for (let radius of radiusValues) {
+for (let radius of radiusValues) {
             // Consulta Overpass: busca vias ("way") e nós ("node") ao redor
             const query = `
             [out:json];
-            (
+(
                 way(around:${radius}, ${lat}, ${lon})["highway"];
                 node(w);
             );
-            out geom;
+out geom;
             `;
             
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
             try {
                 const response = await fetch(url);
-                const data = await response.json();
+const data = await response.json();
 
                 if (data.elements && data.elements.length > 0) {
                     const allWays = data.elements.filter(el => el.type === 'way' && el.tags && el.tags.highway);
-                    let closestWay = null;
+let closestWay = null;
                     let minDistance = Infinity;
 
                     // 1. Encontra a via mais próxima do clique
                     allWays.forEach(way => {
                         if (!way.tags.name || !way.geometry || way.geometry.length < 2) return;
                         
+      
                         const wayCoords = way.geometry.map(g => [g.lon, g.lat]);
                         const distance = turf.pointToLineDistance(turf.point([lon, lat]), turf.lineString(wayCoords), { units: 'meters' });
                         
-                        if (distance < minDistance) {
+                   
+     if (distance < minDistance) {
                             minDistance = distance;
                             closestWay = way;
                         }
-                    });
-
-                    if (closestWay) {
-                        const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]); // [lon, lat]
-                        streetName = closestWay.tags.name || 'Nome da Rua Desconhecido';
+       
+             });
+if (closestWay) {
+                        const fullWayGeometry = closestWay.geometry.map(g => [g.lon, g.lat]);
+// [lon, lat]
+                        streetName = closestWay.tags.name ||
+'Nome da Rua Desconhecido';
                         
                         // 2. Tenta identificar o segmento delimitado por intersecções
                         const wayNodes = closestWay.nodes;
-                        const intersectionNodeIds = [];
+const intersectionNodeIds = [];
                         const nodeUsageCount = {};
                         
                         // Conta quantas vias compartilham cada nó (identifica intersecções)
                         data.elements.filter(el => el.type === 'way' && el.id !== closestWay.id && el.nodes)
                             .forEach(otherWay => {
-                                otherWay.nodes.forEach(nodeId => {
+                    
+              otherWay.nodes.forEach(nodeId => {
                                     if (wayNodes.includes(nodeId)) {
                                         nodeUsageCount[nodeId] = (nodeUsageCount[nodeId] || 0) + 1;
+  
                                     }
                                 });
                             });
-                        
-                        // Adiciona ao array apenas os nós que são pontos de intersecção real
+// Adiciona ao array apenas os nós que são pontos de intersecção real
                         wayNodes.forEach(nodeId => {
                             if (nodeUsageCount[nodeId] >= 1) {
-                                intersectionNodeIds.push(nodeId);
+                              
+    intersectionNodeIds.push(nodeId);
                             }
                         });
-
-                        let segmentNodes = [];
+let segmentNodes = [];
                         
                         // Se houver pelo menos duas intersecções para delimitar um segmento
                         if (intersectionNodeIds.length >= 2) {
                             
-                            // Encontra os índices dos nós de intersecção na geometria completa da via
+                            // Encontra 
+os índices dos nós de intersecção na geometria completa da via
                             const intersectionIndexes = intersectionNodeIds.map(id => {
                                 const node = data.elements.find(el => el.type === 'node' && el.id === id);
-                                if (node) {
+              
+                   if (node) {
                                     // Procura o índice do ponto mais próximo (lon, lat) na geometria completa
-                                    return fullWayGeometry.findIndex(coord => coord[0] === node.lon && coord[1] === node.lat);
+                                
+     return fullWayGeometry.findIndex(coord => coord[0] === node.lon && coord[1] === node.lat);
                                 }
                                 return -1;
-                            }).filter(i => i !== -1).sort((a,b) => a - b);
-
-
-                            if (intersectionIndexes.length >= 2) {
+                      
+        }).filter(i => i !== -1).sort((a,b) => a - b);
+if (intersectionIndexes.length >= 2) {
                                 const clickPoint = turf.point([lon, lat]);
-                                let closestIntersectionIndex = -1;
+let closestIntersectionIndex = -1;
                                 let minDistanceToIntersection = Infinity;
 
                                 // Identifica qual segmento (entre intersecções) foi clicado
                                 for (let i = 0; i < intersectionIndexes.length - 1; i++) {
                                     const startIndex = intersectionIndexes[i];
-                                    const endIndex = intersectionIndexes[i + 1];
+const endIndex = intersectionIndexes[i + 1];
                                     
                                     // Cria um LineString do segmento atual
                                     const segmentLine = turf.lineString(fullWayGeometry.slice(startIndex, endIndex + 1));
-                                    const distance = turf.pointToLineDistance(clickPoint, segmentLine, { units: 'meters' });
+const distance = turf.pointToLineDistance(clickPoint, segmentLine, { units: 'meters' });
 
                                     // Se o clique estiver dentro de um limiar razoável e for o mais próximo até agora
                                     if (distance < 5 && distance < minDistanceToIntersection) { 
-                                        minDistanceToIntersection = distance;
-                                        closestIntersectionIndex = i; 
-                                        
-                                        // Garante que o trecho seja entre essas duas intersecções
+                              
+                minDistanceToIntersection = distance;
+                                        closestIntersectionIndex = i;
+// Garante que o trecho seja entre essas duas intersecções
                                         segmentNodes = fullWayGeometry.slice(startIndex, endIndex + 1);
-                                    }
+}
                                 }
                             }
                         }
 
-                        // 3. Oferece seleção
+                
+         // 3. Oferece seleção
                         // Se encontrou um segmento válido entre intersecções, usa a opção "intersection"
                         if (segmentNodes.length > 1) {
-                            promptSegmentSelection(map, { 
+                          
+    promptSegmentSelection(map, { 
                                 segment: segmentNodes, 
                                 fullWay: fullWayGeometry,
-                                type: 'intersection',
+                             
+     type: 'intersection',
                                 streetName: streetName
                             }, lat, lon);
-                            return;
+return;
                         }
                         
                         // 4. Fallback: Se falhar a segmentação por intersecção, oferece a via completa
                         promptSegmentSelection(map, { 
-                            segment: fullWayGeometry, 
+             
+                segment: fullWayGeometry, 
                             fullWay: fullWayGeometry, 
                             type: 'full',
-                            streetName: streetName
+                        
+     streetName: streetName
                         }, lat, lon);
-                        return;
+return;
                     }
                 }
             } catch (error) {
                 console.error(`Erro na consulta com raio ${radius}:`, error);
-            }
+}
         }
         
         // Se a busca falhar
         ruaSelect.innerHTML = '<option value="">Nenhuma rua encontrada</option>';
-        showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
-    }
+showAlert('Nenhum segmento adequado foi encontrado. Tente clicar em outro local.', 'warning');
+}
     
     // Função para carregar subtipos via Fetch (API)
     async function loadSubtypes(tipoId) {
         const subtipoSelect = document.getElementById('subtipo');
-        subtipoSelect.innerHTML = '<option value="">Carregando Subtipos...</option>';
+subtipoSelect.innerHTML = '<option value="">Carregando Subtipos...</option>';
         subtipoSelect.disabled = true;
 
         if (!tipoId) {
             subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-            return;
+return;
         }
 
         const url = `api.php?action=get_subtipos&id=${tipoId}`;
-
-        try {
+try {
             const response = await fetch(url);
-            const subtypes = await response.json();
+const subtypes = await response.json();
 
             subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-            if (subtypes && subtypes.length > 0) {
+if (subtypes && subtypes.length > 0) {
                 subtypes.forEach(subtipo => {
                     const option = document.createElement('option');
                     option.value = subtipo.id;
                     option.textContent = subtipo.name;
-                    subtipoSelect.appendChild(option);
+         
+               subtipoSelect.appendChild(option);
                 });
-                subtipoSelect.disabled = false;
+subtipoSelect.disabled = false;
             } else {
                 subtipoSelect.innerHTML = '<option value="">Nenhum Subtipo Encontrado</option>';
-            }
+}
 
         } catch (error) {
             console.error('Erro ao buscar subtipos:', error);
-            subtipoSelect.innerHTML = '<option value="">Erro ao Carregar Subtipos</option>';
+subtipoSelect.innerHTML = '<option value="">Erro ao Carregar Subtipos</option>';
         }
     }
 
@@ -410,99 +444,105 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
         try {
             if (currentSegmentLayer) {
                 map.removeLayer(currentSegmentLayer);
-            }
+}
 
             // Converte [lon, lat] para [lat, lon] do Leaflet
             let latLngs = segmentNodes.map(coord => [coord[1], coord[0]]);
-            const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
-                            direction === 'original' ? MAP_CONFIG.SEGMENT_COLORS.original :
+const color = direction === 'reversed' ? MAP_CONFIG.SEGMENT_COLORS.reversed :
+                            direction === 'original' ?
+MAP_CONFIG.SEGMENT_COLORS.original :
                             MAP_CONFIG.SEGMENT_COLORS.both;
-            const lineStyle = { 
+const lineStyle = { 
                 color: color, 
                 weight: 5, 
                 opacity: 0.8,
                 lineCap: 'round',
                 lineJoin: 'round'
-            };
+         
+    };
 
             const segmentLine = L.polyline(latLngs, lineStyle).addTo(map);
             
             let arrowDecorator = null;
-            if (direction !== 'both') {
+if (direction !== 'both') {
                 if (direction === 'reversed') {
                     // Inverte o Polyline para desenhar a seta na direção correta
                     segmentLine.setLatLngs([...latLngs].reverse());
-                }
+}
 
                 const arrowOptions = {
                     patterns: [
                         {
                             offset: '50%',
-                            repeat: '100px',
+       
+                             repeat: '100px',
                             symbol: L.Symbol.arrowHead({
                                 pixelSize: MAP_CONFIG.ARROW_OPTIONS.pixelSize,
-                                polygon: false,
+                
+                                 polygon: false,
                                 pathOptions: {
                                     color: color,
-                                    weight: MAP_CONFIG.ARROW_OPTIONS.weight,
+             
+                                     weight: MAP_CONFIG.ARROW_OPTIONS.weight,
                                     opacity: 0.8
                                 }
-                            })
+       
+                             })
                         }
                     ]
                 };
-                arrowDecorator = L.polylineDecorator(segmentLine, arrowOptions).addTo(map);
+arrowDecorator = L.polylineDecorator(segmentLine, arrowOptions).addTo(map);
             }
 
             const layersToAdd = [segmentLine];
-            if (arrowDecorator) {
+if (arrowDecorator) {
                 layersToAdd.push(arrowDecorator);
-            }
+}
             currentSegmentLayer = L.layerGroup(layersToAdd).addTo(map);
-            map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
+map.fitBounds(segmentLine.getBounds(), { padding: [20, 20] });
             
             saveSegmentState(segmentNodes, direction);
             updateDirectionControls(direction);
             
             return currentSegmentLayer;
-        } catch (error) {
+} catch (error) {
             console.error('Erro ao desenhar segmento:', error);
-            showAlert('Erro ao desenhar o segmento no mapa.', 'error');
+showAlert('Erro ao desenhar o segmento no mapa.', 'error');
         }
     }
 
     function updateDirectionControls(direction) {
         const directionSelect = document.getElementById('directionSelect');
-        if (directionSelect) {
+if (directionSelect) {
             atualizarDirecoes(directionSelect);
             directionSelect.value = direction;
-        }
+}
         const reverseBtn = document.getElementById('reverseBtn');
-        if (reverseBtn) {
+if (reverseBtn) {
             // O botão de inverter só é útil se não for 'Ambos os sentidos'
-            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ? 'block' : 'none';
+            reverseBtn.style.display = (direction === 'original' || direction === 'reversed') ?
+'block' : 'none';
         }
     }
 
     function saveSegmentState(segment, direction) {
         localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT, JSON.stringify(segment));
-        localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
+localStorage.setItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION, direction);
     }
     
     function inverterCoordenadas(segmentNodes, map, currentDirection) {
         // Inverter o array de nós
         const reversedSegment = [...segmentNodes].reverse();
-        const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
+const newDirection = (currentDirection === 'reversed' ? 'original' : 'reversed');
         
         drawSegment(reversedSegment, newDirection);
         
         window.currentSegmentNodes = reversedSegment;
         saveSegmentState(reversedSegment, newDirection);
         document.getElementById('directionSelect').value = newDirection;
-        
-        // Atualiza o dataset para a confirmação
+// Atualiza o dataset para a confirmação
         const container = document.getElementById('segmentSelectionContainer');
-        container.dataset.tempSegmentJson = JSON.stringify(reversedSegment);
+container.dataset.tempSegmentJson = JSON.stringify(reversedSegment);
         container.dataset.tempSegmentDirection = newDirection;
 
         return reversedSegment;
@@ -510,176 +550,178 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
 
     function showAlert(message, type = 'info') {
         const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show`;
+alert.className = `alert alert-${type} alert-dismissible fade show`;
         alert.style.position = 'fixed';
         alert.style.top = '10px';
         alert.style.right = '10px';
         alert.style.zIndex = '1050';
-        alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
         document.body.appendChild(alert);
 
         setTimeout(() => alert.remove(), 5000);
-    }
+}
     
     function atualizarDirecoes(selectElement) {
         selectElement.innerHTML = '';
-        const options = [
+const options = [
             { value: 'both', text: 'Ambos os sentidos' },
             { value: 'original', text: 'Sentido original' },
             { value: 'reversed', text: 'Sentido reverso' },
         ];
-        options.forEach(optionData => {
+options.forEach(optionData => {
             const option = document.createElement('option');
             option.value = optionData.value;
             option.textContent = optionData.text;
             selectElement.appendChild(option);
         });
-    }
+}
 
     function mostrarBotaoReverso(segmentNodes, map) {
         let reverseBtn = document.getElementById('reverseBtn');
-        if (!reverseBtn) {
+if (!reverseBtn) {
             reverseBtn = document.createElement('button');
             reverseBtn.id = 'reverseBtn';
-            reverseBtn.className = 'btn btn-warning mt-2';
+reverseBtn.className = 'btn btn-warning mt-2';
             reverseBtn.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Inverter Sentido';
             document.getElementById('buttonContainer').appendChild(reverseBtn);
-        }
+}
         reverseBtn.style.display = 'block';
         reverseBtn.type = "button";
-        reverseBtn.onclick = () => {
-            const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) || 'original';
+reverseBtn.onclick = () => {
+            const currentDirection = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.DIRECTION) ||
+'original';
             inverterCoordenadas(window.currentSegmentNodes, map, currentDirection);
         };
     }
 
     function esconderBotaoReverso() {
         const reverseBtn = document.getElementById('reverseBtn');
-        if (reverseBtn) {
+if (reverseBtn) {
             reverseBtn.style.display = 'none';
-        }
+}
     }
     
     function calcularDiasSemana() {
         // Implemente sua lógica de cálculo de dias da semana aqui, se necessário.
-    }
+}
 
     // Gerenciamento do Painel de Seleção de Segmento
     function promptSegmentSelection(map, segmentData, lat, lon) {
         const container = document.getElementById('segmentSelectionContainer');
-        const optionsSelect = document.getElementById('segmentOptions');
+const optionsSelect = document.getElementById('segmentOptions');
         const confirmBtn = document.getElementById('confirmSegmentBtn');
         const cancelBtn = document.getElementById('cancelSegmentBtn');
 
-        const intersectionSegmentNodes = segmentData.type === 'intersection' ? segmentData.segment : [];
+        const intersectionSegmentNodes = segmentData.type === 'intersection' ?
+segmentData.segment : [];
         const fullSegmentNodes = segmentData.fullWay || segmentData.segment;
         const streetName = segmentData.streetName;
         
         optionsSelect.innerHTML = '';
         container.style.display = 'block';
-        let options = [];
+let options = [];
 
         // Opção 1: Trecho entre Interseções
         if (segmentData.type === 'intersection' && intersectionSegmentNodes.length > 1) {
             // Usa as coordenadas de início e fim do segmento para a descrição
             const startCoord = `${intersectionSegmentNodes[0][1].toFixed(5)}, ${intersectionSegmentNodes[0][0].toFixed(5)}`;
-            const endCoord = `${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][1].toFixed(5)}, ${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][0].toFixed(5)}`;
+const endCoord = `${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][1].toFixed(5)}, ${intersectionSegmentNodes[intersectionSegmentNodes.length - 1][0].toFixed(5)}`;
             
             options.push({ 
                 value: 'intersection', 
                 text: `Trecho: ${streetName} (De ${startCoord} até ${endCoord}) - Selecionado`, 
                 nodes: intersectionSegmentNodes 
             });
-        }
+}
 
         // Opção 2: Via Completa
         options.push({ value: 'full', text: `Via Completa: ${streetName}`, nodes: fullSegmentNodes });
-        
-        options.forEach(opt => {
+options.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
             option.textContent = opt.text;
             optionsSelect.appendChild(option); // Adiciona ao select
         });
-        
-        // Seleciona a melhor opção automaticamente
-        optionsSelect.value = segmentData.type === 'intersection' ? 'intersection' : 'full';
+// Seleciona a melhor opção automaticamente
+        optionsSelect.value = segmentData.type === 'intersection' ?
+'intersection' : 'full';
 
         function handleSegmentSelection(selectedType) {
             const selectedOption = options.find(opt => opt.value === selectedType);
-            if (selectedOption && selectedOption.nodes && selectedOption.nodes.length > 1) {
-                const direction = document.getElementById('directionSelect').value || 'both';
+if (selectedOption && selectedOption.nodes && selectedOption.nodes.length > 1) {
+                const direction = document.getElementById('directionSelect').value ||
+'both';
                 
                 window.currentSegmentLayer = drawSegment(selectedOption.nodes, direction);
                 
                 // Salva temporariamente no dataset para o clique de confirmação
                 container.dataset.tempSegmentJson = JSON.stringify(selectedOption.nodes);
-                container.dataset.tempSegmentDirection = direction;
+container.dataset.tempSegmentDirection = direction;
 
                 window.currentSegmentNodes = selectedOption.nodes;
                 if (direction === 'original' || direction === 'reversed') {
                     mostrarBotaoReverso(window.currentSegmentNodes, map);
-                } else {
+} else {
                     esconderBotaoReverso();
-                }
+}
             }
         }
         
-        handleSegmentSelection(optionsSelect.value); // Desenha a opção inicial
+        handleSegmentSelection(optionsSelect.value);
+// Desenha a opção inicial
         
         // Listener de Mudança de Opção
         optionsSelect.onchange = (e) => {
             handleSegmentSelection(e.target.value);
-        };
+};
 
         // Listener de Confirmação: Salva o estado e preenche os campos finais
         confirmBtn.onclick = () => {
             const nodesToDraw = JSON.parse(container.dataset.tempSegmentJson);
-            const selectedDirection = container.dataset.tempSegmentDirection;
+const selectedDirection = container.dataset.tempSegmentDirection;
 
             if (nodesToDraw && nodesToDraw.length > 1) {
                 currentSegmentNodes = nodesToDraw;
-                saveSegmentState(nodesToDraw, selectedDirection);
+saveSegmentState(nodesToDraw, selectedDirection);
                 
                 // Formato Waze/final: lat,lon,lat,lon,... 
                 const polylineWazeFormat = nodesToDraw.map(coord => `${coord[1]},${coord[0]}`).join(',');
-                
-                // Salva nos campos de submissão (hidden fields)
+// Salva nos campos de submissão (hidden fields)
                 document.getElementById('finalPolylineInput').value = polylineWazeFormat;
-                document.getElementById('finalStreetNameInput').value = streetName;
+document.getElementById('finalStreetNameInput').value = streetName;
                 
                 // AÇÃO DE PREENCHIMENTO DO CAMPO 'SELECIONE A RUA'
                 const ruaSelect = document.getElementById('ruaSelect');
-                ruaSelect.innerHTML = `<option value="${streetName}" selected>${streetName}</option>`;
+ruaSelect.innerHTML = `<option value="${streetName}" selected>${streetName}</option>`;
                 
                 container.style.display = 'none';
                 showAlert(`Segmento confirmado para a rua **${streetName}**. Sentido: **${selectedDirection.toUpperCase()}**`, 'success');
-            } else {
+} else {
                 showAlert('Erro: Segmento inválido para confirmação.', 'danger');
-            }
+}
         };
         
         // Listener de Cancelamento
         cancelBtn.onclick = () => {
             if (currentSegmentLayer) {
                 map.removeLayer(currentSegmentLayer);
-                currentSegmentLayer = null;
+currentSegmentLayer = null;
             }
             if (clickMarker) {
                 map.removeLayer(clickMarker);
-                clickMarker = null;
+clickMarker = null;
             }
             localStorage.clear();
             currentSegmentNodes = [];
-            document.getElementById('coordenadas').value = '';
+document.getElementById('coordenadas').value = '';
             document.getElementById('ruaSelect').innerHTML = '<option value="">Selecione uma rua</option>';
             document.getElementById('finalPolylineInput').value = '';
             document.getElementById('finalStreetNameInput').value = '';
             container.style.display = 'none';
-            showAlert('Seleção de segmento cancelada. Clique no mapa para recomeçar.', 'info');
+showAlert('Seleção de segmento cancelada. Clique no mapa para recomeçar.', 'info');
             esconderBotaoReverso();
         };
-    }
+}
 
 
     // ===== Inicialização dos Event Listeners (Gatilho inicial) =====
@@ -693,31 +735,31 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
         atualizarDirecoes(document.getElementById('directionSelect'));
         
         // Listener para mudança de direção
+   
         document.getElementById('directionSelect').addEventListener('change', (e) => {
             const newDirection = e.target.value;
             const savedSegment = localStorage.getItem(MAP_CONFIG.LOCAL_STORAGE_KEYS.SEGMENT);
             
             if (savedSegment) {
                 const segmentNodes = JSON.parse(savedSegment);
-                drawSegment(segmentNodes, newDirection);
+                drawSegment(segmentNodes, 
+newDirection);
                 saveSegmentState(segmentNodes, newDirection);
                 
                 const container = document.getElementById('segmentSelectionContainer');
-                container.dataset.tempSegmentDirection = newDirection;
+container.dataset.tempSegmentDirection = newDirection;
             }
         });
         document.getElementById('starttime').addEventListener('change', calcularDiasSemana);
         document.getElementById('endtime').addEventListener('change', calcularDiasSemana);
-        
-        // Listener para carregar subtipos
+// Listener para carregar subtipos
         document.getElementById('tipo').addEventListener('change', (e) => {
             const tipoId = e.target.value;
             loadSubtypes(tipoId);
         });
-        
-        // Cria e adiciona o botão de inverter para que ele possa ser manipulado
-        mostrarBotaoReverso(null, map); 
-        esconderBotaoReverso(); // Esconde ele no início
+// Cria e adiciona o botão de inverter para que ele possa ser manipulado
+        mostrarBotaoReverso(null, map);
+esconderBotaoReverso(); // Esconde ele no início
     });
 </script>
 
@@ -725,7 +767,7 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
     /* Estilos Aprimorados */
     #map {
         border-radius: 8px;
-        transition: box-shadow 0.3s ease;
+transition: box-shadow 0.3s ease;
         height: 500px; /* Altura padrão para o desktop */
     }
 
@@ -733,59 +775,57 @@ const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
     @media (max-width: 768px) {
         #map {
             height: 300px;
-        }
+}
     }
 
     #map:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
+}
 
     .leaflet-popup-content {
         font-size: 14px;
         padding: 8px;
-    }
+}
 
     .btn-warning {
         background-color: #ffc107;
         border-color: #ffc107;
-        transition: all 0.3s ease;
+transition: all 0.3s ease;
     }
 
     .btn-warning:hover {
         transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
     }
 
     /* Estilo para o novo painel de seleção */
     #segmentSelectionContainer {
         border-left: 5px solid #ffc107 !important;
-    }
+}
 
     /* Ajustes de responsividade para os cards de horários */
     @media (max-width: 576px) {
         .card .row .col-md-4 {
             flex: 0 0 100%;
-            max-width: 100%;
+max-width: 100%;
         }
     }
 </style>
 <script>
 //FUNCIONANDO PERFEITAMENTE! GRAÇAS A DEUS!
-
 // Função para carregar subtipos usando a variável injetada pelo Twig (SEM AJAX)
 function loadSubtypes(tipoId) {
     const subtipoSelect = document.getElementById('subtipo');
-    
-    // Reseta o estado do campo
+// Reseta o estado do campo
     subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
     subtipoSelect.disabled = true;
-
-    if (!tipoId) {
+if (!tipoId) {
         return;
-    }
+}
     
     // Obtém os subtipos do objeto global
-    const subtypes = SUBTIPOS_POR_TIPO[tipoId] || []; 
+    const subtypes = SUBTIPOS_POR_TIPO[tipoId] ||
+[]; 
 
     if (subtypes.length > 0) {
         subtypes.forEach(subtipo => {
@@ -795,10 +835,10 @@ function loadSubtypes(tipoId) {
             option.textContent = subtipo.name;
             subtipoSelect.appendChild(option);
         });
-        subtipoSelect.disabled = false; // Habilita o campo após o carregamento
+subtipoSelect.disabled = false; // Habilita o campo após o carregamento
     } else {
         subtipoSelect.innerHTML = '<option value="">Nenhum Subtipo Encontrado</option>';
-    }
+}
 }
 
 // O listener deve estar dentro do bloco DOMContentLoaded (como nos scripts anteriores)
