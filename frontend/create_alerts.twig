@@ -381,8 +381,7 @@ let segmentNodes = [];
                         // Se houver pelo menos duas intersecções para delimitar um segmento
                         if (intersectionNodeIds.length >= 2) {
                             
-                            // Encontra 
- os índices dos nós de intersecção na geometria completa da via
+                            // Encontra os índices dos nós de intersecção na geometria completa da via
                             const intersectionIndexes = intersectionNodeIds.map(id => {
                                 const node = data.elements.find(el => el.type === 'node' && el.id === id);
               
