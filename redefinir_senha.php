@@ -1,65 +1,87 @@
 <?php
 require_once __DIR__ . '/config/configbd.php';
 
-// --- VALIDAÇÃO DE TOKEN (PHP - Lado do Servidor) ---
-
-if (!isset($_GET['token']) || empty($_GET['token'])) {
-    echo "<script>
-        alert('Token não fornecido ou inválido. Você será redirecionado para a página de login.');
-        window.location.href = 'login.html';
-    </script>";
-    exit;
+// 1. Validação Básica de Dados Recebidos
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['email'], $_POST['password1'], $_POST['password2'], $_POST['token'])) {
+    die("Acesso inválido.");
 }
 
-$token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-$email = null;
-$maskedEmail = null;
+$email = $_POST['email'];
+$token = $_POST['token'];
+$password1 = $_POST['password1'];
+$password2 = $_POST['password2'];
+
+// **Validação Lado do Servidor (Fallback)**
+if (strlen($password1) < 8 || !preg_match('/[A-Z]/', $password1) || !preg_match('/[0-9]/', $password1) || !preg_match('/[\W_]/', $password1) || $password1 !== $password2) {
+    die("A senha submetida não atende aos requisitos de segurança.");
+}
 
 try {
     $pdo = Database::getConnection();
+    $pdo->beginTransaction(); // 👈 Inicia a transação para proteger o uso do token
 
-    // 1. Consulta APENAS para verificar a validade do token (sem bloquear ou atualizar)
-    $stmt = $pdo->prepare("
+    // 2. RE-VALIDAÇÃO E BLOQUEIO ATÔMICO
+    // Verifica se o token ainda é válido E não foi usado (used = 0) E BLOQUEIA a linha
+    $stmtCheck = $pdo->prepare("
         SELECT email 
         FROM recuperar_senha 
         WHERE token = :token 
         AND valid >= NOW() 
-        AND used = 0
-    "); // REMOVIDO FOR UPDATE e usado used = 0
-    $stmt->bindParam(':token', $token, PDO::PARAM_STR);
-    $stmt->execute();
+        AND used = 0 
+        FOR UPDATE
+    ");
+    $stmtCheck->bindParam(':token', $token, PDO::PARAM_STR);
+    $stmtCheck->execute();
 
-    // 2. Verifica se o token é válido
-    if ($stmt->rowCount() > 0) {
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email = $result['email']; // Captura o email associado ao token
-
-        // Função auxiliar para mascarar o email para exibição
-        function maskEmail($email) {
-            $parts = explode('@', $email);
-            $name = $parts[0];
-            $domain = $parts[1];
-            // Mascara se tiver mais de 3 caracteres, senão mostra os 2 primeiros
-            $maskedName = (strlen($name) > 3) 
-                          ? substr($name, 0, 2) . str_repeat('*', strlen($name) - 2)
-                          : substr($name, 0, 1) . str_repeat('*', strlen($name) - 1);
-            return $maskedName . '@' . $domain;
+    if ($stmtCheck->rowCount() > 0) {
+        $dbEmail = $stmtCheck->fetchColumn();
+        
+        // Confirma que o email vindo do formulário POST bate com o email do token
+        if ($dbEmail !== $email) {
+             $pdo->rollBack();
+             die("Erro de segurança: Email associado ao token não corresponde.");
         }
-        $maskedEmail = maskEmail($email);
 
-        // **NÃO HÁ COMMIT/ROLLBACK NEM UPDATE AQUI**
+        // 3. ATUALIZAÇÃO: Marca como usado E armazena a nova senha (usando hash)
+        $newHashedPassword = password_hash($password1, PASSWORD_DEFAULT);
+        
+        $stmtUpdateUser = $pdo->prepare("
+            UPDATE usuarios 
+            SET senha = :senha_hash 
+            WHERE email = :email
+        ");
+        $stmtUpdateUser->bindParam(':senha_hash', $newHashedPassword);
+        $stmtUpdateUser->bindParam(':email', $email);
+        $stmtUpdateUser->execute();
 
-    } else {
-        // Token inválido, expirado ou já usado
+        // 4. CONSUMO DO TOKEN (Marcando como usado)
+        $stmtInvalidate = $pdo->prepare("
+            UPDATE recuperar_senha 
+            SET used = 1, valid = NOW() 
+            WHERE token = :token
+        ");
+        $stmtInvalidate->bindParam(':token', $token, PDO::PARAM_STR);
+        $stmtInvalidate->execute();
+
+        $pdo->commit(); // **SUCESSO**: Todas as alterações são salvas
+
+        // Redirecionamento para sucesso
         echo "<script>
-            alert('Token inválido, expirado ou já utilizado. Você será redirecionado para a página de login.');
+            alert('Senha redefinida com sucesso! Você será redirecionado para o login.');
             window.location.href = 'login.html';
         </script>";
-        exit;
+        
+    } else {
+        $pdo->rollBack(); // Falhou a revalidação (token expirado ou usado)
+        die("O link de redefinição expirou ou já foi utilizado. Por favor, solicite um novo.");
     }
 } catch (PDOException $e) {
-    die("Erro ao conectar ou consultar o banco de dados: " . $e->getMessage());
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    die("Erro fatal ao salvar a senha: " . $e->getMessage());
 }
+
 ?>
 
 <!DOCTYPE html>
