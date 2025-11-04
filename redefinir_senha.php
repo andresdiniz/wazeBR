@@ -3,9 +3,7 @@ require_once __DIR__ . '/config/configbd.php';
 
 // --- VALIDAÇÃO DE TOKEN (PHP - Lado do Servidor) ---
 
-// 1. Verificação Inicial
 if (!isset($_GET['token']) || empty($_GET['token'])) {
-    // Redireciona imediatamente se o token não estiver presente
     echo "<script>
         alert('Token não fornecido ou inválido. Você será redirecionado para a página de login.');
         window.location.href = 'login.html';
@@ -13,58 +11,46 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
     exit;
 }
 
-// Captura e sanitiza o valor do token
 $token = htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8');
-$email = null; // Variável para armazenar o email validado
+$email = null;
+$maskedEmail = null;
 
 try {
     $pdo = Database::getConnection();
 
-    // **INÍCIO DA TRANSAÇÃO PARA ATOMICIDADE E SEGURANÇA**
-    $pdo->beginTransaction(); 
-
-    // 2. Consulta e Bloqueio da Linha (SELECT ... FOR UPDATE)
-    // Verifica se o token existe, não expirou (valid >= NOW()) e não foi usado (used = 0)
+    // 1. Consulta APENAS para verificar a validade do token (sem bloquear ou atualizar)
     $stmt = $pdo->prepare("
         SELECT email 
         FROM recuperar_senha 
         WHERE token = :token 
         AND valid >= NOW() 
         AND used = 0
-        FOR UPDATE
-    ");
+    "); // REMOVIDO FOR UPDATE e usado used = 0
     $stmt->bindParam(':token', $token, PDO::PARAM_STR);
     $stmt->execute();
 
+    // 2. Verifica se o token é válido
     if ($stmt->rowCount() > 0) {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email = $result['email']; // Captura o email associado
+        $email = $result['email']; // Captura o email associado ao token
 
-        // 3. Marca o token como usado (Usando 1 para 'usado')
-        $stmtUpdate = $pdo->prepare("
-            UPDATE recuperar_senha 
-            SET used = 1, valid = NOW() 
-            WHERE token = :token
-        ");
-        $stmtUpdate->bindParam(':token', $token, PDO::PARAM_STR);
-        $stmtUpdate->execute();
-        
-        $pdo->commit(); // **CONFIRMA** as duas operações (SELECT/UPDATE) como uma única unidade
-        
-        // Função auxiliar para mascarar o email para exibição (melhora UX)
+        // Função auxiliar para mascarar o email para exibição
         function maskEmail($email) {
             $parts = explode('@', $email);
             $name = $parts[0];
             $domain = $parts[1];
-            $maskedName = substr($name, 0, 2) . str_repeat('*', strlen($name) - 2);
+            // Mascara se tiver mais de 3 caracteres, senão mostra os 2 primeiros
+            $maskedName = (strlen($name) > 3) 
+                          ? substr($name, 0, 2) . str_repeat('*', strlen($name) - 2)
+                          : substr($name, 0, 1) . str_repeat('*', strlen($name) - 1);
             return $maskedName . '@' . $domain;
         }
         $maskedEmail = maskEmail($email);
 
+        // **NÃO HÁ COMMIT/ROLLBACK NEM UPDATE AQUI**
+
     } else {
-        $pdo->rollBack(); // **DESFAZ** em caso de token inválido/expirado/já usado
-        
-        // Redireciona se o token não for válido
+        // Token inválido, expirado ou já usado
         echo "<script>
             alert('Token inválido, expirado ou já utilizado. Você será redirecionado para a página de login.');
             window.location.href = 'login.html';
@@ -72,9 +58,6 @@ try {
         exit;
     }
 } catch (PDOException $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack(); // Garante rollback em caso de erro de DB
-    }
     die("Erro ao conectar ou consultar o banco de dados: " . $e->getMessage());
 }
 ?>
@@ -86,7 +69,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waze Portal - Redefinição de Senha</title>
     <style>
-        /* Melhorias de Layout: Foco em Centralização e Clareza */
+        /* Estilos mantidos da versão anterior (Layout melhorado) */
         body, h2, form, ul, li, input, button {
             margin: 0;
             padding: 0;
@@ -95,7 +78,7 @@ try {
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9ecef; /* Fundo mais suave */
+            background-color: #e9ecef; 
             color: #343a40;
             display: flex;
             justify-content: center;
@@ -105,24 +88,24 @@ try {
 
         form {
             background: #fff;
-            padding: 35px; /* Mais padding */
-            border-radius: 12px; /* Bordas mais arredondadas */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Sombra mais destacada */
+            padding: 35px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
             width: 100%;
-            max-width: 450px; /* Ligeiramente maior */
+            max-width: 450px; 
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 10px; /* Menos espaço antes do título */
-            color: #28a745; /* Cor de sucesso/primária */
+            margin-bottom: 10px; 
+            color: #28a745; 
         }
         
         .info-box {
             text-align: center;
             margin-bottom: 20px;
             padding: 10px;
-            border: 1px solid #ffc107; /* Cor de aviso/alerta */
+            border: 1px solid #ffc107; 
             background-color: #fff3cd;
             border-radius: 5px;
             color: #856404;
@@ -131,13 +114,13 @@ try {
 
         label {
             display: block;
-            margin-bottom: 8px; /* Mais espaço entre label e input */
+            margin-bottom: 8px; 
             font-weight: 600;
         }
 
         input {
             width: 100%;
-            padding: 12px; /* Padding maior */
+            padding: 12px; 
             margin-bottom: 15px;
             border: 1px solid #ced4da;
             border-radius: 6px;
@@ -153,18 +136,18 @@ try {
         ul {
             list-style: none;
             padding-left: 0;
-            margin-bottom: 25px; /* Mais espaço antes do botão */
+            margin-bottom: 25px; 
         }
 
         li {
             font-size: 14px;
-            padding-left: 20px; /* Espaço para ícones de status */
+            padding-left: 20px; 
             position: relative;
             margin: 7px 0;
         }
 
         .error::before {
-            content: '✗'; /* Símbolo de erro */
+            content: '✗'; 
             position: absolute;
             left: 0;
             color: #dc3545;
@@ -172,7 +155,7 @@ try {
         }
 
         .success::before {
-            content: '✓'; /* Símbolo de sucesso */
+            content: '✓'; 
             position: absolute;
             left: 0;
             color: #28a745;
@@ -180,7 +163,7 @@ try {
         }
         
         .error, .success {
-            color: #343a40; /* Mantém a cor do texto neutra, o símbolo indica status */
+            color: #343a40; 
         }
 
         button {
@@ -221,6 +204,7 @@ try {
         <input type="password" id="password2" name="password2" placeholder="Confirme a nova senha" required>
 
         <input type="hidden" name="email" value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="token" value="<?php echo $token; ?>">
         
         <ul id="requirements">
             <li id="length">Mínimo de 8 caracteres</li>
@@ -234,7 +218,7 @@ try {
     </form>
 
     <script>
-        // --- VALIDAÇÃO CLIENT-SIDE (UX) ---
+        // Script de validação de senha (Mantido)
         const password1 = document.getElementById('password1');
         const password2 = document.getElementById('password2');
         const requirements = {
@@ -250,25 +234,20 @@ try {
             const pwd1 = password1.value;
             const pwd2 = password2.value;
 
-            // Verificação dos requisitos
             requirements.length.className = pwd1.length >= 8 ? 'success' : 'error';
             requirements.uppercase.className = /[A-Z]/.test(pwd1) ? 'success' : 'error';
             requirements.number.className = /[0-9]/.test(pwd1) ? 'success' : 'error';
-            // Regex para símbolos: [\W_] significa qualquer coisa que não seja letra ou número (incluindo _)
             requirements.symbol.className = /[\W_]/.test(pwd1) ? 'success' : 'error';
             requirements.match.className = pwd1 === pwd2 ? 'success' : 'error';
 
-            // Habilitar botão apenas se todos os requisitos forem 'success'
             const allValid = Object.values(requirements).every(req => req.className === 'success');
             
             submitButton.disabled = !allValid;
         }
 
-        // Event Listeners
         password1.addEventListener('input', validatePasswords);
         password2.addEventListener('input', validatePasswords);
         
-        // Executa uma vez ao carregar para checar se há algo digitado (improvável, mas seguro)
         validatePasswords();
     </script>
 </body>
