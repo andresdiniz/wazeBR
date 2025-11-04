@@ -122,6 +122,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
 <script>
+const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo | json_encode() | raw }};
     // ===== Variáveis Globais =====
     let map;
     let currentSegmentNodes = [];
@@ -753,63 +754,41 @@
 <script>
 //FUNCIONANDO PERFEITAMENTE! GRAÇAS A DEUS!
 
-// Função para carregar subtipos via Fetch (API)
-async function loadSubtypes(tipoId) {
+// Função para carregar subtipos usando a variável injetada pelo Twig (SEM AJAX)
+function loadSubtypes(tipoId) {
     const subtipoSelect = document.getElementById('subtipo');
-    // Limpa o select e mostra o status de carregamento
-    subtipoSelect.innerHTML = '<option value="">Carregando Subtipos...</option>';
+    
+    // Reseta o estado do campo
+    subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
     subtipoSelect.disabled = true;
 
     if (!tipoId) {
-        // Se nenhum Tipo for selecionado, reseta o Subtipo
-        subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
         return;
     }
+    
+    // Obtém os subtipos do objeto global
+    const subtypes = SUBTIPOS_POR_TIPO[tipoId] || []; 
 
-    // Endpoint para buscar subtipos - Ajuste se necessário!
-    const url = `api.php?action=get_subtipos&id=${tipoId}`; 
-
-    try {
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
-        }
-        
-        // Assumindo que a API retorna um array de objetos: [{ id: 1, name: "Leve" }, { id: 2, name: "Grave" }]
-        const subtypes = await response.json(); 
-
-        subtipoSelect.innerHTML = '<option value="">Selecione um Subtipo</option>';
-
-        if (subtypes && subtypes.length > 0) {
-            subtypes.forEach(subtipo => {
-                const option = document.createElement('option');
-                // IMPORTANTE: O value deve ser o ID do subtipo
-                option.value = subtipo.id; 
-                option.textContent = subtipo.name;
-                subtipoSelect.appendChild(option);
-            });
-            subtipoSelect.disabled = false; // Habilita o campo
-        } else {
-            subtipoSelect.innerHTML = '<option value="">Nenhum Subtipo Encontrado</option>';
-        }
-
-    } catch (error) {
-        console.error('Erro ao buscar subtipos:', error);
-        subtipoSelect.innerHTML = '<option value="">Erro ao Carregar Subtipos</option>';
+    if (subtypes.length > 0) {
+        subtypes.forEach(subtipo => {
+            const option = document.createElement('option');
+            // Usamos o 'id' como o valor da opção
+            option.value = subtipo.id; 
+            option.textContent = subtipo.name;
+            subtipoSelect.appendChild(option);
+        });
+        subtipoSelect.disabled = false; // Habilita o campo após o carregamento
+    } else {
+        subtipoSelect.innerHTML = '<option value="">Nenhum Subtipo Encontrado</option>';
     }
 }
 
-// Gatilho: Deve ser colocado dentro do evento DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-    // ... Seu código de inicialização do mapa e outros listeners ...
+// O listener deve estar dentro do bloco DOMContentLoaded (como nos scripts anteriores)
 
-    // NOVO: Listener para carregar subtipos quando o campo 'tipo' muda
-    document.getElementById('tipo').addEventListener('change', (e) => {
-        const tipoId = e.target.value;
-        loadSubtypes(tipoId);
-    });
-
-    // ... Fim do seu código de inicialização ...
+// ... Dentro do seu document.addEventListener('DOMContentLoaded', () => { ...
+document.getElementById('tipo').addEventListener('change', (e) => {
+    const tipoId = e.target.value;
+    loadSubtypes(tipoId);
 });
+
 </script>
