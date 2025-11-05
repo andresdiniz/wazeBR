@@ -286,7 +286,7 @@ function handleMapClick(e) {
         // 'finalPolylineInput' também receba esse ponto.
         document.getElementById('coordenadas').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 
-        handleSimpleClick(map, lat, lng);
+        getStreetSegment(map, lat, lng);
     }
 }
 // =========================================================================
