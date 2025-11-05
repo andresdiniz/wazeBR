@@ -1194,7 +1194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
 
             // Validação dos campos obrigatórios (você pode incluir outros se necessário)
-            if (!$description || !$tipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$streetSegment || !$segmentDirection) {
+            if (!$description || !$tipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$segmentDirection) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
                 exit;
