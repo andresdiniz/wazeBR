@@ -141,6 +141,52 @@ class="col-md-6">
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
 
 <script>
+// ==========================================================
+        // >> NOVO CÓDIGO PARA ENVIO AJAX DO FORMULÁRIO <<
+        // ==========================================================
+        const form = document.getElementById('eventoForm');
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Impede o envio padrão do formulário
+
+                const formData = new FormData(this);
+                const actionUrl = this.action;
+
+                try {
+                    const response = await fetch(actionUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    // Tenta processar a resposta como JSON
+                    const result = await response.json(); 
+
+                    if (response.ok && result.success) { // Status 200 e sucesso
+                        showAlert(result.message, 'success');
+                        
+                        // Recarrega a página após 1.5 segundo para o usuário ver o alerta
+                        setTimeout(() => {
+                            window.location.reload(); 
+                        }, 1500);
+                        
+                    } else { // Status de erro (400, 500) ou sucesso: false
+                        
+                        let errorMessage = result.message || result.error || 'Erro desconhecido ao processar o evento.';
+                        
+                        // Adiciona campos faltantes na mensagem de erro se houver
+                        if (result.missing && Array.isArray(result.missing)) {
+                            errorMessage += '<br>Campos faltantes: ' + result.missing.join(', ');
+                        }
+                        
+                        showAlert(errorMessage, 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Erro de rede ou ao processar JSON:', error);
+                    showAlert('Não foi possível se conectar ao servidor ou a resposta é inválida.', 'danger');
+                }
+            });
+        }
 const SUBTIPOS_POR_TIPO = {{ subtiposPorTipo |
 json_encode() | raw }};
     // ===== Variáveis Globais =====
@@ -148,7 +194,6 @@ json_encode() | raw }};
     let currentSegmentNodes = [];
 let currentSegmentLayer = null;
     let clickMarker = null;
-
 
     // Limpa o localStorage para evitar dados de sessões anteriores
     localStorage.clear();
