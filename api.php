@@ -1182,7 +1182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $coordenadas = $_POST['coordenadas'] ?? null;         // AQUI: Lê 'coordenadas' (a chave que o PHP espera)
             $rua = $_POST['rua'] ?? null;                         // AQUI: Lê 'rua' (a chave que o PHP espera)
             $streetSegment = $_POST['streetSegment'] ?? null;     // AQUI: Lê 'streetSegment' (a chave que o PHP espera)
-            $segmentDirection = $_POST['directionSelect'] ?? null;// AQUI: Lê 'segmentDirection' (a chave que o PHP espera)
+            $segmentDirection = $_POST['segmentDirection'] ?? null;// AQUI: Lê 'segmentDirection' (a chave que o PHP espera)
             $id_parceiro = $_POST['id_parceiro'] ?? null;
 
             if ($id_parceiro == null) {
@@ -1201,7 +1201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // VARIÁVEIS COM CHAVES ERRADAS (QUE FICARÃO NULL)
             if (!$coordenadas) $missingFields[] = 'coordenadas (Lido de $_POST[\'coordenadas\'])'; 
             if (!$rua) $missingFields[] = 'rua (Lido de $_POST[\'rua\'])';
-            if (!$streetSegment) $missingFields[] = 'streetSegment (Lido de $_POST[\'streetSegment\'])';
+            //if (!$streetSegment) $missingFields[] = 'streetSegment (Lido de $_POST[\'streetSegment\'])';
             if (!$segmentDirection) $missingFields[] = 'segmentDirection (Lido de $_POST[\'segmentDirection\'])';
 
             if (!empty($missingFields)) {
