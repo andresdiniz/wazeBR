@@ -486,30 +486,57 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Manipulação de modais com mapas (Bootstrap 5)
+    const modalMaps = {};
+    
     $('.open-modal').on('click', function() {
-        let lat = $(this).data('lat');
-        let lon = $(this).data('lon');
-        let modalId = $(this).attr('data-bs-target');
-        let mapId = modalId.replace('#alertModal', 'map-');
+        const lat = $(this).data('lat');
+        const lon = $(this).data('lon');
+        const modalId = $(this).attr('data-bs-target');
+        const mapId = modalId.replace('#alertModal', 'map-');
 
+        // Remover eventos anteriores para evitar múltiplas chamadas
+        $(modalId).off('shown.bs.modal');
+        
         // Usar evento do Bootstrap 5
-        $(modalId).on('shown.bs.modal', function() {
-            let mapElement = document.getElementById(mapId);
-            if (mapElement && !mapElement._leaflet_id) {
-                let map = L.map(mapId).setView([lat, lon], 15);
+        $(modalId).one('shown.bs.modal', function() {
+            const mapElement = document.getElementById(mapId);
+            
+            // Verificar se o mapa já existe
+            if (mapElement) {
+                // Se o mapa já foi criado, apenas reajustar tamanho
+                if (modalMaps[mapId]) {
+                    setTimeout(function() {
+                        modalMaps[mapId].invalidateSize();
+                        modalMaps[mapId].setView([lat, lon], 15);
+                    }, 200);
+                } else {
+                    // Criar novo mapa
+                    try {
+                        const map = L.map(mapId, {
+                            center: [lat, lon],
+                            zoom: 15,
+                            scrollWheelZoom: false
+                        });
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap contributors',
+                            maxZoom: 19
+                        }).addTo(map);
 
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup('Localização do Alerta')
-                    .openPopup();
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup('Localização do Alerta')
+                            .openPopup();
 
-                setTimeout(function() {
-                    map.invalidateSize();
-                }, 100);
+                        // Armazenar referência do mapa
+                        modalMaps[mapId] = map;
+
+                        setTimeout(function() {
+                            map.invalidateSize();
+                        }, 200);
+                    } catch (error) {
+                        console.error('Erro ao criar mapa:', error);
+                    }
+                }
             }
         });
     });
