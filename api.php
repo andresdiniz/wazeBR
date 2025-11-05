@@ -1222,7 +1222,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // (Note que no JSON, cada par vem na ordem [longitude, latitude])
             $polylineFormatted = '';
             $coordsArray = json_decode($streetSegment, true);
-            if (is_array($coordsArray)) {
+            if (is_array($coordsArray) && !empty($coordsArray) && is_array($coordsArray[0])) { 
+                // Lógica de JSON Decode (para segmento tipo 6)
                 $formattedCoords = [];
                 foreach ($coordsArray as $coord) {
                     if (is_array($coord) && count($coord) >= 2) {
@@ -1231,12 +1232,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $formattedCoords[] = $coord[0];
                     }
                 }
-                // Junta os valores separados por vírgula e espaço
                 $polylineFormatted = implode(', ', $formattedCoords);
+            } elseif (is_string($streetSegment) && !empty($streetSegment)) {
+                // Lógica para string simples 'lat,lon' (para ponto tipo 3)
+                // ESTE BLOCO AGORA É ALCANÇADO COM SUCESSO DEVIDO AO FALLBACK
+                $polylineFormatted = $streetSegment;
             } else {
-                // Se o JSON não estiver correto, aborta a operação
+                // Se, por alguma razão, o formato ainda estiver inválido
                 http_response_code(400);
-                echo json_encode(['error' => 'Formato inválido para streetSegment.']);
+                echo json_encode(['error' => 'Formato inválido ou ausente para o segmento/polyline.']);
                 exit;
             }
 
