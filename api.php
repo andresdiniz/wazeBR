@@ -1173,19 +1173,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             break;
 
         case 'cadastrar_evento':
-            // Log dos dados recebidos via POST para depuração
-            //logToFile('info', 'Dados recebidos via POST: ' . json_encode($_POST));
-
-            // Recebe os dados enviados
+            // Recebe os dados
             $description = $_POST['nome'] ?? null;
             $tipo = $_POST['tipo'] ?? null;
             $subtipo = $_POST['subtipo'] ?? null;
             $starttime = $_POST['starttime'] ?? null;
             $endtime = $_POST['endtime'] ?? null;
-            $coordenadas = $_POST['coordenadas'] ?? null; // Geralmente o ponto central
-            $rua = $_POST['rua'] ?? null;
-            $streetSegment = $_POST['streetSegment'] ?? null; // JSON com array de coordenadas
-            $segmentDirection = $_POST['segmentDirection'] ?? null; // Valor, por exemplo, "reversed"
+            $coordenadas = $_POST['coordenadas'] ?? null;         // AQUI: Lê 'coordenadas' (a chave que o PHP espera)
+            $rua = $_POST['rua'] ?? null;                         // AQUI: Lê 'rua' (a chave que o PHP espera)
+            $streetSegment = $_POST['streetSegment'] ?? null;     // AQUI: Lê 'streetSegment' (a chave que o PHP espera)
+            $segmentDirection = $_POST['segmentDirection'] ?? null;// AQUI: Lê 'segmentDirection' (a chave que o PHP espera)
             $id_parceiro = $_POST['id_parceiro'] ?? null;
 
             if ($id_parceiro == null) {
@@ -1193,10 +1190,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 die();
             }
 
-            // Validação dos campos obrigatórios (você pode incluir outros se necessário)
-            if (!$description || !$tipo || !$starttime || !$endtime || !$coordenadas || !$rua || !$segmentDirection) {
+            // LISTAGEM ESPECÍFICA DOS CAMPOS FALTANTES
+            $missingFields = [];
+            if (!$description) $missingFields[] = 'description ($nome)';
+            if (!$tipo) $missingFields[] = 'tipo';
+            if (!$subtipo) $missingFields[] = 'subtipo'; // Subtipo é obrigatório, mas não estava na sua validação original.
+            if (!$starttime) $missingFields[] = 'starttime';
+            if (!$endtime) $missingFields[] = 'endtime';
+            
+            // VARIÁVEIS COM CHAVES ERRADAS (QUE FICARÃO NULL)
+            if (!$coordenadas) $missingFields[] = 'coordenadas (Lido de $_POST[\'coordenadas\'])'; 
+            if (!$rua) $missingFields[] = 'rua (Lido de $_POST[\'rua\'])';
+            if (!$streetSegment) $missingFields[] = 'streetSegment (Lido de $_POST[\'streetSegment\'])';
+            if (!$segmentDirection) $missingFields[] = 'segmentDirection (Lido de $_POST[\'segmentDirection\'])';
+
+            if (!empty($missingFields)) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Todos os campos obrigatórios devem ser preenchidos.']);
+                echo json_encode([
+                    'error' => 'Os seguintes campos obrigatórios estão faltando no POST ou estão vazios no PHP: ',
+                    'missing' => $missingFields
+                ]);
                 exit;
             }
 
