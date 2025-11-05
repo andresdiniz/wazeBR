@@ -1252,7 +1252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             try {
                 $pdo = Database::getConnection();
 
-                $sqlconsult = "SELECT subtype_value FROM alert_subtype Where subtype_id=:subtipo";
+                $sqlconsult = "SELECT subtype_value FROM alert_subtype Where id=:subtipo";
 
                 $stmtSubtype = $pdo->prepare($sqlconsult);
                 // O valor de $subtipo aqui é o ID enviado pelo formulário (ex: '4')
