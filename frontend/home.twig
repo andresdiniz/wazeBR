@@ -1,114 +1,274 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
-
 <style>
-    #congestionMap {
-        height: 500px;
-        width: 100%;
+    :root {
+        --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        --card-hover-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
     }
 
-    /* Melhorias mínimas para responsividade */
-    @media (max-width: 767.98px) {
-        .table-responsive {
-            font-size: 0.85rem;
-        }
-
-        .table th,
-        .table td {
-            padding: 0.5rem 0.25rem;
-            vertical-align: middle;
-        }
-
-        .btn-sm {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.4rem;
-        }
-
-        /* Ocultar colunas menos importantes em mobile */
-        .d-none-mobile {
-            display: none !important;
-        }
-
-        .card-header {
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-        }
+    /* Cards melhorados */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        overflow: hidden;
     }
 
-    @media (min-width: 768px) {
-        .d-none-mobile {
-            display: table-cell !important;
-        }
+    .card:hover {
+        box-shadow: var(--card-hover-shadow);
+        transform: translateY(-2px);
     }
 
-    /* Melhor aproveitamento da área */
-    .container {
-        max-width: 100%;
-        padding-left: 15px;
-        padding-right: 15px;
+    .card-header {
+        border: none;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 
-    @media (min-width: 1200px) {
-        .container {
-            max-width: 1400px;
-        }
-    }
-
-    /* Tabelas mais compactas */
-    .table-sm th,
-    .table-sm td {
-        padding: 0.5rem;
+    .card-header i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
     }
 
     .card-body {
-        padding: 1rem;
+        padding: 1.25rem;
     }
 
-    /* Melhorar legibilidade dos badges */
+    /* Badge modernizado */
     .badge {
-        min-width: 45px;
-        padding: 0.375rem 0.5rem;
+        padding: 0.4rem 0.7rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
     }
 
-    /* Botões de ação mais compactos */
-    .btn-group-sm>.btn,
+    /* Mapa de congestionamento */
+    #congestionMap {
+        height: 550px;
+        width: 100%;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    /* Tabelas otimizadas */
+    .table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    /* Botões melhorados */
     .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        transition: var(--transition);
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+
+    .btn-outline-primary:hover {
+        transform: scale(1.05);
+    }
+
+    /* Card de estatísticas (motoristas) */
+    .stat-card {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .stat-card h2 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #0dcaf0;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-card p {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    /* Estados vazios melhorados */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-state i {
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    /* Responsividade aprimorada */
+    @media (max-width: 768px) {
+        .card-header {
+            font-size: 1rem;
+            padding: 0.875rem 1rem;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 0.5rem 0.35rem;
+        }
+
+        .col-mobile-hide {
+            display: none;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .stat-card h2 {
+            font-size: 2.5rem;
+        }
+
+        #congestionMap {
+            height: 400px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.5rem;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .col-mobile-hide {
+            display: table-cell;
+        }
+    }
+
+    @media (min-width: 1400px) {
+        .container-fluid {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+    }
+
+    /* DataTables customização */
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 6px;
+        margin: 0 2px;
+    }
+
+    /* Badges de confiança */
+    .confidence-badge {
+        min-width: 50px;
+        font-weight: 600;
+    }
+
+    /* Animações sutis */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* Melhorias de acessibilidade */
+    .btn:focus,
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Tooltip customizado */
+    [title] {
+        cursor: help;
+    }
+
+    /* Modal map */
+    .modal-map {
+        height: 300px;
+        width: 100%;
+        border-radius: 8px;
     }
 </style>
 
-<div class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
-                    <span><i class="fas fa-car-crash mr-2"></i>Acidentes</span>
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <!-- Card de Acidentes -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <span>
+                        <i class="fas fa-car-crash"></i>
+                        Acidentes
+                    </span>
                     {% if accidentAlerts is not empty %}
-                    <span class="badge badge-light">{{ accidentAlerts|length }}</span>
+                    <span class="badge bg-light text-dark">{{ accidentAlerts|length }}</span>
                     {% endif %}
                 </div>
-                <div class="card-body p-2">
+                <div class="card-body p-0">
                     {% if accidentAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-sm mb-0" id="accidentsTable">
-                            <thead class="thead-light">
+                        <table class="table table-hover align-middle mb-0" id="accidentsTable">
+                            <thead>
                                 <tr>
                                     <th>Local</th>
-                                    <th class="d-none-mobile">Rua</th>
-                                    <th class="d-none d-md-table-cell">Localização</th>
-                                    <th>Data</th>
+                                    <th class="col-mobile-hide">Rua</th>
+                                    <th class="col-mobile-hide">Localização</th>
+                                    <th>Data/Hora</th>
                                     <th class="text-center">Conf.</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
@@ -117,33 +277,34 @@
                                 {% for alert in accidentAlerts %}
                                 <tr>
                                     <td>
-                                        <strong>{{ alert.city }}</strong>
+                                        <strong class="text-dark">{{ alert.city }}</strong>
                                         <div class="d-md-none">
                                             <small class="text-muted">{{ alert.street }}</small>
                                         </div>
                                     </td>
-                                    <td class="d-none-mobile">{{ alert.street }}</td>
-                                    <td class="d-none d-md-table-cell">
+                                    <td class="col-mobile-hide">{{ alert.street }}</td>
+                                    <td class="col-mobile-hide text-center">
                                         <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                             target="_blank" class="btn btn-outline-primary btn-sm">
                                             <i class="fab fa-waze"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <div>{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
-                                        <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
+                                        <div class="fw-semibold">{{ (alert.pubMillis / 1000)|date("d/m/Y") }}</div>
+                                        <small class="text-muted">{{ (alert.pubMillis / 1000)|date("H:i") }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                        <span class="badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning text-dark' : 'danger') }} confidence-badge">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal{{ alert.uuid }}"
-                                                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#alertModal{{ alert.uuid }}"
+                                                data-lat="{{ alert.location_y }}" 
+                                                data-lon="{{ alert.location_x }}"
                                                 title="Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -160,33 +321,37 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-car-crash fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-0">Não há eventos de acidentes registrados no momento.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-car-crash fa-3x"></i>
+                        <p class="mb-0">Não há eventos de acidentes registrados no momento.</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-warning text-dark d-flex align-items-center justify-content-between">
-                    <span><i class="fas fa-traffic-light mr-2"></i>Congestionamentos</span>
+        <!-- Card de Congestionamentos -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <span>
+                        <i class="fas fa-traffic-light"></i>
+                        Congestionamentos
+                    </span>
                     {% if jamAlerts is not empty %}
-                    <span class="badge badge-dark">{{ jamAlerts|length }}</span>
+                    <span class="badge bg-dark">{{ jamAlerts|length }}</span>
                     {% endif %}
                 </div>
-                <div class="card-body p-2">
+                <div class="card-body p-0">
                     {% if jamAlerts is not empty %}
                     <div class="table-responsive">
-                        <table class="table table-striped table-sm mb-0" id="trafficTable">
-                            <thead class="thead-light">
+                        <table class="table table-hover align-middle mb-0" id="trafficTable">
+                            <thead>
                                 <tr>
                                     <th>Local</th>
-                                    <th class="d-none-mobile">Rua</th>
-                                    <th class="d-none d-md-table-cell">Localização</th>
-                                    <th>Data</th>
+                                    <th class="col-mobile-hide">Rua</th>
+                                    <th class="col-mobile-hide">Localização</th>
+                                    <th>Data/Hora</th>
                                     <th class="text-center">Conf.</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
@@ -195,33 +360,34 @@
                                 {% for alert in jamAlerts %}
                                 <tr>
                                     <td>
-                                        <strong>{{ alert.city }}</strong>
+                                        <strong class="text-dark">{{ alert.city }}</strong>
                                         <div class="d-md-none">
                                             <small class="text-muted">{{ alert.street }}</small>
                                         </div>
                                     </td>
-                                    <td class="d-none-mobile">{{ alert.street }}</td>
-                                    <td class="d-none d-md-table-cell">
+                                    <td class="col-mobile-hide">{{ alert.street }}</td>
+                                    <td class="col-mobile-hide text-center">
                                         <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                             target="_blank" class="btn btn-outline-primary btn-sm">
                                             <i class="fab fa-waze"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <div>{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
-                                        <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
+                                        <div class="fw-semibold">{{ (alert.pubMillis / 1000)|date("d/m/Y") }}</div>
+                                        <small class="text-muted">{{ (alert.pubMillis / 1000)|date("H:i") }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                        <span class="badge bg-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning text-dark' : 'danger') }} confidence-badge">
                                             {{ alert.confidence }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-info btn-sm open-modal" data-toggle="modal"
-                                                data-target="#alertModal{{ alert.uuid }}"
-                                                data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}"
+                                            <button class="btn btn-info btn-sm open-modal" 
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#alertModal{{ alert.uuid }}"
+                                                data-lat="{{ alert.location_y }}" 
+                                                data-lon="{{ alert.location_x }}"
                                                 title="Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -238,36 +404,51 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-traffic-light fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-0">Não há congestionamentos registrados no momento.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-traffic-light fa-3x"></i>
+                        <p class="mb-0">Não há congestionamentos registrados no momento.</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Card de Motoristas Impactados -->
         {% if activeDrivers is not empty %}
-        <div class="col-xl-6 col-lg-12 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
-                    <span><i class="fas fa-users mr-2"></i>Motoristas Em Congestionamentos</span>
-                    {% if activeDrivers is defined and activeDrivers is not empty %}
-                    <span class="badge badge-light">{{ activeDrivers[0].total_wazers_impactados }}</span>
-                    {% endif %}
+        <div class="col-xl-6 col-lg-12">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <span>
+                        <i class="fas fa-users"></i>
+                        Motoristas em Congestionamentos
+                    </span>
+                    <span class="badge bg-light text-dark">{{ activeDrivers[0].total_wazers_impactados }}</span>
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    {% if activeDrivers is defined and activeDrivers is not empty %}
-                    <h2 class="font-weight-bold">{{ activeDrivers[0].total_wazers_impactados }}</h2>
-                    {% else %}
-                    <p class="text-muted mb-0">Dados de motoristas não disponíveis.</p>
-                    {% endif %}
+                <div class="card-body stat-card">
+                    <h2>{{ activeDrivers[0].total_wazers_impactados|number_format(0, ',', '.') }}</h2>
+                    <p class="mb-0">motoristas impactados no momento</p>
+                    <small class="text-muted">
+                        <i class="fas fa-clock"></i>
+                        Última atualização: {{ activeDrivers[0].ultima_coleta_dados|date("d/m/Y H:i") }}
+                    </small>
                 </div>
             </div>
         </div>
-            {% endif %}
+        {% endif %}
+
+        <!-- Mapa de Congestionamento -->
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body p-2">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <span>
+                        <i class="fas fa-map-marked-alt"></i>
+                        Mapa de Congestionamentos em Tempo Real
+                    </span>
+                    {% if jamLive is not empty %}
+                    <span class="badge bg-light text-dark">{{ jamLive|length }} congestionamentos ativos</span>
+                    {% endif %}
+                </div>
+                <div class="card-body p-3">
                     <div id="congestionMap"></div>
                 </div>
             </div>
@@ -276,109 +457,156 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        $(".open-modal").on("click", function () {
-            let lat = $(this).data("lat");
-            let lon = $(this).data("lon");
-            let modalId = $(this).attr("data-target");
-            let mapId = modalId.replace("#alertModal", "map-");
+document.addEventListener("DOMContentLoaded", function () {
+    // Configuração do DataTable para Bootstrap 5
+    const dataTableConfig = {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+        },
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+        order: [[3, 'desc']], // Ordenar por data
+        columnDefs: [
+            { orderable: false, targets: [-1] }, // Desabilitar ordenação na coluna de ações
+            { className: "text-center", targets: [4, 5] }
+        ],
+        dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+    };
 
-            $(modalId).on('shown.bs.modal', function () {
-                // Verificação melhorada para evitar erro
-                let mapElement = document.getElementById(mapId);
-                if (mapElement && !mapElement._leaflet_id) {
-                    let map = L.map(mapId).setView([lat, lon], 15);
+    // Inicializar DataTables
+    if ($('#accidentsTable').length) {
+        $('#accidentsTable').DataTable(dataTableConfig);
+    }
 
-                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; OpenStreetMap contributors"
-                    }).addTo(map);
+    if ($('#trafficTable').length) {
+        $('#trafficTable').DataTable(dataTableConfig);
+    }
 
-                    L.marker([lat, lon]).addTo(map)
-                        .bindPopup("Localização do Alerta")
-                        .openPopup();
+    // Manipulação de modais com mapas (Bootstrap 5)
+    $('.open-modal').on('click', function() {
+        let lat = $(this).data('lat');
+        let lon = $(this).data('lon');
+        let modalId = $(this).attr('data-bs-target');
+        let mapId = modalId.replace('#alertModal', 'map-');
 
-                    setTimeout(function () {
-                        map.invalidateSize();
-                    }, 100);
-                }
-            });
+        // Usar evento do Bootstrap 5
+        $(modalId).on('shown.bs.modal', function() {
+            let mapElement = document.getElementById(mapId);
+            if (mapElement && !mapElement._leaflet_id) {
+                let map = L.map(mapId).setView([lat, lon], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup('Localização do Alerta')
+                    .openPopup();
+
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+            }
         });
-
-        // Configuração otimizada do DataTable para responsividade
-        const dataTableConfig = {
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-            },
-            scrollX: true,
-            responsive: true,
-            pageLength: 25, // Mais itens por página para aproveitar melhor a tela
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            order: [[3, 'desc']], // Ordenar por data
-            columnDefs: [
-                { orderable: false, targets: [5] }, // Desabilitar ordenação na coluna de ações
-                { width: "15%", targets: [0] }, // Largura da coluna cidade
-                { width: "8%", targets: [4] }, // Largura da coluna confiança
-                { width: "10%", targets: [5] } // Largura da coluna ações
-            ],
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                '<"row"<"col-sm-12"tr>>' +
-                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
-        };
-
-        if ($('#accidentsTable').length) {
-            $('#accidentsTable').DataTable(dataTableConfig);
-        }
-
-        if ($('#trafficTable').length) {
-            $('#trafficTable').DataTable(dataTableConfig);
-        }
     });
 
-    async function buscarKmDnit(latitude, longitude, raio) {
-        console.log("Buscando KM para:", latitude, longitude, raio);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return "KM Desconhecido";
-    }
-    // Inicialização do mapa de congestionamento
+    // Inicialização do mapa principal
     const congestionMap = L.map('congestionMap').setView([-20.66, -43.79], 13);
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
     }).addTo(congestionMap);
 
-    const jamsData = {{ jamLive| json_encode | raw }};
+    // Dados de congestionamento vindos do PHP
+    const jamsData = {{ jamLive|json_encode|raw }};
 
+    // Função para determinar cor baseada no nível
     function getColorForLevel(level) {
-        switch (level) {
-            case 5: return 'red';    // Tráfego parado
-            case 4: return 'orange'; // Tráfego muito lento
-            case 3: return 'yellow'; // Tráfego lento
-            case 2: return 'lime';   // Tráfego moderado
-            case 1: return 'blue';   // Tráfego leve
-            default: return 'gray';
-        }
+        const colors = {
+            5: '#dc3545',  // Vermelho - Parado
+            4: '#fd7e14',  // Laranja - Muito lento
+            3: '#ffc107',  // Amarelo - Lento
+            2: '#28a745',  // Verde - Moderado
+            1: '#17a2b8',  // Azul - Leve
+        };
+        return colors[level] || '#6c757d';
     }
 
-    if (Array.isArray(jamsData)) {
+    // Função para obter texto do nível
+    function getLevelText(level) {
+        const texts = {
+            5: 'Trânsito Parado',
+            4: 'Muito Lento',
+            3: 'Lento',
+            2: 'Moderado',
+            1: 'Leve'
+        };
+        return texts[level] || 'Desconhecido';
+    }
+
+    // Renderizar congestionamentos no mapa
+    if (Array.isArray(jamsData) && jamsData.length > 0) {
         jamsData.forEach(jam => {
             if (jam.lines && Array.isArray(jam.lines) && jam.lines.length > 0) {
                 const latlngs = jam.lines.map(line => [line.latitude, line.longitude]);
                 const color = getColorForLevel(jam.level);
+                const levelText = getLevelText(jam.level);
+                
                 L.polyline(latlngs, {
                     color: color,
-                    weight: 5,
-                    opacity: 0.7
-                }).addTo(congestionMap).bindPopup(`Congestionamento: Nível ${jam.level}, Rua: ${jam.street}`);
+                    weight: 6,
+                    opacity: 0.8,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                }).addTo(congestionMap)
+                  .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <strong>${jam.street || 'Rua não identificada'}</strong><br>
+                        <strong>Cidade:</strong> ${jam.city || 'N/A'}<br>
+                        <strong>Nível:</strong> ${jam.level}/5 - ${levelText}<br>
+                        <strong>Comprimento:</strong> ${jam.length || 0} metros<br>
+                        <strong>Velocidade:</strong> ${jam.speed || 0} km/h<br>
+                        <strong>Atraso:</strong> ${jam.delay || 0} segundos
+                    </div>
+                  `);
             }
         });
+
+        // Ajustar o zoom para mostrar todos os congestionamentos
+        if (jamsData.length > 0) {
+            const bounds = [];
+            jamsData.forEach(jam => {
+                if (jam.lines && jam.lines.length > 0) {
+                    jam.lines.forEach(line => {
+                        bounds.push([line.latitude, line.longitude]);
+                    });
+                }
+            });
+            if (bounds.length > 0) {
+                congestionMap.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
     } else {
-        console.error("Os dados de congestionamento não são um array:", jamsData);
+        console.log('Nenhum dado de congestionamento disponível');
     }
+
+    // Ajustar mapa após carregamento completo
+    setTimeout(() => {
+        congestionMap.invalidateSize();
+    }, 300);
+
+    // Inicializar tooltips do Bootstrap 5
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
 </script>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
