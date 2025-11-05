@@ -1252,6 +1252,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             try {
                 $pdo = Database::getConnection();
 
+                $sqlconsult = "SELECT subtype_value FROM alert_subtype Where subtype_id=:subtipo";
+
+                $stmtSubtype = $pdo->prepare($sqlconsult);
+                // O valor de $subtipo aqui é o ID enviado pelo formulário (ex: '4')
+                $stmtSubtype->bindParam(':subtipo', $subtipo, PDO::PARAM_STR); 
+                if (!$stmtSubtype->execute()) {
+                throw new Exception('Erro ao buscar o valor do subtipo no banco de dados.');
+                }
+
+                $subtypeResult = $stmtSubtype->fetch(PDO::FETCH_ASSOC);
+
+                if (!$subtypeResult || !isset($subtypeResult['subtype_value'])) {
+                // Trata o erro se o ID for inválido ou não existir
+                throw new Exception('Subtipo (ID: ' . $subtipo . ') não encontrado ou inválido.');
+                }
+                //Substitui o ID pelo valor da string (ex: 'ROAD_CLOSURE')
+                $subtipo = $subtypeResult['subtype_value'];
+
                 // Inserção na tabela events (conforme o DESCRIBE fornecido)
                 $sqlEvent = "
                         INSERT INTO events (
