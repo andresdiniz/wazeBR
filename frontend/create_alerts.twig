@@ -18,6 +18,7 @@
                         <input type="hidden" id="finalPolylineInput" name="coordenadas" required>
                         <input type="hidden" id="finalStreetNameInput" 
 name="rua" required>
+
                     </div>
 
                     <div class="mb-3">
@@ -204,34 +205,46 @@ L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     }
     
     // =========================================================================
-    // MODIFICAÇÃO PRINCIPAL: Lógica condicional no clique do mapa
-    // =========================================================================
-    function handleMapClick(e) {
-        const { lat, lng } = e.latlng;
-        const tipoSelect = document.getElementById('tipo');
-        const tipoId = tipoSelect ? tipoSelect.value : '';
+// MODIFICAÇÃO PRINCIPAL: Lógica condicional no clique do mapa
+// =========================================================================
+function handleMapClick(e) {
+    const { lat, lng } = e.latlng;
+    const tipoSelect = document.getElementById('tipo');
+    const tipoId = tipoSelect ? tipoSelect.value : '';
 
-        // Limpa camadas anteriores
-        if (clickMarker) {
-            map.removeLayer(clickMarker);
-        }
-        if (currentSegmentLayer) {
-            map.removeLayer(currentSegmentLayer);
-            currentSegmentLayer = null;
-        }
-
-        clickMarker = L.marker([lat, lng]).addTo(map);
-        document.getElementById('coordenadas').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        
-        // ** Condição para ativar a lógica de segmento apenas para o tipo 6 **
-        if (tipoId === '6') {
-            // Tipo 6 (Ex: Rodovias): Usa a lógica completa de seleção de segmento
-            getStreetSegment(map, lat, lng);
-        } else {
-            // Outros Tipos: Usa a lógica simplificada de ponto único
-            handleSimpleClick(map, lat, lng);
-        }
+    // Limpa camadas anteriores
+    if (clickMarker) {
+        map.removeLayer(clickMarker);
     }
+    if (currentSegmentLayer) {
+        map.removeLayer(currentSegmentLayer);
+        currentSegmentLayer = null;
+    }
+
+    clickMarker = L.marker([lat, lng]).addTo(map);
+
+    // Passo 1: Limpa os campos de submissão finais (incluindo a polylinha) a cada clique
+    document.getElementById('finalPolylineInput').value = '';
+    document.getElementById('finalStreetNameInput').value = '';
+    
+    // ** Condição para ativar a lógica de segmento apenas para o tipo 6 **
+    if (tipoId === '6') {
+        // Se for Tipo 6 (Segmento), limpamos o campo 'coordenadas'
+        // para evitar que o ponto único interfira no envio da polylinha.
+        document.getElementById('coordenadas').value = ''; 
+        
+        // Tipo 6 (Ex: Rodovias): Usa a lógica completa de seleção de segmento
+        getStreetSegment(map, lat, lng);
+    } else {
+        // Outros Tipos: Usa a lógica simplificada de ponto único.
+        // O campo 'coordenadas' recebe o ponto, e handleSimpleClick garante que
+        // 'finalPolylineInput' também receba esse ponto.
+        document.getElementById('coordenadas').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+        handleSimpleClick(map, lat, lng);
+    }
+}
+// =========================================================================
     // =========================================================================
 
     // Função auxiliar para buscar apenas o nome da rua (simplificada)
@@ -301,13 +314,10 @@ L.marker(e.latlng).addTo(map).bindPopup('Você está aqui!').openPopup();
     async function getStreetSegment(map, lat, lon) {
         // Raio de busca crescente para encontrar vias menores primeiro
         const radiusValues = [50, 100, 200, 400, 800, 1200, 2000];
-let streetName = 'Nome da Rua Desconhecido';
+        let streetName = 'Nome da Rua Desconhecido';
         
         // Atualiza estado de busca UI para o Tipo 6
         const ruaSelect = document.getElementById('ruaSelect');
-        if (ruaSelect) { // Verifica se o elemento existe
-            ruaSelect.innerHTML = '<option value="">Buscando rua...</option>';
-        }
         document.getElementById('segmentSelectionContainer').style.display = 'none';
         esconderBotaoReverso();
 for (let radius of radiusValues) {
