@@ -464,6 +464,7 @@ for (let radius of radiusValues) {
                                     if (distance < 15 && distance < minDistanceToIntersection) { 
                               
                                         minDistanceToIntersection = distance;
+                                        console.log('Distância ao segmento entre intersecções:', distance);
                                         closestIntersectionIndex = i;
                                         // Garante que o trecho seja entre essas duas intersecções
                                         segmentNodes = fullWayGeometry.slice(startIndex, endIndex + 1);
