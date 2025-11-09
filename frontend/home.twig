@@ -240,16 +240,6 @@
         }
     }
 
-    /* Tooltip customizado */
-    .custom-tooltip {
-        background: #2c3e50 !important;
-        color: white !important;
-        padding: 0.5rem 0.75rem !important;
-        border-radius: 0.5rem !important;
-        font-size: 0.85rem !important;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
-    }
-
     /* Animações de entrada */
     .fade-in {
         animation: fadeIn 0.5s ease-in;
@@ -266,6 +256,11 @@
         }
     }
 </style>
+
+<!-- Hidden data for JavaScript -->
+<script type="application/json" id="jamsData">
+{{ jamLive | json_encode | raw }}
+</script>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
     
@@ -324,14 +319,12 @@
                                                     data-bs-target="#alertModal{{ alert.uuid }}"
                                                     data-lat="{{ alert.location_y }}" 
                                                     data-lon="{{ alert.location_x }}"
-                                                    data-bs-toggle-tooltip="tooltip"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                                target="_blank" 
                                                class="btn btn-primary action-btn"
-                                               data-bs-toggle-tooltip="tooltip"
                                                title="Abrir no Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
@@ -404,14 +397,12 @@
                                                     data-bs-target="#alertModal{{ alert.uuid }}"
                                                     data-lat="{{ alert.location_y }}" 
                                                     data-lon="{{ alert.location_x }}"
-                                                    data-bs-toggle-tooltip="tooltip"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                                target="_blank" 
                                                class="btn btn-primary action-btn"
-                                               data-bs-toggle-tooltip="tooltip"
                                                title="Abrir no Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
@@ -495,37 +486,67 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     
-    // Inicializar Tooltips do Bootstrap
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            customClass: 'custom-tooltip'
+    // Variável para controlar se os tooltips já foram inicializados
+    let tooltipsInitialized = false;
+
+    // Inicializar Tooltips do Bootstrap apenas uma vez
+    function initTooltips() {
+        if (tooltipsInitialized) return;
+        
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                trigger: 'hover',
+                boundary: 'window'
+            });
         });
-    });
+        
+        tooltipsInitialized = true;
+        console.log('✓ Tooltips inicializados');
+    }
+
+    // Inicializar tooltips
+    initTooltips();
+
+    // Rastrear mapas já inicializados
+    const initializedMaps = new Set();
 
     // Configuração dos modais com mapas
     $(".open-modal").on("click", function () {
-        let lat = $(this).data("lat");
-        let lon = $(this).data("lon");
-        let modalId = $(this).attr("data-bs-target");
-        let mapId = modalId.replace("#alertModal", "map-");
+        const lat = parseFloat($(this).data("lat"));
+        const lon = parseFloat($(this).data("lon"));
+        const modalId = $(this).attr("data-bs-target");
+        const mapId = modalId.replace("#alertModal", "map-");
 
-        $(modalId).on('shown.bs.modal', function () {
-            let mapElement = document.getElementById(mapId);
+        // Usar 'one' para garantir que o evento só seja anexado uma vez
+        $(modalId).one('shown.bs.modal', function () {
+            // Verificar se o mapa já foi inicializado
+            if (initializedMaps.has(mapId)) {
+                return;
+            }
+
+            const mapElement = document.getElementById(mapId);
             if (mapElement && !mapElement._leaflet_id) {
-                let map = L.map(mapId).setView([lat, lon], 15);
+                try {
+                    const map = L.map(mapId).setView([lat, lon], 15);
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(map);
 
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup("Localização do Alerta")
+                        .openPopup();
 
-                setTimeout(function () {
-                    map.invalidateSize();
-                }, 100);
+                    setTimeout(function () {
+                        map.invalidateSize();
+                    }, 100);
+
+                    // Marcar como inicializado
+                    initializedMaps.add(mapId);
+                } catch (error) {
+                    console.error('Erro ao criar mapa no modal:', error);
+                }
             }
         });
     });
@@ -549,21 +570,26 @@ document.addEventListener("DOMContentLoaded", function () {
              '<"row"<"col-sm-12"tr>>' +
              '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         initComplete: function() {
-            // Notificação quando a tabela carrega
-            $.notify("Dados carregados com sucesso!", {
-                position: "top right",
-                className: "success",
-                autoHideDelay: 3000
-            });
+            // Usar Notify.js se disponível
+            if (typeof $.notify !== 'undefined') {
+                $.notify("✓ Dados carregados com sucesso!", {
+                    position: "top right",
+                    className: "success",
+                    autoHideDelay: 3000
+                });
+            }
         }
     };
 
+    // Inicializar DataTables
     if ($('#accidentsTable').length) {
         $('#accidentsTable').DataTable(dataTableConfig);
+        console.log('✓ Tabela de acidentes inicializada');
     }
 
     if ($('#trafficTable').length) {
         $('#trafficTable').DataTable(dataTableConfig);
+        console.log('✓ Tabela de congestionamentos inicializada');
     }
 
     // Inicialização do mapa de congestionamento
@@ -576,7 +602,17 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(congestionMap);
 
-    const jamsData = {{ jamLive| json_encode | raw }};
+    // Obter dados do elemento script JSON
+    let jamsData = [];
+    const jamsDataElement = document.getElementById('jamsData');
+    
+    if (jamsDataElement) {
+        try {
+            jamsData = JSON.parse(jamsDataElement.textContent);
+        } catch (error) {
+            console.error('Erro ao parsear dados de congestionamento:', error);
+        }
+    }
 
     function getColorForLevel(level) {
         const colors = {
@@ -591,11 +627,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getLevelText(level) {
         const texts = {
-            5: 'Parado',
-            4: 'Muito Lento',
-            3: 'Lento',
-            2: 'Moderado',
-            1: 'Leve'
+            5: 'Tráfego Parado',
+            4: 'Tráfego Muito Lento',
+            3: 'Tráfego Lento',
+            2: 'Tráfego Moderado',
+            1: 'Tráfego Leve'
         };
         return texts[level] || 'Desconhecido';
     }
@@ -609,12 +645,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 const color = getColorForLevel(jam.level);
                 const levelText = getLevelText(jam.level);
                 
-                L.polyline(latlngs, {
+                const polyline = L.polyline(latlngs, {
                     color: color,
                     weight: 6,
                     opacity: 0.8,
                     lineJoin: 'round'
-                }).addTo(congestionMap).bindPopup(`
+                }).addTo(congestionMap);
+
+                polyline.bindPopup(`
                     <div style="min-width: 200px;">
                         <h6 class="mb-2"><i class="fas fa-traffic-light me-2"></i>${levelText}</h6>
                         <p class="mb-1"><strong>Rua:</strong> ${jam.street || 'Não informada'}</p>
@@ -622,63 +660,90 @@ document.addEventListener("DOMContentLoaded", function () {
                         <p class="mb-0"><strong>Nível:</strong> ${jam.level}/5</p>
                     </div>
                 `);
+
+                // Efeitos de hover
+                polyline.on('mouseover', function() {
+                    this.setStyle({ weight: 8, opacity: 1 });
+                });
+
+                polyline.on('mouseout', function() {
+                    this.setStyle({ weight: 6, opacity: 0.8 });
+                });
                 
                 processedJams++;
             }
         });
 
-        // Notificação de sucesso ao carregar o mapa
+        // Remover loading e mostrar notificação
         setTimeout(() => {
             if (mapLoading) mapLoading.classList.add('d-none');
             
-            $.notify(`${processedJams} congestionamento(s) carregado(s) no mapa`, {
-                position: "top right",
-                className: "info",
-                autoHideDelay: 4000
-            });
+            if (typeof $.notify !== 'undefined') {
+                $.notify(`✓ ${processedJams} congestionamento(s) carregado(s)`, {
+                    position: "top right",
+                    className: "info",
+                    autoHideDelay: 4000
+                });
+            }
         }, 500);
+
+        console.log(`✓ ${processedJams} congestionamentos carregados`);
     } else {
         setTimeout(() => {
             if (mapLoading) mapLoading.classList.add('d-none');
             
-            $.notify("Nenhum congestionamento ativo no momento", {
-                position: "top right",
-                className: "warn",
-                autoHideDelay: 4000
-            });
+            if (typeof $.notify !== 'undefined') {
+                $.notify("⚠ Nenhum congestionamento ativo no momento", {
+                    position: "top right",
+                    className: "warn",
+                    autoHideDelay: 4000
+                });
+            }
         }, 500);
     }
 
     // Animação do contador de motoristas
     const driversCountElement = document.getElementById('driversCount');
     if (driversCountElement) {
-        const targetValue = parseInt(driversCountElement.textContent);
-        let currentValue = 0;
-        const duration = 2000; // 2 segundos
-        const increment = targetValue / (duration / 16); // 60fps
+        const targetValue = parseInt(driversCountElement.textContent.replace(/\D/g, ''));
+        
+        if (!isNaN(targetValue) && targetValue > 0) {
+            let currentValue = 0;
+            const duration = 2000;
+            const startTime = Date.now();
 
-        function updateCounter() {
-            currentValue += increment;
-            if (currentValue < targetValue) {
-                driversCountElement.textContent = Math.floor(currentValue);
-                requestAnimationFrame(updateCounter);
-            } else {
-                driversCountElement.textContent = targetValue;
+            function updateCounter() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                currentValue = Math.floor(targetValue * easeOutQuart);
+                
+                driversCountElement.textContent = currentValue.toLocaleString('pt-BR');
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    driversCountElement.textContent = targetValue.toLocaleString('pt-BR');
+                }
             }
-        }
 
-        updateCounter();
+            updateCounter();
+        }
     }
 
     // Notificação de boas-vindas
     setTimeout(() => {
-        $.notify("Bem-vindo ao Dashboard WAZE!", {
-            position: "top right",
-            className: "success",
-            autoHideDelay: 5000
-        });
+        if (typeof $.notify !== 'undefined') {
+            $.notify("🚗 Bem-vindo ao Dashboard WAZE!", {
+                position: "top right",
+                className: "success",
+                autoHideDelay: 5000
+            });
+        }
     }, 1000);
+
+    console.log('✅ Dashboard inicializado com sucesso!');
 });
 </script>
-
-<script src="../js/home-custom.js"></script>
