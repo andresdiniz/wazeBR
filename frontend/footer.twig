@@ -1,41 +1,204 @@
-
 </div>
-<footer class="sticky-footer bg-white">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
-            <span>Ultima atualização de dados às {{atualizacao.execution_time}} </span>
-            <span>Copyright &copy; DADOS WAZE {{ "now"|date("Y") }}</span>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white border-top">
+                <div class="container my-auto">
+                    <div class="row align-items-center">
+                        <!-- Informações de Atualização -->
+                        <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                            <span class="text-muted small">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                <strong>Última atualização:</strong> {{atualizacao.execution_time}}
+                            </span>
+                        </div>
+                        
+                        <!-- Copyright -->
+                        <div class="col-md-6 text-center text-md-end">
+                            <span class="text-muted small">
+                                <i class="fas fa-copyright me-1"></i>
+                                {{ "now"|date("Y") }} <strong>DADOS WAZE</strong> - Todos os direitos reservados
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button -->
+    <a class="scroll-to-top rounded shadow" href="#page-top" title="Voltar ao Topo">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt me-2"></i>Confirmar Saída
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-question-circle fa-3x text-warning"></i>
+                    </div>
+                    <p class="text-center mb-0">
+                        Deseja realmente encerrar sua sessão atual?
+                    </p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <a class="btn btn-primary" href="login.html">
+                        <i class="fas fa-sign-out-alt me-2"></i>Sair
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-</footer>
 
-</div>
-</div>
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-</a>
+    <!-- Scripts -->
+    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
+    <script src="js/scripts-routes.js"></script>
+    <script src="js/traffic-dashboard.js"></script>  
+    <script src="../js/alerts.js"></script>
 
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="logoutModalLabel">Pronto para Sair?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
-            </div>
-            <div class="modal-body">Selecione "Sair" abaixo se estiver pronto para encerrar sua sessão atual.</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a class="btn btn-primary" href="login.html">Sair</a>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- Adicionar funcionalidades extras -->
+    <script>
+        // Ativar tooltips do Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
 
-<script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
+        // Smooth scroll para o botão "scroll to top"
+        document.querySelector('.scroll-to-top')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
 
-<script src="js/scripts-routes.js"></script>
-<script src="js/traffic-dashboard.js"></script>  
-<script src="../js/alerts.js"></script>
+        // Mostrar/ocultar botão scroll to top baseado na posição da página
+        window.addEventListener('scroll', function() {
+            const scrollToTop = document.querySelector('.scroll-to-top');
+            if (scrollToTop) {
+                if (window.pageYOffset > 100) {
+                    scrollToTop.style.display = 'flex';
+                } else {
+                    scrollToTop.style.display = 'none';
+                }
+            }
+        });
+
+        // Toggle sidebar
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.body.classList.toggle('sidebar-toggled');
+            document.querySelector('.sidebar')?.classList.toggle('toggled');
+        });
+
+        document.getElementById('sidebarToggleTop')?.addEventListener('click', function() {
+            document.body.classList.toggle('sidebar-toggled');
+            document.querySelector('.sidebar')?.classList.toggle('toggled');
+        });
+
+        // Auto-fechar sidebar em telas pequenas ao clicar em um link
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('.sidebar .collapse-item').forEach(function(element) {
+                element.addEventListener('click', function() {
+                    document.body.classList.add('sidebar-toggled');
+                    document.querySelector('.sidebar')?.classList.add('toggled');
+                });
+            });
+        }
+    </script>
+
+    <style>
+        /* Estilos adicionais para melhorias visuais */
+        .sticky-footer {
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+        }
+
+        .scroll-to-top {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            display: none;
+            width: 3rem;
+            height: 3rem;
+            text-align: center;
+            line-height: 3rem;
+            background-color: var(--primary-color, #4e73df);
+            color: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scroll-to-top:hover {
+            background-color: #224abe;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .modal-content {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .icon-circle {
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge-counter {
+            position: absolute;
+            transform: scale(0.7);
+            transform-origin: top right;
+            right: 0.25rem;
+            margin-top: -0.25rem;
+        }
+
+        .topbar-divider {
+            width: 0;
+            border-right: 1px solid #e3e6f0;
+            height: calc(4.375rem - 2rem);
+            margin: auto 1rem;
+        }
+
+        /* Animação para dropdown */
+        .animated--grow-in {
+            animation: growIn 0.2s ease-in-out;
+        }
+
+        @keyframes growIn {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 
 </body>
 
