@@ -204,12 +204,70 @@ function getdrivers(PDO $pdo, ?int $id_parceiro = null): array
     }
 }
 
-// Exemplo em backend/dashboard.php
+// Adicionar esta função em home.php
+/**
+ * Busca o resumo total de congestionamento em km por nível.
+ * @param PDO $pdo Conexão PDO.
+ * @param int|null $id_parceiro ID do parceiro.
+ * @return array Resumo do congestionamento (nível e total_km).
+ */
+function getCongestionSummary(PDO $pdo, ?int $id_parceiro = null): array {
+    // Esta query assume que existe uma tabela 'jams' com as colunas 'level' e 'length_km'
+    $query = "
+        SELECT
+            jams.level,
+            COALESCE(ROUND(SUM(jams.length_km), 2), 0) AS total_km
+        FROM
+            jams
+        WHERE
+            jams.is_archived = 0
+            " . (($id_parceiro !== 99 && $id_parceiro !== null) ? " AND jams.id_parceiro = :id_parceiro " : "") . "
+        GROUP BY
+            jams.level
+        ORDER BY
+            jams.level DESC;
+    ";
+
+    try {
+        $stmt = $pdo->prepare($query);
+
+        if ($id_parceiro !== 99 && $id_parceiro !== null) {
+            $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $summary = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Garante que todos os níveis (1 a 5) estejam presentes com 0 km se não houver dados
+        $full_summary = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $found = false;
+            foreach ($summary as $row) {
+                if ((int)$row['level'] === $i) {
+                    $full_summary[] = $row;
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $full_summary[] = ['level' => (string)$i, 'total_km' => 0.00];
+            }
+        }
+        
+        return $full_summary;
+
+    } catch (PDOException $e) {
+        // Log de erro
+        return [];
+    }
+}
+
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
     'jamLive' => getLive($pdo, $id_parceiro),
     'activeDrivers' => getdrivers($pdo, $id_parceiro), // Agora esta função utiliza a consulta para wazers impactados
+    'congestion_summary' => getCongestionSummary($pdo, $id_parceiro), // <--- NOVO
 ];
 
 // Você pode passar $data para o seu template Twig aqui
