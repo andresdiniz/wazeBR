@@ -13,12 +13,16 @@
                             </span>
                         </div>
                         
-                        <!-- Copyright -->
+                        <!-- Copyright e Links -->
                         <div class="col-md-6 text-center text-md-end">
                             <span class="text-muted small">
                                 <i class="fas fa-copyright me-1"></i>
                                 {{ "now"|date("Y") }} <strong>DADOS WAZE</strong> - Todos os direitos reservados
                             </span>
+                            <div class="mt-1">
+                                <a href="#" class="text-muted small me-3">Política de Privacidade</a>
+                                <a href="#" class="text-muted small">Termos de Uso</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -65,6 +69,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Botão Dark Mode -->
+    <button id="darkModeToggle" class="btn btn-light btn-sm position-fixed bottom-0 end-0 m-3" title="Alternar Modo Escuro">
+        <i class="fas fa-moon"></i>
+    </button>
 
     <!-- Scripts -->
     <script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
@@ -122,6 +131,28 @@
                     document.querySelector('.sidebar')?.classList.add('toggled');
                 });
             });
+        }
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                // Salvar preferência no localStorage
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            });
+
+            // Verificar preferência salva
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
         }
     </script>
 
@@ -197,6 +228,49 @@
                 transform: scale(1);
                 opacity: 1;
             }
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .sidebar {
+            background-color: #1e1e1e !important;
+        }
+
+        body.dark-mode .topbar {
+            background-color: #1e1e1e !important;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .sticky-footer {
+            background-color: #1e1e1e !important;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .dropdown-item {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .dropdown-item:hover {
+            background-color: #333;
+        }
+
+        /* Ajustes para o botão dark mode */
+        #darkModeToggle {
+            z-index: 1000;
         }
     </style>
 

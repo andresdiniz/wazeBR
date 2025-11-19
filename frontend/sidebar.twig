@@ -18,7 +18,7 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
+            <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}">
                 <a class="nav-link" href="dashboard">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
@@ -35,22 +35,22 @@
             </div>
 
             <!-- Nav Item - Rotas -->
-            <li class="nav-item">
+            <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                    aria-expanded="false" aria-controls="collapseRoutes">
+                    aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}" aria-controls="collapseRoutes">
                     <i class="fas fa-fw fa-route"></i>
                     <span>Rotas</span>
                 </a>
-                <div id="collapseRoutes" class="collapse" aria-labelledby="headingRoutes" data-bs-parent="#accordionSidebar">
+                <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}" aria-labelledby="headingRoutes" data-bs-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">
                             <i class="fas fa-road text-primary me-1"></i>
                             Opções de Rotas
                         </h6>
-                        <a class="collapse-item" href="routes">
+                        <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
                             <i class="fas fa-list me-2"></i>Todas as Rotas
                         </a>
-                        <a class="collapse-item" href="irregularidades">
+                        <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
                             <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Irregularidades
                         </a>
                     </div>
@@ -67,22 +67,22 @@
             </div>
             
             <!-- Nav Item - Utilitários -->
-            <li class="nav-item">
+            <li class="nav-item {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities"
-                    aria-expanded="false" aria-controls="collapseUtilities">
+                    aria-expanded="{{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'true' : 'false' }}" aria-controls="collapseUtilities">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Utilitários</span>
                 </a>
-                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar">
+                <div id="collapseUtilities" class="collapse {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'show' : '' }}" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">
                             <i class="fas fa-tools text-primary me-1"></i>
                             Opções do Sistema
                         </h6>
-                        <a class="collapse-item" href="utilities-color.html">
+                        <a class="collapse-item {{ pagedata.current_page == 'utilities-color' ? 'active' : '' }}" href="utilities-color.html">
                             <i class="fas fa-palette me-2"></i>Cores
                         </a>
-                        <a class="collapse-item" href="utilities-border.html">
+                        <a class="collapse-item {{ pagedata.current_page == 'utilities-border' ? 'active' : '' }}" href="utilities-border.html">
                             <i class="fas fa-border-style me-2"></i>Bordas
                         </a>
                     </div>
