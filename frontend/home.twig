@@ -884,6 +884,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const jamsData = {{ jamLive|json_encode|raw }};
 
+    // --- NOVO CÁLCULO: Soma da Extensão Total ---
+    let totalLengthMeters = 0;
+    if (Array.isArray(jamsData)) {
+        jamsData.forEach(jam => {
+            // Verifica se o comprimento (length) está definido e é um número
+            if (jam.length !== null && jam.length !== undefined) {
+                totalLengthMeters += jam.length;
+            }
+        });
+    }
+
+    const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
+
+    console.log(`Comprimento total dos congestionamentos: ${totalLengthKM} km`);
+    
     function getColorForLevel(level) {
         const colors = {
             5: '#dc3545', // Vermelho - Tráfego parado
