@@ -10,14 +10,160 @@
         --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
         --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
         --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Header da página */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header .subtitle {
+        color: #858796;
+        font-size: 0.95rem;
+    }
+
+    .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #dc3545;
+    }
+
+    .live-indicator .pulse-dot {
+        width: 10px;
+        height: 10px;
+        background: #dc3545;
+        border-radius: 50%;
+        animation: pulse-animation 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-animation {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.7;
+        }
+    }
+
+    /* Cards de estatísticas rápidas */
+    .stats-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stats-card.danger {
+        border-left-color: #e74a3b;
+    }
+
+    .stats-card.warning {
+        border-left-color: #f6c23e;
+    }
+
+    .stats-card.info {
+        border-left-color: #36b9cc;
+    }
+
+    .stats-card.success {
+        border-left-color: #1cc88a;
+    }
+
+    .stats-card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card.danger .stats-card-icon {
+        background: linear-gradient(135deg, rgba(231, 74, 59, 0.1), rgba(190, 38, 23, 0.1));
+        color: #e74a3b;
+    }
+
+    .stats-card.warning .stats-card-icon {
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1), rgba(221, 162, 10, 0.1));
+        color: #f6c23e;
+    }
+
+    .stats-card.info .stats-card-icon {
+        background: linear-gradient(135deg, rgba(54, 185, 204, 0.1), rgba(37, 131, 145, 0.1));
+        color: #36b9cc;
+    }
+
+    .stats-card-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .stats-card-label {
+        font-size: 0.9rem;
+        color: #858796;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-card-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .stats-card-trend.up {
+        background: rgba(28, 200, 138, 0.1);
+        color: #1cc88a;
+    }
+
+    .stats-card-trend.down {
+        background: rgba(231, 74, 59, 0.1);
+        color: #e74a3b;
     }
 
     /* Mapa de congestionamento */
     #congestionMap {
         height: 550px;
         width: 100%;
-        border-radius: 0.5rem;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 0.75rem;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        z-index: 1;
     }
 
     /* Cards modernos */
@@ -26,22 +172,27 @@
         border-radius: 1rem;
         overflow: hidden;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--card-shadow);
+        background: white;
     }
 
     .modern-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--card-shadow-hover);
     }
 
     .modern-card-header {
         background: var(--primary-gradient);
         color: white;
-        padding: 1rem 1.25rem;
-        font-weight: 600;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        font-size: 1.05rem;
+    }
+
+    .modern-card-header i {
+        font-size: 1.2rem;
     }
 
     .modern-card-header.bg-warning-gradient {
@@ -63,45 +214,12 @@
     /* Badge contador */
     .badge-counter {
         background: rgba(255, 255, 255, 0.25);
-        padding: 0.35rem 0.5rem;
+        padding: 0.4rem 0.75rem;
         border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.95rem;
         backdrop-filter: blur(10px);
-    }
-
-    /* Estatísticas de motoristas */
-    .drivers-stats {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        min-height: 200px;
-    }
-
-    .drivers-count {
-        font-size: 4rem;
-        font-weight: 800;
-        background: var(--info-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-
-    .drivers-label {
-        font-size: 1.1rem;
-        color: #858796;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     /* Tabelas melhoradas */
@@ -117,32 +235,38 @@
         font-size: 0.75rem;
         color: #858796;
         padding: 1rem 0.75rem;
+        letter-spacing: 0.5px;
     }
 
     .modern-table tbody tr {
         transition: all 0.2s ease;
+        border-bottom: 1px solid #f0f0f0;
     }
 
     .modern-table tbody tr:hover {
         background-color: #f8f9fc;
-        transform: scale(1.01);
+        transform: translateX(3px);
+    }
+
+    .modern-table tbody tr:last-child {
+        border-bottom: none;
     }
 
     .modern-table tbody td {
         padding: 1rem 0.75rem;
         vertical-align: middle;
-        border-top: 1px solid #e3e6f0;
     }
 
     /* Badges melhorados */
     .modern-badge {
         padding: 0.5rem 0.875rem;
         border-radius: 50px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.8rem;
-        min-width: 60px;
+        min-width: 65px;
         display: inline-block;
         text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     /* Botões de ação */
@@ -155,30 +279,41 @@
         justify-content: center;
         transition: all 0.3s ease;
         border: none;
-        margin: 0 2px;
+        margin: 0 3px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .action-btn:hover {
-        transform: scale(1.15);
+        transform: translateY(-3px) scale(1.1);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn i {
+        font-size: 0.9rem;
     }
 
     /* Estado vazio */
     .empty-state {
         text-align: center;
-        padding: 3rem 1rem;
+        padding: 4rem 1rem;
     }
 
     .empty-state i {
-        font-size: 4rem;
+        font-size: 5rem;
         color: #d1d3e2;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+    }
+
+    .empty-state h5 {
+        color: #5a5c69;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
     }
 
     .empty-state p {
         color: #858796;
-        font-size: 1rem;
+        font-size: 0.95rem;
         margin-bottom: 0;
     }
 
@@ -189,8 +324,9 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95);
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 1000;
@@ -206,28 +342,102 @@
         animation: spin 1s linear infinite;
     }
 
+    .loading-text {
+        margin-top: 1rem;
+        color: #858796;
+        font-weight: 600;
+    }
+
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
 
+    /* Filtros e ações */
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-section .form-control,
+    .filter-section .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid #e3e6f0;
+        padding: 0.625rem 1rem;
+    }
+
+    .filter-section .btn {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+    }
+
+    /* Legenda do mapa */
+    .map-legend {
+        background: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 200px;
+    }
+
+    .map-legend h6 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .legend-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .legend-color {
+        width: 30px;
+        height: 4px;
+        border-radius: 2px;
+    }
+
     /* Responsividade */
     @media (max-width: 767.98px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .stats-card-value {
+            font-size: 2rem;
+        }
+
+        .stats-card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
         .modern-table {
             font-size: 0.85rem;
         }
 
         .modern-table thead th,
         .modern-table tbody td {
-            padding: 0.65rem 0.5rem;
-        }
-
-        .drivers-count {
-            font-size: 3rem;
-        }
-
-        .drivers-label {
-            font-size: 0.9rem;
+            padding: 0.75rem 0.5rem;
         }
 
         #congestionMap {
@@ -237,6 +447,17 @@
         .action-btn {
             width: 32px;
             height: 32px;
+        }
+
+        .map-legend {
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+        }
+
+        .filter-section {
+            padding: 1rem;
         }
     }
 
@@ -252,28 +473,176 @@
 
     /* Animações de entrada */
     .fade-in {
-        animation: fadeIn 0.5s ease-in;
+        animation: fadeIn 0.6s ease-out;
     }
 
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
         }
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
+    /* Info cards adicionais */
+    .info-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .info-card h5 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card p {
+        margin-bottom: 0;
+        opacity: 0.95;
+    }
+
+    /* Scroll customizado para tabelas */
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
     
+    <!-- Header da Página -->
+    <div class="page-header fade-in">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard WAZE</h1>
+                <p class="subtitle mb-0">
+                    Monitoramento em tempo real de acidentes e congestionamentos
+                </p>
+            </div>
+            <div class="live-indicator">
+                <span class="pulse-dot"></span>
+                AO VIVO
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in">
+            <div class="stats-card danger">
+                <div class="stats-card-icon">
+                    <i class="fas fa-car-crash"></i>
+                </div>
+                <div class="stats-card-value">{{ accidentAlerts|length }}</div>
+                <div class="stats-card-label">Acidentes Ativos</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in" style="animation-delay: 0.1s;">
+            <div class="stats-card warning">
+                <div class="stats-card-icon">
+                    <i class="fas fa-traffic-light"></i>
+                </div>
+                <div class="stats-card-value">{{ jamAlerts|length }}</div>
+                <div class="stats-card-label">Congestionamentos</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-md-0 fade-in" style="animation-delay: 0.2s;">
+            <div class="stats-card info">
+                <div class="stats-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-card-value">
+                    {% if activeDrivers is defined and activeDrivers is not empty %}
+                        {{ activeDrivers[0].total_wazers_impactados }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stats-card-label">Motoristas Impactados</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 fade-in" style="animation-delay: 0.3s;">
+            <div class="stats-card success">
+                <div class="stats-card-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="stats-card-value">{{ jamLive|length }}</div>
+                <div class="stats-card-label">Pontos no Mapa</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Linha do Mapa -->
+    <div class="row mb-4">
+        <div class="col-12 fade-in" style="animation-delay: 0.4s;">
+            <div class="card modern-card">
+                <div class="modern-card-header bg-success-gradient">
+                    <span>
+                        <i class="fas fa-map-marked-alt me-2"></i>
+                        Mapa de Congestionamentos em Tempo Real
+                    </span>
+                    <span class="badge-counter">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizado
+                    </span>
+                </div>
+                <div class="card-body p-3 position-relative">
+                    <div id="congestionMap"></div>
+                    <div class="map-legend">
+                        <h6><i class="fas fa-info-circle me-2"></i>Legenda</h6>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545;"></div>
+                            <span>Parado (Nível 5)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fd7e14;"></div>
+                            <span>Muito Lento (Nível 4)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffc107;"></div>
+                            <span>Lento (Nível 3)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #28a745;"></div>
+                            <span>Moderado (Nível 2)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #17a2b8;"></div>
+                            <span>Leve (Nível 1)</span>
+                        </div>
+                    </div>
+                    <div class="loading-overlay d-none" id="mapLoading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Carregando mapa...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Linha de Cards Principais -->
     <div class="row">
         
         <!-- Card de Acidentes -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.5s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-danger-gradient">
                     <span>
@@ -301,7 +670,7 @@
                                     {% for alert in accidentAlerts %}
                                     <tr>
                                         <td>
-                                            <div class="fw-bold text-primary">{{ alert.city }}</div>
+                                            <div class="fw-bold text-danger">{{ alert.city }}</div>
                                             <small class="text-muted d-lg-none">{{ alert.street }}</small>
                                         </td>
                                         <td class="d-none d-lg-table-cell">
@@ -324,14 +693,12 @@
                                                     data-bs-target="#alertModal{{ alert.uuid }}"
                                                     data-lat="{{ alert.location_y }}" 
                                                     data-lon="{{ alert.location_x }}"
-                                                    data-bs-toggle-tooltip="tooltip"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                                target="_blank" 
                                                class="btn btn-primary action-btn"
-                                               data-bs-toggle-tooltip="tooltip"
                                                title="Abrir no Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
@@ -345,7 +712,8 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-car-crash"></i>
-                            <p>Nenhum acidente registrado no momento.</p>
+                            <h5>Nenhum acidente</h5>
+                            <p>Não há acidentes registrados no momento.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -353,7 +721,7 @@
         </div>
 
         <!-- Card de Congestionamentos -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.6s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-warning-gradient">
                     <span>
@@ -404,14 +772,12 @@
                                                     data-bs-target="#alertModal{{ alert.uuid }}"
                                                     data-lat="{{ alert.location_y }}" 
                                                     data-lon="{{ alert.location_x }}"
-                                                    data-bs-toggle-tooltip="tooltip"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
                                                target="_blank" 
                                                class="btn btn-primary action-btn"
-                                               data-bs-toggle-tooltip="tooltip"
                                                title="Abrir no Waze">
                                                 <i class="fab fa-waze"></i>
                                             </a>
@@ -425,67 +791,10 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-traffic-light"></i>
-                            <p>Nenhum congestionamento ativo no momento.</p>
+                            <h5>Trânsito fluindo</h5>
+                            <p>Não há congestionamentos ativos no momento.</p>
                         </div>
                     {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Linha de Estatísticas e Mapa -->
-    <div class="row">
-        
-        <!-- Card de Motoristas Impactados -->
-        {% if activeDrivers is not empty %}
-        <div class="col-lg-4 col-md-6 mb-4 fade-in" style="animation-delay: 0.2s;">
-            <div class="card modern-card h-100">
-                <div class="modern-card-header bg-info-gradient">
-                    <span>
-                        <i class="fas fa-users me-2"></i>
-                        Motoristas Impactados
-                    </span>
-                </div>
-                <div class="card-body drivers-stats">
-                    {% if activeDrivers is defined and activeDrivers is not empty %}
-                        <div class="drivers-count" id="driversCount">
-                            {{ activeDrivers[0].total_wazers_impactados }}
-                        </div>
-                        <div class="drivers-label">
-                            <i class="fas fa-car me-2"></i>Wazers em Congestionamento
-                        </div>
-                        <small class="text-muted mt-3">
-                            <i class="fas fa-clock me-1"></i>
-                            Última atualização: {{ activeDrivers[0].ultima_coleta_dados|date("H:i") }}
-                        </small>
-                    {% else %}
-                        <div class="empty-state p-0">
-                            <i class="fas fa-users"></i>
-                            <p>Dados não disponíveis</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Card do Mapa -->
-        <div class="col-lg-{{ activeDrivers is not empty ? '8' : '12' }} col-md-{{ activeDrivers is not empty ? '6' : '12' }} mb-4 fade-in" style="animation-delay: 0.3s;">
-            <div class="card modern-card h-100">
-                <div class="modern-card-header bg-success-gradient">
-                    <span>
-                        <i class="fas fa-map-marked-alt me-2"></i>
-                        Mapa de Congestionamentos em Tempo Real
-                    </span>
-                    <span class="badge-counter">
-                        <i class="fas fa-sync-alt me-1"></i>Ao Vivo
-                    </span>
-                </div>
-                <div class="card-body p-3 position-relative">
-                    <div id="congestionMap"></div>
-                    <div class="loading-overlay d-none" id="mapLoading">
-                        <div class="spinner"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -496,189 +805,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     
     // Inicializar Tooltips do Bootstrap
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl, {
             customClass: 'custom-tooltip'
-        });
-    });
-
-    // Configuração dos modais com mapas
-    $(".open-modal").on("click", function () {
-        let lat = $(this).data("lat");
-        let lon = $(this).data("lon");
-        let modalId = $(this).attr("data-bs-target");
-        let mapId = modalId.replace("#alertModal", "map-");
-
-        $(modalId).on('shown.bs.modal', function () {
-            let mapElement = document.getElementById(mapId);
-            if (mapElement && !mapElement._leaflet_id) {
-                let map = L.map(mapId).setView([lat, lon], 15);
-
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
-
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
-
-                setTimeout(function () {
-                    map.invalidateSize();
-                }, 100);
-            }
-        });
-    });
-
-    // Configuração do DataTable
-    const dataTableConfig = {
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
-        },
-        scrollX: true,
-        responsive: true,
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-        order: [[2, 'desc']],
-        columnDefs: [
-            { orderable: false, targets: [4] },
-            { width: "15%", targets: [0] },
-            { width: "10%", targets: [4] }
-        ],
-        dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-             '<"row"<"col-sm-12"tr>>' +
-             '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        initComplete: function() {
-            // Notificação quando a tabela carrega
-            $.notify("Dados carregados com sucesso!", {
-                position: "top right",
-                className: "success",
-                autoHideDelay: 3000
-            });
-        }
-    };
-
-    if ($('#accidentsTable').length) {
-        $('#accidentsTable').DataTable(dataTableConfig);
-    }
-
-    if ($('#trafficTable').length) {
-        $('#trafficTable').DataTable(dataTableConfig);
-    }
-
-    // Inicialização do mapa de congestionamento
-    const mapLoading = document.getElementById('mapLoading');
-    if (mapLoading) mapLoading.classList.remove('d-none');
-
-    const congestionMap = L.map('congestionMap').setView([-20.66, -43.79], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(congestionMap);
-
-    const jamsData = {{ jamLive| json_encode | raw }};
-
-    function getColorForLevel(level) {
-        const colors = {
-            5: '#dc3545', // Vermelho - Tráfego parado
-            4: '#fd7e14', // Laranja - Tráfego muito lento
-            3: '#ffc107', // Amarelo - Tráfego lento
-            2: '#28a745', // Verde - Tráfego moderado
-            1: '#17a2b8'  // Azul - Tráfego leve
-        };
-        return colors[level] || '#6c757d';
-    }
-
-    function getLevelText(level) {
-        const texts = {
-            5: 'Parado',
-            4: 'Muito Lento',
-            3: 'Lento',
-            2: 'Moderado',
-            1: 'Leve'
-        };
-        return texts[level] || 'Desconhecido';
-    }
-
-    if (Array.isArray(jamsData) && jamsData.length > 0) {
-        let processedJams = 0;
-        
-        jamsData.forEach(jam => {
-            if (jam.lines && Array.isArray(jam.lines) && jam.lines.length > 0) {
-                const latlngs = jam.lines.map(line => [line.latitude, line.longitude]);
-                const color = getColorForLevel(jam.level);
-                const levelText = getLevelText(jam.level);
-                
-                L.polyline(latlngs, {
-                    color: color,
-                    weight: 6,
-                    opacity: 0.8,
-                    lineJoin: 'round'
-                }).addTo(congestionMap).bindPopup(`
-                    <div style="min-width: 200px;">
-                        <h6 class="mb-2"><i class="fas fa-traffic-light me-2"></i>${levelText}</h6>
-                        <p class="mb-1"><strong>Rua:</strong> ${jam.street || 'Não informada'}</p>
-                        <p class="mb-1"><strong>Cidade:</strong> ${jam.city || 'Não informada'}</p>
-                        <p class="mb-0"><strong>Nível:</strong> ${jam.level}/5</p>
-                    </div>
-                `);
-                
-                processedJams++;
-            }
-        });
-
-        // Notificação de sucesso ao carregar o mapa
-        setTimeout(() => {
-            if (mapLoading) mapLoading.classList.add('d-none');
-            
-            $.notify(`${processedJams} congestionamento(s) carregado(s) no mapa`, {
-                position: "top right",
-                className: "info",
-                autoHideDelay: 4000
-            });
-        }, 500);
-    } else {
-        setTimeout(() => {
-            if (mapLoading) mapLoading.classList.add('d-none');
-            
-            $.notify("Nenhum congestionamento ativo no momento", {
-                position: "top right",
-                className: "warn",
-                autoHideDelay: 4000
-            });
-        }, 500);
-    }
-
-    // Animação do contador de motoristas
-    const driversCountElement = document.getElementById('driversCount');
-    if (driversCountElement) {
-        const targetValue = parseInt(driversCountElement.textContent);
-        let currentValue = 0;
-        const duration = 2000; // 2 segundos
-        const increment = targetValue / (duration / 16); // 60fps
-
-        function updateCounter() {
-            currentValue += increment;
-            if (currentValue < targetValue) {
-                driversCountElement.textContent = Math.floor(currentValue);
-                requestAnimationFrame(updateCounter);
-            } else {
-                driversCountElement.textContent = targetValue;
-            }
-        }
-
-        updateCounter();
-    }
-
-    // Notificação de boas-vindas
-    setTimeout(() => {
-        $.notify("Bem-vindo ao Dashboard WAZE!", {
-            position: "top right",
-            className: "success",
-            autoHideDelay: 5000
-        });
-    }, 1000);
-});
-</script>
-
-<script src="../js/home-custom.js"></script>
