@@ -809,3 +809,322 @@ document.addEventListener("DOMContentLoaded", function () {
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl, {
             customClass: 'custom-tooltip'
+        });
+    });
+
+    // Configuração dos modais com mapas
+    $(".open-modal").on("click", function () {
+        let lat = $(this).data("lat");
+        let lon = $(this).data("lon");
+        let modalId = $(this).attr("data-bs-target");
+        let mapId = modalId.replace("#alertModal", "map-");
+
+        $(modalId).on('shown.bs.modal', function () {
+            let mapElement = document.getElementById(mapId);
+            if (mapElement && !mapElement._leaflet_id) {
+                let map = L.map(mapId).setView([lat, lon], 15);
+
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(map);
+
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup("Localização do Alerta")
+                    .openPopup();
+
+                setTimeout(function () {
+                    map.invalidateSize();
+                }, 100);
+            }
+        });
+    });
+
+    // Configuração do DataTable
+    const dataTableConfig = {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+        },
+        scrollX: true,
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+        order: [[2, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: [4] },
+            { width: "15%", targets: [0] },
+            { width: "10%", targets: [4] }
+        ],
+        dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        initComplete: function() {
+            console.log('Tabela carregada com sucesso');
+        }
+    };
+
+    // Inicializar DataTables
+    if ($('#accidentsTable').length) {
+        $('#accidentsTable').DataTable(dataTableConfig);
+    }
+
+    if ($('#trafficTable').length) {
+        $('#trafficTable').DataTable(dataTableConfig);
+    }
+
+    // Inicialização do mapa de congestionamento
+    const mapLoading = document.getElementById('mapLoading');
+    if (mapLoading) mapLoading.classList.remove('d-none');
+
+    const congestionMap = L.map('congestionMap').setView([-20.66, -43.79], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(congestionMap);
+
+    const jamsData = {{ jamLive|json_encode|raw }};
+
+    function getColorForLevel(level) {
+        const colors = {
+            5: '#dc3545', // Vermelho - Tráfego parado
+            4: '#fd7e14', // Laranja - Tráfego muito lento
+            3: '#ffc107', // Amarelo - Tráfego lento
+            2: '#28a745', // Verde - Tráfego moderado
+            1: '#17a2b8'  // Azul - Tráfego leve
+        };
+        return colors[level] || '#6c757d';
+    }
+
+    function getLevelText(level) {
+        const texts = {
+            5: 'Parado',
+            4: 'Muito Lento',
+            3: 'Lento',
+            2: 'Moderado',
+            1: 'Leve'
+        };
+        return texts[level] || 'Desconhecido';
+    }
+
+    function getSpeedText(speedKMH) {
+        if (speedKMH === null || speedKMH === undefined) return 'N/A';
+        return speedKMH.toFixed(1) + ' km/h';
+    }
+
+    function getLengthText(lengthMeters) {
+        if (lengthMeters === null || lengthMeters === undefined) return 'N/A';
+        if (lengthMeters >= 1000) {
+            return (lengthMeters / 1000).toFixed(2) + ' km';
+        }
+        return lengthMeters.toFixed(0) + ' m';
+    }
+
+    if (Array.isArray(jamsData) && jamsData.length > 0) {
+        let processedJams = 0;
+        let bounds = [];
+        
+        jamsData.forEach(jam => {
+            if (jam.lines && Array.isArray(jam.lines) && jam.lines.length > 0) {
+                const latlngs = jam.lines.map(line => {
+                    const latLng = [line.latitude, line.longitude];
+                    bounds.push(latLng);
+                    return latLng;
+                });
+                
+                const color = getColorForLevel(jam.level);
+                const levelText = getLevelText(jam.level);
+                const speedText = getSpeedText(jam.speedKMH);
+                const lengthText = getLengthText(jam.length);
+                const delayText = jam.delay ? Math.round(jam.delay / 60) + ' min' : 'N/A';
+                
+                const polyline = L.polyline(latlngs, {
+                    color: color,
+                    weight: 7,
+                    opacity: 0.85,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                }).addTo(congestionMap);
+
+                // Popup melhorado
+                const popupContent = `
+                    <div style="min-width: 250px; font-family: system-ui, -apple-system, sans-serif;">
+                        <div style="background: ${color}; color: white; padding: 0.75rem; margin: -0.75rem -0.75rem 0.75rem -0.75rem; border-radius: 0.5rem 0.5rem 0 0;">
+                            <h6 style="margin: 0; font-weight: 700; font-size: 1rem;">
+                                <i class="fas fa-traffic-light" style="margin-right: 0.5rem;"></i>${levelText}
+                            </h6>
+                        </div>
+                        <div style="padding: 0.5rem 0;">
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong style="color: #5a5c69;">
+                                    <i class="fas fa-road" style="margin-right: 0.5rem; color: #858796;"></i>Rua:
+                                </strong>
+                                <span style="color: #2c3e50;">${jam.street || 'Não informada'}</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong style="color: #5a5c69;">
+                                    <i class="fas fa-city" style="margin-right: 0.5rem; color: #858796;"></i>Cidade:
+                                </strong>
+                                <span style="color: #2c3e50;">${jam.city || 'Não informada'}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e3e6f0;">
+                                <div style="text-align: center; padding: 0.5rem; background: #f8f9fc; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.7rem; color: #858796; text-transform: uppercase; margin-bottom: 0.25rem;">Nível</div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: ${color};">${jam.level}/5</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.5rem; background: #f8f9fc; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.7rem; color: #858796; text-transform: uppercase; margin-bottom: 0.25rem;">Velocidade</div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: #2c3e50;">${speedText}</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.5rem; background: #f8f9fc; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.7rem; color: #858796; text-transform: uppercase; margin-bottom: 0.25rem;">Extensão</div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: #2c3e50;">${lengthText}</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.5rem; background: #f8f9fc; border-radius: 0.5rem;">
+                                    <div style="font-size: 0.7rem; color: #858796; text-transform: uppercase; margin-bottom: 0.25rem;">Atraso</div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: #2c3e50;">${delayText}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                polyline.bindPopup(popupContent, {
+                    maxWidth: 300,
+                    className: 'custom-jam-popup'
+                });
+
+                // Efeito hover
+                polyline.on('mouseover', function() {
+                    this.setStyle({
+                        weight: 9,
+                        opacity: 1
+                    });
+                });
+
+                polyline.on('mouseout', function() {
+                    this.setStyle({
+                        weight: 7,
+                        opacity: 0.85
+                    });
+                });
+                
+                processedJams++;
+            }
+        });
+
+        // Ajustar o mapa para mostrar todos os pontos
+        if (bounds.length > 0) {
+            congestionMap.fitBounds(bounds, { padding: [50, 50] });
+        }
+
+        // Remover loading e mostrar notificação
+        setTimeout(() => {
+            if (mapLoading) mapLoading.classList.add('d-none');
+            
+            if (typeof $.notify !== 'undefined') {
+                $.notify(`${processedJams} congestionamento(s) carregado(s) no mapa`, {
+                    position: "top right",
+                    className: "success",
+                    autoHideDelay: 4000
+                });
+            }
+        }, 800);
+    } else {
+        setTimeout(() => {
+            if (mapLoading) mapLoading.classList.add('d-none');
+            
+            if (typeof $.notify !== 'undefined') {
+                $.notify("Nenhum congestionamento ativo no momento", {
+                    position: "top right",
+                    className: "info",
+                    autoHideDelay: 4000
+                });
+            }
+        }, 800);
+    }
+
+    // Adicionar controles de zoom customizados
+    L.control.zoom({
+        position: 'topright'
+    }).addTo(congestionMap);
+
+    // Botão de reset do mapa
+    const resetButton = L.control({position: 'topright'});
+    resetButton.onAdd = function() {
+        const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        div.innerHTML = '<a href="#" title="Resetar visualização" style="width: 30px; height: 30px; line-height: 30px; display: block; text-align: center; text-decoration: none; color: #333;"><i class="fas fa-home"></i></a>';
+        div.onclick = function(e) {
+            e.preventDefault();
+            congestionMap.setView([-20.66, -43.79], 13);
+        };
+        return div;
+    };
+    resetButton.addTo(congestionMap);
+
+    // Animação do contador de motoristas (se existir)
+    const driversCountElement = document.getElementById('driversCount');
+    if (driversCountElement) {
+        const targetValue = parseInt(driversCountElement.textContent);
+        let currentValue = 0;
+        const duration = 2000;
+        const increment = targetValue / (duration / 16);
+
+        function updateCounter() {
+            currentValue += increment;
+            if (currentValue < targetValue) {
+                driversCountElement.textContent = Math.floor(currentValue).toLocaleString('pt-BR');
+                requestAnimationFrame(updateCounter);
+            } else {
+                driversCountElement.textContent = targetValue.toLocaleString('pt-BR');
+            }
+        }
+
+        updateCounter();
+    }
+
+    // Atualizar hora atual no rodapé
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('pt-BR');
+        const dateString = now.toLocaleDateString('pt-BR');
+        
+        // Se houver um elemento para exibir a hora
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = `${dateString} ${timeString}`;
+        }
+    }
+
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // Auto-refresh da página (opcional - descomente se necessário)
+    // setTimeout(() => {
+    //     location.reload();
+    // }, 300000); // 5 minutos
+
+    // Notificação de boas-vindas
+    setTimeout(() => {
+        if (typeof $.notify !== 'undefined') {
+            $.notify("Dashboard carregado com sucesso!", {
+                position: "top right",
+                className: "success",
+                autoHideDelay: 3000
+            });
+        }
+    }, 1000);
+
+    // Listener para mudanças de tamanho da janela
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            congestionMap.invalidateSize();
+        }, 250);
+    });
+
+    console.log('Dashboard WAZE inicializado com sucesso!');
+});
+</script>
+
+<script src="../js/home-custom.js"></script>
