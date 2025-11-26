@@ -561,7 +561,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-traffic-light"></i>
                 </div>
-                <div class="stats-card-value" id="jamTotalLength"></div>
+                <div class="stats-card-value" id="jamTotalLength">{{ jamAlerts|length }}</div>
                 <div class="stats-card-label">Extensão Congestionada (KM)</div>
             </div>
         </div>
@@ -899,6 +899,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const jamLengthCard = document.getElementById('jamTotalLength');
     if (jamLengthCard) {
         jamLengthCard.textContent = totalLengthKM;
+    }else {
+        console.warn('jamTotalLength card not found');
     }
     
     const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
