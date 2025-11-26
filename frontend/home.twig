@@ -896,7 +896,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Atualiza o card de Congestionamentos com o total em KM
-    const jamLengthCard = document.getElementById('jamTotalLength');
+    let jamLengthCard = document.getElementById('jamTotalLength1');
     if (jamLengthCard) {
         jamLengthCard.textContent = totalLengthKM;
     }else {
