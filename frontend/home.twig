@@ -899,7 +899,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let jamLengthCard = document.getElementById('jamTotalLength');
     if (jamLengthCard) {
         // Agora, totalLengthKM é garantidamente uma string de número ('0.00', '12.45', etc.)
-        jamLengthCard.textContent = totalLengthKM; 
+        jamLengthCard = totalLengthKM; 
         
     } else {
         // Deixe este console.warn para depuração
