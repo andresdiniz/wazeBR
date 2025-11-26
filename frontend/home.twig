@@ -885,7 +885,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const jamsData = {{ jamLive|json_encode|raw }};
 
     // --- NOVO CÁLCULO: Soma da Extensão Total ---
-    let totalLengthMeters = 0;
+    let totalLengthMeters = 0; // Inicialização garantida
     if (Array.isArray(jamsData)) {
         jamsData.forEach(jam => {
             // Verifica se o comprimento (length) está definido e é um número
@@ -895,12 +895,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Atualiza o card de Congestionamentos com o total em KM
-    let jamLengthCard = document.getElementById('jamTotalLength1');
+    // --- ATUALIZAÇÃO DO CARD ---
+    let jamLengthCard = document.getElementById('jamTotalLength');
     if (jamLengthCard) {
-        jamLengthCard.textContent = totalLengthKM;
-    }else {
-        console.warn('jamTotalLength card not found');
+        // Agora, totalLengthKM é garantidamente uma string de número ('0.00', '12.45', etc.)
+        jamLengthCard.textContent = totalLengthKM; 
+        
+    } else {
+        // Deixe este console.warn para depuração
+        console.warn('Card de extensão total (jamTotalLength) não encontrado.');
     }
     
     const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
