@@ -895,10 +895,17 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Atualiza o card de Congestionamentos com o total em KM
+    const jamLengthCard = document.getElementById('jamTotalLength');
+    if (jamLengthCard) {
+        jamLengthCard.textContent = totalLengthKM;
+    }
+    // ... restante do código ...
+
     const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
 
     console.log(`Comprimento total dos congestionamentos: ${totalLengthKM} km`);
-    
+
     function getColorForLevel(level) {
         const colors = {
             5: '#dc3545', // Vermelho - Tráfego parado
