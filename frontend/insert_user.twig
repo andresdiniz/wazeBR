@@ -1,120 +1,74 @@
+{% include 'header.twig' %}
+
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-users-cog me-2"></i>ADMINISTRAR USUÁRIOS</h1>
-    </div>
+    <h1 class="h3 mb-4 text-gray-800">Cadastro de Novo Usuário</h1>
 
-    <!-- Cards Grid -->
-    <div class="row justify-content-center g-4">
-        {% if users.type == 1 or users.type == 2 %}
-        <!-- Card Cadastrar -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100 hover-scale">
-                <div class="card-body text-center">
-                    <div class="icon-circle bg-primary text-white mb-3">
-                        <i class="fas fa-user-plus fa-2x"></i>
-                    </div>
-                    <h5 class="card-title text-primary mb-1">Cadastrar</h5>
-                    <p class="card-text text-muted small">Novos usuários no sistema</p>
-                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#modalCadastrar">
-                        Acessar
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-8 col-md-10">
+
+            {# Lógica para Exibir Mensagens de Status (Sucesso/Erro) #}
+            {% if app.request.query.get('status') == 'success' %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ app.request.query.get('message') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>
+                </div>
+            {% elseif app.request.query.get('status') == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ app.request.query.get('message') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-user-plus mr-2"></i> Adicionar Usuário
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {# O action deve apontar para o script PHP de processamento #}
+                    <form action="insert_user.php" method="POST">
+                        
+                        {# Campo Nome #}
+                        <div class="form-group">
+                            <label for="name">Nome Completo:</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Digite o nome completo" required>
+                        </div>
+                        
+                        {# Campo Email #}
+                        <div class="form-group">
+                            <label for="email">E-mail:</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="email@exemplo.com" required>
+                        </div>
+                        
+                        {# Campo Senha #}
+                        <div class="form-group">
+                            <label for="password">Senha:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        {# Campo Permissão/Nível de Acesso #}
+                        <div class="form-group">
+                            <label for="permission">Nível de Permissão:</label>
+                            <select class="form-control" id="permission" name="permission" required>
+                                <option value="" disabled selected>Selecione o nível</option>
+                                <option value="1">Administrador (Total)</option>
+                                <option value="2">Padrão (Limitado)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-block mt-4">
+                            <i class="fas fa-save mr-1"></i> Cadastrar Usuário
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-
-        <!-- Card Alterar -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100 hover-scale">
-                <div class="card-body text-center">
-                    <div class="icon-circle bg-warning text-white mb-3">
-                        <i class="fas fa-edit fa-2x"></i>
-                    </div>
-                    <h5 class="card-title text-warning mb-1">Alterar</h5>
-                    <p class="card-text text-muted small">Editar informações</p>
-                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#modalAlterar">
-                        Acessar
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Card Reset Senha -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100 hover-scale">
-                <div class="card-body text-center">
-                    <div class="icon-circle bg-info text-white mb-3">
-                        <i class="fas fa-key fa-2x"></i>
-                    </div>
-                    <h5 class="card-title text-info mb-1">Reset de Senha</h5>
-                    <p class="card-text text-muted small">Redefinição de acesso</p>
-                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#modalResetSenha">
-                        Acessar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        {% if users.type == 1 or users.type == 2 %}
-        <!-- Card Apagar -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100 hover-scale">
-                <div class="card-body text-center">
-                    <div class="icon-circle bg-danger text-white mb-3">
-                        <i class="fas fa-user-times fa-2x"></i>
-                    </div>
-                    <h5 class="card-title text-danger mb-1">Apagar</h5>
-                    <p class="card-text text-muted small">Remover usuários</p>
-                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalApagar">
-                        Acessar
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
-<!-- Modals -->
-{% include 'users_modals.twig' %}
 
-<!-- Estilos Adicionais -->
-<style>
-    .hover-scale {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: pointer;
-    }
-
-    .hover-scale:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
-
-    .icon-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    @media (max-width: 768px) {
-        .modal-lg {
-            margin: 1rem;
-        }
-
-        .card {
-            margin-bottom: 1rem;
-        }
-    }
-</style>
-
-<script>
-    id_parceiro = {{ users.id_parceiro }};
-    console.log("ID do Parceiro:", id_parceiro);
-</script>
-<script src="../js/users.js"></script>
+{% include 'footer.twig' %}
