@@ -262,11 +262,45 @@ function getCongestionSummary(PDO $pdo, ?int $id_parceiro = null): array {
     }
 }
 
-function getKms(PDO $pdo, ?int $id_parceiro = null){
+function getKms(PDO $pdo, ?int $id_parceiro = null): float {
+    // 1. TRATAMENTO DE CASO: Se o ID do parceiro for nulo ou inválido,
+    // podemos retornar 0.0 ou buscar o KM total global (se existir).
+    if (is_null($id_parceiro) || $id_parceiro <= 0) {
+        // Se este for o KM TOTAL FIXO de todas as vias (baseado no seu problema GeoJSON),
+        // e você tiver uma linha na tabela 'parceiros' com id=1 para representar o total, use 1.
+        // Caso contrário, retorne 0.0.
+        return 0.0; 
+    }
+
     $sqlkms = "SELECT 
-                total_kms AS total_km 
-            FROM 
-                parceiros where id_parceiro = :id_parceiro";
+                 total_kms AS total_km 
+               FROM 
+                 parceiros 
+               WHERE 
+                 id_parceiro = :id_parceiro";
+
+    // 2. PREPARAR: Prepara a instrução SQL
+    $stmt = $pdo->prepare($sqlkms);
+
+    // 3. VINCULAR PARÂMETRO: Associa o valor de $id_parceiro ao placeholder :id_parceiro
+    // PDO::PARAM_INT garante que o valor é tratado como um inteiro
+    $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+
+    // 4. EXECUTAR: Roda a consulta no banco de dados
+    if (!$stmt->execute()) {
+        // Opcional: Se a execução falhar, você pode logar o erro
+        // error_log("Erro ao executar a consulta de KMs: " . print_r($stmt->errorInfo(), true));
+        return 0.0;
+    }
+
+    // 5. BUSCAR O RESULTADO: Recupera o valor da primeira coluna (total_km)
+    // PDO::FETCH_COLUMN é a forma mais eficiente para buscar um único valor
+    $kmTotal = $stmt->fetchColumn();
+    
+    // O fetchColumn retorna 'false' se não houver resultado.
+    // Usamos o operador de coalescência nula (??) ou a verificação 'false'
+    // para garantir que sempre retornamos um float (0.0 se não encontrado).
+    return $kmTotal !== false ? (float) $kmTotal : 0.0;
 }
 
 $data = [
