@@ -126,6 +126,69 @@
             </div>
         </li>
 
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-heading">
+            <i class="fa-regular fa-chart-bar"></i>
+            Configurações
+        </div>
+
+        <li class="nav-item {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'active' : '' }}">
+            <a class="nav-link" href="#"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseStatsRoutes"
+            aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'true' : 'false' }}">
+                <i class="fas fa-route"></i>
+                <span>Dados das Rotas</span>
+            </a>
+
+            <div id="collapseStatsRoutes"
+                class="collapse {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-road"></i>
+                        Dados de Rotas
+                    </h6>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'analise_tempos' ? 'active' : '' }}" href="routes">
+                        <i class="fas fa-list"></i> Análise de Tempos/Velocidades
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades_stats' ? 'active' : '' }}" href="irregularidades">
+                        <i class="fas fa-exclamation-triangle"></i> Irregularidades
+                    </a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'active' : '' }}">
+            <a class="nav-link" href="#"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseStatsAlerts"
+            aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'true' : 'false' }}">
+                <i class="fas fa-route"></i>
+                <span>Dados dos Alertas</span>
+            </a>
+
+            <div id="collapseStatsAlerts"
+                class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-road"></i>
+                        Dados de Alertas
+                    </h6>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'historic_acidents' ? 'active' : '' }}" href="historic_acidents">
+                        <i class="fas fa-list"></i> Acidentes Históricos
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'historic_buracos' ? 'active' : '' }}" href="historic_buracos">
+                        <i class="fas fa-exclamation-triangle"></i> Buracos Históricos
+                    </a>
+                </div>
+            </div>
+        </li>
+
         
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
