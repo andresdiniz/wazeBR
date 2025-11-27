@@ -1154,7 +1154,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //Calcular Kms por cidade
 
-function calcularpercKms() {
+function calcularpercKms(jamLengthCard1) {
 
     perc = (jamLengthCard1/total_kms)*100;
     return perc;
@@ -1162,7 +1162,7 @@ function calcularpercKms() {
 console.log('Cálculo de extensão total por cidade pronto.');
 console.log('Use a função calcularKmTotal(geojsonData) para obter o comprimento total em quilômetros.');
 console.log('Exemplo: let totalKm = calcularKmTotal(seuGeojsonData);');
-let totalKm = calcularpercKms();
+let totalKm = calcularpercKms(jamLengthCard1);
 console.log(`Extensão total calculada: ${totalKm.toFixed(2)} km`);
 
 </script>
