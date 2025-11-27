@@ -262,12 +262,20 @@ function getCongestionSummary(PDO $pdo, ?int $id_parceiro = null): array {
     }
 }
 
+function getKms(PDO $pdo, ?int $id_parceiro = null){
+    $sqlkms = "SELECT 
+                total_kms AS total_km 
+            FROM 
+                parceiros where id_parceiro = :id_parceiro";
+}
+
 $data = [
     'accidentAlerts' => getAccidentAlerts($pdo, $id_parceiro),
     'jamAlerts' => getJamAlerts($pdo, $id_parceiro),
     'jamLive' => getLive($pdo, $id_parceiro),
     'activeDrivers' => getdrivers($pdo, $id_parceiro), // Agora esta função utiliza a consulta para wazers impactados
     'congestion_summary' => getCongestionSummary($pdo, $id_parceiro), // <--- NOVO
+    'total_kms' => getKms($pdo, $id_parceiro), // <--- NOVO
 ];
 
 // Você pode passar $data para o seu template Twig aqui
