@@ -126,68 +126,61 @@
             </div>
         </li>
 
-        <hr class="sidebar-divider">
+       <hr class="sidebar-divider">
 
-        <div class="sidebar-heading">
-            <i class="fa-regular fa-chart-bar"></i>
-            Configurações
-        </div>
+<div class="sidebar-heading">
+    <i class="fas fa-cog"></i>
+    Configurações
+</div>
 
-        <li class="nav-item {{ pagedata.current_page in ['Config', 'settings'] ? 'active' : '' }}">
-            <a class="nav-link" href="#"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapseStatsRoutes"
-            aria-expanded="{{ pagedata.current_page in ['config', 'settings'] ? 'true' : 'false' }}">
-                <i class="fas fa-route"></i>
-                <span>Configurações do Sistema</span>
-            </a>
+<li class="nav-item {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'active' : '' }}">
+    <a class="nav-link" href="#"
+    data-bs-toggle="collapse"
+    data-bs-target="#collapseSystemSettings"
+    aria-expanded="{{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'true' : 'false' }}">
+        <i class="fas fa-wrench"></i>
+        <span>Configurações do Sistema</span>
+    </a>
 
-            <div id="collapseStatsRoutes"
-                class="collapse {{ pagedata.current_page in ['config', 'settings'] ? 'show' : '' }}">
-                <div class="collapse-inner">
-                    <h6 class="collapse-header">
-                        <i class="fas fa-road"></i>
-                        Configurações do Sistema
-                    </h6>
+    <div id="collapseSystemSettings"
+        class="collapse {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'show' : '' }}">
+        <div class="collapse-inner">
+            <h6 class="collapse-header">
+                <i class="fas fa-tools"></i>
+                Opções do Sistema
+            </h6>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'config' ? 'active' : '' }}" href="settings">
-                        <i class="fas fa-list"></i> Configuraçãoes Gerais
-                    </a>
+            <a class="collapse-item {{ pagedata.current_page == 'settings_gerais' ? 'active' : '' }}" href="settings">
+                <i class="fas fa-palette"></i> Configurações Gerais
+            </a>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'config' ? 'active' : '' }}" href="irregularidades">
-                        <i class="fas fa-exclamation-triangle"></i> Irregularidades
-                    </a>
-                </div>
-            </div>
-        </li>
+            <a class="collapse-item {{ pagedata.current_page == 'settings_irregularidades' ? 'active' : '' }}" href="irregularidades">
+                <i class="fas fa-exclamation-triangle"></i> Gerenciar Irregularidades
+            </a>
+        </div>
+    </div>
+</li>
 
-        <li class="nav-item {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'active' : '' }}">
-            <a class="nav-link" href="#"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapseStatsAlerts"
-            aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'true' : 'false' }}">
-                <i class="fas fa-route"></i>
-                <span>Dados dos Alertas</span>
-            </a>
-
-            <div id="collapseStatsAlerts"
-                class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'show' : '' }}">
-                <div class="collapse-inner">
-                    <h6 class="collapse-header">
-                        <i class="fas fa-road"></i>
-                        Dados de Alertas
-                    </h6>
-
-                    <a class="collapse-item {{ pagedata.current_page == 'historic_acidents' ? 'active' : '' }}" href="historic_acidents">
-                        <i class="fas fa-list"></i> Acidentes Históricos
-                    </a>
-
-                    <a class="collapse-item {{ pagedata.current_page == 'historic_buracos' ? 'active' : '' }}" href="historic_buracos">
-                        <i class="fas fa-exclamation-triangle"></i> Buracos Históricos
-                    </a>
-                </div>
-            </div>
-        </li>
+<li class="nav-item">
+    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities">
+        <i class="fas fa-wrench"></i>
+        <span>Utilitários</span>
+    </a>
+    <div id="collapseUtilities" class="collapse">
+        <div class="collapse-inner">
+            <h6 class="collapse-header">
+                <i class="fas fa-tools"></i>
+                Opções do Sistema
+            </h6>
+            <a class="collapse-item" href="utilities-color.html">
+                <i class="fas fa-palette"></i>Configurações de Cores
+            </a>
+            <a class="collapse-item" href="utilities-border.html">
+                <i class="fas fa-border-style"></i>Bordas
+            </a>
+        </div>
+    </div>
+</li>
 
         
         <!-- Divider -->
