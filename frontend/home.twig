@@ -896,6 +896,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
+    totalLengthKM = totalLengthKM.toString(); // Garantir que seja uma string
 
     console.log(`Comprimento total dos congestionamentos: ${totalLengthKM} km`);
 
@@ -903,7 +904,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let jamLengthCard1 = document.getElementById('jamTotalLength');
     if (jamLengthCard1) {
         // Agora, totalLengthKM é garantidamente uma string de número ('0.00', '12.45', etc.)
-        jamLengthCard1.innerHTML = totalLengthKM; 
+        jamLengthCard1.textContent = totalLengthKM; 
         
     } else {
         // Deixe este console.warn para depuração
