@@ -1,149 +1,120 @@
-{% include 'header.twig' %}
-
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Administração de Usuários</h1>
-
-    {# Lógica para Exibir Mensagens de Status #}
-    {% if app.request.query.get('status') == 'success' %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ app.request.query.get('message') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% elseif app.request.query.get('status') == 'error' %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ app.request.query.get('message') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endif %}
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-success">Lista de Usuários</h6>
-            {# Botão que dispara o modal de Inserção #}
-            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#insertUserModal">
-                <i class="fas fa-user-plus mr-1"></i> Novo Usuário
-            </button>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Nível de Acesso</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.name }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.permission_name }}</td> {# Exemplo: Nome do nível de permissão #}
-                            <td>
-                                {% if user.is_active %}
-                                    <span class="badge badge-success">Ativo</span>
-                                {% else %}
-                                    <span class="badge badge-danger">Inativo</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button class="btn btn-primary btn-sm" title="Editar" data-id="{{ user.id }}" data-toggle="modal" data-target="#editUserModal"><i class="fas fa-edit"></i></button>
-                                <a href="delete_user.php?id={{ user.id }}" class="btn btn-danger btn-sm" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir {{ user.name }}?');"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-users-cog me-2"></i>ADMINISTRAR USUÁRIOS</h1>
     </div>
-</div>
 
-{# ---------------------------------------------------------------------- #}
-{# MODAL PARA INSERÇÃO DE NOVO USUÁRIO #}
-{# ---------------------------------------------------------------------- #}
-<div class="modal fade" id="insertUserModal" tabindex="-1" role="dialog" aria-labelledby="insertUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="insertUserModalLabel">Cadastrar Novo Usuário</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            {# Ação para o script de processamento #}
-            <form action="insert_user.php" method="POST"> 
-                <div class="modal-body">
-                    
-                    <input type="hidden" name="action" value="insert"> {# Campo oculto para identificar a ação #}
-
-                    <div class="form-group">
-                        <label for="new_name">Nome Completo:</label>
-                        <input type="text" class="form-control" id="new_name" name="name" placeholder="Nome" required>
+    <!-- Cards Grid -->
+    <div class="row justify-content-center g-4">
+        {% if users.type == 1 or users.type == 2 %}
+        <!-- Card Cadastrar -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100 hover-scale">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-primary text-white mb-3">
+                        <i class="fas fa-user-plus fa-2x"></i>
                     </div>
-
-                    <div class="form-group">
-                        <label for="new_email">E-mail:</label>
-                        <input type="email" class="form-control" id="new_email" name="email" placeholder="email@exemplo.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_password">Senha:</label>
-                        <input type="password" class="form-control" id="new_password" name="password" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_permission">Nível de Permissão:</label>
-                        <select class="form-control" id="new_permission" name="permission" required>
-                            <option value="" disabled selected>Selecione o nível</option>
-                            {# Itera sobre os níveis de permissão (exemplo) #}
-                            {% for level in userLevels %}
-                                <option value="{{ level.id }}">{{ level.name }}</option>
-                            {% endfor %}
-                            {# Exemplo Estático caso não haja a variável userLevels #}
-                            {# <option value="1">Administrador</option> #}
-                            {# <option value="2">Padrão</option> #}
-                        </select>
-                    </div>
-
+                    <h5 class="card-title text-primary mb-1">Cadastrar</h5>
+                    <p class="card-text text-muted small">Novos usuários no sistema</p>
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalCadastrar">
+                        Acessar
+                    </button>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save mr-1"></i> Cadastrar</button>
+            </div>
+        </div>
+
+        <!-- Card Alterar -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100 hover-scale">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-warning text-white mb-3">
+                        <i class="fas fa-edit fa-2x"></i>
+                    </div>
+                    <h5 class="card-title text-warning mb-1">Alterar</h5>
+                    <p class="card-text text-muted small">Editar informações</p>
+                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalAlterar">
+                        Acessar
+                    </button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
-{# MODAL DE EDIÇÃO (Não implementado, apenas placeholder para estrutura) #}
-<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editUserModalLabel">Editar Usuário</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Formulário de Edição aqui...</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary">Salvar Alterações</button>
             </div>
         </div>
+        {% endif %}
+
+        <!-- Card Reset Senha -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100 hover-scale">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-info text-white mb-3">
+                        <i class="fas fa-key fa-2x"></i>
+                    </div>
+                    <h5 class="card-title text-info mb-1">Reset de Senha</h5>
+                    <p class="card-text text-muted small">Redefinição de acesso</p>
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#modalResetSenha">
+                        Acessar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if users.type == 1 or users.type == 2 %}
+        <!-- Card Apagar -->
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100 hover-scale">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-danger text-white mb-3">
+                        <i class="fas fa-user-times fa-2x"></i>
+                    </div>
+                    <h5 class="card-title text-danger mb-1">Apagar</h5>
+                    <p class="card-text text-muted small">Remover usuários</p>
+                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalApagar">
+                        Acessar
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+<!-- Modals -->
+{% include 'users_modals.twig' %}
 
+<!-- Estilos Adicionais -->
+<style>
+    .hover-scale {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
 
-{% include 'footer.twig' %}
+    .hover-scale:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .modal-lg {
+            margin: 1rem;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<script>
+    id_parceiro = {{ users.id_parceiro }};
+    console.log("ID do Parceiro:", id_parceiro);
+</script>
+<script src="../js/users.js"></script>
