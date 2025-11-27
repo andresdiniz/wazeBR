@@ -1151,6 +1151,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log('Dashboard WAZE inicializado com sucesso!');
 });
+
+//Calcular Kms por cidade
+
+function calcularKmTotal(geojsonData) {
+    let kmTotal = 0;
+    
+    // Turf.length calcula o comprimento total em quilômetros por padrão (se não for especificada a unidade)
+    // Se quiser garantir a unidade: turf.length(geojsonData, {units: 'kilometers'})
+    kmTotal = turf.length(geojsonData, {units: 'kilometers'}); 
+
+    return kmTotal;
+}
+console.log('Cálculo de extensão total por cidade pronto.');
+console.log('Use a função calcularKmTotal(geojsonData) para obter o comprimento total em quilômetros.');
+console.log('Exemplo: let totalKm = calcularKmTotal(seuGeojsonData);');
 </script>
 
 <!--<script src="../js/home-custom.js"></script>-->
