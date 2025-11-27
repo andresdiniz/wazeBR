@@ -312,7 +312,7 @@ $data = [
     'total_kms' => getKms($pdo, $id_parceiro), // <--- NOVO
 ];
 
-echo "<script>console.log('Total KMs: " . json_encode($data['total_kms']) . "');</script>";
+echo getKms($pdo, $id_parceiro);
 
 // Você pode passar $data para o seu template Twig aqui
 // echo $twig->render('dashboard.html.twig', $data);
