@@ -133,28 +133,28 @@
             Configurações
         </div>
 
-        <li class="nav-item {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'active' : '' }}">
+        <li class="nav-item {{ pagedata.current_page in ['Config', 'settings'] ? 'active' : '' }}">
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseStatsRoutes"
-            aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'true' : 'false' }}">
+            aria-expanded="{{ pagedata.current_page in ['config', 'settings'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
-                <span>Dados das Rotas</span>
+                <span>Configurações do Sistema</span>
             </a>
 
             <div id="collapseStatsRoutes"
-                class="collapse {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'show' : '' }}">
+                class="collapse {{ pagedata.current_page in ['config', 'settings'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
-                        Dados de Rotas
+                        Configurações do Sistema
                     </h6>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'analise_tempos' ? 'active' : '' }}" href="routes">
-                        <i class="fas fa-list"></i> Análise de Tempos/Velocidades
+                    <a class="collapse-item {{ pagedata.current_page == 'config' ? 'active' : '' }}" href="settings">
+                        <i class="fas fa-list"></i> Configuraçãoes Gerais
                     </a>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades_stats' ? 'active' : '' }}" href="irregularidades">
+                    <a class="collapse-item {{ pagedata.current_page == 'config' ? 'active' : '' }}" href="irregularidades">
                         <i class="fas fa-exclamation-triangle"></i> Irregularidades
                     </a>
                 </div>
