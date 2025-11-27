@@ -561,7 +561,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-traffic-light"></i>
                 </div>
-                <div class="stats-card-value" id="jamTotalLength">{{ jamAlerts|length }}</div>
+                <div class="stats-card-value" id="jamTotalLength">0.00 km</div>
                 <div class="stats-card-label">Extensão Congestionada (KM)</div>
             </div>
         </div>
@@ -907,11 +907,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- ATUALIZAÇÃO DO CARD ---
     let jamLengthCard1 = document.getElementById('jamTotalLength');
     if (jamLengthCard1) {
-        // Agora, totalLengthKM é garantidamente uma string de número ('0.00', '12.45', etc.)
-        jamLengthCard1.innerText = totalLengthKM; 
-        
+        // totalLengthKM já está com 2 casas decimais (string)
+        const formattedPerc = perc.toFixed(2); 
+
+        // Atualiza o conteúdo do div, incluindo KM e Porcentagem
+        jamLengthCard1.innerHTML = `${totalLengthKM} km <small class="text-muted">(${formattedPerc} %)</small>`;
     } else {
-        // Deixe este console.warn para depuração
         console.warn('Card de extensão total (jamTotalLength) não encontrado.');
     }
     
