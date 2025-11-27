@@ -10,7 +10,7 @@
     <meta name="created" content="{{pagedata.created_at}}">
     <meta name="author" content="Waze Data System">
     <meta name="csrf-token" content="<?= $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32)) ?>">
-    <meta name="theme-color" content="#4e73df">
+    <meta name="theme-color" content="#667eea">
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ settings.systemname }} - {{ pagedata.title }}">
@@ -34,16 +34,10 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <!-- Font Awesome -->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <!-- Fallback para Font Awesome -->
-    <script>
-        if (typeof FontAwesome === 'undefined') {
-            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">');
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Google Fonts - Nunito -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Nunito & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.css">
@@ -66,61 +60,59 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.x/dist/chartjs-chart-matrix.min.js"></script>
-
-    <!-- Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 
     <!-- Notify.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
-
-    <!-- Auto-refresh Script -->
-    <script>
-        // Configuração de auto-refresh para páginas específicas
-        (function() {
-            const currentUrl = window.location.pathname;
-            const validPages = ['home', 'dashboard', 'routes', 'irregularidades'];
-            const refreshInterval = 180000; // 3 minutos
-
-            if (validPages.some(page => currentUrl.includes(page))) {
-                console.log('Auto-refresh ativado para esta página');
-                setInterval(() => {
-                    console.log('Atualizando página...');
-                    window.location.reload();
-                }, refreshInterval);
-            }
-        })();
-    </script>
 
     <style>
         :root {
-            --primary-color: #4e73df;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+            --topbar-height: 70px;
+            --primary-color: #667eea;
             --secondary-color: #858796;
             --success-color: #1cc88a;
             --danger-color: #e74a3b;
             --warning-color: #f6c23e;
             --info-color: #36b9cc;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fc;
+            --sidebar-bg: #1a1d29;
+            --sidebar-hover: #252938;
+            --text-muted: #858796;
+            --border-color: #e3e6f0;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 0.95rem;
+            background-color: var(--light-bg);
+            color: var(--dark-color);
+            overflow-x: hidden;
         }
 
-        /* Animação de carregamento */
+        /* Loading Animation */
         .page-loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.98);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            opacity: 1;
+            z-index: 99999;
             transition: opacity 0.3s ease;
         }
 
@@ -128,5 +120,91 @@
             opacity: 0;
             pointer-events: none;
         }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Smooth Transitions */
+        * {
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Utility Classes */
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
+
+    <!-- Auto-refresh Script -->
+    <script>
+        (function() {
+            const currentUrl = window.location.pathname;
+            const validPages = ['home', 'dashboard', 'routes', 'irregularidades'];
+            const refreshInterval = 180000; // 3 minutos
+
+            if (validPages.some(page => currentUrl.includes(page))) {
+                console.log('🔄 Auto-refresh ativado para esta página');
+                setInterval(() => {
+                    console.log('🔄 Atualizando página...');
+                    window.location.reload();
+                }, refreshInterval);
+            }
+        })();
+
+        // Loading Screen
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const loader = document.querySelector('.page-loading');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => loader.remove(), 300);
+                }
+            }, 500);
+        });
+    </script>
 </head>
+
+<!-- Loading Screen -->
+<div class="page-loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Carregando...</div>
+</div>

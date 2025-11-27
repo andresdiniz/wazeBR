@@ -1,271 +1,601 @@
-</div>
-            <footer class="sticky-footer bg-white border-top">
-                <div class="container my-auto">
-                    <div class="row align-items-center">
-              
-                        <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-                            <span class="text-muted small">
-                           
-                                <i class="fas fa-sync-alt me-2"></i>
-                                <strong>Última atualização:</strong> {{atualizacao.execution_time}}
-                            </span>
-                        </div>
-      
-                        
-                        <div class="col-md-6 text-center text-md-end">
-                           
-                            <span class="text-muted small">
-                                <i class="fas fa-copyright me-1"></i>
-                                {{ "now"|date("Y") }} <strong>DADOS WAZE</strong> - Todos os direitos reservados
-                     
-                            </span>
-                            <div class="mt-1">
-                                <a href="#" class="text-muted small me-3">Política de Privacidade</a>
-                          
-                                <a href="#" class="text-muted small">Termos de Uso</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
- 
-            </footer>
-            </div>
-        </div>
-    <a class="scroll-to-top rounded shadow" href="#page-top" title="Voltar ao Topo">
-        <i class="fas fa-angle-up"></i>
-    </a>
+<style>
+    /* ==================== FOOTER STYLES ==================== */
+    
+    .sticky-footer {
+        background: white;
+        border-top: 1px solid var(--border-color);
+        padding: 2rem 0;
+        margin-top: auto;
+        flex-shrink: 0;
+    }
 
-    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="logoutModalLabel">
-                      
-                        <i class="fas fa-sign-out-alt me-2"></i>Confirmar Saída
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body py-4">
-               
-                    <div class="text-center mb-3">
-                        <i class="fas fa-question-circle fa-3x text-warning"></i>
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .footer-update-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .footer-update-icon {
+        width: 35px;
+        height: 35px;
+        background: var(--primary-gradient);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .footer-update-text strong {
+        color: var(--dark-color);
+        font-weight: 700;
+    }
+
+    .footer-copyright {
+        text-align: right;
+    }
+
+    .footer-copyright-text {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .footer-copyright-text strong {
+        color: var(--dark-color);
+        font-weight: 700;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .footer-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .footer-links a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-gradient);
+        transition: width 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: var(--primary-color);
+    }
+
+    .footer-links a:hover::after {
+        width: 100%;
+    }
+
+    /* Scroll to Top Button */
+    .scroll-to-top {
+        position: fixed;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        display: none;
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1.25rem;
+    }
+
+    .scroll-to-top.show {
+        display: flex;
+    }
+
+    .scroll-to-top:hover {
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    /* Dark Mode Toggle Button */
+    #darkModeToggle {
+        position: fixed;
+        bottom: 5rem;
+        right: 1.5rem;
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    #darkModeToggle:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: scale(1.1) rotate(15deg);
+    }
+
+    /* ==================== MODALS ==================== */
+    
+    .modal-content {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-bottom: none;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .modal-title i {
+        font-size: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-body-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse-icon 2s ease-in-out infinite;
+    }
+
+    .modal-body-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    @keyframes pulse-icon {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .modal-body p {
+        text-align: center;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-bottom: 0;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--light-bg);
+    }
+
+    .modal-footer .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .modal-footer .btn-secondary {
+        background: #858796;
+        border: none;
+    }
+
+    .modal-footer .btn-secondary:hover {
+        background: #6e707e;
+        transform: translateY(-2px);
+    }
+
+    .modal-footer .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+    }
+
+    .modal-footer .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* ==================== DARK MODE ==================== */
+    
+    body.dark-mode {
+        background-color: #0f1419;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .sidebar {
+        background-color: #0a0d11;
+    }
+
+    body.dark-mode .topbar,
+    body.dark-mode .sticky-footer {
+        background-color: #1a1d29;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .footer-update-text,
+    body.dark-mode .footer-copyright-text,
+    body.dark-mode .footer-links a {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    body.dark-mode .footer-update-text strong,
+    body.dark-mode .footer-copyright-text strong {
+        color: white;
+    }
+
+    body.dark-mode .modal-content {
+        background-color: #1a1d29;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .modal-footer {
+        background-color: #0f1419;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .dropdown-menu {
+        background-color: #1a1d29;
+        color: #e0e0e0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .dropdown-item {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    body.dark-mode #darkModeToggle {
+        background: #1a1d29;
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    
+    @media (max-width: 768px) {
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .footer-update-info {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .footer-copyright {
+            text-align: center;
+        }
+
+        .footer-copyright-text {
+            justify-content: center;
+        }
+
+        .footer-links {
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .scroll-to-top {
+            right: 1rem;
+            bottom: 1rem;
+            width: 45px;
+            height: 45px;
+        }
+
+        #darkModeToggle {
+            right: 1rem;
+            bottom: 4rem;
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer">
+            <div class="container my-auto">
+                <div class="footer-content">
+                    
+                    <!-- Update Info -->
+                    <div class="footer-update-info">
+                        <div class="footer-update-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="footer-update-text">
+                            <strong>Última atualização:</strong> {{atualizacao.execution_time}}
+                        </div>
                     </div>
-                    <p class="text-center mb-0">
-                       
-                        Deseja realmente encerrar sua sessão atual?
-                    </p>
+                    
+                    <!-- Copyright -->
+                    <div class="footer-copyright">
+                        <div class="footer-copyright-text">
+                            <i class="fas fa-copyright"></i>
+                            <span>{{ "now"|date("Y") }} <strong>DADOS WAZE</strong> - Todos os direitos reservados</span>
+                        </div>
+                        <div class="footer-links">
+                            <a href="#">Política de Privacidade</a>
+                            <a href="#">Termos de Uso</a>
+                            <a href="#">Suporte</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
-        
-                    </button>
-                    <a class="btn btn-primary" href="login.html">
-                        <i class="fas fa-sign-out-alt me-2"></i>Sair
-                    </a>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top" href="#page-top" id="scrollTopBtn">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Dark Mode Toggle -->
+<button id="darkModeToggle" title="Alternar Modo Escuro">
+    <i class="fas fa-moon"></i>
+</button>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Confirmar Saída
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body-icon">
+                    <i class="fas fa-question-circle"></i>
                 </div>
-  
+                <p>Deseja realmente encerrar sua sessão atual?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <a class="btn btn-primary" href="login.html">
+                    <i class="fas fa-sign-out-alt me-2"></i>Sair
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <button id="darkModeToggle" class="btn btn-light btn-sm position-fixed bottom-0 end-0 m-3" title="Alternar Modo Escuro">
-        <i class="fas fa-moon"></i>
-    </button>
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
 
-    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
-
-    <script>
-        // Ativar tooltips do Bootstrap
-        document.addEventListener('DOMContentLoaded', function() {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ==================== TOOLTIPS ====================
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
-        // Smooth scroll para o botão "scroll to top"
-        document.querySelector('.scroll-to-top')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-        // Mostrar/ocultar botão scroll to top baseado na posição da página
-        window.addEventListener('scroll', function() {
-            const scrollToTop = document.querySelector('.scroll-to-top');
-            if (scrollToTop) {
-                if (window.pageYOffset > 100) {
-                    scrollToTop.style.display = 'flex';
+        // ==================== SCROLL TO TOP ====================
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        
+        if (scrollTopBtn) {
+            // Mostrar/ocultar botão baseado no scroll
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollTopBtn.classList.add('show');
                 } else {
-                    scrollToTop.style.display = 'none';
+                    scrollTopBtn.classList.remove('show');
                 }
-            }
-        });
-        // Toggle sidebar
-        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-            document.body.classList.toggle('sidebar-toggled');
-            document.querySelector('.sidebar')?.classList.toggle('toggled');
-        });
-        document.getElementById('sidebarToggleTop')?.addEventListener('click', function() {
-            document.body.classList.toggle('sidebar-toggled');
-            document.querySelector('.sidebar')?.classList.toggle('toggled');
-        });
-        // Auto-fechar sidebar em telas pequenas ao clicar em um link
-        if (window.innerWidth < 768) {
-            document.querySelectorAll('.sidebar .collapse-item').forEach(function(element) {
-                element.addEventListener('click', function() {
-                    document.body.classList.add('sidebar-toggled');
-                    document.querySelector('.sidebar')?.classList.add('toggled');
+            });
+
+            // Scroll suave ao clicar
+            scrollTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
             });
         }
 
-        // Dark Mode Toggle
+        // ==================== DARK MODE ====================
         const darkModeToggle = document.getElementById('darkModeToggle');
+        
         if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', function() {
-                document.body.classList.toggle('dark-mode');
-                // Salvar preferência no localStorage
-                if (document.body.classList.contains('dark-mode')) {
-                    localStorage.setItem('darkMode', 'enabled');
-                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-                } else {
-                    localStorage.setItem('darkMode', 'disabled');
-                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-                }
-            });
-
-            // Verificar preferência salva
-            if (localStorage.getItem('darkMode') === 'enabled') {
+            // Carregar preferência salva
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
                 document.body.classList.add('dark-mode');
                 darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
             }
+
+            // Toggle dark mode
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    
+                    // Notificação
+                    if (typeof $.notify !== 'undefined') {
+                        $.notify('Modo escuro ativado', {
+                            position: "top right",
+                            className: "info",
+                            autoHideDelay: 2000
+                        });
+                    }
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    
+                    // Notificação
+                    if (typeof $.notify !== 'undefined') {
+                        $.notify('Modo claro ativado', {
+                            position: "top right",
+                            className: "info",
+                            autoHideDelay: 2000
+                        });
+                    }
+                }
+            });
         }
+
+        // ==================== SIDEBAR MOBILE ====================
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
         
-        // O CÓDIGO DE INICIALIZAÇÃO MANUAL DO COLLAPSE FOI REMOVIDO DAQUI
-        // ESTA REMOÇÃO DEVE RESOLVER O CONFLITO E PERMITIR QUE OS SUBMENUS FUNCIONEM.
-    </script>
-
-    <style>
-        /* Estilos adicionais para melhorias visuais */
-        .sticky-footer {
-            padding: 1.5rem 0;
-            flex-shrink: 0;
+        // Fechar sidebar ao clicar em link (mobile)
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(function(element) {
+                element.addEventListener('click', function() {
+                    if (!this.hasAttribute('data-bs-toggle')) {
+                        document.body.classList.remove('sidebar-toggled');
+                        if (sidebar) sidebar.classList.remove('show');
+                    }
+                });
+            });
         }
 
-        .scroll-to-top {
-            position: fixed;
-            right: 1.5rem;
-            bottom: 1.5rem;
-            display: none;
-            width: 3rem;
-            height: 3rem;
-            text-align: center;
-            line-height: 3rem;
-            background-color: var(--primary-color, #4e73df);
-            color: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
+        // ==================== DROPDOWN ANIMATIONS ====================
+        document.querySelectorAll('.dropdown').forEach(function(dropdown) {
+            dropdown.addEventListener('show.bs.dropdown', function() {
+                const menu = this.querySelector('.dropdown-menu');
+                if (menu) {
+                    menu.classList.add('animated--grow-in');
+                }
+            });
+        });
 
-        .scroll-to-top:hover {
-            background-color: #224abe;
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        }
-
-        .modal-content {
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-
-        .icon-circle {
-            height: 2.5rem;
-            width: 2.5rem;
-            border-radius: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .badge-counter {
-            position: absolute;
-            transform: scale(0.7);
-            transform-origin: top right;
-            right: 0.25rem;
-            margin-top: -0.25rem;
-        }
-
-        .topbar-divider {
-            width: 0;
-            border-right: 1px solid #e3e6f0;
-            height: calc(4.375rem - 2rem);
-            margin: auto 1rem;
-        }
-
-        /* Animação para dropdown */
-        .animated--grow-in {
-            animation: growIn 0.2s ease-in-out;
-        }
-
-        @keyframes growIn {
-            0% {
-                transform: scale(0.9);
-                opacity: 0;
+        // ==================== ACTIVE PAGE HIGHLIGHT ====================
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(function(link) {
+            const href = link.getAttribute('href');
+            if (href && currentPath.includes(href)) {
+                link.classList.add('active');
+                
+                // Expandir collapse se estiver dentro
+                const collapse = link.closest('.collapse');
+                if (collapse) {
+                    collapse.classList.add('show');
+                }
             }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
+        });
 
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
+        // ==================== CONSOLE INFO ====================
+        console.log('%c🚀 Sistema WAZE Data carregado com sucesso!', 'color: #667eea; font-size: 16px; font-weight: bold;');
+        console.log('%c📊 Versão: 2.0 | Bootstrap 5.3.3', 'color: #858796; font-size: 12px;');
+        
+    });
 
-        body.dark-mode .sidebar {
-            background-color: #1e1e1e !important;
+    // ==================== UTILITY FUNCTIONS ====================
+    
+    // Função para mostrar notificações
+    function showNotification(message, type = 'info', duration = 3000) {
+        if (typeof $.notify !== 'undefined') {
+            $.notify(message, {
+                position: "top right",
+                className: type,
+                autoHideDelay: duration
+            });
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
+    }
 
-        body.dark-mode .topbar {
-            background-color: #1e1e1e !important;
-            color: #e0e0e0;
+    // Função para confirmar ações
+    function confirmAction(title, text, confirmText = 'Confirmar', cancelText = 'Cancelar') {
+        if (typeof Swal !== 'undefined') {
+            return Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#858796',
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText
+            });
+        } else {
+            return Promise.resolve({ isConfirmed: confirm(`${title}\n\n${text}`) });
         }
+    }
 
-        body.dark-mode .sticky-footer {
-            background-color: #1e1e1e !important;
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .modal-content {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .dropdown-menu {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .dropdown-item {
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .dropdown-item:hover {
-            background-color: #333;
-        }
-
-        /* Ajustes para o botão dark mode */
-        #darkModeToggle {
-            z-index: 1000;
-        }
-    </style>
+    // Expor funções globalmente
+    window.showNotification = showNotification;
+    window.confirmAction = confirmAction;
+</script>
 
 </body>
-
 </html>

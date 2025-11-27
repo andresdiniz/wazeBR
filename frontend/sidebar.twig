@@ -1,211 +1,726 @@
 <body id="page-top">
 
-    <!-- Wrapper Principal -->
-    <div id="wrapper">
+<style>
+    /* ==================== SIDEBAR STYLES ==================== */
+    
+    #wrapper {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+    }
 
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    /* Sidebar Container */
+    .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: var(--sidebar-bg);
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-            <!-- Brand / Logo -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/home">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <img src="{{ settings.logo }}" alt="{{ settings.systemname }}" style="height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
-                </div>
-                <div class="sidebar-brand-text mx-3">{{ settings.systemname }}</div>
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+
+    /* Sidebar Brand */
+    .sidebar-brand {
+        height: var(--topbar-height);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sidebar-brand-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+    }
+
+    .sidebar-brand-icon img {
+        height: 40px;
+        width: auto;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand:hover .sidebar-brand-icon img {
+        transform: scale(1.1) rotate(-15deg);
+    }
+
+    .sidebar-brand-text {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: white;
+        letter-spacing: 0.5px;
+    }
+
+    /* Sidebar Divider */
+    .sidebar-divider {
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        margin: 0.5rem 1rem;
+    }
+
+    /* Sidebar Heading */
+    .sidebar-heading {
+        padding: 1rem 1.5rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Nav Items */
+    .sidebar .nav-item {
+        margin-bottom: 0.25rem;
+    }
+
+    .sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .sidebar .nav-link i {
+        width: 24px;
+        margin-right: 1rem;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+
+    .sidebar .nav-link:hover {
+        background: var(--sidebar-hover);
+        color: white;
+        border-left-color: var(--primary-color);
+        padding-left: 1.75rem;
+    }
+
+    .sidebar .nav-item.active .nav-link {
+        background: var(--primary-gradient);
+        color: white;
+        font-weight: 700;
+        border-left-color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Collapse Menu */
+    .sidebar .collapse-inner {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 0.5rem;
+        margin: 0.25rem 1rem 0.5rem 1rem;
+        padding: 0.5rem 0;
+    }
+
+    .sidebar .collapse-header {
+        padding: 0.75rem 1rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sidebar .collapse-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-radius: 0.35rem;
+        margin: 0.125rem 0.5rem;
+    }
+
+    .sidebar .collapse-item i {
+        width: 20px;
+        margin-right: 0.75rem;
+        text-align: center;
+    }
+
+    .sidebar .collapse-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding-left: 1.25rem;
+    }
+
+    .sidebar .collapse-item.active {
+        background: rgba(102, 126, 234, 0.3);
+        color: white;
+        font-weight: 700;
+    }
+
+    /* Sidebar Toggle Button */
+    .sidebar-toggle-wrapper {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    #sidebarToggle {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    #sidebarToggle:hover {
+        background: var(--primary-color);
+        transform: scale(1.1);
+    }
+
+    #sidebarToggle::before {
+        content: '\f053';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* Sidebar Collapsed State */
+    body.sidebar-toggled .sidebar {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    body.sidebar-toggled .sidebar .sidebar-brand-text,
+    body.sidebar-toggled .sidebar .nav-link span,
+    body.sidebar-toggled .sidebar .sidebar-heading,
+    body.sidebar-toggled .sidebar .collapse-inner {
+        display: none;
+    }
+
+    body.sidebar-toggled .sidebar .nav-link {
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    body.sidebar-toggled .sidebar .nav-link i {
+        margin: 0;
+    }
+
+    body.sidebar-toggled #sidebarToggle::before {
+        content: '\f054';
+    }
+
+    /* ==================== CONTENT WRAPPER ==================== */
+    
+    #content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-left: var(--sidebar-width);
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 100vh;
+        background: var(--light-bg);
+    }
+
+    body.sidebar-toggled #content-wrapper {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+
+    #content {
+        flex: 1;
+        padding-bottom: 2rem;
+    }
+
+    /* ==================== TOPBAR ==================== */
+    
+    .topbar {
+        height: var(--topbar-height);
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    #sidebarToggleTop {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    #sidebarToggleTop:hover {
+        background: var(--light-bg);
+        color: var(--primary-color);
+    }
+
+    /* Topbar Info */
+    .topbar-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .topbar-info i {
+        color: var(--primary-color);
+    }
+
+    /* Topbar Navbar */
+    .topbar .navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .topbar .nav-item {
+        position: relative;
+    }
+
+    .topbar .nav-link {
+        color: var(--text-muted);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+
+    .topbar .nav-link:hover {
+        background: var(--light-bg);
+        color: var(--primary-color);
+    }
+
+    /* Badge Counter */
+    .badge-counter {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--danger-color);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+        border: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        min-width: 280px;
+    }
+
+    .dropdown-header {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--dark-color);
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .dropdown-item:hover {
+        background: var(--light-bg);
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Icon Circle */
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .icon-circle.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    /* Topbar Divider */
+    .topbar-divider {
+        width: 1px;
+        height: 40px;
+        background: var(--border-color);
+        margin: 0 0.75rem;
+    }
+
+    /* User Info */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            margin-left: calc(var(--sidebar-width) * -1);
+        }
+
+        .sidebar.show {
+            margin-left: 0;
+        }
+
+        #content-wrapper {
+            margin-left: 0;
+        }
+
+        body.sidebar-toggled .sidebar {
+            margin-left: 0;
+        }
+
+        body.sidebar-toggled #content-wrapper {
+            margin-left: 0;
+        }
+
+        .topbar-info {
+            display: none;
+        }
+
+        .topbar-divider {
+            display: none;
+        }
+
+        .user-info .d-none-mobile {
+            display: none !important;
+        }
+    }
+
+    /* Overlay para mobile */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        body.sidebar-toggled .sidebar-overlay {
+            display: block;
+            opacity: 1;
+        }
+    }
+</style>
+
+<!-- Wrapper Principal -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav sidebar" id="accordionSidebar">
+
+        <!-- Brand / Logo -->
+        <a class="sidebar-brand" href="/home">
+            <div class="sidebar-brand-icon">
+                <img src="{{ settings.logo }}" alt="{{ settings.systemname }}">
+            </div>
+            <div class="sidebar-brand-text">{{ settings.systemname }}</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}">
+            <a class="nav-link" href="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
             </a>
+        </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
+        <!-- Divider -->
+        <hr class="sidebar-divider">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}">
-                <a class="nav-link" href="dashboard">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            <i class="fas fa-broadcast-tower"></i>
+            Dados ao Vivo
+        </div>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                <i class="fas fa-broadcast-tower me-2"></i>
-                Dados ao Vivo
-            </div>
-
-            <!-- Nav Item - Rotas -->
-            <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                    aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}" aria-controls="collapseRoutes">
-                    <i class="fas fa-fw fa-route"></i>
-                    <span>Rotas</span>
-                </a>
-                <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}" aria-labelledby="headingRoutes" data-bs-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">
-                            <i class="fas fa-road text-primary me-1"></i>
-                            Opções de Rotas
-                        </h6>
-                        <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
-                            <i class="fas fa-list me-2"></i>Todas as Rotas
-                        </a>
-                        <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
-                            <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Irregularidades
-                        </a>
-                    </div>
+        <!-- Nav Item - Rotas -->
+        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
+            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
+                aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+                <i class="fas fa-route"></i>
+                <span>Rotas</span>
+            </a>
+            <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-road"></i>
+                        Opções de Rotas
+                    </h6>
+                    <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
+                        <i class="fas fa-list"></i>Todas as Rotas
+                    </a>
+                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
+                        <i class="fas fa-exclamation-triangle"></i>Irregularidades
+                    </a>
                 </div>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                <i class="fas fa-cog me-2"></i>
-                Configurações
             </div>
-            
-            <!-- Nav Item - Utilitários -->
-            <li class="nav-item {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'active' : '' }}">
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities"
-                    aria-expanded="{{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'true' : 'false' }}" aria-controls="collapseUtilities">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Utilitários</span>
-                </a>
-                <div id="collapseUtilities" class="collapse {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'show' : '' }}" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">
-                            <i class="fas fa-tools text-primary me-1"></i>
-                            Opções do Sistema
-                        </h6>
-                        <a class="collapse-item {{ pagedata.current_page == 'utilities-color' ? 'active' : '' }}" href="utilities-color.html">
-                            <i class="fas fa-palette me-2"></i>Cores
-                        </a>
-                        <a class="collapse-item {{ pagedata.current_page == 'utilities-border' ? 'active' : '' }}" href="utilities-border.html">
-                            <i class="fas fa-border-style me-2"></i>Bordas
-                        </a>
-                    </div>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            <i class="fas fa-cog"></i>
+            Configurações
+        </div>
+        
+        <!-- Nav Item - Utilitários -->
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities">
+                <i class="fas fa-wrench"></i>
+                <span>Utilitários</span>
+            </a>
+            <div id="collapseUtilities" class="collapse">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-tools"></i>
+                        Opções do Sistema
+                    </h6>
+                    <a class="collapse-item" href="utilities-color.html">
+                        <i class="fas fa-palette"></i>Cores
+                    </a>
+                    <a class="collapse-item" href="utilities-border.html">
+                        <i class="fas fa-border-style"></i>Bordas
+                    </a>
                 </div>
-            </li>
-            
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggle -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle" title="Alternar Sidebar"></button>
             </div>
+        </li>
+        
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
 
-        </ul>
-        <!-- End of Sidebar -->
+        <!-- Sidebar Toggle -->
+        <div class="sidebar-toggle-wrapper d-none d-md-block">
+            <button id="sidebarToggle"></button>
+        </div>
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+    </ul>
+    <!-- End of Sidebar -->
 
-            <!-- Main Content -->
-            <div id="content">
+    <!-- Overlay para mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+    <!-- Content Wrapper -->
+    <div id="content-wrapper">
 
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle me-3" title="Alternar Menu">
-                        <i class="fa fa-bars"></i>
-                    </button>
+        <!-- Main Content -->
+        <div id="content">
 
-                    <!-- Topbar Info -->
-                    <div class="d-none d-sm-inline-block">
-                        <span class="text-muted small">
-                            <i class="fas fa-clock me-1"></i>
-                            <span id="currentDateTime"></span>
-                        </span>
-                    </div>
+            <!-- Topbar -->
+            <nav class="topbar">
+
+                <!-- Sidebar Toggle (Mobile) -->
+                <button id="sidebarToggleTop" class="d-md-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Topbar Info -->
+                <div class="topbar-info d-none d-sm-flex ms-3">
+                    <i class="fas fa-clock"></i>
+                    <span id="currentDateTime"></span>
+                </div>
+                
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ms-auto">
+
+                    <!-- Notifications -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell fa-fw"></i>
+                            <span class="badge-counter">3+</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="alertsDropdown">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-bell"></i>
+                                Centro de Notificações
+                            </h6>
+                            <a class="dropdown-item" href="#">
+                                <div class="icon-circle bg-primary">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="small text-muted">12 de Dezembro, 2024</div>
+                                    <span>Novo relatório disponível</span>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center" href="#">
+                                Ver Todas as Notificações
+                            </a>
+                        </div>
+                    </li>
+
+                    <div class="topbar-divider d-none d-sm-block"></div>
+
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="me-2 d-none d-lg-inline">Usuário</span>
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-user"></i>
+                                Perfil
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-cogs"></i>
+                                Configurações
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sair
+                            </a>
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- End of Topbar -->
+
+            <script>
+                // Update DateTime
+                function updateDateTime() {
+                    const now = new Date();
+                    const options = { 
+                        weekday: 'short', 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    };
+                    const dateTimeString = now.toLocaleDateString('pt-BR', options);
+                    const element = document.getElementById('currentDateTime');
+                    if (element) element.textContent = dateTimeString;
+                }
+
+                updateDateTime();
+                setInterval(updateDateTime, 60000);
+
+                // Sidebar Toggle
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sidebarToggle = document.getElementById('sidebarToggle');
+                    const sidebarToggleTop = document.getElementById('sidebarToggleTop');
+                    const sidebar = document.querySelector('.sidebar');
+                    const sidebarOverlay = document.getElementById('sidebarOverlay');
                     
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ms-auto">
-
-                        <!-- Nav Item - Notifications -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-bell fa-fw"></i>
-                                <span class="badge badge-danger badge-counter">3+</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
-                                aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
-                                    <i class="fas fa-bell me-2"></i>Centro de Notificações
-                                </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="me-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">12 de Dezembro, 2024</div>
-                                        <span class="font-weight-bold">Novo relatório disponível</span>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">
-                                    Ver Todas as Notificações
-                                </a>
-                            </div>
-                        </li>
-
-                        <div class="topbar-divider d-none d-sm-block"></div>
-
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="me-2 d-none d-lg-inline text-gray-600 small">Usuário</span>
-                                <i class="fas fa-user-circle fa-2x text-gray-400"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Perfil
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Configurações
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Sair
-                                </a>
-                            </div>
-                        </li>
-
-                    </ul>
-
-                </nav>
-                <!-- End of Topbar -->
-
-                <script>
-                    // Atualizar data e hora em tempo real
-                    function updateDateTime() {
-                        const now = new Date();
-                        const options = { 
-                            weekday: 'short', 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        };
-                        const dateTimeString = now.toLocaleDateString('pt-BR', options);
-                        const element = document.getElementById('currentDateTime');
-                        if (element) {
-                            element.textContent = dateTimeString;
-                        }
+                    if (sidebarToggle) {
+                        sidebarToggle.addEventListener('click', () => {
+                            document.body.classList.toggle('sidebar-toggled');
+                        });
                     }
-
-                    // Atualizar a cada minuto
-                    updateDateTime();
-                    setInterval(updateDateTime, 60000);
-                </script>
+                    
+                    if (sidebarToggleTop) {
+                        sidebarToggleTop.addEventListener('click', () => {
+                            document.body.classList.toggle('sidebar-toggled');
+                            sidebar.classList.toggle('show');
+                        });
+                    }
+                    
+                    if (sidebarOverlay) {
+                        sidebarOverlay.addEventListener('click', () => {
+                            document.body.classList.remove('sidebar-toggled');
+                            sidebar.classList.remove('show');
+                        });
+                    }
+                });
+            </script>
