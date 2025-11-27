@@ -1,84 +1,80 @@
 </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
             <footer class="sticky-footer bg-white border-top">
                 <div class="container my-auto">
                     <div class="row align-items-center">
-                        <!-- Informações de Atualização -->
+              
                         <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
                             <span class="text-muted small">
+                           
                                 <i class="fas fa-sync-alt me-2"></i>
                                 <strong>Última atualização:</strong> {{atualizacao.execution_time}}
                             </span>
                         </div>
+      
                         
-                        <!-- Copyright e Links -->
                         <div class="col-md-6 text-center text-md-end">
+                           
                             <span class="text-muted small">
                                 <i class="fas fa-copyright me-1"></i>
                                 {{ "now"|date("Y") }} <strong>DADOS WAZE</strong> - Todos os direitos reservados
+                     
                             </span>
                             <div class="mt-1">
                                 <a href="#" class="text-muted small me-3">Política de Privacidade</a>
+                          
                                 <a href="#" class="text-muted small">Termos de Uso</a>
                             </div>
                         </div>
                     </div>
                 </div>
+ 
             </footer>
-            <!-- End of Footer -->
-
+            </div>
         </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-    <!-- End of Page Wrapper -->
-
-    <!-- Scroll to Top Button -->
     <a class="scroll-to-top rounded shadow" href="#page-top" title="Voltar ao Topo">
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="logoutModalLabel">
+                      
                         <i class="fas fa-sign-out-alt me-2"></i>Confirmar Saída
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-4">
+               
                     <div class="text-center mb-3">
                         <i class="fas fa-question-circle fa-3x text-warning"></i>
                     </div>
                     <p class="text-center mb-0">
+                       
                         Deseja realmente encerrar sua sessão atual?
                     </p>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>Cancelar
+        
                     </button>
                     <a class="btn btn-primary" href="login.html">
                         <i class="fas fa-sign-out-alt me-2"></i>Sair
                     </a>
                 </div>
+  
             </div>
         </div>
     </div>
 
-    <!-- Botão Dark Mode -->
     <button id="darkModeToggle" class="btn btn-light btn-sm position-fixed bottom-0 end-0 m-3" title="Alternar Modo Escuro">
         <i class="fas fa-moon"></i>
     </button>
 
-    <!-- Scripts -->
     <script src="https://cdn.datatables.net/v/bs5/dt-1.13.10/r-2.5.0/datatables.min.js"></script>
 
-    <!-- Adicionar funcionalidades extras -->
     <script>
         // Ativar tooltips do Bootstrap
         document.addEventListener('DOMContentLoaded', function() {
@@ -96,7 +92,6 @@
                 behavior: 'smooth'
             });
         });
-
         // Mostrar/ocultar botão scroll to top baseado na posição da página
         window.addEventListener('scroll', function() {
             const scrollToTop = document.querySelector('.scroll-to-top');
@@ -108,18 +103,15 @@
                 }
             }
         });
-
         // Toggle sidebar
         document.getElementById('sidebarToggle')?.addEventListener('click', function() {
             document.body.classList.toggle('sidebar-toggled');
             document.querySelector('.sidebar')?.classList.toggle('toggled');
         });
-
         document.getElementById('sidebarToggleTop')?.addEventListener('click', function() {
             document.body.classList.toggle('sidebar-toggled');
             document.querySelector('.sidebar')?.classList.toggle('toggled');
         });
-
         // Auto-fechar sidebar em telas pequenas ao clicar em um link
         if (window.innerWidth < 768) {
             document.querySelectorAll('.sidebar .collapse-item').forEach(function(element) {
@@ -151,6 +143,9 @@
                 darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
             }
         }
+        
+        // O CÓDIGO DE INICIALIZAÇÃO MANUAL DO COLLAPSE FOI REMOVIDO DAQUI
+        // ESTA REMOÇÃO DEVE RESOLVER O CONFLITO E PERMITIR QUE OS SUBMENUS FUNCIONEM.
     </script>
 
     <style>
