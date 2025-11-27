@@ -8,7 +8,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/home">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/wazeportal">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <!-- Exibindo a logo armazenada no banco de dados -->
                     <img src="{{ settings.logo }}" alt="{{ settings.systemname }}" style="height: 40px;">
@@ -46,9 +46,8 @@
                         <h6 class="collapse-header">Histórico Alertas:</h6>
                         <a class="collapse-item" href="historic_acidents">Acidentes</a>
                         <a class="collapse-item" href="historic_buracos">Buracos</a>
-                        <a class="collapse-item" href="jams_historic">Congestionamentos Alertados</a>
-                        <a class="collapse-item" href="jamsanalitics">Congestionamentos Automáticos</a>
-                        <a class="collapse-item" href="obras">Obras</a>
+                        <a class="collapse-item" href="jams_historic">Congestionamentos</a>
+                        <a class="collapse-item" href="buttons.html">Obras</a>
                         <a class="collapse-item" href="buttons.html">Carros Parados</a>
                     </div>
                 </div>
@@ -66,12 +65,10 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">MAPAS AO VIVO</h6>
                         <a class="collapse-item" href="routes">Rotas</a>
-                        <a class="collapse-item" href="jams">Congestionamentos</a>
                         <a class="collapse-item" href="irregularidades">Trafego Anormal</a>
-                        <a class="collapse-item" href="historic_routes">Historico de rotas</a>
-                        <a class="collapse-item" href="compare_routes">Comparação de rotas</a>
-                        <a class="collapse-item" href="utilities-border.html">Localização de cameras</a>
                         <a class="collapse-item" href="utilities-animation.html">Acidentes X Cameras</a>
+                        <a class="collapse-item" href="utilities-border.html">Localização de cameras</a>
+                        <a class="collapse-item" href="utilities-animation.html">Serviços de Emergencia</a>
                     </div>
                 </div>
             </li>
@@ -122,7 +119,7 @@
                         <h6 class="collapse-header">Usuarios:</h6>
                         <a class="collapse-item" href="insert_user">Usuarios</a>
                         {% if session.type == 1 or session.type == 2 %}
-                            <a class="collapse-item" href="parceiro">Parceiro</a>
+                            <a class="collapse-item" href="parceiros">Parceiro</a>
                             {% if session.type == 1 %}
                             <a class="collapse-item" href="settings">Configurações</a>
                             {% endif %}
@@ -135,19 +132,6 @@
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3816207884181087"
-                crossorigin="anonymous"></script>
-            <!-- Vertical -->
-            <ins class="adsbygoogle"
-                style="display:block"
-                data-ad-client="ca-pub-3816207884181087"
-                data-ad-slot="2284108909"
-                data-ad-format="auto"
-                data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
 
         </ul>
         <!-- End of Sidebar -->
@@ -350,7 +334,7 @@
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal1">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -361,23 +345,3 @@
 
                 </nav>
                 <!-- End of Topbar -->
-
-                <!-- Logout Modal-->
-    <!-- Logout Modal -->
-<div class="modal fade" id="logoutModal1" tabindex="-1" aria-labelledby="logoutModalLabel1" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="logoutModalLabel1">Pronto para sair?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                Ao selecionar "Sair", sua sessão será encerrada.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a class="btn btn-danger" href="/logout.php">Sair</a>
-            </div>
-        </div>
-    </div>
-</div>
