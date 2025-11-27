@@ -35,111 +35,97 @@
             Dados ao Vivo
         </div>
 
-        <!-- Nav Item - Rotas -->
         <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
-            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+            <a class="nav-link" href="#" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapseLiveRoutes"
+            aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Rotas</span>
             </a>
-            <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+
+            <div id="collapseLiveRoutes" 
+                class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
                         Opções de Rotas
                     </h6>
+
                     <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
-                        <i class="fas fa-list"></i>Todas as Rotas
+                        <i class="fas fa-list"></i> Todas as Rotas
                     </a>
+
                     <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
-                        <i class="fas fa-exclamation-triangle"></i>Irregularidades
+                        <i class="fas fa-exclamation-triangle"></i> Irregularidades
                     </a>
                 </div>
             </div>
         </li>
 
-        <!-- Divider -->
         <hr class="sidebar-divider">
 
-        <!-- Heading -->
         <div class="sidebar-heading">
             <i class="fa-regular fa-chart-bar"></i>
             Dados Estatísticos
         </div>
-        <!-- Nav Item - Rotas -->
-        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
-            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+
+        <li class="nav-item {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'active' : '' }}">
+            <a class="nav-link" href="#"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseStatsRoutes"
+            aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Dados das Rotas</span>
             </a>
-            <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+
+            <div id="collapseStatsRoutes"
+                class="collapse {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
                         Dados de Rotas
                     </h6>
-                    <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
-                        <i class="fas fa-list"></i>Analise de Tempos/Velocidades
+
+                    <a class="collapse-item {{ pagedata.current_page == 'analise_tempos' ? 'active' : '' }}" href="routes">
+                        <i class="fas fa-list"></i> Análise de Tempos/Velocidades
                     </a>
-                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
-                        <i class="fas fa-exclamation-triangle"></i>Irregularidades
+
+                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades_stats' ? 'active' : '' }}" href="irregularidades">
+                        <i class="fas fa-exclamation-triangle"></i> Irregularidades
                     </a>
                 </div>
             </div>
         </li>
-        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
-            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+
+        <li class="nav-item {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'active' : '' }}">
+            <a class="nav-link" href="#"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseStatsAlerts"
+            aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Dados dos Alertas</span>
             </a>
-            <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+
+            <div id="collapseStatsAlerts"
+                class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
                         Dados de Alertas
                     </h6>
-                    <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="historic_acidents">
-                        <i class="fas fa-list"></i>Acidentes Historicos
-                    </a>
-                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="historic_buracos">
-                        <i class="fas fa-exclamation-triangle"></i>Buracos Historicos
-                    </a>
-                </div>
-            </div>
-        </li>
-        
-        <!-- Divider -->
-        <hr class="sidebar-divider">
 
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            <i class="fas fa-cog"></i>
-            Configurações
-        </div>
-        
-        <!-- Nav Item - Utilitários -->
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities">
-                <i class="fas fa-wrench"></i>
-                <span>Utilitários</span>
-            </a>
-            <div id="collapseUtilities" class="collapse">
-                <div class="collapse-inner">
-                    <h6 class="collapse-header">
-                        <i class="fas fa-tools"></i>
-                        Opções do Sistema
-                    </h6>
-                    <a class="collapse-item" href="utilities-color.html">
-                        <i class="fas fa-palette"></i>Cores
+                    <a class="collapse-item {{ pagedata.current_page == 'historic_acidents' ? 'active' : '' }}" href="historic_acidents">
+                        <i class="fas fa-list"></i> Acidentes Históricos
                     </a>
-                    <a class="collapse-item" href="utilities-border.html">
-                        <i class="fas fa-border-style"></i>Bordas
+
+                    <a class="collapse-item {{ pagedata.current_page == 'historic_buracos' ? 'active' : '' }}" href="historic_buracos">
+                        <i class="fas fa-exclamation-triangle"></i> Buracos Históricos
                     </a>
                 </div>
             </div>
         </li>
+
         
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
