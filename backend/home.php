@@ -277,7 +277,7 @@ function getKms(PDO $pdo, ?int $id_parceiro = null): float {
                FROM 
                  parceiros 
                WHERE 
-                 id_parceiro = :id_parceiro";
+                 id = :id_parceiro";
 
     // 2. PREPARAR: Prepara a instrução SQL
     $stmt = $pdo->prepare($sqlkms);
