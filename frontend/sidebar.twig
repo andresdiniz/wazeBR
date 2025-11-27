@@ -1,139 +1,132 @@
 <body id="page-top">
 
-    <!-- Wrapper Principal -->
     <div id="wrapper">
 
-        <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Brand / Logo -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/home">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <img src="{{ settings.logo }}" alt="{{ settings.systemname }}" style="height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                    <img src="{{ settings.logo }}" alt="{{ settings.systemname }}" style="height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"> [cite: 67]
                 </div>
                 <div class="sidebar-brand-text mx-3">{{ settings.systemname }}</div>
             </a>
 
-            <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}">
-                <a class="nav-link" href="dashboard">
+            <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}"> [cite: 68]
+                <a class="nav-link" href="dashboard"> [cite: 69]
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
-            <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Heading -->
             <div class="sidebar-heading">
-                <i class="fas fa-broadcast-tower me-2"></i>
+                <i class="fas fa-broadcast-tower me-2"></i> [cite: 70]
                 Dados ao Vivo
             </div>
 
-            <!-- Nav Item - Rotas -->
-            <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
+            <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades', 'historico-rotas', 'alertas-tempo-real'] ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
-                    aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}" aria-controls="collapseRoutes">
+                    [cite_start]aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades', 'historico-rotas', 'alertas-tempo-real'] ? 'true' : 'false' }}" aria-controls="collapseRoutes"> [cite: 71, 72]
                     <i class="fas fa-fw fa-route"></i>
                     <span>Rotas</span>
                 </a>
-                <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}" aria-labelledby="headingRoutes" data-bs-parent="#accordionSidebar">
+                <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades', 'historico-rotas', 'alertas-tempo-real'] ? 'show' : '' }}" aria-labelledby="headingRoutes" data-bs-parent="#accordionSidebar"> [cite: 73]
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">
-                            <i class="fas fa-road text-primary me-1"></i>
+                            <i class="fas fa-road text-primary me-1"></i> [cite: 74]
                             Opções de Rotas
                         </h6>
-                        <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
+                        
+                        <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes"> 
                             <i class="fas fa-list me-2"></i>Todas as Rotas
                         </a>
-                        <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
+
+                        <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades"> 
                             <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Irregularidades
+                        </a>
+                        
+                        <a class="collapse-item {{ pagedata.current_page == 'historico-rotas' ? 'active' : '' }}" href="historico-rotas">
+                            <i class="fas fa-history me-2"></i>Histórico de Rotas
+                        </a>
+                        
+                        <a class="collapse-item {{ pagedata.current_page == 'alertas-tempo-real' ? 'active' : '' }}" href="alertas-tempo-real">
+                            <i class="fas fa-bullhorn me-2 text-danger"></i>Alertas em Tempo Real
                         </a>
                     </div>
                 </div>
-            </li>
+            </li> [cite: 77]
 
-            <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Heading -->
             <div class="sidebar-heading">
-                <i class="fas fa-cog me-2"></i>
+                <i class="fas fa-cog me-2"></i> [cite: 78]
                 Configurações
             </div>
             
-            <!-- Nav Item - Utilitários -->
-            <li class="nav-item {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'active' : '' }}">
+            <li class="nav-item {{ pagedata.current_page in ['utilities-color', 'utilities-border', 'utilities-animations'] ? 'active' : '' }}">
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities"
-                    aria-expanded="{{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'true' : 'false' }}" aria-controls="collapseUtilities">
+                    [cite_start]aria-expanded="{{ pagedata.current_page in ['utilities-color', 'utilities-border', 'utilities-animations'] ? 'true' : 'false' }}" aria-controls="collapseUtilities"> [cite: 79, 80]
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Utilitários</span>
                 </a>
-                <div id="collapseUtilities" class="collapse {{ pagedata.current_page in ['utilities-color', 'utilities-border'] ? 'show' : '' }}" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar">
+                <div id="collapseUtilities" class="collapse {{ pagedata.current_page in ['utilities-color', 'utilities-border', 'utilities-animations'] ? 'show' : '' }}" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar"> [cite: 81]
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">
-                            <i class="fas fa-tools text-primary me-1"></i>
+                            <i class="fas fa-tools text-primary me-1"></i> [cite: 82]
                             Opções do Sistema
                         </h6>
-                        <a class="collapse-item {{ pagedata.current_page == 'utilities-color' ? 'active' : '' }}" href="utilities-color.html">
+
+                        <a class="collapse-item {{ pagedata.current_page == 'utilities-color' ? 'active' : '' }}" href="utilities-color.html"> 
                             <i class="fas fa-palette me-2"></i>Cores
                         </a>
-                        <a class="collapse-item {{ pagedata.current_page == 'utilities-border' ? 'active' : '' }}" href="utilities-border.html">
+
+                        <a class="collapse-item {{ pagedata.current_page == 'utilities-border' ? 'active' : '' }}" href="utilities-border.html"> 
                             <i class="fas fa-border-style me-2"></i>Bordas
                         </a>
+                        
+                        <a class="collapse-item {{ pagedata.current_page == 'utilities-animations' ? 'active' : '' }}" href="utilities-animations.html">
+                            <i class="fas fa-shapes me-2"></i>Animações
+                        </a>
+                        
                     </div>
                 </div>
-            </li>
+            </li> [cite: 85]
             
-            <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Sidebar Toggle -->
             <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle" title="Alternar Sidebar"></button>
+                <button class="rounded-circle border-0" id="sidebarToggle" title="Alternar Sidebar"></button> [cite: 86]
             </div>
 
         </ul>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
 
-            <!-- Main Content -->
             <div id="content">
 
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"> [cite: 87]
 
-                    <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle me-3" title="Alternar Menu">
-                        <i class="fa fa-bars"></i>
+                        <i class="fa fa-bars"></i> [cite: 88]
                     </button>
 
-                    <!-- Topbar Info -->
                     <div class="d-none d-sm-inline-block">
                         <span class="text-muted small">
-                            <i class="fas fa-clock me-1"></i>
+                            <i class="fas fa-clock me-1"></i> [cite: 89]
                             <span id="currentDateTime"></span>
                         </span>
                     </div>
                     
-                    <!-- Topbar Navbar -->
                     <ul class="navbar-nav ms-auto">
-
-                        <!-- Nav Item - Notifications -->
+                        [cite: 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
                         <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <span class="badge badge-danger badge-counter">3+</span>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
-                                aria-labelledby="alertsDropdown">
+                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown">
                                 <h6 class="dropdown-header">
                                     <i class="fas fa-bell me-2"></i>Centro de Notificações
                                 </h6>
@@ -148,46 +141,37 @@
                                         <span class="font-weight-bold">Novo relatório disponível</span>
                                     </div>
                                 </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">
-                                    Ver Todas as Notificações
-                                </a>
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Ver Todas as Notificações</a>
                             </div>
                         </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
-                        <!-- Nav Item - User Information -->
+                        [cite: 101, 102, 103, 104, 105, 106, 107, 108]
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="me-2 d-none d-lg-inline text-gray-600 small">Usuário</span>
                                 <i class="fas fa-user-circle fa-2x text-gray-400"></i>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
+                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Perfil
+                                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>Perfil
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Configurações
+                                    <i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>Configurações
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
-                                    Sair
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>Sair
                                 </a>
                             </div>
                         </li>
 
                     </ul>
 
-                </nav>
-                <!-- End of Topbar -->
-
+                </nav> [cite: 109]
                 <script>
-                    // Atualizar data e hora em tempo real
+                    // Atualizar data e hora em tempo real [cite: 110, 111, 112, 113, 114, 115, 116]
                     function updateDateTime() {
                         const now = new Date();
                         const options = { 
