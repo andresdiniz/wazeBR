@@ -66,6 +66,28 @@
             <i class="fa-regular fa-chart-bar"></i>
             Dados Estatísticos
         </div>
+        <!-- Nav Item - Rotas -->
+        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
+            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoutes" 
+                aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+                <i class="fas fa-route"></i>
+                <span>Rotas</span>
+            </a>
+            <div id="collapseRoutes" class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-road"></i>
+                        Opções de Rotas
+                    </h6>
+                    <a class="collapse-item {{ pagedata.current_page == 'routes' ? 'active' : '' }}" href="routes">
+                        <i class="fas fa-list"></i>Todas as Rotas
+                    </a>
+                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
+                        <i class="fas fa-exclamation-triangle"></i>Irregularidades
+                    </a>
+                </div>
+            </div>
+        </li>
         
         <!-- Divider -->
         <hr class="sidebar-divider">
