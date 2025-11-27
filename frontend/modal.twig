@@ -1,153 +1,377 @@
-<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true"
-    data-lat="{{ alert.location_y }}" data-lon="{{ alert.location_x }}">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content shadow-lg rounded">
-            <div class="modal-header bg-primary text-white rounded-top">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i> Detalhes do Evento
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+{# modal.twig - Modal reutilizável para exibição de detalhes de alertas #}
 
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.5rem;">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <div class="bg-light p-3 rounded shadow-sm border">
-                            <h6><i class="fas fa-info-circle mr-2"></i> Informações Básicas</h6>
-                            <hr class="my-2">
-                            <p><strong><i class="fas fa-fingerprint mr-2"></i> UUID:</strong> {{ alert.uuid }}</p>
-                            <p><strong><i class="fas fa-city mr-2"></i> Cidade:</strong> {{ alert.city }}</p>
-                            <p><strong><i class="fas fa-road mr-2"></i> Rua:</strong> {{ alert.street }}</p>
-                            <p><strong><i class="fas fa-map-marker-alt mr-2"></i> Localização:</strong>
-                                Lat: {{ alert.location_y|round(6) }}, Lon: {{ alert.location_x|round(6) }}
-                            </p>
+<style>
+    /* Estilos do Modal - Modo Claro/Escuro */
+    body.dark-mode .modal-content {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    body.dark-mode .modal-header {
+        border-bottom-color: var(--border-color);
+    }
+
+    body.dark-mode .modal-footer {
+        border-top-color: var(--border-color);
+    }
+
+    body.dark-mode .modal-body .bg-light {
+        background-color: var(--table-hover) !important;
+        color: var(--text-primary);
+        border-color: var(--border-color) !important;
+    }
+
+    body.dark-mode .modal-body .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    body.dark-mode .btn-close-white {
+        filter: brightness(1);
+    }
+
+    /* Estilos adicionais do modal */
+    .modal-content {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .modal-header .modal-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-body .bg-light {
+        transition: all 0.3s ease;
+    }
+
+    .modal-body .bg-light h6 {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .modal-body .bg-light p {
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .modal-body .bg-light p strong {
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .modal-body iframe {
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .modal-body iframe:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .btn {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .modal-footer .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Badge styles no modal */
+    .modal-body .badge {
+        padding: 0.4rem 0.75rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Loading spinner */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+
+    /* Responsividade do modal */
+    @media (max-width: 767.98px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal-body .bg-light {
+            padding: 0.75rem !important;
+        }
+
+        .modal-body iframe {
+            height: 250px !important;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+        .modal-footer .btn {
+            width: 100%;
+        }
+    }
+
+    /* Animação de entrada do modal */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+        transform: scale(0.9);
+    }
+
+    .modal.show .modal-dialog {
+        transform: scale(1);
+    }
+</style>
+
+<!-- Modal Único para Alertas -->
+<div class="modal fade" id="alertModal{{ alert.uuid }}" tabindex="-1" aria-labelledby="alertModalLabel{{ alert.uuid }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            
+            <!-- Header do Modal -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel{{ alert.uuid }}">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Detalhes do Evento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            
+            <!-- Body do Modal -->
+            <div class="modal-body">
+                
+                <!-- Informações em Cards -->
+                <div class="row g-3">
+                    
+                    <!-- Card de Informações Básicas -->
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded border h-100">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>
+                                Informações Básicas
+                            </h6>
+                            <div class="info-group">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-fingerprint me-2"></i>UUID:</strong>
+                                    <br>
+                                    <small class="text-muted font-monospace">{{ alert.uuid }}</small>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-city me-2"></i>Cidade:</strong>
+                                    <span class="ms-1">{{ alert.city }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-road me-2"></i>Rua:</strong>
+                                    <span class="ms-1">{{ alert.street }}</span>
+                                </p>
+                                <p class="mb-0">
+                                    <strong><i class="fas fa-map-marker-alt me-2"></i>Coordenadas:</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Lat: {{ alert.location_y|number_format(6, '.', ',') }}<br>
+                                        Lon: {{ alert.location_x|number_format(6, '.', ',') }}
+                                    </small>
+                                </p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="col-md-6 mb-3">
-                        <div class="bg-light p-3 rounded shadow-sm border">
-                            <h6><i class="fas fa-clock mr-2"></i> Detalhes Adicionais</h6>
-                            <hr class="my-2">
-                            <p><strong><i class="far fa-calendar-alt mr-2"></i> Data:</strong>
-                                {{ (alert.pubMillis / 1000) | date("d/m/Y H:i") }}
-                                <small class="text-muted">(UTC)</small>
-                            </p>
-                            <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
-                                <span id="modalKm" class="badge badge-info"></span>
-                            </p>
-                            <p><strong><i class="fas fa-check-double mr-2"></i> Confiança:</strong>
-                                <span class="badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence >= 3 ? 'warning' : 'danger') }}"
-                                    data-toggle="tooltip"
-                                    title="Nível de confiança na precisão do alerta">
-                                    {{ alert.confidence }} - {{ ['Baixa', 'Média', 'Alta'][alert.confidence//2] }}
-                                </span>
-                            </p>
-                            <p><strong><i class="fas fa-traffic-light mr-2"></i> Status:</strong>
-                                <span class="badge badge-{{ alert.status == 1 ? 'success' : 'danger' }}">
-                                    {{ alert.status == 1 ? "Ativo" : "Inativo" }}
-                                    <span class="visually-hidden">Status do alerta</span>
-                                </span>
-                            </p>
-                            <p><strong><i class="fas fa-tags mr-2"></i> Tipo:</strong> {{ alert.type }}</p>
-                            <p><strong><i class="fas fa-tag mr-2"></i> Subtipo:</strong> {{ alert.subtype }}</p>
-                            <p><strong><i class="fas fa-link mr-2"></i> Waze Partner Hub:</strong>
-                                <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}"
-                                    class="badge badge-primary text-decoration-none"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label="Abrir alerta no Waze Partner Hub">
-                                    Ver Detalhes ↗
-                                </a>
-                            </p>
+                    
+                    <!-- Card de Detalhes Técnicos -->
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded border h-100">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-cogs me-2 text-success"></i>
+                                Detalhes Técnicos
+                            </h6>
+                            <div class="info-group">
+                                <p class="mb-2">
+                                    <strong><i class="far fa-calendar-alt me-2"></i>Data/Hora:</strong>
+                                    <br>
+                                    <span class="ms-1">{{ (alert.pubMillis/1000)|date('d/m/Y H:i') }}</span>
+                                    <small class="text-muted"> (UTC)</small>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-tags me-2"></i>Tipo:</strong>
+                                    <span class="badge bg-primary ms-1">{{ alert.type }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-tag me-2"></i>Subtipo:</strong>
+                                    <span class="badge bg-secondary ms-1">{{ alert.subtype|default('N/A') }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-check-double me-2"></i>Confiança:</strong>
+                                    <span class="badge bg-{{ alert.confidence > 4 ? 'success' : (alert.confidence > 2 ? 'warning' : 'danger') }} ms-1">
+                                        {{ alert.confidence }} / 5
+                                    </span>
+                                </p>
+                                <p class="mb-0">
+                                    <strong><i class="fas fa-traffic-light me-2"></i>Status:</strong>
+                                    <span class="badge bg-{{ alert.status == 1 ? 'success' : 'danger' }} ms-1">
+                                        {{ alert.status == 1 ? 'Ativo' : 'Inativo' }}
+                                    </span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <hr class="my-3">
-                <h6 class="text-center text-muted mb-3"><i class="fas fa-map-marked-alt mr-2"></i> Localização no Mapa</h6>
-                <iframe
-                    id="map-{{ alert.uuid }}"
-                    class="rounded shadow-sm border"
-                    src="https://embed.waze.com/{{ user.locale }}/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1&campaign=alerts_{{ alert.uuid }}&vehicle=car&hidegeopins=false&timestamp={{ alert.pubMillis }}"
-                    style="width: 100%; height: 300px; border-color: #e0e0e0;"
-                    allow="geolocation *; fullscreen"
-                    title="Localização exata do alerta {{ alert.code }} no mapa"
-                    loading="lazy"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    aria-describedby="map-description-{{ alert.uuid }}">
-                </iframe>
-                <small id="map-description-{{ alert.uuid }}" class="form-text text-muted text-center">
-                    Mapa interativo mostrando a localização precisa do alerta.
-                </small>
-
-                <hr class="my-3">
-                <h6 class="text-center text-muted mb-3"><i class="fas fa-street-view mr-2"></i> Street View</h6>
-                <iframe
-                    width="100%"
-                    height="300"
-                    frameborder="0"
-                    style="border:0"
-                    src="https://www.google.com/maps/embed/v1/streetview?key=YOUR_GOOGLE_MAPS_API_KEY&location={{ alert.location_y }},{{ alert.location_x }}&fov=80&heading=70&pitch=0"
-                    allowfullscreen
-                    loading="lazy"
-                    class="rounded shadow-sm border">
-                </iframe>
-                <small class="form-text text-muted text-center">
-                    Visualização do Street View da localização (API Key do Google Maps é necessária).
-                </small>
-
+                
+                <hr class="my-4">
+                
+                <!-- Seção de Mapas -->
+                <div class="maps-section">
+                    
+                    <!-- Mapa Waze -->
+                    <div class="mb-4">
+                        <h6 class="text-center text-muted mb-3">
+                            <i class="fas fa-map-marked-alt me-2"></i>
+                            Localização no Mapa
+                        </h6>
+                        <div class="ratio ratio-16x9">
+                            <iframe 
+                                src="https://embed.waze.com/iframe?zoom=16&lat={{ alert.location_y }}&lon={{ alert.location_x }}&pin=1"
+                                class="rounded shadow-sm"
+                                loading="lazy"
+                                title="Mapa Waze - {{ alert.city }}"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <small class="d-block text-center text-muted mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Mapa interativo do Waze mostrando a localização exata
+                        </small>
+                    </div>
+                    
+                    <!-- Street View -->
+                    <div class="mb-3">
+                        <h6 class="text-center text-muted mb-3">
+                            <i class="fas fa-street-view me-2"></i>
+                            Google Street View
+                        </h6>
+                        <div class="ratio ratio-16x9">
+                            <iframe 
+                                src="https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE_API&location={{ alert.location_y }},{{ alert.location_x }}"
+                                class="rounded shadow-sm"
+                                loading="lazy"
+                                title="Street View - {{ alert.city }}"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <small class="d-block text-center text-muted mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Visualização 360° da localização (requer API Key do Google Maps)
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Links Externos -->
+                <div class="external-links mt-3 p-3 bg-light rounded border">
+                    <h6 class="fw-bold mb-2">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        Links Externos
+                    </h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId={{ alert.uuid }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-link me-1"></i>
+                            Waze Partner Hub
+                        </a>
+                        <a href="https://www.google.com/maps?q={{ alert.location_y }},{{ alert.location_x }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-success">
+                            <i class="fab fa-google me-1"></i>
+                            Google Maps
+                        </a>
+                    </div>
+                </div>
             </div>
-
-            <div class="modal-footer d-flex justify-content-end">
-                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}"
-                    class="btn btn-outline-primary" target="_blank">
-                    <i class="fab fa-waze mr-2"></i> Ver no Waze
-                </a>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-times mr-2"></i> Fechar
+            
+            <!-- Footer do Modal -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Fechar
                 </button>
-                <button type="button" class="btn btn-success ml-2" onclick="confirmarAlerta('{{ alert.uuid }}')">
-                    <i class="fas fa-check mr-2"></i> Confirmar
+                <a href="https://www.waze.com/ul?ll={{ alert.location_y }},{{ alert.location_x }}" 
+                   target="_blank" 
+                   class="btn btn-primary">
+                    <i class="fab fa-waze me-2"></i>
+                    Abrir no Waze
+                </a>
+                <button type="button" class="btn btn-success" onclick="confirmarAlerta('{{ alert.uuid }}')">
+                    <i class="fas fa-check me-2"></i>
+                    Confirmar
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const alertModals = document.querySelectorAll("[id^=alertModal]");
-    alertModals.forEach(modal => {
-        modal.addEventListener("show.bs.modal", async function () {
-            const uuid = modal.id.replace("alertModal", "");
-            const latitude = parseFloat(modal.getAttribute("data-lat"));
-            const longitude = parseFloat(modal.getAttribute("data-lon"));
+// Função para confirmar alerta
+function confirmarAlerta(uuid) {
+    if (confirm('Deseja confirmar este alerta?')) {
+        // Aqui você pode adicionar a lógica para confirmar o alerta
+        console.log('Alerta confirmado:', uuid);
+        
+        // Exemplo de requisição AJAX
+        /*
+        fetch('/api/alertas/confirmar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ uuid: uuid })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            bootstrap.Modal.getInstance(document.getElementById('alertModal' + uuid)).hide();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+        */
+    }
+}
 
-            console.log(`Modal ${uuid} aberto. Latitude: ${latitude}, Longitude: ${longitude}`);
-
-            if (!isNaN(latitude) && !isNaN(longitude)) {
-                const kmSpan = document.getElementById(`km-value-${uuid}`);
-                if (kmSpan && kmSpan.textContent.includes('Calculando')) {
-                    const km = await buscarKmDnit(longitude, latitude);
-                    kmSpan.textContent = km !== null ? `KM ${km.toFixed(2).replace('.', ',')}` : 'Não encontrado';
-                }
-            }
+// Atualizar tooltips quando o modal é mostrado
+document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function () {
+            const tooltipTriggerList = [].slice.call(modal.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
     });
-
-    // Inicializar tooltips do Bootstrap
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
 });
-
-// Placeholder para a função de confirmar alerta
-function confirmarAlerta(uuid) {
-    alert(`Alerta ${uuid} confirmado! (Funcionalidade não implementada)`);
-    // Aqui você chamaria sua função para confirmar o alerta no backend
-}
 </script>
