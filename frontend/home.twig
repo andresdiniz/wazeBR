@@ -883,6 +883,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }).addTo(congestionMap);
 
     const jamsData = {{ jamLive|json_encode|raw }};
+    const total_kms = {{ total_kms|default(1) }};
 
     // --- NOVO CÁLCULO: Soma da Extensão Total ---
     let totalLengthMeters = 0; // Inicialização garantida
