@@ -897,7 +897,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const totalLengthKM = (totalLengthMeters / 1000).toFixed(2); // Em quilômetros (duas casas decimais)
     
-    perc = (jamLength/total_kms)*100;
+    perc = (totalLengthKM/total_kms)*100;
     console.log(`Porcentagem de Congestionamento: ${perc.toFixed(2)} %`);
 
     console.log(`Comprimento total dos congestionamentos: ${totalLengthKM} km`);
