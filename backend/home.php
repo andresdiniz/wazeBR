@@ -312,7 +312,7 @@ $data = [
     'total_kms' => getKms($pdo, $id_parceiro), // <--- NOVO
 ];
 
-echo getKms($pdo, $id_parceiro);
+echo getKms($pdo, 2);
 
 // Você pode passar $data para o seu template Twig aqui
 // echo $twig->render('dashboard.html.twig', $data);
