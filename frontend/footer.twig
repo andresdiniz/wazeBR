@@ -151,22 +151,6 @@
                 darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
             }
         }
-
-        // Inicialização manual dos Collapses, se necessário
-            const collapseElementList = document.querySelectorAll('.collapse');
-            const collapseList = [...collapseElementList].map(collapseEl => new bootstrap.Collapse(collapseEl, { toggle: false }));
-
-            // Adicione um listener de clique para alternar o collapse
-            document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(triggerEl => {
-                triggerEl.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('data-bs-target');
-                    const targetEl = document.querySelector(targetId);
-                    if (targetEl) {
-                        bootstrap.Collapse.getOrCreateInstance(targetEl).toggle();
-                    }
-                });
-            });
     </script>
 
     <style>
