@@ -8,7 +8,7 @@
 // include_once 'models/User.php'; 
 
 // Define a URL para redirecionamento após o processamento (o próprio formulário)
-$redirect_url = '/insert_user.twig'; // Mude para o caminho real do seu template
+//$redirect_url = '/insert_user.twig'; // Mude para o caminho real do seu template
 
 // ----------------------------------------------------
 // 2. VERIFICAÇÃO DO MÉTODO DE REQUISIÇÃO
