@@ -1,58 +1,85 @@
+{% set code = errorCode|default('000') %}
+{% set defaultTitle = 'Erro inesperado' %}
+{% set defaultMessage = 'Algo deu errado ao processar sua requisição.' %}
+
+{# Lógica para definir títulos e mensagens de erro específicas baseadas no código #}
+{% if code == 400 %}
+    {% set defaultTitle = 'Requisição Inválida (400)' %}
+    {% set defaultMessage = 'O servidor não conseguiu processar sua requisição devido a uma sintaxe inválida ou dados incorretos.' %}
+{% elseif code == 401 %}
+    {% set defaultTitle = 'Não Autorizado (401)' %}
+    {% set defaultMessage = 'Você precisa estar autenticado para acessar este recurso. Por favor, faça login.' %}
+{% elseif code == 403 %}
+    {% set defaultTitle = 'Acesso Proibido (403)' %}
+    {% set defaultMessage = 'Você não tem permissão para visualizar ou acessar este recurso.' %}
+{% elseif code == 404 %}
+    {% set defaultTitle = 'Página Não Encontrada (404)' %}
+    {% set defaultMessage = 'O recurso solicitado não pôde ser encontrado no servidor. O link pode estar incorreto ou a página foi removida.' %}
+{% elseif code == 500 %}
+    {% set defaultTitle = 'Erro Interno do Servidor (500)' %}
+    {% set defaultMessage = 'Ocorreu um erro inesperado no servidor. Por favor, tente novamente mais tarde ou entre em contato com o suporte.' %}
+{% endif %}
+
+{# Definindo os valores finais: usa o valor passado pelo back-end, ou o default específico que acabamos de definir #}
+{% set finalTitle = errorTitle|default(defaultTitle) %}
+{% set finalMessage = errorMessage|default(defaultMessage) %}
+{% set finalPageTitle = titulo|default(finalTitle) %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro - {{ titulo|default('Erro Desconhecido') }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 50px;
-        }
-        .error-container {
-            display: inline-block;
-            padding: 30px;
-            background-color: #fff;
-            border: 1px solid #f5c6cb;
-            border-radius: 8px;
-            max-width: 600px;
-        }
-        .error-container h1 {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-        .error-container h2 {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-        .error-container p {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .error-container a {
-            color: #721c24;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .error-container a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro - {{ finalPageTitle }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 50px;
+        }
+        .error-container {
+            display: inline-block;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            max-width: 600px;
+        }
+        .error-container h1 {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        .error-container h2 {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+        .error-container p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .error-container a {
+            color: #721c24;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .error-container a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="error-container">
-        <h1>Erro {{ errorCode|default('000') }}</h1>
-        <h2>{{ errorTitle|default('Erro inesperado') }}</h2>
-        <p>{{ errorMessage|default('Algo deu errado ao processar sua requisição.') }}</p>
-        {% if errorDescription is defined %}
-            <p><em>{{ errorDescription }}</em></p>
-        {% endif %}
-        <p><a href="{{ pagina_retorno|default('/') }}">Voltar para a página inicial</a></p>
-    </div>
+    <div class="error-container">
+        <h1>Erro {{ code }}</h1>
+        <h2>{{ finalTitle }}</h2>
+        <p>{{ finalMessage }}</p>
+        {% if errorDescription is defined %}
+            <p><em>{{ errorDescription }}</em></p>
+        {% endif %}
+        <p><a href="{{ pagina_retorno|default('/') }}">Voltar para a página inicial</a></p>
+    </div>
 
 </body>
 </html>
