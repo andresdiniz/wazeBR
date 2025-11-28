@@ -41,14 +41,14 @@ class Logger {
     private $isDebug;
     
     // Níveis de log
-    const EMERGENCY = 'EMERGENCY'; // Sistema inutilizável
-    const ALERT     = 'ALERT';     // Ação imediata necessária
-    const CRITICAL  = 'CRITICAL';  // Condições críticas
-    const ERROR     = 'ERROR';     // Erros que não param o sistema
-    const WARNING   = 'WARNING';   // Avisos
-    const NOTICE    = 'NOTICE';    // Eventos normais mas importantes
-    const INFO      = 'INFO';      // Informações gerais
-    const DEBUG     = 'DEBUG';     // Informações de debug
+    const EMERGENCY = 'EMERGENCY';
+    const ALERT     = 'ALERT';
+    const CRITICAL  = 'CRITICAL';
+    const ERROR     = 'ERROR';
+    const WARNING   = 'WARNING';
+    const NOTICE    = 'NOTICE';
+    const INFO      = 'INFO';
+    const DEBUG     = 'DEBUG';
     
     private function __construct($logDir, $isDebug = false) {
         $this->logDir = $logDir;
@@ -74,7 +74,6 @@ class Logger {
             }
         }
         
-        // Verifica permissões de escrita
         if (!is_writable($this->logDir)) {
             error_log("AVISO: Diretório de logs não tem permissão de escrita: {$this->logDir}");
             return false;
@@ -83,20 +82,11 @@ class Logger {
         return true;
     }
     
-    /**
-     * Registra uma mensagem de log
-     */
     public function log($level, $message, $context = []) {
-        // Determina o arquivo de log baseado no nível
         $logFile = $this->getLogFilePath($level);
-        
-        // Formata a mensagem
         $formattedMessage = $this->formatMessage($level, $message, $context);
-        
-        // Rotaciona o arquivo se necessário
         $this->rotateLogIfNeeded($logFile);
         
-        // Escreve no arquivo
         $result = file_put_contents(
             $logFile,
             $formattedMessage . PHP_EOL,
@@ -107,12 +97,10 @@ class Logger {
             error_log("Falha ao escrever no log: {$logFile}");
         }
         
-        // Em debug, também exibe no error_log do PHP
         if ($this->isDebug) {
             error_log("[{$level}] {$message}");
         }
         
-        // Para erros críticos, envia email (se configurado)
         if (in_array($level, [self::EMERGENCY, self::ALERT, self::CRITICAL])) {
             $this->notifyAdmin($level, $message, $context);
         }
@@ -124,7 +112,6 @@ class Logger {
         $timestamp = date('Y-m-d H:i:s');
         $contextStr = !empty($context) ? ' | Context: ' . json_encode($context) : '';
         
-        // Adiciona informações de rastreamento
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $caller = isset($trace[2]) ? $trace[2] : $trace[1];
         $file = isset($caller['file']) ? basename($caller['file']) : 'unknown';
@@ -144,22 +131,18 @@ class Logger {
     private function getLogFilePath($level) {
         $date = date('Y-m-d');
         
-        // Logs críticos vão para arquivo separado
         if (in_array($level, [self::EMERGENCY, self::ALERT, self::CRITICAL])) {
             return "{$this->logDir}/critical_{$date}.log";
         }
         
-        // Logs de erro
         if ($level === self::ERROR) {
             return "{$this->logDir}/error_{$date}.log";
         }
         
-        // Debug em arquivo separado
         if ($level === self::DEBUG) {
             return "{$this->logDir}/debug_{$date}.log";
         }
         
-        // Outros logs
         return "{$this->logDir}/application_{$date}.log";
     }
     
@@ -176,19 +159,16 @@ class Logger {
     }
     
     private function rotateLog($logFile) {
-        // Move o arquivo atual
         $timestamp = date('YmdHis');
         $backupFile = $logFile . '.' . $timestamp;
         
         if (rename($logFile, $backupFile)) {
-            // Compacta o arquivo antigo
             if (function_exists('gzencode')) {
                 $content = file_get_contents($backupFile);
                 file_put_contents($backupFile . '.gz', gzencode($content));
                 unlink($backupFile);
             }
             
-            // Remove arquivos antigos
             $this->cleanOldLogs($logFile);
         }
     }
@@ -198,12 +178,10 @@ class Logger {
         $files = glob($pattern);
         
         if (count($files) > $this->maxFiles) {
-            // Ordena por data de modificação
             usort($files, function($a, $b) {
                 return filemtime($a) - filemtime($b);
             });
             
-            // Remove os mais antigos
             $toRemove = count($files) - $this->maxFiles;
             for ($i = 0; $i < $toRemove; $i++) {
                 unlink($files[$i]);
@@ -233,9 +211,6 @@ class Logger {
     public function info($message, $context = [])      { return $this->log(self::INFO, $message, $context); }
     public function debug($message, $context = [])     { return $this->log(self::DEBUG, $message, $context); }
     
-    /**
-     * Retorna estatísticas dos logs
-     */
     public function getStats() {
         $stats = [
             'total_size' => 0,
@@ -255,7 +230,6 @@ class Logger {
             ];
         }
         
-        // Pega últimos erros
         $errorFile = $this->logDir . '/error_' . date('Y-m-d') . '.log';
         if (file_exists($errorFile)) {
             $lines = file($errorFile);
@@ -286,7 +260,6 @@ class ErrorHandler {
     }
     
     public function handleError($errno, $errstr, $errfile, $errline) {
-        // Ignora erros suprimidos com @
         if (!(error_reporting() & $errno)) {
             return false;
         }
@@ -299,7 +272,6 @@ class ErrorHandler {
             'type' => $errorType
         ];
         
-        // Determina o nível do log
         if ($errno & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) {
             $this->logger->error($errstr, $context);
         } elseif ($errno & (E_WARNING | E_CORE_WARNING | E_COMPILE_WARNING | E_USER_WARNING)) {
@@ -308,7 +280,6 @@ class ErrorHandler {
             $this->logger->notice($errstr, $context);
         }
         
-        // Não impede o manipulador padrão do PHP
         return false;
     }
     
@@ -322,10 +293,12 @@ class ErrorHandler {
         
         $this->logger->critical($exception->getMessage(), $context);
         
-        // Em produção, mostra página de erro amigável
         if (!$this->isDebug) {
             http_response_code(500);
-            include __DIR__ . '/error_pages/500.html';
+            
+            // Renderiza página de erro standalone (sem header/sidebar/footer)
+            $this->renderStandaloneError(500, 'Erro Interno do Servidor', 
+                'Ocorreu um erro inesperado. Tente novamente mais tarde.');
             exit;
         }
     }
@@ -339,6 +312,10 @@ class ErrorHandler {
                 'line' => $error['line']
             ]);
         }
+    }
+    
+    private function renderStandaloneError($code, $title, $message) {
+        include __DIR__ . '/error_pages/standalone_error.php';
     }
     
     private function getErrorType($errno) {
@@ -362,6 +339,25 @@ class ErrorHandler {
         
         return $types[$errno] ?? 'UNKNOWN';
     }
+}
+
+// =============================================================================
+// FUNÇÃO PARA RENDERIZAR ERRO STANDALONE
+// =============================================================================
+
+function renderErrorPage($code, $title, $message, $description = '', $errorId = '', $trace = '', $isDebug = false) {
+    // Define as variáveis para o template
+    $errorCode = $code;
+    $errorTitle = $title;
+    $errorMessage = $message;
+    $errorDescription = $description;
+    $error_id = $errorId;
+    $errorTrace = $trace;
+    $pagina_retorno = '/';
+    
+    // Inclui o template de erro standalone
+    include __DIR__ . '/frontend/error_standalone.php';
+    exit;
 }
 
 // =============================================================================
@@ -416,7 +412,10 @@ try {
     // Erro crítico na inicialização
     error_log("ERRO CRÍTICO NA INICIALIZAÇÃO: " . $e->getMessage());
     http_response_code(500);
-    die("Erro crítico ao inicializar o sistema. Por favor, contate o administrador.");
+    renderErrorPage(500, 'Erro de Inicialização', 
+        'Erro crítico ao inicializar o sistema.', 
+        $e->getMessage(), 
+        uniqid('err_'));
 }
 
 // =============================================================================
@@ -457,12 +456,18 @@ try {
 } catch (Exception $e) {
     $logger->critical('Erro ao inicializar Twig', ['error' => $e->getMessage()]);
     http_response_code(500);
-    die("Erro ao inicializar o sistema de templates.");
+    renderErrorPage(500, 'Erro de Configuração', 
+        'Erro ao inicializar o sistema de templates.', 
+        $e->getMessage(), 
+        uniqid('err_'));
 }
 
 // =============================================================================
 // LÓGICA DA APLICAÇÃO
 // =============================================================================
+
+// Flag para controlar se devemos renderizar header/sidebar/footer
+$renderLayout = true;
 
 try {
     // Verifica autenticação
@@ -547,6 +552,9 @@ try {
     echo $twig->render('footer.twig', $dados);
     
 } catch (Exception $e) {
+    // NÃO renderiza header/sidebar/footer em caso de erro
+    $renderLayout = false;
+    
     // Tratamento de erros da aplicação
     $code = $e->getCode() ?: 500;
     
@@ -574,47 +582,33 @@ try {
         503 => 'Serviço Indisponível'
     ];
     
-    $errorData = $dados ?? [];
-    $errorData['errorCode'] = $code;
-    $errorData['errorTitle'] = $errorTitles[$code] ?? 'Erro';
+    $errorTitle = $errorTitles[$code] ?? 'Erro';
     
     // Mensagem baseada no código e modo debug
     if ($code >= 400 && $code < 500) {
-        $errorData['errorMessage'] = $e->getMessage() ?: 'Verifique as informações e tente novamente.';
-        $errorData['errorDescription'] = 'Há um problema com a requisição.';
+        $errorMessage = $e->getMessage() ?: 'Verifique as informações e tente novamente.';
+        $errorDescription = 'Há um problema com a requisição.';
     } else {
-        $errorData['errorMessage'] = $isDebug ? $e->getMessage() : 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
-        $errorData['errorDescription'] = 'O erro foi registrado e será analisado.';
+        $errorMessage = $isDebug ? $e->getMessage() : 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
+        $errorDescription = $isDebug ? $e->getTraceAsString() : 'O erro foi registrado e será analisado.';
     }
     
-    $errorData['pagina_retorno'] = '/';
-    $errorData['error_id'] = uniqid('err_'); // ID único para rastrear o erro
+    $errorId = uniqid('err_');
     
-    // Renderiza página de erro
-    try {
-        if ($code == 404 && $loader->exists('404.twig')) {
-            echo $twig->render('404.twig', $errorData);
-        } elseif ($loader->exists('error.twig')) {
-            echo $twig->render('error.twig', $errorData);
-        } else {
-            // Fallback HTML
-            echo "<!DOCTYPE html><html><head><title>Erro {$code}</title></head><body>";
-            echo "<h1>{$code} - {$errorData['errorTitle']}</h1>";
-            echo "<p>{$errorData['errorMessage']}</p>";
-            echo "<p><a href='/'>Voltar para página inicial</a></p>";
-            if ($isDebug) {
-                echo "<pre>" . $e->getTraceAsString() . "</pre>";
-            }
-            echo "</body></html>";
-        }
-    } catch (Exception $renderError) {
-        $logger->critical('Erro ao renderizar página de erro', ['error' => $renderError->getMessage()]);
-        echo "<h1>Erro crítico</h1><p>Contate o administrador.</p>";
-    }
+    // Renderiza página de erro STANDALONE (sem layout)
+    renderErrorPage(
+        $code, 
+        $errorTitle, 
+        $errorMessage, 
+        $errorDescription, 
+        $errorId, 
+        $isDebug ? $e->getTraceAsString() : '', 
+        $isDebug
+    );
 }
 
 // Exibição do Profiler (apenas em debug)
-if (isset($profile) && $isDebug) {
+if (isset($profile) && $isDebug && $renderLayout) {
     if (class_exists(\Twig\Profiler\Dumper\Text::class)) {
         $dumper = new \Twig\Profiler\Dumper\Text();
         echo '<hr><h2>Twig Profiler</h2><pre>';
@@ -623,8 +617,10 @@ if (isset($profile) && $isDebug) {
     }
 }
 
-$logger->info('Requisição finalizada', [
-    'page' => $page ?? 'unknown',
-    'execution_time' => round((microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000, 2) . 'ms'
-]);
+if ($renderLayout) {
+    $logger->info('Requisição finalizada', [
+        'page' => $page ?? 'unknown',
+        'execution_time' => round((microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000, 2) . 'ms'
+    ]);
+}
 ?>
