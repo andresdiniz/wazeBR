@@ -8,6 +8,17 @@ use Twig\Extension\DebugExtension;
 use Twig\Extension\ProfilerExtension;
 use Twig\Profiler\Profile;
 
+ini_set('session.cookie_httonly', 1);      // Impede acesso via JavaScript (XSS)
+ini_set('session.cookie_secure', 1);       // Envia cookies APENAS via HTTPS
+ini_set('session.use_strict_mode', 1);     // Impede que a sessão aceite IDs não inicializados
+session_set_cookie_params([
+    'lifetime' => 86400, // 24 horas
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isHttps, // Variável a ser definida
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 // --- Configuração e Autoload ---
 session_start();
 

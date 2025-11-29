@@ -53,6 +53,7 @@ try {
     
     // --- 3. Roteamento e Preparação de Dados Globais ---
     $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $uri = preg_replace('/[^a-zA-Z0-9_-]/', '', $uri);
     $page = $uri ?: 'home';
     
     $logger->info('Página solicitada', ['page' => $page, 'user_id' => $_SESSION['usuario_id']]);
