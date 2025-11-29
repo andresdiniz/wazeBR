@@ -1050,9 +1050,71 @@ function encontrarKmPorCoordenadasEPR($latitude, $longitude, $limiteKm = null) {
 }
 
 
+// functions/scripts.php (Adicionar)
 
-// Exemplo de uso:
-// $km = encontrarKmPorCoordenadas(-21.6406382, -43.438023);
-// echo "KM: " . $km;
+/**
+ * Registra uma atividade do usuário no banco de dados e no log de aplicação.
+ * @param PDO $pdo Conexão com o banco de dados.
+ * @param Logger $logger Instância do Logger.
+ * @param string $eventType Tipo de evento (LOGIN, VIEW_PAGE, ACTION_EDIT, etc.).
+ * @param string $description Descrição resumida da ação.
+ * @param array $details Detalhes adicionais (ID, dados, etc.).
+ * @return bool
+ */
+function logUserActivity(PDO $pdo, Logger $logger, string $eventType, string $description, array $details = []): bool {
+    $userId = $_SESSION['usuario_id'] ?? 0;
+    
+    // 1. Grava no Log de Aplicação (Para rastreamento imediato)
+    $logger->info("ATIVIDADE DE USUÁRIO: {$description}", array_merge(['user_id' => $userId, 'event' => $eventType], $details));
+    
+    // 2. Grava no Banco de Dados (Para relatórios e auditoria)
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO activity_log (user_id, event_type, description, details)
+            VALUES (:user_id, :event_type, :description, :details)
+        ");
+        
+        return $stmt->execute([
+            ':user_id' => $userId,
+            ':event_type' => $eventType,
+            ':description' => $description,
+            ':details' => json_encode($details, JSON_UNESCAPED_UNICODE)
+        ]);
+    } catch (\PDOException $e) {
+        // Usa o logger para erros do banco de dados
+        $logger->error("Falha ao registrar atividade no BD", ['db_error' => $e->getMessage(), 'event' => $eventType]);
+        return false;
+    }
+}
 
+// functions/scripts.php (Adicionar)
+
+/**
+ * Inicia ou para um timer de performance e registra no log.
+ * @param Logger $logger Instância do Logger.
+ * @param string $event Nome do evento a ser medido.
+ * @param bool $stop Se verdadeiro, para o timer e loga o resultado.
+ * @return float|null Retorna a duração em ms se for uma parada.
+ */
+function timeEvent(Logger $logger, string $event, bool $stop = false): ?float {
+    static $timers = [];
+    $microtime = microtime(true);
+
+    if (!$stop) {
+        $timers[$event] = $microtime;
+        return null;
+    }
+
+    if (!isset($timers[$event])) {
+        $logger->warning("Tentativa de parar timer não iniciado: {$event}");
+        return null;
+    }
+
+    $duration = round(($microtime - $timers[$event]) * 1000, 2); // Duração em milissegundos
+    unset($timers[$event]);
+    
+    $logger->info("TIMING: {$event} concluído", ['duration_ms' => $duration]);
+    
+    return $duration;
+}
 ?>
