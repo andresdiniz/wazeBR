@@ -1,8 +1,5 @@
 <?php
-/**
- * bootstrap.php - Inicialização dos Serviços Essenciais
- * Carrega Dotenv, inicializa Logger, Twig e registra o ErrorHandler.
- */
+// bootstrap.php - Inicialização dos Serviços Essenciais
 
 use Dotenv\Dotenv;
 use Twig\Environment;
@@ -14,47 +11,41 @@ use Twig\Profiler\Profile;
 // --- Configuração e Autoload ---
 session_start();
 
-// CSRF Token (Mantido no index ou movido para middleware/session.php)
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+// Inclusão das novas classes (ou via autoloader)
+require_once __DIR__ . '/classes/Logger.php';
+require_once __DIR__ . '/classes/ErrorHandler.php';
 
-$envPath = __DIR__ . '/.env';
-
-// Assume que configbd.php e scripts.php estão carregados no index ou no composer.json
+// Inclusões de Funções e Configurações
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
-
-// O Logger e o ErrorHandler original (classes) são assumidos como incluídos aqui 
-// ou via autoload.
 
 $results = [];
 
 try {
     // 1. Variáveis de Ambiente e Debug
+    $envPath = __DIR__ . '/.env';
     if (!file_exists($envPath)) {
         throw new Exception("Arquivo .env não encontrado: {$envPath}");
     }
     $dotenv = Dotenv::createImmutable(__DIR__);
     $dotenv->load();
-    $isDebug = isset($_ENV['DEBUG']) && $_ENV['DEBUG'] === 'true';
+    $isDebug = ($_ENV['DEBUG'] ?? 'false') === 'true';
     $results['isDebug'] = $isDebug;
     
-    // 2. Inicializa Logger
+    // 2. Logger e Gerenciamento de Erros
     $logDir = __DIR__ . '/../logs';
     $logger = Logger::getInstance($logDir, $isDebug);
     $results['logger'] = $logger;
+    
+    $errorHandler = new ErrorHandler($logger, $isDebug);
+    $errorHandler->register();
+    
     $logger->info('Sistema inicializando (Bootstrap)', [
         'session_id' => session_id(),
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
     ]);
     
-    // 3. Registra manipulador de erros
-    $errorHandler = new ErrorHandler($logger, $isDebug);
-    $errorHandler->register();
-    $results['errorHandler'] = $errorHandler;
-    
-    // 4. Configurações de erro PHP
+    // 3. Configurações de erro PHP
     if ($isDebug) {
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
@@ -63,21 +54,23 @@ try {
     } else {
         ini_set('display_errors', 0);
         ini_set('display_startup_errors', 0);
+        // Otimização: Ignora NOTICES, STRICT e DEPRECATED em produção
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
     }
     
     ini_set('log_errors', 1);
-    ini_set('error_log', $logDir . '/php_errors.log');
+    ini_set('error_log', $logDir . '/php_errors.log'); // Erros internos do PHP vão para cá
     
-    // 5. Fuso horário
+    // 4. Fuso horário
     $timezone = $_ENV['TIMEZONE'] ?? 'America/Sao_Paulo';
     date_default_timezone_set($timezone);
 
-    // 6. Configuração do TWIG
+    // 5. Configuração do TWIG (Motor de templates)
     $loader = new FilesystemLoader(__DIR__ . '/frontend');
     $twigConfig = [
         'debug' => $isDebug,
-        'cache' => $isDebug ? false : __DIR__ . '/../cache/twig',
+        // Otimização: Cache de templates em produção
+        'cache' => $isDebug ? false : __DIR__ . '/../cache/twig', 
         'auto_reload' => $isDebug,
         'strict_variables' => $isDebug
     ];
@@ -85,7 +78,7 @@ try {
     $twig = new Environment($loader, $twigConfig);
     $results['twig'] = $twig;
     
-    // Extensões de debug
+    // Extensões de debug/profiler
     if ($isDebug) {
         $twig->addExtension(new DebugExtension());
         $profile = new Profile();
@@ -97,6 +90,7 @@ try {
     if (!$isDebug) {
         $cacheDir = __DIR__ . '/../cache/twig';
         if (!is_dir($cacheDir)) {
+            // Tenta criar com 0775
             if (!mkdir($cacheDir, 0775, true)) {
                 $logger->warning('Não foi possível criar diretório de cache do Twig', ['dir' => $cacheDir]);
             }
@@ -106,10 +100,23 @@ try {
     $logger->debug('Twig inicializado com sucesso');
     
 } catch (Exception $e) {
-    // Erro crítico na inicialização (antes do Logger/Twig estarem totalmente prontos)
+    // Erro crítico na inicialização
     error_log("ERRO CRÍTICO NA INICIALIZAÇÃO: " . $e->getMessage());
     http_response_code(500);
-    // Usa a função de renderização de erro de contingência
+    
+    // Função de contingência (deve ser definida no escopo global ou em scripts.php)
+    function renderErrorPage($code, $title, $message, $description = '', $errorId = '', $trace = '', $isDebug = false) {
+        $errorCode = $code;
+        $errorTitle = $title;
+        $errorMessage = $message;
+        $errorDescription = $description;
+        $error_id = $errorId;
+        $errorTrace = $trace;
+        $pagina_retorno = '/';
+        include __DIR__ . '/frontend/error_standalone.php';
+        exit;
+    }
+    
     renderErrorPage(500, 'Erro de Inicialização', 
         'Erro crítico ao inicializar o sistema.', 
         $e->getMessage(), 
