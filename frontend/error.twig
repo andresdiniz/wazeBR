@@ -53,24 +53,54 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+            --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+            --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+            --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+            
+            /* Variáveis para modo claro */
+            --bg-color: #f8f9fc;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #858796;
+            --text-muted: #858796;
+            --border-color: #e3e6f0;
+            --table-hover: #f8f9fc;
+            --header-border: #e3e6f0;
+            --legend-bg: #ffffff;
+            --empty-icon-color: #d1d3e2;
+            --error-color: {{ errorColor }};
+        }
+
+        /* Modo Escuro */
+        body.dark-mode {
+            --bg-color: #1a1d29;
+            --card-bg: #252836;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --text-muted: #8a8d93;
+            --border-color: #3a3d4a;
+            --table-hover: #2d3142;
+            --header-border: #3a3d4a;
+            --legend-bg: #252836;
+            --empty-icon-color: #3a3d4a;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-color: {{ errorColor }};
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 15px 50px rgba(0, 0, 0, 0.15);
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -78,6 +108,7 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+            transition: background 0.3s ease;
         }
 
         /* Animação de fundo */
@@ -99,6 +130,7 @@
             background: rgba(255, 255, 255, 0.5);
             animation: float 25s linear infinite;
             bottom: -150px;
+            border-radius: 50%;
         }
 
         .bg-animation span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
@@ -116,26 +148,25 @@
             0% {
                 transform: translateY(0) rotate(0deg);
                 opacity: 1;
-                border-radius: 0;
             }
             100% {
                 transform: translateY(-1000px) rotate(720deg);
                 opacity: 0;
-                border-radius: 50%;
             }
         }
 
         .error-container {
             position: relative;
             z-index: 1;
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 3rem 2.5rem;
             max-width: 700px;
             width: 100%;
-            box-shadow: var(--shadow);
+            box-shadow: var(--card-shadow);
             animation: slideUp 0.6s ease-out;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
         @keyframes slideUp {
@@ -152,8 +183,8 @@
         .error-icon {
             width: 120px;
             height: 120px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, var(--primary-color), #c0392b);
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--error-color), #c0392b);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -163,7 +194,7 @@
         }
 
         .error-icon i {
-            font-size: 60px;
+            font-size: 3.5rem;
             color: white;
         }
 
@@ -179,94 +210,138 @@
         }
 
         .error-code {
-            font-size: 80px;
+            font-size: 5rem;
             font-weight: 900;
-            color: var(--primary-color);
-            margin-bottom: 10px;
+            color: var(--error-color);
+            margin-bottom: 0.5rem;
             line-height: 1;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .error-title {
-            font-size: 32px;
-            color: var(--text-dark);
-            margin-bottom: 15px;
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
             font-weight: 700;
         }
 
         .error-message {
-            font-size: 18px;
-            color: var(--text-light);
-            margin-bottom: 30px;
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
             line-height: 1.6;
         }
 
         .error-id {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-bottom: 30px;
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--table-hover);
+            border-radius: 0.5rem;
             display: inline-block;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .error-id:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
         }
 
         .error-id strong {
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         .error-actions {
             display: flex;
-            gap: 15px;
+            gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         .btn {
-            padding: 15px 30px;
+            padding: 0.875rem 1.75rem;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 1rem;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
             border: none;
             cursor: pointer;
+            box-shadow: var(--card-shadow);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: var(--primary-gradient);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
         }
 
         .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
         }
 
         .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
+            background: var(--border-color);
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .suggestions {
+            text-align: left;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(28, 200, 138, 0.1);
+            border-radius: 0.75rem;
+            border-left: 4px solid #1cc88a;
+        }
+
+        .suggestions h3 {
+            font-size: 1.125rem;
+            color: #13855c;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 0.5rem 0;
+            color: #13855c;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .suggestions li i {
+            color: #1cc88a;
+            margin-top: 0.25rem;
         }
 
         .error-details {
             text-align: left;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border-left: 5px solid var(--primary-color);
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--table-hover);
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--error-color);
         }
 
         .error-details-header {
@@ -275,15 +350,15 @@
             justify-content: space-between;
             cursor: pointer;
             user-select: none;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
 
         .error-details-header h3 {
-            font-size: 18px;
-            color: var(--text-dark);
+            font-size: 1.125rem;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
         }
 
         .error-details-content {
@@ -298,50 +373,15 @@
         }
 
         .error-details pre {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 13px;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
             line-height: 1.6;
-            color: #2c3e50;
+            color: var(--text-primary);
             white-space: pre-wrap;
             word-wrap: break-word;
-        }
-
-        .suggestions {
-            text-align: left;
-            margin-top: 30px;
-            padding: 20px;
-            background: #e8f5e9;
-            border-radius: 15px;
-            border-left: 5px solid #4caf50;
-        }
-
-        .suggestions h3 {
-            font-size: 18px;
-            color: #2e7d32;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .suggestions ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .suggestions li {
-            padding: 10px 0;
-            color: #1b5e20;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .suggestions li i {
-            color: #4caf50;
-            margin-top: 3px;
+            border: 1px solid var(--border-color);
         }
 
         .toggle-icon {
@@ -355,19 +395,19 @@
         /* Responsividade */
         @media (max-width: 768px) {
             .error-container {
-                padding: 40px 20px;
+                padding: 2rem 1.5rem;
             }
 
             .error-code {
-                font-size: 60px;
+                font-size: 4rem;
             }
 
             .error-title {
-                font-size: 24px;
+                font-size: 1.75rem;
             }
 
             .error-message {
-                font-size: 16px;
+                font-size: 1rem;
             }
 
             .error-icon {
@@ -376,7 +416,7 @@
             }
 
             .error-icon i {
-                font-size: 50px;
+                font-size: 2.5rem;
             }
 
             .btn {
@@ -389,32 +429,22 @@
             }
         }
 
-        /* Modo escuro */
-        body.dark-mode .error-container {
-            background: #2c3e50;
-        }
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 1.5rem 1rem;
+            }
 
-        body.dark-mode .error-title {
-            color: #ecf0f1;
-        }
+            .error-code {
+                font-size: 3rem;
+            }
 
-        body.dark-mode .error-message {
-            color: #bdc3c7;
-        }
-
-        body.dark-mode .error-details,
-        body.dark-mode .error-id {
-            background: #34495e;
-            color: #ecf0f1;
-        }
-
-        body.dark-mode .error-details pre {
-            background: #2c3e50;
-            color: #ecf0f1;
+            .error-title {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
-<body>
+<body class="{% if app.request.cookies.get('darkMode') == 'true' %}dark-mode{% endif %}">
     <!-- Animação de fundo -->
     <div class="bg-animation">
         <span></span>
@@ -447,10 +477,10 @@
 
         <!-- ID do erro -->
         {% if errorId != 'N/A' %}
-        <div class="error-id">
+        <div class="error-id" id="errorId">
             <strong>ID do Erro:</strong> {{ errorId }}
             <br>
-            <small>Use este ID ao contatar o suporte técnico</small>
+            <small>Clique para copiar • Use este ID ao contatar o suporte</small>
         </div>
         {% endif %}
 
@@ -464,12 +494,18 @@
                 <i class="fas fa-arrow-left"></i>
                 Voltar
             </button>
+            {% if code == 500 or code == 503 %}
+            <button onclick="location.reload()" class="btn btn-secondary">
+                <i class="fas fa-redo"></i>
+                Recarregar
+            </button>
+            {% endif %}
         </div>
 
-        <!-- Sugestões -->
+        <!-- Sugestões contextuais -->
         {% if code == 404 %}
         <div class="suggestions">
-            <h3><i class="fas fa-lightbulb"></i> O que você pode fazer:</h3>
+            <h3><i class="fas fa-lightbulb"></i> Sugestões:</h3>
             <ul>
                 <li>
                     <i class="fas fa-check-circle"></i>
@@ -477,25 +513,25 @@
                 </li>
                 <li>
                     <i class="fas fa-check-circle"></i>
-                    <span>Volte para a página inicial e navegue a partir de lá</span>
+                    <span>Navegue pelo menu principal para encontrar o conteúdo</span>
                 </li>
                 <li>
                     <i class="fas fa-check-circle"></i>
-                    <span>Use a busca para encontrar o que procura</span>
+                    <span>Use a busca do sistema se disponível</span>
                 </li>
             </ul>
         </div>
-        {% elseif code == 500 %}
+        {% elseif code == 500 or code == 503 %}
         <div class="suggestions">
-            <h3><i class="fas fa-lightbulb"></i> O que você pode fazer:</h3>
+            <h3><i class="fas fa-lightbulb"></i> Sugestões:</h3>
             <ul>
                 <li>
                     <i class="fas fa-check-circle"></i>
-                    <span>Aguarde alguns minutos e tente novamente</span>
+                    <span>Tente recarregar a página</span>
                 </li>
                 <li>
                     <i class="fas fa-check-circle"></i>
-                    <span>Atualize a página (F5 ou Ctrl+R)</span>
+                    <span>Aguarde alguns minutos e tente novamente</span>
                 </li>
                 <li>
                     <i class="fas fa-check-circle"></i>
@@ -503,10 +539,28 @@
                 </li>
             </ul>
         </div>
+        {% elseif code == 403 %}
+        <div class="suggestions">
+            <h3><i class="fas fa-lightbulb"></i> Sugestões:</h3>
+            <ul>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verifique se você está logado com a conta correta</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Solicite permissões de acesso ao administrador</span>
+                </li>
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <span>Entre em contato com o suporte para mais informações</span>
+                </li>
+            </ul>
+        </div>
         {% endif %}
 
-        <!-- Detalhes técnicos (apenas se houver) -->
-        {% if errorDescription is defined or trace %}
+        <!-- Detalhes técnicos (apenas se houver e em ambiente de desenvolvimento) -->
+        {% if (errorDescription is defined or trace) and app.environment == 'dev' %}
         <div class="error-details">
             <div class="error-details-header" onclick="toggleDetails()">
                 <h3>
@@ -517,12 +571,13 @@
             </div>
             <div class="error-details-content" id="detailsContent">
                 {% if errorDescription is defined %}
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-secondary);">Descrição:</h4>
                 <pre>{{ errorDescription }}</pre>
                 {% endif %}
                 
                 {% if trace %}
-                <h4 style="margin-top: 15px; color: #7f8c8d;">Stack Trace:</h4>
-                <pre style="font-size: 11px;">{{ trace }}</pre>
+                <h4 style="margin: 1rem 0 0.5rem; color: var(--text-secondary);">Stack Trace:</h4>
+                <pre>{{ trace }}</pre>
                 {% endif %}
             </div>
         </div>
@@ -535,35 +590,92 @@
             const content = document.getElementById('detailsContent');
             const icon = document.getElementById('toggleIcon');
             
-            content.classList.toggle('show');
-            icon.classList.toggle('rotated');
+            if (content && icon) {
+                content.classList.toggle('show');
+                icon.classList.toggle('rotated');
+            }
         }
+
+        // Copiar ID do erro ao clicar
+        const errorIdElement = document.getElementById('errorId');
+        if (errorIdElement) {
+            errorIdElement.addEventListener('click', function() {
+                const errorId = '{{ errorId }}';
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(errorId).then(() => {
+                        const original = this.innerHTML;
+                        this.innerHTML = '<strong><i class="fas fa-check"></i> ID copiado!</strong><br><small>Cole para o suporte técnico</small>';
+                        this.style.background = 'rgba(28, 200, 138, 0.2)';
+                        this.style.borderColor = '#1cc88a';
+                        
+                        setTimeout(() => {
+                            this.innerHTML = original;
+                            this.style.background = '';
+                            this.style.borderColor = '';
+                        }, 3000);
+                    }).catch(err => {
+                        console.error('Falha ao copiar: ', err);
+                        fallbackCopyTextToClipboard(errorId);
+                    });
+                } else {
+                    fallbackCopyTextToClipboard(errorId);
+                }
+            });
+        }
+
+        // Fallback para copiar texto
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'sucesso' : 'falha';
+                console.log('Cópia fallback: ' + msg);
+                
+                if (errorIdElement) {
+                    const original = errorIdElement.innerHTML;
+                    errorIdElement.innerHTML = '<strong><i class="fas fa-check"></i> ID copiado!</strong><br><small>Cole para o suporte técnico</small>';
+                    errorIdElement.style.background = 'rgba(28, 200, 138, 0.2)';
+                    errorIdElement.style.borderColor = '#1cc88a';
+                    
+                    setTimeout(() => {
+                        errorIdElement.innerHTML = original;
+                        errorIdElement.style.background = '';
+                        errorIdElement.style.borderColor = '';
+                    }, 3000);
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, não foi possível copiar: ', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Log do erro no console (para debug)
+        console.error('Erro {{ code }}: {{ finalTitle }}', {
+            errorId: '{{ errorId }}',
+            message: '{{ finalMessage }}',
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        });
 
         // Detectar modo escuro do sistema
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('dark-mode');
         }
 
-        // Copiar ID do erro ao clicar
-        {% if errorId != 'N/A' %}
-        document.querySelector('.error-id').addEventListener('click', function() {
-            const errorId = '{{ errorId }}';
-            navigator.clipboard.writeText(errorId).then(() => {
-                const original = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-check"></i> ID copiado!';
-                setTimeout(() => {
-                    this.innerHTML = original;
-                }, 2000);
-            });
-        });
-        {% endif %}
-
-        // Log do erro no console (para debug)
-        console.error('Erro {{ code }}: {{ finalTitle }}', {
-            errorId: '{{ errorId }}',
-            message: '{{ finalMessage }}',
-            timestamp: new Date().toISOString()
-        });
+        // Alternar modo escuro/claro (opcional - pode ser removido)
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            // Salvar preferência em cookie
+            document.cookie = `darkMode=${document.body.classList.contains('dark-mode')}; path=/; max-age=31536000`;
+        }
     </script>
 </body>
 </html>
