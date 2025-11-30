@@ -11,6 +11,7 @@ require_once 'classes/Logger.php';
 require_once 'classes/ErrorHandler.php';
 
 // --- Inicialização do Sistema (Bootstrap) ---
+// O bootstrap.php deve carregar classes, Dotenv, Logger, ErrorHandler e funções (scripts.php)
 $bootstrap = require_once __DIR__ . '/bootstrap.php';
 
 // Extrai serviços e configurações
@@ -19,27 +20,19 @@ $logger = $bootstrap['logger'];
 $twig = $bootstrap['twig'];
 $profile = $bootstrap['profile'] ?? null;
 
-// --- Configuração do ErrorHandler com Twig ---
-$errorHandler = new ErrorHandler($logger, $twig, $isDebug);
-$errorHandler->register();
-
 // --- SEGURANÇA AVANÇADA: Bloqueio de Header Injection (EARLY EXIT) ---
+// Verifica se há caracteres de nova linha/retorno de carro seguidos de headers maliciosos
 if (preg_match("/(%0A|%0D|\\n|\\r)(content-type:|content-length:|xhr-session-id:)/i", json_encode($_SERVER, JSON_UNESCAPED_SLASHES))) {
     $logger->alert('Tentativa de HTTP Header Injection detectada!', [
         'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'N/A',
         'ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
         'method' => $_SERVER['REQUEST_METHOD'] ?? 'N/A'
     ]);
-    $errorHandler->showError(403, 'Acesso Proibido', 'Tentativa de invasão detectada.');
+    header('Location: /403.html', true, 403);
     exit();
 }
 
-// --- Inicialização de Sessão ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// --- CSRF Token ---
+// --- CSRF Token (Mantido no index para início da sessão) ---
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -50,7 +43,6 @@ if (!isset($_SESSION['csrf_token'])) {
 
 // Flag para controlar a renderização de layout (evita renderizar layout no erro)
 $renderLayout = true;
-$page = 'home'; // Valor padrão
 
 try {
     // --- 1. Autenticação e Conexão ---
@@ -63,12 +55,12 @@ try {
     }
     
     // Conexão com banco de dados
-    timeEvent($logger, 'DB_Connection');
+    timeEvent($logger, 'DB_Connection'); // ⏱️ INÍCIO DO TIMING: Conexão com DB
     $pdo = Database::getConnection();
-    timeEvent($logger, 'DB_Connection', true);
+    timeEvent($logger, 'DB_Connection', true); // ⏱️ FIM DO TIMING
     $logger->debug('Conexão com banco de dados estabelecida');
     
-    // --- RASTREABILIDADE 1: Registro de Login/Sessão ---
+    // --- RASTREABILIDADE 1: Registro de Login/Sessão (Executado apenas 1x por sessão) ---
     if (empty($_SESSION['activity_logged'])) {
         logUserActivity($pdo, $logger, 'LOGIN', 'Usuário autenticado no sistema', [
             'ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A'
@@ -77,9 +69,9 @@ try {
     }
 
     // --- 2. Configurações e Manutenção ---
-    timeEvent($logger, 'Load_Settings');
+    timeEvent($logger, 'Load_Settings'); // ⏱️ INÍCIO DO TIMING: Configurações
     $settings = getSiteSettings($pdo); 
-    timeEvent($logger, 'Load_Settings', true);
+    timeEvent($logger, 'Load_Settings', true); // ⏱️ FIM DO TIMING
     
     if (($settings['manutencao'] ?? false) && $_SERVER['REQUEST_URI'] !== '/manutencao.html') {
         $logger->info('Site em manutenção, redirecionando');
@@ -89,20 +81,9 @@ try {
     
     // --- 3. Roteamento e Preparação de Dados Globais ---
     $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-    // SEGURANÇA: Path Traversal Prevention
-    $uri = preg_replace('/[^a-zA-Z0-9_\-\.\/]/', '', $uri);
+    // SEGURANÇA: Path Traversal Prevention (permite apenas alfanumérico e hífens/underscores)
+    $uri = preg_replace('/[^a-zA-Z0-9_-]/', '', $uri);
     $page = $uri ?: 'home';
-    
-    // Prevenção contra directory traversal
-    if (strpos($page, '..') !== false) {
-        $logger->warning('Tentativa de directory traversal detectada', [
-            'page' => $page,
-            'user_id' => $_SESSION['usuario_id'],
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A'
-        ]);
-        $errorHandler->showError(403, 'Acesso Proibido', 'Caminho inválido solicitado.');
-        exit();
-    }
     
     $logger->info('Página solicitada', ['page' => $page, 'user_id' => $_SESSION['usuario_id']]);
 
@@ -112,9 +93,9 @@ try {
     ]);
     
     // Carregamento de dados da página
-    timeEvent($logger, 'Load_PageData');
+    timeEvent($logger, 'Load_PageData'); // ⏱️ INÍCIO DO TIMING: Dados da página
     $pages = getSitepages($pdo, $page);
-    timeEvent($logger, 'Load_PageData', true);
+    timeEvent($logger, 'Load_PageData', true); // ⏱️ FIM DO TIMING
     
     $dadosGlobais = [
         'user' => getSiteUsers($pdo, $_SESSION['usuario_id']),
@@ -122,8 +103,7 @@ try {
         'session' => $_SESSION,
         'pagedata' => $pages['pageData'] ?? null,
         'atualizacao' => getLatestExecutionLogByStatus($pdo, 'success'),
-        'is_debug' => $isDebug,
-        'csrf_token' => $_SESSION['csrf_token']
+        'is_debug' => $isDebug
     ];
     
     // --- 4. Renderização do Layout (Início) ---
@@ -138,34 +118,26 @@ try {
     if (file_exists($controllerPath)) {
         $logger->debug('Carregando controlador', ['controller' => $controllerPath]);
         
-        timeEvent($logger, 'Controller_Execution_' . $page);
-        
-        // Isolamento do controlador em função anônima para melhor controle de escopo
-        $loadController = function($controllerPath, $pdo, $logger) {
-            require_once $controllerPath;
-        };
-        
-        $loadController($controllerPath, $pdo, $logger);
-        $controllerDuration = timeEvent($logger, 'Controller_Execution_' . $page, true);
+        timeEvent($logger, 'Controller_Execution_' . $page); // ⏱️ INÍCIO DO TIMING: Controlador
+        require_once $controllerPath;
+        $controllerDuration = timeEvent($logger, 'Controller_Execution_' . $page, true); // ⏱️ FIM DO TIMING
         
         // RASTREABILIDADE 3: Registro de Execução do Controlador
         logUserActivity($pdo, $logger, 'EXECUTE_CONTROLLER', "Controlador {$page} executado", [
             'duration_ms' => $controllerDuration
         ]);
-    } else {
-        $logger->debug('Controlador não encontrado, usando apenas template', ['controller' => $controllerPath]);
     }
     
     $combinedData = array_merge($dadosGlobais, $data);
     
     // Renderização do template principal
-    timeEvent($logger, 'Twig_Render_' . $page);
+    timeEvent($logger, 'Twig_Render_' . $page); // ⏱️ INÍCIO DO TIMING: Renderização
     try {
         echo $twig->render($templatePath, $combinedData);
-        timeEvent($logger, 'Twig_Render_' . $page, true);
+        timeEvent($logger, 'Twig_Render_' . $page, true); // ⏱️ FIM DO TIMING
         $logger->debug('Página renderizada com sucesso', ['template' => $templatePath]);
     } catch (\Twig\Error\LoaderError $e) {
-        timeEvent($logger, 'Twig_Render_' . $page, true);
+        timeEvent($logger, 'Twig_Render_' . $page, true); // Parada de segurança
         $logger->warning('Template não encontrado (404)', ['template' => $templatePath]);
         throw new Exception('Página não encontrada', 404);
     }
@@ -204,87 +176,40 @@ try {
         ]);
     }
 
-    // Usa o ErrorHandler para renderizar a página de erro
+    // Otimização: Renderiza página de erro sem carregar o layout principal
     $errorTitles = [
-        400 => 'Requisição Inválida', 
-        401 => 'Não Autorizado', 
-        403 => 'Acesso Proibido',
-        404 => 'Página Não Encontrada', 
-        500 => 'Erro Interno do Servidor', 
-        503 => 'Serviço Indisponível'
+        400 => 'Requisição Inválida', 401 => 'Não Autorizado', 403 => 'Acesso Proibido',
+        404 => 'Página Não Encontrada', 500 => 'Erro Interno do Servidor', 503 => 'Serviço Indisponível'
     ];
     
     $errorTitle = $errorTitles[$code] ?? 'Erro';
     $errorMessage = ($code >= 400 && $code < 500) 
         ? ($e->getMessage() ?: 'Verifique as informações e tente novamente.')
         : ($isDebug ? $e->getMessage() : 'Ocorreu um erro inesperado. Tente novamente mais tarde.');
-    
-    $errorHandler->showError($code, $errorTitle, $errorMessage, $e->getMessage());
+    $errorDescription = $isDebug ? $e->getTraceAsString() : 'O erro foi registrado e será analisado.';
+    $errorId = uniqid('err_');
+
+    // Usa a função auxiliar para renderizar o erro standalone
+    renderErrorPage(
+        $code, $errorTitle, $errorMessage, $errorDescription, $errorId, 
+        $isDebug ? $e->getTraceAsString() : '', $isDebug
+    );
 }
 
 // --- Finalização e Debug ---
-if ($renderLayout) {
-    if (isset($profile) && $isDebug) {
-        if (class_exists(\Twig\Profiler\Dumper\Text::class)) {
-            $dumper = new \Twig\Profiler\Dumper\Text();
-            echo '<hr><h2>Twig Profiler</h2><pre>';
-            echo $dumper->dump($profile);
-            echo '</pre>';
-        }
+if (isset($profile) && $isDebug && $renderLayout) {
+    if (class_exists(\Twig\Profiler\Dumper\Text::class)) {
+        $dumper = new \Twig\Profiler\Dumper\Text();
+        echo '<hr><h2>Twig Profiler</h2><pre>';
+        echo $dumper->dump($profile);
+        echo '</pre>';
     }
+}
 
+if ($renderLayout) {
     $logger->info('Requisição finalizada', [
         'page' => $page ?? 'unknown',
+        // Otimização: Cálculo preciso do tempo de execução
         'execution_time' => round((microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000, 2) . 'ms'
     ]);
-}
-
-// --- Funções Auxiliares (se não estiverem no bootstrap) ---
-
-/**
- * Mede o tempo de execução de eventos
- */
-function timeEvent(Logger $logger, string $eventName, bool $stop = false): float {
-    static $timers = [];
-    
-    if (!$stop) {
-        $timers[$eventName] = microtime(true);
-        return 0;
-    } else {
-        if (isset($timers[$eventName])) {
-            $duration = (microtime(true) - $timers[$eventName]) * 1000;
-            $logger->debug("Timing: {$eventName}", ['duration_ms' => round($duration, 2)]);
-            unset($timers[$eventName]);
-            return $duration;
-        }
-        return 0;
-    }
-}
-
-/**
- * Registra atividade do usuário
- */
-function logUserActivity($pdo, Logger $logger, string $action, string $description, array $details = []): bool {
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO user_activity 
-            (user_id, action, description, details, ip_address, user_agent, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ");
-        
-        return $stmt->execute([
-            $_SESSION['usuario_id'],
-            $action,
-            $description,
-            json_encode($details, JSON_UNESCAPED_UNICODE),
-            $_SERVER['REMOTE_ADDR'] ?? 'N/A',
-            $_SERVER['HTTP_USER_AGENT'] ?? 'N/A'
-        ]);
-    } catch (Exception $e) {
-        $logger->error('Falha ao registrar atividade do usuário', [
-            'error' => $e->getMessage(),
-            'action' => $action
-        ]);
-        return false;
-    }
 }
