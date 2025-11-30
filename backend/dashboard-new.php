@@ -1,0 +1,300 @@
+<?php
+$start = microtime(true);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: public, max-age=240'); // Cache por 4 minutos
+// Inclui o arquivo de configuração do banco de dados e autoload do Composer
+require_once './config/configbd.php'; // Conexão ao banco de dados
+require_once './vendor/autoload.php'; // Autoloader do Composer
+
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
+// Configura o carregador do Twig para buscar templates na pasta "frontend"
+$loader = new FilesystemLoader(__DIR__ . '/../frontend'); // Caminho para a pasta frontend
+$twig = new Environment($loader);
+
+// Conexão com o banco de dados
+$pdo = Database::getConnection();
+
+$id_parceiro = $_SESSION['usuario_id_parceiro'];
+session_write_close(); // Libera o lock da sessão
+
+// Função para buscar alertas de acidentes (ordenados pelos mais recentes)
+// Função para buscar alertas de acidentes
+function getAccidentAlerts(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT * 
+              FROM alerts 
+              WHERE type = 'ACCIDENT' AND status = 1";
+    
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $query .= " ORDER BY pubMillis DESC";
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Função para buscar alertas de buracos
+function getHazardAlerts(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
+              FROM alerts 
+              WHERE type = 'HAZARD' AND subtype = 'HAZARD_ON_ROAD_POT_HOLE' AND status = 1";
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $query .= " ORDER BY confidence DESC";
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Função para buscar alertas de congestionamento
+function getJamAlerts(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT uuid, country, city, reportRating, confidence, type, street, location_x, location_y, pubMillis 
+              FROM alerts 
+              WHERE type = 'JAM' AND status = 1";
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $query .= " ORDER BY confidence DESC, pubMillis DESC";
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Função para buscar outros alertas
+function getOtherAlerts(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis
+              FROM alerts
+              WHERE (type != 'ACCIDENT' 
+              AND (type != 'HAZARD' OR subtype != 'HAZARD_ON_ROAD_POT_HOLE') 
+              AND type != 'JAM')
+              AND status = 1";
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Função para alertas ativos hoje
+function getActiveAlertsAnyPeriod(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT COUNT(*) AS activeTotal
+              FROM alerts
+              WHERE status = 1";
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC)['activeTotal'];
+}
+
+// Função para total de alertas no mês
+function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro = null) {
+    $query = "SELECT COUNT(*) AS totalMonth 
+              FROM alerts 
+              WHERE MONTH(FROM_UNIXTIME(pubMillis / 1000)) = MONTH(CURDATE()) 
+              AND YEAR(FROM_UNIXTIME(pubMillis / 1000)) = YEAR(CURDATE())";
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $query .= " AND id_parceiro = :id_parceiro";
+    }
+
+    $stmt = $pdo->prepare($query);
+
+    if ($id_parceiro !== null && $id_parceiro != 99) {
+        $stmt->bindParam(':id_parceiro', $id_parceiro, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC)['totalMonth'];
+}
+
+//Nao fazer nessa ainda pois as irregularidades ainda nao tem a coluna id_parceirofunction getTrafficData(PDO $pdo, $id_parceiro = null) {
+    function getTrafficData(PDO $pdo, $id_parceiro = null) {
+        $cacheDir = __DIR__ . '/cache';
+        if (!file_exists($cacheDir)) {
+            mkdir($cacheDir, 0777, true);
+        }
+    
+        $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
+        $cacheFile = $cacheDir . '/' . $cacheKey;
+    
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 240) {
+            return json_decode(file_get_contents($cacheFile), true);
+        }
+    
+        $params = [];
+        $filter = '';
+        if (!is_null($id_parceiro) && $id_parceiro != 99) {
+            $filter = ' AND id_parceiro = :id_parceiro';
+            $params[':id_parceiro'] = $id_parceiro;
+        }
+    
+        $getData = function($table) use ($pdo, $filter, $params) {
+            $sql = "
+                SELECT 
+                    SUM(CASE WHEN jam_level > 1 THEN length ELSE 0 END) AS lento,
+                    SUM(CASE WHEN time > historic_time THEN time - historic_time ELSE 0 END) AS atraso
+                FROM $table
+                WHERE is_active = 1 $filter
+            ";
+            $stmt = $pdo->prepare($sql);
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        };
+    
+        // Dados das tabelas originais
+        $irregularities = $getData('irregularities');
+        $subroutes = $getData('subroutes');
+        $routes = $getData('routes');
+    
+        // Obter dados da tabela jams
+        $jamsSql = "
+            SELECT 
+                SUM(length) AS lento,
+                SUM(delay) AS atraso
+            FROM jams
+            WHERE status = 1 $filter
+        ";
+        
+        $jamsStmt = $pdo->prepare($jamsSql);
+        foreach ($params as $key => $val) {
+            $jamsStmt->bindValue($key, $val, PDO::PARAM_INT);
+        }
+        $jamsStmt->execute();
+        $jamsData = $jamsStmt->fetch(PDO::FETCH_ASSOC);
+    
+        // Cálculo total incluindo dados da tabela jams
+        $totalKmsLento = ($irregularities['lento'] ?? 0) + ($subroutes['lento'] ?? 0) + ($jamsData['lento'] ?? 0);
+        $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0) + ($jamsData['atraso'] ?? 0);
+    
+        $result = [
+            'total_kms_lento' => number_format($totalKmsLento / 1000, 2),
+            'total_atraso_minutos' => number_format($totalAtraso / 60, 2),
+            'total_atraso_horas' => number_format($totalAtraso / 3600, 2)
+        ];
+        
+        // Salvar no cache
+        file_put_contents($cacheFile, json_encode($result));
+        
+        return $result;
+    }
+
+// Coleta de métricas
+$metrics = [];
+
+// Coleta de dados com medição de performance
+$data = [
+    'accidentAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getAccidentAlerts($pdo) 
+                : getAccidentAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['accidentAlerts']
+    ),
+    
+    'hazardAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getHazardAlerts($pdo) 
+                : getHazardAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['hazardAlerts']
+    ),
+    
+    'jamAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getJamAlerts($pdo) 
+                : getJamAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['jamAlerts']
+    ),
+    
+    'otherAlerts' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getOtherAlerts($pdo) 
+                : getOtherAlerts($pdo, $id_parceiro);
+        }, 
+        $metrics['otherAlerts']
+    ),
+    
+    'activeAlertsToday' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getActiveAlertsAnyPeriod($pdo) 
+                : getActiveAlertsAnyPeriod($pdo, $id_parceiro);
+        }, 
+        $metrics['activeAlertsToday']
+    ),
+    
+    'totalAlertsThisMonth' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getTotalAlertsThisMonth($pdo) 
+                : getTotalAlertsThisMonth($pdo, $id_parceiro);
+        }, 
+        $metrics['totalAlertsThisMonth']
+    ),
+    
+    'traficdata' => measurePerformance(
+        function() use ($pdo, $id_parceiro) {
+            return $id_parceiro == 99 
+                ? getTrafficData($pdo) 
+                : getTrafficData($pdo, $id_parceiro);
+        }, 
+        $metrics['traficdata']
+    ),
+];
+
+// Salvando métricas
+savePerformanceMetrics($metrics, $start);
+
+// Libera buffer e renderiza template
+ob_end_clean();
