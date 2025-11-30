@@ -489,7 +489,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-car-crash"></i>
                 </div>
-                <div class="stats-card-value">{{ accidentAlerts|length }}</div>
+                <div class="stats-card-value">{{ activeAlertsToday }}</div>
                 <div class="stats-card-label">Alertas Hoje</div>
             </div>
         </div>
@@ -498,7 +498,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-traffic-light"></i>
                 </div>
-                <div class="stats-card-value">{{ jamAlerts|length }}</div>
+                <div class="stats-card-value">{{ totalAlertsThisMonth }}</div>
                 <div class="stats-card-label">Alertas Mês</div>
             </div>
         </div>
@@ -507,7 +507,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-road"></i>
                 </div>
-                <div class="stats-card-value">{{ hazardAlerts|length }}</div>
+                <div class="stats-card-value">{{ traficdata.total_kms_lento }}</div>
                 <div class="stats-card-label">KM Congestionados</div>
             </div>
         </div>
@@ -516,7 +516,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="stats-card-value">{{ otherAlerts|length }}</div>
+                <div class="stats-card-value">{{ traficdata.total_atraso_minutos }}</div>
                 <div class="stats-card-label">Atraso Total</div>
             </div>
         </div>
