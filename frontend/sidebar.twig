@@ -1,6 +1,5 @@
 <body id="page-top">
 
-
 <!-- Wrapper Principal -->
 <div id="wrapper">
 
@@ -246,28 +245,55 @@
 
                     <!-- Notifications -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle position-relative" href="#" id="alertsDropdown" 
+                        data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell fa-fw"></i>
-                            <span class="badge-counter">3+</span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3+
+                                <span class="visually-hidden">Notificações não lidas</span>
+                            </span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="alertsDropdown">
+                        <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown">
                             <h6 class="dropdown-header">
-                                <i class="fas fa-bell"></i>
+                                <i class="fas fa-bell me-2"></i>
                                 Centro de Notificações
                             </h6>
-                            <a class="dropdown-item" href="#">
-                                <div class="icon-circle bg-primary">
-                                    <i class="fas fa-file-alt"></i>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="me-3">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="fas fa-file-alt text-white"></i>
+                                    </div>
                                 </div>
                                 <div>
                                     <div class="small text-muted">12 de Dezembro, 2024</div>
-                                    <span>Novo relatório disponível</span>
+                                    <span class="fw-bold">Novo relatório disponível</span>
+                                </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="me-3">
+                                    <div class="icon-circle bg-success">
+                                        <i class="fas fa-donate text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-muted">11 de Dezembro, 2024</div>
+                                    <span class="fw-bold">Sistema atualizado com sucesso</span>
+                                </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="me-3">
+                                    <div class="icon-circle bg-warning">
+                                        <i class="fas fa-exclamation-triangle text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-muted">10 de Dezembro, 2024</div>
+                                    <span class="fw-bold">Alerta: Pico de congestionamentos</span>
                                 </div>
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-center" href="#">
-                                Ver Todas as Notificações
+                            <a class="dropdown-item text-center text-primary" href="#">
+                                <strong>Ver Todas as Notificações</strong>
                             </a>
                         </div>
                     </li>
@@ -276,25 +302,25 @@
 
                     <!-- User Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
+                        data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="me-2 d-none d-lg-inline">{{user.nome}}</span>
                             <div class="user-avatar">
-                                <i class="avatar-image"><img src="{{ user.photo }}" width="100%" height="100%" border-radius="50%" alt="Foto do Usuário"</i>
+                                <img src="{{ user.photo }}" alt="Foto do Usuário">
                             </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <a class="dropdown-item" href="#">
-                                <i class="fas fa-user"></i>
+                                <i class="fas fa-user me-2"></i>
                                 Perfil
                             </a>
                             <a class="dropdown-item" href="#">
-                                <i class="fas fa-cogs"></i>
+                                <i class="fas fa-cogs me-2"></i>
                                 Configurações
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt"></i>
+                                <i class="fas fa-sign-out-alt me-2"></i>
                                 Sair
                             </a>
                         </div>
