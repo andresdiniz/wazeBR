@@ -190,10 +190,7 @@ try {
     $errorId = uniqid('err_');
 
     // Usa a função auxiliar para renderizar o erro standalone
-    renderErrorPage(
-        $code, $errorTitle, $errorMessage, $errorDescription, $errorId, 
-        $isDebug ? $e->getTraceAsString() : '', $isDebug
-    );
+    $errorHandler->showError($code, $errorTitle, $errorMessage, $errorDescription, $isDebug ? $e->getTraceAsString() : '');
 }
 
 // --- Finalização e Debug ---
