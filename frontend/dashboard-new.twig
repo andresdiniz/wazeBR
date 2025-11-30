@@ -517,7 +517,7 @@
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div class="stats-card-value">{{ traficdata.total_atraso_minutos }}</div>
-                <div class="stats-card-label">Atraso Total</div>
+                <div class="stats-card-label">Atraso Total (min)</div>
             </div>
         </div>
     </div>
@@ -929,6 +929,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Configuração dos modais com mapas
+    // Configuração dos modais com mapas
     $(".open-modal").on("click", function () {
         let lat = $(this).data("lat");
         let lon = $(this).data("lon");
@@ -938,19 +939,23 @@ document.addEventListener("DOMContentLoaded", function () {
         $(modalId).on('shown.bs.modal', function () {
             let mapElement = document.getElementById(mapId);
             if (mapElement && !mapElement._leaflet_id) {
-                let map = L.map(mapId).setView([lat, lon], 15);
+                try {
+                    let map = L.map(mapId).setView([lat, lon], 15);
 
-                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    attribution: "&copy; OpenStreetMap contributors"
-                }).addTo(map);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }).addTo(map);
 
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Localização do Alerta")
-                    .openPopup();
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup("Localização do Alerta")
+                        .openPopup();
 
-                setTimeout(function () {
-                    map.invalidateSize();
-                }, 100);
+                    setTimeout(function () {
+                        map.invalidateSize();
+                    }, 100);
+                } catch (error) {
+                    console.error("Erro ao inicializar mapa:", error);
+                }
             }
         });
     });
