@@ -1,14 +1,9 @@
-{% extends 'base.html.twig' %}
-
-{% block stylesheets %}
-{{ parent() }}
 <!-- Leaflet CSS/JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <style>
-    /* Estilos do home.twig mantidos */
     :root {
         --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
@@ -64,36 +59,6 @@
     .page-header .subtitle {
         color: var(--text-secondary);
         font-size: 0.95rem;
-    }
-
-    .live-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: rgba(220, 53, 69, 0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-        color: #dc3545;
-    }
-
-    .live-indicator .pulse-dot {
-        width: 10px;
-        height: 10px;
-        background: #dc3545;
-        border-radius: 50%;
-        animation: pulse-animation 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-animation {
-        0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.2);
-            opacity: 0.7;
-        }
     }
 
     /* Cards de estatísticas rápidas */
@@ -154,11 +119,6 @@
         color: #36b9cc;
     }
 
-    .stats-card.success .stats-card-icon {
-        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1), rgba(19, 133, 92, 0.1));
-        color: #1cc88a;
-    }
-
     .stats-card-value {
         font-size: 2.5rem;
         font-weight: 800;
@@ -174,26 +134,6 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-
-    .stats-card-trend {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-    }
-
-    .stats-card-trend.up {
-        background: rgba(28, 200, 138, 0.1);
-        color: #1cc88a;
-    }
-
-    .stats-card-trend.down {
-        background: rgba(231, 74, 59, 0.1);
-        color: #e74a3b;
-    }  
 
     /* Cards modernos */
     .modern-card {
@@ -393,6 +333,30 @@
         100% { transform: rotate(360deg); }
     }
 
+    /* Filtros e ações */
+    .filter-section {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-section .form-control,
+    .filter-section .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        padding: 0.625rem 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .filter-section .btn {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+    }
+
     /* Animações de entrada */
     .fade-in {
         animation: fadeIn 0.6s ease-out;
@@ -488,23 +452,32 @@
         }
     }
 </style>
-{% endblock %}
 
-{% block body %}
 <div class="container-fluid px-3 px-lg-4 mt-4">
     
     <!-- Header da Página -->
     <div class="page-header fade-in">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
-                <h1><i class="fas fa-tachometer-alt me-2 subtitle"></i>Dashboard Completo de Alertas</h1>
+                <h1><i class="fas fa-chart-line me-2 subtitle"></i>Dashboard Completo</h1>
                 <p class="subtitle mb-0">
-                    Monitoramento em tempo real de todos os tipos de alertas
+                    Análise detalhada de todos os alertas e métricas do sistema
                 </p>
             </div>
-            <div class="live-indicator">
-                <span class="pulse-dot"></span>
-                AO VIVO
+            <div class="d-flex align-items-center gap-3">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i>Excel</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i>CSV</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-sync-alt me-2"></i>Atualizar
+                </button>
             </div>
         </div>
     </div>
@@ -514,19 +487,19 @@
         <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in">
             <div class="stats-card danger">
                 <div class="stats-card-icon">
-                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-car-crash"></i>
                 </div>
-                <div class="stats-card-value">{{ activeAlertsToday }}</div>
-                <div class="stats-card-label">Alertas Hoje</div>
+                <div class="stats-card-value">{{ accidentAlerts|length }}</div>
+                <div class="stats-card-label">Acidentes Ativos</div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in" style="animation-delay: 0.1s;">
-            <div class="stats-card success">
+            <div class="stats-card warning">
                 <div class="stats-card-icon">
-                    <i class="fas fa-calendar-alt"></i>
+                    <i class="fas fa-traffic-light"></i>
                 </div>
-                <div class="stats-card-value">{{ totalAlertsThisMonth }}</div>
-                <div class="stats-card-label">Alertas Mês</div>
+                <div class="stats-card-value">{{ jamAlerts|length }}</div>
+                <div class="stats-card-label">Congestionamentos</div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-3 mb-md-0 fade-in" style="animation-delay: 0.2s;">
@@ -534,17 +507,51 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-road"></i>
                 </div>
-                <div class="stats-card-value">{{ traficdata.total_kms_lento }}</div>
-                <div class="stats-card-label">KM Congestionados</div>
+                <div class="stats-card-value">{{ hazardAlerts|length }}</div>
+                <div class="stats-card-label">Buracos Reportados</div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 fade-in" style="animation-delay: 0.3s;">
-            <div class="stats-card warning">
+            <div class="stats-card success">
                 <div class="stats-card-icon">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="stats-card-value">{{ traficdata.total_atraso_minutos }}</div>
-                <div class="stats-card-label">Minutos de Atraso</div>
+                <div class="stats-card-value">{{ otherAlerts|length }}</div>
+                <div class="stats-card-label">Outros Alertas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-section fade-in" style="animation-delay: 0.4s;">
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6">
+                <label for="dateFilter" class="form-label">Data</label>
+                <input type="date" class="form-control" id="dateFilter">
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label for="cityFilter" class="form-label">Cidade</label>
+                <select class="form-select" id="cityFilter">
+                    <option value="">Todas as cidades</option>
+                    <option value="São Paulo">São Paulo</option>
+                    <option value="Rio de Janeiro">Rio de Janeiro</option>
+                    <option value="Belo Horizonte">Belo Horizonte</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label for="typeFilter" class="form-label">Tipo de Alerta</label>
+                <select class="form-select" id="typeFilter">
+                    <option value="">Todos os tipos</option>
+                    <option value="ACCIDENT">Acidente</option>
+                    <option value="JAM">Congestionamento</option>
+                    <option value="HAZARD">Buraco</option>
+                    <option value="OTHER">Outro</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                <button class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-2"></i>Filtrar
+                </button>
             </div>
         </div>
     </div>
@@ -553,12 +560,12 @@
     <div class="row">
         
         <!-- Card de Acidentes -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.4s;">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.5s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-danger-gradient">
                     <span>
                         <i class="fas fa-car-crash me-2"></i>
-                        Acidentes Recentes
+                        Acidentes Registrados
                     </span>
                     {% if accidentAlerts is not empty %}
                         <span class="badge-counter">{{ accidentAlerts|length }}</span>
@@ -570,10 +577,10 @@
                             <table class="table modern-table" id="accidentsTable">
                                 <thead>
                                     <tr>
-                                        <th>Cidade</th>
+                                        <th>Local</th>
                                         <th class="d-none d-lg-table-cell">Rua</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Conf.</th>
+                                        <th class="d-none d-md-table-cell">Data/Hora</th>
+                                        <th class="text-center">Confiança</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -589,30 +596,21 @@
                                                 {{ alert.street }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             <div class="text-nowrap">{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
                                             <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="modern-badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence > 2 ? 'warning' : 'danger') }}">
-                                                {{ alert.confidence }}
+                                            <span class="modern-badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}%
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             <button class="btn btn-info action-btn open-modal" 
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#alertModal"
-                                                    data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y],
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': alert.type,
-                                                        'subtype': alert.subtype,
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}" 
+                                                    data-lon="{{ alert.location_x }}"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -640,12 +638,12 @@
         </div>
 
         <!-- Card de Congestionamentos -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.5s;">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.6s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-warning-gradient">
                     <span>
                         <i class="fas fa-traffic-light me-2"></i>
-                        Congestionamentos
+                        Congestionamentos Ativos
                     </span>
                     {% if jamAlerts is not empty %}
                         <span class="badge-counter">{{ jamAlerts|length }}</span>
@@ -657,10 +655,10 @@
                             <table class="table modern-table" id="jamsTable">
                                 <thead>
                                     <tr>
-                                        <th>Cidade</th>
+                                        <th>Local</th>
                                         <th class="d-none d-lg-table-cell">Rua</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Conf.</th>
+                                        <th class="d-none d-md-table-cell">Data/Hora</th>
+                                        <th class="text-center">Confiança</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -676,30 +674,21 @@
                                                 {{ alert.street }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             <div class="text-nowrap">{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
                                             <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="modern-badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence > 2 ? 'warning' : 'danger') }}">
-                                                {{ alert.confidence }}
+                                            <span class="modern-badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}%
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             <button class="btn btn-info action-btn open-modal" 
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#alertModal"
-                                                    data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y],
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': alert.type,
-                                                        'subtype': alert.subtype,
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}" 
+                                                    data-lon="{{ alert.location_x }}"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -725,9 +714,13 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Segunda Linha de Cards -->
+    <div class="row">
+        
         <!-- Card de Buracos -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.6s;">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.7s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-info-gradient">
                     <span>
@@ -744,10 +737,10 @@
                             <table class="table modern-table" id="hazardsTable">
                                 <thead>
                                     <tr>
-                                        <th>Cidade</th>
+                                        <th>Local</th>
                                         <th class="d-none d-lg-table-cell">Rua</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Conf.</th>
+                                        <th class="d-none d-md-table-cell">Data/Hora</th>
+                                        <th class="text-center">Confiança</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -763,30 +756,21 @@
                                                 {{ alert.street }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             <div class="text-nowrap">{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
                                             <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="modern-badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence > 2 ? 'warning' : 'danger') }}">
-                                                {{ alert.confidence }}
+                                            <span class="modern-badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}%
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             <button class="btn btn-info action-btn open-modal" 
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#alertModal"
-                                                    data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y],
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': alert.type,
-                                                        'subtype': alert.subtype,
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}" 
+                                                    data-lon="{{ alert.location_x }}"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -805,7 +789,7 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-road"></i>
-                            <h5>Nenhum buraco</h5>
+                            <h5>Estradas em boas condições</h5>
                             <p>Não há buracos reportados no momento.</p>
                         </div>
                     {% endif %}
@@ -814,7 +798,7 @@
         </div>
 
         <!-- Card de Outros Alertas -->
-        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.7s;">
+        <div class="col-xl-6 col-lg-12 mb-4 fade-in" style="animation-delay: 0.8s;">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-success-gradient">
                     <span>
@@ -831,10 +815,10 @@
                             <table class="table modern-table" id="othersTable">
                                 <thead>
                                     <tr>
-                                        <th>Cidade</th>
+                                        <th>Local</th>
                                         <th class="d-none d-lg-table-cell">Rua</th>
-                                        <th>Data/Hora</th>
-                                        <th class="text-center">Conf.</th>
+                                        <th class="d-none d-md-table-cell">Data/Hora</th>
+                                        <th class="text-center">Confiança</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -850,30 +834,21 @@
                                                 {{ alert.street }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             <div class="text-nowrap">{{ (alert.pubMillis / 1000) | date("d/m/Y") }}</div>
                                             <small class="text-muted">{{ (alert.pubMillis / 1000) | date("H:i") }}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="modern-badge badge-{{ alert.confidence > 4 ? 'success' : (alert.confidence > 2 ? 'warning' : 'danger') }}">
-                                                {{ alert.confidence }}
+                                            <span class="modern-badge badge-{{ alert.confidence > 80 ? 'success' : (alert.confidence > 50 ? 'warning' : 'danger') }}">
+                                                {{ alert.confidence }}%
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             <button class="btn btn-info action-btn open-modal" 
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#alertModal"
-                                                    data-alert="{{ {
-                                                        'uuid': alert.uuid,
-                                                        'city': alert.city,
-                                                        'street': alert.street,
-                                                        'location': [alert.location_x, alert.location_y],
-                                                        'timestamp': alert.pubMillis,
-                                                        'type': alert.type,
-                                                        'subtype': alert.subtype,
-                                                        'confidence': alert.confidence,
-                                                        'status': alert.status
-                                                    }|json_encode|e('html_attr') }}"
+                                                    data-bs-target="#alertModal{{ alert.uuid }}"
+                                                    data-lat="{{ alert.location_y }}" 
+                                                    data-lon="{{ alert.location_x }}"
                                                     title="Ver Detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -892,8 +867,8 @@
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <h5>Nenhum alerta</h5>
-                            <p>Não há outros alertas no momento.</p>
+                            <h5>Sem alertas adicionais</h5>
+                            <p>Não há outros tipos de alertas no momento.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -902,176 +877,17 @@
     </div>
 </div>
 
-<!-- Modal Único -->
-<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content shadow-lg rounded modern-card">
-            <div class="modern-card-header bg-primary-gradient rounded-top">
-                <h5 class="modal-title m-0">
-                    <i class="fas fa-exclamation-triangle me-2"></i> Detalhes do Evento
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto; padding: 1.5rem;">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <div class="p-3 rounded" style="background: var(--table-hover); border: 1px solid var(--border-color);">
-                            <h6><i class="fas fa-info-circle mr-2"></i> Informações Básicas</h6>
-                            <hr class="my-2">
-                            <p><strong><i class="fas fa-fingerprint mr-2"></i> UUID:</strong> <span id="modalUuid"></span></p>
-                            <p><strong><i class="fas fa-city mr-2"></i> Cidade:</strong> <span id="modalCity"></span></p>
-                            <p><strong><i class="fas fa-road mr-2"></i> Rua:</strong> <span id="modalStreet"></span></p>
-                            <p><strong><i class="fas fa-map-marker-alt mr-2"></i> Localização:</strong>
-                                Lat: <span id="modalLat"></span>, Lon: <span id="modalLon"></span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <div class="p-3 rounded" style="background: var(--table-hover); border: 1px solid var(--border-color);">
-                            <h6><i class="fas fa-clock mr-2"></i> Detalhes Adicionais</h6>
-                            <hr class="my-2">
-                            <p><strong><i class="far fa-calendar-alt mr-2"></i> Data:</strong>
-                                <span id="modalDate"></span>
-                                <small class="text-muted">(UTC)</small>
-                            </p>
-                            <p><strong><i class="fas fa-tachometer-alt mr-2"></i> KM Estimado:</strong>
-                                <span id="modalKm" class="modern-badge badge-info"></span>
-                            </p>
-                            <p><strong><i class="fas fa-check-double mr-2"></i> Confiança:</strong>
-                                <span id="modalConfidence" class="modern-badge"></span>
-                            </p>
-                            <p><strong><i class="fas fa-traffic-light mr-2"></i> Status:</strong>
-                                <span id="modalStatus" class="modern-badge"></span>
-                            </p>
-                            <p><strong><i class="fas fa-tags mr-2"></i> Tipo:</strong> <span id="modalType"></span></p>
-                            <p><strong><i class="fas fa-tag mr-2"></i> Subtipo:</strong> <span id="modalSubtype"></span></p>
-                            <p><strong><i class="fas fa-link mr-2"></i> Waze Partner Hub:</strong>
-                                <a id="modalPartnerLink" class="modern-badge badge-primary text-decoration-none" target="_blank" rel="noopener noreferrer" aria-label="Abrir alerta no Waze Partner Hub">
-                                    Ver Detalhes ↗
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-3">
-                <h6 class="text-center text-muted mb-3"><i class="fas fa-map-marked-alt mr-2"></i> Localização no Mapa</h6>
-                <iframe id="modalMap" class="rounded" style="width: 100%; height: 300px; border: 1px solid var(--border-color);" allow="geolocation *; fullscreen" title="Localização exata do alerta" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" aria-describedby="map-description">
-                </iframe>
-                <small id="map-description" class="form-text text-muted text-center">
-                    Mapa interativo mostrando a localização precisa do alerta.
-                </small>
-
-                <hr class="my-3">
-                <h6 class="text-center text-muted mb-3"><i class="fas fa-street-view mr-2"></i> Street View</h6>
-                <iframe id="modalStreetView" width="100%" height="300" frameborder="0" style="border: 1px solid var(--border-color);" allowfullscreen loading="lazy" class="rounded">
-                </iframe>
-                <small class="form-text text-muted text-center">
-                    Visualização do Street View da localização (API Key do Google Maps é necessária).
-                </small>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-end">
-                <a id="modalWazeLink" class="btn btn-outline-primary" target="_blank">
-                    <i class="fab fa-waze mr-2"></i> Ver no Waze
-                </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times mr-2"></i> Fechar
-                </button>
-                <button type="button" class="btn btn-success ml-2" id="modalConfirmBtn">
-                    <i class="fas fa-check mr-2"></i> Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     
-    // Configuração do modal
-    const alertModal = document.getElementById('alertModal');
-    if (alertModal) {
-        alertModal.addEventListener('show.bs.modal', async function (event) {
-            const button = event.relatedTarget;
-            
-            try {
-                // Corrigir o parse dos dados
-                const rawData = button.getAttribute('data-alert');
-                let alertData;
-                
-                if (typeof rawData === 'string') {
-                    alertData = JSON.parse(rawData.replace(/&quot;/g, '"'));
-                } else {
-                    alertData = rawData;
-                }
-                
-                console.log('Dados do alerta:', alertData);
-                
-                // Preencher dados básicos
-                document.getElementById('modalUuid').textContent = alertData.uuid;
-                document.getElementById('modalCity').textContent = alertData.city;
-                document.getElementById('modalStreet').textContent = alertData.street;
-                document.getElementById('modalLat').textContent = alertData.location[1].toFixed(6);
-                document.getElementById('modalLon').textContent = alertData.location[0].toFixed(6);
-                document.getElementById('modalDate').textContent = new Date(alertData.timestamp).toLocaleString('pt-BR');
-                document.getElementById('modalType').textContent = alertData.type;
-                document.getElementById('modalSubtype').textContent = alertData.subtype || 'N/A';
-                
-                // Atualizar iframes
-                const wazeSrc = `https://embed.waze.com/iframe?zoom=16&lat=${alertData.location[1]}&lon=${alertData.location[0]}&pin=1`;
-                document.getElementById('modalMap').setAttribute('src', wazeSrc);
-                
-                const streetViewSrc = `https://www.google.com/maps/embed/v1/streetview?key=SUA_CHAVE&location=${alertData.location[1]},${alertData.location[0]}`;
-                document.getElementById('modalStreetView').setAttribute('src', streetViewSrc);
-                
-                // Atualizar links
-                document.getElementById('modalPartnerLink').setAttribute('href', `https://www.waze.com/partnerhub/map-tool/alerts?cardType=3&cardId=${alertData.uuid}`);
-                document.getElementById('modalWazeLink').setAttribute('href', `https://www.waze.com/ul?ll=${alertData.location[1]},${alertData.location[0]}`);
-                
-                // Atualizar status e confiança
-                const statusElement = document.getElementById('modalStatus');
-                statusElement.textContent = alertData.status === 1 ? "Ativo" : "Inativo";
-                statusElement.className = `modern-badge badge-${alertData.status === 1 ? 'success' : 'danger'}`;
-                
-                const confidenceElement = document.getElementById('modalConfidence');
-                confidenceElement.textContent = alertData.confidence;
-                confidenceElement.className = `modern-badge badge-${alertData.confidence > 4 ? 'success' : alertData.confidence >= 3 ? 'warning' : 'danger'}`;
-                
-                // Buscar KM
-                const kmElement = document.getElementById('modalKm');
-                kmElement.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Calculando...';
-                
-                try {
-                    const km = await buscarKmDnit(alertData.location[1], alertData.location[0]);
-                    console.log("Resultado da busca KM:", km);
-                    const kmNumero = parseFloat(km);
-                    
-                    if (!isNaN(kmNumero)) {
-                        kmElement.textContent = `KM ${kmNumero.toFixed(2)}`;
-                        kmElement.className = 'modern-badge badge-info';
-                    } else {
-                        kmElement.textContent = 'KM não encontrado';
-                        kmElement.className = 'modern-badge badge-warning';
-                    }
-                } catch (error) {
-                    console.error("Erro ao buscar KM:", error);
-                    kmElement.textContent = 'Erro na busca';
-                    kmElement.className = 'modern-badge badge-danger';
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados do alerta:', error);
-                alert('Erro ao carregar detalhes do alerta');
-            }
+    // Inicializar Tooltips do Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            customClass: 'custom-tooltip'
         });
-    }
-    
+    });
+
     // Configuração do DataTable
     const dataTableConfig = {
         language: {
@@ -1094,15 +910,67 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log('Tabela carregada com sucesso');
         }
     };
-    
+
     // Inicializar DataTables
-    const tables = ['accidentsTable', 'jamsTable', 'hazardsTable', 'othersTable'];
-    tables.forEach(tableId => {
-        if (document.getElementById(tableId)) {
-            $('#' + tableId).DataTable(dataTableConfig);
-        }
+    if ($('#accidentsTable').length) {
+        $('#accidentsTable').DataTable(dataTableConfig);
+    }
+
+    if ($('#jamsTable').length) {
+        $('#jamsTable').DataTable(dataTableConfig);
+    }
+
+    if ($('#hazardsTable').length) {
+        $('#hazardsTable').DataTable(dataTableConfig);
+    }
+
+    if ($('#othersTable').length) {
+        $('#othersTable').DataTable(dataTableConfig);
+    }
+
+    // Configuração dos modais com mapas
+    $(".open-modal").on("click", function () {
+        let lat = $(this).data("lat");
+        let lon = $(this).data("lon");
+        let modalId = $(this).attr("data-bs-target");
+        let mapId = modalId.replace("#alertModal", "map-");
+
+        $(modalId).on('shown.bs.modal', function () {
+            let mapElement = document.getElementById(mapId);
+            if (mapElement && !mapElement._leaflet_id) {
+                let map = L.map(mapId).setView([lat, lon], 15);
+
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(map);
+
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup("Localização do Alerta")
+                    .openPopup();
+
+                setTimeout(function () {
+                    map.invalidateSize();
+                }, 100);
+            }
+        });
     });
-    
+
+    // Atualizar hora atual
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('pt-BR');
+        const dateString = now.toLocaleDateString('pt-BR');
+        
+        // Se houver um elemento para exibir a hora
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = `${dateString} ${timeString}`;
+        }
+    }
+
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
     // Notificação de boas-vindas
     setTimeout(() => {
         if (typeof $.notify !== 'undefined') {
@@ -1113,8 +981,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }, 1000);
-    
-    console.log('Dashboard Completo inicializado com sucesso!');
+
+    console.log('Dashboard completo inicializado com sucesso!');
 });
 </script>
-{% endblock %}
