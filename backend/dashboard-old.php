@@ -3,55 +3,49 @@
 $request_id = uniqid('REQ_');
 $start = microtime(true);
 
-// 1. Otimização: Remoção de headers não essenciais no início,
-// apenas o Content-Type e Cache-Control (aumentado para 5 minutos)
+// 1. Headers de resposta
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=300'); // Cache por 5 minutos
 
-// 2. Logs e Configuração
-// Assume-se que 'configbd.php' configura a conexão e que 'vendor/autoload.php'
-// inclui o Monolog ou outro sistema de logging PSR-3.
+// 2. Inclusões (Assume-se que Logger.php e scripts.php são incluídos via Composer ou require_once)
 require_once './config/configbd.php';
-require_once './vendor/autoload.php';
+require_once './vendor/autoload.php'; // Inclui Twig, Monolog (se usado) e possivelmente Logger/scripts
 
-// Mock da classe Logger para demonstração (Deve ser substituído pela implementação real do Monolog)
-class Logger {
-    public static function info($message, $context = []) { error_log("INFO: " . $message . " " . json_encode($context)); }
-    public static function warning($message, $context = []) { error_log("WARNING: " . $message . " " . json_encode($context)); }
-    public static function error($message, $context = []) { error_log("ERROR: " . $message . " " . json_encode($context)); }
-}
+// Se scripts.php e Logger.php não são carregados pelo autoload, inclua-os explicitamente:
+// require_once './functions/scripts.php'; // Contém measurePerformance
+// require_once 'Logger.php'; // Sua classe de Logger
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use PDOException; // Importa a classe de exceção do PDO
+use PDOException;
+use Logger; // Utiliza a sua classe Logger
 
-// 3. Tratamento de Erro na Conexão com o Banco de Dados
+// --- Configuração e Conexão (com tratamento de erro) ---
 try {
     // Configura o carregador do Twig
     $loader = new FilesystemLoader(__DIR__ . '/../frontend');
     $twig = new Environment($loader);
 
-    // Conexão com o banco de dados - Assume-se que getConnection() lança PDOException
+    // Conexão com o banco de dados
     $pdo = Database::getConnection();
     Logger::info('Database connection established.', ['request_id' => $request_id]);
 
 } catch (PDOException $e) {
-    // Falha crítica: não é possível carregar o dashboard sem DB
+    // Falha crítica de conexão
     Logger::error('Failed to connect to database.', ['error' => $e->getMessage(), 'request_id' => $request_id]);
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed.']);
     exit;
 } catch (Exception $e) {
-    // Outros erros durante a inicialização (ex: Twig)
+    // Outros erros durante a inicialização
     Logger::error('Initialization error.', ['error' => $e->getMessage(), 'request_id' => $request_id]);
     http_response_code(500);
     echo json_encode(['error' => 'Application initialization failed.']);
     exit;
 }
 
-// 4. Lógica de Sessão e Segurança
+// 3. Lógica de Sessão e Segurança
 if (!isset($_SESSION['usuario_id_parceiro'])) {
-    // Tratamento de segurança: Redirecionar ou retornar erro se a sessão não estiver pronta
     Logger::warning('Session variable usuario_id_parceiro not set.', ['request_id' => $request_id]);
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized or session expired.']);
@@ -61,20 +55,10 @@ if (!isset($_SESSION['usuario_id_parceiro'])) {
 $id_parceiro = $_SESSION['usuario_id_parceiro'];
 session_write_close(); // Libera o lock da sessão o mais cedo possível
 
-// 5. Otimização: Mock da função measurePerformance para simular sua remoção
-// Em produção, esta função e as chamadas a ela seriam removidas para evitar overhead.
-function measurePerformance($callback, &$metric = null) {
-    // Remove o overhead da medição detalhada em ambiente de produção
-    return $callback();
-}
-
-// --- Funções de Busca (Otimizadas com Tipagem e uso consistente de Binding) ---
+// --- Funções de Busca (Otimizadas com Tipagem e Tratamento de Erro) ---
 
 /**
  * Função para buscar alertas de acidentes (ordenados pelos mais recentes)
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return array
  */
 function getAccidentAlerts(PDO $pdo, $id_parceiro = null): array {
     $query = "SELECT uuid, country, city, reportRating, confidence, type, street, location_x, location_y, pubMillis 
@@ -98,15 +82,12 @@ function getAccidentAlerts(PDO $pdo, $id_parceiro = null): array {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         Logger::error('DB Error in getAccidentAlerts', ['error' => $e->getMessage()]);
-        return []; // Retorna array vazio em caso de falha
+        return [];
     }
 }
 
 /**
  * Função para buscar alertas de buracos
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return array
  */
 function getHazardAlerts(PDO $pdo, $id_parceiro = null): array {
     $query = "SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis 
@@ -136,9 +117,6 @@ function getHazardAlerts(PDO $pdo, $id_parceiro = null): array {
 
 /**
  * Função para buscar alertas de congestionamento
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return array
  */
 function getJamAlerts(PDO $pdo, $id_parceiro = null): array {
     $query = "SELECT uuid, country, city, reportRating, confidence, type, street, location_x, location_y, pubMillis 
@@ -168,12 +146,8 @@ function getJamAlerts(PDO $pdo, $id_parceiro = null): array {
 
 /**
  * Função para buscar outros alertas
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return array
  */
 function getOtherAlerts(PDO $pdo, $id_parceiro = null): array {
-    // Consulta reescrita para melhor clareza na lógica:
     $query = "SELECT uuid, country, city, reportRating, confidence, type, subtype, street, location_x, location_y, pubMillis
               FROM alerts
               WHERE status = 1 
@@ -202,9 +176,6 @@ function getOtherAlerts(PDO $pdo, $id_parceiro = null): array {
 
 /**
  * Função para alertas ativos em qualquer período
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return int
  */
 function getActiveAlertsAnyPeriod(PDO $pdo, $id_parceiro = null): int {
     $query = "SELECT COUNT(*) AS activeTotal
@@ -232,12 +203,8 @@ function getActiveAlertsAnyPeriod(PDO $pdo, $id_parceiro = null): int {
 
 /**
  * Função para total de alertas no mês
- * @param PDO $pdo
- * @param int|null $id_parceiro
- * @return int
  */
 function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro = null): int {
-    // 6. Otimização SQL: Usando funções de data do MySQL para filtrar pelo mês/ano
     $query = "SELECT COUNT(*) AS totalMonth 
               FROM alerts 
               WHERE MONTH(FROM_UNIXTIME(pubMillis / 1000)) = MONTH(CURDATE()) 
@@ -262,17 +229,17 @@ function getTotalAlertsThisMonth(PDO $pdo, $id_parceiro = null): int {
     }
 }
 
-// 7. Melhoria no Sistema de Cache e Tratamento de Erro de Arquivo
+/**
+ * Função para buscar dados de tráfego com cache e tratamento de erro de arquivo.
+ */
 function getTrafficData(PDO $pdo, $id_parceiro = null): array {
     $cacheDir = __DIR__ . '/cache';
     $cacheKey = 'trafficdata_' . ($id_parceiro ?? 'all') . '.json';
     $cacheFile = $cacheDir . '/' . $cacheKey;
 
-    // Garante que o diretório de cache existe
     if (!file_exists($cacheDir)) {
         if (!mkdir($cacheDir, 0777, true)) {
             Logger::warning('Failed to create cache directory.', ['path' => $cacheDir]);
-            // Continua sem cache
         }
     }
 
@@ -286,7 +253,6 @@ function getTrafficData(PDO $pdo, $id_parceiro = null): array {
                 return $data;
             } else {
                 Logger::warning('Failed to decode cached JSON.', ['key' => $cacheKey, 'json_error' => json_last_error_msg()]);
-                // Força o recálculo se o cache estiver corrompido
             }
         }
     }
@@ -294,12 +260,10 @@ function getTrafficData(PDO $pdo, $id_parceiro = null): array {
     $params = [];
     $filter = '';
     if (!is_null($id_parceiro) && $id_parceiro != 99) {
-        // Se a coluna id_parceiro for adicionada a irregularities, subroutes e jams, o filtro funciona.
         $filter = ' AND id_parceiro = :id_parceiro';
         $params[':id_parceiro'] = $id_parceiro;
     }
 
-    // Função interna para obter dados, com tratamento de exceção
     $getData = function($table) use ($pdo, $filter, $params) {
         $sql = "
             SELECT 
@@ -321,12 +285,12 @@ function getTrafficData(PDO $pdo, $id_parceiro = null): array {
         }
     };
 
-    // Dados das tabelas originais
+    // Dados das tabelas
     $irregularities = $getData('irregularities');
     $subroutes = $getData('subroutes');
     $routes = $getData('routes');
 
-    // Obter dados da tabela jams
+    // Dados da tabela jams
     $jamsSql = "
         SELECT 
             SUM(length) AS lento,
@@ -352,7 +316,7 @@ function getTrafficData(PDO $pdo, $id_parceiro = null): array {
     $totalAtraso = ($irregularities['atraso'] ?? 0) + ($subroutes['atraso'] ?? 0) + ($routes['atraso'] ?? 0) + ($jamsData['atraso'] ?? 0);
 
     $result = [
-        'total_kms_lento' => number_format($totalKmsLento / 1000, 2, '.', ''), // Usa ponto para JSON
+        'total_kms_lento' => number_format($totalKmsLento / 1000, 2, '.', ''),
         'total_atraso_minutos' => number_format($totalAtraso / 60, 2, '.', ''),
         'total_atraso_horas' => number_format($totalAtraso / 3600, 2, '.', '')
     ];
@@ -367,11 +331,11 @@ function getTrafficData(PDO $pdo, $id_parceiro = null): array {
     return $result;
 }
 
-// --- Coleta de Métricas ---
-$metrics = []; // Mantido para simular a chamada original
+// --- Coleta de Métricas com a função existente em scripts.php ---
+$metrics = []; 
 
-// Coleta de dados com medição de performance (agora simulada, sem overhead)
 $data = [
+    // Usando measurePerformance() do scripts.php
     'accidentAlerts' => measurePerformance(
         function() use ($pdo, $id_parceiro) {
             return $id_parceiro == 99 
@@ -436,8 +400,11 @@ $data = [
     ),
 ];
 
-// Otimização: A função savePerformanceMetrics foi removida/mockada, pois adiciona overhead
-// Salvando métricas de tempo de execução (apenas o tempo total)
+// Otimização: Chama a função que salva as métricas (existente em scripts.php)
+// Se 'savePerformanceMetrics' também está em scripts.php, ela deve ser chamada aqui.
+// Caso contrário, use a lógica de log.
+// savePerformanceMetrics($metrics, $start);
+
 $end = microtime(true);
 Logger::info('Dashboard request completed.', [
     'time_elapsed_ms' => round(($end - $start) * 1000, 2),
@@ -445,12 +412,11 @@ Logger::info('Dashboard request completed.', [
 ]);
 
 
-// 8. Renderização do Template e Finalização
-ob_end_clean(); // Limpa qualquer buffer de saída anterior
-echo $twig->render('dashboard.html.twig', $data); // Assumindo que o Twig renderiza o HTML final
-// Se o output for apenas JSON (como o header sugere, o echo acima deve ser substituído)
-// echo json_encode($data); 
-// Mantive o $twig->render() por causa da importação do Twig no código original.
-// Se a intenção é JSON puro (como sugere o header), use:
-// echo json_encode($data);
+// --- Finalização ---
+ob_end_clean();
+// Escolha a opção de output correta:
+// Opção 1: Renderiza o template Twig (se o dashboard é HTML)
+// echo $twig->render('dashboard.html.twig', $data); 
+// Opção 2: Retorna apenas JSON (se o header 'application/json' for o objetivo final)
+echo json_encode($data);
 ?>
