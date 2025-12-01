@@ -117,17 +117,19 @@ function initializeSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    // Toggle desktop
+    // Toggle desktop (Comportamento de colapsar/expandir)
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
             document.body.classList.toggle('sidebar-toggled');
+            // 2º Correção: Configura os tooltips após o toggle
+            setupSidebarTooltips(); 
         });
     }
     
-    // Toggle mobile
+    // Toggle mobile (Comportamento de mostrar/esconder no canto)
     if (sidebarToggleTop) {
         sidebarToggleTop.addEventListener('click', () => {
-            document.body.classList.toggle('sidebar-toggled');
+            // 1º Correção: REMOVIDO document.body.classList.toggle('sidebar-toggled') para evitar conflito/tela cinza
             if (sidebar) sidebar.classList.toggle('show');
             if (sidebarOverlay) sidebarOverlay.classList.toggle('show');
         });
@@ -136,7 +138,7 @@ function initializeSidebar() {
     // Overlay mobile
     if (sidebarOverlay) {
         sidebarOverlay.addEventListener('click', () => {
-            document.body.classList.remove('sidebar-toggled');
+            // 1º Correção: REMOVIDO document.body.classList.remove('sidebar-toggled')
             if (sidebar) sidebar.classList.remove('show');
             sidebarOverlay.classList.remove('show');
         });
@@ -147,12 +149,87 @@ function initializeSidebar() {
         document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(function(element) {
             element.addEventListener('click', function() {
                 if (!this.hasAttribute('data-bs-toggle')) {
-                    document.body.classList.remove('sidebar-toggled');
+                    // 1º Correção: REMOVIDO document.body.classList.remove('sidebar-toggled')
                     if (sidebar) sidebar.classList.remove('show');
                     if (sidebarOverlay) sidebarOverlay.classList.remove('show');
                 }
             });
         });
+    }
+    
+    // 2º Correção: Inicializa os tooltips no carregamento (se a sidebar já estiver colapsada)
+    setupSidebarTooltips();
+}
+
+// ==================== SIDEBAR TOOLTIPS (2º CORREÇÃO) ====================
+
+function setupSidebarTooltips() {
+    const isToggled = document.body.classList.contains('sidebar-toggled');
+    
+    // Só ativa tooltips em desktop (>= 768px) E com a sidebar colapsada
+    if (!isToggled || window.innerWidth < 768) {
+        document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(link => {
+            link.removeEventListener('mouseenter', createAndShowTooltip);
+            link.removeEventListener('mouseleave', hideAndRemoveTooltip);
+        });
+        document.querySelectorAll('.sidebar-tooltip').forEach(tip => tip.remove());
+        return;
+    }
+
+    // Adiciona listeners para criar os tooltips
+    document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(link => {
+        // Garante que listeners não sejam duplicados
+        link.removeEventListener('mouseenter', createAndShowTooltip);
+        link.removeEventListener('mouseleave', hideAndRemoveTooltip);
+
+        const tooltipText = link.getAttribute('data-tooltip') || link.querySelector('span')?.textContent.trim();
+        if (tooltipText) {
+            link.addEventListener('mouseenter', createAndShowTooltip);
+            link.addEventListener('mouseleave', hideAndRemoveTooltip);
+        }
+    });
+}
+
+function createAndShowTooltip(e) {
+    const link = e.currentTarget;
+    const tooltipText = link.getAttribute('data-tooltip') || link.querySelector('span')?.textContent.trim();
+    if (!tooltipText) return;
+
+    // Remove tooltips existentes antes de criar um novo
+    document.querySelectorAll('.sidebar-tooltip').forEach(tip => tip.remove());
+
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('sidebar-tooltip');
+    tooltip.textContent = tooltipText;
+    document.body.appendChild(tooltip);
+
+    const linkRect = link.getBoundingClientRect();
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const tooltipHeight = tooltip.offsetHeight;
+    
+    // Posiciona o tooltip 10px à direita da sidebar, centralizado verticalmente com o link
+    tooltip.style.top = `${linkRect.top + linkRect.height / 2 - tooltipHeight / 2}px`;
+    tooltip.style.left = `${sidebarRect.right + 10}px`; 
+
+    // Adiciona a classe 'show' após um pequeno atraso para a transição CSS
+    setTimeout(() => {
+        tooltip.classList.add('show');
+    }, 50);
+
+    // Armazena a referência no link para fácil remoção
+    link.dataset.tooltipRef = true;
+}
+
+function hideAndRemoveTooltip(e) {
+    const link = e.currentTarget;
+    const tooltip = document.querySelector('.sidebar-tooltip.show');
+    if (tooltip && link.dataset.tooltipRef) {
+        tooltip.classList.remove('show');
+        setTimeout(() => {
+            tooltip.remove();
+        }, 300); // Tempo da transição CSS (ajustar se necessário no CSS)
+        delete link.dataset.tooltipRef;
     }
 }
 
@@ -246,6 +323,9 @@ function handleResize() {
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         if (sidebarOverlay) sidebarOverlay.classList.remove('show');
     }
+    
+    // 2º Correção: Reconfigura tooltips ao redimensionar (desktop <-> mobile)
+    setupSidebarTooltips(); 
 }
 
 // ==================== UTILITY FUNCTIONS ====================
