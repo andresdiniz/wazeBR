@@ -916,84 +916,16 @@
                         <div class="table-responsive">
                             <table class="table modern-table" id="routesTable">
                                 <thead>
-                                <!-- Atualize a tabela dentro do loop for route in routes -->
-                                    <tr class="fade-in route-row" style="animation-delay: {{ loop.index0 * 0.05 }}s;"
-                                        data-route-id="{{ route.id }}"
-                                        data-route-name="{{ route.name }}"
-                                        data-from-name="{{ route.from_name }}"
-                                        data-to-name="{{ route.to_name }}"
-                                        data-from-lat="{{ route.from_lat|default(-20.66) }}"
-                                        data-from-lon="{{ route.from_lon|default(-43.79) }}"
-                                        data-to-lat="{{ route.to_lat|default(-20.67) }}"
-                                        data-to-lon="{{ route.to_lon|default(-43.78) }}"
-                                        data-historic-speed="{{ route.historic_speed|default(60) }}"
-                                        data-avg-speed="{{ route.avg_speed|default(45) }}"
-                                        data-historic-time="{{ route.historic_time|default(1800) }}"
-                                        data-avg-time="{{ route.avg_time|default(2400) }}"
-                                        data-length="{{ route.length|default(15000) }}">
-                                        <td data-label="Rota">
-                                            <div class="fw-bold text-primary">{{ route.name }}</div>
-                                            <small class="text-muted d-lg-none">
-                                                <i class="fas fa-flag-checkered me-1"></i>{{ route.from_name }} → {{ route.to_name }}
-                                            </small>
-                                        </td>
-                                        <td data-label="Início">
-                                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
-                                                <i class="fas fa-map-marker-alt text-success me-1"></i>{{ route.from_name }}
-                                            </span>
-                                        </td>
-                                        <td data-label="Destino">
-                                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
-                                                <i class="fas fa-flag-checkered text-danger me-1"></i>{{ route.to_name }}
-                                            </span>
-                                        </td>
-                                        <td class="d-none d-lg-table-cell text-center" data-label="Vel. Normal">
-                                            <div class="fw-bold">{{ route.historic_speed|default(0)|number_format(1) }}</div>
-                                            <small class="text-muted">km/h</small>
-                                        </td>
-                                        <td class="d-none d-lg-table-cell text-center" data-label="Tempo Normal">
-                                            <div class="fw-bold">{{ (historic_time / 60)|number_format(1) }}</div>
-                                            <small class="text-muted">min</small>
-                                        </td>
-                                        <td class="text-center" data-label="Vel. Atual">
-                                            <div class="fw-bold 
-                                                {% if route.avg_speed < route.historic_speed * 0.7 %}
-                                                    text-danger
-                                                {% elseif route.avg_speed < route.historic_speed * 0.9 %}
-                                                    text-warning
-                                                {% else %}
-                                                    text-success
-                                                {% endif %}
-                                            ">
-                                                {{ route.avg_speed|default(0)|number_format(1) }}
-                                            </div>
-                                            <small class="text-muted">km/h</small>
-                                        </td>
-                                        <td class="text-center" data-label="Tempo Atual">
-                                            <div class="fw-bold">{{ (avg_time / 60)|number_format(1) }}</div>
-                                            <small class="text-muted">min</small>
-                                        </td>
-                                        <td class="text-center" data-label="Atraso">
-                                            <span class="modern-badge 
-                                                {% if delay_minutes > 5 %}
-                                                    badge-danger
-                                                {% elseif delay_minutes > 1 %}
-                                                    badge-warning
-                                                {% else %}
-                                                    badge-success
-                                                {% endif %}
-                                            ">
-                                                {{ delay_minutes|number_format(1) }} min
-                                            </span>
-                                        </td>
-                                        <td class="text-center" data-label="Ações">
-                                            <button class="btn btn-info action-btn view-route"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#mapModal"
-                                                title="Ver detalhes da rota">
-                                                <i class="fas fa-map-marker-alt"></i>
-                                            </button>
-                                        </td>
+                                    <tr>
+                                        <th>Nome da Rota</th>
+                                        <th>Início</th>
+                                        <th>Fim</th>
+                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal</th>
+                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal</th>
+                                        <th class="text-center">Vel. Atual</th>
+                                        <th class="text-center">Tempo Atual</th>
+                                        <th class="text-center">Atraso</th>
+                                        <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
