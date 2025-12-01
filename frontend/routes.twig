@@ -1,15 +1,11 @@
 <!-- Leaflet CSS + JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <!-- Highcharts -->
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/heatmap.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
-
-<!-- jQuery Sparkline -->
-<script src="https://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.js"></script>
 
 <style>
     /* Reutilizando estilos do home.twig */
@@ -422,25 +418,6 @@
         stroke: var(--border-color);
     }
 
-    /* Leaflet Routing Machine */
-    .leaflet-routing-container {
-        background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 0.5rem !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    body.dark-mode .leaflet-routing-container {
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
-    }
-
-    .leaflet-routing-alt {
-        background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
-        border-color: var(--border-color) !important;
-    }
-
     /* Responsividade */
     @media (max-width: 767.98px) {
         .page-header h1 {
@@ -589,21 +566,20 @@
                                         {% set historic_time = route.historic_time|default(0) %}
                                         {% set avg_time = route.avg_time|default(0) %}
                                         {% set delay_minutes = (avg_time - historic_time) / 60 %}
-                                        <tr class="fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s;"
+                                        <tr class="fade-in route-row" style="animation-delay: {{ loop.index0 * 0.05 }}s;"
                                             data-route-id="{{ route.id }}"
                                             data-route-name="{{ route.name }}"
                                             data-from-name="{{ route.from_name }}"
                                             data-to-name="{{ route.to_name }}"
-                                            data-from-lat="{{ route.from_lat }}"
-                                            data-from-lon="{{ route.from_lon }}"
-                                            data-to-lat="{{ route.to_lat }}"
-                                            data-to-lon="{{ route.to_lon }}"
-                                            data-historic-speed="{{ route.historic_speed|default(0) }}"
-                                            data-avg-speed="{{ route.avg_speed|default(0) }}"
-                                            data-historic-time="{{ route.historic_time|default(0) }}"
-                                            data-avg-time="{{ route.avg_time|default(0) }}"
-                                            data-length="{{ route.length|default(0) }}"
-                                            data-coordinates="{{ route.coordinates|default('[]')|json_encode }}">
+                                            data-from-lat="{{ route.from_lat|default(-20.66) }}"
+                                            data-from-lon="{{ route.from_lon|default(-43.79) }}"
+                                            data-to-lat="{{ route.to_lat|default(-20.67) }}"
+                                            data-to-lon="{{ route.to_lon|default(-43.78) }}"
+                                            data-historic-speed="{{ route.historic_speed|default(60) }}"
+                                            data-avg-speed="{{ route.avg_speed|default(45) }}"
+                                            data-historic-time="{{ route.historic_time|default(1800) }}"
+                                            data-avg-time="{{ route.avg_time|default(2400) }}"
+                                            data-length="{{ route.length|default(15000) }}">
                                             <td>
                                                 <div class="fw-bold text-primary">{{ route.name }}</div>
                                                 <small class="text-muted d-lg-none">
@@ -665,10 +641,6 @@
                                                     data-bs-target="#mapModal"
                                                     title="Ver detalhes da rota">
                                                     <i class="fas fa-map-marker-alt"></i>
-                                                </button>
-                                                <button class="btn btn-warning action-btn show-history"
-                                                    title="Histórico da rota">
-                                                    <i class="fas fa-chart-line"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -733,9 +705,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="exportRouteData">
-                    <i class="fas fa-download me-2"></i>Exportar Dados
-                </button>
             </div>
         </div>
     </div>
@@ -780,7 +749,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Variável global para armazenar o mapa
     let routeMap = null;
-    let routingControl = null;
 
     // Configuração dos botões de visualização de rota
     $(document).on('click', '.view-route', function () {
@@ -798,8 +766,7 @@ document.addEventListener("DOMContentLoaded", function () {
             avg_speed: parseFloat(row.data('avg-speed')),
             historic_time: parseFloat(row.data('historic-time')),
             avg_time: parseFloat(row.data('avg-time')),
-            length: parseFloat(row.data('length')),
-            coordinates: JSON.parse(row.data('coordinates'))
+            length: parseFloat(row.data('length'))
         };
         
         const loadingIndicator = document.getElementById('loadingIndicator');
@@ -828,8 +795,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Calcular estatísticas
         const delayMinutes = ((routeData.avg_time - routeData.historic_time) / 60).toFixed(1);
         const lengthKM = (routeData.length / 1000).toFixed(2);
-        const timeIncrease = ((routeData.avg_time - routeData.historic_time) / routeData.historic_time * 100).toFixed(1);
-        const speedReduction = ((routeData.historic_speed - routeData.avg_speed) / routeData.historic_speed * 100).toFixed(1);
+        const timeIncrease = routeData.historic_time > 0 ? 
+            ((routeData.avg_time - routeData.historic_time) / routeData.historic_time * 100).toFixed(1) : 0;
+        const speedReduction = routeData.historic_speed > 0 ? 
+            ((routeData.historic_speed - routeData.avg_speed) / routeData.historic_speed * 100).toFixed(1) : 0;
         
         // Atualizar insights
         const insightsContainer = document.getElementById('insightsContainer');
@@ -880,13 +849,7 @@ document.addEventListener("DOMContentLoaded", function () {
             routeMap = null;
         }
         
-        // Se existe controle de rota, remover
-        if (routingControl) {
-            routeMap.removeControl(routingControl);
-            routingControl = null;
-        }
-        
-        // Criar novo mapa
+        // Criar novo mapa centralizado no ponto de partida
         routeMap = L.map('mapContainer').setView([routeData.from_lat, routeData.from_lon], 13);
         
         // Adicionar tile layer
@@ -895,124 +858,113 @@ document.addEventListener("DOMContentLoaded", function () {
             maxZoom: 19
         }).addTo(routeMap);
         
-        // Verificar se temos coordenadas específicas ou se precisamos calcular a rota
-        if (routeData.coordinates && routeData.coordinates.length > 0) {
-            // Usar as coordenadas fornecidas
-            const polyline = L.polyline(routeData.coordinates, {
-                color: '#4e73df',
-                weight: 5,
-                opacity: 0.8,
-                lineJoin: 'round',
-                lineCap: 'round'
-            }).addTo(routeMap);
-            
-            // Adicionar marcadores
-            L.marker([routeData.from_lat, routeData.from_lon]).addTo(routeMap)
-                .bindPopup(`<b>${routeData.from_name}</b><br>Início da rota`)
-                .openPopup();
-                
-            L.marker([routeData.to_lat, routeData.to_lon]).addTo(routeMap)
-                .bindPopup(`<b>${routeData.to_name}</b><br>Fim da rota`);
-            
-            // Ajustar visualização para a rota
-            routeMap.fitBounds(polyline.getBounds(), { padding: [50, 50] });
-        } else {
-            // Calcular rota usando OSRM (Open Source Routing Machine)
-            routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(routeData.from_lat, routeData.from_lon),
-                    L.latLng(routeData.to_lat, routeData.to_lon)
-                ],
-                routeWhileDragging: false,
-                showAlternatives: false,
-                addWaypoints: false,
-                draggableWaypoints: false,
-                fitSelectedRoutes: true,
-                show: false, // Esconder o painel de instruções
-                lineOptions: {
-                    styles: [
-                        {
-                            color: '#4e73df',
-                            opacity: 0.8,
-                            weight: 5
-                        }
-                    ]
-                },
-                createMarker: function(i, waypoint, n) {
-                    const marker = L.marker(waypoint.latLng, {
-                        draggable: false
-                    });
-                    
-                    if (i === 0) {
-                        marker.bindPopup(`<b>${routeData.from_name}</b><br>Início da rota`);
-                    } else {
-                        marker.bindPopup(`<b>${routeData.to_name}</b><br>Fim da rota`);
-                    }
-                    
-                    return marker;
-                },
-                router: L.Routing.osrmv1({
-                    serviceUrl: 'https://router.project-osrm.org/route/v1',
-                    profile: 'driving'
-                })
-            }).addTo(routeMap);
-            
-            // Ajustar o zoom para mostrar toda a rota
-            routingControl.on('routesfound', function(e) {
-                const routes = e.routes;
-                if (routes && routes.length > 0) {
-                    const bounds = routes[0].coordinates.reduce((bounds, coord) => {
-                        return bounds.extend(coord);
-                    }, L.latLngBounds([]));
-                    
-                    routeMap.fitBounds(bounds, { padding: [50, 50] });
-                }
-            });
-        }
+        // Gerar pontos intermediários para criar uma rota visual
+        // (Esta é uma simulação - em produção, você usaria uma API de roteamento)
+        const points = generateRoutePoints(
+            [routeData.from_lat, routeData.from_lon],
+            [routeData.to_lat, routeData.to_lon],
+            10 // Número de pontos intermediários
+        );
+        
+        // Criar a rota como uma linha
+        const routeLine = L.polyline(points, {
+            color: '#4e73df',
+            weight: 5,
+            opacity: 0.8,
+            lineJoin: 'round',
+            lineCap: 'round'
+        }).addTo(routeMap);
+        
+        // Adicionar marcador de início
+        const startMarker = L.marker([routeData.from_lat, routeData.from_lon], {
+            icon: L.divIcon({
+                html: '<div style="background: #28a745; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">S</div>',
+                className: 'custom-marker',
+                iconSize: [24, 24]
+            })
+        }).addTo(routeMap)
+        .bindPopup(`<b>${routeData.from_name}</b><br>Ponto de partida da rota`);
+        
+        // Adicionar marcador de fim
+        const endMarker = L.marker([routeData.to_lat, routeData.to_lon], {
+            icon: L.divIcon({
+                html: '<div style="background: #dc3545; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">F</div>',
+                className: 'custom-marker',
+                iconSize: [24, 24]
+            })
+        }).addTo(routeMap)
+        .bindPopup(`<b>${routeData.to_name}</b><br>Ponto de destino da rota`);
+        
+        // Ajustar o mapa para mostrar toda a rota
+        const bounds = routeLine.getBounds();
+        routeMap.fitBounds(bounds, { padding: [50, 50] });
+        
+        // Adicionar informações da rota como popup
+        const routeInfo = `
+            <div style="padding: 10px; min-width: 200px;">
+                <h6 style="margin-top: 0; color: #4e73df;">${routeData.name}</h6>
+                <p><strong>Distância:</strong> ${(routeData.length / 1000).toFixed(2)} km</p>
+                <p><strong>Tempo normal:</strong> ${(routeData.historic_time / 60).toFixed(1)} min</p>
+                <p><strong>Tempo atual:</strong> ${(routeData.avg_time / 60).toFixed(1)} min</p>
+                <p><strong>Atraso:</strong> <span style="color: ${((routeData.avg_time - routeData.historic_time) / 60) > 5 ? '#dc3545' : ((routeData.avg_time - routeData.historic_time) / 60) > 1 ? '#ffc107' : '#28a745'}">
+                    ${((routeData.avg_time - routeData.historic_time) / 60).toFixed(1)} min
+                </span></p>
+            </div>
+        `;
+        
+        // Adicionar popup no meio da rota
+        const middlePoint = points[Math.floor(points.length / 2)];
+        L.popup()
+            .setLatLng(middlePoint)
+            .setContent(routeInfo)
+            .openOn(routeMap);
         
         // Adicionar controles de zoom
         L.control.zoom({
             position: 'topright'
         }).addTo(routeMap);
         
-        // Adicionar botão de reset
-        const resetButton = L.control({position: 'topright'});
-        resetButton.onAdd = function() {
-            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-            div.innerHTML = '<a href="#" title="Resetar visualização" style="width: 30px; height: 30px; line-height: 30px; display: block; text-align: center; text-decoration: none; color: #333; background: white;"><i class="fas fa-home"></i></a>';
-            div.onclick = function(e) {
-                e.preventDefault();
-                if (routingControl) {
-                    const bounds = routingControl.getPlan().getWaypoints().reduce((bounds, waypoint) => {
-                        return bounds.extend(waypoint.latLng);
-                    }, L.latLngBounds([]));
-                    routeMap.fitBounds(bounds, { padding: [50, 50] });
-                } else if (routeData.coordinates && routeData.coordinates.length > 0) {
-                    const bounds = routeData.coordinates.reduce((bounds, coord) => {
-                        return bounds.extend(coord);
-                    }, L.latLngBounds([]));
-                    routeMap.fitBounds(bounds, { padding: [50, 50] });
-                } else {
-                    routeMap.setView([routeData.from_lat, routeData.from_lon], 13);
-                }
-            };
-            return div;
-        };
-        resetButton.addTo(routeMap);
-        
         // Garantir que o mapa se redimensiona corretamente
         setTimeout(() => {
             routeMap.invalidateSize();
         }, 100);
     }
+    
+    // Função auxiliar para gerar pontos de rota (simulação)
+    function generateRoutePoints(start, end, numPoints) {
+        const points = [start];
+        const latDiff = end[0] - start[0];
+        const lonDiff = end[1] - start[1];
+        
+        for (let i = 1; i < numPoints; i++) {
+            const factor = i / numPoints;
+            // Adicionar alguma curvatura aleatória para simular uma rota real
+            const curveFactor = Math.sin(factor * Math.PI) * 0.01;
+            
+            points.push([
+                start[0] + (latDiff * factor) + (Math.random() * curveFactor - curveFactor/2),
+                start[1] + (lonDiff * factor) + (Math.random() * curveFactor - curveFactor/2)
+            ]);
+        }
+        
+        points.push(end);
+        return points;
+    }
 
     function initCharts(routeData) {
-        // Dados simulados para o gráfico de linha (seria substituído por dados reais)
+        // Dados para o gráfico de linha (velocidade ao longo do tempo)
         const hours = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
-        const currentSpeeds = [routeData.avg_speed * 0.9, routeData.avg_speed * 0.7, routeData.avg_speed * 0.8, 
-                               routeData.avg_speed, routeData.avg_speed * 1.1, routeData.avg_speed * 0.85];
-        const historicSpeeds = [routeData.historic_speed * 0.95, routeData.historic_speed * 0.9, routeData.historic_speed * 0.85,
-                                routeData.historic_speed, routeData.historic_speed * 1.05, routeData.historic_speed * 0.95];
+        
+        // Gerar dados baseados na velocidade média com alguma variação
+        const currentSpeeds = hours.map(() => {
+            const variation = (Math.random() * 0.4) - 0.2; // ±20%
+            return routeData.avg_speed * (1 + variation);
+        });
+        
+        const historicSpeeds = hours.map(() => {
+            const variation = (Math.random() * 0.2) - 0.1; // ±10%
+            return routeData.historic_speed * (1 + variation);
+        });
         
         // Gráfico de linha (velocidade ao longo do dia)
         Highcharts.chart('lineChartContainer', {
@@ -1085,16 +1037,24 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
         
-        // Heatmap (simulação de intensidade do tráfego)
-        const segments = 10;
+        // Heatmap (simulação de intensidade do tráfego por segmento)
+        const segments = 5;
+        const intensityLevels = 3;
         const heatmapData = [];
-        for (let i = 0; i < segments; i++) {
-            for (let j = 0; j < 3; j++) {
-                heatmapData.push({
-                    x: i,
-                    y: j,
-                    value: Math.random() * 10
-                });
+        
+        for (let segment = 0; segment < segments; segment++) {
+            for (let level = 0; level < intensityLevels; level++) {
+                // Simular dados: segmentos perto do meio tendem a ter mais congestionamento
+                let value;
+                if (segment === Math.floor(segments/2)) {
+                    value = 7 + Math.random() * 3; // Alto congestionamento no meio
+                } else if (segment === 0 || segment === segments-1) {
+                    value = 2 + Math.random() * 3; // Baixo congestionamento nas extremidades
+                } else {
+                    value = 4 + Math.random() * 3; // Congestionamento médio
+                }
+                
+                heatmapData.push([segment, level, value]);
             }
         }
         
@@ -1119,6 +1079,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
                     }
                 },
+                categories: ['Início', '25%', '50%', '75%', 'Fim'],
                 labels: {
                     style: {
                         color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
@@ -1133,6 +1094,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 },
                 categories: ['Baixo', 'Médio', 'Alto'],
+                reversed: true,
                 labels: {
                     style: {
                         color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
@@ -1159,15 +1121,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 borderColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color'),
                 data: heatmapData,
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    color: '#000000',
+                    style: {
+                        textShadow: 'none',
+                        fontWeight: 'bold'
+                    }
                 }
             }],
             tooltip: {
                 formatter: function() {
                     const levels = ['Baixo', 'Médio', 'Alto'];
-                    return `<b>Segmento ${this.point.x + 1}</b><br>
+                    const segments = ['Início', '25%', '50%', '75%', 'Fim'];
+                    return `<b>Segmento: ${segments[this.point.x]}</b><br>
                            Nível: ${levels[this.point.y]}<br>
-                           Intensidade: ${this.point.value.toFixed(1)}`;
+                           Intensidade: ${this.point.value.toFixed(1)}/10`;
                 }
             },
             credits: {
@@ -1175,52 +1143,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    // Botão de exportação
-    document.getElementById('exportRouteData')?.addEventListener('click', function() {
-        const routeName = document.getElementById('modalRouteName').textContent;
-        
-        // Simular exportação
-        if (typeof $.notify !== 'undefined') {
-            $.notify(`Exportando dados da rota: ${routeName}`, {
-                position: "top right",
-                className: "info",
-                autoHideDelay: 2000
-            });
-        }
-        
-        // Aqui você implementaria a lógica real de exportação
-        setTimeout(() => {
-            if (typeof $.notify !== 'undefined') {
-                $.notify("Dados exportados com sucesso!", {
-                    position: "top right",
-                    className: "success",
-                    autoHideDelay: 3000
-                });
-            }
-        }, 1000);
-    });
-
-    // Botão de histórico
-    $(document).on('click', '.show-history', function () {
-        const row = $(this).closest('tr');
-        const routeId = row.data('route-id');
-        const routeName = row.data('route-name');
-        
-        if (typeof $.notify !== 'undefined') {
-            $.notify(`Abrindo histórico da rota: ${routeName}`, {
-                position: "top right",
-                className: "info",
-                autoHideDelay: 3000
-            });
-        }
-        
-        // Aqui você implementaria a navegação para a página de histórico
-        console.log(`Mostrar histórico da rota: ${routeId} - ${routeName}`);
-        
-        // Simular redirecionamento
-        // window.location.href = `/rotas/historico/${routeId}`;
-    });
 
     // Redimensionar mapa quando o modal é aberto
     $('#mapModal').on('shown.bs.modal', function () {
@@ -1237,9 +1159,6 @@ document.addEventListener("DOMContentLoaded", function () {
             routeMap.remove();
             routeMap = null;
         }
-        if (routingControl) {
-            routingControl = null;
-        }
     });
 
     // Atualizar hora atual
@@ -1248,7 +1167,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const timeString = now.toLocaleTimeString('pt-BR');
         const dateString = now.toLocaleDateString('pt-BR');
         
-        // Se houver um elemento para exibir a hora
         const timeElement = document.getElementById('currentTime');
         if (timeElement) {
             timeElement.textContent = `${dateString} ${timeString}`;
