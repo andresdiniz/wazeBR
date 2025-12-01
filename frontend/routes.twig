@@ -418,34 +418,401 @@
         stroke: var(--border-color);
     }
 
-    /* Responsividade */
-    @media (max-width: 767.98px) {
-        .page-header h1 {
-            font-size: 1.5rem;
-        }
-
-        .modern-table {
-            font-size: 0.85rem;
-        }
-
-        .modern-table thead th,
-        .modern-table tbody td {
-            padding: 0.75rem 0.5rem;
-        }
-
-        .action-btn {
-            width: 32px;
-            height: 32px;
-        }
-
-        #mapContainer {
-            height: 300px;
-        }
-
-        .custom-modal .modal-dialog {
-            margin: 0.5rem;
-        }
+    /* ---------- RESPONSIVIDADE DA TABELA ---------- */
+@media (max-width: 991.98px) {
+    .modern-table th,
+    .modern-table td {
+        font-size: 0.85rem;
+        padding: 0.75rem 0.5rem;
     }
+    
+    .modern-table thead th:nth-child(4),
+    .modern-table thead th:nth-child(5),
+    .modern-table tbody td:nth-child(4),
+    .modern-table tbody td:nth-child(5) {
+        display: none;
+    }
+    
+    .modern-badge {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.75rem;
+        min-width: 55px;
+    }
+    
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        margin: 0 2px;
+    }
+    
+    .action-btn i {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .modern-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .modern-table thead {
+        display: none;
+    }
+    
+    .modern-table tbody {
+        display: block;
+    }
+    
+    .modern-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background: var(--card-bg);
+        box-shadow: var(--card-shadow);
+    }
+    
+    .modern-table tbody tr:hover {
+        transform: translateY(-3px);
+    }
+    
+    .modern-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        width: 100%;
+    }
+    
+    .modern-table tbody td:last-child {
+        border-bottom: none;
+        padding-top: 1rem;
+        justify-content: center;
+    }
+    
+    .modern-table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-right: 1rem;
+        min-width: 80px;
+    }
+    
+    .modern-table tbody td:first-child::before {
+        content: "Rota";
+    }
+    
+    .modern-table tbody td:nth-child(2)::before {
+        content: "Início";
+    }
+    
+    .modern-table tbody td:nth-child(3)::before {
+        content: "Destino";
+    }
+    
+    .modern-table tbody td:nth-child(6)::before {
+        content: "Vel. Atual";
+    }
+    
+    .modern-table tbody td:nth-child(7)::before {
+        content: "Tempo Atual";
+    }
+    
+    .modern-table tbody td:nth-child(8)::before {
+        content: "Atraso";
+    }
+    
+    .modern-table tbody td:nth-child(9)::before {
+        content: "Ações";
+    }
+    
+    /* Ocultar colunas menos importantes em mobile */
+    .modern-table tbody td:nth-child(4),
+    .modern-table tbody td:nth-child(5) {
+        display: none;
+    }
+    
+    /* Ajustar conteúdo das células */
+    .modern-table .fw-bold {
+        font-size: 0.9rem;
+    }
+    
+    .modern-table small.text-muted {
+        font-size: 0.75rem;
+    }
+    
+    /* Badge de atraso */
+    .modern-badge {
+        min-width: 50px;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    /* Container da tabela */
+    .table-responsive {
+        border: none;
+        padding: 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .modern-table tbody tr {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .modern-table tbody td {
+        padding: 0.4rem 0;
+        font-size: 0.8rem;
+    }
+    
+    .modern-table tbody td::before {
+        font-size: 0.75rem;
+        min-width: 70px;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state i {
+        font-size: 3.5rem;
+    }
+    
+    .empty-state h5 {
+        font-size: 1rem;
+    }
+    
+    .empty-state p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ---------- RESPONSIVIDADE DO MODAL ---------- */
+@media (max-width: 1199.98px) {
+    .custom-modal .modal-xl {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .custom-modal .modal-xl {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    #mapContainer {
+        height: 400px;
+    }
+    
+    .modal-body .row {
+        flex-direction: column;
+    }
+    
+    .modal-body .col-lg-8,
+    .modal-body .col-lg-4 {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .modal-body .col-lg-4 {
+        margin-top: 1.5rem;
+    }
+    
+    #heatmapChart {
+        height: 150px;
+        margin-top: 1rem;
+    }
+    
+    #lineChartContainer {
+        height: 200px;
+    }
+    
+    .insight-card {
+        padding: 1rem;
+    }
+    
+    .insight-card-value {
+        font-size: 1.5rem;
+    }
+    
+    .insight-card-label {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .custom-modal .modal-dialog {
+        margin: 0;
+        max-height: 90vh;
+    }
+    
+    .custom-modal .modal-content {
+        border-radius: 0.5rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem !important;
+        max-height: calc(90vh - 130px);
+        overflow-y: auto;
+    }
+    
+    #mapContainer {
+        height: 300px;
+    }
+    
+    .insight-card {
+        margin-bottom: 0.5rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Ajustar layout dos insights em grid 2x2 */
+    #insightsContainer .col-6 {
+        width: 50%;
+        padding: 0.25rem;
+    }
+    
+    /* Tooltip para botões em mobile */
+    .action-btn {
+        position: relative;
+    }
+    
+    .action-btn::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--card-bg);
+        color: var(--text-primary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 1px solid var(--border-color);
+        z-index: 1000;
+    }
+    
+    .action-btn:hover::after {
+        opacity: 1;
+        visibility: visible;
+        bottom: 110%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    #mapContainer {
+        height: 250px;
+    }
+    
+    #heatmapChart {
+        height: 120px;
+    }
+    
+    #lineChartContainer {
+        height: 180px;
+    }
+    
+    .insight-card-value {
+        font-size: 1.25rem;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .modal-header .btn-close {
+        width: 24px;
+        height: 24px;
+        background-size: 12px;
+    }
+}
+
+/* ---------- MELHORIAS PARA TABLETS ---------- */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .modern-table th,
+    .modern-table td {
+        padding: 0.875rem 0.625rem;
+    }
+    
+    .modern-table thead th:nth-child(4),
+    .modern-table thead th:nth-child(5),
+    .modern-table tbody td:nth-child(4),
+    .modern-table tbody td:nth-child(5) {
+        display: table-cell;
+    }
+    
+    /* Ajustar largura das colunas */
+    .modern-table th:nth-child(1),
+    .modern-table td:nth-child(1) {
+        width: 25%;
+    }
+    
+    .modern-table th:nth-child(2),
+    .modern-table td:nth-child(2),
+    .modern-table th:nth-child(3),
+    .modern-table td:nth-child(3) {
+        width: 15%;
+    }
+    
+    .modern-table th:nth-child(9),
+    .modern-table td:nth-child(9) {
+        width: 8%;
+    }
+}
+
+/* ---------- ANIMAÇÕES RESPONSIVAS ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .fade-in,
+    .modern-table tbody tr,
+    .action-btn,
+    .insight-card,
+    .modern-card {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* ---------- SUPORTE PARA ORIENTAÇÃO ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+    .custom-modal .modal-dialog {
+        max-height: 80vh;
+    }
+    
+    .modal-body {
+        max-height: calc(80vh - 130px);
+    }
+    
+    #mapContainer {
+        height: 250px;
+    }
+}
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
@@ -549,16 +916,84 @@
                         <div class="table-responsive">
                             <table class="table modern-table" id="routesTable">
                                 <thead>
-                                    <tr>
-                                        <th>Nome da Rota</th>
-                                        <th>Início</th>
-                                        <th>Fim</th>
-                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal</th>
-                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal</th>
-                                        <th class="text-center">Vel. Atual</th>
-                                        <th class="text-center">Tempo Atual</th>
-                                        <th class="text-center">Atraso</th>
-                                        <th class="text-center">Ações</th>
+                                <!-- Atualize a tabela dentro do loop for route in routes -->
+                                    <tr class="fade-in route-row" style="animation-delay: {{ loop.index0 * 0.05 }}s;"
+                                        data-route-id="{{ route.id }}"
+                                        data-route-name="{{ route.name }}"
+                                        data-from-name="{{ route.from_name }}"
+                                        data-to-name="{{ route.to_name }}"
+                                        data-from-lat="{{ route.from_lat|default(-20.66) }}"
+                                        data-from-lon="{{ route.from_lon|default(-43.79) }}"
+                                        data-to-lat="{{ route.to_lat|default(-20.67) }}"
+                                        data-to-lon="{{ route.to_lon|default(-43.78) }}"
+                                        data-historic-speed="{{ route.historic_speed|default(60) }}"
+                                        data-avg-speed="{{ route.avg_speed|default(45) }}"
+                                        data-historic-time="{{ route.historic_time|default(1800) }}"
+                                        data-avg-time="{{ route.avg_time|default(2400) }}"
+                                        data-length="{{ route.length|default(15000) }}">
+                                        <td data-label="Rota">
+                                            <div class="fw-bold text-primary">{{ route.name }}</div>
+                                            <small class="text-muted d-lg-none">
+                                                <i class="fas fa-flag-checkered me-1"></i>{{ route.from_name }} → {{ route.to_name }}
+                                            </small>
+                                        </td>
+                                        <td data-label="Início">
+                                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                <i class="fas fa-map-marker-alt text-success me-1"></i>{{ route.from_name }}
+                                            </span>
+                                        </td>
+                                        <td data-label="Destino">
+                                            <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                <i class="fas fa-flag-checkered text-danger me-1"></i>{{ route.to_name }}
+                                            </span>
+                                        </td>
+                                        <td class="d-none d-lg-table-cell text-center" data-label="Vel. Normal">
+                                            <div class="fw-bold">{{ route.historic_speed|default(0)|number_format(1) }}</div>
+                                            <small class="text-muted">km/h</small>
+                                        </td>
+                                        <td class="d-none d-lg-table-cell text-center" data-label="Tempo Normal">
+                                            <div class="fw-bold">{{ (historic_time / 60)|number_format(1) }}</div>
+                                            <small class="text-muted">min</small>
+                                        </td>
+                                        <td class="text-center" data-label="Vel. Atual">
+                                            <div class="fw-bold 
+                                                {% if route.avg_speed < route.historic_speed * 0.7 %}
+                                                    text-danger
+                                                {% elseif route.avg_speed < route.historic_speed * 0.9 %}
+                                                    text-warning
+                                                {% else %}
+                                                    text-success
+                                                {% endif %}
+                                            ">
+                                                {{ route.avg_speed|default(0)|number_format(1) }}
+                                            </div>
+                                            <small class="text-muted">km/h</small>
+                                        </td>
+                                        <td class="text-center" data-label="Tempo Atual">
+                                            <div class="fw-bold">{{ (avg_time / 60)|number_format(1) }}</div>
+                                            <small class="text-muted">min</small>
+                                        </td>
+                                        <td class="text-center" data-label="Atraso">
+                                            <span class="modern-badge 
+                                                {% if delay_minutes > 5 %}
+                                                    badge-danger
+                                                {% elseif delay_minutes > 1 %}
+                                                    badge-warning
+                                                {% else %}
+                                                    badge-success
+                                                {% endif %}
+                                            ">
+                                                {{ delay_minutes|number_format(1) }} min
+                                            </span>
+                                        </td>
+                                        <td class="text-center" data-label="Ações">
+                                            <button class="btn btn-info action-btn view-route"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#mapModal"
+                                                title="Ver detalhes da rota">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </thead>
                                 <tbody>
