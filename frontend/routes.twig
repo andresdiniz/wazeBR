@@ -1148,7 +1148,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Configuração dos botões de visualização de rota
     $(document).on('click', '.view-route', function () {
         const row = $(this).closest('tr');
-        console.warning('Rota selecionada:', row.data('route-name'));
+        console.log('Rota selecionada:', row.data('route-name'));
         console.log('Carregando dados da rota...');
         console.log(row.data());
         const routeData = {
