@@ -122,6 +122,7 @@
     .modern-table {
         margin-bottom: 0;
         width: 100%;
+        border-collapse: collapse;
     }
 
     .modern-table thead th {
@@ -136,6 +137,7 @@
         position: sticky;
         top: 0;
         z-index: 10;
+        white-space: nowrap;
     }
 
     .modern-table tbody tr {
@@ -156,6 +158,7 @@
         padding: 1rem 0.75rem;
         vertical-align: middle;
         color: var(--text-primary);
+        white-space: nowrap;
     }
 
     .modern-table .fw-bold {
@@ -419,400 +422,410 @@
     }
 
     /* ---------- RESPONSIVIDADE DA TABELA ---------- */
-@media (max-width: 991.98px) {
-    .modern-table th,
-    .modern-table td {
-        font-size: 0.85rem;
-        padding: 0.75rem 0.5rem;
+    @media (max-width: 1199.98px) {
+        .modern-table th,
+        .modern-table td {
+            font-size: 0.9rem;
+            padding: 0.875rem 0.625rem;
+        }
     }
-    
-    .modern-table thead th:nth-child(4),
-    .modern-table thead th:nth-child(5),
-    .modern-table tbody td:nth-child(4),
-    .modern-table tbody td:nth-child(5) {
-        display: none;
-    }
-    
-    .modern-badge {
-        padding: 0.35rem 0.65rem;
-        font-size: 0.75rem;
-        min-width: 55px;
-    }
-    
-    .action-btn {
-        width: 34px;
-        height: 34px;
-        margin: 0 2px;
-    }
-    
-    .action-btn i {
-        font-size: 0.85rem;
-    }
-}
 
-@media (max-width: 767.98px) {
-    .modern-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
+    @media (max-width: 991.98px) {
+        .modern-table th,
+        .modern-table td {
+            font-size: 0.85rem;
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .modern-table thead th:nth-child(4),
+        .modern-table thead th:nth-child(5),
+        .modern-table tbody td:nth-child(4),
+        .modern-table tbody td:nth-child(5) {
+            display: none;
+        }
+        
+        .modern-badge {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+            min-width: 55px;
+        }
+        
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            margin: 0 2px;
+        }
+        
+        .action-btn i {
+            font-size: 0.85rem;
+        }
     }
-    
-    .modern-table thead {
-        display: none;
+
+    @media (max-width: 767.98px) {
+        .modern-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .modern-table thead {
+            display: none;
+        }
+        
+        .modern-table tbody {
+            display: block;
+        }
+        
+        .modern-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .modern-table tbody tr:hover {
+            transform: translateY(-3px);
+        }
+        
+        .modern-table tbody td {
+            display: block;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            text-align: right;
+            position: relative;
+            padding-left: 50%;
+            white-space: normal;
+        }
+        
+        .modern-table tbody td:last-child {
+            border-bottom: none;
+            padding-top: 1rem;
+            padding-left: 0;
+            text-align: center;
+        }
+        
+        .modern-table tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: left;
+            width: calc(50% - 1rem);
+        }
+        
+        .modern-table tbody td:first-child::before {
+            content: "Rota";
+        }
+        
+        .modern-table tbody td:nth-child(2)::before {
+            content: "Início";
+        }
+        
+        .modern-table tbody td:nth-child(3)::before {
+            content: "Destino";
+        }
+        
+        .modern-table tbody td:nth-child(6)::before {
+            content: "Vel. Atual";
+        }
+        
+        .modern-table tbody td:nth-child(7)::before {
+            content: "Tempo Atual";
+        }
+        
+        .modern-table tbody td:nth-child(8)::before {
+            content: "Atraso";
+        }
+        
+        .modern-table tbody td:nth-child(9)::before {
+            content: "Ações";
+        }
+        
+        /* Ocultar colunas menos importantes em mobile */
+        .modern-table tbody td:nth-child(4),
+        .modern-table tbody td:nth-child(5) {
+            display: none;
+        }
+        
+        /* Ajustar conteúdo das células */
+        .modern-table .fw-bold {
+            font-size: 0.9rem;
+        }
+        
+        .modern-table small.text-muted {
+            font-size: 0.75rem;
+        }
+        
+        /* Badge de atraso */
+        .modern-badge {
+            min-width: 50px;
+            padding: 0.3rem 0.6rem;
+        }
+        
+        /* Container da tabela */
+        .table-responsive {
+            border: none;
+            padding: 0;
+        }
     }
-    
-    .modern-table tbody {
-        display: block;
+
+    @media (max-width: 575.98px) {
+        .modern-table tbody tr {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .modern-table tbody td {
+            padding: 0.4rem 0;
+            font-size: 0.8rem;
+            padding-left: 45%;
+        }
+        
+        .modern-table tbody td::before {
+            font-size: 0.75rem;
+            width: calc(45% - 1rem);
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3.5rem;
+        }
+        
+        .empty-state h5 {
+            font-size: 1rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.85rem;
+        }
     }
-    
-    .modern-table tbody tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        background: var(--card-bg);
-        box-shadow: var(--card-shadow);
+
+    /* ---------- RESPONSIVIDADE DO MODAL ---------- */
+    @media (max-width: 1199.98px) {
+        .custom-modal .modal-xl {
+            max-width: 95%;
+            margin: 0.5rem auto;
+        }
     }
-    
-    .modern-table tbody tr:hover {
-        transform: translateY(-3px);
+
+    @media (max-width: 991.98px) {
+        .custom-modal .modal-xl {
+            max-width: 100%;
+            margin: 0;
+        }
+        
+        #mapContainer {
+            height: 400px;
+        }
+        
+        .modal-body .row {
+            flex-direction: column;
+        }
+        
+        .modal-body .col-lg-8,
+        .modal-body .col-lg-4 {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .modal-body .col-lg-4 {
+            margin-top: 1.5rem;
+        }
+        
+        #heatmapChart {
+            height: 150px;
+            margin-top: 1rem;
+        }
+        
+        #lineChartContainer {
+            height: 200px;
+        }
+        
+        .insight-card {
+            padding: 1rem;
+        }
+        
+        .insight-card-value {
+            font-size: 1.5rem;
+        }
+        
+        .insight-card-label {
+            font-size: 0.8rem;
+        }
     }
-    
-    .modern-table tbody td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid var(--border-color);
+
+    @media (max-width: 767.98px) {
+        .custom-modal .modal-dialog {
+            margin: 0;
+            max-height: 90vh;
+        }
+        
+        .custom-modal .modal-content {
+            border-radius: 0.5rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1rem;
+        }
+        
+        .modal-body {
+            padding: 1rem !important;
+            max-height: calc(90vh - 130px);
+            overflow-y: auto;
+        }
+        
+        #mapContainer {
+            height: 300px;
+        }
+        
+        .insight-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-footer {
+            padding: 0.75rem 1rem;
+        }
+        
+        /* Ajustar layout dos insights em grid 2x2 */
+        #insightsContainer .col-6 {
+            width: 50%;
+            padding: 0.25rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        #mapContainer {
+            height: 250px;
+        }
+        
+        #heatmapChart {
+            height: 120px;
+        }
+        
+        #lineChartContainer {
+            height: 180px;
+        }
+        
+        .insight-card-value {
+            font-size: 1.25rem;
+        }
+        
+        .modal-title {
+            font-size: 1rem;
+        }
+        
+        .modal-header .btn-close {
+            width: 24px;
+            height: 24px;
+            background-size: 12px;
+        }
+    }
+
+    /* ---------- MELHORIAS PARA TABLETS ---------- */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .modern-table th,
+        .modern-table td {
+            padding: 0.875rem 0.625rem;
+        }
+        
+        .modern-table thead th:nth-child(4),
+        .modern-table thead th:nth-child(5),
+        .modern-table tbody td:nth-child(4),
+        .modern-table tbody td:nth-child(5) {
+            display: table-cell;
+        }
+        
+        /* Ajustar largura das colunas */
+        .modern-table th:nth-child(1),
+        .modern-table td:nth-child(1) {
+            width: 25%;
+        }
+        
+        .modern-table th:nth-child(2),
+        .modern-table td:nth-child(2),
+        .modern-table th:nth-child(3),
+        .modern-table td:nth-child(3) {
+            width: 15%;
+        }
+        
+        .modern-table th:nth-child(9),
+        .modern-table td:nth-child(9) {
+            width: 8%;
+        }
+    }
+
+    /* ---------- ANIMAÇÕES RESPONSIVAS ---------- */
+    @media (prefers-reduced-motion: reduce) {
+        .fade-in,
+        .modern-table tbody tr,
+        .action-btn,
+        .insight-card,
+        .modern-card {
+            animation: none;
+            transition: none;
+        }
+    }
+
+    /* ---------- SUPORTE PARA ORIENTAÇÃO ---------- */
+    @media (orientation: landscape) and (max-height: 600px) {
+        .custom-modal .modal-dialog {
+            max-height: 80vh;
+        }
+        
+        .modal-body {
+            max-height: calc(80vh - 130px);
+        }
+        
+        #mapContainer {
+            height: 250px;
+        }
+    }
+
+    /* Ajustes para DataTables responsivo */
+    .dataTables_wrapper {
         width: 100%;
     }
     
-    .modern-table tbody td:last-child {
-        border-bottom: none;
-        padding-top: 1rem;
-        justify-content: center;
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        padding: 0.5rem;
     }
     
-    .modern-table tbody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-right: 1rem;
-        min-width: 80px;
+    @media (max-width: 767.98px) {
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            float: none;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
     }
-    
-    .modern-table tbody td:first-child::before {
-        content: "Rota";
-    }
-    
-    .modern-table tbody td:nth-child(2)::before {
-        content: "Início";
-    }
-    
-    .modern-table tbody td:nth-child(3)::before {
-        content: "Destino";
-    }
-    
-    .modern-table tbody td:nth-child(6)::before {
-        content: "Vel. Atual";
-    }
-    
-    .modern-table tbody td:nth-child(7)::before {
-        content: "Tempo Atual";
-    }
-    
-    .modern-table tbody td:nth-child(8)::before {
-        content: "Atraso";
-    }
-    
-    .modern-table tbody td:nth-child(9)::before {
-        content: "Ações";
-    }
-    
-    /* Ocultar colunas menos importantes em mobile */
-    .modern-table tbody td:nth-child(4),
-    .modern-table tbody td:nth-child(5) {
-        display: none;
-    }
-    
-    /* Ajustar conteúdo das células */
-    .modern-table .fw-bold {
-        font-size: 0.9rem;
-    }
-    
-    .modern-table small.text-muted {
-        font-size: 0.75rem;
-    }
-    
-    /* Badge de atraso */
-    .modern-badge {
-        min-width: 50px;
-        padding: 0.3rem 0.6rem;
-    }
-    
-    /* Container da tabela */
-    .table-responsive {
-        border: none;
-        padding: 0;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .modern-table tbody tr {
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .modern-table tbody td {
-        padding: 0.4rem 0;
-        font-size: 0.8rem;
-    }
-    
-    .modern-table tbody td::before {
-        font-size: 0.75rem;
-        min-width: 70px;
-    }
-    
-    .action-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .empty-state {
-        padding: 2rem 1rem;
-    }
-    
-    .empty-state i {
-        font-size: 3.5rem;
-    }
-    
-    .empty-state h5 {
-        font-size: 1rem;
-    }
-    
-    .empty-state p {
-        font-size: 0.85rem;
-    }
-}
-
-/* ---------- RESPONSIVIDADE DO MODAL ---------- */
-@media (max-width: 1199.98px) {
-    .custom-modal .modal-xl {
-        max-width: 95%;
-        margin: 0.5rem auto;
-    }
-}
-
-@media (max-width: 991.98px) {
-    .custom-modal .modal-xl {
-        max-width: 100%;
-        margin: 0;
-    }
-    
-    #mapContainer {
-        height: 400px;
-    }
-    
-    .modal-body .row {
-        flex-direction: column;
-    }
-    
-    .modal-body .col-lg-8,
-    .modal-body .col-lg-4 {
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .modal-body .col-lg-4 {
-        margin-top: 1.5rem;
-    }
-    
-    #heatmapChart {
-        height: 150px;
-        margin-top: 1rem;
-    }
-    
-    #lineChartContainer {
-        height: 200px;
-    }
-    
-    .insight-card {
-        padding: 1rem;
-    }
-    
-    .insight-card-value {
-        font-size: 1.5rem;
-    }
-    
-    .insight-card-label {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 767.98px) {
-    .custom-modal .modal-dialog {
-        margin: 0;
-        max-height: 90vh;
-    }
-    
-    .custom-modal .modal-content {
-        border-radius: 0.5rem;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-    
-    .modal-header {
-        padding: 1rem;
-    }
-    
-    .modal-body {
-        padding: 1rem !important;
-        max-height: calc(90vh - 130px);
-        overflow-y: auto;
-    }
-    
-    #mapContainer {
-        height: 300px;
-    }
-    
-    .insight-card {
-        margin-bottom: 0.5rem;
-    }
-    
-    .modal-footer {
-        padding: 0.75rem 1rem;
-    }
-    
-    /* Ajustar layout dos insights em grid 2x2 */
-    #insightsContainer .col-6 {
-        width: 50%;
-        padding: 0.25rem;
-    }
-    
-    /* Tooltip para botões em mobile */
-    .action-btn {
-        position: relative;
-    }
-    
-    .action-btn::after {
-        content: attr(title);
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--card-bg);
-        color: var(--text-primary);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.7rem;
-        white-space: nowrap;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.2s;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        border: 1px solid var(--border-color);
-        z-index: 1000;
-    }
-    
-    .action-btn:hover::after {
-        opacity: 1;
-        visibility: visible;
-        bottom: 110%;
-    }
-}
-
-@media (max-width: 575.98px) {
-    #mapContainer {
-        height: 250px;
-    }
-    
-    #heatmapChart {
-        height: 120px;
-    }
-    
-    #lineChartContainer {
-        height: 180px;
-    }
-    
-    .insight-card-value {
-        font-size: 1.25rem;
-    }
-    
-    .modal-title {
-        font-size: 1rem;
-    }
-    
-    .modal-header .btn-close {
-        width: 24px;
-        height: 24px;
-        background-size: 12px;
-    }
-}
-
-/* ---------- MELHORIAS PARA TABLETS ---------- */
-@media (min-width: 768px) and (max-width: 991.98px) {
-    .modern-table th,
-    .modern-table td {
-        padding: 0.875rem 0.625rem;
-    }
-    
-    .modern-table thead th:nth-child(4),
-    .modern-table thead th:nth-child(5),
-    .modern-table tbody td:nth-child(4),
-    .modern-table tbody td:nth-child(5) {
-        display: table-cell;
-    }
-    
-    /* Ajustar largura das colunas */
-    .modern-table th:nth-child(1),
-    .modern-table td:nth-child(1) {
-        width: 25%;
-    }
-    
-    .modern-table th:nth-child(2),
-    .modern-table td:nth-child(2),
-    .modern-table th:nth-child(3),
-    .modern-table td:nth-child(3) {
-        width: 15%;
-    }
-    
-    .modern-table th:nth-child(9),
-    .modern-table td:nth-child(9) {
-        width: 8%;
-    }
-}
-
-/* ---------- ANIMAÇÕES RESPONSIVAS ---------- */
-@media (prefers-reduced-motion: reduce) {
-    .fade-in,
-    .modern-table tbody tr,
-    .action-btn,
-    .insight-card,
-    .modern-card {
-        animation: none;
-        transition: none;
-    }
-}
-
-/* ---------- SUPORTE PARA ORIENTAÇÃO ---------- */
-@media (orientation: landscape) and (max-height: 600px) {
-    .custom-modal .modal-dialog {
-        max-height: 80vh;
-    }
-    
-    .modal-body {
-        max-height: calc(80vh - 130px);
-    }
-    
-    #mapContainer {
-        height: 250px;
-    }
-}
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
@@ -821,7 +834,7 @@
     <div class="page-header fade-in">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
-                <h1><i class="fas fa-route me-2 subtitle"></i>ROTAS Monitoradas</h1>
+                <h1><i class="fas fa-route me-2"></i>ROTAS Monitoradas</h1>
                 <p class="subtitle mb-0">
                     Monitoramento inteligente de rotas e tempo de viagem
                 </p>
@@ -947,31 +960,31 @@
                                             data-historic-time="{{ route.historic_time|default(1800) }}"
                                             data-avg-time="{{ route.avg_time|default(2400) }}"
                                             data-length="{{ route.length|default(15000) }}">
-                                            <td>
+                                            <td data-label="Rota">
                                                 <div class="fw-bold text-primary">{{ route.name }}</div>
                                                 <small class="text-muted d-lg-none">
                                                     <i class="fas fa-flag-checkered me-1"></i>{{ route.from_name }} → {{ route.to_name }}
                                                 </small>
                                             </td>
-                                            <td>
+                                            <td data-label="Início">
                                                 <span class="text-truncate d-inline-block" style="max-width: 150px;">
                                                     <i class="fas fa-map-marker-alt text-success me-1"></i>{{ route.from_name }}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td data-label="Destino">
                                                 <span class="text-truncate d-inline-block" style="max-width: 150px;">
                                                     <i class="fas fa-flag-checkered text-danger me-1"></i>{{ route.to_name }}
                                                 </span>
                                             </td>
-                                            <td class="d-none d-lg-table-cell text-center">
+                                            <td class="d-none d-lg-table-cell text-center" data-label="Vel. Normal">
                                                 <div class="fw-bold">{{ route.historic_speed|default(0)|number_format(1) }}</div>
                                                 <small class="text-muted">km/h</small>
                                             </td>
-                                            <td class="d-none d-lg-table-cell text-center">
+                                            <td class="d-none d-lg-table-cell text-center" data-label="Tempo Normal">
                                                 <div class="fw-bold">{{ (historic_time / 60)|number_format(1) }}</div>
                                                 <small class="text-muted">min</small>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center" data-label="Vel. Atual">
                                                 <div class="fw-bold 
                                                     {% if route.avg_speed < route.historic_speed * 0.7 %}
                                                         text-danger
@@ -985,11 +998,11 @@
                                                 </div>
                                                 <small class="text-muted">km/h</small>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center" data-label="Tempo Atual">
                                                 <div class="fw-bold">{{ (avg_time / 60)|number_format(1) }}</div>
                                                 <small class="text-muted">min</small>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center" data-label="Atraso">
                                                 <span class="modern-badge 
                                                     {% if delay_minutes > 5 %}
                                                         badge-danger
@@ -1002,7 +1015,7 @@
                                                     {{ delay_minutes|number_format(1) }} min
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center" data-label="Ações">
                                                 <button class="btn btn-info action-btn view-route"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#mapModal"
@@ -1088,22 +1101,36 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Configuração do DataTable
+    // Configuração do DataTable com responsividade aprimorada
     if ($('#routesTable').length) {
         $('#routesTable').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
             },
-            scrollX: true,
-            responsive: true,
+            responsive: {
+                details: {
+                    type: 'column',
+                    target: -1
+                }
+            },
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
             order: [[0, 'asc']],
             columnDefs: [
-                { orderable: false, targets: [8] },
-                { width: "20%", targets: [0] },
-                { width: "15%", targets: [1, 2] },
-                { width: "10%", targets: [8] }
+                { 
+                    orderable: false, 
+                    targets: [8],
+                    className: 'dt-body-center'
+                },
+                { 
+                    responsivePriority: 1, 
+                    targets: [0, 1, 2, 6, 7, 8]
+                },
+                { 
+                    responsivePriority: 2, 
+                    targets: [3, 4, 5],
+                    visible: false
+                }
             ],
             dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
@@ -1116,6 +1143,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Variável global para armazenar o mapa
     let routeMap = null;
+    let routeLine = null;
 
     // Configuração dos botões de visualização de rota
     $(document).on('click', '.view-route', function () {
@@ -1151,7 +1179,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Esconder loading após um pequeno delay para garantir que o mapa carregou
         setTimeout(() => {
             if (loadingIndicator) loadingIndicator.style.display = 'none';
-        }, 500);
+        }, 800);
     });
 
     function updateModalContent(routeData) {
@@ -1219,7 +1247,10 @@ document.addEventListener("DOMContentLoaded", function () {
         // Criar novo mapa centralizado no ponto médio
         const centerLat = (routeData.from_lat + routeData.to_lat) / 2;
         const centerLon = (routeData.from_lon + routeData.to_lon) / 2;
-        routeMap = L.map('mapContainer').setView([centerLat, centerLon], 13);
+        
+        routeMap = L.map('mapContainer', {
+            zoomControl: false
+        }).setView([centerLat, centerLon], 13);
         
         // Adicionar tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1227,25 +1258,38 @@ document.addEventListener("DOMContentLoaded", function () {
             maxZoom: 19
         }).addTo(routeMap);
         
+        // Adicionar controles de zoom
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(routeMap);
+        
+        // Adicionar escala
+        L.control.scale({
+            position: 'bottomleft',
+            imperial: false
+        }).addTo(routeMap);
+        
         // Adicionar marcador de início
-        const startMarker = L.marker([routeData.from_lat, routeData.from_lon], {
-            icon: L.divIcon({
-                html: '<div style="background: #28a745; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">S</div>',
-                className: 'custom-marker',
-                iconSize: [30, 30]
-            })
-        }).addTo(routeMap)
-        .bindPopup(`<b>${routeData.from_name}</b><br>Ponto de partida da rota`);
+        const startIcon = L.divIcon({
+            html: '<div style="background: #28a745; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">S</div>',
+            className: 'custom-marker',
+            iconSize: [30, 30]
+        });
+        
+        const startMarker = L.marker([routeData.from_lat, routeData.from_lon], { icon: startIcon })
+            .addTo(routeMap)
+            .bindPopup(`<b>${routeData.from_name}</b><br>Ponto de partida da rota`);
         
         // Adicionar marcador de fim
-        const endMarker = L.marker([routeData.to_lat, routeData.to_lon], {
-            icon: L.divIcon({
-                html: '<div style="background: #dc3545; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">F</div>',
-                className: 'custom-marker',
-                iconSize: [30, 30]
-            })
-        }).addTo(routeMap)
-        .bindPopup(`<b>${routeData.to_name}</b><br>Ponto de destino da rota`);
+        const endIcon = L.divIcon({
+            html: '<div style="background: #dc3545; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">F</div>',
+            className: 'custom-marker',
+            iconSize: [30, 30]
+        });
+        
+        const endMarker = L.marker([routeData.to_lat, routeData.to_lon], { icon: endIcon })
+            .addTo(routeMap)
+            .bindPopup(`<b>${routeData.to_name}</b><br>Ponto de destino da rota`);
         
         try {
             // Buscar rota real usando OSRM (Open Source Routing Machine)
@@ -1266,8 +1310,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Converter coordenadas de [lon, lat] para [lat, lon] (formato do Leaflet)
                 const latLngs = coordinates.map(coord => [coord[1], coord[0]]);
                 
-                // Criar a rota como uma linha com gradiente baseado no atraso
+                // Calcular atraso
                 const delayMinutes = (routeData.avg_time - routeData.historic_time) / 60;
+                
+                // Definir cor da rota baseada no atraso
                 let routeColor = '#1cc88a'; // verde
                 if (delayMinutes > 5) {
                     routeColor = '#e74a3b'; // vermelho
@@ -1275,13 +1321,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     routeColor = '#f6c23e'; // amarelo
                 }
                 
-                const routeLine = L.polyline(latLngs, {
+                // Criar a rota
+                routeLine = L.polyline(latLngs, {
                     color: routeColor,
                     weight: 6,
                     opacity: 0.8,
                     lineJoin: 'round',
                     lineCap: 'round',
-                    dashArray: delayMinutes > 5 ? '10, 10' : null // linha tracejada se muito atrasado
+                    dashArray: delayMinutes > 5 ? '10, 10' : null
                 }).addTo(routeMap);
                 
                 // Ajustar o mapa para mostrar toda a rota
@@ -1317,7 +1364,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Erro ao carregar rota:', error);
             
             // Fallback: criar linha reta se a API falhar
-            const straightLine = L.polyline([
+            routeLine = L.polyline([
                 [routeData.from_lat, routeData.from_lon],
                 [routeData.to_lat, routeData.to_lon]
             ], {
@@ -1329,52 +1376,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 lineCap: 'round'
             }).addTo(routeMap);
             
-            const bounds = straightLine.getBounds();
+            const bounds = routeLine.getBounds();
             routeMap.fitBounds(bounds, { padding: [50, 50] });
             
             // Mostrar mensagem de erro discreta
-            const errorPopup = L.popup()
+            L.popup()
                 .setLatLng([centerLat, centerLon])
                 .setContent('<div style="padding: 10px; color: #856404; background: #fff3cd; border-radius: 5px;"><i class="fas fa-exclamation-triangle"></i> Rota aproximada (linha reta)</div>')
                 .openOn(routeMap);
         }
         
-        // Adicionar controles de zoom
-        L.control.zoom({
-            position: 'topright'
-        }).addTo(routeMap);
-        
-        // Adicionar escala
-        L.control.scale({
-            position: 'bottomleft',
-            imperial: false
-        }).addTo(routeMap);
-        
         // Garantir que o mapa se redimensiona corretamente
         setTimeout(() => {
             routeMap.invalidateSize();
         }, 100);
-    }
-    
-    // Função auxiliar para gerar pontos de rota (simulação)
-    function generateRoutePoints(start, end, numPoints) {
-        const points = [start];
-        const latDiff = end[0] - start[0];
-        const lonDiff = end[1] - start[1];
-        
-        for (let i = 1; i < numPoints; i++) {
-            const factor = i / numPoints;
-            // Adicionar alguma curvatura aleatória para simular uma rota real
-            const curveFactor = Math.sin(factor * Math.PI) * 0.01;
-            
-            points.push([
-                start[0] + (latDiff * factor) + (Math.random() * curveFactor - curveFactor/2),
-                start[1] + (lonDiff * factor) + (Math.random() * curveFactor - curveFactor/2)
-            ]);
-        }
-        
-        points.push(end);
-        return points;
     }
 
     function initCharts(routeData) {
@@ -1584,6 +1599,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (routeMap) {
             routeMap.remove();
             routeMap = null;
+            routeLine = null;
         }
     });
 
@@ -1604,76 +1620,75 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log('Dashboard de Rotas inicializado com sucesso!');
 
-    // Adicione ao final do seu script existente, dentro do DOMContentLoaded
-// Melhorias de responsividade
-function handleResponsiveTable() {
-    const table = document.querySelector('#routesTable');
-    if (!table) return;
-    
-    const screenWidth = window.innerWidth;
-    const rows = table.querySelectorAll('tbody tr');
-    
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const actionCell = cells[cells.length - 1];
+    // Melhorias de responsividade
+    function handleResponsiveTable() {
+        const table = document.querySelector('#routesTable');
+        if (!table) return;
         
-        if (screenWidth < 768) {
-            // Em mobile, garantir que o botão de ação seja sempre visível
-            actionCell.style.display = 'flex';
-            actionCell.style.justifyContent = 'center';
-            actionCell.style.alignItems = 'center';
+        const screenWidth = window.innerWidth;
+        const rows = table.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const actionCell = cells[cells.length - 1];
             
-            // Adicionar título nos botões para mobile
-            const actionBtn = actionCell.querySelector('.action-btn');
-            if (actionBtn) {
-                actionBtn.setAttribute('aria-label', 'Ver detalhes da rota');
+            if (screenWidth < 768) {
+                // Em mobile, garantir que o botão de ação seja sempre visível
+                actionCell.style.display = 'flex';
+                actionCell.style.justifyContent = 'center';
+                actionCell.style.alignItems = 'center';
+                
+                // Adicionar título nos botões para mobile
+                const actionBtn = actionCell.querySelector('.action-btn');
+                if (actionBtn) {
+                    actionBtn.setAttribute('aria-label', 'Ver detalhes da rota');
+                }
+            }
+        });
+    }
+
+    // Executar ao carregar e redimensionar
+    handleResponsiveTable();
+    window.addEventListener('resize', handleResponsiveTable);
+
+    // Melhorias para toque no modal
+    document.addEventListener('touchstart', function(e) {
+        // Prevenir zoom duplo no mapa
+        if (e.target.closest('#mapContainer')) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }
+    }, { passive: false });
+
+    // Melhorar acessibilidade do modal em mobile
+    $('#mapModal').on('shown.bs.modal', function() {
+        // Focar no botão de fechar para melhor acessibilidade
+        setTimeout(() => {
+            const closeBtn = this.querySelector('.btn-close');
+            if (closeBtn && window.innerWidth < 768) {
+                closeBtn.focus();
+            }
+        }, 100);
+        
+        // Ajustar altura do mapa dinamicamente
+        if (window.innerWidth < 768) {
+            const mapContainer = document.getElementById('mapContainer');
+            const modalBody = document.querySelector('.modal-body');
+            const availableHeight = modalBody.clientHeight - 300; // Subtrair espaço para outros elementos
+            
+            if (mapContainer && availableHeight > 200) {
+                mapContainer.style.height = `${availableHeight}px`;
             }
         }
     });
-}
 
-// Executar ao carregar e redimensionar
-handleResponsiveTable();
-window.addEventListener('resize', handleResponsiveTable);
-
-// Melhorias para toque no modal
-document.addEventListener('touchstart', function(e) {
-    // Prevenir zoom duplo no mapa
-    if (e.target.closest('#mapContainer')) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
-    }
-}, { passive: false });
-
-// Melhorar acessibilidade do modal em mobile
-$('#mapModal').on('shown.bs.modal', function() {
-    // Focar no botão de fechar para melhor acessibilidade
-    setTimeout(() => {
-        const closeBtn = this.querySelector('.btn-close');
-        if (closeBtn && window.innerWidth < 768) {
-            closeBtn.focus();
-        }
-    }, 100);
-    
-    // Ajustar altura do mapa dinamicamente
-    if (window.innerWidth < 768) {
+    // Restaurar altura original do mapa ao fechar
+    $('#mapModal').on('hidden.bs.modal', function() {
         const mapContainer = document.getElementById('mapContainer');
-        const modalBody = document.querySelector('.modal-body');
-        const availableHeight = modalBody.clientHeight - 300; // Subtrair espaço para outros elementos
-        
-        if (mapContainer && availableHeight > 200) {
-            mapContainer.style.height = `${availableHeight}px`;
+        if (mapContainer) {
+            mapContainer.style.height = '';
         }
-    }
-});
-
-// Restaurar altura original do mapa ao fechar
-$('#mapModal').on('hidden.bs.modal', function() {
-    const mapContainer = document.getElementById('mapContainer');
-    if (mapContainer) {
-        mapContainer.style.height = '';
-    }
-});
+    });
 });
 </script>
