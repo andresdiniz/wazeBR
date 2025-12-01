@@ -19,7 +19,7 @@
 
         <!-- Nav Item - Dashboard -->
         <li class="nav-item {{ pagedata.current_page == 'dashboard' ? 'active' : '' }}">
-            <a class="nav-link" href="dashboard">
+            <a class="nav-link" href="dashboard" data-tooltip="Dashboard">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
@@ -38,6 +38,7 @@
             <a class="nav-link" href="#" 
             data-bs-toggle="collapse" 
             data-bs-target="#collapseLiveRoutes"
+            data-tooltip="Rotas"
             aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Rotas</span>
@@ -73,6 +74,7 @@
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseStatsRoutes"
+            data-tooltip="Dados das Rotas"
             aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Dados das Rotas</span>
@@ -101,8 +103,9 @@
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseStatsAlerts"
+            data-tooltip="Dados dos Alertas"
             aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'true' : 'false' }}">
-                <i class="fas fa-route"></i>
+                <i class="fas fa-exclamation-circle"></i>
                 <span>Dados dos Alertas</span>
             </a>
 
@@ -110,16 +113,16 @@
                 class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
-                        <i class="fas fa-road"></i>
+                        <i class="fas fa-bell"></i>
                         Dados de Alertas
                     </h6>
 
                     <a class="collapse-item {{ pagedata.current_page == 'historic_acidents' ? 'active' : '' }}" href="historic_acidents">
-                        <i class="fas fa-list"></i> Acidentes Históricos
+                        <i class="fas fa-car-crash"></i> Acidentes Históricos
                     </a>
 
                     <a class="collapse-item {{ pagedata.current_page == 'historic_buracos' ? 'active' : '' }}" href="historic_buracos">
-                        <i class="fas fa-exclamation-triangle"></i> Buracos Históricos
+                        <i class="fas fa-road"></i> Buracos Históricos
                     </a>
                 </div>
             </div>
@@ -140,6 +143,7 @@
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseSystemSettings"
+            data-tooltip="Configurações do Sistema"
             aria-expanded="{{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'true' : 'false' }}">
                 <i class="fas fa-wrench"></i>
                 <span>Configurações do Sistema</span>
@@ -175,8 +179,9 @@
             <!-- Botão que abre/fecha o collapse -->
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
-            data-bs-target="#collapseUtilities">
-                <i class="fas fa-wrench"></i>
+            data-bs-target="#collapseUtilities"
+            data-tooltip="Utilitários">
+                <i class="fas fa-tools"></i>
                 <span>Utilitários</span>
             </a>
 
@@ -186,7 +191,7 @@
 
                     <!-- Cabeçalho interno -->
                     <h6 class="collapse-header">
-                        <i class="fas fa-tools"></i>
+                        <i class="fas fa-wrench"></i>
                         Opções do Sistema
                     </h6>
 
@@ -203,7 +208,6 @@
                 </div>
             </div>
         </li>
-
 
         
         <!-- Divider -->
@@ -245,12 +249,11 @@
 
                     <!-- Notifications -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle position-relative" href="#" id="alertsDropdown" 
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" 
                         data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell fa-fw"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span class="badge rounded-pill bg-danger notification-badge">
                                 3+
-                                <span class="visually-hidden">Notificações não lidas</span>
                             </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown">
@@ -302,11 +305,11 @@
 
                     <!-- User Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
+                        <a class="nav-link dropdown-toggle user-link" href="#" id="userDropdown" 
                         data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="me-2 d-none d-lg-inline">{{user.nome}}</span>
+                            <span class="me-2 d-none d-lg-inline user-name">{{user.nome}}</span>
                             <div class="user-avatar">
-                                <img src="{{ user.photo }}" width: "100%" height: "100%"alt="Foto do Usuário">
+                                <img src="{{ user.photo }}" alt="Foto do Usuário">
                             </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -330,5 +333,3 @@
 
             </nav>
             <!-- End of Topbar -->
-
-            
