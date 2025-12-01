@@ -1603,5 +1603,77 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(updateCurrentTime, 1000);
 
     console.log('Dashboard de Rotas inicializado com sucesso!');
+
+    // Adicione ao final do seu script existente, dentro do DOMContentLoaded
+// Melhorias de responsividade
+function handleResponsiveTable() {
+    const table = document.querySelector('#routesTable');
+    if (!table) return;
+    
+    const screenWidth = window.innerWidth;
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const actionCell = cells[cells.length - 1];
+        
+        if (screenWidth < 768) {
+            // Em mobile, garantir que o botão de ação seja sempre visível
+            actionCell.style.display = 'flex';
+            actionCell.style.justifyContent = 'center';
+            actionCell.style.alignItems = 'center';
+            
+            // Adicionar título nos botões para mobile
+            const actionBtn = actionCell.querySelector('.action-btn');
+            if (actionBtn) {
+                actionBtn.setAttribute('aria-label', 'Ver detalhes da rota');
+            }
+        }
+    });
+}
+
+// Executar ao carregar e redimensionar
+handleResponsiveTable();
+window.addEventListener('resize', handleResponsiveTable);
+
+// Melhorias para toque no modal
+document.addEventListener('touchstart', function(e) {
+    // Prevenir zoom duplo no mapa
+    if (e.target.closest('#mapContainer')) {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }
+}, { passive: false });
+
+// Melhorar acessibilidade do modal em mobile
+$('#mapModal').on('shown.bs.modal', function() {
+    // Focar no botão de fechar para melhor acessibilidade
+    setTimeout(() => {
+        const closeBtn = this.querySelector('.btn-close');
+        if (closeBtn && window.innerWidth < 768) {
+            closeBtn.focus();
+        }
+    }, 100);
+    
+    // Ajustar altura do mapa dinamicamente
+    if (window.innerWidth < 768) {
+        const mapContainer = document.getElementById('mapContainer');
+        const modalBody = document.querySelector('.modal-body');
+        const availableHeight = modalBody.clientHeight - 300; // Subtrair espaço para outros elementos
+        
+        if (mapContainer && availableHeight > 200) {
+            mapContainer.style.height = `${availableHeight}px`;
+        }
+    }
+});
+
+// Restaurar altura original do mapa ao fechar
+$('#mapModal').on('hidden.bs.modal', function() {
+    const mapContainer = document.getElementById('mapContainer');
+    if (mapContainer) {
+        mapContainer.style.height = '';
+    }
+});
 });
 </script>
