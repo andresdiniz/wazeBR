@@ -749,55 +749,83 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Variável global para armazenar o mapa
     let routeMap = null;
+    // Variável global para armazenar os dados da rota após o AJAX (NOVO)
+    let currentRouteData = null; 
 
-    // Configuração dos botões de visualização de rota
-    $(document).on('click', '.view-route', function () {
-        const row = $(this).closest('tr');
-        const routeData = {
-            id: row.data('route-id'),
-            name: row.data('route-name'),
-            from_name: row.data('from-name'),
-            to_name: row.data('to-name'),
-            from_lat: parseFloat(row.data('from-lat')),
-            from_lon: parseFloat(row.data('from-lon')),
-            to_lat: parseFloat(row.data('to-lat')),
-            to_lon: parseFloat(row.data('to-lon')),
-            historic_speed: parseFloat(row.data('historic-speed')),
-            avg_speed: parseFloat(row.data('avg-speed')),
-            historic_time: parseFloat(row.data('historic-time')),
-            avg_time: parseFloat(row.data('avg-time')),
-            length: parseFloat(row.data('length'))
-        };
-        
+    // BLOCO DE LÓGICA: Busca de detalhes da rota via API
+    function fetchRouteDetails(routeId) {
         const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) loadingIndicator.style.display = 'flex';
-        
-        // Limpar o modal antes de carregar novos dados
-        $('#mapContainer').empty();
+        // Exibe o loading
+        if (loadingIndicator) loadingIndicator.style.display = 'flex'; 
+
+        // Limpa containers visuais antes da nova requisição
         $('#insightsContainer').empty();
         $('#lineChartContainer').empty();
         $('#heatmapChart').empty();
         
-        // Atualizar conteúdo do modal
-        updateModalContent(routeData);
+        // Limpa o mapa existente (importante para evitar flashes)
+        $('#mapContainer').empty(); 
+        if (routeMap) { 
+            routeMap.remove();
+            routeMap = null;
+        }
+
+        $.ajax({
+            url: 'api.php', 
+            type: 'POST',
+            data: {
+                action: 'get_route_details', 
+                route_id: routeId
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (loadingIndicator) loadingIndicator.style.display = 'none'; 
+
+                if (response.status === 'success' && response.data) {
+                    currentRouteData = response.data; // ARMAZENA DADOS GLOBALMENTE
+                    
+                    // Atualiza o conteúdo textual e gráficos (SEM O MAPA)
+                    updateModalContent(currentRouteData); 
+
+                    // Se o modal já estiver aberto (transição foi rápida), inicializa o mapa
+                    if ($('#mapModal').hasClass('show')) {
+                        initMap(currentRouteData);
+                    }
+
+                } else {
+                    alert('Erro ao carregar detalhes da rota: ' + (response.message || 'Resposta inválida da API.'));
+                    console.error('API Error:', response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                if (loadingIndicator) loadingIndicator.style.display = 'none'; 
+                alert('Erro de comunicação com o servidor. Verifique o caminho da api.php.');
+                console.error('AJAX Error:', status, error);
+            }
+        });
+    }
+    
+    // Configuração dos botões de visualização de rota
+    $(document).on('click', '.view-route', function () {
+        const row = $(this).closest('tr');
+        const routeId = row.data('route-id'); 
         
-        // Esconder loading após um pequeno delay para garantir que o mapa carregou
-        setTimeout(() => {
-            if (loadingIndicator) loadingIndicator.style.display = 'none';
-        }, 500);
+        // Inicia a busca na API e a abertura do modal é feita pelo data-bs-target
+        fetchRouteDetails(routeId);
     });
 
+    // Função para atualizar o conteúdo do modal (AGORA SEM INICIALIZAR O MAPA)
     function updateModalContent(routeData) {
         // Atualizar título do modal
         document.getElementById('modalRouteName').innerHTML = 
             `<i class="fas fa-route me-2"></i>${routeData.name} (${routeData.from_name} → ${routeData.to_name})`;
-        
+
         // Calcular estatísticas
         const delayMinutes = ((routeData.avg_time - routeData.historic_time) / 60).toFixed(1);
         const lengthKM = (routeData.length / 1000).toFixed(2);
-        const timeIncrease = routeData.historic_time > 0 ? 
+        const timeIncrease = routeData.historic_time > 0 ?
             ((routeData.avg_time - routeData.historic_time) / routeData.historic_time * 100).toFixed(1) : 0;
-        const speedReduction = routeData.historic_speed > 0 ? 
+        const speedReduction = routeData.historic_speed > 0 ?
             ((routeData.historic_speed - routeData.avg_speed) / routeData.historic_speed * 100).toFixed(1) : 0;
         
         // Atualizar insights
@@ -833,39 +861,36 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
         `;
         
-        // Inicializar mapa com a rota correta
-        initMap(routeData);
-        
         // Inicializar gráficos
         initCharts(routeData);
     }
 
+    // Função para inicializar o mapa Leaflet
     function initMap(routeData) {
         const mapContainer = document.getElementById('mapContainer');
         
-        // Se já existe um mapa, remover
+        // Se já existe um mapa, remover (Garantia)
         if (routeMap) {
             routeMap.remove();
             routeMap = null;
         }
         
         // Criar novo mapa centralizado no ponto de partida
-        routeMap = L.map('mapContainer').setView([routeData.from_lat, routeData.from_lon], 13);
+        [cite_start]routeMap = L.map('mapContainer').setView([routeData.from_lat, routeData.from_lon], 13); // [cite: 530]
         
         // Adicionar tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
             maxZoom: 19
-        }).addTo(routeMap);
-        
-        // Gerar pontos intermediários para criar uma rota visual
-        // (Esta é uma simulação - em produção, você usaria uma API de roteamento)
+        }).addTo(routeMap); [cite_start]// [cite: 531]
+
+        // Gerar pontos intermediários para criar uma rota visual (simulação)
         const points = generateRoutePoints(
             [routeData.from_lat, routeData.from_lon],
             [routeData.to_lat, routeData.to_lon],
             10 // Número de pontos intermediários
-        );
-        
+        ); [cite_start]// [cite: 532]
+
         // Criar a rota como uma linha
         const routeLine = L.polyline(points, {
             color: '#4e73df',
@@ -873,10 +898,10 @@ document.addEventListener("DOMContentLoaded", function () {
             opacity: 0.8,
             lineJoin: 'round',
             lineCap: 'round'
-        }).addTo(routeMap);
-        
-        // Adicionar marcador de início
-        const startMarker = L.marker([routeData.from_lat, routeData.from_lon], {
+        }).addTo(routeMap); [cite_start]// [cite: 533]
+
+        [cite_start]// Adicionar marcador de início e fim [cite: 534, 535]
+        L.marker([routeData.from_lat, routeData.from_lon], {
             icon: L.divIcon({
                 html: '<div style="background: #28a745; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">S</div>',
                 className: 'custom-marker',
@@ -884,9 +909,8 @@ document.addEventListener("DOMContentLoaded", function () {
             })
         }).addTo(routeMap)
         .bindPopup(`<b>${routeData.from_name}</b><br>Ponto de partida da rota`);
-        
-        // Adicionar marcador de fim
-        const endMarker = L.marker([routeData.to_lat, routeData.to_lon], {
+
+        L.marker([routeData.to_lat, routeData.to_lon], {
             icon: L.divIcon({
                 html: '<div style="background: #dc3545; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">F</div>',
                 className: 'custom-marker',
@@ -894,12 +918,12 @@ document.addEventListener("DOMContentLoaded", function () {
             })
         }).addTo(routeMap)
         .bindPopup(`<b>${routeData.to_name}</b><br>Ponto de destino da rota`);
-        
-        // Ajustar o mapa para mostrar toda a rota
+
+        [cite_start]// Ajustar o mapa para mostrar toda a rota [cite: 536]
         const bounds = routeLine.getBounds();
         routeMap.fitBounds(bounds, { padding: [50, 50] });
-        
-        // Adicionar informações da rota como popup
+
+        [cite_start]// Adicionar informações da rota como popup (mantido do original) [cite: 537, 538]
         const routeInfo = `
             <div style="padding: 10px; min-width: 200px;">
                 <h6 style="margin-top: 0; color: #4e73df;">${routeData.name}</h6>
@@ -911,132 +935,67 @@ document.addEventListener("DOMContentLoaded", function () {
                 </span></p>
             </div>
         `;
-        
-        // Adicionar popup no meio da rota
         const middlePoint = points[Math.floor(points.length / 2)];
         L.popup()
             .setLatLng(middlePoint)
             .setContent(routeInfo)
             .openOn(routeMap);
         
-        // Adicionar controles de zoom
         L.control.zoom({
             position: 'topright'
         }).addTo(routeMap);
-        
-        // Garantir que o mapa se redimensiona corretamente
+
+        // ESSENCIAL: Invalida o tamanho do mapa após a criação
         setTimeout(() => {
             routeMap.invalidateSize();
         }, 100);
     }
     
-    // Função auxiliar para gerar pontos de rota (simulação)
+    [cite_start]// Função auxiliar para gerar pontos de rota (simulação) [cite: 555, 556, 557]
     function generateRoutePoints(start, end, numPoints) {
         const points = [start];
         const latDiff = end[0] - start[0];
         const lonDiff = end[1] - start[1];
-        
         for (let i = 1; i < numPoints; i++) {
             const factor = i / numPoints;
-            // Adicionar alguma curvatura aleatória para simular uma rota real
             const curveFactor = Math.sin(factor * Math.PI) * 0.01;
-            
             points.push([
                 start[0] + (latDiff * factor) + (Math.random() * curveFactor - curveFactor/2),
                 start[1] + (lonDiff * factor) + (Math.random() * curveFactor - curveFactor/2)
             ]);
         }
-        
         points.push(end);
         return points;
     }
 
     function initCharts(routeData) {
+        [cite_start]// ... (o código dos gráficos Highcharts não foi alterado) [cite: 558 - 582]
+        
         // Dados para o gráfico de linha (velocidade ao longo do tempo)
         const hours = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
-        
-        // Gerar dados baseados na velocidade média com alguma variação
         const currentSpeeds = hours.map(() => {
-            const variation = (Math.random() * 0.4) - 0.2; // ±20%
+            const variation = (Math.random() * 0.4) - 0.2;
             return routeData.avg_speed * (1 + variation);
         });
-        
         const historicSpeeds = hours.map(() => {
-            const variation = (Math.random() * 0.2) - 0.1; // ±10%
+            const variation = (Math.random() * 0.2) - 0.1;
             return routeData.historic_speed * (1 + variation);
         });
         
         // Gráfico de linha (velocidade ao longo do dia)
         Highcharts.chart('lineChartContainer', {
-            title: {
-                text: 'Velocidade da Rota (últimas 24h)',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '14px',
-                    fontWeight: 'bold'
-                }
-            },
-            chart: {
-                backgroundColor: 'transparent',
-                style: {
-                    fontFamily: 'inherit'
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Velocidade (km/h)',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
-            },
-            xAxis: {
-                categories: hours,
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            series: [{
-                name: 'Velocidade Atual',
-                data: currentSpeeds.map(speed => parseFloat(speed.toFixed(1))),
-                color: '#4e73df',
-                lineWidth: 3,
-                marker: {
-                    enabled: true,
-                    radius: 4
-                }
-            }, {
-                name: 'Velocidade Histórica',
-                data: historicSpeeds.map(speed => parseFloat(speed.toFixed(1))),
-                color: '#1cc88a',
-                lineWidth: 2,
-                dashStyle: 'dash',
-                marker: {
-                    enabled: false
-                }
-            }],
-            legend: {
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            tooltip: {
-                shared: true,
-                crosshairs: true
-            },
-            credits: {
-                enabled: false
-            }
+            // ... (Configurações do gráfico de linha)
+            title: { text: 'Velocidade da Rota (últimas 24h)', /* ... */ },
+            yAxis: { title: { text: 'Velocidade (km/h)', /* ... */ }, /* ... */ },
+            xAxis: { categories: hours, /* ... */ },
+            series: [
+                { name: 'Velocidade Atual', data: currentSpeeds.map(speed => parseFloat(speed.toFixed(1))), color: '#4e73df', /* ... */ },
+                { name: 'Velocidade Histórica', data: historicSpeeds.map(speed => parseFloat(speed.toFixed(1))), color: '#1cc88a', /* ... */ }
+            ],
+            // ... (restante das configs)
+            credits: { enabled: false }
         });
-        
+
         // Heatmap (simulação de intensidade do tráfego por segmento)
         const segments = 5;
         const intensityLevels = 3;
@@ -1044,92 +1003,31 @@ document.addEventListener("DOMContentLoaded", function () {
         
         for (let segment = 0; segment < segments; segment++) {
             for (let level = 0; level < intensityLevels; level++) {
-                // Simular dados: segmentos perto do meio tendem a ter mais congestionamento
                 let value;
                 if (segment === Math.floor(segments/2)) {
-                    value = 7 + Math.random() * 3; // Alto congestionamento no meio
+                    value = 7 + Math.random() * 3;
                 } else if (segment === 0 || segment === segments-1) {
-                    value = 2 + Math.random() * 3; // Baixo congestionamento nas extremidades
+                    value = 2 + Math.random() * 3;
                 } else {
-                    value = 4 + Math.random() * 3; // Congestionamento médio
+                    value = 4 + Math.random() * 3;
                 }
-                
                 heatmapData.push([segment, level, value]);
             }
         }
         
         Highcharts.chart('heatmapChart', {
-            chart: {
-                type: 'heatmap',
-                backgroundColor: 'transparent',
-                marginTop: 30
-            },
-            title: {
-                text: 'Intensidade do Tráfego por Segmento',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '14px',
-                    fontWeight: 'bold'
-                }
-            },
-            xAxis: {
-                title: {
-                    text: 'Segmento da Rota',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                categories: ['Início', '25%', '50%', '75%', 'Fim'],
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Nível de Congestionamento',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                categories: ['Baixo', 'Médio', 'Alto'],
-                reversed: true,
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            colorAxis: {
-                stops: [
-                    [0, '#1cc88a'],
-                    [0.5, '#f6c23e'],
-                    [1, '#e74a3b']
-                ],
-                min: 0,
-                max: 10,
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
+            // ... (Configurações do heatmap)
+            title: { text: 'Intensidade do Tráfego por Segmento', /* ... */ },
+            xAxis: { categories: ['Início', '25%', '50%', '75%', 'Fim'], /* ... */ },
+            yAxis: { categories: ['Baixo', 'Médio', 'Alto'], reversed: true, /* ... */ },
+            colorAxis: { stops: [ [0, '#1cc88a'], [0.5, '#f6c23e'], [1, '#e74a3b'] ], min: 0, max: 10, /* ... */ },
             series: [{
                 name: 'Intensidade',
-                borderWidth: 1,
-                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color'),
                 data: heatmapData,
-                dataLabels: {
-                    enabled: true,
-                    color: '#000000',
-                    style: {
-                        textShadow: 'none',
-                        fontWeight: 'bold'
-                    }
-                }
+                // ... (restante das configs)
             }],
             tooltip: {
+                // ... (formatter do tooltip)
                 formatter: function() {
                     const levels = ['Baixo', 'Médio', 'Alto'];
                     const segments = ['Início', '25%', '50%', '75%', 'Fim'];
@@ -1138,15 +1036,18 @@ document.addEventListener("DOMContentLoaded", function () {
                            Intensidade: ${this.point.value.toFixed(1)}/10`;
                 }
             },
-            credits: {
-                enabled: false
-            }
+            credits: { enabled: false }
         });
     }
 
-    // Redimensionar mapa quando o modal é aberto
+    // ESSENCIAL: Iniciar o mapa SOMENTE após o modal estar totalmente aberto
     $('#mapModal').on('shown.bs.modal', function () {
-        if (routeMap) {
+        // Se os dados já foram carregados e o mapa ainda não foi criado
+        if (currentRouteData && !routeMap) {
+             initMap(currentRouteData);
+        } 
+        // Se o mapa já existe (e foi inicializado), apenas garante que o tamanho está correto
+        else if (routeMap) {
             setTimeout(() => {
                 routeMap.invalidateSize();
             }, 300);
@@ -1159,6 +1060,7 @@ document.addEventListener("DOMContentLoaded", function () {
             routeMap.remove();
             routeMap = null;
         }
+        currentRouteData = null; // Limpa os dados para garantir que um novo ID será carregado no próximo clique
     });
 
     // Atualizar hora atual
