@@ -6,42 +6,496 @@
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/heatmap.js"></script>
 
-<!-- Highcharts Heatmap CSS -->
-<link rel="stylesheet" href="https://code.highcharts.com/css/highcharts.css" />
-
+<!-- jQuery Sparkline -->
 <script src="https://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.js"></script>
 
+<style>
+    /* Reutilizando estilos do home.twig */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+        
+        /* Variáveis para modo claro */
+        --bg-color: #f8f9fc;
+        --card-bg: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #858796;
+        --text-muted: #858796;
+        --border-color: #e3e6f0;
+        --table-hover: #f8f9fc;
+        --header-border: #e3e6f0;
+        --legend-bg: #ffffff;
+        --empty-icon-color: #d1d3e2;
+    }
 
-<div class="container-fluid">
+    /* Modo Escuro */
+    body.dark-mode {
+        --bg-color: #1a1d29;
+        --card-bg: #252836;
+        --text-primary: #e4e6eb;
+        --text-secondary: #b0b3b8;
+        --text-muted: #8a8d93;
+        --border-color: #3a3d4a;
+        --table-hover: #2d3142;
+        --header-border: #3a3d4a;
+        --legend-bg: #252836;
+        --empty-icon-color: #3a3d4a;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
 
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h2 class="h3 mb-0 text-gray-800">ROTAS Monitoradas</h2>
+    /* Header da página */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--header-border);
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Cards modernos */
+    .modern-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        background: var(--card-bg);
+    }
+
+    .modern-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .modern-card-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.05rem;
+    }
+
+    .modern-card-header.bg-warning-gradient {
+        background: var(--warning-gradient);
+    }
+
+    .modern-card-header.bg-danger-gradient {
+        background: var(--danger-gradient);
+    }
+
+    .modern-card-header.bg-info-gradient {
+        background: var(--info-gradient);
+    }
+
+    .modern-card-header.bg-success-gradient {
+        background: var(--success-gradient);
+    }
+
+    /* Badge contador */
+    .badge-counter {
+        background: rgba(255, 255, 255, 0.25);
+        padding: 0.4rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Tabelas melhoradas */
+    .modern-table {
+        margin-bottom: 0;
+        width: 100%;
+    }
+
+    .modern-table thead th {
+        background: var(--table-hover);
+        border: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 1rem 0.75rem;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: var(--table-hover);
+        transform: translateX(3px);
+    }
+
+    .modern-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .modern-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        color: var(--text-primary);
+    }
+
+    .modern-table .fw-bold {
+        color: var(--text-primary);
+    }
+
+    .modern-table .text-muted,
+    .modern-table small.text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    /* Badges melhorados */
+    .modern-badge {
+        padding: 0.5rem 0.875rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        min-width: 65px;
+        display: inline-block;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Botões de ação */
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0 3px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px) scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn i {
+        font-size: 0.9rem;
+    }
+
+    /* Estado vazio */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: var(--empty-icon-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+    }
+
+    .empty-state h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+
+    /* Loading spinner */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--card-bg);
+        opacity: 0.95;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 1rem;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid #4e73df;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        margin-top: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Modal personalizado */
+    .custom-modal .modal-content {
+        border: none;
+        border-radius: 1rem;
+        background: var(--card-bg);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-modal .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 1rem 1rem 0 0;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .custom-modal .modal-header .close {
+        color: white;
+        opacity: 0.8;
+        text-shadow: none;
+    }
+
+    .custom-modal .modal-header .close:hover {
+        opacity: 1;
+    }
+
+    .custom-modal .modal-body {
+        padding: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .custom-modal .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+    }
+
+    /* Mapa */
+    #mapContainer {
+        height: 500px;
+        width: 100%;
+        border-radius: 0.75rem;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        z-index: 1;
+    }
+
+    /* Insights cards */
+    .insight-card {
+        background: var(--card-bg);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        box-shadow: var(--card-shadow);
+        border-left: 4px solid;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .insight-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .insight-card.danger {
+        border-left-color: #e74a3b;
+    }
+
+    .insight-card.warning {
+        border-left-color: #f6c23e;
+    }
+
+    .insight-card.info {
+        border-left-color: #36b9cc;
+    }
+
+    .insight-card.success {
+        border-left-color: #1cc88a;
+    }
+
+    .insight-card-value {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .insight-card-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Tooltip customizado */
+    .custom-tooltip {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 0.5rem !important;
+        font-size: 0.85rem !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    /* Animações de entrada */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Scroll customizado para tabelas */
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: var(--border-color);
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--text-muted);
+        border-radius: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--text-secondary);
+    }
+
+    /* Highcharts no modo escuro */
+    body.dark-mode .highcharts-background {
+        fill: var(--card-bg);
+    }
+
+    body.dark-mode .highcharts-title,
+    body.dark-mode .highcharts-axis-title,
+    body.dark-mode .highcharts-axis-labels text {
+        fill: var(--text-primary) !important;
+        color: var(--text-primary) !important;
+    }
+
+    body.dark-mode .highcharts-grid-line {
+        stroke: var(--border-color);
+    }
+
+    /* Responsividade */
+    @media (max-width: 767.98px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .modern-table {
+            font-size: 0.85rem;
+        }
+
+        .modern-table thead th,
+        .modern-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        #mapContainer {
+            height: 300px;
+        }
+
+        .custom-modal .modal-dialog {
+            margin: 0.5rem;
+        }
+    }
+</style>
+
+<div class="container-fluid px-3 px-lg-4 mt-4">
+    
+    <!-- Header da Página -->
+    <div class="page-header fade-in">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-route me-2 subtitle"></i>ROTAS Monitoradas</h1>
+                <p class="subtitle mb-0">
+                    Monitoramento inteligente de rotas e tempo de viagem
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-success">
+                    <i class="fas fa-sync-alt me-1"></i>Atualizado em tempo real
+                </span>
+            </div>
+        </div>
     </div>
 
-    {# DEBUG temporário: remova em produção 
-    <pre>{{ dump(routes) }}</pre>
-    #}
-
-    <div class="row">
-        <div class="col-12">
-            {% if routes is not empty %}
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Detalhes das Rotas</h6>
-                    </div>
-                    <div class="card-body">
+    <!-- Card de Rotas -->
+    <div class="row mb-4">
+        <div class="col-12 fade-in">
+            <div class="card modern-card">
+                <div class="modern-card-header bg-info-gradient">
+                    <span>
+                        <i class="fas fa-route me-2"></i>
+                        Detalhes das Rotas Monitoradas
+                    </span>
+                    {% if routes is not empty %}
+                        <span class="badge-counter">{{ routes|length }} rotas</span>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0 position-relative">
+                    {% if routes is not empty %}
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered" id="routesTable" width="100%" cellspacing="0">
-                                <thead class="thead-dark">
+                            <table class="table modern-table" id="routesTable">
+                                <thead>
                                     <tr>
                                         <th>Nome da Rota</th>
                                         <th>Início</th>
                                         <th>Fim</th>
-                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal (km/h)</th>
-                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal (min)</th>
-                                        <th class="text-center">Vel. Atual (km/h)</th>
-                                        <th class="text-center">Tempo Atual (min)</th>
-                                        <th class="text-center">Atraso (min)</th>
+                                        <th class="d-none d-lg-table-cell text-center">Vel. Normal</th>
+                                        <th class="d-none d-lg-table-cell text-center">Tempo Normal</th>
+                                        <th class="text-center">Vel. Atual</th>
+                                        <th class="text-center">Tempo Atual</th>
+                                        <th class="text-center">Atraso</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -50,36 +504,74 @@
                                         {% set historic_time = route.historic_time|default(0) %}
                                         {% set avg_time = route.avg_time|default(0) %}
                                         {% set delay_minutes = (avg_time - historic_time) / 60 %}
-                                        <tr data-uuid="{{ route.id }}" class="
-                                            {% if delay_minutes > 5 %}
-                                                table-danger
-                                            {% elseif delay_minutes > 1 %}
-                                                table-warning
-                                            {% else %}
-                                                table-light
-                                            {% endif %}
-                                        ">
-                                            <td data-toggle="tooltip" title="{{ route.name }}" class="text-truncate" style="max-width: 150px;">{{ route.name }}</td>
-                                            <td data-toggle="tooltip" title="{{ route.from_name }}" class="text-truncate" style="max-width: 150px;">{{ route.from_name }}</td>
-                                            <td data-toggle="tooltip" title="{{ route.to_name }}" class="text-truncate" style="max-width: 150px;">{{ route.to_name }}</td>
-                                            <td class="d-none d-lg-table-cell text-center" title="{{ route.historic_speed|number_format(2) }} Km/h">{{ route.historic_speed|default(0)|number_format(2) }}</td>
-                                            <td class="d-none d-lg-table-cell text-center" title="{{ (historic_time / 60)|number_format(2) }} min">{{ (historic_time / 60)|number_format(1) }}</td>
-                                            <td class="text-center" title="{{ route.avg_speed|number_format(2) }} Km/h">{{ route.avg_speed|default(0)|number_format(2) }}</td>
-                                            <td class="text-center" title="{{ (avg_time / 60)|number_format(2) }} min">{{ (avg_time / 60)|number_format(1) }}</td>
-                                            <td class="text-center 
-                                                {% if delay_minutes > 1 %}
-                                                    text-danger font-weight-bold
-                                                {% else %}
-                                                    text-success
-                                                {% endif %}
-                                            " title="{{ delay_minutes|number_format(2) }} min">{{ delay_minutes|number_format(1) }}</td>
+                                        <tr class="fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                                            <td>
+                                                <div class="fw-bold text-primary">{{ route.name }}</div>
+                                                <small class="text-muted d-lg-none">
+                                                    <i class="fas fa-flag-checkered me-1"></i>{{ route.from_name }} → {{ route.to_name }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                    <i class="fas fa-map-marker-alt text-success me-1"></i>{{ route.from_name }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                    <i class="fas fa-flag-checkered text-danger me-1"></i>{{ route.to_name }}
+                                                </span>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell text-center">
+                                                <div class="fw-bold">{{ route.historic_speed|default(0)|number_format(1) }}</div>
+                                                <small class="text-muted">km/h</small>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell text-center">
+                                                <div class="fw-bold">{{ (historic_time / 60)|number_format(1) }}</div>
+                                                <small class="text-muted">min</small>
+                                            </td>
                                             <td class="text-center">
-                                                <button class="btn btn-primary btn-sm view-route"
-                                                    data-toggle="modal"
-                                                    data-target="#mapModal"
+                                                <div class="fw-bold 
+                                                    {% if route.avg_speed < route.historic_speed * 0.7 %}
+                                                        text-danger
+                                                    {% elseif route.avg_speed < route.historic_speed * 0.9 %}
+                                                        text-warning
+                                                    {% else %}
+                                                        text-success
+                                                    {% endif %}
+                                                ">
+                                                    {{ route.avg_speed|default(0)|number_format(1) }}
+                                                </div>
+                                                <small class="text-muted">km/h</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="fw-bold">{{ (avg_time / 60)|number_format(1) }}</div>
+                                                <small class="text-muted">min</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="modern-badge 
+                                                    {% if delay_minutes > 5 %}
+                                                        badge-danger
+                                                    {% elseif delay_minutes > 1 %}
+                                                        badge-warning
+                                                    {% else %}
+                                                        badge-success
+                                                    {% endif %}
+                                                ">
+                                                    {{ delay_minutes|number_format(1) }} min
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-info action-btn view-route"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#mapModal"
                                                     data-route-id="{{ route.id }}"
                                                     title="Ver detalhes da rota">
-                                                    <i class="fas fa-map-marker-alt"></i> VER MAPA
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                </button>
+                                                <button class="btn btn-warning action-btn"
+                                                    onclick="showRouteHistory('{{ route.id }}')"
+                                                    title="Histórico da rota">
+                                                    <i class="fas fa-chart-line"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -87,65 +579,426 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-route"></i>
+                            <h5>Nenhuma rota monitorada</h5>
+                            <p>Não há rotas configuradas ou dados disponíveis no momento.</p>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="alert alert-info text-center" role="alert">
-                    <h4 class="alert-heading">Sem Rotas Monitoradas!</h4>
-                    <p>Não há rotas configuradas ou dados disponíveis no momento.</p>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 
-    <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Carregando...</span>
+    <!-- Cards de Estatísticas de Rotas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3 fade-in">
+            <div class="insight-card success">
+                <div class="insight-card-value">{{ routes|length }}</div>
+                <div class="insight-card-label">Total de Rotas</div>
+                <small class="text-muted">Monitoradas ativamente</small>
+            </div>
         </div>
-        <p class="mt-2 text-muted">Carregando detalhes da rota...</p>
+        <div class="col-xl-3 col-md-6 mb-3 fade-in" style="animation-delay: 0.1s;">
+            <div class="insight-card 
+                {% if routes|filter(r => ((r.avg_time|default(0) - r.historic_time|default(0)) / 60) > 5)|length > 0 %}
+                    danger
+                {% elseif routes|filter(r => ((r.avg_time|default(0) - r.historic_time|default(0)) / 60) > 1)|length > 0 %}
+                    warning
+                {% else %}
+                    info
+                {% endif %}
+            ">
+                <div class="insight-card-value">
+                    {{ routes|filter(r => ((r.avg_time|default(0) - r.historic_time|default(0)) / 60) > 1)|length }}
+                </div>
+                <div class="insight-card-label">Rotas com Atraso</div>
+                <small class="text-muted">> 1 minuto de atraso</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 fade-in" style="animation-delay: 0.2s;">
+            <div class="insight-card info">
+                <div class="insight-card-value">
+                    {% set total_length = 0 %}
+                    {% for route in routes %}
+                        {% set total_length = total_length + (route.length|default(0) / 1000) %}
+                    {% endfor %}
+                    {{ total_length|number_format(1) }} km
+                </div>
+                <div class="insight-card-label">Extensão Total</div>
+                <small class="text-muted">Soma de todas as rotas</small>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 fade-in" style="animation-delay: 0.3s;">
+            <div class="insight-card warning">
+                <div class="insight-card-value">
+                    {% if routes|length > 0 %}
+                        {% set avg_delay = 0 %}
+                        {% for route in routes %}
+                            {% set delay_minutes = ((route.avg_time|default(0) - route.historic_time|default(0)) / 60) %}
+                            {% set avg_delay = avg_delay + delay_minutes %}
+                        {% endfor %}
+                        {{ (avg_delay / routes|length)|number_format(1) }} min
+                    {% else %}
+                        0.0 min
+                    {% endif %}
+                </div>
+                <div class="insight-card-label">Atraso Médio</div>
+                <small class="text-muted">Por rota</small>
+            </div>
+        </div>
     </div>
 </div>
-<div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+
+<!-- Modal de Detalhes da Rota -->
+<div class="modal fade custom-modal" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detalhes da Rota: <span id="modalRouteName"></span></h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h5 class="modal-title" id="modalRouteName">
+                    <i class="fas fa-route me-2"></i>Detalhes da Rota
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="loadingIndicator" class="text-center" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Carregando...</span>
-                    </div>
-                    <p>Carregando dados da rota...</p>
+                <div id="loadingIndicator" class="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Carregando dados da rota...</div>
                 </div>
                 
                 <div class="row">
                     <div class="col-lg-8 mb-4 mb-lg-0">
-                        <div id="mapContainer" class="rounded border" style="height: 500px;"></div>
+                        <div id="mapContainer" class="rounded" style="height: 500px;"></div>
                         <div class="mt-3">
-                            <div id="heatmapChart" style="height: 200px;"></div>
+                            <div id="heatmapChart" style="height: 200px; border-radius: 0.75rem; overflow: hidden;"></div>
                         </div>
                     </div>
                     
                     <div class="col-lg-4">
-                        <div class="card h-100">
+                        <div class="card modern-card h-100">
+                            <div class="modern-card-header bg-primary-gradient">
+                                <span>
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Insights da Rota
+                                </span>
+                            </div>
                             <div class="card-body">
-                                <h6 class="card-title text-muted mb-3">INSIGHTS</h6>
-                                <div id="insightsContainer" class="row"> <!-- Adicionada classe row -->
+                                <div id="insightsContainer" class="row g-3">
                                     <!-- Conteúdo será inserido aqui via JavaScript -->
                                 </div>
-                                <div id="lineChartContainer" style="height: 250px; margin-top: 20px;"></div>
+                                <div id="lineChartContainer" class="mt-4" style="height: 250px;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="exportRouteData">
+                    <i class="fas fa-download me-2"></i>Exportar Dados
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="../js/scripts-routes.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // Inicializar Tooltips do Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            customClass: 'custom-tooltip'
+        });
+    });
+
+    // Configuração do DataTable
+    if ($('#routesTable').length) {
+        $('#routesTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+            },
+            scrollX: true,
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            order: [[0, 'asc']],
+            columnDefs: [
+                { orderable: false, targets: [8] },
+                { width: "20%", targets: [0] },
+                { width: "15%", targets: [1, 2] },
+                { width: "10%", targets: [8] }
+            ],
+            dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            initComplete: function() {
+                console.log('Tabela de rotas carregada com sucesso');
+            }
+        });
+    }
+
+    // Configuração dos botões de visualização de rota
+    $(".view-route").on("click", function () {
+        const routeId = $(this).data("route-id");
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        // Mostrar loading
+        if (loadingIndicator) loadingIndicator.style.display = 'flex';
+        
+        // Aqui você faria uma requisição AJAX para obter os detalhes da rota
+        // Por enquanto, vamos simular com um timeout
+        setTimeout(() => {
+            // Simular dados da rota
+            const routeData = {
+                id: routeId,
+                name: "Rota " + routeId,
+                from_name: "Ponto Inicial " + routeId,
+                to_name: "Ponto Final " + routeId,
+                historic_speed: 60,
+                avg_speed: 45,
+                historic_time: 1800,
+                avg_time: 2400,
+                length: 15000,
+                coordinates: [
+                    [-20.66, -43.79],
+                    [-20.67, -43.78],
+                    [-20.68, -43.77],
+                    [-20.69, -43.76]
+                ]
+            };
+            
+            updateModalContent(routeData);
+            
+            // Esconder loading
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+        }, 1000);
+    });
+
+    function updateModalContent(routeData) {
+        // Atualizar título do modal
+        document.getElementById('modalRouteName').innerHTML = 
+            `<i class="fas fa-route me-2"></i>${routeData.name}`;
+        
+        // Atualizar insights
+        const insightsContainer = document.getElementById('insightsContainer');
+        const delayMinutes = ((routeData.avg_time - routeData.historic_time) / 60).toFixed(1);
+        
+        insightsContainer.innerHTML = `
+            <div class="col-6">
+                <div class="insight-card ${delayMinutes > 5 ? 'danger' : delayMinutes > 1 ? 'warning' : 'success'}">
+                    <div class="insight-card-value">${delayMinutes}</div>
+                    <div class="insight-card-label">Atraso Atual</div>
+                    <small class="text-muted">minutos</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="insight-card ${routeData.avg_speed < routeData.historic_speed * 0.7 ? 'danger' : routeData.avg_speed < routeData.historic_speed * 0.9 ? 'warning' : 'success'}">
+                    <div class="insight-card-value">${routeData.avg_speed.toFixed(1)}</div>
+                    <div class="insight-card-label">Velocidade Média</div>
+                    <small class="text-muted">km/h</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="insight-card info">
+                    <div class="insight-card-value">${(routeData.length / 1000).toFixed(2)}</div>
+                    <div class="insight-card-label">Distância</div>
+                    <small class="text-muted">quilômetros</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="insight-card warning">
+                    <div class="insight-card-value">${((routeData.avg_time - routeData.historic_time) / routeData.historic_time * 100).toFixed(1)}%</div>
+                    <div class="insight-card-label">Aumento no Tempo</div>
+                    <small class="text-muted">vs. histórico</small>
+                </div>
+            </div>
+        `;
+        
+        // Inicializar mapa
+        initMap(routeData.coordinates);
+        
+        // Inicializar gráficos
+        initCharts(routeData);
+    }
+
+    function initMap(coordinates) {
+        const mapContainer = document.getElementById('mapContainer');
+        
+        // Limpar mapa existente
+        if (mapContainer._leaflet_id) {
+            mapContainer._leaflet_id = null;
+            mapContainer.innerHTML = '';
+        }
+        
+        // Criar novo mapa
+        const map = L.map('mapContainer').setView(coordinates[0], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Adicionar rota
+        const polyline = L.polyline(coordinates, {
+            color: '#4e73df',
+            weight: 4,
+            opacity: 0.8,
+            lineJoin: 'round'
+        }).addTo(map);
+        
+        // Adicionar marcadores
+        L.marker(coordinates[0]).addTo(map)
+            .bindPopup('<b>Início da Rota</b>')
+            .openPopup();
+            
+        L.marker(coordinates[coordinates.length - 1]).addTo(map)
+            .bindPopup('<b>Fim da Rota</b>');
+        
+        // Ajustar visualização para a rota
+        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    }
+
+    function initCharts(routeData) {
+        // Gráfico de linha (simulado)
+        Highcharts.chart('lineChartContainer', {
+            title: {
+                text: 'Desempenho da Rota (últimas 24h)',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                }
+            },
+            chart: {
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: 'inherit'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Velocidade (km/h)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+            },
+            xAxis: {
+                categories: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            series: [{
+                name: 'Velocidade Atual',
+                data: [55, 48, 42, 50, 60, 45],
+                color: '#4e73df'
+            }, {
+                name: 'Velocidade Histórica',
+                data: [60, 58, 55, 58, 62, 58],
+                color: '#1cc88a',
+                dashStyle: 'dash'
+            }],
+            legend: {
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            credits: {
+                enabled: false
+            }
+        });
+        
+        // Heatmap (simulado)
+        Highcharts.chart('heatmapChart', {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: 'Intensidade do Tráfego por Segmento',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                }
+            },
+            colorAxis: {
+                stops: [
+                    [0, '#1cc88a'],
+                    [0.5, '#f6c23e'],
+                    [1, '#e74a3b']
+                ],
+                min: 0,
+                max: 10
+            },
+            series: [{
+                data: [
+                    [0, 0, 5],
+                    [0, 1, 3],
+                    [0, 2, 8],
+                    [1, 0, 2],
+                    [1, 1, 6],
+                    [1, 2, 9],
+                    [2, 0, 4],
+                    [2, 1, 7],
+                    [2, 2, 1]
+                ]
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+    }
+
+    // Botão de exportação
+    document.getElementById('exportRouteData')?.addEventListener('click', function() {
+        // Simular exportação
+        if (typeof $.notify !== 'undefined') {
+            $.notify("Exportando dados da rota...", {
+                position: "top right",
+                className: "info",
+                autoHideDelay: 2000
+            });
+        }
+        
+        // Aqui você implementaria a lógica real de exportação
+        setTimeout(() => {
+            if (typeof $.notify !== 'undefined') {
+                $.notify("Dados exportados com sucesso!", {
+                    position: "top right",
+                    className: "success",
+                    autoHideDelay: 3000
+                });
+            }
+        }, 1000);
+    });
+
+    // Função para mostrar histórico da rota
+    window.showRouteHistory = function(routeId) {
+        if (typeof $.notify !== 'undefined') {
+            $.notify(`Abrindo histórico da rota ${routeId}...`, {
+                position: "top right",
+                className: "info",
+                autoHideDelay: 3000
+            });
+        }
+        
+        // Aqui você implementaria a navegação para a página de histórico
+        console.log(`Mostrar histórico da rota: ${routeId}`);
+    };
+
+    console.log('Dashboard de Rotas inicializado com sucesso!');
+});
+</script>
