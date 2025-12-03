@@ -14,11 +14,8 @@ ini_set('error_log', __DIR__ . '/logs/cron_error.log');
 
 require_once __DIR__ . '/config/configbd.php';
 require_once __DIR__ . '/functions/scripts.php';
-require_once __DIR__ . '/vendor/autoload.php'; // Para Monolog se usar Composer
-
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\RotatingFileHandler;
+require_once __DIR__ . '/classes/Logger.php';
+require_once __DIR__ . '/classes/ErrorHandler.php';
 
 // ============================================================================
 // CONSTANTES DE CONFIGURAÇÃO
@@ -49,8 +46,8 @@ class Config {
     ];
 
     private static $alertRecipients = [
-        'default' => ['alerta@example.com'],
-        'critical' => ['alerta@example.com', 'emergencia@example.com']
+        'default' => ['andresoaresdiniz201218@gmail.com'],
+        'critical' => ['andresoaresdiniz201218@gmail.com', 'andresoaresdiniz201218@gmail.com']
     ];
 
     public static function getUrls(): array {
@@ -63,32 +60,6 @@ class Config {
 }
 
 // ============================================================================
-// CLASSE DE LOGGER
-// ============================================================================
-
-class AppLogger {
-    private static $logger;
-
-    public static function getInstance(): Logger {
-        if (self::$logger === null) {
-            self::$logger = new Logger('cemaden');
-            
-            // Log para arquivo rotativo
-            self::$logger->pushHandler(
-                new RotatingFileHandler(__DIR__ . '/logs/app.log', 30, Logger::INFO)
-            );
-            
-            // Log de erros separado
-            self::$logger->pushHandler(
-                new StreamHandler(__DIR__ . '/logs/errors.log', Logger::ERROR)
-            );
-        }
-        
-        return self::$logger;
-    }
-}
-
-// ============================================================================
 // CLASSE CLIENTE API CEMADEN
 // ============================================================================
 
@@ -97,8 +68,8 @@ class CemadenAPIClient {
     private $maxRetries;
     private $retryDelay;
 
-    public function __construct(int $maxRetries = MAX_RETRIES, int $retryDelay = RETRY_DELAY) {
-        $this->logger = AppLogger::getInstance();
+    public function __construct(Logger $logger, int $maxRetries = MAX_RETRIES, int $retryDelay = RETRY_DELAY) {
+        $this->logger = $logger;
         $this->maxRetries = $maxRetries;
         $this->retryDelay = $retryDelay;
     }
@@ -213,9 +184,9 @@ class CemadenRepository {
     private $insertStmt;
     private $cotasCache = [];
 
-    public function __construct(PDO $pdo) {
+    public function __construct(PDO $pdo, Logger $logger) {
         $this->pdo = $pdo;
-        $this->logger = AppLogger::getInstance();
+        $this->logger = $logger;
         $this->prepareStatements();
     }
 
@@ -358,9 +329,9 @@ class DataProcessor {
         'erros' => []
     ];
 
-    public function __construct(CemadenRepository $repository, AlertService $alertService) {
+    public function __construct(CemadenRepository $repository, AlertService $alertService, Logger $logger) {
         $this->timezone = new DateTimeZone(TIMEZONE);
-        $this->logger = AppLogger::getInstance();
+        $this->logger = $logger;
         $this->repository = $repository;
         $this->alertService = $alertService;
     }
@@ -567,8 +538,8 @@ class AlertService {
     private $logger;
     private $sentAlerts = [];
 
-    public function __construct() {
-        $this->logger = AppLogger::getInstance();
+    public function __construct(Logger $logger) {
+        $this->logger = $logger;
     }
 
     /**
@@ -627,11 +598,14 @@ Status: ATENÇÃO NECESSÁRIA
 
         foreach ($recipients as $email) {
             try {
-                sendEmail(
-                    $email,
-                    "[$tipoMaiusculo] {$dados['estacao_nome']} - {$dados['cidade_nome']}/{$dados['uf_estado']}",
-                    $mensagem
-                );
+                // Usa a função sendEmail do seu sistema
+                if (function_exists('sendEmail')) {
+                    sendEmail(
+                        $email,
+                        $mensagem,
+                        "[$tipoMaiusculo] {$dados['estacao_nome']} - {$dados['cidade_nome']}/{$dados['uf_estado']}"
+                    );
+                }
                 
                 $this->logger->info("Alerta de $tipo enviado para $email - Estação: {$dados['codigo_estacao']}");
             } catch (Exception $e) {
@@ -646,7 +620,15 @@ Status: ATENÇÃO NECESSÁRIA
 // ============================================================================
 
 function main(): void {
-    $logger = AppLogger::getInstance();
+    // Inicializa Logger com suas classes existentes
+    $logDir = __DIR__ . '/logs';
+    $isDebug = ($_ENV['DEBUG'] ?? 'false') === 'true';
+    $logger = Logger::getInstance($logDir, $isDebug);
+    
+    // Inicializa ErrorHandler
+    $errorHandler = new ErrorHandler($logger, null, $isDebug);
+    $errorHandler->register();
+    
     $startTime = microtime(true);
     
     $logger->info("========================================");
@@ -658,10 +640,10 @@ function main(): void {
     try {
         // Inicializa componentes
         $pdo = Database::getConnection();
-        $repository = new CemadenRepository($pdo);
-        $alertService = new AlertService();
-        $processor = new DataProcessor($repository, $alertService);
-        $apiClient = new CemadenAPIClient();
+        $repository = new CemadenRepository($pdo, $logger);
+        $alertService = new AlertService($logger);
+        $processor = new DataProcessor($repository, $alertService, $logger);
+        $apiClient = new CemadenAPIClient($logger);
 
         $urls = Config::getUrls();
         $totalUrls = count($urls);
@@ -719,10 +701,12 @@ function main(): void {
         
         // Tenta registrar falha
         try {
-            $repository->logExecution('falha', [
-                'tempo' => round(microtime(true) - $startTime, 2),
-                'erros' => [$e->getMessage()]
-            ]);
+            if (isset($repository)) {
+                $repository->logExecution('falha', [
+                    'tempo' => round(microtime(true) - $startTime, 2),
+                    'erros' => [$e->getMessage()]
+                ]);
+            }
         } catch (Exception $ex) {
             $logger->error("Não foi possível registrar falha no banco");
         }
