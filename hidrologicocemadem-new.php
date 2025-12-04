@@ -40,9 +40,9 @@ define('DEFAULT_OFFSET', 0);
 
 class Config {
     private static $urls = [
-        "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/8",
-        "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/8",
-        "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=8"
+        "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/96",
+        "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/96",
+        "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=96"
     ];
 
     private static $alertRecipients = [
