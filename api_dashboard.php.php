@@ -46,8 +46,8 @@ class Config {
     ];
 
     private static $alertRecipients = [
-        'default' => ['andresoaresdiniz201218@gmail.com'],
-        'critical' => ['andresoaresdiniz201218@gmail.com']
+        'default' => ['alerta@example.com'],
+        'critical' => ['alerta@example.com', 'emergencia@example.com']
     ];
 
     public static function getUrls(): array {
@@ -202,11 +202,11 @@ class CemadenRepository {
         // Prepared statement para inserção
         $this->insertStmt = $this->pdo->prepare(
             "INSERT INTO leituras_cemaden (
-                data_leitura, hora_leitura, valor, valor_offset, 
+                data_leitura, hora_leitura, valor, offset, 
                 cota_atencao, cota_alerta, cota_transbordamento,
                 nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
             ) VALUES (
-                :data_leitura, :hora_leitura, :valor, :valor_offset,
+                :data_leitura, :hora_leitura, :valor, :offset,
                 :cota_atencao, :cota_alerta, :cota_transbordamento,
                 :nivel_atual, :estacao_nome, :cidade_nome, :uf_estado, :codigo_estacao
             )"
@@ -223,7 +223,7 @@ class CemadenRepository {
 
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT cota_atencao, cota_alerta, cota_transbordamento, valor_offset 
+                "SELECT cota_atencao, cota_alerta, cota_transbordamento, offset 
                  FROM estacoes_config 
                  WHERE codigo_estacao = ?"
             );
@@ -243,7 +243,7 @@ class CemadenRepository {
             'cota_atencao' => DEFAULT_COTA_ATENCAO,
             'cota_alerta' => DEFAULT_COTA_ALERTA,
             'cota_transbordamento' => DEFAULT_COTA_TRANSBORDAMENTO,
-            'valor_offset' => DEFAULT_OFFSET
+            'offset' => DEFAULT_OFFSET
         ];
         
         $this->cotasCache[$codigoEstacao] = $default;
@@ -463,7 +463,7 @@ class DataProcessor {
             'estacao_nome' => $estacaoNome,
             'cidade_nome' => $cidadeNome,
             'uf_estado' => $ufEstado,
-            'valor_offset' => $cotas['valor_offset'],
+            'offset' => $cotas['offset'],
             'cota_atencao' => $cotas['cota_atencao'],
             'cota_alerta' => $cotas['cota_alerta'],
             'cota_transbordamento' => $cotas['cota_transbordamento'],
@@ -570,37 +570,48 @@ class AlertService {
     /**
      * Envia alerta por email
      */
-    // Substitua o método sendAlert por:
     private function sendAlert(string $tipo, array $dados): void {
         $tipoMaiusculo = strtoupper($tipo);
         $cotaAtual = $dados["cota_$tipo"] ?? $dados['cota_transbordamento'];
         
-        // Email (mantém como estava)
-        $mensagem = "..."; // sua mensagem de email
-        
+        $mensagem = "
+═══════════════════════════════════════════════
+ALERTA DE $tipoMaiusculo - Sistema CEMADEN
+═══════════════════════════════════════════════
+
+Estação: {$dados['estacao_nome']} (Cód: {$dados['codigo_estacao']})
+Data/Hora: {$dados['data_leitura']} às {$dados['hora_leitura']}
+Localização: {$dados['cidade_nome']}/{$dados['uf_estado']}
+
+Valor Atual: {$dados['valor']} mm
+Cota de $tipoMaiusculo: $cotaAtual mm
+Diferença: " . ($dados['valor'] - $cotaAtual) . " mm acima
+
+Status: ATENÇÃO NECESSÁRIA
+
+═══════════════════════════════════════════════
+        ";
+
         $recipients = ($tipo === 'transbordamento') 
             ? Config::getAlertRecipients('critical')
             : Config::getAlertRecipients('default');
 
         foreach ($recipients as $email) {
             try {
+                // Usa a função sendEmail do seu sistema
                 if (function_exists('sendEmail')) {
-                    sendEmail($email, $mensagem, "[$tipoMaiusculo] ...");
+                    sendEmail(
+                        $email,
+                        $mensagem,
+                        "[$tipoMaiusculo] {$dados['estacao_nome']} - {$dados['cidade_nome']}/{$dados['uf_estado']}"
+                    );
                 }
-                $this->logger->info("Alerta de $tipo enviado para $email");
+                
+                $this->logger->info("Alerta de $tipo enviado para $email - Estação: {$dados['codigo_estacao']}");
             } catch (Exception $e) {
                 $this->logger->error("Erro ao enviar alerta: " . $e->getMessage());
             }
         }
-        
-        /* ADICIONE AQUI: Envio via WhatsApp
-        try {
-            require_once __DIR__ . '/whatsapp_alerts.php';
-            $whatsapp = new ApiBrasilWhatsApp($this->pdo, $this->logger);
-            $whatsapp->enviarTexto($dados, $tipo);
-        } catch (Exception $e) {
-            $this->logger->error("Erro WhatsApp: " . $e->getMessage());
-        }*/
     }
 }
 

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard CEMADEN - Monitoramento Hidrológico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stat-icon.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-icon.yellow { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.red { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .stat-content h3 {
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-content .value {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-badge.normal { background: #d4edda; color: #155724; }
+        .status-badge.atencao { background: #fff3cd; color: #856404; }
+        .status-badge.alerta { background: #f8d7da; color: #721c24; }
+        .status-badge.transbordamento { background: #721c24; color: white; }
+
+        .station-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .station-item {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .station-item:hover {
+            background: #f8f9fa;
+        }
+
+        .station-info h4 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .station-info p {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .station-value {
+            text-align: right;
+        }
+
+        .station-value .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .station-value .unit {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .execution-log {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .log-item.success { border-color: #28a745; }
+        .log-item.error { border-color: #dc3545; }
+        .log-item.warning { border-color: #ffc107; }
+
+        .log-time {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .log-message {
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading i {
+            font-size: 48px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .alert-box.danger {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-tint"></i> Dashboard CEMADEN</h1>
+                <p class="subtitle">Sistema de Monitoramento Hidrológico em Tempo Real</p>
+            </div>
+            <button class="refresh-btn" onclick="loadDashboard()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-broadcast-tower"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Estações Ativas</h3>
+                    <div class="value" id="totalStations">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Status Normal</h3>
+                    <div class="value" id="normalStations">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Em Alerta</h3>
+                    <div class="value" id="alertStations">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Última Coleta</h3>
+                    <div class="value" id="lastExecution" style="font-size: 18px;">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <!-- Estações -->
+            <div class="card">
+                <h2><i class="fas fa-map-marker-alt"></i> Estações Monitoradas</h2>
+                <div id="stationsList" class="station-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Carregando dados...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log de Execuções -->
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Últimas Execuções</h2>
+                <div id="executionLog" class="execution-log">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Carregando logs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Evolução -->
+        <div class="card full-width">
+            <h2><i class="fas fa-chart-line"></i> Evolução nas Últimas 24h</h2>
+            <div id="chartContainer" class="chart-container">
+                <canvas id="evolutionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chart = null;
+
+        // Carrega dashboard ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            // Auto-refresh a cada 5 minutos
+            setInterval(loadDashboard, 300000);
+        });
+
+        async function loadDashboard() {
+            try {
+                // Animação de loading
+                document.querySelector('.refresh-btn i').classList.add('fa-spin');
+
+                // Carrega dados
+                await Promise.all([
+                    loadStats(),
+                    loadStations(),
+                    loadExecutionLog(),
+                    loadChart()
+                ]);
+
+                document.querySelector('.refresh-btn i').classList.remove('fa-spin');
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+                alert('Erro ao carregar dados. Verifique a conexão com a API.');
+            }
+        }
+
+        async function loadStats() {
+            // Simula chamada à API - SUBSTITUIR pela sua API real
+            const response = await fetch('api_dashboard.php?action=stats');
+            const data = await response.json();
+
+            document.getElementById('totalStations').textContent = data.total || 0;
+            document.getElementById('normalStations').textContent = data.normal || 0;
+            document.getElementById('alertStations').textContent = data.alertas || 0;
+            document.getElementById('lastExecution').textContent = data.ultima_execucao || '-';
+        }
+
+        async function loadStations() {
+            const response = await fetch('api_dashboard.php?action=stations');
+            const stations = await response.json();
+
+            const container = document.getElementById('stationsList');
+            container.innerHTML = '';
+
+            stations.forEach(station => {
+                const status = getStatus(station.valor, station.cota_atencao, station.cota_alerta, station.cota_transbordamento);
+                
+                container.innerHTML += `
+                    <div class="station-item">
+                        <div class="station-info">
+                            <h4>${station.estacao_nome}</h4>
+                            <p><i class="fas fa-map-pin"></i> ${station.cidade_nome}/${station.uf_estado}</p>
+                            <span class="status-badge ${status.class}">${status.text}</span>
+                        </div>
+                        <div class="station-value">
+                            <div class="value">${station.valor}</div>
+                            <div class="unit">mm</div>
+                            <p style="font-size: 11px; color: #7f8c8d; margin-top: 5px;">
+                                ${station.data_leitura} ${station.hora_leitura}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function loadExecutionLog() {
+            const response = await fetch('api_dashboard.php?action=logs');
+            const logs = await response.json();
+
+            const container = document.getElementById('executionLog');
+            container.innerHTML = '';
+
+            logs.forEach(log => {
+                const statusClass = log.status === 'sucesso' ? 'success' : 
+                                   log.status === 'falha' ? 'error' : 'warning';
+                
+                container.innerHTML += `
+                    <div class="log-item ${statusClass}">
+                        <div class="log-time">
+                            <i class="fas fa-clock"></i> ${log.data_execucao}
+                        </div>
+                        <div class="log-message">
+                            <strong>Status:</strong> ${log.status}<br>
+                            <strong>Registros:</strong> ${log.registros_inseridos} inseridos / ${log.registros_processados} processados<br>
+                            <strong>Tempo:</strong> ${log.tempo_execucao}s
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function loadChart() {
+            const response = await fetch('api_dashboard.php?action=chart');
+            const data = await response.json();
+
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: data.datasets.map((dataset, index) => ({
+                        label: dataset.name,
+                        data: dataset.values,
+                        borderColor: getChartColor(index),
+                        backgroundColor: getChartColor(index, 0.1),
+                        tension: 0.4,
+                        fill: true
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Precipitação (mm)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getStatus(valor, atencao, alerta, transbordamento) {
+            if (valor >= transbordamento) return { class: 'transbordamento', text: 'Transbordamento' };
+            if (valor >= alerta) return { class: 'alerta', text: 'Alerta' };
+            if (valor >= atencao) return { class: 'atencao', text: 'Atenção' };
+            return { class: 'normal', text: 'Normal' };
+        }
+
+        function getChartColor(index, alpha = 1) {
+            const colors = [
+                `rgba(102, 126, 234, ${alpha})`,
+                `rgba(17, 153, 142, ${alpha})`,
+                `rgba(245, 87, 108, ${alpha})`,
+                `rgba(250, 112, 154, ${alpha})`
+            ];
+            return colors[index % colors.length];
+        }
+    </script>
+</body>
+</html>
