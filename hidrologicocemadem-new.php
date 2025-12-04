@@ -47,7 +47,7 @@ class Config {
 
     private static $alertRecipients = [
         'default' => ['andresoaresdiniz201218@gmail.com'],
-        'critical' => ['andresoaresdiniz201218@gmail.com', 'andresoaresdiniz201218@gmail.com']
+        'critical' => ['andresoaresdiniz201218@gmail.com']
     ];
 
     public static function getUrls(): array {
@@ -202,11 +202,11 @@ class CemadenRepository {
         // Prepared statement para inserção
         $this->insertStmt = $this->pdo->prepare(
             "INSERT INTO leituras_cemaden (
-                data_leitura, hora_leitura, valor, offset, 
+                data_leitura, hora_leitura, valor, valor_offset, 
                 cota_atencao, cota_alerta, cota_transbordamento,
                 nivel_atual, estacao_nome, cidade_nome, uf_estado, codigo_estacao
             ) VALUES (
-                :data_leitura, :hora_leitura, :valor, :offset,
+                :data_leitura, :hora_leitura, :valor, :valor_offset,
                 :cota_atencao, :cota_alerta, :cota_transbordamento,
                 :nivel_atual, :estacao_nome, :cidade_nome, :uf_estado, :codigo_estacao
             )"
@@ -223,7 +223,7 @@ class CemadenRepository {
 
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT cota_atencao, cota_alerta, cota_transbordamento, offset 
+                "SELECT cota_atencao, cota_alerta, cota_transbordamento, valor_offset 
                  FROM estacoes_config 
                  WHERE codigo_estacao = ?"
             );
@@ -243,7 +243,7 @@ class CemadenRepository {
             'cota_atencao' => DEFAULT_COTA_ATENCAO,
             'cota_alerta' => DEFAULT_COTA_ALERTA,
             'cota_transbordamento' => DEFAULT_COTA_TRANSBORDAMENTO,
-            'offset' => DEFAULT_OFFSET
+            'valor_offset' => DEFAULT_OFFSET
         ];
         
         $this->cotasCache[$codigoEstacao] = $default;
@@ -463,7 +463,7 @@ class DataProcessor {
             'estacao_nome' => $estacaoNome,
             'cidade_nome' => $cidadeNome,
             'uf_estado' => $ufEstado,
-            'offset' => $cotas['offset'],
+            'valor_offset' => $cotas['valor_offset'],
             'cota_atencao' => $cotas['cota_atencao'],
             'cota_alerta' => $cotas['cota_alerta'],
             'cota_transbordamento' => $cotas['cota_transbordamento'],
