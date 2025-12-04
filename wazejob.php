@@ -74,7 +74,7 @@ $scripts = [
     'worker_notifications.php' => '/worker_notifications.php',
     'wazejobtraficc.php'    => '/wazejobtraficc.php',
     'dadoscemadem.php'      => '/dadoscemadem.php',
-    'hidrologicocemadem.php'=> '/hidrologicocemadem.php',
+    'hidrologicocemadem-new.php'=> '/hidrologicocemadem-new.php',
     'gerar_xml.php'         => '/gerar_xml.php',
     'alerts_por_email.php'  => '/alerts_por_email.php' 
 ];
