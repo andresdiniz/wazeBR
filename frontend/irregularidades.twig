@@ -1,5 +1,4 @@
-[file name]: irregularidades.twig
-[file content begin]
+
 {% set show_origin = irregularities|reduce((carry, irr) => carry or (irr.from_name is defined and irr.from_name is not empty), false) %}
 {% set show_destination = irregularities|reduce((carry, irr) => carry or (irr.to_name is defined and irr.to_name is not empty), false) %}
 {% set show_avg_speed = irregularities|reduce((carry, irr) => carry or (irr.avg_speed is defined and irr.avg_speed is not empty), false) %}
@@ -742,4 +741,3 @@
     });
 })(jQuery);
 </script>
-[file content end]
