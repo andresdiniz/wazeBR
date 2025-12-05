@@ -195,6 +195,9 @@
     .modern-table {
         margin-bottom: 0;
         font-size: 0.9rem;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
     }
 
     .modern-table thead th {
@@ -204,10 +207,12 @@
         text-transform: uppercase;
         font-size: 0.75rem;
         color: var(--text-secondary);
-        padding: 1rem 0.5rem;
+        padding: 1rem 0.75rem;
         letter-spacing: 0.5px;
-        text-align: center;
         white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
     .modern-table tbody tr {
@@ -217,7 +222,6 @@
 
     .modern-table tbody tr:hover {
         background-color: var(--table-hover);
-        transform: translateX(3px);
     }
 
     .modern-table tbody tr:last-child {
@@ -225,22 +229,23 @@
     }
 
     .modern-table tbody td {
-        padding: 0.75rem 0.5rem;
+        padding: 0.85rem 0.75rem;
         vertical-align: middle;
         color: var(--text-primary);
-        text-align: center;
+        border-top: 1px solid var(--border-color);
     }
 
     .modern-table .city-cell {
-        text-align: left;
+        min-width: 120px;
     }
 
     .modern-table .text-truncate-cell {
-        max-width: 150px;
+        max-width: 180px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         display: inline-block;
+        vertical-align: middle;
     }
 
     .action-btn {
@@ -266,55 +271,67 @@
     }
 
     .speed-badge {
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
         font-weight: 600;
         font-size: 0.8rem;
         display: inline-block;
-        min-width: 60px;
+        min-width: 70px;
         white-space: nowrap;
+        text-align: center;
     }
 
     .speed-low {
-        background: rgba(220, 53, 69, 0.1);
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));
         color: #dc3545;
-        border: 1px solid rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.3);
     }
 
     .speed-medium {
-        background: rgba(255, 193, 7, 0.1);
-        color: #ffc107;
-        border: 1px solid rgba(255, 193, 7, 0.2);
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+        color: #d39e00;
+        border: 1px solid rgba(255, 193, 7, 0.3);
     }
 
     .speed-high {
-        background: rgba(40, 167, 69, 0.1);
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.15), rgba(40, 167, 69, 0.05));
         color: #28a745;
-        border: 1px solid rgba(40, 167, 69, 0.2);
+        border: 1px solid rgba(40, 167, 69, 0.3);
     }
 
     .delay-badge {
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
         font-weight: 600;
         font-size: 0.8rem;
-        background: rgba(108, 117, 125, 0.1);
-        color: #6c757d;
-        border: 1px solid rgba(108, 117, 125, 0.2);
+        background: linear-gradient(135deg, rgba(108, 117, 125, 0.15), rgba(108, 117, 125, 0.05));
+        color: #495057;
+        border: 1px solid rgba(108, 117, 125, 0.3);
         white-space: nowrap;
-        min-width: 50px;
+        min-width: 60px;
+        text-align: center;
     }
 
     .length-badge {
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
         font-weight: 600;
         font-size: 0.8rem;
-        background: rgba(23, 162, 184, 0.1);
-        color: #17a2b8;
-        border: 1px solid rgba(23, 162, 184, 0.2);
+        background: linear-gradient(135deg, rgba(23, 162, 184, 0.15), rgba(23, 162, 184, 0.05));
+        color: #138496;
+        border: 1px solid rgba(23, 162, 184, 0.3);
         white-space: nowrap;
-        min-width: 50px;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    .table-hover-actions {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modern-table tbody tr:hover .table-hover-actions {
+        opacity: 1;
     }
 
     .empty-state {
@@ -433,30 +450,55 @@
     }
 
     .insights-container {
-        padding: 1rem;
+        padding: 1.5rem;
         background: var(--card-bg);
     }
 
     .insight-card {
         background: var(--table-hover);
         border-radius: 0.75rem;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
         border-left: 4px solid #4e73df;
     }
 
     .insight-card h6 {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: var(--text-secondary);
         margin-bottom: 0.25rem;
         font-weight: 600;
     }
 
     .insight-card p {
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: var(--text-primary);
         margin-bottom: 0;
+    }
+
+    /* Melhorias para tabela responsiva */
+    .table-responsive {
+        position: relative;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #4e73df;
+        border-radius: 3px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #2e59d9;
     }
 
     /* Responsividade para tabelas */
@@ -467,19 +509,23 @@
         
         .modern-table thead th,
         .modern-table tbody td {
-            padding: 0.5rem 0.25rem;
+            padding: 0.75rem 0.5rem;
         }
         
         .speed-badge,
         .delay-badge,
         .length-badge {
             font-size: 0.75rem;
-            padding: 0.2rem 0.3rem;
-            min-width: 45px;
+            padding: 0.3rem 0.4rem;
+            min-width: 55px;
         }
         
         .text-truncate-cell {
-            max-width: 120px;
+            max-width: 140px;
+        }
+        
+        .table-hover-actions {
+            opacity: 1;
         }
     }
 
@@ -508,8 +554,8 @@
         }
         
         .action-btn {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             margin: 0 2px;
         }
         
@@ -525,21 +571,29 @@
         .delay-badge,
         .length-badge {
             font-size: 0.7rem;
-            padding: 0.15rem 0.25rem;
-            min-width: 40px;
+            padding: 0.25rem 0.35rem;
+            min-width: 50px;
+        }
+        
+        .text-truncate-cell {
+            max-width: 100px;
+        }
+        
+        .insights-container {
+            padding: 1rem;
         }
         
         .insight-card {
-            padding: 0.5rem;
-            margin-bottom: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
         }
         
         .insight-card h6 {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
         }
         
         .insight-card p {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
     }
 
@@ -560,6 +614,10 @@
         .stats-card-value {
             font-size: 1.75rem;
         }
+        
+        .modern-table tbody td {
+            padding: 0.65rem 0.4rem;
+        }
     }
 
     /* Tooltip customizado */
@@ -571,14 +629,40 @@
         font-size: 0.85rem !important;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
         border: 1px solid var(--border-color) !important;
+        max-width: 300px !important;
     }
     
     /* Melhorias para DataTable responsivo */
+    .dataTables_wrapper {
+        padding: 0 0.5rem;
+    }
+    
     .dataTables_wrapper .dataTables_length,
     .dataTables_wrapper .dataTables_filter,
     .dataTables_wrapper .dataTables_info,
     .dataTables_wrapper .dataTables_paginate {
         font-size: 0.85rem;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 0.375rem 0.75rem;
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+        margin: 0 2px !important;
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #4e73df !important;
+        border-color: #4e73df !important;
+        color: white !important;
     }
     
     @media (max-width: 767.98px) {
@@ -594,6 +678,35 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
         }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.25rem 0.5rem !important;
+            margin: 0 1px !important;
+        }
+    }
+    
+    /* Status indicator */
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-active {
+        background-color: #dc3545;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+    }
+    
+    .status-moderate {
+        background-color: #ffc107;
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+    }
+    
+    .status-clear {
+        background-color: #28a745;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
     }
 </style>
 
@@ -609,7 +722,7 @@
             <div>
                 <h1><i class="fas fa-traffic-light me-2"></i>Congestionamentos em Tempo Real</h1>
                 <p class="subtitle mb-0">
-                    Monitoramento de tráfego e congestionamentos ativos
+                    Monitoramento de tráfego e congestionamentos ativos. Dados atualizados em tempo real.
                 </p>
             </div>
             <div class="live-indicator">
@@ -626,7 +739,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-car-crash"></i>
                 </div>
-                <div class="stats-card-value">{{ jams|length }}</div>
+                <div class="stats-card-value" id="activeJamsCount">{{ jams|length }}</div>
                 <div class="stats-card-label">Congestionamentos Ativos</div>
             </div>
         </div>
@@ -635,7 +748,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="stats-card-value">
+                <div class="stats-card-value" id="totalDelay">
                     {% set total_delay = 0 %}
                     {% for jam in jams %}
                         {% set total_delay = total_delay + (jam.delay / 60) %}
@@ -650,7 +763,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-road"></i>
                 </div>
-                <div class="stats-card-value">
+                <div class="stats-card-value" id="totalLength">
                     {% set total_length = 0 %}
                     {% for jam in jams %}
                         {% set total_length = total_length + jam.length %}
@@ -665,7 +778,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-tachometer-alt"></i>
                 </div>
-                <div class="stats-card-value">
+                <div class="stats-card-value" id="avgSpeed">
                     {% set total_speed = 0 %}
                     {% for jam in jams %}
                         {% set total_speed = total_speed + jam.speed %}
@@ -697,23 +810,23 @@
             <div class="card-body p-0 position-relative">
                 {% if jams is not empty %}
                     <div class="table-responsive">
-                        <table class="table modern-table" id="routesTable">
+                        <table class="table modern-table" id="jamsTable">
                             <thead>
                                 <tr>
                                     <th class="mobile-text-small">Cidade</th>
-                                    <th class="mobile-text-small">Início</th>
-                                    <th class="mobile-text-small mobile-hide-2">Fim</th>
-                                    <th class="mobile-text-small">Vel. Normal</th>
+                                    <th class="mobile-text-small">Localização</th>
+                                    <th class="mobile-text-small mobile-hide-2">Destino</th>
+                                    <th class="mobile-text-small">Velocidade</th>
                                     <th class="mobile-text-small mobile-hide">Vel. Atual</th>
                                     <th class="mobile-text-small">Atraso</th>
-                                    <th class="mobile-text-small mobile-hide-2">Comprimento</th>
-                                    <th class="mobile-text-small d-none d-lg-table-cell">Publicado em</th>
+                                    <th class="mobile-text-small mobile-hide-2">Extensão</th>
+                                    <th class="mobile-text-small d-none d-lg-table-cell">Detectado</th>
                                     <th class="text-center mobile-text-small">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for jam in jams %}
-                                {% set delay_minutes = jam.delay / 60 %}
+                                {% set delay_minutes = (jam.delay / 60)|round(0, 'ceil') %}
                                 {% set pub_date = null %}
                                 
                                 {# Corrigir o parsing da data #}
@@ -722,72 +835,87 @@
                                     {% if jam.pubMillis matches '/^\\d+\\.\\d+$/' %}
                                         {# É um timestamp com ponto decimal #}
                                         {% set pub_timestamp = jam.pubMillis|split('.')|first %}
-                                        {% set pub_date = pub_timestamp|date('d/m/Y H:i:s') %}
+                                        {% set pub_date = pub_timestamp|date('d/m/Y H:i:s', timezone="America/Sao_Paulo") %}
                                     {% elseif jam.pubMillis matches '/^\\d+$/' %}
                                         {# É um timestamp inteiro #}
-                                        {% set pub_date = jam.pubMillis|date('d/m/Y H:i:s') %}
+                                        {% set pub_date = jam.pubMillis|date('d/m/Y H:i:s', timezone="America/Sao_Paulo") %}
                                     {% else %}
                                         {# Tentar usar como string #}
                                         {% set pub_date = jam.pubMillis %}
                                     {% endif %}
                                 {% endif %}
                                 
-                                <tr>
+                                {# Determinar status baseado na velocidade #}
+                                {% set speed_status = '' %}
+                                {% if jam.speed < 10 %}
+                                    {% set speed_status = 'status-active' %}
+                                {% elseif jam.speed < 20 %}
+                                    {% set speed_status = 'status-moderate' %}
+                                {% else %}
+                                    {% set speed_status = 'status-clear' %}
+                                {% endif %}
+                                
+                                <tr data-jam-id="{{ jam.uuid }}">
                                     <td class="city-cell">
-                                        <div class="fw-bold text-primary">{{ jam.city[:15] }}{% if jam.city|length > 15 %}...{% endif %}</div>
-                                        <small class="text-muted d-lg-none d-block mobile-text-small">
-                                            {% if pub_date %}
-                                                {{ pub_date|slice(0, 11) }}
-                                            {% endif %}
-                                        </small>
+                                        <div class="d-flex align-items-center">
+                                            <span class="status-indicator {{ speed_status }}"></span>
+                                            <div>
+                                                <div class="fw-bold text-primary">{{ jam.city|slice(0, 20) }}{% if jam.city|length > 20 %}...{% endif %}</div>
+                                                <small class="text-muted d-lg-none d-block mobile-text-small">
+                                                    {% if pub_date %}
+                                                        {{ pub_date|slice(0, 11) }}
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="text-truncate-cell d-block" title="{{ jam.street }}">
-                                            {{ jam.street[:20] }}{% if jam.street|length > 20 %}...{% endif %}
+                                            {{ jam.street|slice(0, 25) }}{% if jam.street|length > 25 %}...{% endif %}
                                         </span>
                                     </td>
                                     <td class="mobile-hide-2">
                                         <span class="text-truncate-cell d-block" title="{{ jam.endNode }}">
-                                            {{ jam.endNode[:20] }}{% if jam.endNode|length > 20 %}...{% endif %}
+                                            {{ jam.endNode|slice(0, 25) }}{% if jam.endNode|length > 25 %}...{% endif %}
                                         </span>
                                     </td>
                                     <td>
                                         {% if jam.speedKMH < 20 %}
-                                            <span class="speed-badge speed-low" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-low" data-bs-toggle="tooltip" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
                                                 {{ jam.speedKMH|number_format(0) }} km/h
                                             </span>
                                         {% elseif jam.speedKMH < 40 %}
-                                            <span class="speed-badge speed-medium" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-medium" data-bs-toggle="tooltip" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
                                                 {{ jam.speedKMH|number_format(0) }} km/h
                                             </span>
                                         {% else %}
-                                            <span class="speed-badge speed-high" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-high" data-bs-toggle="tooltip" title="Velocidade normal: {{ jam.speedKMH|number_format(1) }} km/h">
                                                 {{ jam.speedKMH|number_format(0) }} km/h
                                             </span>
                                         {% endif %}
                                     </td>
                                     <td class="mobile-hide">
                                         {% if jam.speed < 10 %}
-                                            <span class="speed-badge speed-low" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-low" data-bs-toggle="tooltip" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
                                                 {{ jam.speed|number_format(0) }} km/h
                                             </span>
                                         {% elseif jam.speed < 20 %}
-                                            <span class="speed-badge speed-medium" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-medium" data-bs-toggle="tooltip" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
                                                 {{ jam.speed|number_format(0) }} km/h
                                             </span>
                                         {% else %}
-                                            <span class="speed-badge speed-high" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
+                                            <span class="speed-badge speed-high" data-bs-toggle="tooltip" title="Velocidade atual: {{ jam.speed|number_format(1) }} km/h">
                                                 {{ jam.speed|number_format(0) }} km/h
                                             </span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <span class="delay-badge" title="Atraso: {{ delay_minutes|number_format(1) }} minutos">
+                                        <span class="delay-badge" data-bs-toggle="tooltip" title="Atraso estimado: {{ delay_minutes|number_format(0) }} minutos">
                                             {{ delay_minutes|number_format(0) }} min
                                         </span>
                                     </td>
                                     <td class="mobile-hide-2">
-                                        <span class="length-badge" title="Comprimento: {% if jam.length >= 1000 %}{{ (jam.length / 1000)|number_format(2) }} km{% else %}{{ jam.length|number_format(0) }} m{% endif %}">
+                                        <span class="length-badge" data-bs-toggle="tooltip" title="Comprimento: {% if jam.length >= 1000 %}{{ (jam.length / 1000)|number_format(2) }} km{% else %}{{ jam.length|number_format(0) }} m{% endif %}">
                                             {% if jam.length >= 1000 %}
                                                 {{ (jam.length / 1000)|number_format(1) }} km
                                             {% else %}
@@ -804,11 +932,11 @@
                                         <small class="text-muted">--:--</small>
                                         {% endif %}
                                     </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-primary action-btn view-route" 
+                                    <td class="text-center table-hover-actions">
+                                        <button class="btn btn-primary action-btn view-jam-btn" 
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#mapModal"
-                                                data-route-id="{{ jam.uuid }}"
+                                                data-jam-id="{{ jam.uuid }}"
                                                 data-city="{{ jam.city }}"
                                                 data-street="{{ jam.street }}"
                                                 data-end-node="{{ jam.endNode }}"
@@ -817,17 +945,26 @@
                                                 data-delay="{{ jam.delay }}"
                                                 data-length="{{ jam.length }}"
                                                 data-pub-millis="{{ jam.pubMillis }}"
+                                                {% if jam.location_y is defined and jam.location_x is defined %}
+                                                data-location-y="{{ jam.location_y }}"
+                                                data-location-x="{{ jam.location_x }}"
+                                                {% endif %}
                                                 title="Ver detalhes no mapa">
                                             <i class="fas fa-map-marked-alt"></i>
                                         </button>
-                                        {% if jam.location_y and jam.location_x %}
-                                        <a href="https://www.waze.com/ul?ll={{ jam.location_y }},{{ jam.location_x }}" 
+                                        {% if jam.location_y is defined and jam.location_x is defined %}
+                                        <a href="https://www.waze.com/ul?ll={{ jam.location_y }},{{ jam.location_x }}&navigate=yes" 
                                            target="_blank"
                                            class="btn btn-info action-btn"
-                                           title="Abrir no Waze">
+                                           title="Navegar com Waze">
                                             <i class="fab fa-waze"></i>
                                         </a>
                                         {% endif %}
+                                        <button class="btn btn-success action-btn share-jam-btn" 
+                                                data-jam-id="{{ jam.uuid }}"
+                                                title="Compartilhar localização">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -872,6 +1009,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="navigateBtn" style="display: none;">
+                    <i class="fas fa-directions me-1"></i>Navegar
+                </button>
             </div>
         </div>
     </div>
@@ -881,49 +1021,86 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Função para formatar a data do pubMillis
     function formatPubMillis(pubMillis) {
-        if (!pubMillis) return 'N/A';
+        if (!pubMillis) return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
         
         try {
-            // Verificar se é um número com ponto decimal
-            if (typeof pubMillis === 'string' || typeof pubMillis === 'number') {
-                // Remover parte decimal se existir
-                const timestamp = Math.floor(parseFloat(pubMillis));
-                
-                // Converter para Date
-                const date = new Date(timestamp * 1000); // Converter de segundos para milissegundos
-                
-                // Formatar data
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const year = date.getFullYear();
-                const hours = date.getHours().toString().padStart(2, '0');
-                const minutes = date.getMinutes().toString().padStart(2, '0');
-                const seconds = date.getSeconds().toString().padStart(2, '0');
-                
-                return {
-                    date: `${day}/${month}/${year}`,
-                    time: `${hours}:${minutes}`,
-                    fullTime: `${hours}:${minutes}:${seconds}`
-                };
+            let timestamp;
+            
+            // Se for uma string, tentar extrair o timestamp
+            if (typeof pubMillis === 'string') {
+                // Remover caracteres não numéricos exceto ponto
+                const cleaned = pubMillis.replace(/[^\d.]/g, '');
+                if (cleaned) {
+                    timestamp = parseFloat(cleaned);
+                } else {
+                    return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
+                }
+            } else if (typeof pubMillis === 'number') {
+                timestamp = pubMillis;
+            } else {
+                return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
             }
+            
+            // Converter para Date - assumindo que o timestamp está em milissegundos
+            let date;
+            if (timestamp > 1000000000000) {
+                // Já está em milissegundos
+                date = new Date(timestamp);
+            } else if (timestamp > 1000000000) {
+                // Está em segundos
+                date = new Date(timestamp * 1000);
+            } else {
+                // Timestamp muito pequeno, tratar como segundos
+                date = new Date(timestamp * 1000);
+            }
+            
+            // Verificar se a data é válida
+            if (isNaN(date.getTime())) {
+                console.warn('Data inválida do timestamp:', timestamp);
+                return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
+            }
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            
+            return {
+                date: `${day}/${month}/${year}`,
+                time: `${hours}:${minutes}`,
+                fullTime: `${hours}:${minutes}:${seconds}`,
+                datetime: date
+            };
         } catch (e) {
-            console.error('Erro ao formatar pubMillis:', e);
+            console.error('Erro ao formatar pubMillis:', e, pubMillis);
+            return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
         }
-        
-        return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
     }
 
-    // Remover qualquer listener anterior para evitar conflitos
-    const viewRouteButtons = document.querySelectorAll('.view-route');
-    viewRouteButtons.forEach(button => {
-        button.replaceWith(button.cloneNode(true));
-    });
-
+    // Variáveis globais para o mapa
+    let currentMap = null;
+    let currentMarker = null;
+    let modalInstance = null;
+    
     // Inicializar DataTable com configuração responsiva
-    if (typeof $.fn.DataTable !== 'undefined' && $('#routesTable').length) {
-        $('#routesTable').DataTable({
+    if (typeof $.fn.DataTable !== 'undefined' && $('#jamsTable').length) {
+        const table = $('#jamsTable').DataTable({
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json',
+                search: "Pesquisar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ congestionamentos",
+                infoEmpty: "Nenhum congestionamento encontrado",
+                infoFiltered: "(filtrado de _MAX_ registros)",
+                zeroRecords: "Nenhum congestionamento encontrado",
+                paginate: {
+                    first: "Primeira",
+                    last: "Última",
+                    next: "Próxima",
+                    previous: "Anterior"
+                }
             },
             responsive: true,
             pageLength: 10,
@@ -947,32 +1124,71 @@ document.addEventListener("DOMContentLoaded", function () {
                     targets: [4, 6, 7] 
                 }
             ],
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row mt-2"<"col-sm-12"tr>><"row mt-2"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             initComplete: function() {
                 console.log('Tabela de congestionamentos carregada com sucesso');
+                
+                // Adicionar classe à tabela após inicialização
+                $('#jamsTable').addClass('table-striped');
+                
+                // Configurar tooltips após a tabela ser renderizada
+                setTimeout(initializeTooltips, 100);
+            }
+        });
+        
+        // Configurar busca em tempo real
+        $('#jamsTable_filter input').on('keyup', function() {
+            const searchTerm = $(this).val();
+            if (searchTerm.length >= 3 || searchTerm.length === 0) {
+                table.search(searchTerm).draw();
             }
         });
     }
     
-    // Inicializar tooltips
-    if (typeof bootstrap !== 'undefined') {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                customClass: 'custom-tooltip',
-                trigger: 'hover'
+    // Inicializar tooltips do Bootstrap
+    function initializeTooltips() {
+        if (typeof bootstrap !== 'undefined') {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                try {
+                    new bootstrap.Tooltip(tooltipTriggerEl, {
+                        customClass: 'custom-tooltip',
+                        trigger: 'hover focus',
+                        placement: 'top'
+                    });
+                } catch (e) {
+                    console.warn('Erro ao criar tooltip:', e);
+                }
             });
-        });
+        }
     }
     
-    // Configurar o evento do modal
-    const mapModal = document.getElementById('mapModal');
-    let currentMap = null;
-    let modalInstance = null;
+    // Inicializar tooltips após o carregamento da página
+    setTimeout(initializeTooltips, 500);
     
-    // Função para carregar dados da rota
-    function loadRouteData(button) {
-        const routeId = button.getAttribute('data-route-id');
+    // Configurar evento de clique para os botões de visualização
+    document.addEventListener('click', function(e) {
+        // Verificar se é um botão de visualização de congestionamento
+        if (e.target.closest('.view-jam-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.view-jam-btn');
+            loadJamDetails(button);
+        }
+        
+        // Verificar se é um botão de compartilhamento
+        if (e.target.closest('.share-jam-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.share-jam-btn');
+            const jamId = button.getAttribute('data-jam-id');
+            shareJamLocation(jamId);
+        }
+    });
+    
+    // Função para carregar detalhes do congestionamento no modal
+    function loadJamDetails(button) {
+        if (!button) return;
+        
+        const jamId = button.getAttribute('data-jam-id');
         const city = button.getAttribute('data-city');
         const street = button.getAttribute('data-street');
         const endNode = button.getAttribute('data-end-node');
@@ -981,8 +1197,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const delay = parseInt(button.getAttribute('data-delay'));
         const length = parseInt(button.getAttribute('data-length'));
         const pubMillis = button.getAttribute('data-pub-millis');
+        const locationY = button.getAttribute('data-location-y');
+        const locationX = button.getAttribute('data-location-x');
         
-        console.log('Carregando dados da rota:', routeId);
+        console.log('Carregando detalhes do congestionamento:', jamId, city, street);
         
         // Formatando a data
         const formattedDate = formatPubMillis(pubMillis);
@@ -990,82 +1208,135 @@ document.addEventListener("DOMContentLoaded", function () {
         // Atualizar título do modal
         const modalTitle = document.getElementById('modalRouteName');
         if (modalTitle) {
-            modalTitle.textContent = `Congestionamento: ${street.substring(0, 30)}${street.length > 30 ? '...' : ''}`;
+            modalTitle.textContent = `Congestionamento: ${street}`;
         }
         
-        // Configurar dados para o modal
+        // Mostrar loading
+        const modalLoading = document.getElementById('modalLoading');
+        const modalMapContainer = document.getElementById('modalMapContainer');
+        const insightsContent = document.getElementById('insightsContent');
+        const navigateBtn = document.getElementById('navigateBtn');
+        
+        if (modalLoading) modalLoading.classList.remove('d-none');
+        if (modalMapContainer) modalMapContainer.innerHTML = '';
+        if (insightsContent) insightsContent.innerHTML = '';
+        
+        // Configurar botão de navegação
+        if (navigateBtn && locationY && locationX) {
+            navigateBtn.style.display = 'inline-block';
+            navigateBtn.onclick = function() {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${locationY},${locationX}`, '_blank');
+            };
+        } else if (navigateBtn) {
+            navigateBtn.style.display = 'none';
+        }
+        
+        // Inicializar ou reutilizar instância do modal
         if (!modalInstance) {
-            modalInstance = new bootstrap.Modal(mapModal);
+            modalInstance = new bootstrap.Modal(document.getElementById('mapModal'));
         }
         
         // Configurar evento quando o modal é mostrado
         const handleModalShow = function() {
-            // Mostrar loading
-            const modalLoading = document.getElementById('modalLoading');
-            const modalMapContainer = document.getElementById('modalMapContainer');
-            const insightsContent = document.getElementById('insightsContent');
-            
-            if (modalLoading) modalLoading.classList.remove('d-none');
-            if (modalMapContainer) modalMapContainer.innerHTML = '';
-            if (insightsContent) insightsContent.innerHTML = '';
-            
-            // Simular carregamento (substituir por chamada AJAX real)
+            // Carregar mapa após um pequeno delay para garantir que o modal esteja visível
             setTimeout(() => {
-                // Carregar mapa
+                // Inicializar ou atualizar mapa
+                let centerLat = -20.66;
+                let centerLng = -43.79;
+                
+                // Usar coordenadas específicas se disponíveis
+                if (locationY && locationX) {
+                    centerLat = parseFloat(locationY);
+                    centerLng = parseFloat(locationX);
+                }
+                
+                // Se o mapa já existe, remover e criar um novo
                 if (currentMap) {
                     currentMap.remove();
                     currentMap = null;
+                    currentMarker = null;
                 }
                 
                 // Criar novo mapa
                 if (modalMapContainer) {
-                    currentMap = L.map('modalMapContainer').setView([-20.66, -43.79], 13);
+                    currentMap = L.map('modalMapContainer').setView([centerLat, centerLng], 13);
                     
+                    // Adicionar camada do OpenStreetMap
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap contributors',
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                         maxZoom: 19
                     }).addTo(currentMap);
                     
                     // Adicionar marcador
-                    L.marker([-20.66, -43.79]).addTo(currentMap)
-                        .bindPopup(`<strong>${street}</strong><br>${city}`)
+                    currentMarker = L.marker([centerLat, centerLng]).addTo(currentMap)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <h6 style="margin-bottom: 8px; color: #333;">${street}</h6>
+                                <p style="margin-bottom: 5px; color: #666;"><strong>Cidade:</strong> ${city}</p>
+                                <p style="margin-bottom: 5px; color: #666;"><strong>Destino:</strong> ${endNode || 'N/A'}</p>
+                                <p style="margin-bottom: 5px; color: #666;"><strong>Velocidade:</strong> ${speed} km/h</p>
+                                <p style="margin-bottom: 0; color: #666;"><strong>Atraso:</strong> ${Math.floor(delay / 60)} min</p>
+                            </div>
+                        `)
                         .openPopup();
+                    
+                    // Ajustar visualização para incluir o marcador
+                    currentMap.fitBounds(currentMarker.getBounds());
                 }
                 
                 // Atualizar insights
                 if (insightsContent) {
                     const delayMinutes = Math.floor(delay / 60);
                     const lengthKm = (length / 1000).toFixed(1);
+                    const speedReduction = ((1 - (speed / speedKMH)) * 100).toFixed(0);
                     
                     insightsContent.innerHTML = `
-                        <div class="col-6 col-md-3 mb-2">
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
                             <div class="insight-card">
                                 <h6><i class="fas fa-tachometer-alt me-1"></i>Vel. Normal</h6>
                                 <p>${speedKMH.toFixed(0)} km/h</p>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3 mb-2">
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
                             <div class="insight-card" style="border-left-color: #ffc107;">
                                 <h6><i class="fas fa-tachometer-alt me-1"></i>Vel. Atual</h6>
                                 <p>${speed.toFixed(0)} km/h</p>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3 mb-2">
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
                             <div class="insight-card" style="border-left-color: #dc3545;">
                                 <h6><i class="fas fa-clock me-1"></i>Atraso</h6>
                                 <p>${delayMinutes} min</p>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3 mb-2">
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
                             <div class="insight-card" style="border-left-color: #1cc88a;">
                                 <h6><i class="fas fa-road me-1"></i>Extensão</h6>
                                 <p>${lengthKm} km</p>
                             </div>
                         </div>
-                        <div class="col-12 mt-2">
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
+                            <div class="insight-card" style="border-left-color: #6f42c1;">
+                                <h6><i class="fas fa-chart-line me-1"></i>Redução</h6>
+                                <p>${speedReduction}%</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3 mb-2">
+                            <div class="insight-card" style="border-left-color: #20c997;">
+                                <h6><i class="fas fa-car me-1"></i>Status</h6>
+                                <p>${speed < 10 ? 'Congestionado' : speed < 20 ? 'Lento' : 'Moderado'}</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 mt-2">
                             <div class="insight-card" style="border-left-color: #6c757d;">
-                                <h6><i class="fas fa-calendar me-1"></i>Publicado em</h6>
+                                <h6><i class="fas fa-calendar me-1"></i>Detectado em</h6>
                                 <p>${formattedDate.date} ${formattedDate.fullTime}</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 mt-2">
+                            <div class="insight-card" style="border-left-color: #fd7e14;">
+                                <h6><i class="fas fa-map-marker-alt me-1"></i>Coordenadas</h6>
+                                <p>${locationY ? locationY + ', ' + locationX : 'Não disponível'}</p>
                             </div>
                         </div>
                     `;
@@ -1074,25 +1345,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Esconder loading
                 if (modalLoading) modalLoading.classList.add('d-none');
                 
-                // Ajustar tamanho do mapa
-                setTimeout(() => {
-                    if (currentMap) {
+                // Ajustar tamanho do mapa após o modal ser exibido
+                if (currentMap) {
+                    setTimeout(() => {
                         currentMap.invalidateSize();
-                    }
-                }, 100);
-            }, 500);
+                        if (currentMarker) {
+                            currentMap.fitBounds(currentMarker.getBounds());
+                        }
+                    }, 100);
+                }
+            }, 100);
         };
         
-        // Remover listeners anteriores e adicionar novo
+        // Configurar evento uma única vez
+        const mapModal = document.getElementById('mapModal');
         mapModal.removeEventListener('show.bs.modal', handleModalShow);
         mapModal.addEventListener('show.bs.modal', handleModalShow);
         
         // Configurar evento quando o modal é fechado
         const handleModalHidden = function() {
-            // Limpar mapa quando o modal é fechado
+            // Limpar recursos do mapa
             if (currentMap) {
                 currentMap.remove();
                 currentMap = null;
+                currentMarker = null;
             }
         };
         
@@ -1103,26 +1379,88 @@ document.addEventListener("DOMContentLoaded", function () {
         modalInstance.show();
     }
     
-    // Adicionar event listeners aos botões
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.view-route')) {
-            e.preventDefault();
-            const button = e.target.closest('.view-route');
-            loadRouteData(button);
-        }
-    });
-    
-    // Atualizar estatísticas periodicamente (a cada 30 segundos)
-    setInterval(() => {
-        // Em produção, você faria uma requisição AJAX para atualizar os dados
-        if (typeof $.notify !== 'undefined') {
-            $.notify("Atualizando dados de congestionamentos...", {
-                position: "top right",
-                className: "info",
-                autoHideDelay: 2000
+    // Função para compartilhar localização
+    function shareJamLocation(jamId) {
+        // Encontrar a linha da tabela correspondente
+        const row = document.querySelector(`tr[data-jam-id="${jamId}"]`);
+        if (!row) return;
+        
+        // Extrair dados da linha
+        const city = row.querySelector('.city-cell .fw-bold')?.textContent.trim() || '';
+        const street = row.querySelector('td:nth-child(2) .text-truncate-cell')?.textContent.trim() || '';
+        const speed = row.querySelector('.speed-badge')?.textContent.trim() || '';
+        const delay = row.querySelector('.delay-badge')?.textContent.trim() || '';
+        
+        // Criar texto para compartilhar
+        const shareText = `Congestionamento em ${city}: ${street}. Velocidade: ${speed}, Atraso: ${delay}.`;
+        
+        // Verificar se a API de compartilhamento está disponível
+        if (navigator.share) {
+            navigator.share({
+                title: 'Informação de Trânsito',
+                text: shareText,
+                url: window.location.href
+            }).catch(err => {
+                console.log('Erro ao compartilhar:', err);
+                fallbackShare(shareText);
             });
+        } else {
+            fallbackShare(shareText);
         }
-    }, 30000);
+    }
+    
+    // Fallback para navegadores sem suporte à API de compartilhamento
+    function fallbackShare(text) {
+        // Copiar para a área de transferência
+        navigator.clipboard.writeText(text).then(() => {
+            // Mostrar notificação
+            if (typeof $.notify !== 'undefined') {
+                $.notify("Informações copiadas para a área de transferência!", {
+                    position: "top right",
+                    className: "success",
+                    autoHideDelay: 3000
+                });
+            } else {
+                alert("Informações copiadas para a área de transferência!");
+            }
+        }).catch(err => {
+            console.error('Erro ao copiar:', err);
+            alert("Erro ao compartilhar. Texto: " + text);
+        });
+    }
+    
+    // Atualizar estatísticas periodicamente (a cada 60 segundos)
+    let updateInterval = null;
+    
+    function startAutoUpdate() {
+        if (updateInterval) clearInterval(updateInterval);
+        
+        updateInterval = setInterval(() => {
+            // Em produção, você faria uma requisição AJAX para atualizar os dados
+            console.log('Atualizando dados de congestionamentos...');
+            
+            // Atualizar o indicador "ao vivo"
+            const pulseDot = document.querySelector('.pulse-dot');
+            if (pulseDot) {
+                pulseDot.style.animation = 'none';
+                setTimeout(() => {
+                    pulseDot.style.animation = 'pulse-animation 2s ease-in-out infinite';
+                }, 10);
+            }
+            
+            // Mostrar notificação (opcional)
+            if (typeof $.notify !== 'undefined') {
+                $.notify("Dados atualizados", {
+                    position: "top right",
+                    className: "info",
+                    autoHideDelay: 2000
+                });
+            }
+        }, 60000); // 60 segundos
+    }
+    
+    // Iniciar atualização automática
+    startAutoUpdate();
     
     // Configurar animação do indicador "ao vivo"
     const pulseDot = document.querySelector('.pulse-dot');
@@ -1132,9 +1470,10 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 pulseDot.style.animation = 'pulse-animation 2s ease-in-out infinite';
             }, 10);
-        }, 10000);
+        }, 5000);
     }
     
     console.log('Dashboard de congestionamentos inicializado com sucesso!');
 });
 </script>
+[file content end]
