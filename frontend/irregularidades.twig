@@ -1,3 +1,5 @@
+[file name]: irregularidades.twig
+[file content begin]
 {% set show_origin = irregularities|reduce((carry, irr) => carry or (irr.from_name is defined and irr.from_name is not empty), false) %}
 {% set show_destination = irregularities|reduce((carry, irr) => carry or (irr.to_name is defined and irr.to_name is not empty), false) %}
 {% set show_avg_speed = irregularities|reduce((carry, irr) => carry or (irr.avg_speed is defined and irr.avg_speed is not empty), false) %}
@@ -6,87 +8,586 @@
 {% set show_historic_time = irregularities|reduce((carry, irr) => carry or (irr.historic_time is defined and irr.historic_time is not empty), false) %}
 {% set show_jam_level = irregularities|reduce((carry, irr) => carry or (irr.jam_level is defined and irr.jam_level is not empty), false) %}
 
-<div class="container">
-    <h2>Irregularidades</h2>
-    {% if irregularities is not empty %}
-        <div class="d-none d-lg-block">
-            <div class="table-responsive">
-                <table id="irregularitiesTable" class="table table-striped table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            {% if show_origin %}<th>Origem</th>{% endif %}
-                            {% if show_destination %}<th>Destino</th>{% endif %}
-                            {% if show_avg_speed %}<th>Velocidade Média</th>{% endif %}
-                            {% if show_avg_time %}<th>Tempo Médio</th>{% endif %}
-                            {% if show_historic_speed %}<th>Velocidade Histórica</th>{% endif %}
-                            {% if show_historic_time %}<th>Tempo Histórico</th>{% endif %}
-                            {% if show_jam_level %}<th>Nível de Congestionamento</th>{% endif %}
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for irregularity in irregularities %}
-                            <tr>
-                                <td>{{ irregularity.id }}</td>
-                                <td>{{ irregularity.name }}</td>
-                                {% if show_origin %}<td>{{ irregularity.from_name|default('') }}</td>{% endif %}
-                                {% if show_destination %}<td>{{ irregularity.to_name|default('') }}</td>{% endif %}
-                                {% if show_avg_speed %}<td>{{ irregularity.avg_speed|default(0)|number_format(2, '.', ',') }} Km/h</td>{% endif %}
-                                {% if show_avg_time %}<td>{{ (irregularity.avg_time|default(0) / 60)|number_format(2, '.', ',') }} min</td>{% endif %}
-                                {% if show_historic_speed %}<td>{{ irregularity.historic_speed|default(0)|number_format(2, '.', ',') }} Km/h</td>{% endif %}
-                                {% if show_historic_time %}<td>{{ (irregularity.historic_time|default(0) / 60)|number_format(2, '.', ',') }} min</td>{% endif %}
-                                {% if show_jam_level %}<td>{{ irregularity.jam_level|default('') }}</td>{% endif %}
-                                <td>
-                                    <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<style>
+    /* Estilos específicos para a página de irregularidades */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--header-border);
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stats-card.primary {
+        border-left-color: #4e73df;
+    }
+
+    .stats-card.warning {
+        border-left-color: #f6c23e;
+    }
+
+    .stats-card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card.primary .stats-card-icon {
+        background: linear-gradient(135deg, rgba(78, 115, 223, 0.1), rgba(54, 101, 223, 0.1));
+        color: #4e73df;
+    }
+
+    .stats-card.warning .stats-card-icon {
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1), rgba(221, 162, 10, 0.1));
+        color: #f6c23e;
+    }
+
+    .stats-card-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .stats-card-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .modern-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        background: var(--card-bg);
+        margin-bottom: 1.5rem;
+    }
+
+    .modern-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .modern-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.05rem;
+    }
+
+    .modern-card-header i {
+        font-size: 1.2rem;
+    }
+
+    .badge-counter {
+        background: rgba(255, 255, 255, 0.25);
+        padding: 0.4rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .modern-table {
+        margin-bottom: 0;
+    }
+
+    .modern-table thead th {
+        background: var(--table-hover);
+        border: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 1rem 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: var(--table-hover);
+        transform: translateX(3px);
+    }
+
+    .modern-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .modern-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        color: var(--text-primary);
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0 3px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px) scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn i {
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: var(--empty-icon-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+    }
+
+    .empty-state h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+
+    .mobile-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #4e73df;
+    }
+
+    .mobile-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .mobile-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-card-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-card-item:last-child {
+        border-bottom: none;
+    }
+
+    .mobile-card-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .mobile-card-value {
+        color: var(--text-primary);
+        text-align: right;
+        max-width: 60%;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .stats-card-value {
+            font-size: 2rem;
+        }
+
+        .stats-card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .modern-table {
+            font-size: 0.85rem;
+        }
+
+        .modern-table thead th,
+        .modern-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+    }
+</style>
+
+<div class="container-fluid px-3 px-lg-4 mt-4">
+    
+    <!-- Header da Página -->
+    <div class="page-header fade-in">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-exclamation-triangle me-2"></i>Irregularidades</h1>
+                <p class="subtitle mb-0">
+                    Monitoramento de irregularidades no trânsito e desvios de padrão
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary fs-6">{{ irregularities|length }}</span>
             </div>
         </div>
+    </div>
 
-        <div class="d-lg-none">
-            {% for irregularity in irregularities %}
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ irregularity.name }}</h5>
-                        <p class="card-text">
-                            {% if show_origin %}<strong>Origem:</strong> {{ irregularity.from_name|default('') }}<br>{% endif %}
-                            {% if show_destination %}<strong>Destino:</strong> {{ irregularity.to_name|default('') }}<br>{% endif %}
-                            {% if show_avg_speed %}<strong>Velocidade Média:</strong> {{ irregularity.avg_speed|default(0)|number_format(2) }} km/h<br>{% endif %}
-                            {% if show_avg_time %}<strong>Tempo Médio:</strong> {{ (irregularity.avg_time|default(0) / 60)|number_format(2) }} min<br>{% endif %}
-                            {% if show_historic_speed %}<strong>Velocidade Histórica:</strong> {{ irregularity.historic_speed|default(0)|number_format(2) }} km/h<br>{% endif %}
-                            {% if show_historic_time %}<strong>Tempo Histórico:</strong> {{ (irregularity.historic_time|default(0) / 60)|number_format(2) }} min<br>{% endif %}
-                            {% if show_jam_level %}<strong>Nível de Congestionamento:</strong> {{ irregularity.jam_level|default('') }}{% endif %}
-                        </p>
-                        <button class="btn btn-primary btn-sm view-map" data-route-id="{{ irregularity.id }}" data-bs-toggle="modal" data-bs-target="#mapModal">Ver no Mapa</button>
-                    </div>
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-6 col-md-6 mb-3 mb-xl-0 fade-in">
+            <div class="stats-card primary">
+                <div class="stats-card-icon">
+                    <i class="fas fa-road"></i>
                 </div>
-            {% endfor %}
+                <div class="stats-card-value">{{ irregularities|length }}</div>
+                <div class="stats-card-label">Irregularidades Registradas</div>
+            </div>
         </div>
-    {% else %}
-        <p>Não há irregularidades registradas no momento.</p>
-    {% endif %}
-</div>
+        <div class="col-xl-6 col-md-6 mb-3 mb-xl-0 fade-in" style="animation-delay: 0.1s;">
+            <div class="stats-card warning">
+                <div class="stats-card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-card-value">
+                    {% set total_time = 0 %}
+                    {% for irr in irregularities %}
+                        {% set total_time = total_time + (irr.avg_time|default(0) / 60) %}
+                    {% endfor %}
+                    {{ total_time|number_format(2, '.', ',') }}
+                </div>
+                <div class="stats-card-label">Tempo Total de Atraso (min)</div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Conteúdo Principal -->
+    <div class="fade-in" style="animation-delay: 0.2s;">
+        <div class="card modern-card">
+            <div class="modern-card-header">
+                <span>
+                    <i class="fas fa-list-alt me-2"></i>
+                    Lista de Irregularidades
+                </span>
+                {% if irregularities is not empty %}
+                    <span class="badge-counter">{{ irregularities|length }} registros</span>
+                {% endif %}
+            </div>
+            
+            <div class="card-body p-0">
+                {% if irregularities is not empty %}
+                    <!-- Versão Desktop -->
+                    <div class="d-none d-lg-block">
+                        <div class="table-responsive">
+                            <table id="irregularitiesTable" class="table modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        {% if show_origin %}<th>Origem</th>{% endif %}
+                                        {% if show_destination %}<th>Destino</th>{% endif %}
+                                        {% if show_avg_speed %}<th>Velocidade Média</th>{% endif %}
+                                        {% if show_avg_time %}<th>Tempo Médio</th>{% endif %}
+                                        {% if show_historic_speed %}<th>Velocidade Histórica</th>{% endif %}
+                                        {% if show_historic_time %}<th>Tempo Histórico</th>{% endif %}
+                                        {% if show_jam_level %}<th>Nível de Congestionamento</th>{% endif %}
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for irregularity in irregularities %}
+                                        <tr>
+                                            <td>
+                                                <span class="fw-bold text-primary">#{{ irregularity.id }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">{{ irregularity.name }}</div>
+                                            </td>
+                                            {% if show_origin %}
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                    {{ irregularity.from_name|default('N/A') }}
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_destination %}
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                                    {{ irregularity.to_name|default('N/A') }}
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_avg_speed %}
+                                            <td>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                                    {{ irregularity.avg_speed|default(0)|number_format(2, '.', ',') }} Km/h
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_avg_time %}
+                                            <td>
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                                                    {{ (irregularity.avg_time|default(0) / 60)|number_format(2, '.', ',') }} min
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_historic_speed %}
+                                            <td>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+                                                    {{ irregularity.historic_speed|default(0)|number_format(2, '.', ',') }} Km/h
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_historic_time %}
+                                            <td>
+                                                <span class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25">
+                                                    {{ (irregularity.historic_time|default(0) / 60)|number_format(2, '.', ',') }} min
+                                                </span>
+                                            </td>
+                                            {% endif %}
+                                            {% if show_jam_level %}
+                                            <td>
+                                                {% set jam_level = irregularity.jam_level|default('') %}
+                                                {% if jam_level == 5 %}
+                                                    <span class="badge bg-danger">Parado (Nível 5)</span>
+                                                {% elseif jam_level == 4 %}
+                                                    <span class="badge bg-warning">Muito Lento (Nível 4)</span>
+                                                {% elseif jam_level == 3 %}
+                                                    <span class="badge bg-warning">Lento (Nível 3)</span>
+                                                {% elseif jam_level == 2 %}
+                                                    <span class="badge bg-success">Moderado (Nível 2)</span>
+                                                {% elseif jam_level == 1 %}
+                                                    <span class="badge bg-info">Leve (Nível 1)</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ jam_level }}</span>
+                                                {% endif %}
+                                            </td>
+                                            {% endif %}
+                                            <td class="text-center">
+                                                <button class="btn btn-primary action-btn view-map" 
+                                                        data-route-id="{{ irregularity.id }}" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#mapModal"
+                                                        title="Ver no Mapa">
+                                                    <i class="fas fa-map-marked-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Versão Mobile -->
+                    <div class="d-lg-none">
+                        <div class="p-3">
+                            {% for irregularity in irregularities %}
+                                <div class="mobile-card">
+                                    <div class="mobile-card-title">
+                                        {{ irregularity.name }}
+                                        <small class="text-muted d-block">ID: #{{ irregularity.id }}</small>
+                                    </div>
+                                    
+                                    {% if show_origin %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Origem:</span>
+                                        <span class="mobile-card-value">{{ irregularity.from_name|default('N/A') }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_destination %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Destino:</span>
+                                        <span class="mobile-card-value">{{ irregularity.to_name|default('N/A') }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_avg_speed %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Velocidade Média:</span>
+                                        <span class="mobile-card-value text-info">
+                                            {{ irregularity.avg_speed|default(0)|number_format(2, '.', ',') }} Km/h
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_avg_time %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Tempo Médio:</span>
+                                        <span class="mobile-card-value text-warning">
+                                            {{ (irregularity.avg_time|default(0) / 60)|number_format(2, '.', ',') }} min
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_historic_speed %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Velocidade Histórica:</span>
+                                        <span class="mobile-card-value text-secondary">
+                                            {{ irregularity.historic_speed|default(0)|number_format(2, '.', ',') }} Km/h
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_historic_time %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Tempo Histórico:</span>
+                                        <span class="mobile-card-value text-dark">
+                                            {{ (irregularity.historic_time|default(0) / 60)|number_format(2, '.', ',') }} min
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if show_jam_level %}
+                                    <div class="mobile-card-item">
+                                        <span class="mobile-card-label">Congestionamento:</span>
+                                        <span class="mobile-card-value">
+                                            {% set jam_level = irregularity.jam_level|default('') %}
+                                            {% if jam_level == 5 %}
+                                                <span class="badge bg-danger">Parado (Nível 5)</span>
+                                            {% elseif jam_level == 4 %}
+                                                <span class="badge bg-warning">Muito Lento (Nível 4)</span>
+                                            {% elseif jam_level == 3 %}
+                                                <span class="badge bg-warning">Lento (Nível 3)</span>
+                                            {% elseif jam_level == 2 %}
+                                                <span class="badge bg-success">Moderado (Nível 2)</span>
+                                            {% elseif jam_level == 1 %}
+                                                <span class="badge bg-info">Leve (Nível 1)</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ jam_level }}</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3 pt-2 border-top">
+                                        <button class="btn btn-primary btn-sm view-map w-100" 
+                                                data-route-id="{{ irregularity.id }}" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#mapModal">
+                                            <i class="fas fa-map-marked-alt me-2"></i>Ver no Mapa
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-road"></i>
+                        <h5>Nenhuma irregularidade</h5>
+                        <p>Não há irregularidades registradas no momento.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal para o Mapa -->
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mapModalLabel">Mapa da Irregularidade</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            <div class="modal-header modern-card-header">
+                <h5 class="modal-title" id="mapModalLabel">
+                    <i class="fas fa-map-marked-alt me-2"></i>
+                    Mapa da Irregularidade
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-0 position-relative">
                 <!-- Placeholder para spinner -->
-                <div id="mapLoader" class="text-center my-3" style="display: none;">
-                    <div class="spinner-border" role="status">
+                <div id="mapLoader" class="text-center my-5" style="display: none;">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                         <span class="visually-hidden">Carregando...</span>
                     </div>
+                    <p class="mt-3 text-muted">Carregando mapa...</p>
                 </div>
                 <div id="mapContainer" style="width: 100%; height: 500px;"></div>
             </div>
@@ -134,15 +635,58 @@
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
                     }).addTo(map);
 
-                    L.polyline(coordinates, { color: 'red' }).addTo(map);
+                    // Adicionar linha vermelha para a irregularidade
+                    L.polyline(coordinates, { 
+                        color: '#dc3545',
+                        weight: 5,
+                        opacity: 0.8,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    }).addTo(map);
+
+                    // Adicionar marcador no início
+                    L.marker(coordinates[0], {
+                        icon: L.divIcon({
+                            html: '<i class="fas fa-map-marker-alt fa-2x" style="color: #dc3545;"></i>',
+                            iconSize: [30, 30],
+                            className: 'custom-marker'
+                        })
+                    }).addTo(map)
+                    .bindPopup('<strong>Início da Irregularidade</strong>');
+
+                    // Adicionar marcador no final
+                    L.marker(coordinates[coordinates.length - 1], {
+                        icon: L.divIcon({
+                            html: '<i class="fas fa-flag-checkered fa-2x" style="color: #28a745;"></i>',
+                            iconSize: [30, 30],
+                            className: 'custom-marker'
+                        })
+                    }).addTo(map)
+                    .bindPopup('<strong>Fim da Irregularidade</strong>');
+
+                    // Ajustar o zoom para mostrar toda a linha
+                    map.fitBounds(coordinates, { padding: [50, 50] });
                 } else {
-                    $mapContainer.html('<p>Não foi possível carregar as coordenadas.</p>');
+                    $mapContainer.html(`
+                        <div class="text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h5 class="text-muted">Não foi possível carregar as coordenadas</h5>
+                            <p class="text-muted">A rota não possui coordenadas disponíveis.</p>
+                        </div>
+                    `);
                 }
             } catch (error) {
                 console.error('Erro ao buscar coordenadas:', error);
-                $mapContainer.html('<p>Erro ao buscar as coordenadas. Tente novamente mais tarde.</p>');
+                $mapContainer.html(`
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                        <h5 class="text-muted">Erro ao carregar mapa</h5>
+                        <p class="text-muted">Tente novamente mais tarde.</p>
+                    </div>
+                `);
             } finally {
                 // Oculta o spinner quando finalizado
                 $mapLoader.hide();
@@ -161,7 +705,41 @@
                 map.remove();
                 map = null;
             }
+            $('#mapLoader').hide();
+        });
+
+        // Inicializar DataTable para a versão desktop
+        if ($('#irregularitiesTable').length) {
+            $('#irregularitiesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json'
+                },
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                order: [[0, 'desc']],
+                columnDefs: [
+                    { orderable: false, targets: $('th').length - 1 }, // Última coluna (Ações)
+                    { width: "80px", targets: 0 }, // ID
+                    { width: "100px", targets: $('th').length - 1 } // Ações
+                ],
+                dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                initComplete: function() {
+                    console.log('Tabela de irregularidades carregada com sucesso');
+                }
+            });
+        }
+
+        // Adicionar tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: 'custom-tooltip'
+            });
         });
     });
 })(jQuery);
 </script>
+[file content end]
