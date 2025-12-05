@@ -714,11 +714,31 @@
                             <tbody>
                                 {% for jam in jams %}
                                 {% set delay_minutes = jam.delay / 60 %}
+                                {% set pub_date = null %}
+                                
+                                {# Corrigir o parsing da data #}
+                                {% if jam.pubMillis is defined and jam.pubMillis is not empty %}
+                                    {# Tentar diferentes formatos #}
+                                    {% if jam.pubMillis matches '/^\\d+\\.\\d+$/' %}
+                                        {# É um timestamp com ponto decimal #}
+                                        {% set pub_timestamp = jam.pubMillis|split('.')|first %}
+                                        {% set pub_date = pub_timestamp|date('d/m/Y H:i:s') %}
+                                    {% elseif jam.pubMillis matches '/^\\d+$/' %}
+                                        {# É um timestamp inteiro #}
+                                        {% set pub_date = jam.pubMillis|date('d/m/Y H:i:s') %}
+                                    {% else %}
+                                        {# Tentar usar como string #}
+                                        {% set pub_date = jam.pubMillis %}
+                                    {% endif %}
+                                {% endif %}
+                                
                                 <tr>
                                     <td class="city-cell">
                                         <div class="fw-bold text-primary">{{ jam.city[:15] }}{% if jam.city|length > 15 %}...{% endif %}</div>
                                         <small class="text-muted d-lg-none d-block mobile-text-small">
-                                            {{ (jam.pubMillis / 1000)|date("d/m H:i") }}
+                                            {% if pub_date %}
+                                                {{ pub_date|slice(0, 11) }}
+                                            {% endif %}
                                         </small>
                                     </td>
                                     <td>
@@ -776,8 +796,13 @@
                                         </span>
                                     </td>
                                     <td class="d-none d-lg-table-cell">
-                                        <div class="text-nowrap">{{ (jam.pubMillis / 1000)|date("d/m/Y") }}</div>
-                                        <small class="text-muted">{{ (jam.pubMillis / 1000)|date("H:i") }}</small>
+                                        {% if pub_date %}
+                                        <div class="text-nowrap">{{ pub_date|slice(0, 10) }}</div>
+                                        <small class="text-muted">{{ pub_date|slice(11, 5) }}</small>
+                                        {% else %}
+                                        <div class="text-nowrap">N/A</div>
+                                        <small class="text-muted">--:--</small>
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
                                         <button class="btn btn-primary action-btn view-route" 
@@ -854,6 +879,40 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Função para formatar a data do pubMillis
+    function formatPubMillis(pubMillis) {
+        if (!pubMillis) return 'N/A';
+        
+        try {
+            // Verificar se é um número com ponto decimal
+            if (typeof pubMillis === 'string' || typeof pubMillis === 'number') {
+                // Remover parte decimal se existir
+                const timestamp = Math.floor(parseFloat(pubMillis));
+                
+                // Converter para Date
+                const date = new Date(timestamp * 1000); // Converter de segundos para milissegundos
+                
+                // Formatar data
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                
+                return {
+                    date: `${day}/${month}/${year}`,
+                    time: `${hours}:${minutes}`,
+                    fullTime: `${hours}:${minutes}:${seconds}`
+                };
+            }
+        } catch (e) {
+            console.error('Erro ao formatar pubMillis:', e);
+        }
+        
+        return { date: 'N/A', time: '--:--', fullTime: '--:--:--' };
+    }
+
     // Remover qualquer listener anterior para evitar conflitos
     const viewRouteButtons = document.querySelectorAll('.view-route');
     viewRouteButtons.forEach(button => {
@@ -921,9 +980,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const speed = parseFloat(button.getAttribute('data-speed'));
         const delay = parseInt(button.getAttribute('data-delay'));
         const length = parseInt(button.getAttribute('data-length'));
-        const pubMillis = parseInt(button.getAttribute('data-pub-millis'));
+        const pubMillis = button.getAttribute('data-pub-millis');
         
         console.log('Carregando dados da rota:', routeId);
+        
+        // Formatando a data
+        const formattedDate = formatPubMillis(pubMillis);
         
         // Atualizar título do modal
         const modalTitle = document.getElementById('modalRouteName');
@@ -972,11 +1034,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 // Atualizar insights
                 if (insightsContent) {
-                    const delayMinutes = (delay / 60).toFixed(0);
+                    const delayMinutes = Math.floor(delay / 60);
                     const lengthKm = (length / 1000).toFixed(1);
-                    const pubDate = new Date(pubMillis);
-                    const formattedDate = pubDate.toLocaleDateString('pt-BR');
-                    const formattedTime = pubDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                     
                     insightsContent.innerHTML = `
                         <div class="col-6 col-md-3 mb-2">
@@ -1001,6 +1060,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="insight-card" style="border-left-color: #1cc88a;">
                                 <h6><i class="fas fa-road me-1"></i>Extensão</h6>
                                 <p>${lengthKm} km</p>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="insight-card" style="border-left-color: #6c757d;">
+                                <h6><i class="fas fa-calendar me-1"></i>Publicado em</h6>
+                                <p>${formattedDate.date} ${formattedDate.fullTime}</p>
                             </div>
                         </div>
                     `;
@@ -1029,7 +1094,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentMap.remove();
                 currentMap = null;
             }
-            console.log('Modal fechado, limpando mapa...');
         };
         
         mapModal.removeEventListener('hidden.bs.modal', handleModalHidden);
@@ -1051,7 +1115,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Atualizar estatísticas periodicamente (a cada 30 segundos)
     setInterval(() => {
         // Em produção, você faria uma requisição AJAX para atualizar os dados
-        // Por enquanto, apenas mostramos uma notificação
         if (typeof $.notify !== 'undefined') {
             $.notify("Atualizando dados de congestionamentos...", {
                 position: "top right",
