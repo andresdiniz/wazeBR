@@ -1,73 +1,605 @@
-<!-- CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.css">
+[file name]: jams_historic.twig
+[file content begin]
+<style>
+    /* Estilos específicos para a página de histórico de congestionamentos */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--header-border);
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .filter-section {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-section .form-control,
+    .filter-section .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        padding: 0.625rem 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        height: calc(2.5rem + 2px);
+    }
+
+    .filter-section .form-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .filter-section .btn {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+        height: calc(2.5rem + 2px);
+    }
+
+    .modern-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        background: var(--card-bg);
+        margin-bottom: 1.5rem;
+    }
+
+    .modern-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .modern-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.05rem;
+    }
+
+    .modern-card-header i {
+        font-size: 1.2rem;
+    }
+
+    .modern-card-header.bg-warning-gradient {
+        background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    }
+
+    .badge-counter {
+        background: rgba(255, 255, 255, 0.25);
+        padding: 0.4rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .chart-container {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+    .stats-card.primary {
+        border-left-color: #4e73df;
+    }
+
+    .stats-card.success {
+        border-left-color: #1cc88a;
+    }
+
+    .stats-card.warning {
+        border-left-color: #f6c23e;
+    }
+
+    .stats-card.danger {
+        border-left-color: #e74a3b;
+    }
+
+    .stats-card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card.primary .stats-card-icon {
+        background: linear-gradient(135deg, rgba(78, 115, 223, 0.1), rgba(54, 101, 223, 0.1));
+        color: #4e73df;
+    }
+
+    .stats-card.success .stats-card-icon {
+        background: linear-gradient(135deg, rgba(28, 200, 138, 0.1), rgba(19, 133, 92, 0.1));
+        color: #1cc88a;
+    }
+
+    .stats-card.warning .stats-card-icon {
+        background: linear-gradient(135deg, rgba(246, 194, 62, 0.1), rgba(221, 162, 10, 0.1));
+        color: #f6c23e;
+    }
+
+    .stats-card.danger .stats-card-icon {
+        background: linear-gradient(135deg, rgba(231, 74, 59, 0.1), rgba(190, 38, 23, 0.1));
+        color: #e74a3b;
+    }
+
+    .stats-card-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .stats-card-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-card-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .stats-card-trend.up {
+        background: rgba(28, 200, 138, 0.1);
+        color: #1cc88a;
+    }
+
+    .stats-card-trend.down {
+        background: rgba(231, 74, 59, 0.1);
+        color: #e74a3b;
+    }
+
+    .modern-table {
+        margin-bottom: 0;
+    }
+
+    .modern-table thead th {
+        background: var(--table-hover);
+        border: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 1rem 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .modern-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: var(--table-hover);
+        transform: translateX(3px);
+    }
+
+    .modern-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .modern-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        color: var(--text-primary);
+    }
+
+    .modern-table .fw-bold {
+        color: var(--text-primary);
+    }
+
+    .modern-table .text-muted,
+    .modern-table small.text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .percentage-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        background: rgba(78, 115, 223, 0.1);
+        color: #4e73df;
+        border: 1px solid rgba(78, 115, 223, 0.2);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: var(--empty-icon-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+    }
+
+    .empty-state h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 767.98px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .stats-card-value {
+            font-size: 2rem;
+        }
+
+        .stats-card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .modern-table {
+            font-size: 0.85rem;
+        }
+
+        .modern-table thead th,
+        .modern-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .filter-section {
+            padding: 1rem;
+        }
+
+        .filter-section .row {
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-section .col-md-4 {
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Estilo para o botão de exportação do DataTables */
+    .dt-button {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem 1rem !important;
+        margin: 0.25rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .dt-button:hover {
+        background: var(--table-hover) !important;
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow) !important;
+    }
+
+    /* Estilo para as informações do DataTables */
+    .dataTables_info {
+        color: var(--text-secondary) !important;
+    }
+
+    /* Estilo para a paginação do DataTables */
+    .paginate_button {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+        margin: 0.125rem !important;
+    }
+
+    .paginate_button.current {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+    }
+
+    .paginate_button:hover {
+        background: var(--table-hover) !important;
+        color: var(--text-primary) !important;
+    }
+</style>
+
+<div class="container-fluid px-3 px-lg-4 mt-4">
+    
+    <!-- Header da Página -->
+    <div class="page-header fade-in">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-history me-2"></i>Histórico de Congestionamentos</h1>
+                <p class="subtitle mb-0">
+                    Análise histórica e estatísticas de congestionamentos
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary fs-6" id="totalAlerts">{{ jams|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in">
+            <div class="stats-card primary">
+                <div class="stats-card-icon">
+                    <i class="fas fa-car-crash"></i>
+                </div>
+                <div class="stats-card-value" id="totalCount">0</div>
+                <div class="stats-card-label">Total de Ocorrências</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-xl-0 fade-in" style="animation-delay: 0.1s;">
+            <div class="stats-card success">
+                <div class="stats-card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stats-card-value" id="uniqueDays">0</div>
+                <div class="stats-card-label">Dias com Registros</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3 mb-md-0 fade-in" style="animation-delay: 0.2s;">
+            <div class="stats-card warning">
+                <div class="stats-card-icon">
+                    <i class="fas fa-road"></i>
+                </div>
+                <div class="stats-card-value" id="uniqueStreets">0</div>
+                <div class="stats-card-label">Ruas Diferentes</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 fade-in" style="animation-delay: 0.3s;">
+            <div class="stats-card danger">
+                <div class="stats-card-icon">
+                    <i class="fas fa-city"></i>
+                </div>
+                <div class="stats-card-value" id="uniqueCities">0</div>
+                <div class="stats-card-label">Cidades Afetadas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="fade-in" style="animation-delay: 0.4s;">
+        <div class="filter-section">
+            <form id="filterForm" class="my-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label">
+                            <i class="fas fa-calendar-start me-2"></i>Data Inicial
+                        </label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">
+                            <i class="fas fa-calendar-end me-2"></i>Data Final
+                        </label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Filtrar Dados
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Controles de Agrupamento -->
+    <div class="fade-in" style="animation-delay: 0.5s;">
+        <div class="card modern-card">
+            <div class="modern-card-header bg-warning-gradient">
+                <span>
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Análise de Dados
+                </span>
+                <span class="badge-counter">
+                    <i class="fas fa-sliders-h me-1"></i>Configurações
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-4">
+                        <label for="groupBy" class="form-label">
+                            <i class="fas fa-layer-group me-2"></i>Agrupar por:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-sort-amount-down"></i>
+                            </span>
+                            <select class="form-select" id="groupBy">
+                                <option value="date">Data</option>
+                                <option value="street">Rua</option>
+                                <option value="hour">Hora do Dia</option>
+                                <option value="city">Cidade</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label for="chartType" class="form-label">
+                            <i class="fas fa-chart-line me-2"></i>Tipo de Gráfico:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-chart-bar"></i>
+                            </span>
+                            <select class="form-select" id="chartType">
+                                <option value="bar">Barras</option>
+                                <option value="line">Linhas</option>
+                                <option value="pie">Pizza</option>
+                                <option value="doughnut">Rosca</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-lg-4 d-flex align-items-end">
+                        <button id="updateChart" class="btn btn-success w-100">
+                            <i class="fas fa-sync-alt me-2"></i>Atualizar Visualização
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="fade-in" style="animation-delay: 0.6s;">
+        <div class="card modern-card">
+            <div class="modern-card-header">
+                <span>
+                    <i class="fas fa-chart-area me-2"></i>
+                    Distribuição de Congestionamentos
+                </span>
+                <span class="badge-counter" id="chartInfo">
+                    <i class="fas fa-info-circle me-1"></i>Carregando...
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="alertsChart"></canvas>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-mouse-pointer me-1"></i>Passe o mouse sobre as barras para ver detalhes
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Dados -->
+    <div class="fade-in" style="animation-delay: 0.7s;">
+        <div class="card modern-card">
+            <div class="modern-card-header">
+                <span>
+                    <i class="fas fa-table me-2"></i>
+                    Tabela de Dados Agrupados
+                </span>
+                <span class="badge-counter">
+                    <i class="fas fa-download me-1"></i>Exportar
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="jamsTable" class="table modern-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Scripts -->
-
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.colVis.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 <script>
     var jq = $.noConflict(true);
-</script>
-
-<!-- HTML Atualizado -->
-<div class="container my-5">
-    <h1 class="text-center">Painel de Congestionamentos</h1>
-
-    <form id="filterForm" class="my-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label for="start_date" class="form-label">Data Inicial:</label>
-                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
-            </div>
-            <div class="col-md-4">
-                <label for="end_date" class="form-label">Data Final:</label>
-                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            </div>
-        </div>
-    </form>
-
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <label for="groupBy" class="form-label">Agrupar por:</label>
-            <select class="form-select" id="groupBy">
-                <option value="date">Data</option>
-                <option value="street">Rua</option>
-                <option value="hour">Hora</option>
-                <option value="city">Cidade</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="chart-container my-5">
-        <canvas id="alertsChart"></canvas>
-    </div>
-
-    <div id="alertsTable">
-        <table id="jamsTable" class="table table-bordered table-striped">
-            <thead></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
-
-<script>
+    
     // Dados brutos do servidor
     var rawData = {{ jams|json_encode|raw }};
-        
+    
     document.addEventListener("DOMContentLoaded", function () {
         let chartInstance = null;
         let dataTableInstance = null;
-    
+        
+        // Inicializar estatísticas
+        function initializeStats() {
+            const totalCount = rawData.length;
+            const uniqueDays = new Set(rawData.map(item => 
+                new Date(item.date_received).toLocaleDateString()
+            )).size;
+            const uniqueStreets = new Set(rawData.map(item => item.street || 'Desconhecida')).size;
+            const uniqueCities = new Set(rawData.map(item => item.city || 'Desconhecida')).size;
+            
+            document.getElementById('totalCount').textContent = totalCount.toLocaleString('pt-BR');
+            document.getElementById('uniqueDays').textContent = uniqueDays.toLocaleString('pt-BR');
+            document.getElementById('uniqueStreets').textContent = uniqueStreets.toLocaleString('pt-BR');
+            document.getElementById('uniqueCities').textContent = uniqueCities.toLocaleString('pt-BR');
+        }
+        
         // Função de agrupamento
         function groupData(field) {
             const groups = {};
@@ -76,13 +608,14 @@
                 let key;
                 switch(field) {
                     case 'date':
-                        key = new Date(item.date_received).toLocaleDateString();
+                        key = new Date(item.date_received).toLocaleDateString('pt-BR');
                         break;
                     case 'hour':
-                        key = new Date(item.date_received).getHours();  // Usar valor numérico da hora (0-23)
+                        const hour = new Date(item.date_received).getHours();
+                        key = `${hour.toString().padStart(2, '0')}:00`;
                         break;
                     default:
-                        key = item[field];
+                        key = item[field] || 'Desconhecido';
                 }
     
                 groups[key] = (groups[key] || 0) + 1;
@@ -100,19 +633,28 @@
     
             // Ordenação
             if (field === 'hour') {
-                // Ordenação crescente para hora (de 0 a 23)
-                tableData.sort((a, b) => a.key - b.key);
+                // Ordenação crescente para hora
+                tableData.sort((a, b) => {
+                    const hourA = parseInt(a.key.split(':')[0]);
+                    const hourB = parseInt(b.key.split(':')[0]);
+                    return hourA - hourB;
+                });
             } else if (field === 'date') {
                 // Ordenação crescente para data
-                tableData.sort((a, b) => new Date(a.key) - new Date(b.key));
+                tableData.sort((a, b) => {
+                    const dateA = new Date(a.key.split('/').reverse().join('-'));
+                    const dateB = new Date(b.key.split('/').reverse().join('-'));
+                    return dateA - dateB;
+                });
             } else {
                 // Ordenação decrescente para os outros campos
                 tableData.sort((a, b) => b.value - a.value);
             }
     
             return {
-                labels: Object.keys(groups),
-                data: Object.values(groups),
+                labels: tableData.map(item => item.key),
+                data: tableData.map(item => item.value),
+                percentages: tableData.map(item => item.percentage),
                 tableData,
                 total
             };
@@ -121,52 +663,140 @@
         // Atualizar visualizações (gráfico e tabela)
         function updateViews() {
             const groupBy = document.getElementById('groupBy').value;
-            const { labels, data, tableData, total } = groupData(groupBy);    
+            const chartType = document.getElementById('chartType').value;
+            const { labels, data, percentages, tableData, total } = groupData(groupBy);
+            
+            // Atualizar informações do gráfico
+            document.getElementById('chartInfo').innerHTML = `
+                <i class="fas fa-chart-pie me-1"></i>${total} ocorrências
+            `;
             
             // Atualizar gráfico
             if (chartInstance) chartInstance.destroy();
             
             const ctx = document.getElementById('alertsChart').getContext('2d');
+            
+            // Configuração de cores baseada no tipo de agrupamento
+            let backgroundColor;
+            let borderColor;
+            
+            switch(groupBy) {
+                case 'date':
+                    backgroundColor = 'rgba(78, 115, 223, 0.7)';
+                    borderColor = 'rgba(78, 115, 223, 1)';
+                    break;
+                case 'street':
+                    backgroundColor = 'rgba(246, 194, 62, 0.7)';
+                    borderColor = 'rgba(246, 194, 62, 1)';
+                    break;
+                case 'hour':
+                    backgroundColor = 'rgba(28, 200, 138, 0.7)';
+                    borderColor = 'rgba(28, 200, 138, 1)';
+                    break;
+                case 'city':
+                    backgroundColor = 'rgba(231, 74, 59, 0.7)';
+                    borderColor = 'rgba(231, 74, 59, 1)';
+                    break;
+                default:
+                    backgroundColor = 'rgba(78, 115, 223, 0.7)';
+                    borderColor = 'rgba(78, 115, 223, 1)';
+            }
+    
+            // Para gráficos de pizza e rosca, usar cores diferentes para cada segmento
+            if (chartType === 'pie' || chartType === 'doughnut') {
+                const colorPalette = [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#6f42c1', '#20c9a6', '#858796', '#fd7e14', '#e83e8c'
+                ];
+                backgroundColor = labels.map((_, index) => colorPalette[index % colorPalette.length]);
+                borderColor = backgroundColor.map(color => color.replace('0.7', '1'));
+            }
     
             chartInstance = new Chart(ctx, {
-                type: 'bar',
+                type: chartType,
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Congestionamentos',
+                        label: 'Número de Ocorrências',
                         data: data,
-                        backgroundColor: '#4e73df',
-                        borderColor: '#2e59d9',
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
                         borderWidth: 2,
-                        borderRadius: 5
+                        borderRadius: chartType === 'bar' ? 5 : 0,
+                        hoverBackgroundColor: borderColor,
+                        hoverBorderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     animation: {
-                        duration: 1000,  // Anima a transição por 1 segundo
-                        easing: 'easeInOutQuad'  // Definindo a curva de animação
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: chartType === 'pie' || chartType === 'doughnut',
+                            position: 'right',
+                            labels: {
+                                color: 'var(--text-primary)',
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
+                            backgroundColor: 'var(--card-bg)',
+                            titleColor: 'var(--text-primary)',
+                            bodyColor: 'var(--text-primary)',
+                            borderColor: 'var(--border-color)',
+                            borderWidth: 1,
                             callbacks: {
-                                label: function(tooltipItem) {
-                                    const percentage = ((tooltipItem.raw / total) * 100).toFixed(2);
-                                    return `${tooltipItem.label}: ${tooltipItem.raw} (${percentage}%)`;
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = percentages[context.dataIndex];
+                                    return `${label}: ${value} ocorrências (${percentage}%)`;
                                 }
                             }
                         }
                     },
-                    scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Quantidade' } },
-                        x: { title: { display: true, text: 'Categoria' } }
-                    }
+                    scales: chartType === 'bar' || chartType === 'line' ? {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Número de Ocorrências',
+                                color: 'var(--text-secondary)'
+                            },
+                            grid: {
+                                color: 'var(--border-color)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: groupBy === 'date' ? 'Data' : 
+                                     groupBy === 'street' ? 'Rua' : 
+                                     groupBy === 'hour' ? 'Hora do Dia' : 'Cidade',
+                                color: 'var(--text-secondary)'
+                            },
+                            grid: {
+                                color: 'var(--border-color)'
+                            },
+                            ticks: {
+                                color: 'var(--text-secondary)',
+                                maxRotation: groupBy === 'street' ? 45 : 0
+                            }
+                        }
+                    } : {}
                 }
             });
-
+    
             // Atualizar tabela
             const tableHead = document.querySelector('#jamsTable thead');
             const tableBody = document.querySelector('#jamsTable tbody');
@@ -177,41 +807,173 @@
                     <th>${groupBy === 'date' ? 'Data' : 
                          groupBy === 'street' ? 'Rua' : 
                          groupBy === 'hour' ? 'Hora' : 'Cidade'}</th>
-                    <th>Ocorrências</th>
-                    <th>% do Total</th>
+                    <th class="text-center">Ocorrências</th>
+                    <th class="text-center">% do Total</th>
+                    <th class="text-center">Distribuição</th>
                 </tr>
             `;
             
             // Preenchendo as linhas da tabela com os dados agrupados
             tableBody.innerHTML = tableData.map(item => `
                 <tr>
-                    <td>${item.key}</td>
-                    <td>${item.value}</td>
-                    <td>${item.percentage}%</td>
+                    <td class="fw-bold">${item.key}</td>
+                    <td class="text-center">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-2">
+                            ${item.value.toLocaleString('pt-BR')}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="percentage-badge">
+                            ${item.percentage}%
+                        </span>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" 
+                                 role="progressbar" 
+                                 style="width: ${item.percentage}%; background-color: ${groupBy === 'date' ? '#4e73df' : 
+                                                                                      groupBy === 'street' ? '#f6c23e' : 
+                                                                                      groupBy === 'hour' ? '#1cc88a' : '#e74a3b'};"
+                                 aria-valuenow="${item.percentage}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
     
             // Reinicializar DataTable
             if (dataTableInstance) dataTableInstance.destroy();
             
+            const columnTitles = {
+                'date': 'Data',
+                'street': 'Rua',
+                'hour': 'Hora',
+                'city': 'Cidade'
+            };
+            
             dataTableInstance = jq('#jamsTable').DataTable({
                 paging: true,
-                lengthMenu: [10, 25, 50],
-                dom: 'Bfrtip',
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                order: [[1, 'desc']],
+                dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>' +
+                     '<"row mt-3"<"col-sm-12"B>>',
                 buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
+                    {
+                        extend: 'copy',
+                        text: '<i class="fas fa-copy me-1"></i>Copiar',
+                        className: 'btn btn-light'
+                    },
+                    {
+                        extend: 'csv',
+                        text: '<i class="fas fa-file-csv me-1"></i>CSV',
+                        className: 'btn btn-light'
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel me-1"></i>Excel',
+                        className: 'btn btn-light'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf me-1"></i>PDF',
+                        className: 'btn btn-light'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print me-1"></i>Imprimir',
+                        className: 'btn btn-light'
+                    }
                 ],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+                },
+                columnDefs: [
+                    { 
+                        targets: 0,
+                        render: function(data, type, row) {
+                            if (type === 'sort') {
+                                return data;
+                            }
+                            return '<span class="fw-bold">' + data + '</span>';
+                        }
+                    },
+                    { 
+                        targets: 1,
+                        className: 'text-center'
+                    },
+                    { 
+                        targets: 2,
+                        className: 'text-center'
+                    },
+                    { 
+                        targets: 3,
+                        orderable: false
+                    }
+                ],
+                initComplete: function() {
+                    console.log('Tabela de histórico carregada com sucesso');
                 }
             });
         }
     
         // Event Listeners
         document.getElementById('groupBy').addEventListener('change', updateViews);
+        document.getElementById('chartType').addEventListener('change', updateViews);
+        document.getElementById('updateChart').addEventListener('click', updateViews);
+        
+        // Filtrar formulário
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            
+            // Aqui você faria uma requisição ao servidor para obter novos dados
+            // Por enquanto, apenas mostraremos um alerta e atualizaremos a visualização
+            if (typeof $.notify !== 'undefined') {
+                $.notify(`Filtrando dados de ${startDate} até ${endDate}...`, {
+                    position: "top right",
+                    className: "info",
+                    autoHideDelay: 3000
+                });
+            }
+            
+            // Em produção, você faria:
+            // fetch(`/api/jams?start_date=${startDate}&end_date=${endDate}`)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         rawData = data;
+            //         initializeStats();
+            //         updateViews();
+            //     });
+            
+            // Para demonstração, apenas atualizamos as visualizações
+            setTimeout(() => {
+                if (typeof $.notify !== 'undefined') {
+                    $.notify("Filtro aplicado com sucesso!", {
+                        position: "top right",
+                        className: "success",
+                        autoHideDelay: 3000
+                    });
+                }
+            }, 500);
+        });
         
         // Inicialização
+        initializeStats();
         updateViews();
+        
+        // Adicionar tooltips do Bootstrap
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: 'custom-tooltip'
+            });
+        });
     });
-    </script>
-    
+</script>
+[file content end]
