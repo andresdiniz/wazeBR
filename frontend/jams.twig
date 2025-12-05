@@ -686,7 +686,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body p-0 position-relative">
-                <div id="mapContainer" style="width: 100%; height: 500px;"></div>
+                <div id="modalMapContainer" style="width: 100%; height: 500px;"></div>
                 <div id="insightsContainer" class="p-3 border-top">
                     <div class="row" id="insightsContent">
                         <!-- Insights serão carregados dinamicamente -->
@@ -769,16 +769,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // Configurar o evento do modal
     const mapModal = document.getElementById('mapModal');
     let currentMap = null;
-    
+
     mapModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         const routeId = button.getAttribute('data-route-id');
         
         // Mostrar loading
-        document.getElementById('modalLoading').classList.remove('d-none');
+        const modalLoading = document.getElementById('modalLoading');
+        const mapContainer = document.getElementById('mapContainer');
+        const insightsContent = document.getElementById('insightsContent');
         
-        // Aqui você faria uma requisição para obter os dados da rota
-        // Por enquanto, vamos simular com dados estáticos
+        if (modalLoading) modalLoading.classList.remove('d-none');
+        if (mapContainer) mapContainer.innerHTML = ''; // Limpar mapa anterior
+        if (insightsContent) insightsContent.innerHTML = ''; // Limpar insights
+        
+        // Simular carregamento (substituir por chamada AJAX real)
         setTimeout(() => {
             // Carregar mapa
             if (currentMap) {
@@ -786,7 +791,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             
             // Criar novo mapa
-            currentMap = L.map('mapContainer').setView([-20.66, -43.79], 13);
+            currentMap = L.map('modalMapContainer').setView([-20.66, -43.79], 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
@@ -799,44 +804,47 @@ document.addEventListener("DOMContentLoaded", function () {
                 .openPopup();
             
             // Atualizar insights
-            const insightsContent = document.getElementById('insightsContent');
-            insightsContent.innerHTML = `
-                <div class="col-md-3">
-                    <div class="insight-card">
-                        <h6><i class="fas fa-tachometer-alt me-2"></i>Velocidade Atual</h6>
-                        <p>15.2 km/h</p>
+            if (insightsContent) {
+                insightsContent.innerHTML = `
+                    <div class="col-md-3">
+                        <div class="insight-card">
+                            <h6><i class="fas fa-tachometer-alt me-2"></i>Velocidade Atual</h6>
+                            <p>15.2 km/h</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="insight-card" style="border-left-color: #ffc107;">
-                        <h6><i class="fas fa-clock me-2"></i>Atraso Atual</h6>
-                        <p>8.5 min</p>
+                    <div class="col-md-3">
+                        <div class="insight-card" style="border-left-color: #ffc107;">
+                            <h6><i class="fas fa-clock me-2"></i>Atraso Atual</h6>
+                            <p>8.5 min</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="insight-card" style="border-left-color: #1cc88a;">
-                        <h6><i class="fas fa-road me-2"></i>Extensão</h6>
-                        <p>1.2 km</p>
+                    <div class="col-md-3">
+                        <div class="insight-card" style="border-left-color: #1cc88a;">
+                            <h6><i class="fas fa-road me-2"></i>Extensão</h6>
+                            <p>1.2 km</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="insight-card" style="border-left-color: #36b9cc;">
-                        <h6><i class="fas fa-car me-2"></i>Nível</h6>
-                        <p>Alto</p>
+                    <div class="col-md-3">
+                        <div class="insight-card" style="border-left-color: #36b9cc;">
+                            <h6><i class="fas fa-car me-2"></i>Nível</h6>
+                            <p>Alto</p>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             
             // Esconder loading
-            document.getElementById('modalLoading').classList.add('d-none');
+            if (modalLoading) modalLoading.classList.add('d-none');
             
             // Ajustar tamanho do mapa
             setTimeout(() => {
-                currentMap.invalidateSize();
+                if (currentMap) {
+                    currentMap.invalidateSize();
+                }
             }, 100);
         }, 1000);
     });
-    
+
     mapModal.addEventListener('hidden.bs.modal', function () {
         // Limpar mapa quando o modal é fechado
         if (currentMap) {
