@@ -2,9 +2,103 @@
 
 {% extends 'base.twig' %}
 
+{# 1. CSS EMBUTIDO (Para garantir o estilo, se o main.css falhar ou não estiver no base.twig) #}
+{% block style_block %}
+<style>
+/* Os estilos foram extraídos do seu arquivo e são os mesmos do CSS unificado. 
+   Recomenda-se mover isso para um arquivo externo (main.css) se possível. */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); 
+    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%); 
+    --color-bg: #f8f9fc;
+    --color-card-bg: #ffffff;
+    --color-text-primary: #2c3e50;
+    --color-text-secondary: #858796;
+    --color-border: #e3e6f0;
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode {
+    --color-bg: #1e212b;
+    --color-card-bg: #272c38;
+    --color-text-primary: #e4e6eb;
+    --color-text-secondary: #a9aabc;
+    --color-border: #3a4154;
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.page-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Card Moderno e Componentes */
+.modern-card {
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    background: var(--color-card-bg);
+}
+.modern-card-header {
+    border-top: 4px solid transparent; 
+    border-image: var(--info-gradient);
+    border-image-slice: 1;
+}
+
+/* Notificações */
+.notification-group {
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-card-bg);
+    transition: all 0.3s ease;
+}
+
+.notification-group:hover {
+    border-color: #1cc88a; 
+    box-shadow: 0 0 8px rgba(28, 200, 138, 0.1);
+}
+
+.notification-header {
+    border-bottom: 1px dashed var(--color-border);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+}
+
+.channel-check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+/* Formulários */
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+.btn-success { background: #1cc88a; }
+.btn-success:hover { background: var(--success-gradient); }
+
+</style>
+{% endblock %}
+
+
 {% block title %}Configurações de Notificações{% endblock %}
 
 {% block content %}
+{# Define preferences com um fallback robusto para evitar o erro 500 #}
+{% set preferences = preferences|default({}) %}
+{% set prefs_system = preferences.system|default({}) %}
+{% set prefs_activity = preferences.activity|default({}) %}
+{% set prefs_updates = preferences.updates|default({'frequency': 'daily'}) %}
+
+
 <div class="container-fluid">
     <div class="page-header fade-in">
         <h1 class="mb-1"><i class="fas fa-bell me-2"></i> Notificações</h1>
@@ -15,17 +109,16 @@
         
         <div class="row">
             
-            {# Coluna Principal de Configurações #}
             <div class="col-lg-8">
                 
-                {# Card de Configurações Gerais #}
+                {# CARD 1: Configurações Gerais #}
                 <div class="modern-card fade-in" style="animation-delay: 0.1s;">
                     <div class="modern-card-header bg-info-gradient">
                         Preferências de Notificação
                     </div>
                     <div class="modern-card-body">
                         
-                        {# Exemplo de Tipo de Notificação: Alertas de Sistema #}
+                        {# Bloco 1: Alertas Críticos de Sistema #}
                         <div class="notification-group">
                             <div class="notification-header">
                                 <h5>Alertas Críticos de Sistema</h5>
@@ -40,7 +133,8 @@
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="system_push" name="prefs[system][push]" value="1" {% if preferences.system.push %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="system_push" name="prefs[system][push]" value="1" 
+                                           {% if prefs_system.push|default(false) %}checked{% endif %}>
                                     <label class="form-check-label" for="system_push">
                                         Notificação Push
                                     </label>
@@ -48,7 +142,7 @@
                             </div>
                         </div>
                         
-                        {# Exemplo de Tipo de Notificação: Atividade da Conta #}
+                        {# Bloco 2: Atividade da Conta #}
                         <div class="notification-group">
                             <div class="notification-header">
                                 <h5>Atividade da Conta</h5>
@@ -57,13 +151,15 @@
                             
                             <div class="channel-check-group mt-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="activity_email" name="prefs[activity][email]" value="1" {% if preferences.activity.email %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="activity_email" name="prefs[activity][email]" value="1" 
+                                           {% if prefs_activity.email|default(false) %}checked{% endif %}>
                                     <label class="form-check-label" for="activity_email">
                                         Email
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="activity_sms" name="prefs[activity][sms]" value="1" {% if preferences.activity.sms %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="activity_sms" name="prefs[activity][sms]" value="1" 
+                                           {% if prefs_activity.sms|default(false) %}checked{% endif %}>
                                     <label class="form-check-label" for="activity_sms">
                                         SMS
                                     </label>
@@ -71,7 +167,7 @@
                             </div>
                         </div>
 
-                        {# Exemplo de Tipo de Notificação: Novas Funcionalidades #}
+                        {# Bloco 3: Novas Funcionalidades e Frequência #}
                         <div class="notification-group">
                             <div class="notification-header">
                                 <h5>Atualizações de Produtos</h5>
@@ -80,13 +176,15 @@
                             
                             <div class="channel-check-group mt-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="updates_email" name="prefs[updates][email]" value="1" {% if preferences.updates.email %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="updates_email" name="prefs[updates][email]" value="1" 
+                                           {% if prefs_updates.email|default(false) %}checked{% endif %}>
                                     <label class="form-check-label" for="updates_email">
                                         Email
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="updates_inapp" name="prefs[updates][inapp]" value="1" {% if preferences.updates.inapp %}checked{% endif %}>
+                                    <input class="form-check-input" type="checkbox" id="updates_inapp" name="prefs[updates][inapp]" value="1" 
+                                           {% if prefs_updates.inapp|default(false) %}checked{% endif %}>
                                     <label class="form-check-label" for="updates_inapp">
                                         No Aplicativo (In-app)
                                     </label>
@@ -95,10 +193,11 @@
 
                             <h6 class="mt-4 mb-2 text-secondary">Frequência</h6>
                             <select class="form-select form-select-sm w-50" id="updates_frequency" name="prefs[updates][frequency]">
-                                <option value="instant" {% if preferences.updates.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
-                                <option value="daily" {% if preferences.updates.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
-                                <option value="weekly" {% if preferences.updates.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
-                                <option value="never" {% if preferences.updates.frequency == 'never' %}selected{% endif %}>Nunca</option>
+                                {# O valor padrão é definido no 'set' do Twig acima: prefs_updates.frequency|default('daily') #}
+                                <option value="instant" {% if prefs_updates.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
+                                <option value="daily" {% if prefs_updates.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
+                                <option value="weekly" {% if prefs_updates.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
+                                <option value="never" {% if prefs_updates.frequency == 'never' %}selected{% endif %}>Nunca</option>
                             </select>
                         </div>
                         
@@ -113,20 +212,20 @@
             <div class="col-lg-4">
                 <div class="modern-card fade-in" style="animation-delay: 0.2s;">
                     <div class="modern-card-header bg-success-gradient">
-                        <i class="fas fa-info-circle me-2"></i> Sua Preferência Atual
+                        <i class="fas fa-info-circle me-2"></i> Resumo
                     </div>
                     <div class="modern-card-body">
-                        <p class="text-secondary">Você atualmente está inscrito em **8 de 12** categorias de notificação.</p>
+                        <p class="text-secondary">Você atualmente está inscrito em **{{ preferences.total_active|default('?') }} de {{ preferences.total_available|default('?') }}** categorias de notificação.</p>
                         
                         <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> Notificações por Email: <span class="fw-bold">5 ativas</span></li>
-                            <li class="mb-2"><i class="fas fa-mobile-alt me-2 text-primary"></i> Notificações Push: <span class="fw-bold">2 ativas</span></li>
-                            <li class="mb-2"><i class="fas fa-sms me-2 text-primary"></i> Notificações por SMS: <span class="fw-bold">1 ativa</span></li>
+                            <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> Email: <span class="fw-bold">{{ preferences.email_active|default('?') }} ativas</span></li>
+                            <li class="mb-2"><i class="fas fa-mobile-alt me-2 text-primary"></i> Push: <span class="fw-bold">{{ preferences.push_active|default('?') }} ativas</span></li>
+                            <li class="mb-2"><i class="fas fa-sms me-2 text-primary"></i> SMS: <span class="fw-bold">{{ preferences.sms_active|default('?') }} ativas</span></li>
                         </ul>
                         
                         <hr>
                         <p class="small text-secondary m-0">
-                            **Nota:** Você sempre receberá notificações críticas (como redefinição de senha ou problemas de serviço) no seu email primário, independentemente das configurações acima.
+                            **Nota:** Por motivos de segurança, algumas notificações críticas não podem ser desativadas.
                         </p>
                     </div>
                 </div>
@@ -148,24 +247,28 @@
         
         console.log('Página de Notificações carregada.');
 
-        // Exemplo de lógica para desabilitar opções se a frequência for "Nunca"
+        // Lógica para desabilitar opções se a frequência for "Nunca"
         const updateFrequencySelect = document.getElementById('updates_frequency');
+        // Seleciona os checkboxes dentro do terceiro bloco de notificação
         const updateChannels = document.querySelector('.notification-group:nth-child(3) .channel-check-group');
 
-        if (updateFrequencySelect) {
-            updateFrequencySelect.addEventListener('change', function() {
-                const isDisabled = this.value === 'never';
+        if (updateFrequencySelect && updateChannels) {
+            function toggleUpdateChannels() {
+                const isDisabled = updateFrequencySelect.value === 'never';
                 const checkboxes = updateChannels.querySelectorAll('input[type="checkbox"]');
                 
                 checkboxes.forEach(checkbox => {
                     checkbox.disabled = isDisabled;
+                    // Se estiver desabilitado, desmarca.
                     if (isDisabled) {
                         checkbox.checked = false;
                     }
                 });
-            });
-            // Executa na carga inicial
-            updateFrequencySelect.dispatchEvent(new Event('change'));
+            }
+            
+            updateFrequencySelect.addEventListener('change', toggleUpdateChannels);
+            // Executa na carga inicial para aplicar o estado correto
+            toggleUpdateChannels();
         }
     });
 </script>
