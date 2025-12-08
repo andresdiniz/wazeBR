@@ -14,6 +14,8 @@ $isDebug = true; // Mantenha TRUE para desenvolvimento. Mude para FALSE em produ
 $logDir = __DIR__ . '/logs';
 $loggedInUserId = $_SESSION['user_id'] ?? null; // CHAVE: Ajuste a chave da sessão conforme seu sistema!
 
+echo $loggedInUserId;
+
 // 2. INCLUDES E AUTOLOAD
 require_once './vendor/autoload.php';      // Autoloader do Composer
 require_once './config/configbd.php';      // Conexão com o banco de dados
