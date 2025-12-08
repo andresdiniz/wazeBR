@@ -256,9 +256,10 @@ $user['photo_url'] = !empty($user['photo'])
     : '/caminho/para/default-avatar.png';
 
 
-// 8. RENDERIZAÇÃO
-echo $twig->render('profile.twig', [
+// 8. PASSAGEM DOS DADOS PARA A VIEW
+
+$data = [
     'user' => $user,
     'messages' => $messages, 
-    'errors' => $errors,     
-]);
+    'errors' => $errors
+];
