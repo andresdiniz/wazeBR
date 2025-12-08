@@ -17,10 +17,10 @@ function initializeSystem() {
 }
 
 function setupEventListeners() {
-    // Event listeners para elementos interativos
     document.addEventListener('click', handleGlobalClicks);
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
 }
 
 // ==================== TOOLTIPS ====================
@@ -60,13 +60,11 @@ function initializeDarkMode() {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const darkMode = localStorage.getItem('darkMode');
     
-    // Aplicar modo escuro salvo
     if (darkMode === 'enabled') {
         document.body.classList.add('dark-mode');
         if (darkModeToggle) darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
 
-    // Event listener para o toggle
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', toggleDarkMode);
     }
@@ -117,68 +115,114 @@ function initializeSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    // Toggle desktop (Comportamento de colapsar/expandir)
+    // Toggle desktop (Colapsar/Expandir)
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
             document.body.classList.toggle('sidebar-toggled');
-            // 2º Correção: Configura os tooltips após o toggle
-            setupSidebarTooltips(); 
+            setupSidebarTooltips();
+            
+            // Salvar preferência
+            const isToggled = document.body.classList.contains('sidebar-toggled');
+            localStorage.setItem('sidebar-toggled', isToggled);
         });
     }
     
-    // Toggle mobile (Comportamento de mostrar/esconder no canto)
+    // Toggle mobile (Mostrar/Esconder)
     if (sidebarToggleTop) {
-        sidebarToggleTop.addEventListener('click', () => {
-            // 1º Correção: REMOVIDO document.body.classList.toggle('sidebar-toggled') para evitar conflito/tela cinza
-            if (sidebar) sidebar.classList.toggle('show');
-            if (sidebarOverlay) sidebarOverlay.classList.toggle('show');
+        sidebarToggleTop.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileSidebar();
         });
     }
     
     // Overlay mobile
     if (sidebarOverlay) {
         sidebarOverlay.addEventListener('click', () => {
-            // 1º Correção: REMOVIDO document.body.classList.remove('sidebar-toggled')
-            if (sidebar) sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
+            closeMobileSidebar();
         });
     }
 
-    // Fechar sidebar ao clicar em link (mobile)
-    if (window.innerWidth < 768) {
-        document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(function(element) {
-            element.addEventListener('click', function() {
-                if (!this.hasAttribute('data-bs-toggle')) {
-                    // 1º Correção: REMOVIDO document.body.classList.remove('sidebar-toggled')
-                    if (sidebar) sidebar.classList.remove('show');
-                    if (sidebarOverlay) sidebarOverlay.classList.remove('show');
-                }
-            });
+    // Fechar sidebar ao clicar em links (mobile)
+    document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            // Não fechar se for um botão de collapse
+            if (this.hasAttribute('data-bs-toggle')) {
+                return;
+            }
+            
+            // Fechar apenas em mobile
+            if (isMobile()) {
+                closeMobileSidebar();
+            }
         });
+    });
+    
+    // Restaurar preferência de sidebar (desktop)
+    if (!isMobile()) {
+        const sidebarToggled = localStorage.getItem('sidebar-toggled');
+        if (sidebarToggled === 'true') {
+            document.body.classList.add('sidebar-toggled');
+        }
     }
     
-    // 2º Correção: Inicializa os tooltips no carregamento (se a sidebar já estiver colapsada)
+    // Inicializar tooltips
     setupSidebarTooltips();
 }
 
-// ==================== SIDEBAR TOOLTIPS (2º CORREÇÃO) ====================
+// Funções auxiliares para sidebar mobile
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar && overlay) {
+        const isOpen = sidebar.classList.contains('show');
+        
+        if (isOpen) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+}
 
+function openMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar) sidebar.classList.add('show');
+    if (overlay) overlay.classList.add('show');
+    
+    // Prevenir scroll do body
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar) sidebar.classList.remove('show');
+    if (overlay) overlay.classList.remove('show');
+    
+    // Restaurar scroll do body
+    document.body.style.overflow = '';
+}
+
+function isMobile() {
+    return window.innerWidth < 768;
+}
+
+// ==================== SIDEBAR TOOLTIPS ====================
 function setupSidebarTooltips() {
     const isToggled = document.body.classList.contains('sidebar-toggled');
     
-    // Só ativa tooltips em desktop (>= 768px) E com a sidebar colapsada
-    if (!isToggled || window.innerWidth < 768) {
-        document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(link => {
-            link.removeEventListener('mouseenter', createAndShowTooltip);
-            link.removeEventListener('mouseleave', hideAndRemoveTooltip);
-        });
-        document.querySelectorAll('.sidebar-tooltip').forEach(tip => tip.remove());
+    // Só ativa tooltips em desktop E com a sidebar colapsada
+    if (!isToggled || isMobile()) {
+        removeAllTooltips();
         return;
     }
 
     // Adiciona listeners para criar os tooltips
     document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(link => {
-        // Garante que listeners não sejam duplicados
         link.removeEventListener('mouseenter', createAndShowTooltip);
         link.removeEventListener('mouseleave', hideAndRemoveTooltip);
 
@@ -191,12 +235,13 @@ function setupSidebarTooltips() {
 }
 
 function createAndShowTooltip(e) {
+    if (isMobile()) return;
+    
     const link = e.currentTarget;
     const tooltipText = link.getAttribute('data-tooltip') || link.querySelector('span')?.textContent.trim();
     if (!tooltipText) return;
 
-    // Remove tooltips existentes antes de criar um novo
-    document.querySelectorAll('.sidebar-tooltip').forEach(tip => tip.remove());
+    removeAllTooltips();
 
     const tooltip = document.createElement('div');
     tooltip.classList.add('sidebar-tooltip');
@@ -208,16 +253,13 @@ function createAndShowTooltip(e) {
     const sidebarRect = sidebar.getBoundingClientRect();
     const tooltipHeight = tooltip.offsetHeight;
     
-    // Posiciona o tooltip 10px à direita da sidebar, centralizado verticalmente com o link
     tooltip.style.top = `${linkRect.top + linkRect.height / 2 - tooltipHeight / 2}px`;
-    tooltip.style.left = `${sidebarRect.right + 10}px`; 
+    tooltip.style.left = `${sidebarRect.right + 10}px`;
 
-    // Adiciona a classe 'show' após um pequeno atraso para a transição CSS
     setTimeout(() => {
         tooltip.classList.add('show');
     }, 50);
 
-    // Armazena a referência no link para fácil remoção
     link.dataset.tooltipRef = true;
 }
 
@@ -228,9 +270,16 @@ function hideAndRemoveTooltip(e) {
         tooltip.classList.remove('show');
         setTimeout(() => {
             tooltip.remove();
-        }, 300); // Tempo da transição CSS (ajustar se necessário no CSS)
+        }, 300);
         delete link.dataset.tooltipRef;
     }
+}
+
+function removeAllTooltips() {
+    document.querySelectorAll('.sidebar-tooltip').forEach(tip => tip.remove());
+    document.querySelectorAll('.sidebar .nav-link, .sidebar .collapse-item').forEach(link => {
+        delete link.dataset.tooltipRef;
+    });
 }
 
 // ==================== DROPDOWNS ====================
@@ -248,6 +297,19 @@ function initializeDropdowns() {
             const menu = this.querySelector('.dropdown-menu');
             if (menu) {
                 menu.classList.remove('animated--grow-in');
+            }
+        });
+        
+        // Fechar dropdown ao clicar em item (mobile)
+        dropdown.addEventListener('click', function(e) {
+            if (isMobile() && e.target.classList.contains('dropdown-item')) {
+                const dropdownToggle = this.querySelector('[data-bs-toggle="dropdown"]');
+                if (dropdownToggle) {
+                    const bsDropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+                    if (bsDropdown) {
+                        setTimeout(() => bsDropdown.hide(), 150);
+                    }
+                }
             }
         });
     });
@@ -292,22 +354,33 @@ function startAutoRefresh() {
 function handleGlobalClicks(e) {
     // Fechar dropdowns ao clicar fora
     if (!e.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown-menu').forEach(function(menu) {
-            if (menu.classList.contains('show')) {
-                const dropdown = menu.closest('.dropdown');
-                if (dropdown) {
-                    const toggle = dropdown.querySelector('.dropdown-toggle');
-                    if (toggle) {
-                        bootstrap.Dropdown.getInstance(toggle)?.hide();
-                    }
+        document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+            const dropdown = menu.closest('.dropdown');
+            if (dropdown) {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+                if (toggle) {
+                    const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                    if (bsDropdown) bsDropdown.hide();
                 }
             }
         });
     }
+    
+    // Fechar sidebar mobile ao clicar fora
+    if (isMobile()) {
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggleTop');
+        
+        if (sidebar && sidebar.classList.contains('show')) {
+            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                closeMobileSidebar();
+            }
+        }
+    }
 }
 
 function handleScroll() {
-    // Efeitos de parallax ou outros efeitos de scroll
+    // Efeitos de parallax
     const scrolled = window.pageYOffset;
     const parallaxElements = document.querySelectorAll('[data-parallax]');
     
@@ -318,14 +391,37 @@ function handleScroll() {
 }
 
 function handleResize() {
-    // Ajustes responsivos em tempo real
-    if (window.innerWidth >= 768) {
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        if (sidebarOverlay) sidebarOverlay.classList.remove('show');
+    // Fechar sidebar mobile ao mudar para desktop
+    if (!isMobile()) {
+        closeMobileSidebar();
     }
     
-    // 2º Correção: Reconfigura tooltips ao redimensionar (desktop <-> mobile)
-    setupSidebarTooltips(); 
+    // Reconfigurar tooltips
+    setupSidebarTooltips();
+    
+    // Fechar dropdowns abertos
+    document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+        const dropdown = menu.closest('.dropdown');
+        if (dropdown) {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            if (toggle) {
+                const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                if (bsDropdown) bsDropdown.hide();
+            }
+        }
+    });
+}
+
+function handleOrientationChange() {
+    // Fechar sidebar ao mudar orientação
+    if (isMobile()) {
+        closeMobileSidebar();
+    }
+    
+    // Reconfigurar após mudança de orientação
+    setTimeout(() => {
+        handleResize();
+    }, 300);
 }
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -338,7 +434,6 @@ function showNotification(message, type = 'info', duration = 3000) {
             style: 'bootstrap'
         });
     } else if (typeof Toast !== 'undefined') {
-        // Usar BS5 Toast como fallback
         const toast = new Toast({
             title: type.charAt(0).toUpperCase() + type.slice(1),
             message: message,
@@ -386,8 +481,9 @@ window.addEventListener('load', function() {
 
 // ==================== CONSOLE INFO ====================
 console.log('%c🚀 Sistema WAZE Data carregado com sucesso!', 'color: #667eea; font-size: 18px; font-weight: bold;');
-console.log('%c📊 Versão: 2.0 | Bootstrap 5.3.3 | Design Moderno', 'color: #858796; font-size: 14px;');
+console.log('%c📊 Versão: 2.0 | Bootstrap 5.3.3 | Design Moderno e Responsivo', 'color: #858796; font-size: 14px;');
 
 // Expor funções globalmente
 window.showNotification = showNotification;
 window.confirmAction = confirmAction;
+window.isMobile = isMobile;
