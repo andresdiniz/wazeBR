@@ -27,25 +27,50 @@
 /* ==================== SIDEBAR ==================== */
 .sidebar {
     width: var(--sidebar-width);
-    min-height: 100vh;
+    height: 100vh;
     background: var(--sidebar-bg);
     position: fixed;
     left: 0;
     top: 0;
     z-index: 1000;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden; /* Remove scroll da sidebar principal */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
-.sidebar::-webkit-scrollbar {
-    width: 6px;
+/* Container scrollável do conteúdo */
+.sidebar-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 1rem;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+/* Scrollbar personalizada - Webkit (Chrome, Safari, Edge) */
+.sidebar-scrollable-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-scrollable-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-scrollable-content::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.sidebar-scrollable-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Scrollbar para Firefox */
+.sidebar-scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.1);
 }
 
 /* Brand/Logo */
@@ -61,6 +86,7 @@
     top: 0;
     z-index: 10;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .sidebar-brand:hover {
@@ -102,6 +128,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     margin: 1rem 1.5rem;
     opacity: 0.6;
+    flex-shrink: 0;
 }
 
 /* Cabeçalhos */
@@ -115,12 +142,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-/* Itens de Navegação */
-.sidebar .nav-item {
-    margin-bottom: 0.25rem;
-    position: relative;
+    flex-shrink: 0;
 }
 
 .sidebar .nav-link {
@@ -246,6 +268,9 @@
     position: sticky;
     bottom: 0;
     background: var(--sidebar-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 #sidebarToggle {
