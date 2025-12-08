@@ -4,21 +4,22 @@
 /* ========================================= */
 :root {
     /* Cores de Ação (Gradients) */
-    [cite_start]--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); [cite: 1]
-    [cite_start]--success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); [cite: 2]
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
     --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
     --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
-    [cite_start]--info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%); [cite: 3]
-    
+    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+
     /* Cores do Tema - Claro */
     --color-bg: #f8f9fc;
     --color-card-bg: #ffffff;
-    [cite_start]--color-text-primary: #2c3e50; [cite: 4]
+    --color-text-primary: #2c3e50;
     --color-text-secondary: #858796;
     --color-border: #e3e6f0;
-    [cite_start]--card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05); [cite: 4] [cite_start]/* Mais suave */ [cite: 5]
-    [cite_start]--card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1); [cite: 5]
-[cite_start]} [cite: 6]
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    /* Mais suave */
+    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
 
 /* Modo Escuro */
 body.dark-mode {
@@ -27,191 +28,200 @@ body.dark-mode {
     --color-text-primary: #e4e6eb;
     --color-text-secondary: #a9aabc;
     --color-border: #3a4154;
-    [cite_start]--card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); [cite: 7]
-    [cite_start]--card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4); [cite: 7]
-[cite_start]} [cite: 8]
-
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
 
 /* ========================================= */
 /* 2. Estilos Base e Utilidades */
 /* ========================================= */
 body {
-    [cite_start]background-color: var(--color-bg); [cite: 8, 9]
-[cite_start]} [cite: 9]
+    background-color: var(--color-bg);
+}
+
 .page-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1rem;
-    [cite_start]border-bottom: 1px solid var(--color-border); [cite: 10]
-[cite_start]} [cite: 10]
+    border-bottom: 1px solid var(--color-border);
+}
+
 .page-header h1 {
     font-size: 2rem;
     font-weight: 700;
     color: var(--color-text-primary);
 }
+
 .page-header .subtitle {
-    [cite_start]color: var(--color-text-secondary); [cite: 11]
-    [cite_start]font-size: 0.9rem; [cite: 11]
-}
-.fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-    [cite_start]opacity: 0; [cite: 12]
-[cite_start]} [cite: 12]
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    [cite_start]to { opacity: 1; [cite: 12, 13]
-    transform: translateY(0); [cite_start]} [cite: 13]
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
 }
 
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* ========================================= */
 /* 3. Card Moderno */
 /* ========================================= */
 .modern-card {
-    [cite_start]border: 1px solid var(--color-border); [cite: 14]
-    [cite_start]border-radius: 1rem; [cite: 14]
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: var(--card-shadow);
     background: var(--color-card-bg);
-    [cite_start]height: 100%; [cite: 15]
-[cite_start]} [cite: 15]
+    height: 100%;
+}
+
 .modern-card:hover {
     box-shadow: var(--card-shadow-hover);
-    border-color: #667eea70; 
+    border-color: #667eea70;
 }
+
 .modern-card-header {
     padding: 0.75rem 1.5rem;
-    [cite_start]font-weight: 600; [cite: 16]
-    [cite_start]display: flex; [cite: 16]
+    font-weight: 600;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 1rem;
     border-bottom: 1px solid var(--color-border);
-    [cite_start]color: var(--color-text-primary); [cite: 17] [cite_start]/* Melhor contraste */ [cite: 17]
+    color: var(--color-text-primary);
     background: var(--color-card-bg);
-    
-    /* Novo: Aplica o gradiente como uma borda superior para destaque */
-    [cite_start]border-top: 4px solid transparent; [cite: 18]
-[cite_start]} [cite: 18]
+    border-top: 4px solid transparent;
+}
 
 /* Aplica o gradiente na borda superior conforme a classe de cor */
 .modern-card-header.bg-info-gradient {
-    [cite_start]border-image: var(--info-gradient); [cite: 19]
-    [cite_start]border-image-slice: 1; [cite: 19]
+    border-image: var(--info-gradient);
+    border-image-slice: 1;
 }
+
 .modern-card-header.bg-success-gradient {
     border-image: var(--success-gradient);
     border-image-slice: 1;
 }
+
 .modern-card-header.bg-danger-gradient {
     border-image: var(--danger-gradient);
-    [cite_start]border-image-slice: 1; [cite: 20]
-[cite_start]} [cite: 20]
-
+    border-image-slice: 1;
+}
 
 /* ========================================= */
 /* 4. Estilos de Perfil */
 /* ========================================= */
 .profile-photo-container {
-    width: 100px; 
+    width: 100px;
     height: 100px;
-    [cite_start]border-radius: 50%; [cite: 21]
-    [cite_start]overflow: hidden; [cite: 21]
+    border-radius: 50%;
+    overflow: hidden;
     margin: 0 auto 2rem;
-    border: 3px solid #667eea; 
+    border: 3px solid #667eea;
     box-shadow: var(--card-shadow);
-    [cite_start]background: #f0f0f0; [cite: 22]
-[cite_start]} [cite: 22]
+    background: #f0f0f0;
+}
+
 .profile-photo-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+
 .profile-info-label {
-    [cite_start]font-size: 0.75rem; [cite: 23]
-    [cite_start]color: var(--color-text-secondary); [cite: 23]
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-top: 0.75rem;
 }
+
 .profile-info-value {
     font-size: 1rem;
-    [cite_start]color: var(--color-text-primary); [cite: 24]
-    [cite_start]font-weight: 500; [cite: 24]
+    color: var(--color-text-primary);
+    font-weight: 500;
     padding-bottom: 0.25rem;
     margin-bottom: 1rem;
-    [cite_start]border-bottom: 1px solid var(--color-border); [cite: 25] [cite_start]/* Borda sólida mais limpa */ [cite: 25]
-[cite_start]} [cite: 25]
-
+    border-bottom: 1px solid var(--color-border);
+}
 
 /* ========================================= */
 /* 5. Formulários e Botões */
 /* ========================================= */
 .form-control, .form-select {
-    [cite_start]border-radius: 0.5rem; [cite: 26]
-    [cite_start]border: 1px solid var(--color-border); [cite: 26]
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
     padding: 0.625rem 1rem;
     background-color: var(--color-card-bg);
     color: var(--color-text-primary);
 }
+
 .form-control:focus, .form-select:focus {
-    [cite_start]border-color: #667eea; [cite: 27]
-    [cite_start]box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25); [cite: 27]
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
     background-color: var(--color-card-bg);
-    [cite_start]color: var(--color-text-primary); [cite: 28]
-[cite_start]} [cite: 28]
+    color: var(--color-text-primary);
+}
 
 .btn-primary, .btn-info, .btn-success, .btn-danger {
     font-weight: 600;
     border-radius: 0.5rem;
     border: none;
-    [cite_start]padding: 0.75rem 1.5rem; [cite: 29]
-    [cite_start]transition: transform 0.2s ease, opacity 0.2s ease; [cite: 29]
-    color: white; 
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    color: white;
 }
 
 /* Cores sólidas e gradiente no hover para destaque */
-[cite_start].btn-primary { background: #667eea; [cite: 30]
-[cite_start]} [cite: 30]
+.btn-primary { background: #667eea; }
 .btn-info { background: #36b9cc; }
 .btn-success { background: #1cc88a; }
 .btn-danger { background: #e74a3b; }
 
-[cite_start].btn-primary:hover { background: var(--primary-gradient); opacity: 1; transform: translateY(-1px); [cite: 31]
-[cite_start]} [cite: 31]
+.btn-primary:hover { background: var(--primary-gradient); opacity: 1; transform: translateY(-1px); }
 .btn-info:hover { background: var(--info-gradient); opacity: 1; transform: translateY(-1px); }
 .btn-success:hover { background: var(--success-gradient); opacity: 1; transform: translateY(-1px); }
-[cite_start].btn-danger:hover { background: var(--danger-gradient); [cite: 32]
-opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
-
+.btn-danger:hover { background: var(--danger-gradient); opacity: 1; transform: translateY(-1px); }
 
 /* ========================================= */
 /* 6. Notificações */
 /* ========================================= */
 .notification-group {
-    [cite_start]border: 1px solid var(--color-border); [cite: 33]
-    [cite_start]border-radius: 0.75rem; [cite: 33]
-    padding: 1.5rem; 
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
     background-color: var(--color-card-bg);
     transition: all 0.3s ease;
 }
+
 .notification-group:hover {
-    [cite_start]border-color: #667eea; [cite: 34]
-    [cite_start]box-shadow: 0 0 8px rgba(102, 126, 234, 0.1); [cite: 34]
+    border-color: #667eea;
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.1);
 }
+
 .notification-header {
-    border-bottom: 1px dashed var(--color-border); 
-    [cite_start]margin-bottom: 1.25rem; [cite: 35]
-    [cite_start]padding-bottom: 0.75rem; [cite: 35]
+    border-bottom: 1px dashed var(--color-border);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
 }
-.notification-header h5 {
-    font-weight: 700;
-}
-.channel-check-group {
-    [cite_start]gap: 2rem; [cite: 36]
-[cite_start]} [cite: 36]
+
+.notification-header h5 { font-weight: 700; }
+
+.channel-check-group { gap: 2rem; }
+
 .channel-check-group .form-check-label {
     font-size: 0.95rem;
 }
@@ -221,12 +231,12 @@ opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
 /* ========================================= */
 .container-fluid {
     /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
-    [cite_start]padding-bottom: 5rem !important; [cite: 37]
-[cite_start]} [cite: 37]
+    padding-bottom: 5rem !important;
+}
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
-    
+
     <div class="page-header fade-in">
         <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil e Configurações</h1>
         <p class="subtitle mb-0">Gerencie suas informações pessoais, segurança e preferências de sistema.</p>
@@ -235,9 +245,9 @@ opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
     {# ---------------------------------------------------- #}
     {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
     {# ---------------------------------------------------- #}
-    
+
     {% if messages is not empty %}
-        [cite_start]{% for message in [cite: 38] [cite_start]messages %} [cite: 38]
+        {% for message in messages %}
             <div class="alert alert-success fade-in" role="alert">
                 <i class="fas fa-check-circle me-2"></i>{{ message }}
             </div>
@@ -246,15 +256,13 @@ opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
 
     {% if errors is not empty %}
         <div class="alert alert-danger fade-in" role="alert">
-            
-            [cite_start]<i class="fas fa-exclamation-triangle me-2"></i> [cite: 39]
+            <i class="fas fa-exclamation-triangle me-2"></i>
             {% if errors|length == 1 %}
                 {{ errors[0] }}
             {% else %}
                 <ul class="mb-0 ps-3">
                     {% for error in errors %}
-     
-                        [cite_start]<li>{{ error }}</li> [cite: 40]
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -262,262 +270,223 @@ opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
     {% endif %}
 
     <div class="row">
-        
-        [cite_start]<div class="col-xl-4 col-lg-5 mb-4 fade-in"> [cite: 41]
+
+        <div class="col-xl-4 col-lg-5 mb-4 fade-in">
             <div class="card modern-card h-100">
                 <div class="modern-card-header bg-info-gradient">
                     <span>
                         <i class="fas fa-id-badge me-2"></i>
-        
-                        [cite_start]Dados Pessoais [cite: 42]
+                        Dados Pessoais
                     </span>
                 </div>
+
                 <div class="card-body p-4 text-center">
-                    
-        
-                    [cite_start]<div class="profile-photo-container"> [cite: 43]
+                    <div class="profile-photo-container">
                         <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
                     </div>
 
                     <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
-          
-                    [cite_start]<p class="text-secondary mb-3">@{{ user.username|default('username') }}</p> [cite: 44]
+                    <p class="text-secondary mb-3">@{{ user.username|default('username') }}</p>
 
                     <div class="text-start mt-4">
                         <div class="profile-info-label">E-mail</div>
                         <div class="profile-info-value">{{ user.email|default('N/A') }}</div>
 
-            
-                        [cite_start]<div class="profile-info-label">Telefone</div> [cite: 45]
+                        <div class="profile-info-label">Telefone</div>
                         <div class="profile-info-value">{{ user.phone_number|default('N/A') }}</div>
 
                         <div class="profile-info-label">Tipo de Usuário</div>
                         <div class="profile-info-value">
-        
-                            [cite_start]{{ user.type == '1' ? [cite: 46] [cite_start]'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }} [cite: 47]
+                            {{ user.type == '1' ? 'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-     
-        [cite_start]<div class="col-xl-8 col-lg-7 mb-4"> [cite: 48]
-            
+        <div class="col-xl-8 col-lg-7 mb-4">
+
             {# =================== FORMULÁRIO 2: PREFERÊNCIAS DE APP (NOVAS COLUNAS NA TABELA USER) =================== #}
             <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.2s;">
                 <div class="modern-card-header bg-info-gradient">
                     <span>
- 
-                        [cite_start]<i class="fas fa-sliders-h me-2"></i> [cite: 49]
+                        <i class="fas fa-sliders-h me-2"></i>
                         Preferências de Aplicativo
                     </span>
                 </div>
-            
-                [cite_start]<div class="card-body p-4"> [cite: 50]
+
+                <div class="card-body p-4">
                     <form id="updateAppPreferencesForm" method="POST" action="">
                         <input type="hidden" name="action" value="update_app_preferences">
 
                         <div class="row">
-                   
-                            [cite_start]<div class="col-md-6 mb-3"> [cite: 51]
+                            <div class="col-md-6 mb-3">
                                 <label for="ui_locale" class="profile-info-label mb-1">Idioma da Interface</label>
                                 <select class="form-select" id="ui_locale" name="ui_locale" required>
-                
-                                    [cite_start]<option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option> [cite: 52]
+                                    <option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
                                     <option value="en-US" {% if user.ui_locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
-                        
-                                    [cite_start]<option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option> [cite: 53]
+                                    <option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option>
                                 </select>
                             </div>
-                  
-                            [cite_start]<div class="col-md-6 mb-3"> [cite: 54]
+
+                            <div class="col-md-6 mb-3">
                                 <label for="ui_timezone" class="profile-info-label mb-1">Fuso Horário</label>
                                 <select class="form-select" id="ui_timezone" name="ui_timezone" required>
-                
-                                    [cite_start]<option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option> [cite: 55]
+                                    <option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option>
                                     <option value="America/New_York" {% if user.ui_timezone == 'America/New_York' %}selected{% endif %}>América/Nova York (GMT-5)</option>
-                      
-                                    [cite_start]<option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option> [cite: 56]
+                                    <option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option>
                                 </select>
                             </div>
-                
-                        [cite_start]</div> [cite: 57]
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                [cite_start]<label for="ui_theme" class="profile-info-label mb-1">Tema da [cite: 58] Interface</label>
+                                <label for="ui_theme" class="profile-info-label mb-1">Tema da Interface</label>
                                 <select class="form-select" id="ui_theme" name="ui_theme" required>
                                     <option value="light" {% if user.ui_theme == 'light' %}selected{% endif %}>Modo Claro</option>
-                  
-                                    [cite_start]<option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option> [cite: 59]
+                                    <option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option>
                                     <option value="system" {% if user.ui_theme == 'system' %}selected{% endif %}>Seguir Sistema</option>
-                          
-                                    [cite_start]</select> [cite: 60]
+                                </select>
                             </div>
+
                             <div class="col-md-6 mb-3">
-                                [cite_start]<label for="home_page" class="profile-info-label mb-1">Página [cite: 61] Inicial Padrão</label>
+                                <label for="home_page" class="profile-info-label mb-1">Página Inicial Padrão</label>
                                 <select class="form-select" id="home_page" name="home_page" required>
                                     <option value="dashboard" {% if user.home_page == 'dashboard' %}selected{% endif %}>Dashboard Principal</option>
-                 
-                                    [cite_start]<option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option> [cite: 62]
+                                    <option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option>
                                     <option value="reports" {% if user.home_page == 'reports' %}selected{% endif %}>Relatórios</option>
-                          
-                                    [cite_start]</select> [cite: 63]
+                                </select>
                             </div>
                         </div>
 
                         <button type="submit" class="btn btn-info mt-3"><i class="fas fa-save me-2"></i>Salvar Preferências</button>
-          
-                    [cite_start]</form> [cite: 64]
+                    </form>
                 </div>
             </div>
 
             {# =================== FORMULÁRIO 3: CONTROLE DE NOTIFICAÇÕES (TABELA user_notification_preferences) =================== #}
             <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.3s;">
                 <div class="modern-card-header bg-success-gradient">
-    
-                    [cite_start]<span> [cite: 65]
+                    <span>
                         <i class="fas fa-bell me-2"></i>
                         Controle de Notificações
                     </span>
-           
-                [cite_start]</div> [cite: 66]
+                </div>
+
                 <div class="card-body p-4">
                     <form id="updateNotificationForm" method="POST" action="">
                         <input type="hidden" name="action" value="update_notifications">
 
-                        [cite_start]<p class="text-secondary mb-4">Defina [cite: 67] como e quando você quer ser alertado sobre os eventos do sistema.</p>
+                        <p class="text-secondary mb-4">Defina como e quando você quer ser alertado sobre os eventos do sistema.</p>
 
                         {# Loop sobre os tipos de notificação: user_preferences deve ser um array associativo (ex: ['activity' => {...}, 'security' => {...}]) #}
                         {% for type, prefs in user_preferences %}
-               
-                            [cite_start]<div class="notification-group"> [cite: 68]
+                            <div class="notification-group">
                                 <div class="notification-header">
                                     {# Converte a chave (ex: 'activity') para um título amigável #}
-       
-                                    [cite_start]<h5> [cite: 69]
-                                        {% if type == 'activity' %}<i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades e Tarefas
-                   
-                                        [cite_start]{% elseif type == 'security' %}<i class="fas fa-shield-alt me-2 text-danger"></i> Segurança e Conta [cite: 70]
-                                        {% elseif type == 'marketing' %}<i class="fas fa-bullhorn me-2 text-success"></i> Novidades e Promoções
-               
-                                        [cite_start]{% else %}{{ type|capitalize }} [cite: 71]
+                                    <h5>
+                                        {% if type == 'activity' %}
+                                            <i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades e Tarefas
+                                        {% elseif type == 'security' %}
+                                            <i class="fas fa-shield-alt me-2 text-danger"></i> Segurança e Conta
+                                        {% elseif type == 'marketing' %}
+                                            <i class="fas fa-bullhorn me-2 text-success"></i> Novidades e Promoções
+                                        {% else %}
+                                            {{ type|capitalize }}
                                         {% endif %}
-                             
-                                    [cite_start]</h5> [cite: 72]
+                                    </h5>
                                 </div>
 
                                 <input type="hidden" name="prefs[{{ type }}][notification_type]" value="{{ type }}">
-                      
-           
-                                [cite_start]<div class="row"> [cite: 73]
+
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
-                   
-                                        [cite_start]<label class="profile-info-label mb-2">Canais de Alerta:</label> [cite: 74]
+                                        <label class="profile-info-label mb-2">Canais de Alerta:</label>
                                         <div class="channel-check-group">
-                                  
-                                            [cite_start]{# Checkboxes para os Canais #} [cite: 75]
+                                            {# Checkboxes para os Canais #}
                                             <div class="form-check">
-                                        
-                                                [cite_start]<input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_email]" id="{{ type }}_email" value="1" {% if prefs.channel_email == 1 %}checked{% endif %}> [cite: 76]
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_email]" id="{{ type }}_email" value="1" {% if prefs.channel_email == 1 %}checked{% endif %}>
                                                 <label class="form-check-label" for="{{ type }}_email"><i class="fas fa-envelope me-1"></i> E-mail</label>
-                   
-                                            [cite_start]</div> [cite: 77]
-                                            <div class="form-check">
-                              
-                                                [cite_start]<input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_push]" id="{{ type }}_push" value="1" {% if prefs.channel_push == 1 %}checked{% endif %}> [cite: 78]
-                                                <label class="form-check-label" for="{{ type }}_push"><i class="fas fa-bell me-1"></i> Push/App</label>
-         
-                                            [cite_start]</div> [cite: 79]
-                                            <div class="form-check">
-                    
-                                                [cite_start]<input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" id="{{ type }}_whatsapp" value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}> [cite: 80]
-                                                [cite_start]<label class="form-check-label" for="{{ type }}_whatsapp"><i class="fab fa-whatsapp [cite: 81] [cite_start]me-1"></i> WhatsApp</label> [cite: 81]
                                             </div>
+
                                             <div class="form-check">
-          
-                                                [cite_start]<input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_sms]" id="{{ type }}_sms" value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}> [cite: 82]
-                                             
-                                                [cite_start]<label class="form-check-label" for="{{ type }}_sms"><i class="fas fa-sms me-1"></i> SMS</label> [cite: 83]
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_push]" id="{{ type }}_push" value="1" {% if prefs.channel_push == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_push"><i class="fas fa-bell me-1"></i> Push/App</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" id="{{ type }}_whatsapp" value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_whatsapp"><i class="fab fa-whatsapp me-1"></i> WhatsApp</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_sms]" id="{{ type }}_sms" value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_sms"><i class="fas fa-sms me-1"></i> SMS</label>
                                             </div>
                                         </div>
-     
-                                    [cite_start]</div> [cite: 84]
-                                    
-                                 
-                                    [cite_start]<div class="col-md-6 mb-3"> [cite: 85]
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="{{ type }}_frequency" class="profile-info-label mb-2">Frequência (apenas para E-mail):</label>
-                                        [cite_start]<select class="form-select form-select-sm" id="{{ type }}_frequency" name="prefs[{{ [cite: 86] [cite_start]type }}][frequency]"> [cite: 86]
+                                        <select class="form-select form-select-sm" id="{{ type }}_frequency" name="prefs[{{ type }}][frequency]">
                                             <option value="instant" {% if prefs.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
-                                           
-                                            [cite_start]<option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option> [cite: 87]
+                                            <option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
                                             <option value="weekly" {% if prefs.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
-                                   
-                                            [cite_start]</select> [cite: 88]
+                                        </select>
                                     </div>
                                 </div>
-                           
-                            [cite_start]</div> [cite: 89]
+                            </div>
                         {% endfor %}
-                        
+
                         <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check-double me-2"></i>Salvar Notificações</button>
-                 
-                    [cite_start]</form> [cite: 90]
+                    </form>
                 </div>
             </div>
 
             {# =================== FORMULÁRIO 4: SEGURANÇA (EXISTENTE) =================== #}
             <div class="card modern-card fade-in" style="animation-delay: 0.4s;">
                 <div class="modern-card-header bg-danger-gradient">
-               
-                    [cite_start]<span> [cite: 91]
+                    <span>
                         <i class="fas fa-lock me-2"></i>
                         Segurança da Conta
                     </span>
                 </div>
-      
-                [cite_start]<div class="card-body p-4"> [cite: 92]
+
+                <div class="card-body p-4">
                     <form id="updatePasswordForm" method="POST" action="">
                         <input type="hidden" name="action" value="update_password">
 
                         <div class="mb-3">
-             
-                            [cite_start]<label for="current_password" class="profile-info-label mb-1">Senha Atual</label> [cite: 93]
+                            <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
                             <input type="password" class="form-control" id="current_password" name="current_password" required>
                         </div>
-                        
-                        [cite_start]<div class="mb-3"> [cite: 94]
+
+                        <div class="mb-3">
                             <label for="new_password" class="profile-info-label mb-1">Nova Senha</label>
                             <input type="password" class="form-control" id="new_password" name="new_password" required>
                         </div>
-          
-                        [cite_start]<div class="mb-3"> [cite: 95]
+
+                        <div class="mb-3">
                             <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                   
-                        [cite_start]</div> [cite: 96]
-                        
+                        </div>
+
                         <hr>
-                        
-                       
-                        [cite_start]<div class="mb-3"> [cite: 97]
+
+                        <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="is_2fa_enabled" name="is_2fa_enabled" value="1" role="switch" {% if user.is_2fa_enabled == 1 %}checked{% endif %}>
-                      
-                                [cite_start]<label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label> [cite: 98]
+                                <label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label>
                                 <small class="d-block text-secondary">Aumente a segurança da sua conta exigindo um código adicional no login.</small>
                             </div>
-          
-                        [cite_start]</div> [cite: 99]
+                        </div>
 
                         <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Salvar Configurações de Segurança</button>
                     </form>
                 </div>
             </div>
 
-    
-        [cite_start]</div> [cite: 100]
+        </div>
     </div>
 </div>
 
@@ -525,24 +494,25 @@ opacity: 1; transform: translateY(-1px); [cite_start]} [cite: 32]
 document.addEventListener("DOMContentLoaded", function () {
     // Validação Client-Side para Nova Senha
     const updatePasswordForm = document.getElementById('updatePasswordForm');
-    [cite_start]if (updatePasswordForm) { [cite: 101]
+    if (updatePasswordForm) {
         updatePasswordForm.addEventListener('submit', function(e) {
             const newPassword = document.getElementById('new_password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
 
             if (newPassword !== confirmPassword) {
                 e.preventDefault();
-                [cite_start]alert("Erro: A nova senha e a confirmação não coincidem. Por [cite: 102] [cite_start]favor, verifique."); [cite: 102]
+                alert("Erro: A nova senha e a confirmação não coincidem. Por favor, verifique.");
             }
         });
-    [cite_start]} [cite: 103]
+    }
 
     // Aplica a animação fade-in em todos os elementos relevantes
-    [cite_start]const fadeElements = document.querySelectorAll('.fade-in'); [cite: 104]
-    [cite_start]fadeElements.forEach(element => { [cite: 104]
+    const fadeElements = document.querySelectorAll('.fade-in');
+    fadeElements.forEach(element => {
         // Força o re-flow para garantir que a animação seja executada
-        [cite_start]void element.offsetWidth; [cite: 104]
-    [cite_start]}); [cite: 104]
-    [cite_start]console.log('Página de Perfil inicializada com submissão nativa via POST.'); [cite: 105]
+        void element.offsetWidth;
+    });
+
+    console.log('Página de Perfil inicializada com submissão nativa via POST.');
 });
 </script>
