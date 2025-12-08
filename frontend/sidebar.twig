@@ -1,4 +1,191 @@
-<body id="page-top">
+<style>
+/* ============================================================
+   CSS ADICIONAL - ALINHAMENTO LINEAR TOPBAR
+   Cole este CSS após o sidebar.css ou dentro de uma tag <style>
+   ============================================================ */
+
+/* FORÇAR LAYOUT LINEAR NA TOPBAR */
+.topbar .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
+}
+
+/* ORDEM DOS ELEMENTOS */
+.topbar .navbar-nav > *:nth-child(1) {
+    order: 1; /* Notificações */
+}
+
+.topbar .navbar-nav > *:nth-child(2) {
+    order: 2; /* Divisor */
+}
+
+.topbar .navbar-nav > *:nth-child(3) {
+    order: 3; /* Usuário */
+}
+
+/* NOTIFICAÇÃO - POSIÇÃO E ESTILO */
+.topbar .navbar-nav .nav-item:has(#alertsDropdown) {
+    order: 1 !important;
+    margin-right: 0 !important;
+}
+
+.topbar .navbar-nav .nav-item:has(#alertsDropdown) .nav-link {
+    padding: 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* DIVISOR - POSIÇÃO */
+.topbar-divider {
+    order: 2 !important;
+    height: 30px !important;
+    width: 1px !important;
+    background: #e3e6f0 !important;
+    margin: 0 0.75rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* USUÁRIO - POSIÇÃO E LAYOUT */
+.topbar .navbar-nav .nav-item:has(#userDropdown) {
+    order: 3 !important;
+    margin-left: 0 !important;
+}
+
+.topbar .navbar-nav .nav-item:has(#userDropdown) .nav-link {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* USER-LINK - LAYOUT INTERNO */
+.user-link {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+}
+
+/* NOME DO USUÁRIO - ORDEM */
+.user-link .user-name {
+    order: 1 !important;
+    margin-right: 0 !important;
+}
+
+/* AVATAR - ORDEM */
+.user-link .user-avatar {
+    order: 2 !important;
+    margin-left: 0 !important;
+}
+
+/* SETA DO DROPDOWN - ORDEM */
+.user-link::after {
+    order: 3 !important;
+    margin-left: 0.25rem !important;
+}
+
+/* REMOVER MARGENS EXTRAS */
+.topbar .navbar-nav > * {
+    margin: 0 !important;
+}
+
+/* GARANTIR ALINHAMENTO VERTICAL PERFEITO */
+.topbar .navbar-nav,
+.topbar .navbar-nav > *,
+.topbar .nav-link,
+.user-link {
+    align-items: center !important;
+}
+
+/* FIX PARA BOOTSTRAP CONFLITOS */
+.topbar .navbar-nav .nav-item.dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* GARANTIR QUE NÃO QUEBRA LINHA */
+.topbar .navbar-nav {
+    white-space: nowrap;
+}
+
+.topbar .navbar-nav .nav-item {
+    display: inline-flex;
+}
+
+/* RESPONSIVE - MANTER ORDEM EM MOBILE */
+@media (max-width: 992px) {
+    .user-name {
+        display: none !important;
+    }
+    
+    .user-link {
+        gap: 0 !important;
+        padding: 0.5rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .topbar-divider {
+        display: none !important;
+    }
+    
+    .topbar .navbar-nav {
+        gap: 0.25rem !important;
+    }
+}
+
+/* FIX PARA CHROME */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .topbar .navbar-nav {
+        -webkit-box-align: center;
+        -webkit-box-pack: end;
+    }
+}
+
+/* FIX PARA FIREFOX */
+@-moz-document url-prefix() {
+    .topbar .navbar-nav {
+        display: -moz-box;
+        -moz-box-align: center;
+        -moz-box-pack: end;
+    }
+}
+
+/* FIX PARA SAFARI */
+@supports (-webkit-appearance:none) {
+    .topbar .navbar-nav {
+        display: -webkit-flex;
+        -webkit-align-items: center;
+        -webkit-justify-content: flex-end;
+    }
+}
+
+/* DEBUG (REMOVER EM PRODUÇÃO) */
+/*
+.topbar .navbar-nav > *:nth-child(1) {
+    background: rgba(255, 0, 0, 0.1) !important;
+}
+
+.topbar .navbar-nav > *:nth-child(2) {
+    background: rgba(0, 255, 0, 0.1) !important;
+}
+
+.topbar .navbar-nav > *:nth-child(3) {
+    background: rgba(0, 0, 255, 0.1) !important;
+}
+*/
+
+</style>
+
+</body id="page-top">
 
 <!-- Wrapper Principal -->
 <div id="wrapper">
