@@ -34,18 +34,19 @@
             Dados ao Vivo
         </div>
 
-        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'active' : '' }}">
+        <!-- Nav Item - Rotas -->
+        <li class="nav-item {{ pagedata.current_page in ['routes', 'irregularidades', 'mapa_tempo_real', 'rastreamento'] ? 'active' : '' }}">
             <a class="nav-link" href="#" 
             data-bs-toggle="collapse" 
             data-bs-target="#collapseLiveRoutes"
             data-tooltip="Rotas"
-            aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades'] ? 'true' : 'false' }}">
+            aria-expanded="{{ pagedata.current_page in ['routes', 'irregularidades', 'mapa_tempo_real', 'rastreamento'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Rotas</span>
             </a>
 
             <div id="collapseLiveRoutes" 
-                class="collapse {{ pagedata.current_page in ['routes', 'irregularidades'] ? 'show' : '' }}">
+                class="collapse {{ pagedata.current_page in ['routes', 'irregularidades', 'mapa_tempo_real', 'rastreamento'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
@@ -56,8 +57,88 @@
                         <i class="fas fa-list"></i> Todas as Rotas
                     </a>
 
+                    <a class="collapse-item {{ pagedata.current_page == 'mapa_tempo_real' ? 'active' : '' }}" href="mapa_tempo_real">
+                        <i class="fas fa-map-marked-alt"></i> Mapa em Tempo Real
+                    </a>
+
                     <a class="collapse-item {{ pagedata.current_page == 'irregularidades' ? 'active' : '' }}" href="irregularidades">
                         <i class="fas fa-exclamation-triangle"></i> Irregularidades
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'rastreamento' ? 'active' : '' }}" href="rastreamento">
+                        <i class="fas fa-location-arrow"></i> Rastreamento de Veículos
+                    </a>
+                </div>
+            </div>
+        </li>
+
+        <!-- Nav Item - Tráfego -->
+        <li class="nav-item {{ pagedata.current_page in ['trafego_atual', 'congestionamentos', 'fluxo_veiculos'] ? 'active' : '' }}">
+            <a class="nav-link" href="#" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapseLiveTraffic"
+            data-tooltip="Tráfego"
+            aria-expanded="{{ pagedata.current_page in ['trafego_atual', 'congestionamentos', 'fluxo_veiculos'] ? 'true' : 'false' }}">
+                <i class="fas fa-traffic-light"></i>
+                <span>Tráfego</span>
+            </a>
+
+            <div id="collapseLiveTraffic" 
+                class="collapse {{ pagedata.current_page in ['trafego_atual', 'congestionamentos', 'fluxo_veiculos'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-car"></i>
+                        Monitoramento de Tráfego
+                    </h6>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'trafego_atual' ? 'active' : '' }}" href="trafego_atual">
+                        <i class="fas fa-chart-line"></i> Tráfego Atual
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'congestionamentos' ? 'active' : '' }}" href="congestionamentos">
+                        <i class="fas fa-stop-circle"></i> Congestionamentos
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'fluxo_veiculos' ? 'active' : '' }}" href="fluxo_veiculos">
+                        <i class="fas fa-exchange-alt"></i> Fluxo de Veículos
+                    </a>
+                </div>
+            </div>
+        </li>
+
+        <!-- Nav Item - Alertas -->
+        <li class="nav-item {{ pagedata.current_page in ['alertas_ativos', 'acidentes', 'obras', 'perigos'] ? 'active' : '' }}">
+            <a class="nav-link" href="#" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapseLiveAlerts"
+            data-tooltip="Alertas"
+            aria-expanded="{{ pagedata.current_page in ['alertas_ativos', 'acidentes', 'obras', 'perigos'] ? 'true' : 'false' }}">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Alertas</span>
+            </a>
+
+            <div id="collapseLiveAlerts" 
+                class="collapse {{ pagedata.current_page in ['alertas_ativos', 'acidentes', 'obras', 'perigos'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-bell"></i>
+                        Alertas em Tempo Real
+                    </h6>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'alertas_ativos' ? 'active' : '' }}" href="alertas_ativos">
+                        <i class="fas fa-bell-on"></i> Alertas Ativos
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'acidentes' ? 'active' : '' }}" href="acidentes">
+                        <i class="fas fa-car-crash"></i> Acidentes
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'obras' ? 'active' : '' }}" href="obras">
+                        <i class="fas fa-hard-hat"></i> Obras
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'perigos' ? 'active' : '' }}" href="perigos">
+                        <i class="fas fa-radiation"></i> Perigos na Via
                     </a>
                 </div>
             </div>
@@ -70,51 +151,61 @@
             Dados Estatísticos
         </div>
 
-        <li class="nav-item {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'active' : '' }}">
+        <!-- Nav Item - Dados das Rotas -->
+        <li class="nav-item {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats', 'comparativo_rotas', 'velocidade_media'] ? 'active' : '' }}">
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseStatsRoutes"
             data-tooltip="Dados das Rotas"
-            aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'true' : 'false' }}">
+            aria-expanded="{{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats', 'comparativo_rotas', 'velocidade_media'] ? 'true' : 'false' }}">
                 <i class="fas fa-route"></i>
                 <span>Dados das Rotas</span>
             </a>
 
             <div id="collapseStatsRoutes"
-                class="collapse {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats'] ? 'show' : '' }}">
+                class="collapse {{ pagedata.current_page in ['analise_tempos', 'irregularidades_stats', 'comparativo_rotas', 'velocidade_media'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-road"></i>
-                        Dados de Rotas
+                        Análises de Rotas
                     </h6>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'analise_tempos' ? 'active' : '' }}" href="routes">
-                        <i class="fas fa-list"></i> Análise de Tempos/Velocidades
+                    <a class="collapse-item {{ pagedata.current_page == 'analise_tempos' ? 'active' : '' }}" href="analise_tempos">
+                        <i class="fas fa-clock"></i> Análise de Tempos
                     </a>
 
-                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades_stats' ? 'active' : '' }}" href="irregularidades">
+                    <a class="collapse-item {{ pagedata.current_page == 'velocidade_media' ? 'active' : '' }}" href="velocidade_media">
+                        <i class="fas fa-tachometer-alt"></i> Velocidade Média
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'comparativo_rotas' ? 'active' : '' }}" href="comparativo_rotas">
+                        <i class="fas fa-balance-scale"></i> Comparativo de Rotas
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'irregularidades_stats' ? 'active' : '' }}" href="irregularidades_stats">
                         <i class="fas fa-exclamation-triangle"></i> Irregularidades
                     </a>
                 </div>
             </div>
         </li>
 
-        <li class="nav-item {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'active' : '' }}">
+        <!-- Nav Item - Dados dos Alertas -->
+        <li class="nav-item {{ pagedata.current_page in ['historic_acidents', 'historic_buracos', 'mapa_calor', 'tendencias'] ? 'active' : '' }}">
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseStatsAlerts"
             data-tooltip="Dados dos Alertas"
-            aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'true' : 'false' }}">
+            aria-expanded="{{ pagedata.current_page in ['historic_acidents', 'historic_buracos', 'mapa_calor', 'tendencias'] ? 'true' : 'false' }}">
                 <i class="fas fa-exclamation-circle"></i>
                 <span>Dados dos Alertas</span>
             </a>
 
             <div id="collapseStatsAlerts"
-                class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos'] ? 'show' : '' }}">
+                class="collapse {{ pagedata.current_page in ['historic_acidents', 'historic_buracos', 'mapa_calor', 'tendencias'] ? 'show' : '' }}">
                 <div class="collapse-inner">
                     <h6 class="collapse-header">
                         <i class="fas fa-bell"></i>
-                        Dados de Alertas
+                        Histórico de Alertas
                     </h6>
 
                     <a class="collapse-item {{ pagedata.current_page == 'historic_acidents' ? 'active' : '' }}" href="historic_acidents">
@@ -123,6 +214,52 @@
 
                     <a class="collapse-item {{ pagedata.current_page == 'historic_buracos' ? 'active' : '' }}" href="historic_buracos">
                         <i class="fas fa-road"></i> Buracos Históricos
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'mapa_calor' ? 'active' : '' }}" href="mapa_calor">
+                        <i class="fas fa-fire"></i> Mapa de Calor
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'tendencias' ? 'active' : '' }}" href="tendencias">
+                        <i class="fas fa-chart-area"></i> Tendências
+                    </a>
+                </div>
+            </div>
+        </li>
+
+        <!-- Nav Item - Relatórios -->
+        <li class="nav-item {{ pagedata.current_page in ['relatorios_mensais', 'relatorios_anuais', 'exportar_dados', 'dashboards_personalizados'] ? 'active' : '' }}">
+            <a class="nav-link" href="#"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseStatsReports"
+            data-tooltip="Relatórios"
+            aria-expanded="{{ pagedata.current_page in ['relatorios_mensais', 'relatorios_anuais', 'exportar_dados', 'dashboards_personalizados'] ? 'true' : 'false' }}">
+                <i class="fas fa-file-alt"></i>
+                <span>Relatórios</span>
+            </a>
+
+            <div id="collapseStatsReports"
+                class="collapse {{ pagedata.current_page in ['relatorios_mensais', 'relatorios_anuais', 'exportar_dados', 'dashboards_personalizados'] ? 'show' : '' }}">
+                <div class="collapse-inner">
+                    <h6 class="collapse-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        Relatórios e Exportações
+                    </h6>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'relatorios_mensais' ? 'active' : '' }}" href="relatorios_mensais">
+                        <i class="fas fa-calendar-alt"></i> Relatórios Mensais
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'relatorios_anuais' ? 'active' : '' }}" href="relatorios_anuais">
+                        <i class="fas fa-calendar"></i> Relatórios Anuais
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'exportar_dados' ? 'active' : '' }}" href="exportar_dados">
+                        <i class="fas fa-download"></i> Exportar Dados
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'dashboards_personalizados' ? 'active' : '' }}" href="dashboards_personalizados">
+                        <i class="fas fa-chart-pie"></i> Dashboards Personalizados
                     </a>
                 </div>
             </div>
@@ -138,73 +275,77 @@
         </div>
 
         <!-- ITEM: Configurações do Sistema -->
-        <li class="nav-item {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'active' : '' }}">
-            <!-- Botão que abre/fecha o collapse -->
+        <li class="nav-item {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades', 'settings_notificacoes', 'settings_integracao'] ? 'active' : '' }}">
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
             data-bs-target="#collapseSystemSettings"
             data-tooltip="Configurações do Sistema"
-            aria-expanded="{{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'true' : 'false' }}">
+            aria-expanded="{{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades', 'settings_notificacoes', 'settings_integracao'] ? 'true' : 'false' }}">
                 <i class="fas fa-wrench"></i>
                 <span>Configurações do Sistema</span>
             </a>
 
-            <!-- CONTAINER do collapse -->
             <div id="collapseSystemSettings"
-                class="collapse {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades'] ? 'show' : '' }}">
+                class="collapse {{ pagedata.current_page in ['settings_gerais', 'settings_irregularidades', 'settings_notificacoes', 'settings_integracao'] ? 'show' : '' }}">
                 <div class="collapse-inner">
-
-                    <!-- Cabeçalho interno do collapse -->
                     <h6 class="collapse-header">
                         <i class="fas fa-tools"></i>
                         Opções do Sistema
                     </h6>
 
-                    <!-- Link: Configurações Gerais -->
-                    <a class="collapse-item {{ pagedata.current_page == 'settings_gerais' ? 'active' : '' }}" href="settings">
-                        <i class="fas fa-palette"></i> Configurações Gerais
+                    <a class="collapse-item {{ pagedata.current_page == 'settings_gerais' ? 'active' : '' }}" href="settings_gerais">
+                        <i class="fas fa-sliders-h"></i> Configurações Gerais
                     </a>
 
-                    <!-- Link: Gerenciar Irregularidades -->
-                    <a class="collapse-item {{ pagedata.current_page == 'settings_irregularidades' ? 'active' : '' }}" href="irregularidades">
+                    <a class="collapse-item {{ pagedata.current_page == 'settings_irregularidades' ? 'active' : '' }}" href="settings_irregularidades">
                         <i class="fas fa-exclamation-triangle"></i> Gerenciar Irregularidades
                     </a>
 
+                    <a class="collapse-item {{ pagedata.current_page == 'settings_notificacoes' ? 'active' : '' }}" href="settings_notificacoes">
+                        <i class="fas fa-bell"></i> Notificações
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'settings_integracao' ? 'active' : '' }}" href="settings_integracao">
+                        <i class="fas fa-plug"></i> Integrações
+                    </a>
                 </div>
             </div>
         </li>
 
-        <!-- ITEM: Utilitários -->
-        <li class="nav-item">
-            <!-- Botão que abre/fecha o collapse -->
+        <!-- ITEM: Usuários e Permissões -->
+        <li class="nav-item {{ pagedata.current_page in ['usuarios', 'perfis', 'logs_acesso', 'auditoria'] ? 'active' : '' }}">
             <a class="nav-link" href="#"
             data-bs-toggle="collapse"
-            data-bs-target="#collapseUtilities"
-            data-tooltip="Utilitários">
-                <i class="fas fa-tools"></i>
-                <span>Utilitários</span>
+            data-bs-target="#collapseUsers"
+            data-tooltip="Usuários"
+            aria-expanded="{{ pagedata.current_page in ['usuarios', 'perfis', 'logs_acesso', 'auditoria'] ? 'true' : 'false' }}">
+                <i class="fas fa-users"></i>
+                <span>Usuários</span>
             </a>
 
-            <!-- CONTAINER do collapse -->
-            <div id="collapseUtilities" class="collapse">
+            <div id="collapseUsers"
+                class="collapse {{ pagedata.current_page in ['usuarios', 'perfis', 'logs_acesso', 'auditoria'] ? 'show' : '' }}">
                 <div class="collapse-inner">
-
-                    <!-- Cabeçalho interno -->
                     <h6 class="collapse-header">
-                        <i class="fas fa-wrench"></i>
-                        Opções do Sistema
+                        <i class="fas fa-user-cog"></i>
+                        Gerenciamento de Usuários
                     </h6>
 
-                    <!-- Link: Configurações de Cores -->
-                    <a class="collapse-item" href="utilities-color.html">
-                        <i class="fas fa-palette"></i> Configurações de Cores
+                    <a class="collapse-item {{ pagedata.current_page == 'usuarios' ? 'active' : '' }}" href="usuarios">
+                        <i class="fas fa-user-friends"></i> Gerenciar Usuários
                     </a>
 
-                    <!-- Link: Bordas -->
-                    <a class="collapse-item" href="utilities-border.html">
-                        <i class="fas fa-border-style"></i> Bordas
+                    <a class="collapse-item {{ pagedata.current_page == 'perfis' ? 'active' : '' }}" href="perfis">
+                        <i class="fas fa-id-card"></i> Perfis e Permissões
                     </a>
 
+                    <a class="collapse-item {{ pagedata.current_page == 'logs_acesso' ? 'active' : '' }}" href="logs_acesso">
+                        <i class="fas fa-history"></i> Logs de Acesso
+                    </a>
+
+                    <a class="collapse-item {{ pagedata.current_page == 'auditoria' ? 'active' : '' }}" href="auditoria">
+                        <i class="fas fa-shield-alt"></i> Auditoria
+                    </a>
                 </div>
             </div>
         </li>
@@ -252,9 +393,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" 
                         data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell fa-fw"></i>
-                            <span class="badge rounded-pill bg-danger notification-badge">
-                                3+
-                            </span>
+                            <span class="badge rounded-pill bg-danger notification-badge">3+</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="alertsDropdown">
                             <h6 class="dropdown-header">
@@ -307,22 +446,35 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle user-link" href="#" id="userDropdown" 
                         data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="me-2 d-none d-lg-inline user-name">{{user.nome}}</span>
+                            <span class="me-2 d-none d-lg-inline user-name">{{ user.nome }}</span>
                             <div class="user-avatar">
                                 <img src="{{ user.photo }}" alt="Foto do Usuário">
                             </div>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#">
+                        <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-user me-2"></i>
+                                Minha Conta
+                            </h6>
+                            <a class="dropdown-item" href="perfil">
                                 <i class="fas fa-user me-2"></i>
                                 Perfil
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="configuracoes">
                                 <i class="fas fa-cogs me-2"></i>
                                 Configurações
                             </a>
+                            <a class="dropdown-item" href="notificacoes">
+                                <i class="fas fa-bell me-2"></i>
+                                Notificações
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                            <a class="dropdown-item" href="ajuda">
+                                <i class="fas fa-question-circle me-2"></i>
+                                Ajuda
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                 <i class="fas fa-sign-out-alt me-2"></i>
                                 Sair
                             </a>
