@@ -1,0 +1,125 @@
+<div class="col-xl-8 col-lg-7 mb-4">
+    {# ... (Seções de Dados Pessoais e Segurança existentes) ... #}
+
+    <div class="card modern-card fade-in" style="animation-delay: 0.3s;">
+        <div class="modern-card-header bg-info-gradient">
+            <span>
+                <i class="fas fa-sliders-h me-2"></i>
+                Preferências de Aplicativo
+            </span>
+        </div>
+        <div class="card-body p-4">
+            {# Formulário para as colunas da tabela 'user' #}
+            <form id="updateAppPreferencesForm" method="POST" action="">
+                <input type="hidden" name="action" value="update_app_preferences">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="ui_locale" class="profile-info-label mb-1">Idioma da Interface</label>
+                        <select class="form-select" id="ui_locale" name="ui_locale" required>
+                            <option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
+                            <option value="en-US" {% if user.ui_locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
+                            <option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="ui_timezone" class="profile-info-label mb-1">Fuso Horário</label>
+                        {# Lista grande, mas aqui estão algumas opções comuns #}
+                        <select class="form-select" id="ui_timezone" name="ui_timezone" required>
+                            <option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option>
+                            <option value="America/New_York" {% if user.ui_timezone == 'America/New_York' %}selected{% endif %}>América/Nova York (GMT-5)</option>
+                            <option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option>
+                            {# Adicione mais opções conforme necessário #}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="ui_theme" class="profile-info-label mb-1">Tema da Interface</label>
+                        <select class="form-select" id="ui_theme" name="ui_theme" required>
+                            <option value="light" {% if user.ui_theme == 'light' %}selected{% endif %}>Modo Claro</option>
+                            <option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option>
+                            <option value="system" {% if user.ui_theme == 'system' %}selected{% endif %}>Seguir Sistema</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="home_page" class="profile-info-label mb-1">Página Inicial Padrão</label>
+                        <select class="form-select" id="home_page" name="home_page" required>
+                            <option value="dashboard" {% if user.home_page == 'dashboard' %}selected{% endif %}>Dashboard Principal</option>
+                            <option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option>
+                            <option value="reports" {% if user.home_page == 'reports' %}selected{% endif %}>Relatórios</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-info mt-3"><i class="fas fa-cogs me-2"></i>Salvar Preferências</button>
+            </form>
+        </div>
+    </div>
+
+    {# ---------------------------------------------------------------- #}
+    
+    <div class="card modern-card mt-4 fade-in" style="animation-delay: 0.4s;">
+        <div class="modern-card-header bg-success-gradient">
+            <span>
+                <i class="fas fa-bell me-2"></i>
+                Controle de Notificações
+            </span>
+        </div>
+        <div class="card-body p-4">
+            {# Formulário para as colunas da tabela 'user_notification_preferences' #}
+            <form id="updateNotificationForm" method="POST" action="">
+                <input type="hidden" name="action" value="update_notifications">
+
+                <p class="text-secondary mb-3">Selecione quais notificações você deseja receber e por qual canal.</p>
+                
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr class="profile-info-label">
+                            <th>Tipo de Notificação</th>
+                            <th>E-mail</th>
+                            <th>SMS</th>
+                            <th>WhatsApp</th>
+                            <th>Push/App</th>
+                            <th>Frequência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for type, prefs in user_preferences %}
+                            {# Loop sobre os tipos de notificação definidos no seu controlador (ex: 'activity', 'security', 'marketing') #}
+                            <tr>
+                                <td class="fw-bold">{{ type|capitalize }}</td>
+                                <td>
+                                    <input type="checkbox" name="prefs[{{ type }}][channel_email]" 
+                                           value="1" {% if prefs.channel_email == 1 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="prefs[{{ type }}][channel_sms]" 
+                                           value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" 
+                                           value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="prefs[{{ type }}][channel_push]" 
+                                           value="1" {% if prefs.channel_push == 1 %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm" name="prefs[{{ type }}][frequency]">
+                                        <option value="instant" {% if prefs.frequency == 'instant' %}selected{% endif %}>Instantâneo</option>
+                                        <option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Diário</option>
+                                        <option value="weekly" {% if prefs.frequency == 'weekly' %}selected{% endif %}>Semanal</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check-double me-2"></i>Salvar Notificações</button>
+            </form>
+        </div>
+    </div>
+</div>
