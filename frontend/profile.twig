@@ -307,6 +307,15 @@
                             <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_2fa_enabled" name="is_2fa_enabled" value="1" role="switch" {% if user.is_2fa_enabled == 1 %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label>
+                                <small class="d-block text-secondary">Aumente a segurança da sua conta exigindo um código adicional no login.</small>
+                            </div>
+                        </div>
+                        
                         <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Alterar Senha</button>
                     </form>
                 </div>
