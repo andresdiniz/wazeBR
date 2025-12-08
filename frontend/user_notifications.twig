@@ -81,18 +81,6 @@ body.dark-mode {
 .btn-success:hover { background: var(--success-gradient); }
 
 </style>
-{% endblock %}
-
-
-{% block title %}Configurações de Notificações{% endblock %}
-
-{% block content %}
-{# Define preferences com um fallback robusto para evitar o erro 500 #}
-{% set preferences = preferences|default({}) %}
-{% set prefs_system = preferences.system|default({}) %}
-{% set prefs_activity = preferences.activity|default({}) %}
-{% set prefs_updates = preferences.updates|default({'frequency': 'daily'}) %}
-
 
 <div class="container-fluid">
     <div class="page-header fade-in">
