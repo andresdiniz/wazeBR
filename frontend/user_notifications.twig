@@ -1,12 +1,21 @@
+{# user_notifications.twig - Versão Otimizada com CSS Aprimorado #}
 
+{% extends 'base.twig' %}
+
+{# 1. CSS EMBUTIDO (Para garantir o estilo e os novos espaçamentos) #}
+{% block style_block %}
 <style>
-/* Os estilos foram extraídos do seu arquivo e são os mesmos do CSS unificado. 
-   Recomenda-se mover isso para um arquivo externo (main.css) se possível. */
-
+/* ========================================= */
+/* 1. Variáveis Globais (Light & Dark Mode) */
+/* ========================================= */
 :root {
+    /* Cores de Ação */
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
     --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); 
     --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%); 
+    --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+
+    /* Cores do Tema - CLARO */
     --color-bg: #f8f9fc;
     --color-card-bg: #ffffff;
     --color-text-primary: #2c3e50;
@@ -16,6 +25,7 @@
     --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
+/* Modo Escuro */
 body.dark-mode {
     --color-bg: #1e212b;
     --color-card-bg: #272c38;
@@ -26,61 +36,132 @@ body.dark-mode {
     --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
+/* ========================================= */
+/* 2. Estilos Base e Layout */
+/* ========================================= */
+body { background-color: var(--color-bg); color: var(--color-text-primary); }
+
 .page-header {
     margin-bottom: 2.5rem;
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem; /* Aumento o padding aqui */
     border-bottom: 1px solid var(--color-border);
 }
 
-/* Card Moderno e Componentes */
+.page-header h1 { font-size: 2rem; }
+.page-header .subtitle { font-size: 1rem; } /* Melhora a legibilidade do subtítulo */
+
+/* Componentes: Card Moderno */
 .modern-card {
     border: 1px solid var(--color-border);
     border-radius: 1rem;
     box-shadow: var(--card-shadow);
     background: var(--color-card-bg);
+    margin-bottom: 2rem; /* Aumenta o espaçamento entre os cards */
 }
 .modern-card-header {
+    padding: 1.25rem 1.5rem; /* Aumento o padding vertical do cabeçalho */
+    font-weight: 700;
     border-top: 4px solid transparent; 
     border-image: var(--info-gradient);
     border-image-slice: 1;
 }
+.modern-card-header.bg-success-gradient {
+    border-image: var(--success-gradient);
+    border-image-slice: 1;
+}
 
-/* Notificações */
+.modern-card-body {
+    padding: 1.75rem; /* Aumenta o padding interno do corpo do card */
+}
+
+/* Formulários */
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
+}
+.btn-success { background: #1cc88a; border-radius: 0.75rem; }
+.btn-success:hover { background: var(--success-gradient); }
+
+
+/* ========================================= */
+/* 3. Estilos de Notificações (Foco em Espaçamento) */
+/* ========================================= */
 .notification-group {
     border: 1px solid var(--color-border);
     border-radius: 0.75rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 2rem; /* AUMENTADO: Mais respiro interno */
+    margin-bottom: 1.75rem; /* Aumenta o espaçamento entre grupos de notificação */
     background-color: var(--color-card-bg);
     transition: all 0.3s ease;
 }
 
 .notification-group:hover {
     border-color: #1cc88a; 
-    box-shadow: 0 0 8px rgba(28, 200, 138, 0.1);
+    box-shadow: 0 0 8px rgba(28, 200, 138, 0.15); /* Sombra mais visível no hover */
 }
 
 .notification-header {
     border-bottom: 1px dashed var(--color-border);
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem; /* AUMENTADO: Mais espaço antes dos checkboxes */
+    padding-bottom: 1rem;
+}
+
+.notification-header h5 {
+    font-weight: 700;
+    margin-bottom: 0.5rem; /* Espaço entre o título e a descrição */
 }
 
 .channel-check-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 3rem; /* AUMENTADO: Mais distância horizontal entre checkboxes */
+    margin-top: 1rem;
 }
 
-/* Formulários */
-.form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+/* Estilo para o seletor de frequência */
+.frequency-group {
+    margin-top: 1.5rem; /* Mais espaço acima da frequência */
 }
-.btn-success { background: #1cc88a; }
-.btn-success:hover { background: var(--success-gradient); }
 
+.frequency-group h6 {
+    margin-bottom: 0.75rem;
+}
+
+.frequency-group .form-select {
+    width: 60%; /* Ajuste a largura do seletor */
+    max-width: 300px;
+}
+
+/* Ajustes no Card de Resumo */
+.summary-list {
+    margin-top: 1rem;
+    padding-left: 0;
+}
+.summary-list li {
+    margin-bottom: 0.8rem;
+    color: var(--color-text-primary);
+}
+.summary-list i {
+    color: #667eea; /* Ícones em cor primária */
+}
+.summary-note {
+    padding-top: 1rem;
+    border-top: 1px dashed var(--color-border);
+}
 </style>
+{% endblock %}
+
+
+{% block title %}Configurações de Notificações{% endblock %}
+
+{% block content %}
+{# GARANTIA CONTRA ERRO 500: Define variáveis com fallback robusto #}
+{% set preferences = preferences|default({}) %}
+{% set prefs_system = preferences.system|default({}) %}
+{% set prefs_activity = preferences.activity|default({}) %}
+{% set prefs_updates = preferences.updates|default({'frequency': 'daily'}) %}
+
 
 <div class="container-fluid">
     <div class="page-header fade-in">
@@ -88,13 +169,15 @@ body.dark-mode {
         <p class="subtitle">Gerencie como e quando você deseja receber alertas e atualizações do sistema.</p>
     </div>
 
-    <form action="" method="POST">
+    {# Ação do formulário deve ser corrigida se 'user_notifications_save' for a causa do Erro 500 #}
+    <form action="{{ path('user_notifications_save') }}" method="POST">
         
         <div class="row">
             
+            {# Coluna Principal de Configurações #}
             <div class="col-lg-8">
                 
-                {# CARD 1: Configurações Gerais #}
+                {# CARD 1: Preferências de Notificação #}
                 <div class="modern-card fade-in" style="animation-delay: 0.1s;">
                     <div class="modern-card-header bg-info-gradient">
                         Preferências de Notificação
@@ -108,7 +191,7 @@ body.dark-mode {
                                 <p class="text-secondary mb-0">Receba avisos imediatos sobre problemas de segurança ou manutenção.</p>
                             </div>
                             
-                            <div class="channel-check-group mt-3">
+                            <div class="channel-check-group">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="system_email" name="prefs[system][email]" value="1" checked disabled>
                                     <label class="form-check-label" for="system_email">
@@ -132,7 +215,7 @@ body.dark-mode {
                                 <p class="text-secondary mb-0">Alertas de login em novo dispositivo, alteração de senha, etc.</p>
                             </div>
                             
-                            <div class="channel-check-group mt-3">
+                            <div class="channel-check-group">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="activity_email" name="prefs[activity][email]" value="1" 
                                            {% if prefs_activity.email|default(false) %}checked{% endif %}>
@@ -150,14 +233,14 @@ body.dark-mode {
                             </div>
                         </div>
 
-                        {# Bloco 3: Novas Funcionalidades e Frequência #}
+                        {# Bloco 3: Atualizações de Produtos e Frequência #}
                         <div class="notification-group">
                             <div class="notification-header">
                                 <h5>Atualizações de Produtos</h5>
                                 <p class="text-secondary mb-0">Notícias sobre novas funcionalidades e melhorias na plataforma.</p>
                             </div>
                             
-                            <div class="channel-check-group mt-3">
+                            <div class="channel-check-group">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="updates_email" name="prefs[updates][email]" value="1" 
                                            {% if prefs_updates.email|default(false) %}checked{% endif %}>
@@ -174,20 +257,21 @@ body.dark-mode {
                                 </div>
                             </div>
 
-                            <h6 class="mt-4 mb-2 text-secondary">Frequência</h6>
-                            <select class="form-select form-select-sm w-50" id="updates_frequency" name="prefs[updates][frequency]">
-                                {# O valor padrão é definido no 'set' do Twig acima: prefs_updates.frequency|default('daily') #}
-                                <option value="instant" {% if prefs_updates.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
-                                <option value="daily" {% if prefs_updates.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
-                                <option value="weekly" {% if prefs_updates.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
-                                <option value="never" {% if prefs_updates.frequency == 'never' %}selected{% endif %}>Nunca</option>
-                            </select>
+                            <div class="frequency-group">
+                                <h6 class="text-secondary">Frequência</h6>
+                                <select class="form-select form-select-sm" id="updates_frequency" name="prefs[updates][frequency]">
+                                    <option value="instant" {% if prefs_updates.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
+                                    <option value="daily" {% if prefs_updates.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
+                                    <option value="weekly" {% if prefs_updates.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
+                                    <option value="never" {% if prefs_updates.frequency == 'never' %}selected{% endif %}>Nunca</option>
+                                </select>
+                            </div>
                         </div>
                         
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-success mt-3 fade-in" style="animation-delay: 0.3s;"><i class="fas fa-save me-2"></i> Salvar Alterações</button>
+                <button type="submit" class="btn btn-success mt-3"><i class="fas fa-save me-2"></i> Salvar Alterações</button>
 
             </div>
             
@@ -200,16 +284,15 @@ body.dark-mode {
                     <div class="modern-card-body">
                         <p class="text-secondary">Você atualmente está inscrito em **{{ preferences.total_active|default('?') }} de {{ preferences.total_available|default('?') }}** categorias de notificação.</p>
                         
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i> Email: <span class="fw-bold">{{ preferences.email_active|default('?') }} ativas</span></li>
-                            <li class="mb-2"><i class="fas fa-mobile-alt me-2 text-primary"></i> Push: <span class="fw-bold">{{ preferences.push_active|default('?') }} ativas</span></li>
-                            <li class="mb-2"><i class="fas fa-sms me-2 text-primary"></i> SMS: <span class="fw-bold">{{ preferences.sms_active|default('?') }} ativas</span></li>
+                        <ul class="list-unstyled summary-list">
+                            <li><i class="fas fa-envelope me-2"></i> Email: <span class="fw-bold">{{ preferences.email_active|default('?') }} ativas</span></li>
+                            <li><i class="fas fa-mobile-alt me-2"></i> Push: <span class="fw-bold">{{ preferences.push_active|default('?') }} ativas</span></li>
+                            <li><i class="fas fa-sms me-2"></i> SMS: <span class="fw-bold">{{ preferences.sms_active|default('?') }} ativas</span></li>
                         </ul>
                         
-                        <hr>
-                        <p class="small text-secondary m-0">
+                        <div class="small text-secondary summary-note">
                             **Nota:** Por motivos de segurança, algumas notificações críticas não podem ser desativadas.
-                        </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -218,18 +301,18 @@ body.dark-mode {
     </form>
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Aplica a animação fade-in em todos os elementos
+        // Aplica a animação fade-in
         document.querySelectorAll('.fade-in').forEach(element => {
-            void element.offsetWidth; // Força o re-flow
+            void element.offsetWidth; 
         });
         
-        console.log('Página de Notificações carregada.');
-
         // Lógica para desabilitar opções se a frequência for "Nunca"
         const updateFrequencySelect = document.getElementById('updates_frequency');
-        // Seleciona os checkboxes dentro do terceiro bloco de notificação
         const updateChannels = document.querySelector('.notification-group:nth-child(3) .channel-check-group');
 
         if (updateFrequencySelect && updateChannels) {
@@ -239,7 +322,6 @@ body.dark-mode {
                 
                 checkboxes.forEach(checkbox => {
                     checkbox.disabled = isDisabled;
-                    // Se estiver desabilitado, desmarca.
                     if (isDisabled) {
                         checkbox.checked = false;
                     }
@@ -247,8 +329,8 @@ body.dark-mode {
             }
             
             updateFrequencySelect.addEventListener('change', toggleUpdateChannels);
-            // Executa na carga inicial para aplicar o estado correto
             toggleUpdateChannels();
         }
     });
 </script>
+{% endblock %}
