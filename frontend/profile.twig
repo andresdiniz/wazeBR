@@ -1,0 +1,310 @@
+<style>
+    /* Inclusão de variáveis e estilos do home.twig para consistência */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+        
+        /* Variáveis para modo claro */
+        --bg-color: #f8f9fc;
+        --card-bg: #ffffff;
+        --text-primary: #2c3e50;
+        --text-secondary: #858796;
+        --border-color: #e3e6f0;
+        --header-border: #e3e6f0;
+    }
+
+    /* Modo Escuro (Apenas o essencial para o card) */
+    body.dark-mode {
+        --bg-color: #1a1d29;
+        --card-bg: #252836;
+        --text-primary: #e4e6eb;
+        --text-secondary: #b0b3b8;
+        --border-color: #3a3d4a;
+        --header-border: #3a3d4a;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Reutilização de estilos de home.twig */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--header-border);
+    }
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .page-header .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+    .modern-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        background: var(--card-bg);
+    }
+    .modern-card:hover {
+        box-shadow: var(--card-shadow-hover);
+    }
+    .modern-card-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 1.05rem;
+    }
+    .modern-card-header i {
+        font-size: 1.2rem;
+    }
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilos específicos do Perfil */
+    .profile-photo-container {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 1.5rem;
+        border: 4px solid var(--primary-gradient);
+        box-shadow: var(--card-shadow);
+        background: #f0f0f0; /* Cor de fundo para fallback */
+    }
+
+    .profile-photo-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .profile-info-value {
+        font-size: 1.05rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        padding-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+        padding: 0.625rem 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+    }
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        font-weight: 600;
+        border-radius: 0.5rem;
+    }
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+</style>
+
+<div class="container-fluid px-3 px-lg-4 mt-4">
+    
+    <div class="page-header fade-in">
+        <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil</h1>
+        <p class="subtitle mb-0">Gerencie suas informações pessoais e configurações de conta.</p>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-xl-4 col-lg-5 mb-4 fade-in">
+            <div class="card modern-card h-100">
+                <div class="modern-card-header bg-info-gradient">
+                    <span>
+                        <i class="fas fa-id-badge me-2"></i>
+                        Dados Pessoais
+                    </span>
+                </div>
+                <div class="card-body p-4 text-center">
+                    
+                    <div class="profile-photo-container">
+                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
+                    </div>
+
+                    <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
+                    <p class="text-secondary mb-3">@{{ user.username|default('username') }}</p>
+
+                    <div class="text-start mt-4">
+                        <div class="profile-info-label">E-mail</div>
+                        <div class="profile-info-value">{{ user.email|default('N/A') }}</div>
+
+                        <div class="profile-info-label">Telefone</div>
+                        <div class="profile-info-value">{{ user.phone_number|default('N/A') }}</div>
+
+                        <div class="profile-info-label">Tipo de Usuário</div>
+                        <div class="profile-info-value">
+                            {{ user.type == '1' ? 'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7 mb-4">
+            
+            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.1s;">
+                <div class="modern-card-header bg-primary-gradient">
+                    <span>
+                        <i class="fas fa-edit me-2"></i>
+                        Atualizar Dados
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <form id="updateProfileForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="profile-info-label mb-1">Nome Completo</label>
+                                <input type="text" class="form-control" id="nome" name="nome" value="{{ user.nome }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="profile-info-label mb-1">Nome de Usuário (Username)</label>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="profile-info-label mb-1">E-mail</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" disabled>
+                                <small class="text-secondary">O e-mail não pode ser alterado.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone_number" class="profile-info-label mb-1">Telefone</label>
+                                <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+                            </div>
+                        </div>
+                        <div class="row">
+                             <div class="col-md-6 mb-3">
+                                <label for="locale" class="profile-info-label mb-1">Idioma / Localização</label>
+                                <select class="form-select" id="locale" name="locale" required>
+                                    <option value="pt-BR" {% if user.locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
+                                    <option value="en-US" {% if user.locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
+                                    </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="receber_email" class="profile-info-label mb-1">Receber E-mails de Notificação</label>
+                                <select class="form-select" id="receber_email" name="receber_email" required>
+                                    <option value="1" {% if user.receber_email == '1' %}selected{% endif %}>Sim</option>
+                                    <option value="0" {% if user.receber_email == '0' %}selected{% endif %}>Não</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save me-2"></i>Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card modern-card fade-in" style="animation-delay: 0.2s;">
+                <div class="modern-card-header bg-danger-gradient">
+                    <span>
+                        <i class="fas fa-lock me-2"></i>
+                        Segurança da Conta
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <form id="updatePasswordForm">
+                        <div class="mb-3">
+                            <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="profile-info-label mb-1">Nova Senha</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Alterar Senha</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Reutilizar a inicialização do Tooltip se o JS do Bootstrap estiver incluído
+    if (typeof bootstrap !== 'undefined') {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                customClass: 'custom-tooltip'
+            });
+        });
+    }
+
+    // Lógica simples para exemplo de submissão de formulário
+    const updateProfileForm = document.getElementById('updateProfileForm');
+    const updatePasswordForm = document.getElementById('updatePasswordForm');
+
+    if (updateProfileForm) {
+        updateProfileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log("Formulário de perfil submetido!");
+            // Aqui você adicionará sua lógica AJAX para o PHP
+            alert('Dados de perfil salvos com sucesso! (Simulação)');
+        });
+    }
+
+    if (updatePasswordForm) {
+        updatePasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (newPassword !== confirmPassword) {
+                alert("Erro: A nova senha e a confirmação não coincidem.");
+                return;
+            }
+
+            console.log("Formulário de senha submetido!");
+            // Aqui você adicionará sua lógica AJAX para o PHP
+            alert('Senha alterada com sucesso! (Simulação)');
+        });
+    }
+
+    console.log('Página de Perfil inicializada.');
+});
+</script>
