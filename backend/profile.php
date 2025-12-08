@@ -62,7 +62,7 @@ try {
 }
 
 // Inicializa o Modelo e Variáveis
-$userModel = new User($pdo);
+//$userModel = new User($pdo);
 $messages = [];
 $errors = [];
 
