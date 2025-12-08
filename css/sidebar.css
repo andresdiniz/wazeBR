@@ -438,12 +438,14 @@ body.sidebar-toggled #content-wrapper {
     margin-bottom: 0;
     list-style: none;
     padding: 0;
+    height: 100%;
 }
 
 .topbar .nav-item {
     position: relative;
     display: flex;
     align-items: center;
+    height: auto;
 }
 
 .topbar .nav-link {
@@ -457,7 +459,8 @@ body.sidebar-toggled #content-wrapper {
     text-decoration: none;
     position: relative;
     white-space: nowrap;
-    min-height: 44px; /* Touch target mínimo */
+    min-height: 44px;
+    height: auto;
 }
 
 .topbar .nav-link:hover {
@@ -469,12 +472,13 @@ body.sidebar-toggled #content-wrapper {
 .topbar .nav-link .fa-bell {
     font-size: 1.25rem;
     position: relative;
+    display: block;
 }
 
 .notification-badge {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: -4px;
+    right: -4px;
     font-size: 0.65rem;
     font-weight: 700;
     padding: 0.2em 0.5em;
@@ -486,14 +490,16 @@ body.sidebar-toggled #content-wrapper {
     align-items: center;
     justify-content: center;
     animation: pulse 2s infinite;
+    z-index: 1;
 }
 
-/* ==================== USER MENU - CORRIGIDO ==================== */
+/* ==================== USER MENU - TOTALMENTE CORRIGIDO ==================== */
 .user-link {
     display: flex !important;
     align-items: center !important;
     gap: 0.75rem !important;
     padding: 0.5rem 0.75rem !important;
+    height: auto !important;
 }
 
 .user-name {
@@ -501,6 +507,9 @@ body.sidebar-toggled #content-wrapper {
     font-weight: 600;
     font-size: 0.95rem;
     white-space: nowrap;
+    line-height: 1.2;
+    margin: 0;
+    display: inline-block;
 }
 
 .user-avatar {
@@ -508,6 +517,8 @@ body.sidebar-toggled #content-wrapper {
     height: 40px !important;
     min-width: 40px;
     min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--border-color);
@@ -517,17 +528,85 @@ body.sidebar-toggled #content-wrapper {
     justify-content: center;
     background: var(--light-bg);
     flex-shrink: 0;
+    position: relative;
 }
 
 .user-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .user-link:hover .user-avatar {
     border-color: var(--primary-color);
     transform: scale(1.05);
+}
+
+/* Garantir alinhamento correto do dropdown toggle */
+.user-link::after {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* ==================== CORREÇÕES ESPECÍFICAS CROSS-BROWSER ==================== */
+
+/* Remover espaçamento extra do Bootstrap */
+.topbar .navbar-nav .nav-item {
+    margin-bottom: 0 !important;
+}
+
+.topbar .navbar-nav .nav-link {
+    margin-bottom: 0 !important;
+}
+
+/* Forçar display correto */
+.topbar .dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+}
+
+/* Alinhamento vertical perfeito */
+.topbar .nav-item,
+.topbar .nav-link,
+.user-link {
+    align-self: center;
+}
+
+/* Garantir que o avatar não quebre */
+.user-avatar {
+    line-height: 0;
+    font-size: 0;
+}
+
+.user-avatar img {
+    vertical-align: middle;
+    border-style: none;
+}
+
+/* Evitar quebra de layout */
+.topbar .navbar-nav {
+    flex-wrap: nowrap;
+}
+
+/* Centralização perfeita do conteúdo */
+.topbar {
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ==================== ESTADOS HOVER E FOCUS ==================== */
+.user-link:hover,
+.user-link:focus {
+    text-decoration: none;
+    outline: none;
+}
+
+.user-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
 }
 
 /* Divisor da Topbar */
