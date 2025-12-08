@@ -1,10 +1,13 @@
 <?php
 // profile.php - Controlador de Perfil com Logger e ErrorHandler
 
-// 1. CONFIGURAÇÃO INICIAL
+/* 1. CONFIGURAÇÃO INICIAL
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
-}
+}*/
+
+session_start(); // Garantir que a sessão esteja iniciada
+var_dump($_SESSION);
 
 // Variáveis de Ambiente
 $isDebug = true; // Mantenha TRUE para desenvolvimento. Mude para FALSE em produção.
