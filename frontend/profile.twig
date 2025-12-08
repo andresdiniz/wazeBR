@@ -164,6 +164,7 @@
 
     {# ---------------------------------------------------- #}
     {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
+    {# As variáveis 'messages' e 'errors' devem ser passadas pelo controlador PHP #}
     {# ---------------------------------------------------- #}
     
     {% if messages is not empty %}
@@ -234,7 +235,7 @@
                     </span>
                 </div>
                 <div class="card-body p-4">
-                    {# CORREÇÃO: Adicionando method="POST" e action. Action vazia submete para a mesma página. #}
+                    {# Formulário de Atualização de Perfil: Submissão via POST #}
                     <form id="updateProfileForm" method="POST" action="">
                         <input type="hidden" name="action" value="update_profile">
 
@@ -290,7 +291,7 @@
                     </span>
                 </div>
                 <div class="card-body p-4">
-                    {# CORREÇÃO: Adicionando method="POST" e action. Action vazia submete para a mesma página. #}
+                    {# Formulário de Alteração de Senha: Submissão via POST #}
                     <form id="updatePasswordForm" method="POST" action="">
                         <input type="hidden" name="action" value="update_password">
 
@@ -317,7 +318,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Reutilizar a inicialização do Tooltip (opcional)
+    // Inicialização do Tooltip se o JS do Bootstrap estiver incluído (Opcional)
     if (typeof bootstrap !== 'undefined') {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -327,8 +328,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // A LÓGICA DE SUBMISSÃO NATIVA AGORA ESTÁ EM USO.
-    // Mantemos apenas a checagem client-side de confirmação de senha para melhor UX.
+    // Apenas checagem client-side para garantir que a nova senha e a confirmação coincidam.
+    // O envio nativo via POST continua, a menos que esta validação falhe.
     const updatePasswordForm = document.getElementById('updatePasswordForm');
 
     if (updatePasswordForm) {
@@ -336,16 +337,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const newPassword = document.getElementById('new_password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
 
-            // Checagem de senhas iguais antes de enviar ao PHP
             if (newPassword !== confirmPassword) {
-                e.preventDefault(); // Impede o envio se as senhas não coincidirem
-                alert("Erro: A nova senha e a confirmação não coincidem.");
-                // O PHP fará a validação final (tamanho, senha atual, etc.)
+                e.preventDefault(); // Impede o envio para o PHP
+                alert("Erro: A nova senha e a confirmação não coincidem. Por favor, verifique.");
             }
         });
     }
 
-    // Não precisamos de listener para o updateProfileForm, pois ele submete diretamente.
-    // console.log('Página de Perfil inicializada. Submissão via POST nativa ativada.');
+    console.log('Página de Perfil inicializada com submissão nativa via POST.');
 });
 </script>
