@@ -12,7 +12,7 @@ var_dump($_SESSION);
 // Variáveis de Ambiente
 $isDebug = true; // Mantenha TRUE para desenvolvimento. Mude para FALSE em produção.
 $logDir = __DIR__ . '/logs';
-$loggedInUserId = $_SESSION['user_id'] ?? null; // CHAVE: Ajuste a chave da sessão conforme seu sistema!
+$loggedInUserId = $_SESSION['usuario_id'] ?? null; // CHAVE: Ajuste a chave da sessão conforme seu sistema!
 
 echo $loggedInUserId;
 
