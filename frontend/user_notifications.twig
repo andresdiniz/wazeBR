@@ -1,9 +1,8 @@
 {# user_notifications.twig - Versão Otimizada com CSS Aprimorado #}
 
-{% extends 'base.twig' %}
 
-{# 1. CSS EMBUTIDO (Para garantir o estilo e os novos espaçamentos) #}
-{% block style_block %}
+
+
 <style>
 /* ========================================= */
 /* 1. Variáveis Globais (Light & Dark Mode) */
@@ -150,18 +149,6 @@ body { background-color: var(--color-bg); color: var(--color-text-primary); }
     border-top: 1px dashed var(--color-border);
 }
 </style>
-{% endblock %}
-
-
-{% block title %}Configurações de Notificações{% endblock %}
-
-{% block content %}
-{# GARANTIA CONTRA ERRO 500: Define variáveis com fallback robusto #}
-{% set preferences = preferences|default({}) %}
-{% set prefs_system = preferences.system|default({}) %}
-{% set prefs_activity = preferences.activity|default({}) %}
-{% set prefs_updates = preferences.updates|default({'frequency': 'daily'}) %}
-
 
 <div class="container-fluid">
     <div class="page-header fade-in">
@@ -170,7 +157,7 @@ body { background-color: var(--color-bg); color: var(--color-text-primary); }
     </div>
 
     {# Ação do formulário deve ser corrigida se 'user_notifications_save' for a causa do Erro 500 #}
-    <form action="{{ path('user_notifications_save') }}" method="POST">
+    <form action="" method="POST">
         
         <div class="row">
             
@@ -301,9 +288,6 @@ body { background-color: var(--color-bg); color: var(--color-text-primary); }
     </form>
 </div>
 
-{% endblock %}
-
-{% block javascripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Aplica a animação fade-in
@@ -333,4 +317,3 @@ body { background-color: var(--color-bg); color: var(--color-text-primary); }
         }
     });
 </script>
-{% endblock %}
