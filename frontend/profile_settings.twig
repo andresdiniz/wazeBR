@@ -211,6 +211,14 @@ body {
 .channel-check-group .form-check-label {
     font-size: 0.95rem;
 }
+
+/* ========================================= */
+/* 7. Ajustes de Layout */
+/* ========================================= */
+.container-fluid {
+    /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
+    padding-bottom: 5rem !important; 
+}
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
@@ -260,7 +268,7 @@ body {
                 <div class="card-body p-4 text-center">
                     
                     <div class="profile-photo-container">
-                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
+                        <img src="{{ user.photo_url|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
                     </div>
 
                     <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
@@ -452,8 +460,7 @@ body {
 
         </div>
     </div>
-    </div>
-    </div>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
