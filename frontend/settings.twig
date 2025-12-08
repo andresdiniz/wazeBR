@@ -1,14 +1,170 @@
+{# settings.twig - Versão com CSS e Espaçamento Aprimorados #}
+
+{% block styles %}
+<style>
+/* ========================================= */
+/* 1. VARIÁVEIS DE COR E ESTILO (para consistência) */
+/* ========================================= */
+:root {
+    --primary-color: #4e73df;
+    --primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    --success-color: #1cc88a;
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    --bg-light: #f9f9fc;
+    --border-color: #e3e6f0;
+    --shadow-main: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Garante que o container tenha respiro */
+.container-fluid {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+/* ========================================= */
+/* 2. HEADER E TÍTULOS */
+/* ========================================= */
+.page-header-custom {
+    padding-bottom: 1.5rem; /* Aumenta o respiro abaixo do header */
+    border-bottom: 2px solid var(--border-color);
+}
+.page-header-custom .h2 {
+    font-weight: 700;
+}
+
+/* ========================================= */
+/* 3. CARDS (Melhoria no Spacing) */
+/* ========================================= */
+.card {
+    border-radius: 0.75rem;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.card-header {
+    border-bottom: none;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    padding: 1rem 1.5rem; /* Mais respiro interno */
+    font-weight: 600;
+}
+
+/* Aplica o gradiente nas cores principais dos cards */
+.card.border-primary .card-header.bg-primary {
+    background-image: var(--primary-gradient);
+}
+.card.border-success .card-header.bg-success {
+    background-image: var(--success-gradient);
+}
+
+/* Remove padding do card-body se contiver uma tabela */
+.card-body.p-0 .table-responsive {
+    border-radius: 0 0 0.75rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-top: none;
+}
+
+/* ========================================= */
+/* 4. TABELAS (Melhoria no Spacing e Alinhamento) */
+/* ========================================= */
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0 !important; /* Remove margem desnecessária */
+}
+
+.table thead th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 0.75rem 1rem; /* Mais espaço no cabeçalho */
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+.table-hover tbody tr:hover {
+    background-color: var(--bg-light); /* Fundo mais suave */
+    transform: none; /* Remove a translação lateral desnecessária */
+}
+
+.table tbody td {
+    padding: 1rem 1rem; /* AUMENTADO: Mais espaçamento vertical nas células */
+    vertical-align: middle; /* Garante que o conteúdo esteja sempre centralizado verticalmente */
+}
+
+/* Estilos de Imagem e Cor na Tabela */
+.table img {
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+}
+.color-preview {
+    border: 2px solid var(--border-color) !important;
+}
+
+/* ========================================= */
+/* 5. MODAIS (Estilização da Navegação) */
+/* ========================================= */
+
+.modal-content {
+    border-radius: 0.7rem;
+}
+
+.modal-header.bg-gradient-primary {
+    background-image: var(--primary-gradient);
+    border-bottom: none;
+}
+
+/* Navegação Lateral do Modal de Configurações */
+#settingsModal .nav-link {
+    padding: 0.75rem 1rem;
+    color: var(--primary-color);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+}
+
+#settingsModal .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 8px rgba(78, 115, 223, 0.2);
+}
+
+/* Conteúdo das abas com padding consistente */
+#settingsModal .tab-content {
+    padding: 1rem 1.5rem !important;
+}
+
+/* Footer do Modal */
+.modal-footer {
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-light);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Estilo para a box de upload */
+.file-upload-box {
+    border: 2px dashed var(--border-color) !important;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.file-upload-box:hover {
+    border-color: var(--primary-color) !important;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="container-fluid">
-    <!-- Header Melhorado -->
-    <div class="d-flex justify-content-between align-items-center mb-4 py-3 border-bottom">
-        <h1 class="h2 mb-0 text-primary">
+    <div class="d-flex justify-content-between align-items-center mb-5 page-header-custom">
+        <h1 class="h2 mb-0 text-primary page-header-custom-title">
             <i class="fas fa-cogs me-2"></i>Configurações do Sistema
         </h1>
     </div>
 
-    <!-- Seção de Configurações Gerais -->
-    <div class="card shadow mb-4 border-primary">
-        <div class="card-header bg-primary text-white py-3">
+    <div class="card shadow mb-5 border-primary">
+        <div class="card-header bg-primary text-white">
             <h5 class="m-0">
                 <i class="fas fa-wrench me-2"></i>Configurações Gerais
             </h5>
@@ -41,11 +197,10 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="color-preview me-2" 
-                                         style="background:{{ setting.theme_color }}; 
+                                         style="background:{{ setting.theme_color }};
                                                 width: 25px; 
                                                 height: 25px;
-                                                border-radius: 4px;
-                                                border: 1px solid #dee2e6">
+                                                border-radius: 4px;">
                                     </div>
                                     <span class="text-muted small">{{ setting.theme_color }}</span>
                                 </div>
@@ -63,9 +218,9 @@
                             </td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-outline-primary btn-edit-setting" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#settingsModal"
-                                    data-all='{{ setting|json_encode }}'>
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#settingsModal"
+                                        data-all='{{ setting|json_encode }}'>
                                     <i class="fas fa-edit"></i>
                                 </button>
                             </td>
@@ -83,13 +238,12 @@
         </div>
     </div>
 
-    <!-- Seção de Páginas -->
-    <div class="card shadow mb-4 border-success">
-        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card shadow mb-5 border-success">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <h5 class="m-0">
                 <i class="fas fa-file-alt me-2"></i>Gerenciamento de Páginas
             </h5>
-            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#pageModal">
+            <button class="btn btn-light btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#pageModal">
                 <i class="fas fa-plus me-2"></i>Nova Página
             </button>
         </div>
@@ -141,17 +295,13 @@
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form action="" method="POST" class="d-inline">
-                                        <!-- Tipo do formulário: exclusão de parceiro -->
                                         <input type="hidden" name="form_type" value="delete_page">
-                                        <!-- ID da pagina a ser excluída -->
                                         <input type="hidden" name="id" value="{{ page.id }}">
-                                    
-                                        <!-- Botão de exclusão -->
+                                        
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
-                                    
                                 </div>
                             </td>
                         </tr>
@@ -168,8 +318,8 @@
         </div>
     </div>
 
-    <div class="card shadow mb-4 border-primary">
-        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card shadow mb-5 border-primary">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="m-0">
                 <i class="fas fa-users me-2"></i> Gerenciamento de Parcerias
             </h5>
@@ -177,7 +327,7 @@
                 <i class="fas fa-plus me-1"></i> Novo Parceiro
             </button>
         </div>
-    
+        
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle">
@@ -200,7 +350,7 @@
                                     data-id="{{ parceiro.id }}" data-nome="{{ parceiro.Nome }}" data-identificador="{{ parceiro.name_partner }}">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-    
+                                
                                 <form action="" method="POST" class="d-inline">
                                     <input type="hidden" name="action" value="delete_partner">
                                     <input type="hidden" name="id" value="{{ parceiro.id }}">
@@ -218,11 +368,9 @@
     </div>    
 </div>
 
-<!-- Modal Configurações - Versão Melhorada -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
-            <!-- Header Estilizado -->
             <div class="modal-header bg-gradient-primary text-white">
                 <h5 class="modal-title">
                     <i class="fas fa-sliders-h me-2"></i>Configurações Avançadas
@@ -232,7 +380,6 @@
 
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-0">
-                    <!-- Menu Lateral -->
                     <div class="d-flex flex-wrap flex-lg-nowrap">
                         <nav class="nav flex-column bg-light border-end p-3" style="min-width: 220px;">
                             <a class="nav-link active" data-bs-toggle="tab" href="#tab-geral">
@@ -249,12 +396,10 @@
                             </a>
                         </nav>
 
-                        <!-- Conteúdo das Abas -->
                         <div class="tab-content flex-grow-1 p-4">
-                            <!-- Aba Geral -->
                             <div class="tab-pane fade show active" id="tab-geral">
                                 <input type="hidden" name="form_type" value="update_general">
-                                <div class="mb-3">
+                                <div class="mb-4">
                                     <label class="form-label fw-bold">Informações Básicas</label>
                                     <input type="text" class="form-control mb-3" name="systemname" placeholder="Nome do Sistema" required>
 
@@ -277,7 +422,6 @@
                                 </div>
                             </div>
 
-                            <!-- Aba Aparência -->
                             <div class="tab-pane fade" id="tab-aparencia">
                                 <input type="hidden" name="form_type" value="update_appearance">
                                 <div class="row g-4">
@@ -327,26 +471,24 @@
                                 </div>
                             </div>
 
-                            <!-- Aba SEO -->
                             <div class="tab-pane fade" id="tab-seo">
                                 <input type="hidden" name="form_type" value="update_seo">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Configurações SEO</label>
-                                    <input type="text" class="form-control mb-2" name="seo_keywords" placeholder="Palavras-chave (separadas por vírgula)">
+                                    <input type="text" class="form-control mb-3" name="seo_keywords" placeholder="Palavras-chave (separadas por vírgula)">
                                     <input type="text" class="form-control" name="google_analytics_id" placeholder="ID do Google Analytics">
                                 </div>
                             </div>
 
-                            <!-- Aba Segurança -->
                             <div class="tab-pane fade" id="tab-seguranca">
                                 <input type="hidden" name="form_type" value="update_security">
-                                <div class="alert alert-warning mb-3">
+                                <div class="alert alert-warning mb-4">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     Configurações sensíveis - modifique com cuidado
                                 </div>
 
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
+                                <div class="mb-4">
+                                    <div class="form-check form-switch mb-2">
                                         <input class="form-check-input" type="checkbox" name="manutencao">
                                         <label class="form-check-label">Modo Manutenção</label>
                                     </div>
@@ -358,14 +500,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Tentativas de Login</label>
-                                    <input type="number" class="form-control" name="max_login_attempts" min="1" max="10" style="max-width: 150px;">
+                                    <label class="form-label">Tentativas de Login (Máx)</label>
+                                    <input type="number" class="form-control" name="max_login_attempts" min="1" max="10" value="5" style="max-width: 150px;">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Footer Fixo -->
-                    <div class="modal-footer bg-light">
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-2"></i>Cancelar
                         </button>
@@ -379,7 +520,6 @@
     </div>
 </div>
 
-<!-- Modal Único para Páginas (Criação/Edição) -->
 <div class="modal fade" id="pageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content border-0">
@@ -392,8 +532,7 @@
             <form id="pageForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="form_type" value="new_page">
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <!-- Conteúdo Principal -->
+                    <div class="row g-4">
                         <div class="col-md-8">
                             <div class="mb-3">
                                 <label class="form-label">Título da Página</label>
@@ -407,7 +546,7 @@
                                     <input type="text" class="form-control" name="url" maxlength="50">
                                 </div>
                             </div>
-                            
+                        
                             <div class="mb-3">
                                 <label class="form-label">Conteúdo</label>
                                 <textarea class="form-control" name="description" rows="5" maxlength="255"></textarea>
@@ -419,10 +558,9 @@
                             </div>
                         </div>
 
-                        <!-- Configurações Adicionais -->
                         <div class="col-md-4 border-start">
-                            <div class="mb-3">
-                                <label class="form-label">Status</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Status</label>
                                 <select class="form-select" name="status">
                                     <option value="draft">Rascunho</option>
                                     <option value="published">Publicado</option>
@@ -430,8 +568,8 @@
                                 </select>
                             </div>
                             
-                            <div class="mb-3">
-                                <label class="form-label">SEO</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">SEO</label>
                                 <input type="text" class="form-control mb-2" 
                                        name="meta_title" 
                                        placeholder="Meta Título" 
@@ -462,27 +600,26 @@
     </div>
 </div>
 
-<!-- Modal de Criar Parceiro -->
 <div class="modal fade" id="createPartnerModal" tabindex="-1" role="dialog" aria-labelledby="createPartnerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="createPartnerModalLabel">Adicionar Parceiro</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <form id="createPartnerForm" method="post">
                     <input type="hidden" name="form_type" value="create_partner">
-                    <div class="form-group">
-                        <label for="createNome">Nome</label>
+                    <div class="mb-3">
+                        <label for="createNome" class="form-label">Nome</label>
                         <input type="text" class="form-control" id="createNome" name="Nome" required>
                     </div>
-                    <div class="form-group">
-                        <label for="createIdentificador">Identificador</label>
+                    <div class="mb-3">
+                        <label for="createIdentificador" class="form-label">Identificador</label>
                         <input type="text" class="form-control" id="createIdentificador" name="name_partner" required>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-success">Salvar</button>
                     </div>
                 </form>
@@ -491,14 +628,12 @@
     </div>
 </div>
 
-<!-- Modal de Editar Parceiro -->
-<!-- Modal de Editar Parceiro -->
 <div class="modal fade" id="editPartnerModal" tabindex="-1" role="dialog" aria-labelledby="editPartnerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="editPartnerModalLabel">Editar Parceiro</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <form id="editPartnerForm" method="post" action="">
@@ -525,10 +660,21 @@
 
 <script>
 $(document).ready(function() {
+    // Função para obter dados de um atributo 'data-all' (JSON)
+    const getDataFromButton = (button) => {
+        try {
+            // O data-all no Twig já faz json_encode, então é apenas um string JSON
+            return JSON.parse(button.data('all'));
+        } catch (e) {
+            console.error("Erro ao decodificar JSON do botão:", e);
+            return {};
+        }
+    };
+    
     // Configurações do Sistema
     $('#settingsModal').on('show.bs.modal', function(e) {
         const button = $(e.relatedTarget);
-        const data = button.data('all');
+        const data = getDataFromButton(button);
         const modal = $(this);
         
         modal.find('input[name="systemname"]').val(data.systemname);
@@ -536,7 +682,8 @@ $(document).ready(function() {
         modal.find('input[name="contact_email"]').val(data.contact_email);
         modal.find('input[name="admin_email"]').val(data.admin_email);
         modal.find('select[name="timezone"]').val(data.timezone);
-        modal.find('input[name="manutencao"]').prop('checked', data.manutencao == 1);
+        // Garante que o checkbox seja marcado corretamente (0 ou 1)
+        modal.find('input[name="manutencao"]').prop('checked', data.manutencao == 1); 
         modal.find('input[name="social_facebook"]').val(data.social_facebook);
         modal.find('input[name="social_instagram"]').val(data.social_instagram);
     });
@@ -544,21 +691,29 @@ $(document).ready(function() {
     // Páginas
     $('#pageModal').on('show.bs.modal', function(e) {
         const button = $(e.relatedTarget);
-        const isEdit = !!button.data('all');
+        const data = button.data('all') ? getDataFromButton(button) : null;
+        const isEdit = !!data;
         const modal = $(this);
         
         if(isEdit) {
-            const data = button.data('all');
             modal.find('#modalPageTitle').html('<i class="fas fa-edit me-2"></i>Editar Página');
+            modal.find('input[name="form_type"]').val('update_page'); // Altera o tipo de formulário para update
+            
             modal.find('input[name="title"]').val(data.title);
             modal.find('input[name="url"]').val(data.url);
             modal.find('textarea[name="description"]').val(data.descripton);
             modal.find('select[name="status"]').val(data.status);
             modal.find('input[name="meta_title"]').val(data.meta_title);
             modal.find('textarea[name="meta_description"]').val(data.meta_description);
+
+            // Trigger para atualizar o contador de caracteres
+            $('textarea[name="meta_description"]').trigger('input'); 
         } else {
             modal.find('#modalPageTitle').html('<i class="fas fa-plus me-2"></i>Nova Página');
+            modal.find('input[name="form_type"]').val('new_page'); // Garante o valor padrão
             modal.find('form')[0].reset();
+            // Reseta o contador
+            $('#metaCounter').text('0/160');
         }
     });
 
@@ -568,6 +723,7 @@ $(document).ready(function() {
         $('#metaCounter').text(`${length}/160`);
     });
 
+    // Edição de Parceiro
     $('#editPartnerModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var id = button.data('id');
@@ -579,42 +735,6 @@ $(document).ready(function() {
         modal.find('#editNome').val(nome);
         modal.find('#editIdentificador').val(identificador);
     });
-
 });
 </script>
-
-<style>
-.color-preview {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-.color-preview:hover {
-    transform: scale(1.1);
-}
-.table-hover tbody tr {
-    transition: all 0.2s ease;
-}
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: translateX(5px);
-}
-.modal-content {
-    border-radius: 0.7rem;
-}
-.form-control-color {
-    height: 38px;
-    width: 100%;
-}
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.modal-footer .btn {
-    min-height: 30px; /* Ajuste a altura mínima para os botões */
-    padding: 10px 10px; /* Ajuste o preenchimento (padding) para os botões */
-}
-
-</style>
+{% endblock %}
