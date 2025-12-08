@@ -1,0 +1,306 @@
+<style>
+/* ========================================= */
+/* 1. Variáveis Globais (Light & Dark Mode) */
+/* ========================================= */
+:root {
+    /* Cores de Ação (Gradients) */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+
+    /* Cores do Tema - Claro */
+    --color-bg: #f8f9fc;
+    --color-card-bg: #ffffff;
+    --color-text-primary: #2c3e50;
+    --color-text-secondary: #858796;
+    --color-border: #e3e6f0;
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Modo Escuro */
+body.dark-mode {
+    --color-bg: #1e212b;
+    --color-card-bg: #272c38;
+    --color-text-primary: #e4e6eb;
+    --color-text-secondary: #a9aabc;
+    --color-border: #3a4154;
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================= */
+/* 2. Estilos Base e Utilidades */
+/* ========================================= */
+body {
+    background-color: var(--color-bg);
+}
+
+.page-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.page-header .subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================= */
+/* 3. Card Moderno */
+/* ========================================= */
+.modern-card {
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--card-shadow);
+    background: var(--color-card-bg);
+    height: 100%;
+}
+
+.modern-card-header {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background: var(--color-card-bg);
+    border-top: 4px solid transparent;
+}
+
+/* Aplica o gradiente na borda superior conforme a classe de cor */
+.modern-card-header.bg-success-gradient {
+    border-image: var(--success-gradient);
+    border-image-slice: 1;
+}
+
+/* ========================================= */
+/* 4. Formulários e Botões */
+/* ========================================= */
+.btn-success { background: #1cc88a; }
+.btn-success:hover { background: var(--success-gradient); opacity: 1; transform: translateY(-1px); }
+
+/* Para reutilizar a label de info */
+.profile-info-label {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 0.75rem;
+}
+
+.form-select {
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    padding: 0.625rem 1rem;
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
+}
+
+.form-select:focus {
+    border-color: #1cc88a; /* Destaca com cor de sucesso */
+    box-shadow: 0 0 0 0.25rem rgba(28, 200, 138, 0.25);
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
+}
+
+
+/* ========================================= */
+/* 5. Estilos de Notificações (Específicos para esta tela) */
+/* ========================================= */
+.notification-group {
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-card-bg);
+    transition: all 0.3s ease;
+}
+
+.notification-group:hover {
+    border-color: #1cc88a; /* Destaca com cor de sucesso */
+    box-shadow: 0 0 8px rgba(28, 200, 138, 0.1);
+}
+
+.notification-header {
+    border-bottom: 1px dashed var(--color-border);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+}
+
+.notification-header h5 { font-weight: 700; }
+
+.channel-check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.channel-check-group .form-check-label {
+    font-size: 0.95rem;
+}
+
+/* ========================================= */
+/* 6. Ajustes de Layout */
+/* ========================================= */
+.container-fluid {
+    /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
+    padding-bottom: 5rem !important;
+}
+</style>
+
+<div class="container-fluid px-3 px-lg-4 mt-4">
+
+    <div class="page-header fade-in">
+        <h1><i class="fas fa-bell me-2 text-success"></i>Controle de Notificações</h1>
+        <p class="subtitle mb-0">Defina como e quando você quer ser alertado sobre os eventos do sistema.</p>
+    </div>
+
+    {# ---------------------------------------------------- #}
+    {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
+    {# ---------------------------------------------------- #}
+
+    {% if messages is not empty %}
+        {% for message in messages %}
+            <div class="alert alert-success fade-in" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if errors is not empty %}
+        <div class="alert alert-danger fade-in" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {% if errors|length == 1 %}
+                {{ errors[0] }}
+            {% else %}
+                <ul class="mb-0 ps-3">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <div class="row justify-content-center">
+        <div class="col-xl-9 col-lg-10 col-md-12">
+            {# =================== FORMULÁRIO: CONTROLE DE NOTIFICAÇÕES =================== #}
+            <div class="card modern-card mb-4 fade-in">
+                <div class="modern-card-header bg-success-gradient">
+                    <span>
+                        <i class="fas fa-cogs me-2"></i>
+                        Configurações por Tipo de Alerta
+                    </span>
+                </div>
+
+                <div class="card-body p-4">
+                    <form id="updateNotificationForm" method="POST" action="">
+                        <input type="hidden" name="action" value="update_notifications">
+
+                        {# Loop sobre os tipos de notificação: user_preferences deve ser um array associativo (ex: ['activity' => {...}, 'security' => {...}]) #}
+                        {% for type, prefs in user_preferences %}
+                            <div class="notification-group">
+                                <div class="notification-header">
+                                    <h5>
+                                        {% if type == 'activity' %}
+                                            <i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades e Tarefas
+                                        {% elseif type == 'security' %}
+                                            <i class="fas fa-shield-alt me-2 text-danger"></i> Segurança e Conta
+                                        {% elseif type == 'marketing' %}
+                                            <i class="fas fa-bullhorn me-2 text-info"></i> Novidades e Promoções
+                                        {% else %}
+                                            <i class="fas fa-bell me-2"></i> {{ type|capitalize }}
+                                        {% endif %}
+                                    </h5>
+                                </div>
+
+                                <input type="hidden" name="prefs[{{ type }}][notification_type]" value="{{ type }}">
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="profile-info-label mb-2">Canais de Alerta:</label>
+                                        <div class="channel-check-group">
+                                            {# Checkboxes para os Canais #}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_email]" id="{{ type }}_email" value="1" {% if prefs.channel_email == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_email"><i class="fas fa-envelope me-1"></i> E-mail</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_push]" id="{{ type }}_push" value="1" {% if prefs.channel_push == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_push"><i class="fas fa-bell me-1"></i> Push/App</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" id="{{ type }}_whatsapp" value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_whatsapp"><i class="fab fa-whatsapp me-1"></i> WhatsApp</label>
+                                            </div>
+
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_sms]" id="{{ type }}_sms" value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}>
+                                                <label class="form-check-label" for="{{ type }}_sms"><i class="fas fa-sms me-1"></i> SMS</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ type }}_frequency" class="profile-info-label mb-2">Frequência (apenas para E-mail):</label>
+                                        <select class="form-select form-select-sm" id="{{ type }}_frequency" name="prefs[{{ type }}][frequency]">
+                                            <option value="instant" {% if prefs.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
+                                            <option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
+                                            <option value="weekly" {% if prefs.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check-double me-2"></i>Salvar Notificações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Aplica a animação fade-in em todos os elementos relevantes
+    const fadeElements = document.querySelectorAll('.fade-in');
+    fadeElements.forEach(element => {
+        // Força o re-flow para garantir que a animação seja executada
+        void element.offsetWidth;
+    });
+
+    console.log('Página de Notificações inicializada.');
+});
+</script>

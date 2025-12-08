@@ -3,185 +3,185 @@
 /* 1. Variáveis Globais (Light & Dark Mode) */
 /* ========================================= */
 :root {
-    /* Cores de Ação (Gradients) */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-    --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
-    --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
-    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    /* Cores de Ação (Gradients) */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+    --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
 
-    /* Cores do Tema - Claro */
-    --color-bg: #f8f9fc;
-    --color-card-bg: #ffffff;
-    --color-text-primary: #2c3e50;
-    --color-text-secondary: #858796;
-    --color-border: #e3e6f0;
-    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-    /* Mais suave */
-    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+    /* Cores do Tema - Claro */
+    --color-bg: #f8f9fc;
+    --color-card-bg: #ffffff;
+    --color-text-primary: #2c3e50;
+    --color-text-secondary: #858796;
+    --color-border: #e3e6f0;
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    /* Mais suave */
+    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Modo Escuro */
 body.dark-mode {
-    --color-bg: #1e212b;
-    --color-card-bg: #272c38;
-    --color-text-primary: #e4e6eb;
-    --color-text-secondary: #a9aabc;
-    --color-border: #3a4154;
-    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
+    --color-bg: #1e212b;
+    --color-card-bg: #272c38;
+    --color-text-primary: #e4e6eb;
+    --color-text-secondary: #a9aabc;
+    --color-border: #3a4154;
+    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* ========================================= */
 /* 2. Estilos Base e Utilidades */
 /* ========================================= */
 body {
-    background-color: var(--color-bg);
+    background-color: var(--color-bg);
 }
 
 .page-header {
-    margin-bottom: 2.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .page-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
 }
 
 .page-header .subtitle {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
 }
 
 .fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ========================================= */
 /* 3. Card Moderno */
 /* ========================================= */
 .modern-card {
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: var(--card-shadow);
-    background: var(--color-card-bg);
-    height: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--card-shadow);
+    background: var(--color-card-bg);
+    height: 100%;
 }
 
 .modern-card:hover {
-    box-shadow: var(--card-shadow-hover);
-    border-color: #667eea70;
+    box-shadow: var(--card-shadow-hover);
+    border-color: #667eea70;
 }
 
 .modern-card-header {
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-text-primary);
-    background: var(--color-card-bg);
-    border-top: 4px solid transparent;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background: var(--color-card-bg);
+    border-top: 4px solid transparent;
 }
 
 /* Aplica o gradiente na borda superior conforme a classe de cor */
 .modern-card-header.bg-info-gradient {
-    border-image: var(--info-gradient);
-    border-image-slice: 1;
+    border-image: var(--info-gradient);
+    border-image-slice: 1;
 }
 
 .modern-card-header.bg-success-gradient {
-    border-image: var(--success-gradient);
-    border-image-slice: 1;
+    border-image: var(--success-gradient);
+    border-image-slice: 1;
 }
 
 .modern-card-header.bg-danger-gradient {
-    border-image: var(--danger-gradient);
-    border-image-slice: 1;
+    border-image: var(--danger-gradient);
+    border-image-slice: 1;
 }
 
 /* ========================================= */
 /* 4. Estilos de Perfil */
 /* ========================================= */
 .profile-photo-container {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: 0 auto 2rem;
-    border: 3px solid #667eea;
-    box-shadow: var(--card-shadow);
-    background: #f0f0f0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 2rem;
+    border: 3px solid #667eea;
+    box-shadow: var(--card-shadow);
+    background: #f0f0f0;
 }
 
 .profile-photo-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .profile-info-label {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 0.75rem;
 }
 
 .profile-info-value {
-    font-size: 1rem;
-    color: var(--color-text-primary);
-    font-weight: 500;
-    padding-bottom: 0.25rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    padding-bottom: 0.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 /* ========================================= */
 /* 5. Formulários e Botões */
 /* ========================================= */
 .form-control, .form-select {
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    padding: 0.625rem 1rem;
-    background-color: var(--color-card-bg);
-    color: var(--color-text-primary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    padding: 0.625rem 1rem;
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    background-color: var(--color-card-bg);
-    color: var(--color-text-primary);
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    background-color: var(--color-card-bg);
+    color: var(--color-text-primary);
 }
 
 .btn-primary, .btn-info, .btn-success, .btn-danger {
-    font-weight: 600;
-    border-radius: 0.5rem;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    color: white;
 }
 
 /* Cores sólidas e gradiente no hover para destaque */
@@ -196,323 +196,213 @@ body {
 .btn-danger:hover { background: var(--danger-gradient); opacity: 1; transform: translateY(-1px); }
 
 /* ========================================= */
-/* 6. Notificações */
-/* ========================================= */
-.notification-group {
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    background-color: var(--color-card-bg);
-    transition: all 0.3s ease;
-}
-
-.notification-group:hover {
-    border-color: #667eea;
-    box-shadow: 0 0 8px rgba(102, 126, 234, 0.1);
-}
-
-.notification-header {
-    border-bottom: 1px dashed var(--color-border);
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
-}
-
-.notification-header h5 { font-weight: 700; }
-
-.channel-check-group { gap: 2rem; }
-
-.channel-check-group .form-check-label {
-    font-size: 0.95rem;
-}
-
-/* ========================================= */
 /* 7. Ajustes de Layout */
 /* ========================================= */
 .container-fluid {
-    /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
-    padding-bottom: 5rem !important;
+    /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
+    padding-bottom: 5rem !important;
 }
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
 
-    <div class="page-header fade-in">
-        <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil e Configurações</h1>
-        <p class="subtitle mb-0">Gerencie suas informações pessoais, segurança e preferências de sistema.</p>
-    </div>
+    <div class="page-header fade-in">
+        <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil e Configurações</h1>
+        <p class="subtitle mb-0">Gerencie suas informações pessoais, segurança e preferências de sistema.</p>
+    </div>
 
-    {# ---------------------------------------------------- #}
-    {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
-    {# ---------------------------------------------------- #}
+    {# ---------------------------------------------------- #}
+    {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
+    {# ---------------------------------------------------- #}
 
-    {% if messages is not empty %}
-        {% for message in messages %}
-            <div class="alert alert-success fade-in" role="alert">
-                <i class="fas fa-check-circle me-2"></i>{{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% if messages is not empty %}
+        {% for message in messages %}
+            <div class="alert alert-success fade-in" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
-    {% if errors is not empty %}
-        <div class="alert alert-danger fade-in" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            {% if errors|length == 1 %}
-                {{ errors[0] }}
-            {% else %}
-                <ul class="mb-0 ps-3">
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-    {% endif %}
+    {% if errors is not empty %}
+        <div class="alert alert-danger fade-in" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {% if errors|length == 1 %}
+                {{ errors[0] }}
+            {% else %}
+                <ul class="mb-0 ps-3">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
 
-    <div class="row">
+    <div class="row">
 
-        <div class="col-xl-4 col-lg-5 mb-4 fade-in">
-            <div class="card modern-card h-100">
-                <div class="modern-card-header bg-info-gradient">
-                    <span>
-                        <i class="fas fa-id-badge me-2"></i>
-                        Dados Pessoais
-                    </span>
-                </div>
+        <div class="col-xl-4 col-lg-5 mb-4 fade-in">
+            <div class="card modern-card h-100">
+                <div class="modern-card-header bg-info-gradient">
+                    <span>
+                        <i class="fas fa-id-badge me-2"></i>
+                        Dados Pessoais
+                    </span>
+                </div>
 
-                <div class="card-body p-4 text-center">
-                    <div class="profile-photo-container">
-                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
-                    </div>
+                <div class="card-body p-4 text-center">
+                    <div class="profile-photo-container">
+                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
+                    </div>
 
-                    <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
-                    <p class="text-secondary mb-3">@{{ user.username|default('username') }}</p>
+                    <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
+                    <p class="text-secondary mb-3">@{{ user.username|default('username') }}</p>
 
-                    <div class="text-start mt-4">
-                        <div class="profile-info-label">E-mail</div>
-                        <div class="profile-info-value">{{ user.email|default('N/A') }}</div>
+                    <div class="text-start mt-4">
+                        <div class="profile-info-label">E-mail</div>
+                        <div class="profile-info-value">{{ user.email|default('N/A') }}</div>
 
-                        <div class="profile-info-label">Telefone</div>
-                        <div class="profile-info-value">{{ user.phone_number|default('N/A') }}</div>
+                        <div class="profile-info-label">Telefone</div>
+                        <div class="profile-info-value">{{ user.phone_number|default('N/A') }}</div>
 
-                        <div class="profile-info-label">Tipo de Usuário</div>
-                        <div class="profile-info-value">
-                            {{ user.type == '1' ? 'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        <div class="profile-info-label">Tipo de Usuário</div>
+                        <div class="profile-info-value">
+                            {{ user.type == '1' ? 'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="col-xl-8 col-lg-7 mb-4">
 
-            {# =================== FORMULÁRIO 2: PREFERÊNCIAS DE APP (NOVAS COLUNAS NA TABELA USER) =================== #}
-            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.2s;">
-                <div class="modern-card-header bg-info-gradient">
-                    <span>
-                        <i class="fas fa-sliders-h me-2"></i>
-                        Preferências de Aplicativo
-                    </span>
-                </div>
+            {# =================== FORMULÁRIO 2: PREFERÊNCIAS DE APP (NOVAS COLUNAS NA TABELA USER) =================== #}
+            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.2s;">
+                <div class="modern-card-header bg-info-gradient">
+                    <span>
+                        <i class="fas fa-sliders-h me-2"></i>
+                        Preferências de Aplicativo
+                    </span>
+                </div>
 
-                <div class="card-body p-4">
-                    <form id="updateAppPreferencesForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_app_preferences">
+                <div class="card-body p-4">
+                    <form id="updateAppPreferencesForm" method="POST" action="">
+                        <input type="hidden" name="action" value="update_app_preferences">
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_locale" class="profile-info-label mb-1">Idioma da Interface</label>
-                                <select class="form-select" id="ui_locale" name="ui_locale" required>
-                                    <option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
-                                    <option value="en-US" {% if user.ui_locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
-                                    <option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option>
-                                </select>
-                            </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ui_locale" class="profile-info-label mb-1">Idioma da Interface</label>
+                                <select class="form-select" id="ui_locale" name="ui_locale" required>
+                                    <option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
+                                    <option value="en-US" {% if user.ui_locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
+                                    <option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option>
+                                </select>
+                            </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_timezone" class="profile-info-label mb-1">Fuso Horário</label>
-                                <select class="form-select" id="ui_timezone" name="ui_timezone" required>
-                                    <option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option>
-                                    <option value="America/New_York" {% if user.ui_timezone == 'America/New_York' %}selected{% endif %}>América/Nova York (GMT-5)</option>
-                                    <option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option>
-                                </select>
-                            </div>
-                        </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ui_timezone" class="profile-info-label mb-1">Fuso Horário</label>
+                                <select class="form-select" id="ui_timezone" name="ui_timezone" required>
+                                    <option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option>
+                                    <option value="America/New_York" {% if user.ui_timezone == 'America/New_York' %}selected{% endif %}>América/Nova York (GMT-5)</option>
+                                    <option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option>
+                                </select>
+                            </div>
+                        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_theme" class="profile-info-label mb-1">Tema da Interface</label>
-                                <select class="form-select" id="ui_theme" name="ui_theme" required>
-                                    <option value="light" {% if user.ui_theme == 'light' %}selected{% endif %}>Modo Claro</option>
-                                    <option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option>
-                                    <option value="system" {% if user.ui_theme == 'system' %}selected{% endif %}>Seguir Sistema</option>
-                                </select>
-                            </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ui_theme" class="profile-info-label mb-1">Tema da Interface</label>
+                                <select class="form-select" id="ui_theme" name="ui_theme" required>
+                                    <option value="light" {% if user.ui_theme == 'light' %}selected{% endif %}>Modo Claro</option>
+                                    <option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option>
+                                    <option value="system" {% if user.ui_theme == 'system' %}selected{% endif %}>Seguir Sistema</option>
+                                </select>
+                            </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="home_page" class="profile-info-label mb-1">Página Inicial Padrão</label>
-                                <select class="form-select" id="home_page" name="home_page" required>
-                                    <option value="dashboard" {% if user.home_page == 'dashboard' %}selected{% endif %}>Dashboard Principal</option>
-                                    <option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option>
-                                    <option value="reports" {% if user.home_page == 'reports' %}selected{% endif %}>Relatórios</option>
-                                </select>
-                            </div>
-                        </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="home_page" class="profile-info-label mb-1">Página Inicial Padrão</label>
+                                <select class="form-select" id="home_page" name="home_page" required>
+                                    <option value="dashboard" {% if user.home_page == 'dashboard' %}selected{% endif %}>Dashboard Principal</option>
+                                    <option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option>
+                                    <option value="reports" {% if user.home_page == 'reports' %}selected{% endif %}>Relatórios</option>
+                                </select>
+                            </div>
+                        </div>
 
-                        <button type="submit" class="btn btn-info mt-3"><i class="fas fa-save me-2"></i>Salvar Preferências</button>
-                    </form>
-                </div>
-            </div>
+                        <button type="submit" class="btn btn-info mt-3"><i class="fas fa-save me-2"></i>Salvar Preferências</button>
+                    </form>
+                </div>
+            </div>
 
-            {# =================== FORMULÁRIO 3: CONTROLE DE NOTIFICAÇÕES (TABELA user_notification_preferences) =================== #}
-            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.3s;">
-                <div class="modern-card-header bg-success-gradient">
-                    <span>
-                        <i class="fas fa-bell me-2"></i>
-                        Controle de Notificações
-                    </span>
-                </div>
+            {# =================== FORMULÁRIO 4: SEGURANÇA (EXISTENTE) =================== #}
+            <div class="card modern-card fade-in" style="animation-delay: 0.4s;">
+                <div class="modern-card-header bg-danger-gradient">
+                    <span>
+                        <i class="fas fa-lock me-2"></i>
+                        Segurança da Conta
+                    </span>
+                </div>
 
-                <div class="card-body p-4">
-                    <form id="updateNotificationForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_notifications">
+                <div class="card-body p-4">
+                    <form id="updatePasswordForm" method="POST" action="">
+                        <input type="hidden" name="action" value="update_password">
 
-                        <p class="text-secondary mb-4">Defina como e quando você quer ser alertado sobre os eventos do sistema.</p>
+                        <div class="mb-3">
+                            <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
 
-                        {# Loop sobre os tipos de notificação: user_preferences deve ser um array associativo (ex: ['activity' => {...}, 'security' => {...}]) #}
-                        {% for type, prefs in user_preferences %}
-                            <div class="notification-group">
-                                <div class="notification-header">
-                                    {# Converte a chave (ex: 'activity') para um título amigável #}
-                                    <h5>
-                                        {% if type == 'activity' %}
-                                            <i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades e Tarefas
-                                        {% elseif type == 'security' %}
-                                            <i class="fas fa-shield-alt me-2 text-danger"></i> Segurança e Conta
-                                        {% elseif type == 'marketing' %}
-                                            <i class="fas fa-bullhorn me-2 text-success"></i> Novidades e Promoções
-                                        {% else %}
-                                            {{ type|capitalize }}
-                                        {% endif %}
-                                    </h5>
-                                </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="profile-info-label mb-1">Nova Senha</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        </div>
 
-                                <input type="hidden" name="prefs[{{ type }}][notification_type]" value="{{ type }}">
+                        <div class="mb-3">
+                            <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="profile-info-label mb-2">Canais de Alerta:</label>
-                                        <div class="channel-check-group">
-                                            {# Checkboxes para os Canais #}
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_email]" id="{{ type }}_email" value="1" {% if prefs.channel_email == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_email"><i class="fas fa-envelope me-1"></i> E-mail</label>
-                                            </div>
+                        <hr>
 
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_push]" id="{{ type }}_push" value="1" {% if prefs.channel_push == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_push"><i class="fas fa-bell me-1"></i> Push/App</label>
-                                            </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_2fa_enabled" name="is_2fa_enabled" value="1" role="switch" {% if user.is_2fa_enabled == 1 %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label>
+                                <small class="d-block text-secondary">Aumente a segurança da sua conta exigindo um código adicional no login.</small>
+                            </div>
+                        </div>
 
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" id="{{ type }}_whatsapp" value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_whatsapp"><i class="fab fa-whatsapp me-1"></i> WhatsApp</label>
-                                            </div>
+                        <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Salvar Configurações de Segurança</button>
+                    </form>
+                </div>
+            </div>
 
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_sms]" id="{{ type }}_sms" value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_sms"><i class="fas fa-sms me-1"></i> SMS</label>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="{{ type }}_frequency" class="profile-info-label mb-2">Frequência (apenas para E-mail):</label>
-                                        <select class="form-select form-select-sm" id="{{ type }}_frequency" name="prefs[{{ type }}][frequency]">
-                                            <option value="instant" {% if prefs.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
-                                            <option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
-                                            <option value="weekly" {% if prefs.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-
-                        <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check-double me-2"></i>Salvar Notificações</button>
-                    </form>
-                </div>
-            </div>
-
-            {# =================== FORMULÁRIO 4: SEGURANÇA (EXISTENTE) =================== #}
-            <div class="card modern-card fade-in" style="animation-delay: 0.4s;">
-                <div class="modern-card-header bg-danger-gradient">
-                    <span>
-                        <i class="fas fa-lock me-2"></i>
-                        Segurança da Conta
-                    </span>
-                </div>
-
-                <div class="card-body p-4">
-                    <form id="updatePasswordForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_password">
-
-                        <div class="mb-3">
-                            <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="new_password" class="profile-info-label mb-1">Nova Senha</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                        </div>
-
-                        <hr>
-
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_2fa_enabled" name="is_2fa_enabled" value="1" role="switch" {% if user.is_2fa_enabled == 1 %}checked{% endif %}>
-                                <label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label>
-                                <small class="d-block text-secondary">Aumente a segurança da sua conta exigindo um código adicional no login.</small>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Salvar Configurações de Segurança</button>
-                    </form>
-                </div>
-            </div>
-
-        </div>
-    </div>
+        </div>
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Validação Client-Side para Nova Senha
-    const updatePasswordForm = document.getElementById('updatePasswordForm');
-    if (updatePasswordForm) {
-        updatePasswordForm.addEventListener('submit', function(e) {
-            const newPassword = document.getElementById('new_password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
+    // Validação Client-Side para Nova Senha
+    const updatePasswordForm = document.getElementById('updatePasswordForm');
+    if (updatePasswordForm) {
+        updatePasswordForm.addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
 
-            if (newPassword !== confirmPassword) {
-                e.preventDefault();
-                alert("Erro: A nova senha e a confirmação não coincidem. Por favor, verifique.");
-            }
-        });
-    }
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert("Erro: A nova senha e a confirmação não coincidem. Por favor, verifique.");
+            }
+        });
+    }
 
-    // Aplica a animação fade-in em todos os elementos relevantes
-    const fadeElements = document.querySelectorAll('.fade-in');
-    fadeElements.forEach(element => {
-        // Força o re-flow para garantir que a animação seja executada
-        void element.offsetWidth;
-    });
+    // Aplica a animação fade-in em todos os elementos relevantes
+    const fadeElements = document.querySelectorAll('.fade-in');
+    fadeElements.forEach(element => {
+        // Força o re-flow para garantir que a animação seja executada
+        void element.offsetWidth;
+    });
 
-    console.log('Página de Perfil inicializada com submissão nativa via POST.');
+    console.log('Página de Perfil inicializada com submissão nativa via POST.');
 });
 </script>
