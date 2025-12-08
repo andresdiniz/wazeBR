@@ -1,27 +1,109 @@
 <?php
-// profile.php - Controlador de Perfil com Logger e ErrorHandler
+// profile.php - Controlador de Perfil com Modelo Integrado, Logger e ErrorHandler
 
-/* 1. CONFIGURAÇÃO INICIAL
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}*/
+// =========================================================================
+// 0. MODELO DE DADOS INTEGRADO (CLASSE USER)
+// =========================================================================
 
-session_start(); // Garantir que a sessão esteja iniciada
-var_dump($_SESSION);
+class User {
+    private $pdo;
+    private $tableName = 'users';
+
+    public function __construct(PDO $pdo) {
+        $this->pdo = $pdo;
+    }
+
+    /**
+     * Busca os dados de um usuário pelo ID.
+     */
+    public function getById($id) {
+        if (!is_numeric($id)) return false;
+        
+        $sql = "SELECT id, email, phone_number, nome, username, photo, password, type, locale, receber_email 
+                FROM {$this->tableName} 
+                WHERE id = :id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Atualiza os dados pessoais do usuário.
+     */
+    public function updateProfile($id, array $data) {
+        if (!is_numeric($id) || empty($data)) return false;
+
+        $allowedFields = ['nome', 'username', 'phone_number', 'locale', 'receber_email', 'photo']; 
+        $updateData = [];
+        $fields = [];
+        
+        foreach ($data as $key => $value) {
+            if (in_array($key, $allowedFields)) {
+                $fields[] = "{$key} = :{$key}";
+                $updateData[$key] = $value;
+            }
+        }
+        
+        if (empty($fields)) return false;
+
+        $sql = "UPDATE {$this->tableName} SET " . implode(', ', $fields) . " WHERE id = :id";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $updateData['id'] = $id;
+        
+        return $stmt->execute($updateData);
+    }
+    
+    /**
+     * Atualiza a senha do usuário.
+     */
+    public function updatePassword($id, $hashedPassword) {
+        if (!is_numeric($id)) return false;
+
+        $sql = "UPDATE {$this->tableName} SET password = :password WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        
+        return $stmt->execute([
+            'password' => $hashedPassword,
+            'id' => $id
+        ]);
+    }
+    
+    /**
+     * Verifica se o username já está em uso por outro usuário.
+     */
+     public function isUsernameTaken($username, $currentId) {
+        $sql = "SELECT id FROM {$this->tableName} WHERE username = :username AND id != :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['username' => $username, 'id' => $currentId]);
+        
+        return $stmt->fetchColumn() !== false;
+    }
+}
+
+
+// =========================================================================
+// 1. CONFIGURAÇÃO INICIAL E INCLUDES (CONTROLADOR)
+// =========================================================================
+
+session_start();
+// var_dump($_SESSION); // Descomente apenas para debug
 
 // Variáveis de Ambiente
-$isDebug = true; // Mantenha TRUE para desenvolvimento. Mude para FALSE em produção.
+$isDebug = true; 
 $logDir = __DIR__ . '/logs';
-$loggedInUserId = $_SESSION['usuario_id'] ?? null; // CHAVE: Ajuste a chave da sessão conforme seu sistema!
+// Use a chave correta. Se for 'usuario_id' como você tentou, mantenha.
+$loggedInUserId = $_SESSION['usuario_id'] ?? null; 
 
-echo $loggedInUserId;
+// echo $loggedInUserId; // Descomente apenas para debug
 
 // 2. INCLUDES E AUTOLOAD
 require_once './vendor/autoload.php';      // Autoloader do Composer
 require_once './config/configbd.php';      // Conexão com o banco de dados
-require_once 'User.php';                   // Modelo de Usuário (User.php)
-require_once './classes/Logger.php';       // Classe Logger
-require_once './classes/ErrorHandler.php'; // Classe ErrorHandler
+// REMOVEMOS: require_once 'User.php'; 
+require_once './classes/Logger.php';       
+require_once './classes/ErrorHandler.php'; 
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -33,38 +115,39 @@ $logger = Logger::getInstance($logDir, $isDebug);
 $loader = new FilesystemLoader(__DIR__ . '/../frontend');
 $twig = new Environment($loader);
 
-// Inicializa o ErrorHandler e o registra para capturar todos os erros/exceções
+// Inicializa o ErrorHandler
 $errorHandler = new ErrorHandler($logger, $twig, $isDebug);
 $errorHandler->register();
 
 
 // 4. AUTENTICAÇÃO
 if (!$loggedInUserId) {
-    // Em vez de usar header() e exit;, usamos o método showError do ErrorHandler 
-    // para renderizar uma página de erro 401 (Não Autorizado) de forma limpa.
+    // Logamos o acesso não autorizado
+    $logger->warning("Acesso 401 negado. Sessão inativa ou chave 'usuario_id' não definida.", [
+        'session_id' => session_id()
+    ]);
+    
+    // Mostramos o erro 401 e encerramos
     $errorHandler->showError(401, 
         'Acesso Não Autorizado', 
         'Você precisa estar logado para acessar esta página.',
         'Redirecionando para a página de login...'
     );
-    // Nota: O showError já executa exit, mas mantenha para clareza
     exit;
 }
 
 // 5. CONEXÃO COM O BANCO DE DADOS
 try {
-    // Usa a sua classe de conexão com o banco de dados
     $pdo = Database::getConnection(); 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
-    // Qualquer falha aqui (ex: PDOException) será capturada pelo ErrorHandler.
-    // Apenas relançamos para que o handleException faça seu trabalho (logar CRITICAL e mostrar 500).
+    // Relançamos para que o ErrorHandler capture, logue (CRITICAL) e mostre o erro 500.
     throw $e;
 }
 
-// Inicializa o Modelo e Variáveis
-//$userModel = new User($pdo);
+// Inicializa o Modelo (AGORA A CLASSE JÁ ESTÁ DEFINIDA ACIMA)
+$userModel = new User($pdo);
 $messages = [];
 $errors = [];
 
@@ -79,7 +162,9 @@ if (!$user) {
 }
 
 
-// 6. TRATAMENTO DE REQUISIÇÕES POST (ATUALIZAÇÃO DE DADOS)
+// =========================================================================
+// 6. TRATAMENTO DE REQUISIÇÕES POST (LOGIC DE ATUALIZAÇÃO)
+// =========================================================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
@@ -114,7 +199,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 if ($userModel->updateProfile($loggedInUserId, $updateData)) {
                     $messages[] = "Seu perfil foi atualizado com sucesso!";
-                    // Recarrega os dados atualizados
                     $user = $userModel->getById($loggedInUserId); 
                     $logger->info("Perfil do usuário ID {$loggedInUserId} atualizado com sucesso.");
                 } else {
@@ -122,11 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $logger->warning("Falha ao atualizar perfil do ID: {$loggedInUserId}. Nenhum dado modificado.", $updateData);
                 }
             } catch (Throwable $e) {
-                // Deixa o ErrorHandler global pegar e logar a exceção
                 throw $e; 
             }
         } else {
-            // Log de Erros de Validação do Usuário
             $logger->notice("Falha na validação de perfil para ID: {$loggedInUserId}", ['errors' => $errors]);
         }
     }
@@ -157,14 +239,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($userModel->updatePassword($loggedInUserId, $newHashedPassword)) {
                     $messages[] = "Sua senha foi alterada com sucesso! Você deve fazer login novamente.";
                     $logger->info("Senha do usuário ID {$loggedInUserId} alterada com sucesso.");
-                    // Redirecionamento de segurança após alteração de senha
-                    // header('Location: /logout.php'); exit; 
                 } else {
                     $errors[] = "Erro ao alterar a senha. Tente novamente.";
                     $logger->error("Falha fatal ao alterar senha do ID: {$loggedInUserId}. (Erro DB).");
                 }
             } catch (Throwable $e) {
-                 // Deixa o ErrorHandler global pegar e logar a exceção
                 throw $e; 
             }
         }
