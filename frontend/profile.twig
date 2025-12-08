@@ -134,6 +134,24 @@
     .btn-primary:hover {
         opacity: 0.9;
     }
+    
+    /* Estilos para mensagens (erros/sucesso) */
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
 
 </style>
 
@@ -143,6 +161,33 @@
         <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil</h1>
         <p class="subtitle mb-0">Gerencie suas informações pessoais e configurações de conta.</p>
     </div>
+
+    {# ---------------------------------------------------- #}
+    {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
+    {# ---------------------------------------------------- #}
+    
+    {% if messages is not empty %}
+        {% for message in messages %}
+            <div class="alert alert-success fade-in" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if errors is not empty %}
+        <div class="alert alert-danger fade-in" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {% if errors|length == 1 %}
+                {{ errors[0] }}
+            {% else %}
+                <ul class="mb-0 ps-3">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <div class="row">
         
@@ -157,7 +202,7 @@
                 <div class="card-body p-4 text-center">
                     
                     <div class="profile-photo-container">
-                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
+                        <img src="{{ user.photo_url|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
                     </div>
 
                     <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
@@ -189,7 +234,10 @@
                     </span>
                 </div>
                 <div class="card-body p-4">
-                    <form id="updateProfileForm">
+                    {# CORREÇÃO: Adicionando method="POST" e action. Action vazia submete para a mesma página. #}
+                    <form id="updateProfileForm" method="POST" action="">
+                        <input type="hidden" name="action" value="update_profile">
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="nome" class="profile-info-label mb-1">Nome Completo</label>
@@ -212,7 +260,7 @@
                             </div>
                         </div>
                         <div class="row">
-                             <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="locale" class="profile-info-label mb-1">Idioma / Localização</label>
                                 <select class="form-select" id="locale" name="locale" required>
                                     <option value="pt-BR" {% if user.locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
@@ -242,7 +290,10 @@
                     </span>
                 </div>
                 <div class="card-body p-4">
-                    <form id="updatePasswordForm">
+                    {# CORREÇÃO: Adicionando method="POST" e action. Action vazia submete para a mesma página. #}
+                    <form id="updatePasswordForm" method="POST" action="">
+                        <input type="hidden" name="action" value="update_password">
+
                         <div class="mb-3">
                             <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
                             <input type="password" class="form-control" id="current_password" name="current_password" required>
@@ -266,7 +317,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Reutilizar a inicialização do Tooltip se o JS do Bootstrap estiver incluído
+    // Reutilizar a inicialização do Tooltip (opcional)
     if (typeof bootstrap !== 'undefined') {
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -276,36 +327,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Lógica simples para exemplo de submissão de formulário
-    const updateProfileForm = document.getElementById('updateProfileForm');
+    // A LÓGICA DE SUBMISSÃO NATIVA AGORA ESTÁ EM USO.
+    // Mantemos apenas a checagem client-side de confirmação de senha para melhor UX.
     const updatePasswordForm = document.getElementById('updatePasswordForm');
-
-    if (updateProfileForm) {
-        updateProfileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log("Formulário de perfil submetido!");
-            // Aqui você adicionará sua lógica AJAX para o PHP
-            alert('Dados de perfil salvos com sucesso! (Simulação)');
-        });
-    }
 
     if (updatePasswordForm) {
         updatePasswordForm.addEventListener('submit', function(e) {
-            e.preventDefault();
             const newPassword = document.getElementById('new_password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
 
+            // Checagem de senhas iguais antes de enviar ao PHP
             if (newPassword !== confirmPassword) {
+                e.preventDefault(); // Impede o envio se as senhas não coincidirem
                 alert("Erro: A nova senha e a confirmação não coincidem.");
-                return;
+                // O PHP fará a validação final (tamanho, senha atual, etc.)
             }
-
-            console.log("Formulário de senha submetido!");
-            // Aqui você adicionará sua lógica AJAX para o PHP
-            alert('Senha alterada com sucesso! (Simulação)');
         });
     }
 
-    console.log('Página de Perfil inicializada.');
+    // Não precisamos de listener para o updateProfileForm, pois ele submete diretamente.
+    // console.log('Página de Perfil inicializada. Submissão via POST nativa ativada.');
 });
 </script>
