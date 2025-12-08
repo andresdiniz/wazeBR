@@ -203,7 +203,7 @@
                 <div class="card-body p-4 text-center">
                     
                     <div class="profile-photo-container">
-                        <img src="{{ user.photo_url|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
+                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
                     </div>
 
                     <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
