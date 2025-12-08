@@ -1,492 +1,383 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
 <style>
-/* ========================================= */
-/* 1. Variáveis Globais (Light & Dark Mode) */
-/* ========================================= */
-:root {
-    /* Cores de Ação (Gradients) */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-    --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
-    --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
-    --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+        --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+        
+        /* Variáveis para modo claro */
+        --color-bg: #f8f9fc;
+        --color-card-bg: #ffffff;
+        --color-text-primary: #2c3e50;
+        --color-text-secondary: #858796;
+        --color-border: #e3e6f0;
+    }
+
+    /* Modo Escuro */
+    body.dark-mode {
+        --color-bg: #1e212b;
+        --color-card-bg: #272c38;
+        --color-text-primary: #e4e6eb;
+        --color-text-secondary: #a9aabc;
+        --color-border: #3a4154;
+    }
+
+    /* Estilos Base */
+    body {
+        background-color: var(--color-bg);
+    }
     
-    /* Cores do Tema - Claro */
-    --color-bg: #f8f9fc;
-    --color-card-bg: #ffffff;
-    --color-text-primary: #2c3e50;
-    --color-text-secondary: #858796;
-    --color-border: #e3e6f0;
-    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.05); /* Mais suave */
-    --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-/* Modo Escuro */
-body.dark-mode {
-    --color-bg: #1e212b;
-    --color-card-bg: #272c38;
-    --color-text-primary: #e4e6eb;
-    --color-text-secondary: #a9aabc;
-    --color-border: #3a4154;
-    --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.4);
-}
-
-
-/* ========================================= */
-/* 2. Estilos Base e Utilidades */
-/* ========================================= */
-body {
-    background-color: var(--color-bg);
-}
-.page-header {
-    margin-bottom: 2.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-}
-.page-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-}
-.page-header .subtitle {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-}
-.fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-    opacity: 0; 
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-
-/* ========================================= */
-/* 3. Card Moderno */
-/* ========================================= */
-.modern-card {
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: var(--card-shadow);
-    background: var(--color-card-bg);
-    height: 100%;
-}
-.modern-card:hover {
-    box-shadow: var(--card-shadow-hover);
-    border-color: #667eea70; 
-}
-.modern-card-header {
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    color: var(--color-text-primary); /* Melhor contraste */
-    background: var(--color-card-bg);
+    /* Novo: Ajuste de Layout */
+    .container-fluid {
+        /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé/footer */
+        padding-bottom: 5rem !important; 
+    }
     
-    /* Novo: Aplica o gradiente como uma borda superior para destaque */
-    border-top: 4px solid transparent; 
-}
+    /* ... [Restante do seu CSS] ... */
 
-/* Aplica o gradiente na borda superior conforme a classe de cor */
-.modern-card-header.bg-info-gradient {
-    border-image: var(--info-gradient);
-    border-image-slice: 1;
-}
-.modern-card-header.bg-success-gradient {
-    border-image: var(--success-gradient);
-    border-image-slice: 1;
-}
-.modern-card-header.bg-danger-gradient {
-    border-image: var(--danger-gradient);
-    border-image-slice: 1;
-}
-
-
-/* ========================================= */
-/* 4. Estilos de Perfil */
-/* ========================================= */
-.profile-photo-container {
-    width: 100px; 
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: 0 auto 2rem;
-    border: 3px solid #667eea; 
-    box-shadow: var(--card-shadow);
-    background: #f0f0f0;
-}
-.profile-photo-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.profile-info-label {
-    font-size: 0.75rem; 
-    color: var(--color-text-secondary);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-top: 0.75rem;
-}
-.profile-info-value {
-    font-size: 1rem;
-    color: var(--color-text-primary);
-    font-weight: 500;
-    padding-bottom: 0.25rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border); /* Borda sólida mais limpa */
-}
-
-
-/* ========================================= */
-/* 5. Formulários e Botões */
-/* ========================================= */
-.form-control, .form-select {
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    padding: 0.625rem 1rem;
-    background-color: var(--color-card-bg);
-    color: var(--color-text-primary);
-}
-.form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    background-color: var(--color-card-bg);
-    color: var(--color-text-primary);
-}
-
-.btn-primary, .btn-info, .btn-success, .btn-danger {
-    font-weight: 600;
-    border-radius: 0.5rem;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    color: white; 
-}
-
-/* Cores sólidas e gradiente no hover para destaque */
-.btn-primary { background: #667eea; }
-.btn-info { background: #36b9cc; }
-.btn-success { background: #1cc88a; }
-.btn-danger { background: #e74a3b; }
-
-.btn-primary:hover { background: var(--primary-gradient); opacity: 1; transform: translateY(-1px); }
-.btn-info:hover { background: var(--info-gradient); opacity: 1; transform: translateY(-1px); }
-.btn-success:hover { background: var(--success-gradient); opacity: 1; transform: translateY(-1px); }
-.btn-danger:hover { background: var(--danger-gradient); opacity: 1; transform: translateY(-1px); }
-
-
-/* ========================================= */
-/* 6. Notificações */
-/* ========================================= */
-.notification-group {
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    padding: 1.5rem; 
-    margin-bottom: 1.5rem;
-    background-color: var(--color-card-bg);
-    transition: all 0.3s ease;
-}
-.notification-group:hover {
-    border-color: #667eea;
-    box-shadow: 0 0 8px rgba(102, 126, 234, 0.1);
-}
-.notification-header {
-    border-bottom: 1px dashed var(--color-border); 
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
-}
-.notification-header h5 {
-    font-weight: 700;
-}
-.channel-check-group {
-    gap: 2rem; 
-}
-.channel-check-group .form-check-label {
-    font-size: 0.95rem;
-}
-
-/* ========================================= */
-/* 7. Ajustes de Layout */
-/* ========================================= */
-.container-fluid {
-    /* Garante um espaçamento inferior generoso para evitar sobreposição com o rodapé */
-    padding-bottom: 5rem !important; 
-}
 </style>
 
 <div class="container-fluid px-3 px-lg-4 mt-4">
     
-    <div class="page-header fade-in">
-        <h1><i class="fas fa-user-circle me-2 subtitle"></i>Meu Perfil e Configurações</h1>
-        <p class="subtitle mb-0">Gerencie suas informações pessoais, segurança e preferências de sistema.</p>
+    <div class="page-header mb-4 fade-in">
+        <h1 class="fw-bold"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard Principal</h1>
+        <p class="text-secondary subtitle">Visão geral e status em tempo real do sistema.</p>
     </div>
 
-    {# ---------------------------------------------------- #}
-    {# EXIBIÇÃO DE MENSAGENS (ERROS E SUCESSO) #}
-    {# ---------------------------------------------------- #}
-    
-    {% if messages is not empty %}
-        {% for message in messages %}
-            <div class="alert alert-success fade-in" role="alert">
-                <i class="fas fa-check-circle me-2"></i>{{ message }}
+    <div class="row mb-4">
+        {# Cartão 1 #}
+        <div class="col-xl-3 col-md-6 mb-4 fade-in">
+            <div class="modern-card border-start-primary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Entregas Pendentes</div>
+                            <div class="h5 mb-0 fw-bold text-primary-dark" id="pendingDeliveries">{{ data.pending_deliveries|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-        {% endfor %}
-    {% endif %}
-
-    {% if errors is not empty %}
-        <div class="alert alert-danger fade-in" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            {% if errors|length == 1 %}
-                {{ errors[0] }}
-            {% else %}
-                <ul class="mb-0 ps-3">
-                    {% for error in errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-    {% endif %}
 
+        {# Cartão 2 #}
+        <div class="col-xl-3 col-md-6 mb-4 fade-in" style="animation-delay: 0.1s;">
+            <div class="modern-card border-start-success">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Total de Clientes</div>
+                            <div class="h5 mb-0 fw-bold text-success-dark" id="totalClients">{{ data.total_clients|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Cartão 3 #}
+        <div class="col-xl-3 col-md-6 mb-4 fade-in" style="animation-delay: 0.2s;">
+            <div class="modern-card border-start-warning">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Avisos e Pendências</div>
+                            <div class="h5 mb-0 fw-bold text-warning-dark" id="systemAlerts">{{ data.system_alerts|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Cartão 4 (Novo - Temperatura Média/Indicador Geral) #}
+        <div class="col-xl-3 col-md-6 mb-4 fade-in" style="animation-delay: 0.3s;">
+            <div class="modern-card border-start-info">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Temperatura Média do Sistema</div>
+                            <div class="h5 mb-0 fw-bold text-info-dark" id="avgSystemTemp">{{ data.avg_system_temp|default('28.5°C') }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-thermometer-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        {# Gráfico Principal (Vendas/Atividades) #}
+        <div class="col-xl-8 col-lg-7 mb-4 fade-in" style="animation-delay: 0.4s;">
+            <div class="modern-card shadow-lg h-100">
+                <div class="modern-card-header py-3 d-flex flex-row align-items-center justify-content-between border-start-info">
+                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-chart-bar me-2"></i>Atividade Mensal do Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyActivityChart" style="height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Mapa de Congestionamento (Leaflet) #}
+        <div class="col-xl-4 col-lg-5 mb-4 fade-in" style="animation-delay: 0.5s;">
+            <div class="modern-card shadow-lg h-100">
+                <div class="modern-card-header py-3 d-flex flex-row align-items-center justify-content-between border-start-warning">
+                    <h6 class="m-0 fw-bold text-warning"><i class="fas fa-map-marked-alt me-2"></i>Mapa de Congestionamento</h6>
+                </div>
+                <div class="card-body p-2">
+                    <div id="congestionMap" style="height: 350px; border-radius: 0.5rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row">
         
-        <div class="col-xl-4 col-lg-5 mb-4 fade-in">
-            <div class="card modern-card h-100">
-                <div class="modern-card-header bg-info-gradient">
-                    <span>
-                        <i class="fas fa-id-badge me-2"></i>
-                        Dados Pessoais
-                    </span>
+        {# Tabela de Tarefas Pendentes #}
+        <div class="col-xl-7 col-lg-6 mb-4 fade-in" style="animation-delay: 0.6s;">
+            <div class="modern-card shadow-lg h-100">
+                <div class="modern-card-header py-3 d-flex flex-row align-items-center justify-content-between border-start-success">
+                    <h6 class="m-0 fw-bold text-success"><i class="fas fa-tasks me-2"></i>Tarefas Pendentes</h6>
                 </div>
-                <div class="card-body p-4 text-center">
-                    
-                    <div class="profile-photo-container">
-                        <img src="{{ user.photo|default('path/to/default-avatar.png') }}" alt="{{ user.nome }}">
-                    </div>
-
-                    <h4 class="text-primary fw-bold mb-1">{{ user.nome|default('Nome do Usuário') }}</h4>
-                    <p class="text-secondary mb-3">@{{ user.username|default('username') }}</p>
-
-                    <div class="text-start mt-4">
-                        <div class="profile-info-label">E-mail</div>
-                        <div class="profile-info-value">{{ user.email|default('N/A') }}</div>
-
-                        <div class="profile-info-label">Telefone</div>
-                        <div class="profile-info-value">{{ user.phone_number|default('N/A') }}</div>
-
-                        <div class="profile-info-label">Tipo de Usuário</div>
-                        <div class="profile-info-value">
-                            {{ user.type == '1' ? 'Administrador' : (user.type == '2' ? 'Gerente' : (user.type == '3' ? 'Colaborador' : 'Visitante')) }}
-                        </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light-gray">
+                                <tr>
+                                    <th>Tarefa</th>
+                                    <th>Prioridade</th>
+                                    <th>Status</th>
+                                    <th>Prazo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if data.pending_tasks is not empty %}
+                                    {% for task in data.pending_tasks|slice(0, 5) %}
+                                        <tr>
+                                            <td>{{ task.description }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if task.priority == 'Alta' %}bg-danger
+                                                    {% elseif task.priority == 'Média' %}bg-warning
+                                                    {% else %}bg-success
+                                                    {% endif %}">
+                                                    {{ task.priority }}
+                                                </span>
+                                            </td>
+                                            <td><i class="fas fa-clock me-1 text-info"></i>{{ task.status }}</td>
+                                            <td class="text-secondary">{{ task.due_date }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="4" class="text-center text-secondary py-4">Nenhuma tarefa pendente.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-8 col-lg-7 mb-4">
-            
-            {# =================== FORMULÁRIO 2: PREFERÊNCIAS DE APP (NOVAS COLUNAS NA TABELA USER) =================== #}
-            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.2s;">
-                <div class="modern-card-header bg-info-gradient">
-                    <span>
-                        <i class="fas fa-sliders-h me-2"></i>
-                        Preferências de Aplicativo
-                    </span>
+        {# Progresso de Projetos #}
+        <div class="col-xl-5 col-lg-6 mb-4 fade-in" style="animation-delay: 0.7s;">
+            <div class="modern-card shadow-lg h-100">
+                <div class="modern-card-header py-3 d-flex flex-row align-items-center justify-content-between border-start-primary">
+                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-project-diagram me-2"></i>Progresso dos Projetos</h6>
                 </div>
-                <div class="card-body p-4">
-                    <form id="updateAppPreferencesForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_app_preferences">
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_locale" class="profile-info-label mb-1">Idioma da Interface</label>
-                                <select class="form-select" id="ui_locale" name="ui_locale" required>
-                                    <option value="pt-BR" {% if user.ui_locale == 'pt-BR' %}selected{% endif %}>Português (Brasil)</option>
-                                    <option value="en-US" {% if user.ui_locale == 'en-US' %}selected{% endif %}>Inglês (EUA)</option>
-                                    <option value="es-ES" {% if user.ui_locale == 'es-ES' %}selected{% endif %}>Espanhol (Espanha)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_timezone" class="profile-info-label mb-1">Fuso Horário</label>
-                                <select class="form-select" id="ui_timezone" name="ui_timezone" required>
-                                    <option value="America/Sao_Paulo" {% if user.ui_timezone == 'America/Sao_Paulo' %}selected{% endif %}>América/São Paulo (GMT-3)</option>
-                                    <option value="America/New_York" {% if user.ui_timezone == 'America/New_York' %}selected{% endif %}>América/Nova York (GMT-5)</option>
-                                    <option value="Europe/London" {% if user.ui_timezone == 'Europe/London' %}selected{% endif %}>Europa/Londres (GMT+0)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="ui_theme" class="profile-info-label mb-1">Tema da Interface</label>
-                                <select class="form-select" id="ui_theme" name="ui_theme" required>
-                                    <option value="light" {% if user.ui_theme == 'light' %}selected{% endif %}>Modo Claro</option>
-                                    <option value="dark" {% if user.ui_theme == 'dark' %}selected{% endif %}>Modo Escuro</option>
-                                    <option value="system" {% if user.ui_theme == 'system' %}selected{% endif %}>Seguir Sistema</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="home_page" class="profile-info-label mb-1">Página Inicial Padrão</label>
-                                <select class="form-select" id="home_page" name="home_page" required>
-                                    <option value="dashboard" {% if user.home_page == 'dashboard' %}selected{% endif %}>Dashboard Principal</option>
-                                    <option value="tasks" {% if user.home_page == 'tasks' %}selected{% endif %}>Minhas Tarefas</option>
-                                    <option value="reports" {% if user.home_page == 'reports' %}selected{% endif %}>Relatórios</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-info mt-3"><i class="fas fa-save me-2"></i>Salvar Preferências</button>
-                    </form>
-                </div>
-            </div>
-
-            {# =================== FORMULÁRIO 3: CONTROLE DE NOTIFICAÇÕES (TABELA user_notification_preferences) =================== #}
-            <div class="card modern-card mb-4 fade-in" style="animation-delay: 0.3s;">
-                <div class="modern-card-header bg-success-gradient">
-                    <span>
-                        <i class="fas fa-bell me-2"></i>
-                        Controle de Notificações
-                    </span>
-                </div>
-                <div class="card-body p-4">
-                    <form id="updateNotificationForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_notifications">
-
-                        <p class="text-secondary mb-4">Defina como e quando você quer ser alertado sobre os eventos do sistema.</p>
-
-                        {# Loop sobre os tipos de notificação: user_preferences deve ser um array associativo (ex: ['activity' => {...}, 'security' => {...}]) #}
-                        {% for type, prefs in user_preferences %}
-                            <div class="notification-group">
-                                <div class="notification-header">
-                                    {# Converte a chave (ex: 'activity') para um título amigável #}
-                                    <h5>
-                                        {% if type == 'activity' %}<i class="fas fa-clipboard-list me-2 text-primary"></i> Atividades e Tarefas
-                                        {% elseif type == 'security' %}<i class="fas fa-shield-alt me-2 text-danger"></i> Segurança e Conta
-                                        {% elseif type == 'marketing' %}<i class="fas fa-bullhorn me-2 text-success"></i> Novidades e Promoções
-                                        {% else %}{{ type|capitalize }}
-                                        {% endif %}
-                                    </h5>
-                                </div>
-
-                                <input type="hidden" name="prefs[{{ type }}][notification_type]" value="{{ type }}">
-                                
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="profile-info-label mb-2">Canais de Alerta:</label>
-                                        <div class="channel-check-group">
-                                            {# Checkboxes para os Canais #}
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_email]" id="{{ type }}_email" value="1" {% if prefs.channel_email == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_email"><i class="fas fa-envelope me-1"></i> E-mail</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_push]" id="{{ type }}_push" value="1" {% if prefs.channel_push == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_push"><i class="fas fa-bell me-1"></i> Push/App</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_whatsapp]" id="{{ type }}_whatsapp" value="1" {% if prefs.channel_whatsapp == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_whatsapp"><i class="fab fa-whatsapp me-1"></i> WhatsApp</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="prefs[{{ type }}][channel_sms]" id="{{ type }}_sms" value="1" {% if prefs.channel_sms == 1 %}checked{% endif %}>
-                                                <label class="form-check-label" for="{{ type }}_sms"><i class="fas fa-sms me-1"></i> SMS</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6 mb-3">
-                                        <label for="{{ type }}_frequency" class="profile-info-label mb-2">Frequência (apenas para E-mail):</label>
-                                        <select class="form-select form-select-sm" id="{{ type }}_frequency" name="prefs[{{ type }}][frequency]">
-                                            <option value="instant" {% if prefs.frequency == 'instant' %}selected{% endif %}>Instantâneo (Assim que ocorrer)</option>
-                                            <option value="daily" {% if prefs.frequency == 'daily' %}selected{% endif %}>Resumo Diário</option>
-                                            <option value="weekly" {% if prefs.frequency == 'weekly' %}selected{% endif %}>Resumo Semanal</option>
-                                        </select>
-                                    </div>
-                                </div>
+                <div class="card-body">
+                    {% if data.project_progress is not empty %}
+                        {% for project in data.project_progress %}
+                            <h4 class="small fw-bold mt-2">{{ project.name }} <span class="float-end text-{{ project.color }}">{{ project.progress }}%</span></h4>
+                            <div class="progress mb-4">
+                                <div class="progress-bar bg-{{ project.color }}" role="progressbar" style="width: {{ project.progress }}%" aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         {% endfor %}
-                        
-                        <button type="submit" class="btn btn-success mt-3"><i class="fas fa-check-double me-2"></i>Salvar Notificações</button>
-                    </form>
+                    {% else %}
+                        <p class="text-center text-secondary py-4">Nenhum projeto em andamento.</p>
+                    {% endif %}
                 </div>
             </div>
-
-            {# =================== FORMULÁRIO 4: SEGURANÇA (EXISTENTE) =================== #}
-            <div class="card modern-card fade-in" style="animation-delay: 0.4s;">
-                <div class="modern-card-header bg-danger-gradient">
-                    <span>
-                        <i class="fas fa-lock me-2"></i>
-                        Segurança da Conta
-                    </span>
-                </div>
-                <div class="card-body p-4">
-                    <form id="updatePasswordForm" method="POST" action="">
-                        <input type="hidden" name="action" value="update_password">
-
-                        <div class="mb-3">
-                            <label for="current_password" class="profile-info-label mb-1">Senha Atual</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="new_password" class="profile-info-label mb-1">Nova Senha</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="profile-info-label mb-1">Confirmar Nova Senha</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                        </div>
-                        
-                        <hr>
-                        
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_2fa_enabled" name="is_2fa_enabled" value="1" role="switch" {% if user.is_2fa_enabled == 1 %}checked{% endif %}>
-                                <label class="form-check-label fw-bold" for="is_2fa_enabled">Autenticação de Dois Fatores (2FA)</label>
-                                <small class="d-block text-secondary">Aumente a segurança da sua conta exigindo um código adicional no login.</small>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-danger mt-3"><i class="fas fa-shield-alt me-2"></i>Salvar Configurações de Segurança</button>
-                    </form>
-                </div>
-            </div>
-
         </div>
+
     </div>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Validação Client-Side para Nova Senha
-    const updatePasswordForm = document.getElementById('updatePasswordForm');
+    // Dados simulados para o gráfico
+    const chartData = {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        datasets: [{
+            label: 'Atividades Concluídas',
+            backgroundColor: 'rgba(102, 126, 234, 0.7)', // Cor principal
+            borderColor: '#667eea',
+            data: [45, 59, 80, 81, 56, 55, 40, 60, 75, 90, 85, 95], // Dados de exemplo
+            tension: 0.4,
+            fill: true,
+        }]
+    };
 
-    if (updatePasswordForm) {
-        updatePasswordForm.addEventListener('submit', function(e) {
-            const newPassword = document.getElementById('new_password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-
-            if (newPassword !== confirmPassword) {
-                e.preventDefault();
-                alert("Erro: A nova senha e a confirmação não coincidem. Por favor, verifique.");
+    // Configuração do Gráfico de Barras/Linha
+    const ctx = document.getElementById('monthlyActivityChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line', // Mudado para Line para visual mais suave
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                }
             }
         });
     }
 
+    // Inicialização do Mapa Leaflet
+    const mapElement = document.getElementById('congestionMap');
+    let congestionMap;
+    let heatLayer;
+
+    if (mapElement) {
+        // Coordenadas centrais (Exemplo: São Paulo)
+        const centerCoords = [-23.5505, -46.6333]; 
+
+        congestionMap = L.map('congestionMap', {
+            zoomControl: false // Oculta o controle de zoom padrão
+        }).setView(centerCoords, 12); // Nível de zoom
+
+        // Adiciona um mapa base (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(congestionMap);
+
+        // Dados simulados para o Heatmap (Latitude, Longitude, Intensidade)
+        // Valores mais altos = mais congestionamento (heatmap mais quente)
+        const heatData = [
+            [-23.5489, -46.6388, 0.5], // Ponto 1 - Tráfego leve
+            [-23.555, -46.645, 0.8],   // Ponto 2 - Tráfego médio
+            [-23.56, -46.65, 1.2],     // Ponto 3 - Tráfego alto (mais intenso)
+            [-23.552, -46.63, 0.3],   // Ponto 4 - Tráfego muito leve
+            [-23.57, -46.64, 1.5]      // Ponto 5 - Pico de Congestionamento
+        ];
+
+        // Adiciona a camada de calor
+        heatLayer = L.heatLayer(heatData, {
+            radius: 25,
+            blur: 15,
+            maxZoom: 17,
+            gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'} // Cores (do mais frio/azul ao mais quente/vermelho)
+        }).addTo(congestionMap);
+
+    }
+
+
+    // Lógica para atualizar contadores dinamicamente (simulação)
+    function updateCounter() {
+        const pendingEl = document.getElementById('pendingDeliveries');
+        const clientEl = document.getElementById('totalClients');
+        const alertEl = document.getElementById('systemAlerts');
+
+        // Simulação de atualização de dados
+        pendingEl.textContent = Math.floor(Math.random() * 50) + 10; 
+        clientEl.textContent = Math.floor(Math.random() * 1000) + 500;
+        alertEl.textContent = Math.floor(Math.random() * 5); 
+
+        // Adiciona a lógica real de fetch aqui se for necessário
+
+        updateCounter();
+    }
+
+    // Atualizar hora atual no rodapé
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('pt-BR');
+        const dateString = now.toLocaleDateString('pt-BR');
+        
+        // Se houver um elemento para exibir a hora
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = `${dateString} ${timeString}`;
+        }
+    }
+
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // Auto-refresh da página (opcional - descomente se necessário)
+    // setTimeout(() => {
+    //     location.reload();
+    // }, 300000); // 5 minutos
+
+    // Notificação de boas-vindas
+    setTimeout(() => {
+        if (typeof $.notify !== 'undefined') {
+            $.notify("Dashboard carregado com sucesso!", {
+                position: "top right",
+                className: "success",
+                autoHideDelay: 3000
+            });
+        }
+    }, 1000);
+
+    // Listener para mudanças de tamanho da janela
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            // Necessário para garantir que o mapa Leaflet se ajuste corretamente
+            if (congestionMap) {
+                congestionMap.invalidateSize();
+            }
+        }, 250);
+    });
+    
     // Aplica a animação fade-in em todos os elementos relevantes
     const fadeElements = document.querySelectorAll('.fade-in');
     fadeElements.forEach(element => {
         // Força o re-flow para garantir que a animação seja executada
         void element.offsetWidth; 
     });
-
-
-    console.log('Página de Perfil inicializada com submissão nativa via POST.');
 });
 </script>
