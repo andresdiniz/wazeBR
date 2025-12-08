@@ -1,9 +1,4 @@
-{# user_notifications.twig #}
 
-{% extends 'base.twig' %}
-
-{# 1. CSS EMBUTIDO (Para garantir o estilo, se o main.css falhar ou não estiver no base.twig) #}
-{% block style_block %}
 <style>
 /* Os estilos foram extraídos do seu arquivo e são os mesmos do CSS unificado. 
    Recomenda-se mover isso para um arquivo externo (main.css) se possível. */
@@ -235,9 +230,6 @@ body.dark-mode {
     </form>
 </div>
 
-{% endblock %}
-
-{% block javascripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Aplica a animação fade-in em todos os elementos
@@ -272,4 +264,3 @@ body.dark-mode {
         }
     });
 </script>
-{% endblock %}
