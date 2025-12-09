@@ -8,8 +8,8 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=300'); // Cache HTTP por 5 minutos
 
 // 2. Includes principais
-require_once '../config/configbd.php';
-require_once '../vendor/autoload.php';
+require_once './config/configbd.php';
+require_once './vendor/autoload.php';
 // se Logger não for carregado via autoload, inclua aqui:
 // require_once __DIR__ . '/classes/Logger.php';
 
