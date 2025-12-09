@@ -669,6 +669,11 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Scripts do Chart.js (carregados agora, não mais dinamicamente) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
 <!-- Scripts adicionais (carregados dinamicamente) -->
 <script>
     // Estado global da aplicação
@@ -701,15 +706,8 @@
     // Função para inicializar o aplicativo após os dados estarem disponíveis
     function initializeApp() {
         try {
-            // Carregar scripts necessários
-            loadScript('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js', function() {
-                loadScript('https://cdn.jsdelivr.net/npm/chart.js', function() {
-                    loadScript('https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns', function() {
-                        initCharts();
-                        loadDataTables();
-                    });
-                });
-            });
+            initCharts();
+            loadDataTables();
         } catch (error) {
             console.error('Erro na inicialização:', error);
             alert(`Erro: ${error.message}\n\nO aplicativo pode não funcionar corretamente.`);
@@ -720,9 +718,18 @@
     function initCharts() {
         {% if dados %}
             try {
-                const labels = {{ dados.labels|json_encode|raw }}.map(date => new Date(date));
+                // Converter strings de data para objetos Date
+                const labels = {{ dados.labels|json_encode|raw }}.map(date => {
+                    // Se já for uma string ISO, usar new Date
+                    if (typeof date === 'string' && date.includes('T')) {
+                        return new Date(date);
+                    }
+                    // Se for timestamp
+                    return new Date(date * 1000);
+                });
                 
-                initComparativeChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels,
+                // Inicializar gráficos
+                comparisonChartVelocidade = initComparativeChart('comparisonChartVelocidade', 'Velocidade (km/h)', labels,
                     {{ dados.rota1_values.velocidade|json_encode|raw }},
                     {{ dados.rota2_values.velocidade|json_encode|raw }},
                     ['#3c8dbc', '#d33724'],
@@ -730,7 +737,7 @@
                     '{{ route2_name }}'
                 );
 
-                initComparativeChart('comparisonChartTempo', 'Tempo (segundos)', labels,
+                comparisonChartTempo = initComparativeChart('comparisonChartTempo', 'Tempo (segundos)', labels,
                     {{ dados.rota1_values.tempo|json_encode|raw }},
                     {{ dados.rota2_values.tempo|json_encode|raw }},
                     ['#3c8dbc', '#d33724'],
@@ -753,6 +760,8 @@
                 }
             } catch (error) {
                 console.error('Erro na inicialização dos gráficos:', error);
+                // Tentar inicializar novamente após 1 segundo
+                setTimeout(initCharts, 1000);
             }
         {% endif %}
     }
@@ -760,11 +769,18 @@
     // Função otimizada para criar gráficos comparativos
     function initComparativeChart(canvasId, title, labels, data1, data2, colors, label1, label2) {
         const ctx = document.getElementById(canvasId);
-        if (!ctx) return;
+        if (!ctx) {
+            console.error('Canvas não encontrado:', canvasId);
+            return null;
+        }
     
         // Destruir gráfico existente se houver
-        if (window[canvasId]) {
-            window[canvasId].destroy();
+        if (canvasId === 'comparisonChartVelocidade' && comparisonChartVelocidade) {
+            comparisonChartVelocidade.destroy();
+            comparisonChartVelocidade = null;
+        } else if (canvasId === 'comparisonChartTempo' && comparisonChartTempo) {
+            comparisonChartTempo.destroy();
+            comparisonChartTempo = null;
         }
         
         // Configuração de gráfico otimizada
@@ -886,9 +902,13 @@
         };
     
         // Criar novo gráfico
-        window[canvasId] = new Chart(ctx, chartConfig);
-        
-        return window[canvasId];
+        try {
+            const chart = new Chart(ctx, chartConfig);
+            return chart;
+        } catch (error) {
+            console.error('Erro ao criar gráfico:', error);
+            return null;
+        }
     }
 
     // Carregamento sob demanda do DataTables
