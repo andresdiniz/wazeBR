@@ -476,6 +476,6 @@ echo json_encode(
     ],
     JSON_UNESCAPED_UNICODE
 );
-
-$data = $data;*/
+*/
+var_dump($data);
 exit;
