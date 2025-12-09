@@ -884,6 +884,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+
+    console.log('Iniciando dashboard completo...');
+    console.time('Dashboard completo carregado em');
+    console.log('Total de alertas de buracos: {{ hazardAlerts }}');
     
     // Inicializar Tooltips do Bootstrap (mesmo código da home)
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
