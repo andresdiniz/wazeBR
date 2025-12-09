@@ -21,7 +21,7 @@ $id_parceiro = $_SESSION['usuario_id_parceiro'] ?? 99; // Pega o valor ou usa um
 function getRoutesBasic(PDO $pdo, $id_parceiro) {
     $query = "
         SELECT 
-            id, name, from_name, to_name, historic_speed, historic_time, avg_speed, avg_time 
+            id, name, from_name, to_name, historic_speed, historic_time, avg_speed, avg_time, length
         FROM 
             routes
     ";
