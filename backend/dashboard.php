@@ -462,20 +462,5 @@ $logger->info('Dashboard request completed.', [
 ]);
 
 // Garante que nenhum output buffer antigo vaze
-if (ob_get_length()) {
     ob_end_clean();
-}
-
-/* Resposta final em JSON (mantendo todos os* recursos)
-echo json_encode(
-    [
-        'request_id' =>/ $request_id,
-        'time_ms'    => $timeElapsedMs,
-        'metrics'    => $metrics,
-        'data'       => $data
-    ],
-    JSON_UNESCAPED_UNICODE
-);
-*/
-
 exit;
