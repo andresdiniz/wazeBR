@@ -1191,82 +1191,93 @@ document.addEventListener("DOMContentLoaded", function () {
     // ================================
     async function loadRouteLines(routeId, routeData) {
 
-    try {
+        try {
+            let lines = null;
 
-        // ✅ USAR CACHE SE EXISTIR
-        let lines;
-        if (routeCache[routeId]) {
-            console.log('Rota carregada do cache:', routeId);
-            lines = routeCache[routeId];
-        } else {
-            const response = await fetch(
-                `/api.php?action=get_route_lines&route_id=${encodeURIComponent(routeId)}`
-            );
-
-            if (!response.ok) {
-                throw new Error('Erro ao buscar rota');
+            // 1️⃣ Cache em memória
+            if (routeCache[routeId]) {
+                console.log('%cCACHE HIT (memory): ' + routeId, 'color: green');
+                lines = routeCache[routeId];
             }
 
-            lines = await response.json();
-
-            if (!Array.isArray(lines) || lines.length === 0) {
-                throw new Error('Nenhuma coordenada encontrada');
+            // 2️⃣ Cache sessionStorage
+            else {
+                lines = getCachedRoute(routeId);
+                if (lines) {
+                    console.log('%cCACHE HIT (session): ' + routeId, 'color: orange');
+                    routeCache[routeId] = lines;
+                }
             }
 
-            // Ordenar e salvar no cache
-            lines.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
-            routeCache[routeId] = lines;
+            // 3️⃣ Backend
+            if (!lines) {
+                console.log('%cCACHE MISS (backend): ' + routeId, 'color: red');
+
+                const response = await fetch(
+                    `/api.php?action=get_route_lines&route_id=${encodeURIComponent(routeId)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar rota');
+                }
+
+                lines = await response.json();
+
+                if (!Array.isArray(lines) || lines.length === 0) {
+                    throw new Error('Nenhuma coordenada encontrada');
+                }
+
+                lines.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+
+                routeCache[routeId] = lines;
+                setCachedRoute(routeId, lines);
+            }
+
+            // ✅ A partir daqui `lines` SEMPRE existe
+            const latLngs = lines.map(p => [parseFloat(p.y), parseFloat(p.x)]);
+
+            if (routeMap) {
+                routeMap.remove();
+            }
+
+            routeMap = L.map('mapContainer');
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 19
+            }).addTo(routeMap);
+
+            const routeColor = getRouteColor(routeData);
+
+            routeLine = L.polyline([], {
+                color: routeColor,
+                weight: 5,
+                opacity: 0.9,
+                lineJoin: 'round'
+            }).addTo(routeMap);
+
+            routeMap.fitBounds(latLngs, { padding: [40, 40] });
+
+            let i = 0;
+            const drawInterval = setInterval(() => {
+                if (i >= latLngs.length) {
+                    clearInterval(drawInterval);
+                    return;
+                }
+                routeLine.addLatLng(latLngs[i++]);
+            }, 10);
+
+            L.marker(latLngs[0]).addTo(routeMap).bindPopup('Início da rota');
+            L.marker(latLngs[latLngs.length - 1]).addTo(routeMap).bindPopup('Fim da rota');
+
+            setTimeout(() => routeMap.invalidateSize(), 300);
+
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao carregar rota no mapa');
         }
-
-        // Converter para Leaflet
-        const latLngs = lines.map(p => [parseFloat(p.y), parseFloat(p.x)]);
-
-        // Reset mapa
-        if (routeMap) {
-            routeMap.remove();
-            routeMap = null;
-        }
-
-        routeMap = L.map('mapContainer');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-            maxZoom: 19
-        }).addTo(routeMap);
-
-        const routeColor = getRouteColor(routeData);
-
-        // ✅ POLYLINE ANIMADA
-        routeLine = L.polyline([], {
-            color: routeColor,
-            weight: 5,
-            opacity: 0.9,
-            lineJoin: 'round'
-        }).addTo(routeMap);
-
-        routeMap.fitBounds(latLngs, { padding: [40, 40] });
-
-        // Animação do desenho
-        let i = 0;
-        const drawInterval = setInterval(() => {
-            if (i >= latLngs.length) {
-                clearInterval(drawInterval);
-                return;
-            }
-            routeLine.addLatLng(latLngs[i]);
-            i++;
-        }, 10); // velocidade do desenho
-
-        // Marcadores
-        L.marker(latLngs[0]).addTo(routeMap).bindPopup('Início da rota');
-        L.marker(latLngs[latLngs.length - 1]).addTo(routeMap).bindPopup('Fim da rota');
-
-        setTimeout(() => routeMap.invalidateSize(), 300);
-
-    } catch (err) {
-        console.error(err);
-        alert('Erro ao carregar rota no mapa');
     }
-}
+
 
     // ================================
     // INSIGHTS
@@ -1361,4 +1372,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return '#1cc88a';                 // verde
     }
 });
+
+function getCachedRoute(routeId) {
+    const cached = sessionStorage.getItem('route_' + routeId);
+    return cached ? JSON.parse(cached) : null;
+}
+
+function setCachedRoute(routeId, data) {
+    sessionStorage.setItem('route_' + routeId, JSON.stringify(data));
+}
 </script>
