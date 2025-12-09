@@ -489,7 +489,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-car-crash"></i>
                 </div>
-                <div class="stats-card-value">{{ activeAlertsToday }}</div>
+                <div class="stats-card-value">{{ data.activeAlertsToday }}</div>
                 <div class="stats-card-label">Alertas Ativos</div>
             </div>
         </div>
@@ -498,7 +498,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-traffic-light"></i>
                 </div>
-                <div class="stats-card-value">{{ totalAlertsThisMonth }}</div>
+                <div class="stats-card-value">{{ data.totalAlertsThisMonth }}</div>
                 <div class="stats-card-label">Alertas Mês</div>
             </div>
         </div>
@@ -507,7 +507,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-road"></i>
                 </div>
-                <div class="stats-card-value">{{ traficdata.total_kms_lento }}</div>
+                <div class="stats-card-value">{{ data.traficdata.total_kms_lento }}</div>
                 <div class="stats-card-label">KMs Congestionados</div>
             </div>
         </div>
@@ -516,7 +516,7 @@
                 <div class="stats-card-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="stats-card-value">{{ traficdata.total_atraso_minutos }} min</div>
+                <div class="stats-card-value">{{ daata.traficdata.total_atraso_minutos }} min</div>
                 <div class="stats-card-label">Atraso Total</div>
             </div>
         </div>
@@ -569,7 +569,7 @@
                         Acidentes Registrados
                     </span>
                     {% if accidentAlerts is not empty %}
-                        <span class="badge-counter">{{ accidentAlerts|length }}</span>
+                        <span class="badge-counter">{{ data.accidentAlerts|length }}</span>
                     {% endif %}
                 </div>
                 <div class="card-body p-0 position-relative">
@@ -586,7 +586,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for alert in accidentAlerts %}
+                                    {% for alert in daata.accidentAlerts %}
                                     <tr>
                                         <td>
                                             <div class="fw-bold text-danger">{{ alert.city }}</div>
