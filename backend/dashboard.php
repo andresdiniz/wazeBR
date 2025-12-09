@@ -477,5 +477,17 @@ echo json_encode(
     JSON_UNESCAPED_UNICODE
 );
 */
-var_dump($data);
+$response = json_decode($jsonFromApi, true); // se vier via API interna
+$data = [
+    // métricas rápidas
+    'activeAlertsToday'     => $response['data']['activeAlertsToday'],
+    'totalAlertsThisMonth'  => $response['data']['totalAlertsThisMonth'],
+    'traficdata'            => $response['data']['traficdata'],
+
+    // listas
+    'accidentAlerts' => $response['data']['accidentAlerts'],
+    'jamAlerts'      => $response['data']['jamAlerts'],
+    'hazardAlerts'   => $response['data']['hazardAlerts'],
+    'otherAlerts'    => $response['data']['otherAlerts']
+];
 exit;
