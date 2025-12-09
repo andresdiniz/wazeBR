@@ -713,4 +713,3 @@ $logger->info('wazealerts concluído', [
 
 // Não faz exit aqui: quem manda é o wazejob.php
 return true;
-wazealerts
