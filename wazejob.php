@@ -147,13 +147,13 @@ $pdo = Database::getConnection();
  */
 $scripts = [
     'wazealerts.php'           => '/wazealerts.php',
-    'notifications.php'        => '/notifications.php',
-    'worker_notifications.php' => '/worker_notifications.php',
     'wazejobtraficc.php'       => '/wazejobtraficc.php',
     'dadoscemadem.php'         => '/dadoscemadem.php',
     'hidrologicocemadem-new.php'=> '/hidrologicocemadem-new.php',
     'gerar_xml.php'            => '/gerar_xml.php',
-    'alerts_por_email.php'     => '/alerts_por_email.php'
+    'alerts_por_email.php'     => '/alerts_por_email.php',
+    'notifications.php'        => '/notifications.php',
+    'worker_notifications.php' => '/worker_notifications.php'
 ];
 
 if ($debug && PHP_SAPI === 'cli') {
