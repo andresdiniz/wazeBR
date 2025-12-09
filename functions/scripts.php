@@ -332,50 +332,70 @@ function shouldRunScript($scriptName, $pdo)
 }
 
 // Executa o script com verificação
-function executeScript($scriptName, $scriptFile, $pdo)
-{
-    echo "Verificando se é para executar o script: $scriptName\n";
+function executeScript(
+    string $scriptName,
+    string $scriptFile,
+    PDO $pdo,
+    Logger $logger,
+    bool $debug = false
+): void {
+    if ($debug) {
+        echo "Verificando se é para executar o script: {$scriptName}\n";
+    }
 
-    if (shouldRunScript($scriptName, $pdo)) {
-        try {
-            // Marca o tempo de início da execução
-            $startTime = microtime(true);
-
-            // Obtém o caminho completo do script
-            $url = dirname(__DIR__) . '/' . ltrim($scriptFile, '/');
-            echo 'Endereço do script é: ' . $url . PHP_EOL;
-
-            // Verifica se o arquivo existe antes de incluí-lo
-            if (!file_exists($url)) {
-                throw new Exception("O script '$scriptFile' não foi encontrado no caminho '$url'.");
-            }
-
-            // Inclui o script
-            include $url;
-
-            // Marca o tempo de fim da execução
-            $endTime = microtime(true);
-
-            // Calcula o tempo total de execução
-            $executionTime = $endTime - $startTime;
-
-            // Mensagem de sucesso
-            $logMessage = "Script '$scriptName' executado com sucesso. Tempo de execução: " . number_format($executionTime, 4) . " segundos.";
-
-            // Registra logs
-            logToFile('info', $logMessage);
-            logExecution($scriptName, 'success', $logMessage, $pdo);
-            error_log($logMessage);
-        } catch (Exception $e) {
-            // Log de erro
-            logExecution($scriptName, 'error', $e->getMessage(), $pdo);
-            logToFile('error', $e->getMessage(), ['scriptName' => $scriptName]);
-            error_log("Erro ao executar o script '$scriptName': " . $e->getMessage());
+    if (!shouldRunScript($scriptName, $pdo)) {
+        if ($debug) {
+            echo "Script '{$scriptName}' não deve ser executado.\n";
         }
-    } else {
-        echo "Script '$scriptName' não deve ser executado.\n";
+        return;
+    }
+
+    $startTime = microtime(true);
+
+    try {
+        $url = dirname(__DIR__) . '/' . ltrim($scriptFile, '/');
+
+        if ($debug) {
+            echo "Endereço do script: {$url}\n";
+        }
+
+        if (!file_exists($url)) {
+            throw new RuntimeException("Script não encontrado: {$url}");
+        }
+
+        /**
+         * ✅ Variáveis DISPONÍVEIS para o script incluído
+         */
+        // $pdo     → conexão
+        // $logger  → logger
+        // $debug   → flag debug
+        include $url;
+
+        $executionTime = round(microtime(true) - $startTime, 4);
+
+        $logger->info('Script executado com sucesso', [
+            'script' => $scriptName,
+            'tempo_s' => $executionTime
+        ]);
+
+        logExecution($scriptName, 'success', 'Execução concluída', $pdo);
+
+    } catch (Throwable $e) {
+        $logger->error('Erro ao executar script', [
+            'script' => $scriptName,
+            'mensagem' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+
+        logExecution($scriptName, 'error', $e->getMessage(), $pdo);
+
+        if ($debug) {
+            fwrite(STDERR, "Erro em {$scriptName}: {$e->getMessage()}\n");
+        }
     }
 }
+
 
 /**
  * Funções relacionadas a e-mails

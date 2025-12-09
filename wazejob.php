@@ -101,7 +101,7 @@ function executeScriptWithLogging(
 
         $scriptStart = microtime(true);
         // A função executeScript continua vindo do seu functions/scripts.php
-        executeScript($scriptName, $path, $pdo);
+        executeScript($scriptName, $path, $pdo, $logger, $debug);
         $scriptEnd = microtime(true);
 
         $duration = round($scriptEnd - $scriptStart, 2);
