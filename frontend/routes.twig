@@ -1146,7 +1146,6 @@
     const routeCache = {};
 
     console.log('Script de rotas carregado');
-    console.log('Rotas disponíveis:', {{ routeCache|json_encode()|raw }});
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -1171,6 +1170,8 @@ document.addEventListener("DOMContentLoaded", function () {
             avg_time: parseFloat(row.data('avg-time')),
             length: parseFloat(row.data('length'))
         };
+
+        console.log('Carregando detalhes da rota:', routeData);
 
         document.getElementById('modalRouteName').innerHTML =
             `<i class="fas fa-route me-2"></i>${routeData.name} (${routeData.from_name} → ${routeData.to_name})`;
