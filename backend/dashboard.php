@@ -412,5 +412,5 @@ $logger->info('Dashboard request completed.', [
 // --- Finalização ---
 ob_end_clean();
 // Retorna JSON para o frontend
-var_dump( json_encode($data));
+var_dump( json_encode($otherAlerts));
 ?>
