@@ -1,106 +1,105 @@
 <?php
+declare(strict_types=1);
+
 /**
- * Sistema de Coleta e Processamento de Dados Hidrológicos CEMADEN
- * 
- * @version 2.0
- * @author Sistema de Monitoramento
+ * Script: hidrologicocemadem-new.php
+ * Responsabilidade: Sistema de Coleta e Processamento de Dados Hidrológicos CEMADEN
+ *
+ * Pré-requisitos (fornecidos pelo wazejob.php):
+ *   - $logger: Logger
+ *   - $pdo: PDO
  */
 
-// Configurações iniciais
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/logs/cron_error.log');
+if (!isset($logger) || !($logger instanceof Logger)) {
+    throw new RuntimeException('Logger não disponível em hidrologicocemadem-new.php');
+}
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    throw new RuntimeException('PDO não disponível em hidrologicocemadem-new.php');
+}
 
-require_once __DIR__ . '/config/configbd.php';
-require_once __DIR__ . '/functions/scripts.php';
-require_once __DIR__ . '/classes/Logger.php';
-require_once __DIR__ . '/classes/ErrorHandler.php';
+$startTime = microtime(true);
+$currentDateTime = date('Y-m-d H:i:s');
 
-// ============================================================================
-// CONSTANTES DE CONFIGURAÇÃO
-// ============================================================================
+$logger->info('hidrologicocemadem iniciado', ['datetime' => $currentDateTime]);
 
-define('TIMEZONE', 'America/Sao_Paulo');
-define('CURL_TIMEOUT', 30);
-define('CURL_CONNECT_TIMEOUT', 10);
-define('MAX_RETRIES', 3);
-define('RETRY_DELAY', 2); // segundos
-define('BATCH_SIZE', 100);
-
-// Cotas padrão (caso não existam na base)
-define('DEFAULT_COTA_ATENCAO', 50);
-define('DEFAULT_COTA_ALERTA', 70);
-define('DEFAULT_COTA_TRANSBORDAMENTO', 100);
-define('DEFAULT_OFFSET', 0);
+set_time_limit(300);
 
 // ============================================================================
-// CLASSE DE CONFIGURAÇÃO
+// CONSTANTES
 // ============================================================================
 
-class Config {
+define('CEMADEN_TIMEZONE', 'America/Sao_Paulo');
+define('CEMADEN_CURL_TIMEOUT', 30);
+define('CEMADEN_CURL_CONNECT_TIMEOUT', 10);
+define('CEMADEN_MAX_RETRIES', 3);
+define('CEMADEN_RETRY_DELAY', 2);
+define('CEMADEN_BATCH_SIZE', 100);
+
+define('CEMADEN_DEFAULT_COTA_ATENCAO', 50);
+define('CEMADEN_DEFAULT_COTA_ALERTA', 70);
+define('CEMADEN_DEFAULT_COTA_TRANSBORDAMENTO', 100);
+define('CEMADEN_DEFAULT_OFFSET', 0);
+
+// ============================================================================
+// CLASSE CONFIG
+// ============================================================================
+
+class CemadenConfig
+{
     private static $urls = [
         "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/3121/96",
         "https://mapservices.cemaden.gov.br/MapaInterativoWS/resources/horario/4146/96",
         "https://resources.cemaden.gov.br/graficos/cemaden/hidro/resources/json/AcumuladoResource.php?est=6622&pag=96"
     ];
 
-    private static $alertRecipients = [
-        'default' => ['andresoaresdiniz201218@gmail.com'],
-        'critical' => ['andresoaresdiniz201218@gmail.com']
-    ];
-
-    public static function getUrls(): array {
+    public static function getUrls(): array
+    {
         return self::$urls;
-    }
-
-    public static function getAlertRecipients(string $level = 'default'): array {
-        return self::$alertRecipients[$level] ?? self::$alertRecipients['default'];
     }
 }
 
 // ============================================================================
-// CLASSE CLIENTE API CEMADEN
+// CLASSE CLIENTE API
 // ============================================================================
 
-class CemadenAPIClient {
+class CemadenAPIClient
+{
     private $logger;
     private $maxRetries;
     private $retryDelay;
 
-    public function __construct(Logger $logger, int $maxRetries = MAX_RETRIES, int $retryDelay = RETRY_DELAY) {
+    public function __construct(Logger $logger, int $maxRetries = CEMADEN_MAX_RETRIES, int $retryDelay = CEMADEN_RETRY_DELAY)
+    {
         $this->logger = $logger;
         $this->maxRetries = $maxRetries;
         $this->retryDelay = $retryDelay;
     }
 
-    /**
-     * Busca dados de uma URL com retry automático
-     */
-    public function fetchData(string $url): ?array {
+    public function fetchData(string $url): ?array
+    {
         $attempts = 0;
-        
+
         while ($attempts < $this->maxRetries) {
             try {
-                $this->logger->info("Tentativa " . ($attempts + 1) . " - Buscando: $url");
-                
+                $this->logger->debug("Tentativa " . ($attempts + 1), ['url' => $url]);
+
                 $ch = curl_init();
                 curl_setopt_array($ch, [
                     CURLOPT_URL => $url,
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_TIMEOUT => CURL_TIMEOUT,
-                    CURLOPT_CONNECTTIMEOUT => CURL_CONNECT_TIMEOUT,
+                    CURLOPT_TIMEOUT => CEMADEN_CURL_TIMEOUT,
+                    CURLOPT_CONNECTTIMEOUT => CEMADEN_CURL_CONNECT_TIMEOUT,
                     CURLOPT_FOLLOWLOCATION => true,
                     CURLOPT_SSL_VERIFYPEER => true
                 ]);
 
                 $response = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                
+
                 if (curl_errno($ch)) {
                     throw new Exception("Erro cURL: " . curl_error($ch));
                 }
-                
+
                 curl_close($ch);
 
                 if ($httpCode !== 200) {
@@ -108,7 +107,7 @@ class CemadenAPIClient {
                 }
 
                 $data = json_decode($response, true);
-                
+
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     throw new Exception("JSON inválido: " . json_last_error_msg());
                 }
@@ -117,81 +116,77 @@ class CemadenAPIClient {
                     throw new Exception("Resposta vazia");
                 }
 
-                $this->logger->info("Dados obtidos com sucesso de: $url");
+                $this->logger->info('Dados obtidos com sucesso', ['url' => $url]);
                 return $data;
-
             } catch (Exception $e) {
                 $attempts++;
-                $this->logger->warning("Falha na tentativa $attempts: " . $e->getMessage());
-                
+                $this->logger->warning("Falha na tentativa $attempts", [
+                    'mensagem' => $e->getMessage()
+                ]);
+
                 if ($attempts < $this->maxRetries) {
                     sleep($this->retryDelay);
                 } else {
-                    $this->logger->error("Falha após $attempts tentativas: $url");
+                    $this->logger->error("Falha após $attempts tentativas", ['url' => $url]);
                     return null;
                 }
             }
         }
-        
+
         return null;
     }
 }
 
 // ============================================================================
-// CLASSE DE VALIDAÇÃO
+// CLASSE VALIDADOR
 // ============================================================================
 
-class DataValidator {
-    /**
-     * Valida estrutura do primeiro formato de JSON
-     */
-    public static function validateFormat1(array $data): bool {
+class CemadenDataValidator
+{
+    public static function validateFormat1(array $data): bool
+    {
         return isset($data['estacao'], $data['datas'], $data['horarios'], $data['acumulados']) &&
-               isset($data['estacao']['idEstacao'], $data['estacao']['nome']);
+            isset($data['estacao']['idEstacao'], $data['estacao']['nome']);
     }
 
-    /**
-     * Valida estrutura do segundo formato de JSON
-     */
-    public static function validateFormat2(array $data): bool {
-        return is_array($data) && 
-               isset($data[0]['codigo'], $data[0]['datahora'], $data[0]['valor']);
+    public static function validateFormat2(array $data): bool
+    {
+        return is_array($data) &&
+            isset($data[0]['codigo'], $data[0]['datahora'], $data[0]['valor']);
     }
 
-    /**
-     * Valida valor numérico dentro de limites razoáveis
-     */
-    public static function validateValue(float $value): bool {
-        return $value >= 0 && $value <= 10000; // mm de chuva
+    public static function validateValue(float $value): bool
+    {
+        return $value >= 0 && $value <= 10000;
     }
 
-    /**
-     * Sanitiza string
-     */
-    public static function sanitizeString(?string $value): string {
+    public static function sanitizeString(?string $value): string
+    {
         return trim(strip_tags($value ?? ''));
     }
 }
 
 // ============================================================================
-// CLASSE REPOSITORY (Acesso ao Banco)
+// CLASSE REPOSITORY
 // ============================================================================
 
-class CemadenRepository {
+class CemadenRepository
+{
     private $pdo;
     private $logger;
     private $checkStmt;
     private $insertStmt;
     private $cotasCache = [];
 
-    public function __construct(PDO $pdo, Logger $logger) {
+    public function __construct(PDO $pdo, Logger $logger)
+    {
         $this->pdo = $pdo;
         $this->logger = $logger;
         $this->prepareStatements();
     }
 
-    private function prepareStatements(): void {
-        // Prepared statement para verificação de duplicidade
+    private function prepareStatements(): void
+    {
         $this->checkStmt = $this->pdo->prepare(
             "SELECT 1 FROM leituras_cemaden 
              WHERE codigo_estacao = ? 
@@ -199,7 +194,6 @@ class CemadenRepository {
              AND hora_leitura = ?"
         );
 
-        // Prepared statement para inserção
         $this->insertStmt = $this->pdo->prepare(
             "INSERT INTO leituras_cemaden (
                 data_leitura, hora_leitura, valor, valor_offset, 
@@ -213,10 +207,8 @@ class CemadenRepository {
         );
     }
 
-    /**
-     * Busca cotas específicas da estação (cache em memória)
-     */
-    public function getCotasEstacao(string $codigoEstacao): array {
+    public function getCotasEstacao(string $codigoEstacao): array
+    {
         if (isset($this->cotasCache[$codigoEstacao])) {
             return $this->cotasCache[$codigoEstacao];
         }
@@ -235,33 +227,31 @@ class CemadenRepository {
                 return $result;
             }
         } catch (PDOException $e) {
-            $this->logger->warning("Erro ao buscar cotas da estação $codigoEstacao: " . $e->getMessage());
+            $this->logger->warning("Erro ao buscar cotas", [
+                'codigo_estacao' => $codigoEstacao,
+                'mensagem' => $e->getMessage()
+            ]);
         }
 
-        // Retorna valores padrão
         $default = [
-            'cota_atencao' => DEFAULT_COTA_ATENCAO,
-            'cota_alerta' => DEFAULT_COTA_ALERTA,
-            'cota_transbordamento' => DEFAULT_COTA_TRANSBORDAMENTO,
-            'valor_offset' => DEFAULT_OFFSET
+            'cota_atencao' => CEMADEN_DEFAULT_COTA_ATENCAO,
+            'cota_alerta' => CEMADEN_DEFAULT_COTA_ALERTA,
+            'cota_transbordamento' => CEMADEN_DEFAULT_COTA_TRANSBORDAMENTO,
+            'valor_offset' => CEMADEN_DEFAULT_OFFSET
         ];
-        
+
         $this->cotasCache[$codigoEstacao] = $default;
         return $default;
     }
 
-    /**
-     * Verifica se registro já existe
-     */
-    public function exists(string $codigoEstacao, string $dataLeitura, string $horaLeitura): bool {
+    public function exists(string $codigoEstacao, string $dataLeitura, string $horaLeitura): bool
+    {
         $this->checkStmt->execute([$codigoEstacao, $dataLeitura, $horaLeitura]);
-        return (bool) $this->checkStmt->fetchColumn();
+        return (bool)$this->checkStmt->fetchColumn();
     }
 
-    /**
-     * Insere registros em lote
-     */
-    public function insertBatch(array $registros): int {
+    public function insertBatch(array $registros): int
+    {
         if (empty($registros)) {
             return 0;
         }
@@ -275,48 +265,94 @@ class CemadenRepository {
                     $inserted++;
                 }
             }
-            
+
             $this->pdo->commit();
-            $this->logger->info("Inseridos $inserted registros em lote");
-            
+            $this->logger->info("Registros inseridos em lote", ['total' => $inserted]);
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            $this->logger->error("Erro no batch insert: " . $e->getMessage());
+            $this->logger->error('Erro no batch insert', ['mensagem' => $e->getMessage()]);
             throw $e;
         }
 
         return $inserted;
     }
+}
 
-    /**
-     * Registra execução do script
-     */
-    public function logExecution(string $status, array $stats): void {
-        try {
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO execucoes_log (data_execucao, status, registros_processados, 
-                 registros_inseridos, tempo_execucao, erros) 
-                 VALUES (NOW(), :status, :processados, :inseridos, :tempo, :erros)"
-            );
-            
-            $stmt->execute([
-                'status' => $status,
-                'processados' => $stats['processados'] ?? 0,
-                'inseridos' => $stats['inseridos'] ?? 0,
-                'tempo' => $stats['tempo'] ?? 0,
-                'erros' => json_encode($stats['erros'] ?? [])
-            ]);
-        } catch (PDOException $e) {
-            $this->logger->error("Erro ao registrar execução: " . $e->getMessage());
+// ============================================================================
+// CLASSE SERVIÇO DE ALERTAS
+// ============================================================================
+
+class CemadenAlertService
+{
+    private $logger;
+    private $sentAlerts = [];
+
+    public function __construct(Logger $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function checkAlerts(array $dados): void
+    {
+        $valor = $dados['valor'];
+        $codigoEstacao = $dados['codigo_estacao'];
+
+        $alertKey = "{$codigoEstacao}|{$dados['data_leitura']}";
+        if (isset($this->sentAlerts[$alertKey])) {
+            return;
+        }
+
+        if ($valor >= $dados['cota_transbordamento']) {
+            $this->sendAlert('transbordamento', $dados);
+            $this->sentAlerts[$alertKey] = true;
+        } elseif ($valor >= $dados['cota_alerta']) {
+            $this->sendAlert('alerta', $dados);
+            $this->sentAlerts[$alertKey] = true;
+        } elseif ($valor >= $dados['cota_atencao']) {
+            $this->sendAlert('atencao', $dados);
+            $this->sentAlerts[$alertKey] = true;
+        }
+    }
+
+    private function sendAlert(string $tipo, array $dados): void
+    {
+        $tipoMaiusculo = strtoupper($tipo);
+        $cotaAtual = $dados["cota_$tipo"] ?? $dados['cota_transbordamento'];
+
+        $mensagem = "Atenção!\n\n" .
+            "Estação: {$dados['estacao_nome']}\n" .
+            "Cidade: {$dados['cidade_nome']}/{$dados['uf_estado']}\n" .
+            "Data/Hora: {$dados['data_leitura']} {$dados['hora_leitura']}\n" .
+            "Nível Atual: {$dados['nivel_atual']}\n" .
+            "Cota de {$tipoMaiusculo}: {$cotaAtual}\n\n" .
+            "Tome as medidas necessárias!";
+
+        if (function_exists('sendEmail')) {
+            try {
+                sendEmail(
+                    'andresoaresdiniz201218@gmail.com',
+                    $mensagem,
+                    "[$tipoMaiusculo] Alerta - {$dados['estacao_nome']}"
+                );
+
+                $this->logger->info("Alerta de $tipo enviado", [
+                    'estacao' => $dados['estacao_nome']
+                ]);
+            } catch (Exception $e) {
+                $this->logger->error('Erro ao enviar alerta', [
+                    'mensagem' => $e->getMessage()
+                ]);
+            }
         }
     }
 }
 
 // ============================================================================
-// CLASSE PROCESSADOR DE DADOS
+// CLASSE PROCESSADOR
 // ============================================================================
 
-class DataProcessor {
+class CemadenDataProcessor
+{
     private $timezone;
     private $logger;
     private $repository;
@@ -329,52 +365,52 @@ class DataProcessor {
         'erros' => []
     ];
 
-    public function __construct(CemadenRepository $repository, AlertService $alertService, Logger $logger) {
-        $this->timezone = new DateTimeZone(TIMEZONE);
+    public function __construct(CemadenRepository $repository, CemadenAlertService $alertService, Logger $logger)
+    {
+        $this->timezone = new DateTimeZone(CEMADEN_TIMEZONE);
         $this->logger = $logger;
         $this->repository = $repository;
         $this->alertService = $alertService;
     }
 
-    /**
-     * Processa dados no formato 1
-     */
-    public function processFormat1(array $data): void {
-        if (!DataValidator::validateFormat1($data)) {
+    public function processFormat1(array $data): void
+    {
+        if (!CemadenDataValidator::validateFormat1($data)) {
             throw new Exception("Estrutura de dados inválida - Formato 1");
         }
 
         $estacao = $data['estacao'];
-        $codigoEstacao = DataValidator::sanitizeString($estacao['idEstacao']);
+        $codigoEstacao = CemadenDataValidator::sanitizeString($estacao['idEstacao']);
         $cotas = $this->repository->getCotasEstacao($codigoEstacao);
 
         foreach ($data['datas'] as $dataIndex => $dataItem) {
             foreach ($data['horarios'] as $horaIndex => $horario) {
                 $valor = $data['acumulados'][$dataIndex][$horaIndex] ?? null;
-                
-                if ($valor === null || !DataValidator::validateValue((float)$valor)) {
+
+                if ($valor === null || !CemadenDataValidator::validateValue((float)$valor)) {
                     continue;
                 }
 
                 try {
                     $datetime = $this->parseDateTime($dataItem, $horario);
-                    
+
                     $registro = $this->prepareRecord(
                         $datetime,
                         (float)$valor,
                         $codigoEstacao,
-                        DataValidator::sanitizeString($estacao['nome']),
-                        DataValidator::sanitizeString($estacao['idMunicipio']['cidade']),
-                        DataValidator::sanitizeString($estacao['idMunicipio']['uf']),
+                        CemadenDataValidator::sanitizeString($estacao['nome']),
+                        CemadenDataValidator::sanitizeString($estacao['idMunicipio']['cidade']),
+                        CemadenDataValidator::sanitizeString($estacao['idMunicipio']['uf']),
                         $cotas
                     );
 
                     $this->addToBatch($registro);
                     $this->stats['processados']++;
-
                 } catch (Exception $e) {
                     $this->stats['erros'][] = $e->getMessage();
-                    $this->logger->warning("Erro ao processar registro: " . $e->getMessage());
+                    $this->logger->warning('Erro ao processar registro', [
+                        'mensagem' => $e->getMessage()
+                    ]);
                 }
             }
         }
@@ -382,11 +418,9 @@ class DataProcessor {
         $this->flushBatch();
     }
 
-    /**
-     * Processa dados no formato 2
-     */
-    public function processFormat2(array $data): void {
-        if (!DataValidator::validateFormat2($data)) {
+    public function processFormat2(array $data): void
+    {
+        if (!CemadenDataValidator::validateFormat2($data)) {
             throw new Exception("Estrutura de dados inválida - Formato 2");
         }
 
@@ -395,11 +429,11 @@ class DataProcessor {
                 $datetime = new DateTime($registro['datahora'], new DateTimeZone('UTC'));
                 $datetime->setTimezone($this->timezone);
 
-                $codigoEstacao = DataValidator::sanitizeString($registro['codigo']);
+                $codigoEstacao = CemadenDataValidator::sanitizeString($registro['codigo']);
                 $cotas = $this->repository->getCotasEstacao($codigoEstacao);
                 $valor = (float)$registro['valor'];
 
-                if (!DataValidator::validateValue($valor)) {
+                if (!CemadenDataValidator::validateValue($valor)) {
                     continue;
                 }
 
@@ -407,32 +441,31 @@ class DataProcessor {
                     $datetime,
                     $valor,
                     $codigoEstacao,
-                    DataValidator::sanitizeString($registro['estacao']),
-                    DataValidator::sanitizeString($registro['cidade']),
-                    DataValidator::sanitizeString($registro['uf']),
+                    CemadenDataValidator::sanitizeString($registro['estacao']),
+                    CemadenDataValidator::sanitizeString($registro['cidade']),
+                    CemadenDataValidator::sanitizeString($registro['uf']),
                     $cotas
                 );
 
                 $this->addToBatch($record);
                 $this->stats['processados']++;
-
             } catch (Exception $e) {
                 $this->stats['erros'][] = $e->getMessage();
-                $this->logger->warning("Erro ao processar registro: " . $e->getMessage());
+                $this->logger->warning('Erro ao processar registro', [
+                    'mensagem' => $e->getMessage()
+                ]);
             }
         }
 
         $this->flushBatch();
     }
 
-    /**
-     * Converte data/hora string para DateTime
-     */
-    private function parseDateTime(string $data, string $hora): DateTime {
+    private function parseDateTime(string $data, string $hora): DateTime
+    {
         $horarioFormatado = str_replace('h', ':00', $hora);
         $datetime = DateTime::createFromFormat(
-            'd/m/Y H:i', 
-            "$data $horarioFormatado", 
+            'd/m/Y H:i',
+            "$data $horarioFormatado",
             $this->timezone
         );
 
@@ -443,9 +476,6 @@ class DataProcessor {
         return $datetime;
     }
 
-    /**
-     * Prepara registro para inserção
-     */
     private function prepareRecord(
         DateTime $datetime,
         float $valor,
@@ -471,19 +501,15 @@ class DataProcessor {
         ];
     }
 
-    /**
-     * Adiciona registro ao buffer de lote
-     */
-    private function addToBatch(array $registro): void {
-        // Verifica duplicidade em memória antes de adicionar
+    private function addToBatch(array $registro): void
+    {
         $key = "{$registro['codigo_estacao']}|{$registro['data_leitura']}|{$registro['hora_leitura']}";
-        
+
         if (isset($this->batchBuffer[$key])) {
             $this->stats['duplicados']++;
             return;
         }
 
-        // Verifica no banco
         if ($this->repository->exists(
             $registro['codigo_estacao'],
             $registro['data_leitura'],
@@ -495,19 +521,15 @@ class DataProcessor {
 
         $this->batchBuffer[$key] = $registro;
 
-        // Flush automático ao atingir tamanho do lote
-        if (count($this->batchBuffer) >= BATCH_SIZE) {
+        if (count($this->batchBuffer) >= CEMADEN_BATCH_SIZE) {
             $this->flushBatch();
         }
 
-        // Verificar alertas
         $this->alertService->checkAlerts($registro);
     }
 
-    /**
-     * Insere lote no banco
-     */
-    private function flushBatch(): void {
+    private function flushBatch(): void
+    {
         if (empty($this->batchBuffer)) {
             return;
         }
@@ -517,90 +539,14 @@ class DataProcessor {
             $this->stats['inseridos'] += $inserted;
             $this->batchBuffer = [];
         } catch (Exception $e) {
-            $this->logger->error("Erro ao inserir lote: " . $e->getMessage());
+            $this->logger->error('Erro ao inserir lote', ['mensagem' => $e->getMessage()]);
             $this->stats['erros'][] = "Batch insert failed: " . $e->getMessage();
         }
     }
 
-    /**
-     * Retorna estatísticas do processamento
-     */
-    public function getStats(): array {
+    public function getStats(): array
+    {
         return $this->stats;
-    }
-}
-
-// ============================================================================
-// CLASSE DE SERVIÇO DE ALERTAS
-// ============================================================================
-
-class AlertService {
-    private $logger;
-    private $sentAlerts = [];
-
-    public function __construct(Logger $logger) {
-        $this->logger = $logger;
-    }
-
-    /**
-     * Verifica e envia alertas se necessário
-     */
-    public function checkAlerts(array $dados): void {
-        $valor = $dados['valor'];
-        $codigoEstacao = $dados['codigo_estacao'];
-        
-        // Evita enviar múltiplos alertas para mesma estação
-        $alertKey = "{$codigoEstacao}|{$dados['data_leitura']}";
-        if (isset($this->sentAlerts[$alertKey])) {
-            return;
-        }
-
-        if ($valor >= $dados['cota_transbordamento']) {
-            $this->sendAlert('transbordamento', $dados);
-            $this->sentAlerts[$alertKey] = true;
-        } elseif ($valor >= $dados['cota_alerta']) {
-            $this->sendAlert('alerta', $dados);
-            $this->sentAlerts[$alertKey] = true;
-        } elseif ($valor >= $dados['cota_atencao']) {
-            $this->sendAlert('atencao', $dados);
-            $this->sentAlerts[$alertKey] = true;
-        }
-    }
-
-    /**
-     * Envia alerta por email
-     */
-    // Substitua o método sendAlert por:
-    private function sendAlert(string $tipo, array $dados): void {
-        $tipoMaiusculo = strtoupper($tipo);
-        $cotaAtual = $dados["cota_$tipo"] ?? $dados['cota_transbordamento'];
-        
-        // Email (mantém como estava)
-        $mensagem = "..."; // sua mensagem de email
-        
-        $recipients = ($tipo === 'transbordamento') 
-            ? Config::getAlertRecipients('critical')
-            : Config::getAlertRecipients('default');
-
-        foreach ($recipients as $email) {
-            try {
-                if (function_exists('sendEmail')) {
-                    sendEmail($email, $mensagem, "[$tipoMaiusculo] ...");
-                }
-                $this->logger->info("Alerta de $tipo enviado para $email");
-            } catch (Exception $e) {
-                $this->logger->error("Erro ao enviar alerta: " . $e->getMessage());
-            }
-        }
-        
-        /* ADICIONE AQUI: Envio via WhatsApp
-        try {
-            require_once __DIR__ . '/whatsapp_alerts.php';
-            $whatsapp = new ApiBrasilWhatsApp($this->pdo, $this->logger);
-            $whatsapp->enviarTexto($dados, $tipo);
-        } catch (Exception $e) {
-            $this->logger->error("Erro WhatsApp: " . $e->getMessage());
-        }*/
     }
 }
 
@@ -608,102 +554,76 @@ class AlertService {
 // FUNÇÃO PRINCIPAL
 // ============================================================================
 
-function main(): void {
-    // Inicializa Logger com suas classes existentes
-    $logDir = __DIR__ . '/logs';
-    $isDebug = ($_ENV['DEBUG'] ?? 'false') === 'true';
-    $logger = Logger::getInstance($logDir, $isDebug);
-    
-    // Inicializa ErrorHandler
-    $errorHandler = new ErrorHandler($logger, null, $isDebug);
-    $errorHandler->register();
-    
-    $startTime = microtime(true);
-    
-    $logger->info("========================================");
-    $logger->info("Iniciando coleta de dados CEMADEN");
-    $logger->info("========================================");
-
-    date_default_timezone_set(TIMEZONE);
-
+function mainHidrologico(PDO $pdo, Logger $logger): void
+{
     try {
-        // Inicializa componentes
-        $pdo = Database::getConnection();
         $repository = new CemadenRepository($pdo, $logger);
-        $alertService = new AlertService($logger);
-        $processor = new DataProcessor($repository, $alertService, $logger);
+        $alertService = new CemadenAlertService($logger);
+        $processor = new CemadenDataProcessor($repository, $alertService, $logger);
         $apiClient = new CemadenAPIClient($logger);
 
-        $urls = Config::getUrls();
+        $urls = CemadenConfig::getUrls();
         $totalUrls = count($urls);
         $processedUrls = 0;
 
         foreach ($urls as $index => $url) {
-            $logger->info("Processando URL " . ($index + 1) . "/$totalUrls: $url");
+            $logger->info("Processando URL " . ($index + 1) . "/$totalUrls", ['url' => $url]);
 
             $data = $apiClient->fetchData($url);
 
             if ($data === null) {
-                $logger->warning("Falha ao obter dados de: $url");
+                $logger->warning('Falha ao obter dados', ['url' => $url]);
                 continue;
             }
 
-            // Detecta formato e processa
             try {
-                if (DataValidator::validateFormat1($data)) {
-                    $logger->info("Formato detectado: Tipo 1 (estacao/datas/horarios)");
+                if (CemadenDataValidator::validateFormat1($data)) {
+                    $logger->info('Formato detectado: Tipo 1');
                     $processor->processFormat1($data);
-                } elseif (DataValidator::validateFormat2($data)) {
-                    $logger->info("Formato detectado: Tipo 2 (array de registros)");
+                } elseif (CemadenDataValidator::validateFormat2($data)) {
+                    $logger->info('Formato detectado: Tipo 2');
                     $processor->processFormat2($data);
                 } else {
                     throw new Exception("Formato de dados não reconhecido");
                 }
-                
+
                 $processedUrls++;
             } catch (Exception $e) {
-                $logger->error("Erro ao processar dados de $url: " . $e->getMessage());
-            }
-        }
-
-        // Estatísticas finais
-        $stats = $processor->getStats();
-        $executionTime = round(microtime(true) - $startTime, 2);
-        $stats['tempo'] = $executionTime;
-
-        $logger->info("========================================");
-        $logger->info("Processamento Concluído");
-        $logger->info("URLs processadas: $processedUrls/$totalUrls");
-        $logger->info("Registros processados: {$stats['processados']}");
-        $logger->info("Registros inseridos: {$stats['inseridos']}");
-        $logger->info("Duplicados ignorados: {$stats['duplicados']}");
-        $logger->info("Erros: " . count($stats['erros']));
-        $logger->info("Tempo de execução: {$executionTime}s");
-        $logger->info("========================================");
-
-        // Registra execução no banco
-        $status = (count($stats['erros']) === 0) ? 'sucesso' : 'sucesso_com_erros';
-        $repository->logExecution($status, $stats);
-
-    } catch (PDOException $e) {
-        $logger->error("Erro crítico de banco de dados: " . $e->getMessage());
-        
-        // Tenta registrar falha
-        try {
-            if (isset($repository)) {
-                $repository->logExecution('falha', [
-                    'tempo' => round(microtime(true) - $startTime, 2),
-                    'erros' => [$e->getMessage()]
+                $logger->error('Erro ao processar dados', [
+                    'url' => $url,
+                    'mensagem' => $e->getMessage()
                 ]);
             }
-        } catch (Exception $ex) {
-            $logger->error("Não foi possível registrar falha no banco");
         }
 
+        $stats = $processor->getStats();
+
+        $logger->info('Processamento concluído', [
+            'urls_processadas' => "$processedUrls/$totalUrls",
+            'registros_processados' => $stats['processados'],
+            'registros_inseridos' => $stats['inseridos'],
+            'duplicados_ignorados' => $stats['duplicados'],
+            'erros' => count($stats['erros'])
+        ]);
     } catch (Exception $e) {
-        $logger->error("Erro crítico: " . $e->getMessage());
+        $logger->error('Erro crítico', [
+            'mensagem' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+        throw $e;
     }
 }
 
-// Executa o script
-main();
+// Execução
+mainHidrologico($pdo, $logger);
+
+$endTime = microtime(true);
+$totalTime = round($endTime - $startTime, 2);
+
+$logger->info('hidrologicocemadem concluído', [
+    'tempo_total_s' => $totalTime,
+    'memoria_pico_mb' => round(memory_get_peak_usage(true) / 1024 / 1024, 2)
+]);
+
+return true;
